@@ -1,0 +1,79 @@
+﻿@model IEnumerable<BulkyBook.Models.Product>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<partial name="_Notifications" />
+
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Products List</h2>
+        <div class="Col-6 text-end mb-2">
+            <a asp-action="UpSert" class="btn btn-dark"><i class="bi bi-plus-circle"></i>Create New</a>
+        </div>
+
+        <table id="tblData" class="table  table-bordered table-striped table-info">
+            <thead>
+                <tr>
+                    <th>
+                        ID
+                    </th>
+                    <th>
+                       Title
+                    </th>
+                  
+                    <th>
+                        ISBN
+                    </th>
+                  
+                    <th>
+                   Price
+                    </th>
+                   
+                    <th>
+                        Author
+                    </th>
+                    <th>
+                        categry
+                    </th>
+                    <th>
+                       
+                    </th>
+                </tr>   
+            </thead>
+     @*   <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Title)   
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ISBN)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Price)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Author)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.categry.Name)
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+        </tbody>*@
+        </table>
+    </div>
+</div>
+@section Scripts{
+    <script type="text/javascript" src="~/js/Product.js"></script>
+}
+ 
