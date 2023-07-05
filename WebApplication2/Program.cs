@@ -13,8 +13,16 @@ var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddDbContext<ApplicationDBContext>(option => 
         option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
         builder.Services.AddIdentity<IdentityUser,IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false).AddEntityFrameworkStores<ApplicationDBContext>().AddDefaultTokenProviders();
-        builder.Services.AddRazorPages();
+builder.Services.ConfigureApplicationCookie(option =>
+{
+    option.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+    option.LogoutPath = $"/Identity/Account/Logout";
+    option.LoginPath = $"/Identity/Account/Login";
+
+});
+builder.Services.AddRazorPages();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IEmailSender,EmailSender>(); 
 

@@ -1,0 +1,108 @@
+﻿@model Company
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Create Company</h1>
+
+<div class="card shadow m-4">
+     <div class="card-header bg-secondary bg-gradient ml-0 py-3 ">
+
+         <div class="row">
+             <div class="col-12 text-center">
+                 <h2 class="text-white py-0">@(Model.Id!=0?"Update":"Create") Company</h2>
+             </div>
+         </div>
+     </div>
+
+
+    <div class="card-body p-4">
+
+        <form asp-action="UpSert" enctype="multipart/form-data">
+
+            <input hidden asp-for="Id" />
+           
+
+            <div class="row">
+                <div class="col-10">
+                    <div class="border p-3 mt-4">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="Name" class="control-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="StreetAddress" class="control-label text-muted"></label>
+                            <textarea asp-for="StreetAddress" class="form-control">
+
+                    </textarea>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="City" class="control-label"></label>
+                            <input asp-for="City" class="form-control" />
+                            <span asp-validation-for="City" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="State" class="control-label"></label>
+                            <input asp-for="State" class="form-control" />
+                            <span asp-validation-for="State" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="PostalCode" class="control-label"></label>
+                            <input asp-for="PostalCode" class="form-control" />
+                            <span asp-validation-for="PostalCode" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="PhoneNumber" class="control-label"></label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                    
+
+
+                        <div class="row">
+                            <div class="col-6 col-md">
+
+                                @if (Model.Id != 0)
+                                {
+                                    <input type="submit" value="Update" style="width:90%" class="btn btn-primary" />
+
+                                }
+                                else
+                                {
+                                    <input type="submit" value="Create" style="width:90%" class="btn btn-primary" />
+
+                                }
+
+                            </div>
+                            <div class="col-6 col-md">
+                                <a asp-action="Index" style="width:90%" class="btn btn-secondary">Back to List</a>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+               
+
+            </div>
+           
+        </form>
+    </div>
+</div>
+ 
+<hr />
+
+
+
+ 
+ 
+@section scripts{
+     
+    @{
+    <partial name="_ValidationScriptsPartial"/>
+    }
+}

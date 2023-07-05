@@ -5,17 +5,16 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Create Product</h1>
 
 <div class="card shadow m-4">
-     <div class="card-header bg-secondary bg-gradient ml-0 py-3 ">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3 ">
 
-         <div class="row">
-             <div class="col-12 text-center">
-                 <h2 class="text-white py-0">@(Model.product.Id!=0?"Update":"Create") Product</h2>
-             </div>
-         </div>
-     </div>
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-0">@(Model.product.Id!=0?"Update":"Create") Product</h2>
+            </div>
+        </div>
+    </div>
 
 
     <div class="card-body p-4">
@@ -71,9 +70,8 @@
                             <span asp-validation-for="product.Author" class="text-danger"></span>
                         </div>
                         <div class="form-group">
-                            <label asp-for="product.ImageUrl" class="control-label"></label>
-                            <input type="file" name="file" class="form-control" />
-                            <span asp-validation-for="product.ImageUrl" class="text-danger"></span>
+                            
+                           
                         </div>
 
                         <div class="form-group mb-2">
@@ -110,37 +108,96 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-2">
-                    <img src="@Model.product.ImageUrl" style="width:100%;border:1px solid white;border-radius:5px;" />
+                <div class="col-2" style="display: inline-flex;padding: 0;">
+                    <div class="upload-container">
+                        <label for="file-input" class="btn btn-primary" style="width: inherit;padding: 0px;">
+                            <span class="upload-icon">&#43;</span>
+                            <input id="file-input" type="file" onchange="previewImage(event)" name="file" class="file-input" />
+                        </label>
+                    </div>
+                    <img src="@Model.product.ImageUrl" id="preview" style="width:98%;height: 150px;
+border:10px solid white;border-radius:5px;border: 2px solid #96948c;margin-left: 1px;" />
                 </div>
 
             </div>
-           
+
         </form>
     </div>
 </div>
- 
+
 <hr />
 
 
+<style>
+    .upload-container {
+        text-align: center;
+        margin-top: 50px;
+        width: 28px;
+    }
 
- 
- 
+    .file-input {
+        display: none;
+    }
+
+    .file-label {
+        padding: 8px 16px;
+        background-color: #f1f1f1;
+        color: #555;
+        border: 2px dashed #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .file-label:hover {
+            background-color: #e5e5e5;
+        }
+
+        .file-label:active {
+            background-color: #ddd;
+        }
+
+    .file-name {
+        font-size: 14px;
+        margin-top: 8px;
+    }
+
+    .upload-icon {
+        font-size: 24px;
+     
+    }
+
+   
+</style>
 @section scripts{
-     <script>
-    tinymce.init({
-      selector: 'textarea',
-      plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss',
-      toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-      tinycomments_mode: 'embedded',
-      tinycomments_author: 'Author name',
-      mergetags_list: [
-        { value: 'First.Name', title: 'First Name' },
-        { value: 'Email', title: 'Email' },
-      ]
-    });
-  </script>
+    <script>
+        tinymce.init({
+            selector: 'textarea',
+            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+            tinycomments_mode: 'embedded',
+            tinycomments_author: 'Author name',
+            mergetags_list: [
+                { value: 'First.Name', title: 'First Name' },
+                { value: 'Email', title: 'Email' },
+            ]
+        });
+    </script>
+    <script>
+        function previewImage(event) {
+            var input = event.target;
+            var reader = new FileReader();
+            reader.onload = function () {
+                var output = document.getElementById('preview');
+                output.src = reader.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    </script>
     @{
-    <partial name="_ValidationScriptsPartial"/>
+        <partial name="_ValidationScriptsPartial" />
     }
 }
