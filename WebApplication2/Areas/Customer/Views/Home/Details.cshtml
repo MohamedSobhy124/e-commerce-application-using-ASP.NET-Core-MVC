@@ -1,44 +1,63 @@
-﻿@model Product
+﻿@model ShoppingCart
   
    
 <form method="post">
+    <input hidden asp-for="ProductId" />
+    <div class="card">
+
+        <div class="card-header bg-secondary bg-gradient ml-0 py-1 ">
+
+             
+                <div class=" text-center">
+                    <h2 class="text-white py-0"> @Model.product.Title</h2>
+                <p class="text-white py-0">By : @Model.product.Author</p>
+                </div>
+            
+        </div>
+        <div class="card-body"> 
+
+    <div class="block">
+        <a asp-action="Index" class="shadow btn custom-btn ">Back</a>
+    </div>
     <div class="container my-5">
+        
         <div class="row">
             <div class="col-md-5">
+                
                 <div class="main-img">
-                    <img class="img-fluid" src="@Model.ImageUrl" alt="ProductS">
+
+                            <img class="img-fluid" src="@Model.product.ImageUrl" alt="ProductS">
                    
                 </div>
             </div>
             <div class="col-md-7">
                 <div class="main-description px-2">
                     <div class="category text-bold">
-                        @Model.Title
+                       
                     </div>
                     <div class="product-title text-bold my-3">
-                        @Model.categry.Name
+                                @Model.product.categry.Name
                     </div>
 
 
                     <div class="price-area my-4">
-                        <p class="old-price mb-1"><del>@Model.ListPrice</del>
+                                <p class="old-price mb-1">
+                                    <del>@Model.product.ListPrice</del>
                             @*<span class="old-price-discount text-danger">(20% off)</span></p>*@
-                        <p class="new-price text-bold mb-1">@Model.Price</p>
+                                <p class="new-price text-bold mb-1">@Model.product.Price</p>
                         <p class="text-secondary mb-1">(Additional tax may apply on checkout)</p>
 
                     </div>
 
 
                     <div class="buttons d-flex my-5">
-                        <div class="block">
-                            <a href="#" class="shadow btn custom-btn ">Wishlist</a>
-                        </div>
+                       
                         <div class="block">
                             <button class="shadow btn custom-btn">Add to cart</button>
                         </div>
 
                         <div class="block quantity">
-                            <input type="number" class="form-control" id="cart_quantity" value="1" min="0" max="5" placeholder="Enter email" name="cart_quantity">
+                            <input type="number" asp-for="Count"  class="form-control"  >
                         </div>
                     </div>
 
@@ -49,26 +68,13 @@
 
                 <div class="product-details my-4">
                     <p class="details-title text-color mb-1">Product Details</p>
-                    <p class="description">@Html.Raw(Model.Description) </p>
+                            <p class="description">@Html.Raw(Model.product.Description) </p>
                 </div>
-               @* <div class="product-details my-4">
-                    <p class="details-title text-color mb-2">Material & Care</p>
-                    <ul>
-                        <li>Cotton</li>
-                        <li>Machine-wash</li>
-                    </ul>
-                </div>
-                <div class="product-details my-4">
-                    <p class="details-title text-color mb-2">Sold by</p>
-                    <ul>
-                        <li>Cotton</li>
-                        <li>Machine-wash</li>
-                    </ul>
-                </div>*@
+                
             </div>
         </div>
     </div>
-
+        </div>
 </form>
 
     

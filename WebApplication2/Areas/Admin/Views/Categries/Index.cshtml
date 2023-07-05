@@ -6,17 +6,27 @@
 }
 
 <partial name="_Notifications" />
-<div class="container">
-    <div class="row">
-        <div class="col-6 text-primary">
-            Categries List
+ 
 
+<div class="card">
+
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3 ">
+
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-0">Categries List</h2>
             </div>
-            <div class="Col-6 text-end mb-1">
-        <a asp-action="Create" class="btn btn-success"><i class="bi bi-plus-circle"></i>Create New</a>
         </div>
     </div>
-</div>
+    <div class="card-body">
+        <div class="Col-6 text-end mb-2">
+            <a asp-action="Create" class="btn btn-dark"><i class="bi bi-plus-circle"></i>Create New Categray</a>
+        </div>
+
+
+
+
+
 <table class="table table-bordered table-responsive table-striped">
     <thead>
         <tr>
@@ -47,3 +57,4 @@
 }
     </tbody>
 </table>
+    </div>

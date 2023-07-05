@@ -1,4 +1,4 @@
-﻿using System;
+﻿    using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +10,12 @@ namespace BulkyBook.DataAccess.Repository.IRepository
     {
         ICategryReprository categry{ get; }
         IProductReprository product { get; }
+        ICompanyRepository company { get; }
+        IShoppingCartReprository shoppingCart { get; }
+        IApplicationUserReprository applicationUser { get; }
+        IOrderDetailRepository OrderDetail { get; }
+        IOrderHeaderRepository OrderHeader { get; }
+
         void save();
     }
 }
