@@ -8,6 +8,7 @@ using System.Security.Claims;
 namespace BulkyBook.Areas.Customer.Controllers
 {
     [Area("Customer")]
+ 
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -24,7 +25,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             IEnumerable<Product> ProductList =_unitOfWork.product.GetAll(includeProperties: "categry");
             return View(ProductList);
         }
-
+        [Authorize]
         public IActionResult Details(int productId)
         {
             ShoppingCart cart = new()
