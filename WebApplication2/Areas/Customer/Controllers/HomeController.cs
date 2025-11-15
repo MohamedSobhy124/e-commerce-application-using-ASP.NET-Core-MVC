@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Security.Claims;
+using Newtonsoft.Json;
 
 namespace BulkyBook.Areas.Customer.Controllers
 {
@@ -13,6 +14,7 @@ namespace BulkyBook.Areas.Customer.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private const string SessionCartKey = "SessionCart";
 
         public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
         {
@@ -25,7 +27,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             IEnumerable<Product> ProductList =_unitOfWork.product.GetAll(includeProperties: "categry");
             return View(ProductList);
         }
-        [Authorize]
+        
         public IActionResult Details(int productId)
         {
             ShoppingCart cart = new()
@@ -38,33 +40,74 @@ namespace BulkyBook.Areas.Customer.Controllers
         
             return View(cart);
         }
+        
         [HttpPost]
-        [Authorize]
         public IActionResult Details(ShoppingCart shoppingCart)
         {
-            
-            var claimsIdentity=(ClaimsIdentity)User.Identity;
-            var UserId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-            shoppingCart.ApplicationUserId = UserId;
-
-            ShoppingCart shoppingCartFromDB = _unitOfWork.shoppingCart.Get(a => a.ProductId == shoppingCart.ProductId && a.ApplicationUserId == UserId);
-
-            if(shoppingCartFromDB != null)
+            // Check if user is authenticated
+            if (User.Identity.IsAuthenticated)
             {
-                shoppingCartFromDB.Count += shoppingCart.Count;
-            _unitOfWork.shoppingCart.update(shoppingCartFromDB);
+                // Handle authenticated user - save to database
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                var UserId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+                shoppingCart.ApplicationUserId = UserId;
 
+                ShoppingCart shoppingCartFromDB = _unitOfWork.shoppingCart.Get(a => a.ProductId == shoppingCart.ProductId && a.ApplicationUserId == UserId);
+
+                if (shoppingCartFromDB != null)
+                {
+                    shoppingCartFromDB.Count += shoppingCart.Count;
+                    _unitOfWork.shoppingCart.update(shoppingCartFromDB);
+                }
+                else
+                {
+                    _unitOfWork.shoppingCart.add(shoppingCart);
+                }
+
+                _unitOfWork.save();
+                TempData["success"] = "Cart Updated Successfully";
             }
             else
             {
-                _unitOfWork.shoppingCart.add(shoppingCart);
-
+                // Handle anonymous user - save to session
+                var sessionCart = GetSessionCart();
+                
+                var existingItem = sessionCart.FirstOrDefault(c => c.ProductId == shoppingCart.ProductId);
+                if (existingItem != null)
+                {
+                    existingItem.Count += shoppingCart.Count;
+                }
+                else
+                {
+                    sessionCart.Add(new SessionCartItem
+                    {
+                        ProductId = shoppingCart.ProductId,
+                        Count = shoppingCart.Count
+                    });
+                }
+                
+                SaveSessionCart(sessionCart);
+                TempData["success"] = "Cart Updated Successfully";
             }
 
-            _unitOfWork.save();
-            TempData["success"] = "Cart Updated Successfuly";
-
             return RedirectToAction("Index");
+        }
+
+        // Helper methods for session cart
+        private List<SessionCartItem> GetSessionCart()
+        {
+            var cartJson = HttpContext.Session.GetString(SessionCartKey);
+            if (string.IsNullOrEmpty(cartJson))
+            {
+                return new List<SessionCartItem>();
+            }
+            return JsonConvert.DeserializeObject<List<SessionCartItem>>(cartJson);
+        }
+
+        private void SaveSessionCart(List<SessionCartItem> cart)
+        {
+            var cartJson = JsonConvert.SerializeObject(cart);
+            HttpContext.Session.SetString(SessionCartKey, cartJson);
         }
 
         public IActionResult Privacy()
@@ -77,5 +120,12 @@ namespace BulkyBook.Areas.Customer.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+    }
+
+    // Helper class for session-based cart
+    public class SessionCartItem
+    {
+        public int ProductId { get; set; }
+        public int Count { get; set; }
     }
 }

@@ -1,9 +1,25 @@
 ﻿@model ShoppingCartVM
-
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
 
 <form method="post">
 	<br />
 	<div class="container">
+		@if (!SignInManager.IsSignedIn(User))
+		{
+			<div class="alert alert-info alert-dismissible fade show" role="alert">
+				<h5 class="alert-heading"><i class="bi bi-info-circle"></i> Guest Checkout</h5>
+				<p>You're checking out as a guest. You can also:</p>
+				<a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="/Customer/Cart/Summary" class="btn btn-sm btn-primary">
+					<i class="bi bi-box-arrow-in-right"></i> Login
+				</a>
+				<a asp-area="Identity" asp-page="/Account/Register" asp-route-returnUrl="/Customer/Cart/Summary" class="btn btn-sm btn-success">
+					<i class="bi bi-person-plus"></i> Register
+				</a>
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+		}
+		
 		<div class="card shadow border-0">
 
 			<div class="card-header bg-secondary bg-gradient text-light ml-0 py-4">

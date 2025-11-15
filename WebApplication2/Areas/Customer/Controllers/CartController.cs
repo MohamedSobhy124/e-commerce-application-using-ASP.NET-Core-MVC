@@ -7,16 +7,17 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Stripe.Checkout;
 using System.Security.Claims;
+using Newtonsoft.Json;
 
 namespace BulkyBook.Areas.Customer.Controllers
 {
 	[Area("Customer")]
-    [Authorize]
     public class CartController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
 		private readonly IEmailSender _emailSender;
 		public ShoppingCartVM  ShoppingCartVM { get; set; }
+        private const string SessionCartKey = "SessionCart";
 
         public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender) 
         {
@@ -25,81 +26,192 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
         public IActionResult Index()
         {
-
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-            var UserId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
             ShoppingCartVM = new ShoppingCartVM()
             {
-                ShoppingCartList=_unitOfWork.shoppingCart.GetAll(a=>a.ApplicationUserId==UserId,
-                includeProperties: "product"
-
-                )
-                
+                ShoppingCartList = new List<ShoppingCart>(),
+                OrderHeader = new()
             };
-            foreach(var cart  in ShoppingCartVM.ShoppingCartList)
+
+            if (User.Identity.IsAuthenticated)
             {
-                cart.Price=GetPriceBasedOnQty(cart);
-                ShoppingCartVM.OrderTotal +=(cart.Price*cart.Count);
+                // Get cart from database for authenticated users
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                var UserId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+                ShoppingCartVM.ShoppingCartList = _unitOfWork.shoppingCart.GetAll(a => a.ApplicationUserId == UserId,
+                    includeProperties: "product").ToList();
+            }
+            else
+            {
+                // Get cart from session for anonymous users
+                var sessionCart = GetSessionCart();
+                foreach (var item in sessionCart)
+                {
+                    var product = _unitOfWork.product.Get(p => p.Id == item.ProductId, includeProperties: "categry");
+                    if (product != null)
+                    {
+                        ShoppingCartVM.ShoppingCartList.Add(new ShoppingCart
+                        {
+                            ProductId = item.ProductId,
+                            product = product,
+                            Count = item.Count
+                        });
+                    }
+                }
+            }
+
+            foreach (var cart in ShoppingCartVM.ShoppingCartList)
+            {
+                cart.Price = GetPriceBasedOnQty(cart);
+                ShoppingCartVM.OrderTotal += (cart.Price * cart.Count);
             }
             return View(ShoppingCartVM);
         }
 
-        public IActionResult Pluse( int CartId)
+        // Helper methods for session cart
+        private List<SessionCartItem> GetSessionCart()
         {
-            var cartFromDD=_unitOfWork.shoppingCart.Get(a=>a.Id==CartId);
-            cartFromDD.Count += 1;
-            _unitOfWork.shoppingCart.update(cartFromDD);
-            _unitOfWork.save();
-            return RedirectToAction(nameof(Index));    
+            var cartJson = HttpContext.Session.GetString(SessionCartKey);
+            if (string.IsNullOrEmpty(cartJson))
+            {
+                return new List<SessionCartItem>();
+            }
+            return JsonConvert.DeserializeObject<List<SessionCartItem>>(cartJson);
         }
-        public IActionResult Minus(int CartId)
-        {
-            var cartFromDD = _unitOfWork.shoppingCart.Get(a => a.Id == CartId);
-            if(cartFromDD.Count <= 1) 
-            { 
-                _unitOfWork.shoppingCart.remove(cartFromDD);
 
+        private void SaveSessionCart(List<SessionCartItem> cart)
+        {
+            var cartJson = JsonConvert.SerializeObject(cart);
+            HttpContext.Session.SetString(SessionCartKey, cartJson);
+        }
+
+        public IActionResult Pluse(int CartId)
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                var cartFromDD = _unitOfWork.shoppingCart.Get(a => a.Id == CartId);
+                cartFromDD.Count += 1;
+                _unitOfWork.shoppingCart.update(cartFromDD);
+                _unitOfWork.save();
             }
             else
             {
-                cartFromDD.Count -= 1;
-                _unitOfWork.shoppingCart.update(cartFromDD);
+                // Handle session cart - CartId is actually ProductId for session
+                var sessionCart = GetSessionCart();
+                var item = sessionCart.FirstOrDefault(c => c.ProductId == CartId);
+                if (item != null)
+                {
+                    item.Count += 1;
+                    SaveSessionCart(sessionCart);
+                }
             }
-          
-            _unitOfWork.save();
             return RedirectToAction(nameof(Index));
         }
+        
+        public IActionResult Minus(int CartId)
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                var cartFromDD = _unitOfWork.shoppingCart.Get(a => a.Id == CartId);
+                if (cartFromDD.Count <= 1)
+                {
+                    _unitOfWork.shoppingCart.remove(cartFromDD);
+                }
+                else
+                {
+                    cartFromDD.Count -= 1;
+                    _unitOfWork.shoppingCart.update(cartFromDD);
+                }
+
+                _unitOfWork.save();
+            }
+            else
+            {
+                // Handle session cart - CartId is actually ProductId for session
+                var sessionCart = GetSessionCart();
+                var item = sessionCart.FirstOrDefault(c => c.ProductId == CartId);
+                if (item != null)
+                {
+                    if (item.Count <= 1)
+                    {
+                        sessionCart.Remove(item);
+                    }
+                    else
+                    {
+                        item.Count -= 1;
+                    }
+                    SaveSessionCart(sessionCart);
+                }
+            }
+            return RedirectToAction(nameof(Index));
+        }
+        
         public IActionResult Remove(int CartId)
         {
-            var cartFromDD = _unitOfWork.shoppingCart.Get(a => a.Id == CartId);
-            
+            if (User.Identity.IsAuthenticated)
+            {
+                var cartFromDD = _unitOfWork.shoppingCart.Get(a => a.Id == CartId);
                 _unitOfWork.shoppingCart.remove(cartFromDD);
-
-            _unitOfWork.save();
+                _unitOfWork.save();
+            }
+            else
+            {
+                // Handle session cart - CartId is actually ProductId for session
+                var sessionCart = GetSessionCart();
+                var item = sessionCart.FirstOrDefault(c => c.ProductId == CartId);
+                if (item != null)
+                {
+                    sessionCart.Remove(item);
+                    SaveSessionCart(sessionCart);
+                }
+            }
             return RedirectToAction(nameof(Index));
         }
 		public IActionResult Summary()
 		{
-			var claimsIdentity = (ClaimsIdentity)User.Identity;
-			var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-
 			ShoppingCartVM = new()
 			{
-				ShoppingCartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId,
-				includeProperties: "product"),
+				ShoppingCartList = new List<ShoppingCart>(),
 				OrderHeader = new()
 			};
 
-			ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.applicationUser.Get(u => u.Id == userId);
+			if (User.Identity.IsAuthenticated)
+			{
+				// Authenticated user - get cart from database
+				var claimsIdentity = (ClaimsIdentity)User.Identity;
+				var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-			ShoppingCartVM.OrderHeader.Name = ShoppingCartVM.OrderHeader.ApplicationUser.Name;
-			ShoppingCartVM.OrderHeader.PhoneNumber = ShoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
-			ShoppingCartVM.OrderHeader.StreetAddress = ShoppingCartVM.OrderHeader.ApplicationUser.StreetAddress;
-			ShoppingCartVM.OrderHeader.City = ShoppingCartVM.OrderHeader.ApplicationUser.City;
-			ShoppingCartVM.OrderHeader.State = ShoppingCartVM.OrderHeader.ApplicationUser.State;
-			ShoppingCartVM.OrderHeader.PostalCode = ShoppingCartVM.OrderHeader.ApplicationUser.PostalCode;
+				ShoppingCartVM.ShoppingCartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId,
+					includeProperties: "product").ToList();
 
+				ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.applicationUser.Get(u => u.Id == userId);
 
+				// Pre-fill user details
+				ShoppingCartVM.OrderHeader.Name = ShoppingCartVM.OrderHeader.ApplicationUser.Name;
+				ShoppingCartVM.OrderHeader.PhoneNumber = ShoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
+				ShoppingCartVM.OrderHeader.StreetAddress = ShoppingCartVM.OrderHeader.ApplicationUser.StreetAddress;
+				ShoppingCartVM.OrderHeader.City = ShoppingCartVM.OrderHeader.ApplicationUser.City;
+				ShoppingCartVM.OrderHeader.State = ShoppingCartVM.OrderHeader.ApplicationUser.State;
+				ShoppingCartVM.OrderHeader.PostalCode = ShoppingCartVM.OrderHeader.ApplicationUser.PostalCode;
+			}
+			else
+			{
+				// Anonymous user - get cart from session
+				var sessionCart = GetSessionCart();
+				foreach (var item in sessionCart)
+				{
+					var product = _unitOfWork.product.Get(p => p.Id == item.ProductId, includeProperties: "categry");
+					if (product != null)
+					{
+						ShoppingCartVM.ShoppingCartList.Add(new ShoppingCart
+						{
+							ProductId = item.ProductId,
+							product = product,
+							Count = item.Count
+						});
+					}
+				}
+				// Leave customer details empty for guest to fill
+			}
 
 			foreach (var cart in ShoppingCartVM.ShoppingCartList)
 			{
@@ -114,18 +226,47 @@ namespace BulkyBook.Areas.Customer.Controllers
 		[ActionName("Summary")]
 		public IActionResult SummaryPOST(ShoppingCartVM ShoppingCartVM)
 		{
-			var claimsIdentity = (ClaimsIdentity)User.Identity;
-			var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+			bool isGuest = false;
+			string userId = null;
+			ApplicationUser applicationUser = null;
 
-			ShoppingCartVM.ShoppingCartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId,
-				includeProperties: "product");
+			if (User.Identity.IsAuthenticated)
+			{
+				// Authenticated user
+				var claimsIdentity = (ClaimsIdentity)User.Identity;
+				userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+				
+				ShoppingCartVM.ShoppingCartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId,
+					includeProperties: "product").ToList();
+				
+				applicationUser = _unitOfWork.applicationUser.Get(u => u.Id == userId);
+			}
+			else
+			{
+				// Guest user
+				isGuest = true;
+				var sessionCart = GetSessionCart();
+				ShoppingCartVM.ShoppingCartList = new List<ShoppingCart>();
+				
+				foreach (var item in sessionCart)
+				{
+					var product = _unitOfWork.product.Get(p => p.Id == item.ProductId, includeProperties: "categry");
+					if (product != null)
+					{
+						ShoppingCartVM.ShoppingCartList.Add(new ShoppingCart
+						{
+							ProductId = item.ProductId,
+							product = product,
+							Count = item.Count
+						});
+					}
+				}
+			}
+
 			if (ShoppingCartVM.ShoppingCartList.Count() > 0)
 			{
 				ShoppingCartVM.OrderHeader.OrderDate = System.DateTime.Now;
-				ShoppingCartVM.OrderHeader.ApplicationUserId = userId;
-
-				ApplicationUser applicationUser = _unitOfWork.applicationUser.Get(u => u.Id == userId);
-
+				ShoppingCartVM.OrderHeader.ApplicationUserId = userId; // Will be null for guest
 
 				foreach (var cart in ShoppingCartVM.ShoppingCartList)
 				{
@@ -133,20 +274,22 @@ namespace BulkyBook.Areas.Customer.Controllers
 					ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
 				}
 
-				if (applicationUser.CompanyId.GetValueOrDefault() == 0)
+				// Set payment status - guest and regular users need immediate payment
+				if (isGuest || applicationUser?.CompanyId.GetValueOrDefault() == 0)
 				{
-					//it is a regular customer 
 					ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
 					ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
 				}
 				else
 				{
-					//it is a company user
+					// Company user with delayed payment
 					ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPayment;
 					ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusApproved;
 				}
+
 				_unitOfWork.OrderHeader.add(ShoppingCartVM.OrderHeader);
 				_unitOfWork.save();
+				
 				foreach (var cart in ShoppingCartVM.ShoppingCartList)
 				{
 					OrderDetail orderDetail = new()
@@ -160,10 +303,10 @@ namespace BulkyBook.Areas.Customer.Controllers
 					_unitOfWork.save();
 				}
 
-				if (applicationUser.CompanyId.GetValueOrDefault() == 0)
+				// Process payment for guest and regular customers
+				if (isGuest || applicationUser?.CompanyId.GetValueOrDefault() == 0)
 				{
-					//it is a regular customer account and we need to capture payment
-					//stripe logic
+					// Stripe payment logic
 					var domain = Request.Scheme + "://" + Request.Host.Value + "/";
 					var options = new SessionCreateOptions
 					{
@@ -179,7 +322,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 						{
 							PriceData = new SessionLineItemPriceDataOptions
 							{
-								UnitAmount = (long)(item.Price * 100), // $20.50 => 2050
+								UnitAmount = (long)(item.Price * 100),
 								Currency = "usd",
 								ProductData = new SessionLineItemPriceDataProductDataOptions
 								{
@@ -191,31 +334,46 @@ namespace BulkyBook.Areas.Customer.Controllers
 						options.LineItems.Add(sessionLineItem);
 					}
 
-
 					var service = new SessionService();
 					Session session = service.Create(options);
 					_unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
 					_unitOfWork.save();
+					
+					// Clear session cart for guest users
+					if (isGuest)
+					{
+						HttpContext.Session.Remove(SessionCartKey);
+					}
+					
 					Response.Headers.Add("Location", session.Url);
 					return new StatusCodeResult(303);
+				}
 
+				// Clear cart for authenticated users (DB)
+				if (!isGuest)
+				{
+					List<ShoppingCart> shoppingCarts = _unitOfWork.shoppingCart
+						.GetAll(u => u.ApplicationUserId == userId).ToList();
+					_unitOfWork.shoppingCart.removeRage(shoppingCarts);
+					_unitOfWork.save();
 				}
 
 				return RedirectToAction(nameof(OrderConfirmation), new { id = ShoppingCartVM.OrderHeader.Id });
 			}
 			else
-				TempData["success"] = "You Need to Add Items in the Cart";
-			return RedirectToAction(nameof(Index),"Home");
+			{
+				TempData["error"] = "You Need to Add Items in the Cart";
+			}
+			return RedirectToAction(nameof(Index), "Home");
 		}
 
 
 		public IActionResult OrderConfirmation(int id)
 		{
-
 			OrderHeader orderHeader = _unitOfWork.OrderHeader.Get(u => u.Id == id, includeProperties: "ApplicationUser");
 			if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
 			{
-				//this is an order by customer
+				//this is an order by customer or guest
 
 				var service = new SessionService();
 				Session session = service.Get(orderHeader.SessionId);
@@ -226,18 +384,24 @@ namespace BulkyBook.Areas.Customer.Controllers
 					_unitOfWork.OrderHeader.UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
 					_unitOfWork.save();
 				}
-				//HttpContext.Session.Clear();
-
 			}
 
-			_emailSender.SendEmailAsync(orderHeader.ApplicationUser.Email, "New Order - Bulky Book",
-				$"<p>New Order Created - {orderHeader.Id}</p>");
+			// Send email only if user has an email (authenticated users)
+			if (orderHeader.ApplicationUser != null && !string.IsNullOrEmpty(orderHeader.ApplicationUser.Email))
+			{
+				_emailSender.SendEmailAsync(orderHeader.ApplicationUser.Email, "New Order - Bulky Book",
+					$"<p>New Order Created - {orderHeader.Id}</p>");
+			}
 
-			List<ShoppingCart> shoppingCarts = _unitOfWork.shoppingCart
-				.GetAll(u => u.ApplicationUserId == orderHeader.ApplicationUserId).ToList();
+			// Clear cart for authenticated users only
+			if (!string.IsNullOrEmpty(orderHeader.ApplicationUserId))
+			{
+				List<ShoppingCart> shoppingCarts = _unitOfWork.shoppingCart
+					.GetAll(u => u.ApplicationUserId == orderHeader.ApplicationUserId).ToList();
 
-			_unitOfWork.shoppingCart.removeRage(shoppingCarts);
-			_unitOfWork.save();
+				_unitOfWork.shoppingCart.removeRage(shoppingCarts);
+				_unitOfWork.save();
+			}
 
 			return View(id);
 		}
@@ -283,4 +447,10 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
     }
 
+    // Helper class for session-based cart
+    public class SessionCartItem
+    {
+        public int ProductId { get; set; }
+        public int Count { get; set; }
+    }
 }

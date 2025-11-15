@@ -34,7 +34,7 @@
                                 <p><span class="text-muted">@Html.Raw(@item.product.Description) </span></p>
                             </div>
                             <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
-                                    <a class="btn btn-link px-2" asp-action="Minus" asp-route-CartId="@item.Id"
+                                    <a class="btn btn-link px-2" asp-action="Minus" asp-route-CartId="@(item.Id > 0 ? item.Id : item.ProductId)"
                                         onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
                                         <i class="bi bi-dash-square bg-primary"></i>
                                 </a>
@@ -42,7 +42,7 @@
                                 <input id="form1" min="0" name="quantity" readonly value="@item.Count" type="number"
                                        class="form-control form-control-sm" />
 
-                                    <a class="btn btn-link px-2" asp-action="Pluse" asp-route-CartId="@item.Id"
+                                    <a class="btn btn-link px-2" asp-action="Pluse" asp-route-CartId="@(item.Id > 0 ? item.Id : item.ProductId)"
                                         onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
                                     <i class="bi bi-plus-square bg-primary"></i>
                                 </a>
@@ -51,7 +51,7 @@
                                 <h5 class="mb-0">@item.Price.ToString("c")</h5>
                             </div>                          
                             <div class="col-md-1 col-lg-1 col-xl-1 ">
-                                    <a asp-action="Remove" asp-route-CartId="@item.Id" class="text-danger"><i class="bi bi-trash-fill"></i>    </a>
+                                    <a asp-action="Remove" asp-route-CartId="@(item.Id > 0 ? item.Id : item.ProductId)" class="text-danger"><i class="bi bi-trash-fill"></i>    </a>
                             </div>
                         </div>  
                     </div>
