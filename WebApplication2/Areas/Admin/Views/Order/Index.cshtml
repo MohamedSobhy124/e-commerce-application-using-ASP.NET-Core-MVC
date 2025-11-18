@@ -1,0 +1,66 @@
+@model IEnumerable<OrderHeader>
+
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<partial name="_Notifications" />
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">
+                    <i class="bi bi-receipt me-3"></i>
+                    Orders Management
+                </h2>
+            </div>
+
+            <div class="admin-card-body">
+                <!-- Filter Tabs -->
+                <div class="order-filter-tabs mb-4">
+                    <button class="filter-tab active" onclick="filterOrders('all')">
+                        <i class="bi bi-list-ul me-2"></i>All Orders
+                    </button>
+                    <button class="filter-tab" onclick="filterOrders('pending')">
+                        <i class="bi bi-clock me-2"></i>Pending
+                    </button>
+                    <button class="filter-tab" onclick="filterOrders('approved')">
+                        <i class="bi bi-check-circle me-2"></i>Approved
+                    </button>
+                    <button class="filter-tab" onclick="filterOrders('inprocess')">
+                        <i class="bi bi-gear me-2"></i>Processing
+                    </button>
+                    <button class="filter-tab" onclick="filterOrders('shipped')">
+                        <i class="bi bi-truck me-2"></i>Shipped
+                    </button>
+                    <button class="filter-tab" onclick="filterOrders('delivered')">
+                        <i class="bi bi-check-circle-fill me-2"></i>Delivered
+                    </button>
+                </div>
+
+                <div class="admin-table-wrapper">
+                    <table id="tblData" class="table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Order Date</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/order.js"></script>
+}
+

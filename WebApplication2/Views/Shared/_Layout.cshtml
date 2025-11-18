@@ -1,5 +1,13 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<BulkyBook.SharedResources> Localizer
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture.RequestCulture.Culture.Name;
+    var isRtl = currentCulture == "ar";
+}
+<!DOCTYPE html>
+<html lang="@currentCulture" dir="@(isRtl ? "rtl" : "ltr")">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,19 +15,35 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
    
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="~/css/order-details.css" asp-append-version="true" />
+
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/home-enhanced.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/product-details.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/cart.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/forms.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/animations.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/external-login.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/notification-bell.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/rtl.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BulkyBook.styles.css" asp-append-version="true" />
 
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/notifications.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark  border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BulkyBook</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-book-half me-2"></i>Ideal Weight
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -27,34 +51,107 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="Customer" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door me-1"></i>@Localizer["Home"]
+                            </a>
                         </li>
 
                         @*@if(User.IsInRole(SD.Role_Admin)){*@
                         <li class="nav-item dropdown">
-                            <a class="nav-link text-light dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Managment
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-gear me-1"></i>@Localizer["Management"]
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Categries" asp-action="Index">Categray</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">Product</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Order" asp-action="Index">
+                                        <i class="bi bi-receipt me-2"></i>@Localizer["Orders"]
+                                    </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Companies" asp-action="Index">Company</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Categries" asp-action="Index">
+                                        <i class="bi bi-tag me-2"></i>@Localizer["Category"]
+                                    </a>
                                 </li>
-                                 
+                                <li>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">
+                                        <i class="bi bi-box me-2"></i>@Localizer["Product"]
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Companies" asp-action="Index">
+                                        <i class="bi bi-building me-2"></i>@Localizer["Company"]
+                                    </a>
+                                </li>
                             </ul>
                         </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <div class="notification-bell-container">
+                                    <button id="notificationBell" class="notification-bell" onclick="toggleNotifications()">
+                                        <i class="bi bi-bell-fill"></i>
+                                        <span id="notificationBadge" class="notification-badge">0</span>
+                                        <span class="notification-dot" id="notificationDot"></span>
+                                    </button>
+                                    <div id="notificationDropdown" class="notification-dropdown">
+                                        <div class="notification-dropdown-header">
+                                            <h5 class="notification-dropdown-title">
+                                                <i class="bi bi-bell me-2"></i>Notifications
+                                            </h5>
+                                            <button class="mark-all-read-btn" onclick="markAllAsRead()">
+                                                Mark all read
+                                            </button>
+                                        </div>
+                                        <div id="notificationList" class="notification-list">
+                                            <div class="notification-empty">
+                                                <i class="bi bi-bell-slash"></i>
+                                                <p>No notifications yet</p>
+                                            </div>
+                                        </div>
+                                        <div class="notification-dropdown-footer">
+                                            <a href="#" class="view-all-notifications">View All Notifications</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        }
                         <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="Customer" asp-controller="Cart" asp-action="Index">
+                            <a class="nav-link" asp-area="Customer" asp-controller="Cart" asp-action="Index">
                                @await Component.InvokeAsync("ShoppingCart")
                             </a>
+                        </li>
+                        
+                        <!-- Language Switcher -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-globe me-1"></i>
+                                <span id="currentLanguageDisplay">
+                                    @{
+                                        var langDisplay = currentCulture == "ar" ? "العربية" : "English";
+                                    }
+                                    @langDisplay
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+                                <li>
+                                    <a href="javascript:void(0);" 
+                                       onclick="switchToArabic()" 
+                                       id="langButtonAr"
+                                       class="dropdown-item @(currentCulture == "ar" ? "active" : "")">
+                                        <i class="bi bi-translate me-2"></i> العربية
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);" 
+                                       onclick="switchToEnglish()" 
+                                       id="langButtonEn"
+                                       class="dropdown-item @(currentCulture == "en" ? "active" : "")">
+                                        <i class="bi bi-translate me-2"></i> English
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                     <partial name="_LoginPartial" />
@@ -68,14 +165,136 @@
         </main>
     </div>
 
-    <footer class="border-top footer bg-dark text-muted">
-        <div class="container text-light">
-            &copy; 2023 - Mohamed Sobhy - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="enhanced-footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Company Info -->
+                <div class="footer-section">
+                    <h3 class="footer-logo">
+                        <i class="bi bi-book-half me-2"></i>
+                        BulkyBook
+                    </h3>
+                    <p class="footer-description">
+                        Your trusted online bookstore offering thousands of books from top authors worldwide. 
+                        Discover, read, and grow with BulkyBook.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" title="Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Twitter">
+                            <i class="bi bi-twitter"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Instagram">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+                        <a href="#" class="social-link" title="LinkedIn">
+                            <i class="bi bi-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="footer-section">
+                    <h4 class="footer-title">@Localizer["QuickLinks"]</h4>
+                    <ul class="footer-links">
+                        <li>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["Home"]
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["AboutUs"]
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["ContactUs"]
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="" asp-controller="Home" asp-action="Privacy" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["PrivacyPolicy"]
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Customer Service -->
+                <div class="footer-section">
+                    <h4 class="footer-title">@Localizer["CustomerService"]</h4>
+                    <ul class="footer-links">
+                        <li>
+                            <a href="#" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["HelpCenter"]
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["ShippingInfo"]
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["Returns"]
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="TrackOrder" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["TrackOrder"]
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="footer-section">
+                    <h4 class="footer-title">@Localizer["Newsletter"]</h4>
+                    <p class="footer-description">
+                        Subscribe to get special offers, free giveaways, and updates.
+                    </p>
+                    <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Thank you for subscribing!');">
+                        <input type="email" class="newsletter-input" placeholder="Your email address" required />
+                        <button type="submit" class="newsletter-btn">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 BulkyBook by <strong>Mohamed Sobhy</strong>. @Localizer["AllRightsReserved"]</p>
+            </div>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script src="~/js/toastr-config.js" asp-append-version="true"></script>
+    <script src="~/js/notifications.js" asp-append-version="true"></script>
+    <script src="~/js/notification-handler.js" asp-append-version="true"></script>
+    <script src="~/js/language-switcher.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script>
+            // Set user roles for SignalR
+            const userRoles = '@(string.Join(",", User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value)))';
+            if (typeof setUserRoles === 'function') {
+                setUserRoles(userRoles);
+            }
+        </script>
+    }
  
 
     <script src="https://cdn.tiny.cloud/1/it1906a6ew4dupngfx15tu2vmarmq8tpdnpg3nhx5r4vexcs/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>

@@ -7,53 +7,43 @@
 
 <partial name="_Notifications" />
 
-<div class="card">
-    <div class="card-header bg-secondary bg-gradient ml-0 py-3 ">
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">
+                    <i class="bi bi-building me-3"></i>
+                    Companies List
+                </h2>
+            </div>
 
-        <div class="row">
-            <div class="col-12 text-center">
-                <h2 class="text-white py-0">Companies List</h2>
+            <div class="admin-card-body">
+                <div class="text-end mb-3">
+                    <a asp-action="UpSert" class="create-new-btn">
+                        <i class="bi bi-plus-circle"></i>
+                        Create New Company
+                    </a>
+                </div>
+
+                <div class="admin-table-wrapper">
+                    <table id="tblData" class="table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Phone Number</th>
+                                <th>City</th>
+                                <th>State</th>
+                                <th>Actions</th>
+                            </tr>   
+                        </thead>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-    <div class="card-body">
-       
-        <div class="Col-6 text-end mb-2">
-            <a asp-action="UpSert" class="btn btn-dark "><i class="bi bi-plus-circle"></i>Create New Company</a>
-        </div>
-
-        <table id="tblData" class="table  table-bordered table-striped border-1">
-            <thead>
-                <tr>
-                    <th>
-                        ID
-                    </th>
-                    <th>
-                       Name
-                    </th>
-                  
-                    <th>
-                        Phone Number
-                    </th>
-                  
-                    <th>
-                   City
-                    </th>
-                   
-                    <th>
-                        State
-                    </th>
-                     
-                    <th>
-                       
-                    </th>
-                </tr>   
-            </thead>
-  
-        </table>
-    </div>
 </div>
+
 @section Scripts{
     <script type="text/javascript" src="~/js/Company.js"></script>
 }
- 

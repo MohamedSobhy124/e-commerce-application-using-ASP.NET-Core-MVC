@@ -1,35 +1,723 @@
 ﻿@model IEnumerable<Product>
 
+@{
+    var categories = ViewBag.Categories as IEnumerable<BulkyBook.Models.Categry> ?? Enumerable.Empty<BulkyBook.Models.Categry>();
+    var selectedCategory = ViewBag.SelectedCategory as int?;
+    var searchTerm = ViewBag.SearchTerm as string ?? "";
+    var sortBy = ViewBag.SortBy as string ?? "";
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <i class="bi bi-book-half me-3"></i>
+                @Localizer["DiscoverYourNextGreatRead"]
+            </h1>
+            <p class="hero-subtitle">
+                @Localizer["ExploreThousandsOfBooks"]
+            </p>
+
+            <div class="hero-search-box">
+                <form asp-action="Index" method="get">
+                    <div class="advanced-search-container">
+                        <div class="search-input-wrapper">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" 
+                                   name="searchTerm" 
+                                   value="@searchTerm" 
+                                   class="hero-search-input" 
+                                   placeholder="@Localizer["SearchByTitleAuthorOrDescription"]" />
+                        </div>
+                        <button type="submit" class="hero-search-btn">
+                            <i class="bi bi-search me-2"></i>
+                            @Localizer["Search"]
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="hero-categories">
+                <a href="@Url.Action("Index")" class="hero-category-badge @(!selectedCategory.HasValue ? "active" : "")">
+                    <i class="bi bi-grid-3x3-gap me-2"></i>@Localizer["AllBooks"]
+                </a>
+                @foreach (var category in categories.Take(5))
+                {
+                    <a href="@Url.Action("Index", new { categoryId = category.Id })" 
+                       class="hero-category-badge @(selectedCategory == category.Id ? "active" : "")">
+                        <i class="bi bi-tag me-2"></i>@category.Name
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
 <partial name="_Notifications" />
-<div class="row pb-3">
-    @foreach (var Product in Model)
-    {
-        <div class="col-lg-3 col-sm-6">
-            <div class="row p-2">
-                <div class="col-12 p-1">
-                    <div class="card border-0 p-3 shadow border-top border-5 rounded">
-                        <img src="@Product.ImageUrl" class="card-img-top rounded" style="height:200px" />
-                        <div class="card-body pb-0">
-                            <div class="Pl-1">
-                                <p class="card-title h5 text-dark opacity-75 text-uppercase text-center">@Product.Title</p>
-                                <p class="card-title text-warning  text-center">by : <b>@Product.Author</b></p>
-                            </div>
-                            <div class="Pl-1">
-                                <p class=" text-dark text-opacity-75  text-center mb-0 ">List Price : <span class="text-decoration-line-through">@Product.ListPrice.ToString("c")</span></p>
-                            </div>
-                            <div class="Pl-1">
-                                <p class=" text-dark text-opacity-75  text-center">As Low as : <span>@Product.Price.ToString("c")</span></p>
-                            </div>
-                            <div >
-                                <a asp-action="Details" asp-route-productId="@Product.Id" class="btn btn-dark bg-gradient border-0 form-control">
-                                    Details
-                                </a>
-                                
-                             </div>
+@Html.AntiForgeryToken()
+
+<div class="container-fluid px-3">
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-header">
+            <h2 class="filter-title">
+                <i class="bi bi-funnel"></i>
+                @Localizer["FilterAndSort"]
+            </h2>
+            <div class="filter-actions">
+                @if (selectedCategory.HasValue || !string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(sortBy))
+                {
+                    <a href="@Url.Action("Index")" class="clear-filters-btn">
+                        <i class="bi bi-x-circle me-2"></i>
+                        @Localizer["ClearFilters"]
+                    </a>
+                }
+            </div>
+        </div>
+
+        <form asp-action="Index" method="get">
+            <input type="hidden" name="searchTerm" value="@searchTerm" />
+            
+            <div class="filter-groups">
+                <!-- Category Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="bi bi-folder"></i>
+                        @Localizer["Category"]
+                    </label>
+                    <select name="categoryId" class="filter-select" onchange="this.form.submit()">
+                        <option value="">@Localizer["AllCategories"]</option>
+                        @foreach (var category in categories)
+                        {
+                            <option value="@category.Id" selected="@(selectedCategory == category.Id)">
+                                @category.Name
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Sort By Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="bi bi-sort-down"></i>
+                        @Localizer["SortBy"]
+                    </label>
+                    <select name="sortBy" class="filter-select" onchange="this.form.submit()">
+                        <option value="" selected="@(string.IsNullOrEmpty(sortBy))">@Localizer["Default"]</option>
+                        <option value="name" selected="@(sortBy == "name")">@Localizer["NameAZ"]</option>
+                        <option value="price_low" selected="@(sortBy == "price_low")">@Localizer["PriceLowToHigh"]</option>
+                        <option value="price_high" selected="@(sortBy == "price_high")">@Localizer["PriceHighToLow"]</option>
+                        <option value="newest" selected="@(sortBy == "newest")">@Localizer["Newest"]</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Header -->
+    <div class="results-header">
+        <div class="results-count">
+            Showing <strong>@Model.Count()</strong> books
+            @if (selectedCategory.HasValue)
+            {
+                var category = categories.FirstOrDefault(c => c.Id == selectedCategory.Value);
+                if (category != null)
+                {
+                    <span>in <strong>@category.Name</strong></span>
+                }
+            }
+            @if (!string.IsNullOrEmpty(searchTerm))
+            {
+                <span>matching <strong>"@searchTerm"</strong></span>
+            }
+        </div>
+        
+        <div class="view-toggle">
+            <button class="view-btn active" title="Grid View">
+                <i class="bi bi-grid-3x3-gap"></i>
+            </button>
+            <button class="view-btn" title="List View">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="row" id="productContainer">
+@foreach (var Product in Model)
+{
+    var discount = Product.ListPrice > 0 ? (int)((Product.ListPrice - Product.Price) / Product.ListPrice * 100) : 0;
+    var cartProductIds = ViewBag.CartProductIds as List<int> ?? new List<int>();
+    var isInCart = cartProductIds.Contains(Product.Id);
+    
+    <div class="col-lg-3 col-md-4 col-sm-6 product-col">
+        <div class="product-card">
+            <div class="product-image-wrapper">
+                <img src="@Product.ImageUrl" class="product-image" alt="@Product.Title" />
+                    <button class="add-to-cart-btn @(isInCart ? "in-cart" : "")" 
+                            data-product-id="@Product.Id"
+                            onclick="toggleCart(@Product.Id, this)" 
+                            title="@(isInCart ? "Remove from Cart" : "Add to Cart")">
+                        <i class="bi @(isInCart ? "bi-check-lg" : "bi-plus-lg")"></i>
+                    </button>
+                @if (discount > 0)
+                {
+                    <div class="product-badge">@discount% OFF</div>
+                }
+            </div>
+            <div class="product-content">
+                <h3 class="product-title">@Product.Title</h3>
+                <div class="product-author">
+                    <i class="bi bi-pencil-fill"></i>
+                    <span>@Product.Author</span>
+                </div>
+                        <div class="price-section">
+                            @if (discount > 0)
+                            {
+                                <p class="list-price">
+                                    <span>@Product.ListPrice.ToString("c")</span>
+                                </p>
+                            }
+                            <p class="current-price">
+                                @Product.Price.ToString("c")
+                            </p>
+                        </div>
+                        <a asp-action="Details" asp-route-productId="@Product.Id" class="btn details-btn w-100">
+                            @Localizer["ViewDetails"]
+                        </a>
+            </div>
+        </div>
+    </div>
+}
+    </div>
+</div>
+
+<!-- Loading Indicator -->
+<div class="text-center" id="loadingIndicator" style="display: none;">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="loading-text">Loading more products...</p>
+</div>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <h2 class="features-title">@Localizer["WhyChooseBulkyBook"]</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-truck"></i>
+                </div>
+                <h3 class="feature-title">@Localizer["FreeShipping"]</h3>
+                <p class="feature-description">
+                    @Localizer["FreeShippingDesc"]
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <h3 class="feature-title">@Localizer["SecurePayment"]</h3>
+                <p class="feature-description">
+                    @Localizer["SecurePaymentDesc"]
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+                <h3 class="feature-title">@Localizer["EasyReturns"]</h3>
+                <p class="feature-description">
+                    @Localizer["EasyReturnsDesc"]
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-headset"></i>
+                </div>
+                <h3 class="feature-title">@Localizer["Support247"]</h3>
+                <p class="feature-description">
+                    @Localizer["Support247Desc"]
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">10K+</div>
+                <div class="stat-label">@Localizer["BooksAvailable"]</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">50K+</div>
+                <div class="stat-label">@Localizer["HappyCustomers"]</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1K+</div>
+                <div class="stat-label">@Localizer["Authors"]</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">99%</div>
+                <div class="stat-label">@Localizer["CustomerSatisfaction"]</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Cart Sidebar -->
+<div id="cartSidebar" class="cart-sidebar">
+    <div class="cart-header">
+        <h5 class="cart-title">
+            <i class="bi bi-cart3 me-2"></i>
+            Cart (<span id="sidebarCartCount">0</span>)
+        </h5>
+        <button class="cart-close-btn" onclick="closeCartSidebar()">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+    
+    <div id="cartItemsContainer" class="cart-items-container">
+        <!-- Cart items will be loaded here -->
+    </div>
+    
+    <div class="cart-footer">
+        <div class="cart-subtotal">
+            <span>@Localizer["Subtotal"]:</span>
+            <span id="cartSubtotal" class="cart-subtotal-amount">$0.00</span>
+        </div>
+        <a href="/Customer/Cart/Summary" class="btn btn-checkout w-100">
+            <i class="bi bi-lock-fill me-2"></i>@Localizer["Checkout"]
+        </a>
+        <a href="/Customer/Cart/Index" class="btn btn-view-cart w-100 mt-2">
+            @Localizer["ViewFullCart"]
+        </a>
+    </div>
+</div>
+
+<!-- Overlay -->
+<div id="cartOverlay" class="cart-overlay" onclick="closeCartSidebar()"></div>
+
+<!-- Floating Cart Button -->
+    <button class="floating-cart-btn" onclick="openCartSidebar()" title="View Cart">
+        <i class="bi bi-cart3"></i>
+        <span id="floatingCartBadge" class="floating-cart-badge">0</span>
+    </button>
+
+@section Scripts {
+    <script>
+        let currentPage = 1;
+        let isLoading = false;
+        let hasMoreProducts = true;
+        const isAuthenticated = @Json.Serialize(User.Identity.IsAuthenticated);
+        let cartProductIds = @Html.Raw(Json.Serialize(ViewBag.CartProductIds ?? new List<int>()));
+
+        // Save scroll position before any operation
+        function saveScrollPosition() {
+            sessionStorage.setItem('scrollPosition', window.scrollY || window.pageYOffset);
+        }
+
+        // Restore scroll position
+        function restoreScrollPosition() {
+            const savedPosition = sessionStorage.getItem('scrollPosition');
+            if (savedPosition) {
+                window.scrollTo(0, parseInt(savedPosition));
+            }
+        }
+
+        // Restore scroll position on page load
+        window.addEventListener('load', function() {
+            restoreScrollPosition();
+            // Clear the saved position after restoring
+            sessionStorage.removeItem('scrollPosition');
+            
+            // Initialize floating cart badge for all users
+                const initialCount = cartProductIds.length;
+                updateFloatingCartBadge(initialCount);
+        });
+
+        // Save scroll position before page unload
+        window.addEventListener('beforeunload', function() {
+            saveScrollPosition();
+        });
+
+        // Function to format currency
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(value);
+        }
+
+        // Function to update cart widget using AJAX
+        function updateCartWidget() {
+            fetch('/Customer/Home/GetCartWidget')
+                .then(response => response.text())
+                .then(html => {
+                    // Find the cart link and update its content
+                    const cartLink = document.querySelector('a[href*="/Customer/Cart/Index"]');
+                    if (cartLink) {
+                        cartLink.innerHTML = html;
+                        console.log('Cart widget updated successfully via AJAX');
+                    } else {
+                        console.error('Cart link not found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating cart widget:', error);
+                });
+        }
+
+        // Function to update floating cart badge
+        function updateFloatingCartBadge(count) {
+            const floatingBadge = document.getElementById('floatingCartBadge');
+            const floatingBtn = document.querySelector('.floating-cart-btn');
+            if (floatingBadge) {
+                floatingBadge.textContent = count;
+                // Add pulse animation
+                if (floatingBtn) {
+                    floatingBtn.classList.add('pulse');
+                    setTimeout(() => {
+                        floatingBtn.classList.remove('pulse');
+                    }, 600);
+                }
+            }
+        }
+
+        // Function to open cart sidebar
+        function openCartSidebar() {
+            console.log('Opening cart sidebar...');
+            const sidebar = document.getElementById('cartSidebar');
+            const overlay = document.getElementById('cartOverlay');
+            
+            if (sidebar && overlay) {
+                sidebar.classList.add('active');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                console.log('Cart sidebar opened successfully');
+                loadCartItems();
+            } else {
+                console.error('Cart sidebar or overlay not found!');
+            }
+        }
+
+        // Function to close cart sidebar
+        function closeCartSidebar() {
+            document.getElementById('cartSidebar').classList.remove('active');
+            document.getElementById('cartOverlay').classList.remove('active');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+
+        // Function to load cart items
+        function loadCartItems() {
+            console.log('loadCartItems called, isAuthenticated:', isAuthenticated);
+
+            console.log('Fetching cart items from server...');
+            fetch('/Customer/Cart/GetCartItems')
+                .then(response => {
+                    console.log('Cart items response received:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Cart items data:', data);
+                    const container = document.getElementById('cartItemsContainer');
+                    const countElement = document.getElementById('sidebarCartCount');
+                    const subtotalElement = document.getElementById('cartSubtotal');
+
+                    if (data.items && data.items.length > 0) {
+                        container.innerHTML = data.items.map(item => createCartItemHTML(item)).join('');
+                        countElement.textContent = data.items.length;
+                        subtotalElement.textContent = formatCurrency(data.subtotal);
+                        
+                        // Update floating cart badge
+                        updateFloatingCartBadge(data.items.length);
+                        console.log('Cart items loaded successfully:', data.items.length, 'items');
+                    } else {
+                        container.innerHTML = '<div class="cart-empty"><i class="bi bi-cart-x"></i><p>Your cart is empty</p></div>';
+                        countElement.textContent = '0';
+                        subtotalElement.textContent = '$0.00';
+                        
+                        // Update floating cart badge
+                        updateFloatingCartBadge(0);
+                        console.log('Cart is empty');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading cart items:', error);
+                });
+        }
+
+        // Function to create cart item HTML
+        function createCartItemHTML(item) {
+            return `
+                <div class="cart-item" data-product-id="${item.productId}">
+                    <img src="${item.imageUrl}" alt="${item.title}" class="cart-item-image">
+                    <div class="cart-item-details">
+                        <h6 class="cart-item-title">${item.title}</h6>
+                        <p class="cart-item-price">${formatCurrency(item.price * item.count)}</p>
+                        <div class="cart-item-quantity">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="updateCartQuantity(${item.productId}, ${item.count - 1})">
+                                <i class="bi bi-dash"></i>
+                            </button>
+                            <span>${item.count}</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="updateCartQuantity(${item.productId}, ${item.count + 1})">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                            <button class="cart-item-remove" onclick="removeFromCart(${item.productId})" title="Remove">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    }
-</div>
+            `;
+        }
+
+        // Function to update cart quantity
+        function updateCartQuantity(productId, newCount) {
+            if (newCount < 1) {
+                removeFromCart(productId);
+                return;
+            }
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const formData = new FormData();
+            formData.append('productId', productId);
+            formData.append('count', newCount);
+            formData.append('__RequestVerificationToken', token);
+
+            fetch('/Customer/Cart/UpdateQuantity', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadCartItems(); // This will also update the floating badge
+                    updateCartWidget();
+                }
+            })
+            .catch(error => {
+                console.error('Error updating quantity:', error);
+            });
+        }
+
+        // Function to remove item from cart
+        function removeFromCart(productId) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const formData = new FormData();
+            formData.append('productId', productId);
+            formData.append('__RequestVerificationToken', token);
+
+            fetch('/Customer/Home/ToggleCart', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update button state for this product
+                    const button = document.querySelector(`button[data-product-id="${productId}"]`);
+                    if (button) {
+                        button.classList.remove('in-cart');
+                        button.querySelector('i').className = 'bi bi-plus-lg';
+                        button.title = 'Add to Cart';
+                    }
+                    cartProductIds = cartProductIds.filter(id => id !== productId);
+                    
+                    // Update floating cart badge
+                    updateFloatingCartBadge(data.cartCount);
+                    
+                    loadCartItems();
+                    updateCartWidget();
+                    
+                    if (typeof toastr !== 'undefined') {
+                        toastr.info('Product removed from cart');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error removing from cart:', error);
+            });
+        }
+
+        // Function to toggle product in cart
+        function toggleCart(productId, button) {
+            const isCurrentlyInCart = button.classList.contains('in-cart');
+            const originalIcon = button.querySelector('i').className;
+            
+            // Save scroll position in case of any unexpected navigation
+            saveScrollPosition();
+            
+            button.classList.add('loading');
+            button.querySelector('i').className = 'bi bi-arrow-repeat';
+            button.querySelector('i').style.animation = 'spin 1s linear infinite';
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const formData = new FormData();
+            formData.append('productId', productId);
+            formData.append('__RequestVerificationToken', token);
+
+            fetch('/Customer/Home/ToggleCart', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server response:', data);
+                if (data.success) {
+                    button.classList.remove('loading');
+                    button.querySelector('i').style.animation = '';
+                    
+                    if (data.isAdded) {
+                        // Product was added
+                        button.classList.add('in-cart');
+                        button.querySelector('i').className = 'bi bi-check-lg';
+                        button.title = 'Remove from Cart';
+                        cartProductIds.push(productId);
+                        
+                        // Show notification
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success(data.message);
+                        }
+                        
+                        // Update floating cart badge
+                        updateFloatingCartBadge(data.cartCount);
+                        
+                        console.log('About to open cart sidebar...');
+                        // Open the cart sidebar to show the added item
+                        openCartSidebar();
+                    } else {
+                        // Product was removed
+                        button.classList.remove('in-cart');
+                        button.querySelector('i').className = 'bi bi-plus-lg';
+                        button.title = 'Add to Cart';
+                        cartProductIds = cartProductIds.filter(id => id !== productId);
+                        
+                        // Show notification
+                        if (typeof toastr !== 'undefined') {
+                            toastr.info(data.message);
+                        }
+                        
+                        // Update floating cart badge
+                        updateFloatingCartBadge(data.cartCount);
+                    }
+                    
+                    // Update cart widget in navbar using AJAX
+                    updateCartWidget();
+                } else {
+                    throw new Error(data.message || 'Failed to update cart');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                button.classList.remove('loading');
+                button.querySelector('i').className = originalIcon;
+                button.querySelector('i').style.animation = '';
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Failed to update cart. Please try again.');
+                } else {
+                    alert('Failed to update cart. Please try again.');
+                }
+            });
+        }
+
+        // Function to create product HTML
+        function createProductCard(product, isAuthenticated) {
+            const discount = product.listPrice > 0 ? Math.floor((product.listPrice - product.price) / product.listPrice * 100) : 0;
+            const discountBadge = discount > 0 ? `<div class="product-badge">${discount}% OFF</div>` : '';
+            const listPriceHtml = discount > 0 ? `<p class="list-price"><span>${formatCurrency(product.listPrice)}</span></p>` : '';
+            
+            const isInCart = cartProductIds.includes(product.id);
+            const addToCartBtn = isAuthenticated ? `
+                <button class="add-to-cart-btn ${isInCart ? 'in-cart' : ''}" 
+                        data-product-id="${product.id}"
+                        onclick="toggleCart(${product.id}, this)" 
+                        title="${isInCart ? 'Remove from Cart' : 'Add to Cart'}">
+                    <i class="bi ${isInCart ? 'bi-check-lg' : 'bi-plus-lg'}"></i>
+                </button>
+            ` : '';
+            
+            return `
+                <div class="col-lg-3 col-md-4 col-sm-6 product-col">
+                    <div class="product-card">
+                        <div class="product-image-wrapper">
+                            <img src="${product.imageUrl}" class="product-image" alt="${product.title}" />
+                            ${addToCartBtn}
+                            ${discountBadge}
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">${product.title}</h3>
+                            <div class="product-author">
+                                <i class="bi bi-pencil-fill"></i>
+                                <span>${product.author}</span>
+                            </div>
+                            <div class="price-section">
+                                ${listPriceHtml}
+                                <p class="current-price">
+                                    ${formatCurrency(product.price)}
+                                </p>
+                            </div>
+                            <a href="/Customer/Home/Details?productId=${product.id}" class="btn details-btn w-100">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Function to load more products
+        function loadMoreProducts() {
+            if (isLoading || !hasMoreProducts) return;
+
+            isLoading = true;
+            document.getElementById('loadingIndicator').style.display = 'block';
+
+            fetch(`/Customer/Home/LoadMoreProducts?page=${currentPage}&pageSize=20`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('productContainer');
+                    
+                    data.products.forEach(product => {
+                        container.insertAdjacentHTML('beforeend', createProductCard(product, isAuthenticated));
+                    });
+
+                    hasMoreProducts = data.hasMore;
+                    currentPage++;
+                    isLoading = false;
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('Error loading products:', error);
+                    isLoading = false;
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                });
+        }
+
+        // Infinite scroll detection
+        window.addEventListener('scroll', function() {
+            const scrollPosition = window.innerHeight + window.scrollY;
+            const threshold = document.documentElement.offsetHeight - 1200; // Load when 500px from bottom
+
+            if (scrollPosition >= threshold && !isLoading && hasMoreProducts) {
+                loadMoreProducts();
+            }
+        });
+
+        // Save scroll position when clicking on any link (like Details button)
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a');
+            if (link && link.href) {
+                saveScrollPosition();
+            }
+        });
+    </script>
+}

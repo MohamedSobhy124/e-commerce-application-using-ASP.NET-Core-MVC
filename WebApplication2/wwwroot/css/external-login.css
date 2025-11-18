@@ -1,0 +1,235 @@
+/* ===================================
+   External Login Providers (Google, etc.)
+   =================================== */
+
+/* External Login Section */
+.external-login-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--gray-200);
+}
+
+.external-login-title {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    position: relative;
+}
+
+.external-login-title::before,
+.external-login-title::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 30%;
+    height: 1px;
+    background: var(--gray-300);
+}
+
+.external-login-title::before {
+    left: 0;
+}
+
+.external-login-title::after {
+    right: 0;
+}
+
+.external-login-title span {
+    background: var(--white);
+    padding: 0 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* External Login Buttons */
+.external-login-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.external-login-form {
+    width: 100%;
+}
+
+/* Google Login Button */
+.google-login-btn {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    background: var(--white);
+    color: var(--gray-700);
+    border: 2px solid var(--gray-300);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.google-login-btn:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.google-login-btn:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+.google-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.google-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Facebook Login Button (for future use) */
+.facebook-login-btn {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    background: #1877f2;
+    color: var(--white);
+    border: 2px solid #1877f2;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.facebook-login-btn:hover {
+    background: #166fe5;
+    border-color: #166fe5;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    color: var(--white);
+}
+
+.facebook-icon {
+    font-size: 1.5rem;
+}
+
+/* Microsoft Login Button (for future use) */
+.microsoft-login-btn {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    background: var(--white);
+    color: var(--gray-700);
+    border: 2px solid var(--gray-300);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.microsoft-login-btn:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.microsoft-icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* Loading State */
+.external-login-btn.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.external-login-btn.loading::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 1s linear infinite;
+    margin-left: 0.5rem;
+}
+
+/* Security Notice */
+.external-login-notice {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--gray-50);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--gray-200);
+}
+
+.external-login-notice i {
+    color: var(--primary-color);
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.external-login-notice p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+    .external-login-title::before,
+    .external-login-title::after {
+        width: 25%;
+    }
+
+    .google-login-btn,
+    .facebook-login-btn,
+    .microsoft-login-btn {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+    }
+}
+
+/* Animation for external login buttons */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.external-login-buttons {
+    animation: fadeInScale 0.5s ease 0.3s both;
+}
+

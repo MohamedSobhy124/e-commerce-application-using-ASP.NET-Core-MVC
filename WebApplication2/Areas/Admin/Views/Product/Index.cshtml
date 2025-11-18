@@ -7,81 +7,44 @@
 
 <partial name="_Notifications" />
 
-<div class="card">
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">
+                    <i class="bi bi-box-seam me-3"></i>
+                    Products List
+                </h2>
+            </div>
 
-    <div class="card-header bg-secondary bg-gradient ml-0 py-3 ">
+            <div class="admin-card-body">
+                <div class="text-end mb-3">
+                    <a asp-action="UpSert" class="create-new-btn">
+                        <i class="bi bi-plus-circle"></i>
+                        Create New Product
+                    </a>
+                </div>
 
-        <div class="row">
-            <div class="col-12 text-center">
-                <h2 class="text-white py-0">Products List</h2>
+                <div class="admin-table-wrapper">
+                    <table id="tblData" class="table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>ISBN</th>
+                                <th>Price</th>
+                                <th>Author</th>
+                                <th>Category</th>
+                                <th>Actions</th>
+                            </tr>   
+                        </thead>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-    <div class="card-body">
-        <div class="Col-6 text-end mb-2">
-            <a asp-action="UpSert" class="btn btn-dark"><i class="bi bi-plus-circle"></i>Create New Product</a>
-        </div>
-
-        <table id="tblData" class="table  table-bordered table-striped table-info">
-            <thead>
-                <tr>
-                    <th>
-                        ID
-                    </th>
-                    <th>
-                       Title
-                    </th>
-                  
-                    <th>
-                        ISBN
-                    </th>
-                  
-                    <th>
-                   Price
-                    </th>
-                   
-                    <th>
-                        Author
-                    </th>
-                    <th>
-                        categry
-                    </th>
-                    <th>
-                       
-                    </th>
-                </tr>   
-            </thead>
-     @*   <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Title)   
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.ISBN)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Price)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Author)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.categry.Name)
-                        </td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                        </td>
-                    </tr>
-                }
-        </tbody>*@
-        </table>
-    </div>
 </div>
+
 @section Scripts{
     <script type="text/javascript" src="~/js/Product.js"></script>
 }
- 

@@ -1,0 +1,183 @@
+// Real-time Notification System using SignalR
+let notificationConnection = null;
+
+// Initialize SignalR connection
+function initializeNotifications() {
+    if (typeof signalR === 'undefined') {
+        console.error('SignalR library not loaded');
+        return;
+    }
+
+    notificationConnection = new signalR.HubConnectionBuilder()
+        .withUrl("/notificationHub")
+        .withAutomaticReconnect()
+        .build();
+
+    // Handle incoming notifications
+    notificationConnection.on("ReceiveOrderNotification", function (data) {
+        console.log('New order notification received:', data);
+        
+        // Show toastr notification
+        if (typeof toastr !== 'undefined') {
+            toastr.success(
+                `Order #${data.orderId} - ${data.message}<br>Total: $${data.total.toFixed(2)}`,
+                data.title,
+                {
+                    timeOut: 10000,
+                    extendedTimeOut: 5000,
+                    closeButton: true,
+                    progressBar: true,
+                    onclick: function() {
+                        window.location.href = `/Admin/Order/Details/${data.orderId}`;
+                    }
+                }
+            );
+        }
+
+        // Play notification sound
+        playNotificationSound();
+
+        // Update notification bell
+        updateNotificationBell();
+
+        // Show browser notification if permitted
+        showBrowserNotification(data.title, data.message);
+    });
+
+    notificationConnection.on("ReceiveOrderConfirmation", function (data) {
+        console.log('Order confirmation received:', data);
+        
+        if (typeof toastr !== 'undefined') {
+            toastr.success(
+                data.message,
+                data.title,
+                {
+                    timeOut: 8000,
+                    closeButton: true,
+                    progressBar: true
+                }
+            );
+        }
+    });
+
+    // Start connection
+    notificationConnection.start()
+        .then(function () {
+            console.log('SignalR connected successfully');
+            
+            // Join admin group if user is admin
+            if (isUserAdmin()) {
+                notificationConnection.invoke("JoinAdminGroup")
+                    .then(() => console.log('Joined admin group'))
+                    .catch(err => console.error('Error joining admin group:', err));
+            }
+        })
+        .catch(function (err) {
+            console.error('SignalR connection error:', err);
+        });
+
+    // Reconnection handling
+    notificationConnection.onreconnecting(function() {
+        console.log('SignalR reconnecting...');
+    });
+
+    notificationConnection.onreconnected(function() {
+        console.log('SignalR reconnected');
+        if (isUserAdmin()) {
+            notificationConnection.invoke("JoinAdminGroup");
+        }
+    });
+
+    notificationConnection.onclose(function() {
+        console.log('SignalR connection closed');
+    });
+}
+
+// Check if user is admin (you can customize this based on your role check)
+function isUserAdmin() {
+    // Check if user has admin role - you might need to pass this from the server
+    const userRoles = document.querySelector('meta[name="user-roles"]')?.content || '';
+    return userRoles.includes('Admin');
+}
+
+// Update notification bell count
+function updateNotificationBell() {
+    const badge = document.getElementById('notificationBadge');
+    if (badge) {
+        let currentCount = parseInt(badge.textContent) || 0;
+        currentCount++;
+        badge.textContent = currentCount;
+        badge.style.display = 'inline-block';
+        
+        // Animate bell
+        const bell = document.getElementById('notificationBell');
+        if (bell) {
+            bell.classList.add('ring');
+            setTimeout(() => bell.classList.remove('ring'), 1000);
+        }
+    }
+}
+
+// Play notification sound
+function playNotificationSound() {
+    try {
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUKfk77RgGgU7k9nzzn0pBSh+zPLaizsKGGS56+mnUhQKQ5zd8sFuJAUthM/z2Yk3CBppu+zn');
+        audio.play().catch(e => console.log('Could not play sound:', e));
+    } catch (e) {
+        console.log('Audio not supported:', e);
+    }
+}
+
+// Show browser notification
+function showBrowserNotification(title, message) {
+    if (!("Notification" in window)) {
+        return;
+    }
+
+    if (Notification.permission === "granted") {
+        const notification = new Notification(title, {
+            body: message,
+            icon: '/favicon.ico',
+            badge: '/favicon.ico',
+            tag: 'order-notification',
+            requireInteraction: true
+        });
+
+        notification.onclick = function() {
+            window.focus();
+            notification.close();
+        };
+    } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(function (permission) {
+            if (permission === "granted") {
+                showBrowserNotification(title, message);
+            }
+        });
+    }
+}
+
+// Request notification permission
+function requestNotificationPermission() {
+    if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize SignalR
+    initializeNotifications();
+    
+    // Request notification permission for admins
+    if (isUserAdmin()) {
+        requestNotificationPermission();
+    }
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (notificationConnection) {
+        notificationConnection.stop();
+    }
+});
+

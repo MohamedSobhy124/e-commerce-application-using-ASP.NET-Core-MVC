@@ -15,13 +15,18 @@ namespace BulkyBook.Utility
 
 		public const string StatusPending = "Pending";
 		public const string StatusApproved = "Approved";
+		public const string StatusPaid = "Paid";
 		public const string StatusInProcess = "Processing";
+		public const string StatusInPreparingShiping = "Preparing Shiping";
 		public const string StatusShipped = "Shipped";
+		public const string StatusOutForDelivery = "OutForDelivery";
+		public const string StatusDelivered = "Delivered";
 		public const string StatusCancelled = "Cancelled";
+		public const string StatusReturned = "Returned";
 		public const string StatusRefunded = "Refunded";
 
 		public const string PaymentStatusPending = "Pending";
-		public const string PaymentStatusApproved = "Approved";
+		public const string PaymentStatusPaid = "Paid";
 		public const string PaymentStatusDelayedPayment = "ApprovedForDelayedPayment";
 		public const string PaymentStatusRejected = "Rejected";
 

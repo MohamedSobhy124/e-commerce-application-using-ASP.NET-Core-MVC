@@ -1,0 +1,46 @@
+=====================================
+RESTART YOUR APP NOW - SIMPLE STEPS
+=====================================
+
+YOUR APP IS STILL RUNNING!
+That's why you're seeing the 404 error (old code).
+
+STEP 1: STOP the App
+--------------------
+Go to the terminal/console where your app is running
+Press: Ctrl + C
+Wait for it to stop completely
+
+
+STEP 2: RUN Again
+--------------------
+dotnet run
+
+
+STEP 3: OPEN INCOGNITO WINDOW
+--------------------
+Press: Ctrl + Shift + N
+Navigate to: http://localhost:5047
+
+
+STEP 4: TEST
+--------------------
+✅ Should see: الرئيسية (Arabic)
+✅ Click globe 🌐
+✅ Click "English"  
+✅ Switches to English (NO 404!)
+✅ Click globe again
+✅ Click "العربية"
+✅ Switches to Arabic!
+
+
+WHY INCOGNITO?
+--------------
+Your regular browser has OLD cookie set to English.
+Incognito = Fresh start = Uses default (Arabic).
+
+
+THAT'S IT! 
+Just stop app, restart, and use incognito!
+=====================================
+
