@@ -1,73 +1,73 @@
 ﻿@model ShoppingCartVM
 
-<section class="h-100" style="background-color: #eee;">
-    <div class="block">
-        <a asp-action="Index" asp-controller="Home" class=" btn  btn-block btn-lg ">Continue Shopping</a>
-    </div>
-    <div class="container h-100 py-5">
-        <div class="row d-flex justify-content-center align-items-center h-100">
-            <div class="col-10">
-
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="fw-normal mb-0 text-black">Shopping Cart</h3>
-                    <div>
-                        <p class="mb-0">
-                            <span class="text-muted">Sort by:</span> <a href="#!" class="text-body">
-                                price <i class="fas fa-angle-down mt-1"></i>
-                            </a>
-                        </p>
+<section class="cart-page-wrapper">
+    <div class="container py-4">
+        <a asp-action="Index" asp-controller="Home" class="continue-shopping-btn">
+            <i class="bi bi-arrow-left"></i>
+            @Localizer["ContinueShopping"]
+        </a>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="cart-header-section">
+                    <h3 class="cart-title">
+                        <i class="bi bi-cart3 me-3"></i>@Localizer["ShoppingCart"]
+                    </h3>
+                    <div class="cart-sort">
+                        <p class="cart-sort-label">@Localizer["SortBy"]:</p>
+                        <a href="#!" class="cart-sort-link">
+                            @Localizer["Price"] <i class="bi bi-chevron-down"></i>
+                        </a>
                     </div>                  
                 </div>
+
                 @foreach(var item in Model.ShoppingCartList)
                 {
-                    
-               
-                <div class="card rounded-3 mb-4">
-                    <div class="card-body p-4">
+                    <div class="cart-item-card">
                         <div class="row d-flex justify-content-between align-items-center">
                             <div class="col-md-2 col-lg-2 col-xl-2">
-                                <img src="@item.product.ImageUrl"
-                                     class="img-fluid rounded-3" style="height:90px;width:80%;" alt="Cotton T-shirt">
+                                <img src="@item.product.ImageUrl" class="cart-item-image" alt="@item.product.Title">
                             </div>
                             <div class="col-md-3 col-lg-3 col-xl-3">
-                                <p class="lead fw-normal mb-2">@item.product.Title</p>
-                                <p><span class="text-muted">@Html.Raw(@item.product.Description) </span></p>
+                                <p class="cart-item-title">@item.product.Title</p>
+                                <div class="cart-item-description">
+                                    @Html.Raw(@item.product.Description)
+                                </div>
                             </div>
-                            <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
-                                    <a class="btn btn-link px-2" asp-action="Minus" asp-route-CartId="@item.Id"
-                                        onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                                        <i class="bi bi-dash-square bg-primary"></i>
-                                </a>
+                            <div class="col-md-3 col-lg-3 col-xl-2">
+                                <div class="cart-quantity-controls">
+                                    <a class="cart-quantity-btn" asp-action="Minus" asp-route-CartId="@item.Id" asp-route-ProductId="@item.ProductId">
+                                        <i class="bi bi-dash"></i>
+                                    </a>
 
-                                <input id="form1" min="0" name="quantity" readonly value="@item.Count" type="number"
-                                       class="form-control form-control-sm" />
+                                    <input readonly value="@item.Count" type="number" class="cart-quantity-input" />
 
-                                    <a class="btn btn-link px-2" asp-action="Pluse" asp-route-CartId="@item.Id"
-                                        onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                                    <i class="bi bi-plus-square bg-primary"></i>
-                                </a>
+                                    <a class="cart-quantity-btn" asp-action="Pluse" asp-route-CartId="@item.Id" asp-route-ProductId="@item.ProductId">
+                                        <i class="bi bi-plus"></i>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                                <h5 class="mb-0">@item.Price.ToString("c")</h5>
+                            <div class="col-md-3 col-lg-2 col-xl-2">
+                                <h5 class="cart-item-price">@item.Price.ToString("c")</h5>
                             </div>                          
-                            <div class="col-md-1 col-lg-1 col-xl-1 ">
-                                    <a asp-action="Remove" asp-route-CartId="@item.Id" class="text-danger"><i class="bi bi-trash-fill"></i>    </a>
+                            <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                                <a asp-action="Remove" asp-route-CartId="@item.Id" asp-route-ProductId="@item.ProductId" class="cart-delete-btn">
+                                    <i class="bi bi-trash-fill"></i>
+                                </a>
                             </div>
                         </div>  
                     </div>
-                </div>
-
                 }
-                 
 
-                <div class="card">
-                    <div class="card-body text-center">
-                        Total : @Model.OrderTotal.ToString("c")
-                        <hr />
-                        <a asp-action="Summary" class="btn btn-primary border-0 bg-gradient w-100 py-2">Summary</a>
-                    </div>
+                <div class="cart-total-card">
+                    <p class="cart-total-label">@Localizer["TotalAmount"]</p>
+                    <h2 class="cart-total-amount">@Model.OrderTotal.ToString("c")</h2>
+                    <hr style="border-color: rgba(255,255,255,0.3); margin: 1.5rem 0;" />
+                    <a asp-action="Summary" class="cart-summary-btn">
+                        <i class="bi bi-arrow-right-circle"></i>
+                        @Localizer["ProceedToSummary"]
+                    </a>
                 </div>
-
             </div>
         </div>
     </div>

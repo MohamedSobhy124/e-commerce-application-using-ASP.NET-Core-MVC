@@ -1,0 +1,245 @@
+/* ===================================
+   Layout - Navigation & Footer
+   =================================== */
+
+/* Navbar Styles */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 0;
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-bottom: 2px solid rgba(124, 58, 237, 0.3);
+}
+
+.navbar .container-fluid {
+    padding: 0.75rem 2rem;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--white) !important;
+    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-decoration: none;
+    transition: var(--transition);
+    padding: 0.5rem 0;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+}
+
+.navbar-toggler {
+    border: none;
+    padding: 0.5rem;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.85)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.navbar-nav {
+    align-items: center;
+}
+
+.nav-item {
+    margin: 0 0.5rem;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 500;
+    padding: 0.625rem 1rem !important;
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition);
+    position: relative;
+}
+
+.nav-link:hover {
+    color: var(--white) !important;
+    background-color: rgba(124, 58, 237, 0.2);
+    transform: translateY(-2px);
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #7c3aed, #ec4899);
+    transition: var(--transition);
+}
+
+.nav-link:hover::after {
+    width: 80%;
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    background-color: var(--white);
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+    animation: fadeIn 0.2s ease;
+}
+
+.dropdown-item {
+    padding: 0.625rem 1.25rem;
+    color: var(--gray-700);
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.dropdown-item:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+.dropdown-divider {
+    margin: 0.5rem 0;
+    border-color: var(--gray-200);
+}
+
+.dropdown-toggle::after {
+    margin-left: 0.5rem;
+    transition: var(--transition);
+}
+
+.dropdown-toggle:hover::after {
+    transform: rotate(180deg);
+}
+
+/* Shopping Cart Badge in Navbar */
+.nav-link i.bi-cart {
+    font-size: 1.2rem;
+    margin-right: 0.25rem;
+}
+
+#cartCount {
+    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    color: var(--white);
+    padding: 0.125rem 0.5rem;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    margin-left: 0.25rem;
+}
+
+/* Body Content Adjustment for Fixed Navbar */
+body {
+    padding-top: 72px;
+}
+
+main {
+    min-height: calc(100vh - 132px);
+}
+
+/* Footer Styles */
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    color: rgba(255, 255, 255, 0.85);
+    padding: 1.25rem 0;
+    border-top: 2px solid rgba(124, 58, 237, 0.3);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.footer .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.footer a {
+    color: #7c3aed;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    transition: var(--transition);
+}
+
+.footer a:hover {
+    color: #ec4899;
+    text-decoration: underline;
+}
+
+/* Responsive Navigation */
+@media (max-width: 768px) {
+    .navbar .container-fluid {
+        padding: 0.75rem 1rem;
+    }
+
+    .navbar-collapse {
+        background-color: rgba(17, 24, 39, 0.98);
+        margin: 0.5rem -1rem -0.75rem;
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+    }
+
+    .nav-item {
+        margin: 0.25rem 0;
+    }
+
+    .nav-link {
+        padding: 0.75rem 1rem !important;
+    }
+
+    .nav-link::after {
+        display: none;
+    }
+
+    .dropdown-menu {
+        background-color: rgba(31, 41, 55, 0.95);
+        border: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .dropdown-item {
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(124, 58, 237, 0.3);
+        color: var(--white);
+    }
+
+    body {
+        padding-top: 60px;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+
+    .footer {
+        padding: 1rem 0;
+        font-size: 0.875rem;
+    }
+
+    .footer .container {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+

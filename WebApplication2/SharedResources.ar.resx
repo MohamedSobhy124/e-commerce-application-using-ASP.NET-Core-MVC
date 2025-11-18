@@ -1,0 +1,690 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" msdata:Ordinal="5" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Navigation & Common -->
+  <data name="Home" xml:space="preserve">
+    <value>الرئيسية</value>
+  </data>
+  <data name="Shop" xml:space="preserve">
+    <value>المتجر</value>
+  </data>
+  <data name="Products" xml:space="preserve">
+    <value>المنتجات</value>
+  </data>
+  <data name="Cart" xml:space="preserve">
+    <value>السلة</value>
+  </data>
+  <data name="Checkout" xml:space="preserve">
+    <value>إتمام الشراء</value>
+  </data>
+  <data name="Orders" xml:space="preserve">
+    <value>الطلبات</value>
+  </data>
+  <data name="MyAccount" xml:space="preserve">
+    <value>حسابي</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>تسجيل الدخول</value>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>تسجيل جديد</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>تسجيل الخروج</value>
+  </data>
+  <data name="Management" xml:space="preserve">
+    <value>الإدارة</value>
+  </data>
+  <data name="Dashboard" xml:space="preserve">
+    <value>لوحة التحكم</value>
+  </data>
+  
+  <!-- Product Related -->
+  <data name="ProductDetails" xml:space="preserve">
+    <value>تفاصيل المنتج</value>
+  </data>
+  <data name="Price" xml:space="preserve">
+    <value>السعر</value>
+  </data>
+  <data name="Author" xml:space="preserve">
+    <value>المؤلف</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>الفئة</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>الوصف</value>
+  </data>
+  <data name="AddToCart" xml:space="preserve">
+    <value>أضف للسلة</value>
+  </data>
+  <data name="BuyNow" xml:space="preserve">
+    <value>اشتر الآن</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>عرض التفاصيل</value>
+  </data>
+  <data name="InStock" xml:space="preserve">
+    <value>متوفر</value>
+  </data>
+  <data name="OutOfStock" xml:space="preserve">
+    <value>غير متوفر</value>
+  </data>
+  <data name="Quantity" xml:space="preserve">
+    <value>الكمية</value>
+  </data>
+  
+  <!-- Cart & Checkout -->
+  <data name="ShoppingCart" xml:space="preserve">
+    <value>سلة التسوق</value>
+  </data>
+  <data name="CartIsEmpty" xml:space="preserve">
+    <value>سلة التسوق فارغة</value>
+  </data>
+  <data name="ContinueShopping" xml:space="preserve">
+    <value>متابعة التسوق</value>
+  </data>
+  <data name="ProceedToCheckout" xml:space="preserve">
+    <value>إتمام الشراء</value>
+  </data>
+  <data name="Subtotal" xml:space="preserve">
+    <value>المجموع الفرعي</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>المجموع الكلي</value>
+  </data>
+  <data name="OrderSummary" xml:space="preserve">
+    <value>ملخص الطلب</value>
+  </data>
+  <data name="ShippingDetails" xml:space="preserve">
+    <value>بيانات الشحن</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>الاسم</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>البريد الإلكتروني</value>
+  </data>
+  <data name="Phone" xml:space="preserve">
+    <value>الهاتف</value>
+  </data>
+  <data name="Address" xml:space="preserve">
+    <value>العنوان</value>
+  </data>
+  <data name="City" xml:space="preserve">
+    <value>المدينة</value>
+  </data>
+  <data name="State" xml:space="preserve">
+    <value>المحافظة</value>
+  </data>
+  <data name="PostalCode" xml:space="preserve">
+    <value>الرمز البريدي</value>
+  </data>
+  <data name="PlaceOrder" xml:space="preserve">
+    <value>تأكيد الطلب</value>
+  </data>
+  <data name="PaymentMethod" xml:space="preserve">
+    <value>طريقة الدفع</value>
+  </data>
+  
+  <!-- Order Status -->
+  <data name="OrderStatus" xml:space="preserve">
+    <value>حالة الطلب</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>قيد الانتظار</value>
+  </data>
+  <data name="Approved" xml:space="preserve">
+    <value>موافق عليه</value>
+  </data>
+  <data name="Processing" xml:space="preserve">
+    <value>قيد المعالجة</value>
+  </data>
+  <data name="Shipped" xml:space="preserve">
+    <value>تم الشحن</value>
+  </data>
+  <data name="Delivered" xml:space="preserve">
+    <value>تم التوصيل</value>
+  </data>
+  <data name="Cancelled" xml:space="preserve">
+    <value>ملغي</value>
+  </data>
+  
+  <!-- Admin Panel -->
+  <data name="Categories" xml:space="preserve">
+    <value>الفئات</value>
+  </data>
+  <data name="AddNew" xml:space="preserve">
+    <value>إضافة جديد</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>تعديل</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>حفظ</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>الإجراءات</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>التفاصيل</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>تحديث</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>إنشاء</value>
+  </data>
+  
+  <!-- Messages -->
+  <data name="Success" xml:space="preserve">
+    <value>نجح</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>خطأ</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>تحذير</value>
+  </data>
+  <data name="ItemAddedToCart" xml:space="preserve">
+    <value>تم إضافة المنتج للسلة بنجاح</value>
+  </data>
+  <data name="ItemRemovedFromCart" xml:space="preserve">
+    <value>تم إزالة المنتج من السلة</value>
+  </data>
+  <data name="OrderPlacedSuccessfully" xml:space="preserve">
+    <value>تم تقديم الطلب بنجاح</value>
+  </data>
+  
+  <!-- Search & Filter -->
+  <data name="Search" xml:space="preserve">
+    <value>بحث</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>تصفية</value>
+  </data>
+  <data name="SortBy" xml:space="preserve">
+    <value>ترتيب حسب</value>
+  </data>
+  <data name="AllCategories" xml:space="preserve">
+    <value>جميع الفئات</value>
+  </data>
+  <data name="PriceLowToHigh" xml:space="preserve">
+    <value>السعر: من الأقل للأعلى</value>
+  </data>
+  <data name="PriceHighToLow" xml:space="preserve">
+    <value>السعر: من الأعلى للأقل</value>
+  </data>
+  <data name="Newest" xml:space="preserve">
+    <value>الأحدث</value>
+  </data>
+  
+  <!-- Footer -->
+  <data name="AboutUs" xml:space="preserve">
+    <value>من نحن</value>
+  </data>
+  <data name="ContactUs" xml:space="preserve">
+    <value>اتصل بنا</value>
+  </data>
+  <data name="PrivacyPolicy" xml:space="preserve">
+    <value>سياسة الخصوصية</value>
+  </data>
+  <data name="TermsAndConditions" xml:space="preserve">
+    <value>الشروط والأحكام</value>
+  </data>
+  <data name="ReturnPolicy" xml:space="preserve">
+    <value>سياسة الإرجاع</value>
+  </data>
+  <data name="Newsletter" xml:space="preserve">
+    <value>النشرة البريدية</value>
+  </data>
+  <data name="Subscribe" xml:space="preserve">
+    <value>اشترك</value>
+  </data>
+  <data name="AllRightsReserved" xml:space="preserve">
+    <value>جميع الحقوق محفوظة</value>
+  </data>
+  
+  <!-- Guest Checkout -->
+  <data name="GuestCheckout" xml:space="preserve">
+    <value>الشراء كضيف</value>
+  </data>
+  <data name="TrackOrder" xml:space="preserve">
+    <value>تتبع الطلب</value>
+  </data>
+  <data name="OrderNumber" xml:space="preserve">
+    <value>رقم الطلب</value>
+  </data>
+  
+  <!-- Common Actions -->
+  <data name="Remove" xml:space="preserve">
+    <value>إزالة</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>إضافة</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>رجوع</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>التالي</value>
+  </data>
+  <data name="Previous" xml:space="preserve">
+    <value>السابق</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>إغلاق</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>تأكيد</value>
+  </data>
+  
+  <!-- Language Switcher -->
+  <data name="Language" xml:space="preserve">
+    <value>اللغة</value>
+  </data>
+  <data name="Arabic" xml:space="preserve">
+    <value>العربية</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>الإنجليزية</value>
+  </data>
+  
+  <!-- Additional Footer -->
+  <data name="QuickLinks" xml:space="preserve">
+    <value>روابط سريعة</value>
+  </data>
+  <data name="CustomerService" xml:space="preserve">
+    <value>خدمة العملاء</value>
+  </data>
+  <data name="HelpCenter" xml:space="preserve">
+    <value>مركز المساعدة</value>
+  </data>
+  <data name="ShippingInfo" xml:space="preserve">
+    <value>معلومات الشحن</value>
+  </data>
+  <data name="Returns" xml:space="preserve">
+    <value>الإرجاع</value>
+  </data>
+  <data name="StreetAddress" xml:space="preserve">
+    <value>عنوان الشارع</value>
+  </data>
+  
+  <!-- Order Actions -->
+  <data name="StartProcessing" xml:space="preserve">
+    <value>بدء المعالجة</value>
+  </data>
+  <data name="ShipOrder" xml:space="preserve">
+    <value>شحن الطلب</value>
+  </data>
+  <data name="MarkAsDelivered" xml:space="preserve">
+    <value>تم التوصيل</value>
+  </data>
+  <data name="CancelOrder" xml:space="preserve">
+    <value>إلغاء الطلب</value>
+  </data>
+  <data name="UpdateOrderDetails" xml:space="preserve">
+    <value>تحديث بيانات الطلب</value>
+  </data>
+  <data name="OrderItems" xml:space="preserve">
+    <value>عناصر الطلب</value>
+  </data>
+  <data name="CustomerInformation" xml:space="preserve">
+    <value>معلومات العميل</value>
+  </data>
+  <data name="ShippingInformation" xml:space="preserve">
+    <value>معلومات الشحن</value>
+  </data>
+  <data name="Carrier" xml:space="preserve">
+    <value>شركة الشحن</value>
+  </data>
+  <data name="TrackingNumber" xml:space="preserve">
+    <value>رقم التتبع</value>
+  </data>
+  <data name="PaymentStatus" xml:space="preserve">
+    <value>حالة الدفع</value>
+  </data>
+  <data name="Paid" xml:space="preserve">
+    <value>مدفوع</value>
+  </data>
+  <data name="Company" xml:space="preserve">
+    <value>الشركة</value>
+  </data>
+  <data name="Product" xml:space="preserve">
+    <value>المنتج</value>
+  </data>
+  <data name="CartUpdatedSuccessfully" xml:space="preserve">
+    <value>تم تحديث السلة بنجاح</value>
+  </data>
+  <data name="ClearFilters" xml:space="preserve">
+    <value>مسح التصفية</value>
+  </data>
+  <data name="ShowingResults" xml:space="preserve">
+    <value>عرض</value>
+  </data>
+  <data name="Books" xml:space="preserve">
+    <value>كتب</value>
+  </data>
+  <data name="EmailAddress" xml:space="preserve">
+    <value>عنوان البريد الإلكتروني</value>
+  </data>
+  <data name="TrackYourOrder" xml:space="preserve">
+    <value>تتبع طلبك</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>عرض</value>
+  </data>
+  
+  <!-- Home Page Hero -->
+  <data name="DiscoverYourNextGreatRead" xml:space="preserve">
+    <value>اكتشف كتابك القادم المميز</value>
+  </data>
+  <data name="ExploreThousandsOfBooks" xml:space="preserve">
+    <value>استكشف آلاف الكتب من أفضل المؤلفين حول العالم</value>
+  </data>
+  <data name="SearchByTitleAuthorOrDescription" xml:space="preserve">
+    <value>ابحث بالعنوان أو المؤلف أو الوصف...</value>
+  </data>
+  <data name="AllBooks" xml:space="preserve">
+    <value>جميع الكتب</value>
+  </data>
+  <data name="FilterAndSort" xml:space="preserve">
+    <value>تصفية وترتيب</value>
+  </data>
+  <data name="Showing" xml:space="preserve">
+    <value>عرض</value>
+  </data>
+  <data name="GridView" xml:space="preserve">
+    <value>عرض شبكي</value>
+  </data>
+  <data name="ListView" xml:space="preserve">
+    <value>عرض قائمة</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>افتراضي</value>
+  </data>
+  <data name="NameAZ" xml:space="preserve">
+    <value>الاسم (أ-ي)</value>
+  </data>
+  
+  <!-- Features Section -->
+  <data name="WhyChooseBulkyBook" xml:space="preserve">
+    <value>لماذا تختار BulkyBook؟</value>
+  </data>
+  <data name="FreeShipping" xml:space="preserve">
+    <value>شحن مجاني</value>
+  </data>
+  <data name="FreeShippingDesc" xml:space="preserve">
+    <value>استمتع بالشحن المجاني على جميع الطلبات التي تزيد عن 50 دولاراً. توصيل سريع وموثوق إلى باب منزلك.</value>
+  </data>
+  <data name="SecurePayment" xml:space="preserve">
+    <value>دفع آمن</value>
+  </data>
+  <data name="SecurePaymentDesc" xml:space="preserve">
+    <value>معلومات الدفع الخاصة بك مشفرة وآمنة. نقبل جميع طرق الدفع الرئيسية.</value>
+  </data>
+  <data name="EasyReturns" xml:space="preserve">
+    <value>إرجاع سهل</value>
+  </data>
+  <data name="EasyReturnsDesc" xml:space="preserve">
+    <value>غير راضٍ؟ قم بإرجاع كتبك خلال 30 يوماً لاسترداد كامل المبلغ، بدون أسئلة.</value>
+  </data>
+  <data name="Support247" xml:space="preserve">
+    <value>دعم 24/7</value>
+  </data>
+  <data name="Support247Desc" xml:space="preserve">
+    <value>فريق دعم العملاء لدينا متاح على مدار الساعة لمساعدتك في أي أسئلة أو مخاوف.</value>
+  </data>
+  
+  <!-- Statistics -->
+  <data name="BooksAvailable" xml:space="preserve">
+    <value>كتاب متاح</value>
+  </data>
+  <data name="HappyCustomers" xml:space="preserve">
+    <value>عميل سعيد</value>
+  </data>
+  <data name="Authors" xml:space="preserve">
+    <value>مؤلف</value>
+  </data>
+  <data name="CustomerSatisfaction" xml:space="preserve">
+    <value>رضا العملاء</value>
+  </data>
+  
+  <!-- Cart Page -->
+  <data name="YourCart" xml:space="preserve">
+    <value>سلتك</value>
+  </data>
+  <data name="EmptyCart" xml:space="preserve">
+    <value>سلة فارغة</value>
+  </data>
+  <data name="YourCartIsEmpty" xml:space="preserve">
+    <value>سلتك فارغة</value>
+  </data>
+  <data name="TotalAmount" xml:space="preserve">
+    <value>المبلغ الإجمالي</value>
+  </data>
+  <data name="ProceedToSummary" xml:space="preserve">
+    <value>المتابعة إلى الملخص</value>
+  </data>
+  
+  <!-- Checkout -->
+  <data name="BackToCart" xml:space="preserve">
+    <value>العودة للسلة</value>
+  </data>
+  <data name="EstimatedDelivery" xml:space="preserve">
+    <value>التوصيل المتوقع</value>
+  </data>
+  <data name="GuestCheckoutInfo" xml:space="preserve">
+    <value>الشراء كضيف - سيتم إرسال تفاصيل طلبك إلى بريدك الإلكتروني</value>
+  </data>
+  <data name="Important" xml:space="preserve">
+    <value>مهم</value>
+  </data>
+  <data name="SaveYourOrderNumber" xml:space="preserve">
+    <value>احفظ رقم طلبك! ستحتاجه لتتبع طلبك.</value>
+  </data>
+  
+  <!-- Order Confirmation -->
+  <data name="OrderPlacedSuccessful" xml:space="preserve">
+    <value>تم تقديم الطلب بنجاح!</value>
+  </data>
+  <data name="YourOrderNumber" xml:space="preserve">
+    <value>رقم طلبك</value>
+  </data>
+  <data name="WhatsNext" xml:space="preserve">
+    <value>ما التالي؟</value>
+  </data>
+  <data name="ConfirmationEmail" xml:space="preserve">
+    <value>بريد التأكيد</value>
+  </data>
+  <data name="CheckYourEmail" xml:space="preserve">
+    <value>تحقق من بريدك الإلكتروني لتفاصيل الطلب</value>
+  </data>
+  <data name="WeWillPrepare" xml:space="preserve">
+    <value>سنقوم بتحضير طلبك</value>
+  </data>
+  <data name="EstimatedDays" xml:space="preserve">
+    <value>متوقع 7-14 يوم</value>
+  </data>
+  <data name="NeedHelp" xml:space="preserve">
+    <value>تحتاج مساعدة؟</value>
+  </data>
+  <data name="ContactSupport" xml:space="preserve">
+    <value>اتصل بفريق الدعم</value>
+  </data>
+  
+  <!-- Admin Orders -->
+  <data name="OrdersManagement" xml:space="preserve">
+    <value>إدارة الطلبات</value>
+  </data>
+  <data name="AllOrders" xml:space="preserve">
+    <value>جميع الطلبات</value>
+  </data>
+  <data name="OrderID" xml:space="preserve">
+    <value>رقم الطلب</value>
+  </data>
+  <data name="Customer" xml:space="preserve">
+    <value>العميل</value>
+  </data>
+  <data name="OrderDate" xml:space="preserve">
+    <value>تاريخ الطلب</value>
+  </data>
+  <data name="BackToOrdersList" xml:space="preserve">
+    <value>العودة لقائمة الطلبات</value>
+  </data>
+  <data name="TrackOrderNow" xml:space="preserve">
+    <value>تتبع الطلب الآن</value>
+  </data>
+  <data name="TrackAnotherOrder" xml:space="preserve">
+    <value>تتبع طلب آخر</value>
+  </data>
+  
+  <!-- Messages & Notifications -->
+  <data name="OrderNotFound" xml:space="preserve">
+    <value>الطلب غير موجود</value>
+  </data>
+  <data name="PleaseCheckOrderIDAndEmail" xml:space="preserve">
+    <value>يرجى التحقق من رقم الطلب والبريد الإلكتروني.</value>
+  </data>
+  <data name="ProvideBothOrderIDAndEmail" xml:space="preserve">
+    <value>يرجى تقديم كل من رقم الطلب والبريد الإلكتروني</value>
+  </data>
+  <data name="EnterYourOrderID" xml:space="preserve">
+    <value>أدخل رقم طلبك</value>
+  </data>
+  <data name="EnterYourEmail" xml:space="preserve">
+    <value>أدخل عنوان بريدك الإلكتروني</value>
+  </data>
+  <data name="BackToShopping" xml:space="preserve">
+    <value>العودة للتسوق</value>
+  </data>
+  <data name="OrderDetails" xml:space="preserve">
+    <value>تفاصيل الطلب</value>
+  </data>
+  
+  <!-- Newsletter -->
+  <data name="SubscribeToNewsletter" xml:space="preserve">
+    <value>اشترك للحصول على عروض خاصة وهدايا مجانية وتحديثات</value>
+  </data>
+  <data name="YourEmailAddress" xml:space="preserve">
+    <value>عنوان بريدك الإلكتروني</value>
+  </data>
+  <data name="ThankYouForSubscribing" xml:space="preserve">
+    <value>شكراً لاشتراكك!</value>
+  </data>
+  
+  <!-- Product Details Page -->
+  <data name="BackToProducts" xml:space="preserve">
+    <value>العودة للمنتجات</value>
+  </data>
+  <data name="By" xml:space="preserve">
+    <value>بواسطة</value>
+  </data>
+  <data name="OriginalPrice" xml:space="preserve">
+    <value>السعر الأصلي</value>
+  </data>
+  <data name="AdditionalTaxMayApply" xml:space="preserve">
+    <value>(قد يتم تطبيق ضرائب إضافية عند الدفع)</value>
+  </data>
+  
+  <!-- Cart Sidebar -->
+  <data name="Checkout" xml:space="preserve">
+    <value>إتمام الدفع</value>
+  </data>
+  <data name="ViewFullCart" xml:space="preserve">
+    <value>عرض السلة الكاملة</value>
+  </data>
+  
+  <!-- Login/Register -->
+  <data name="CreateAccount" xml:space="preserve">
+    <value>إنشاء حساب</value>
+  </data>
+  <data name="JoinBulkyBookToday" xml:space="preserve">
+    <value>انضم إلى BulkyBook اليوم</value>
+  </data>
+  <data name="QuickSignUpWith" xml:space="preserve">
+    <value>تسجيل سريع باستخدام</value>
+  </data>
+  <data name="SignUpWithGoogle" xml:space="preserve">
+    <value>التسجيل عبر Google</value>
+  </data>
+  <data name="OrRegisterWithEmail" xml:space="preserve">
+    <value>أو التسجيل بالبريد الإلكتروني</value>
+  </data>
+  <data name="FullName" xml:space="preserve">
+    <value>الاسم الكامل</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>كلمة المرور</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>تأكيد كلمة المرور</value>
+  </data>
+</root>
+
+
+
