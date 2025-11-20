@@ -1,0 +1,296 @@
+/* ==========================================
+   REVIEWS & RATINGS SYSTEM
+   Ideal Weight - Health & Wellness Theme
+   ========================================== */
+
+/* Reviews Section */
+.product-reviews-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-top: 3rem;
+}
+
+.reviews-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.reviews-header h4 {
+    color: #1976D2;
+    margin: 0;
+}
+
+.reviews-rating-summary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Star Rating Display */
+.rating-stars {
+    color: #FFB800;
+    font-size: 1.25rem;
+}
+
+.rating-stars i {
+    margin-right: 2px;
+}
+
+.rating-average {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.rating-count {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Star Rating Input (Reverse for RTL-like behavior) */
+.star-rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.star-rating-input input {
+    display: none;
+}
+
+.star-rating-input label {
+    cursor: pointer;
+    font-size: 2.5rem;
+    transition: all 0.2s ease;
+    color: #ddd;
+}
+
+.star-rating-input label:hover,
+.star-rating-input label:hover ~ label {
+    color: #FFB800;
+    transform: scale(1.1);
+}
+
+.star-rating-input input:checked ~ label {
+    color: #FFB800;
+}
+
+/* Review Form Section */
+.review-form-section {
+    background: linear-gradient(135deg, #E3F2FD, #F1F8E9);
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    border: 2px solid #3B9DD5;
+}
+
+.review-form-section h5 {
+    color: #1976D2;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+}
+
+.review-form-section .form-label {
+    font-weight: 600;
+    color: #333;
+}
+
+.review-form-section textarea {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+}
+
+.review-form-section textarea:focus {
+    border-color: #3B9DD5;
+    box-shadow: 0 0 0 0.25rem rgba(59, 157, 213, 0.15);
+}
+
+/* Reviews List */
+.reviews-list {
+    margin-top: 2rem;
+}
+
+.review-item {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.review-item:hover {
+    background: #f8f9fa;
+    padding-left: 2rem;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.review-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.review-user strong {
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.review-user .badge {
+    background: linear-gradient(135deg, #7BC043, #558B2F) !important;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+}
+
+.review-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+}
+
+.review-rating {
+    color: #FFB800;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+}
+
+.review-date {
+    color: #999;
+    font-size: 0.85rem;
+}
+
+.review-comment {
+    color: #555;
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+/* Product Card Star Rating */
+.product-card-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.product-card-stars {
+    color: #FFB800;
+    font-size: 0.9rem;
+}
+
+.product-card-stars i {
+    margin-right: 1px;
+}
+
+.product-card-rating-text {
+    color: #666;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Empty Reviews State */
+.reviews-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #999;
+}
+
+.reviews-empty i {
+    font-size: 3rem;
+    color: #ddd;
+    margin-bottom: 1rem;
+}
+
+/* Helpful Button (Future Feature) */
+.review-helpful-btn {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    color: #666;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.review-helpful-btn:hover {
+    border-color: #3B9DD5;
+    color: #3B9DD5;
+    background: #E3F2FD;
+}
+
+/* RTL Support */
+[dir="rtl"] .star-rating-input {
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+[dir="rtl"] .rating-stars i {
+    margin-right: 0;
+    margin-left: 2px;
+}
+
+[dir="rtl"] .product-card-stars i {
+    margin-right: 0;
+    margin-left: 1px;
+}
+
+[dir="rtl"] .review-item:hover {
+    padding-left: 1.5rem;
+    padding-right: 2rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .reviews-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .review-header {
+        flex-direction: column;
+    }
+    
+    .review-meta {
+        align-items: flex-start;
+    }
+    
+    .star-rating-input label {
+        font-size: 2rem;
+    }
+}
+
+/* Loading State */
+.reviews-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+}
+
+.reviews-loading .spinner-border {
+    color: #3B9DD5;
+}
+

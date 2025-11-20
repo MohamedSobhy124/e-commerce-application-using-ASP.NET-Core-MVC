@@ -1,0 +1,117 @@
+@{
+    ViewData["Title"] = "Create Admin User";
+}
+
+<partial name="_Notifications" />
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card" style="max-width: 700px; margin: 0 auto;">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">
+                    <i class="bi bi-person-plus-fill me-3"></i>
+                    @Localizer["CreateNewUser"]
+                </h2>
+            </div>
+
+            <div class="admin-card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>@Localizer["Note"]:</strong>@Localizer["InternalUserRegistrationHeaderMassage"] 
+                </div>
+
+                <form method="post" asp-action="CreateAdminUser">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="row">
+                        <!-- Email -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-envelope me-2"></i>@Localizer["Email"] *
+                            </label>
+                            <input type="email" name="email" class="form-control" required 
+                                   placeholder="admin@idealweight.com" />
+                        </div>
+
+                        <!-- Name -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-person me-2"></i>@Localizer["FullName"] *
+                            </label>
+                            <input type="text" name="name" class="form-control" required 
+                                   placeholder="@Localizer["FullName"]" />
+                        </div>
+
+                        <!-- Password -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-lock me-2"></i>@Localizer["Password"] *
+                            </label>
+                            <input type="password" name="password" class="form-control" required 
+                                   placeholder="••••••••" minlength="6" />
+                            <small class="text-muted">Minimum 6 characters</small>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-telephone me-2"></i>@Localizer["Phone"]
+                            </label>
+                            <input type="tel" name="phoneNumber" class="form-control" 
+                                   placeholder="+971 50 000 0000" />
+                        </div>
+
+                      
+
+                        <!-- Company (Only for Company role) -->
+                        <div class="col-md-6 mb-3" id="companyField" style="display: none;">
+                            <label class="form-label">
+                                <i class="bi bi-building me-2"></i>@Localizer["Company"] *
+                            </label>
+                            <select name="companyId" class="form-control">
+                                <option value="">-- Select Company --</option>
+                                @foreach (var company in ViewBag.Companies as IEnumerable<SelectListItem>)
+                                {
+                                    <option value="@company.Value">@company.Text</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-person-plus me-2"></i>
+                            @Localizer["CreateAccount"]
+                        </button>
+                        <a asp-area="Admin" asp-controller="Order" asp-action="Index" class="btn btn-secondary ms-2">
+                            <i class="bi bi-x-circle me-2"></i>
+                            @Localizer["Cancel"]
+                        </a>
+                    </div>
+                </form>
+
+                <hr class="my-4" />
+
+                <div class="alert alert-success">
+                    <i class="bi bi-shield-check me-2"></i>
+                    <strong>@Localizer["Note"]:</strong> 
+                    @Localizer["InternalUserRegistrationFooterMassage"]
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Show/hide company field based on role selection
+        $('#roleSelect').change(function() {
+            if ($(this).val() === 'Company') {
+                $('#companyField').show();
+            } else {
+                $('#companyField').hide();
+            }
+        });
+    </script>
+}
+

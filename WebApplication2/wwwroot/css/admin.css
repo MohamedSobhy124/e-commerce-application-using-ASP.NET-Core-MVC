@@ -69,92 +69,150 @@
     border-radius: var(--border-radius);
     overflow: hidden;
 }
-
+/* ------------------------------
+   TABLE BASE (White Body)
+--------------------------------*/
 #tblData {
     width: 100%;
-    margin-bottom: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--white);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-#tblData thead {
-    background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-900) 100%);
+    /* ------------------------------
+   HEADER (Enhanced Premium Look)
+--------------------------------*/
+    #tblData thead {
+        background: linear-gradient(135deg, #0059ff 0%, #002c85 100%);
+        position: relative;
+    }
+
+        /* Glossy light at top of header */
+        #tblData thead::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 40%;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.15);
+            filter: blur(12px);
+        }
+
+        /* Header text */
+        #tblData thead th {
+            font-weight: 800;
+            font-size: 0.95rem;
+            padding: 1.3rem 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            border: none;
+            position: relative;
+            z-index: 2;
+        }
+
+    /* ------------------------------
+   TABLE ROWS (White Clean Body)
+--------------------------------*/
+    #tblData tbody tr {
+        transition: 0.25s ease;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+        #tblData tbody tr:hover {
+            background: rgba(0, 90, 255, 0.07);
+            transform: scale(1.005);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+        }
+
+    /* ------------------------------
+   TABLE CELLS
+--------------------------------*/
+    #tblData tbody td {
+        padding: 1rem;
+        color: var(--gray-900);
+        font-weight: 500;
+    }
+
+    /* ------------------------------
+   BUTTONS
+--------------------------------*/
+    #tblData .btn {
+        padding: 0.45rem 0.9rem;
+        font-size: 0.85rem;
+        margin: 0 0.25rem;
+        border-radius: 10px;
+        transition: 0.2s ease;
+    }
+
+        #tblData .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+/* ------------------------------
+   SEARCH INPUT
+--------------------------------*/
+.dataTables_wrapper .dataTables_filter input {
+    border: 2px solid var(--gray-300);
+    border-radius: 12px;
+    padding: 0.6rem 1rem;
+    width: 220px;
+    transition: 0.25s ease;
+    background: #fff;
 }
 
-#tblData thead th {
-    color: var(--white);
-    font-weight: 700;
-    font-size: 0.95rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 1.25rem 1rem;
-    border: none;
+    .dataTables_wrapper .dataTables_filter input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 5px var(--primary-light);
+    }
+
+/* ------------------------------
+   PAGE LENGTH DROPDOWN
+--------------------------------*/
+.dataTables_wrapper .dataTables_length select {
+    border: 2px solid var(--gray-300);
+    border-radius: 12px;
+    padding: 0.5rem;
+    background: #fff;
+    transition: 0.25s ease;
 }
 
-#tblData tbody tr {
-    transition: var(--transition);
-    border-bottom: 1px solid var(--gray-200);
-}
+    .dataTables_wrapper .dataTables_length select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 5px var(--primary-light);
+    }
 
-#tblData tbody tr:hover {
-    background-color: var(--primary-light);
-    transform: scale(1.01);
-    box-shadow: var(--shadow-sm);
-}
-
-#tblData tbody td {
-    padding: 1rem;
-    color: var(--gray-700);
-    font-weight: 500;
-    vertical-align: middle;
-}
-
-#tblData .btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    margin: 0 0.25rem;
-}
-
+/* ------------------------------
+   PAGINATION
+--------------------------------*/
 .dataTables_wrapper .dataTables_paginate .paginate_button {
-    padding: 0.5rem 1rem;
-    margin: 0 0.25rem;
-    border-radius: var(--border-radius-sm);
+    padding: 0.6rem 1rem;
+    margin: 0 0.3rem;
+    border-radius: 12px;
     background: var(--white);
     border: 2px solid var(--gray-300);
     color: var(--gray-700);
     font-weight: 600;
-    transition: var(--transition);
+    transition: 0.25s ease;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background: var(--primary-color);
-    color: var(--white);
-    border-color: var(--primary-color);
-}
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: var(--primary-color);
+        color: var(--white) !important;
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+    }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background: var(--primary-color);
-    color: var(--white);
-    border-color: var(--primary-color);
-}
-
-.dataTables_wrapper .dataTables_filter input {
-    border: 2px solid var(--gray-300);
-    border-radius: var(--border-radius-sm);
-    padding: 0.5rem 1rem;
-    margin-left: 0.5rem;
-}
-
-.dataTables_wrapper .dataTables_filter input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px var(--primary-light);
-}
-
-.dataTables_wrapper .dataTables_length select {
-    border: 2px solid var(--gray-300);
-    border-radius: var(--border-radius-sm);
-    padding: 0.5rem 1rem;
-    margin: 0 0.5rem;
-}
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: var(--primary-color) !important;
+        color: var(--white) !important;
+        border-color: var(--primary-color);
+        box-shadow: 0 3px 10px var(--primary-light);
+    }
 
 /* Form Wrapper */
 .admin-form-wrapper {
@@ -411,3 +469,8 @@
     }
 }
 
+table.dataTable thead > tr > th.sorting:before, table.dataTable thead > tr > th.sorting:after, table.dataTable thead > tr > th.sorting_asc:before, table.dataTable thead > tr > th.sorting_asc:after, table.dataTable thead > tr > th.sorting_desc:before, table.dataTable thead > tr > th.sorting_desc:after, table.dataTable thead > tr > th.sorting_asc_disabled:before, table.dataTable thead > tr > th.sorting_asc_disabled:after, table.dataTable thead > tr > th.sorting_desc_disabled:before, table.dataTable thead > tr > th.sorting_desc_disabled:after, table.dataTable thead > tr > td.sorting:before, table.dataTable thead > tr > td.sorting:after, table.dataTable thead > tr > td.sorting_asc:before, table.dataTable thead > tr > td.sorting_asc:after, table.dataTable thead > tr > td.sorting_desc:before, table.dataTable thead > tr > td.sorting_desc:after, table.dataTable thead > tr > td.sorting_asc_disabled:before, table.dataTable thead > tr > td.sorting_asc_disabled:after, table.dataTable thead > tr > td.sorting_desc_disabled:before, table.dataTable thead > tr > td.sorting_desc_disabled:after {
+ 
+    line-height: 12px !important;
+    
+}

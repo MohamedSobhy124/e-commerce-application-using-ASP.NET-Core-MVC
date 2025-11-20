@@ -21,6 +21,8 @@ namespace BulkyBook.DataAccess.Data
         public object OrderHeaders { get; internal set; }
         public DbSet<OrderDetail> orderDetails { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
 
 
 

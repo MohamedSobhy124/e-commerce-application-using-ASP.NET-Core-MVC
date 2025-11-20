@@ -1,0 +1,231 @@
+/* ==========================================
+   WHATSAPP INTEGRATION STYLES
+   Brand Color: #25D366 (WhatsApp Green)
+   ========================================== */
+
+/* Floating WhatsApp Button */
+.floating-whatsapp-btn {
+    position: fixed;
+    bottom: 120px;
+    right: 18px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 998;
+    border: none;
+    text-decoration: none;
+}
+
+.floating-whatsapp-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+    background: linear-gradient(135deg, #128C7E 0%, #25D366 100%);
+}
+
+.floating-whatsapp-btn i {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* WhatsApp Tooltip */
+.whatsapp-tooltip {
+    position: absolute;
+    right: 70px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 600;
+    color: #128C7E;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.floating-whatsapp-btn:hover .whatsapp-tooltip {
+    opacity: 1;
+}
+
+/* RTL Support for WhatsApp Button - Keep on RIGHT side */
+[dir="rtl"] .floating-whatsapp-btn {
+    right: 20px;
+    left: auto;
+}
+
+[dir="rtl"] .whatsapp-tooltip {
+    left: auto;
+    right: 70px;
+}
+
+/* Product Page WhatsApp Button */
+.whatsapp-product-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+}
+
+.whatsapp-product-btn:hover {
+    background: linear-gradient(135deg, #128C7E 0%, #25D366 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.5);
+}
+
+.whatsapp-product-btn i {
+    font-size: 1.2rem;
+}
+
+/* Cart Sidebar WhatsApp Link */
+.whatsapp-cart-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #25D366;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.whatsapp-cart-link:hover {
+    background: #128C7E;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* WhatsApp Icon */
+.bi-whatsapp::before {
+    content: "\f618"; /* Bootstrap Icons WhatsApp icon */
+}
+
+/* Pulse Animation for Attention */
+.whatsapp-pulse {
+    animation: whatsappPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes whatsappPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(37, 211, 102, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .floating-whatsapp-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+        bottom: 80px;
+    }
+    
+    .whatsapp-tooltip {
+        display: none; /* Hide tooltip on mobile */
+    }
+}
+
+/* WhatsApp Button in Checkout/Order Pages */
+.whatsapp-support-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: #25D366;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.whatsapp-support-btn:hover {
+    background: #128C7E;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* WhatsApp Contact Section */
+.whatsapp-contact-section {
+    background: linear-gradient(135deg, #E8F5E9 0%, #E1F5FE 100%);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 2px solid #25D366;
+    text-align: center;
+}
+
+.whatsapp-contact-section h4 {
+    color: #128C7E;
+    margin-bottom: 1rem;
+}
+
+.whatsapp-contact-section p {
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.whatsapp-big-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    background: #25D366;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+}
+
+.whatsapp-big-btn:hover {
+    background: #128C7E;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+}
+
+.whatsapp-big-btn i {
+    font-size: 1.5rem;
+}
+

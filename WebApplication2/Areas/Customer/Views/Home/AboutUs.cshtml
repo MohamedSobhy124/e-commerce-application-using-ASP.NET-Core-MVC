@@ -1,0 +1,343 @@
+@{
+    ViewData["Title"] = Localizer["AboutUs"];
+    var currentLang = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="page-header text-center mb-5">
+                <h1 class="display-4" style="color: #1976D2; font-weight: 800;">
+                    <i class="bi bi-heart-pulse me-3"></i>
+                    @if(currentLang == "ar") {
+                        <text>نبذة عنا</text>
+                    } else {
+                        <text>About Us</text>
+                    }
+                </h1>
+                <div class="underline" style="width: 100px; height: 4px; background: linear-gradient(90deg, #3B9DD5, #7BC043); margin: 1rem auto;"></div>
+            </div>
+
+            @if(currentLang == "ar") 
+            {
+                <!-- Arabic Content -->
+                <div class="content-section" style="direction: rtl; text-align: right;">
+                    <!-- Vision -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #3B9DD5; font-weight: 700;">
+                                <i class="bi bi-eye me-3"></i>الرؤية
+                            </h2>
+                            <p class="lead" style="line-height: 1.8; color: #555;">
+                                في "مركز ايديال ويت"، نطمح لأن نكون روادًا في مجال الصحة والعافية في الشرق الأوسط - 
+                                نقدم مكملات غذائية مبتكرة، ووجبات خفيفة مغذية، وإرشادات صحية متخصصة. 
+                                نلتزم بتمكين الأفراد في رحلة لياقتهم البدنية، من خلال توفير الأدوات والمعرفة اللازمة لتحقيق أفضل صحة. 
+                                نسعى جاهدين لريادة هذا المجال بالنزاهة والجودة، وشغفنا بقوة الصحة التحويلية.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Mission -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-bullseye me-3"></i>الرسالة
+                            </h2>
+                            <p class="lead" style="line-height: 1.8; color: #555;">
+                                يلتزم "مركز ايديال ويت" بإحداث ثورة في مجال الصحة واللياقة البدنية في الشرق الأوسط من خلال تقديم منتجات وخدمات مبتكرة. 
+                                رسالتنا هي تثقيف عملائنا وإشراكهم من خلال تجارب تفاعلية، وتعزيز شراكات طويلة الأمد، وبناء مجتمع ملتزم بالصحة والعافية.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Core Values -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                                <i class="bi bi-stars me-3"></i>قيمنا
+                            </h2>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="value-item p-3" style="border-right: 4px solid #7BC043; background: #F1F8E9; border-radius: 8px;">
+                                        <i class="bi bi-check-circle-fill me-2" style="color: #7BC043;"></i>
+                                        <strong>الصدق</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="value-item p-3" style="border-right: 4px solid #7BC043; background: #F1F8E9; border-radius: 8px;">
+                                        <i class="bi bi-check-circle-fill me-2" style="color: #7BC043;"></i>
+                                        <strong>التواصل المفتوح</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="value-item p-3" style="border-right: 4px solid #7BC043; background: #F1F8E9; border-radius: 8px;">
+                                        <i class="bi bi-check-circle-fill me-2" style="color: #7BC043;"></i>
+                                        <strong>المسؤولية والأهداف الواضحة</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="value-item p-3" style="border-right: 4px solid #7BC043; background: #F1F8E9; border-radius: 8px;">
+                                        <i class="bi bi-check-circle-fill me-2" style="color: #7BC043;"></i>
+                                        <strong>خطة استراتيجية واضحة</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="value-item p-3" style="border-right: 4px solid #7BC043; background: #F1F8E9; border-radius: 8px;">
+                                        <i class="bi bi-check-circle-fill me-2" style="color: #7BC043;"></i>
+                                        <strong>بيئة عمل إيجابية وودية</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="value-item p-3" style="border-right: 4px solid #7BC043; background: #F1F8E9; border-radius: 8px;">
+                                        <i class="bi bi-check-circle-fill me-2" style="color: #7BC043;"></i>
+                                        <strong>تشجيع العمل الجماعي</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Branches -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-geo-alt-fill me-3"></i>فروعنا: فرعان في الإمارات
+                            </h2>
+                            <p class="lead mb-4" style="line-height: 1.8; color: #555;">
+                                ايديال ويت، اسم موثوق في مجال الصحة والعافية منذ عام ٢٠٢١، يخدم الإمارات العربية المتحدة بفخر من خلال فرعين. 
+                                نحن متحمسون لتوسيع فروعنا الجديدة، مما يعزز التزامنا بتوفير التغذية والمكملات الغذائية. 
+                                رؤيتنا طموحة: أن نتواجد في كل إمارة، انضموا إلينا في رحلتنا نحو العافية.
+                            </p>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="branch-card p-4" style="background: linear-gradient(135deg, #E3F2FD, #F1F8E9); border-radius: 12px; border: 2px solid #3B9DD5;">
+                                        <h4 style="color: #1976D2; font-weight: 700;">
+                                            <i class="bi bi-shop me-2"></i>فرع الشامخة
+                                        </h4>
+                                        <p class="mb-2">
+                                            <i class="bi bi-geo-alt me-2" style="color: #7BC043;"></i>
+                                            الشامخة مول, بجوار الفردان للصرافة, محل رقم 38
+                                        </p>
+                                        <a href="https://maps.app.goo.gl/9SU1q2p69vfRTkMn8?g_st=aw" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-primary mt-2">
+                                            <i class="bi bi-map me-2"></i>عرض على الخريطة
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <div class="branch-card p-4" style="background: linear-gradient(135deg, #E3F2FD, #F1F8E9); border-radius: 12px; border: 2px solid #7BC043;">
+                                        <h4 style="color: #1976D2; font-weight: 700;">
+                                            <i class="bi bi-shop me-2"></i>فرع الوثبة
+                                        </h4>
+                                        <p class="mb-2">
+                                            <i class="bi bi-geo-alt me-2" style="color: #7BC043;"></i>
+                                            الوثبة مول, مقابل صيدلية ميدسينا, محل رقم 26
+                                        </p>
+                                        <a href="https://maps.app.goo.gl/12J3mbtkGsk6FKLp9?g_st=aw" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-success mt-2">
+                                            <i class="bi bi-map me-2"></i>عرض على الخريطة
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="contact-info text-center mt-4 p-4" style="background: #E3F2FD; border-radius: 12px;">
+                                <h5 style="color: #1976D2; font-weight: 700; margin-bottom: 1rem;">
+                                    <i class="bi bi-telephone-fill me-2"></i>للتواصل معنا
+                                </h5>
+                                <p class="mb-0">
+                                    <strong>Tel:</strong> <a href="tel:+97167678985" style="color: #7BC043; font-weight: 700;">+971 67 67 8985</a>
+                                    <br/>
+                                    <strong>Mobile:</strong> <a href="tel:+971507700559" style="color: #7BC043; font-weight: 700;">+971 50 770 0559</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <p style="line-height: 1.8; color: #555; font-size: 1.05rem;">
+                                ايديال ويت هو أفضل متجر لكمال الأجسام ومكملات التغذية في الإمارات العربية المتحدة. 
+                                اشترِ بروتينك عالي الجودة، ومكملات ما قبل التمرين، ومكملات إنقاص الوزن وزيادة الوزن عبر الإنترنت. 
+                                يقدم آيديال ويت مجموعة كاملة من الوجبات الخفيفة الصحية والمكملات الغذائية.
+                            </p>
+                            <p style="line-height: 1.8; color: #555; font-size: 1.05rem;">
+                                متجر ايديال ويت في الإمارات العربية المتحدة هو المتجر الأول في مجال مكملات كمال الأجسام ومتاجر التغذية. 
+                                أقل الأسعار على مكملات كمال الأجسام، مع أسرع خدمة شحن.
+                            </p>
+                            <p style="line-height: 1.8; color: #555; font-size: 1.05rem;">
+                                كما نوفر مجموعة كاملة من أدونيس، ونانو، وأبلايد نيوترشن، وهي علامات تجارية معروفة.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- English Content -->
+                <div class="content-section">
+                    <!-- Vision -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #3B9DD5; font-weight: 700;">
+                                <i class="bi bi-eye me-3"></i>VISION
+                            </h2>
+                            <p class="lead" style="line-height: 1.8; color: #555;">
+                                At Ideal Weight, we envision becoming the pioneers of health and wellness in the Middle East - 
+                                Offering innovative supplements, nutritious snacks, and expert health guidance. 
+                                Our commitment is to empower individuals on their fitness journey, providing the tools and knowledge to achieve optimal well-being. 
+                                We strive to lead the industry with integrity, quality, and a passion for the transformative power of health.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Mission -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-bullseye me-3"></i>MISSION
+                            </h2>
+                            <p class="lead" style="line-height: 1.8; color: #555;">
+                                Ideal Weight is dedicated to revolutionizing health and fitness in the Middle East by providing innovative products and services. 
+                                Our mission is to educate and engage our customers through interactive experiences, fostering long-term partnerships and a community dedicated to wellness.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Core Values -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                                <i class="bi bi-stars me-3"></i>OUR VALUES
+                            </h2>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="value-item p-3" style="border-left: 4px solid #7BC043; background: #F1F8E9; border-radius: 8px;">
+                                        <i class="bi bi-check-circle-fill me-2" style="color: #7BC043;"></i>
+                                        <strong>Honesty</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="value-item p-3" style="border-left: 4px solid #7BC043; background: #F1F8E9; border-radius: 8px;">
+                                        <i class="bi bi-check-circle-fill me-2" style="color: #7BC043;"></i>
+                                        <strong>Open Communication</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="value-item p-3" style="border-left: 4px solid #7BC043; background: #F1F8E9; border-radius: 8px;">
+                                        <i class="bi bi-check-circle-fill me-2" style="color: #7BC043;"></i>
+                                        <strong>Clear Accountability & Objectives</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="value-item p-3" style="border-left: 4px solid #7BC043; background: #F1F8E9; border-radius: 8px;">
+                                        <i class="bi bi-check-circle-fill me-2" style="color: #7BC043;"></i>
+                                        <strong>Clear Strategic Plan</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="value-item p-3" style="border-left: 4px solid #7BC043; background: #F1F8E9; border-radius: 8px;">
+                                        <i class="bi bi-check-circle-fill me-2" style="color: #7BC043;"></i>
+                                        <strong>Positive and Friendly Environment</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="value-item p-3" style="border-left: 4px solid #7BC043; background: #F1F8E9; border-radius: 8px;">
+                                        <i class="bi bi-check-circle-fill me-2" style="color: #7BC043;"></i>
+                                        <strong>Encouraging Teamwork</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Branches -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-geo-alt-fill me-3"></i>BRANCHES: 2 in UAE
+                            </h2>
+                            <p class="lead mb-4" style="line-height: 1.8; color: #555;">
+                                "Ideal Weight Retail, a trusted name in health and wellness since 2021, proudly serves the UAE with two locations. 
+                                We're excited to expand new branches, furthering our commitment to accessible nutrition and supplements. 
+                                Our vision is ambitious: to establish a presence in every emirate. Join us on our journey to wellness."
+                            </p>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="branch-card p-4" style="background: linear-gradient(135deg, #E3F2FD, #F1F8E9); border-radius: 12px; border: 2px solid #3B9DD5;">
+                                        <h4 style="color: #1976D2; font-weight: 700;">
+                                            <i class="bi bi-shop me-2"></i>Alshamkha Branch
+                                        </h4>
+                                        <p class="mb-2">
+                                            <i class="bi bi-geo-alt me-2" style="color: #7BC043;"></i>
+                                            Alshamkha Mall, beside Alfardan Exchange, shop 38
+                                        </p>
+                                        <a href="https://maps.app.goo.gl/9SU1q2p69vfRTkMn8?g_st=aw" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-primary mt-2">
+                                            <i class="bi bi-map me-2"></i>View on Map
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <div class="branch-card p-4" style="background: linear-gradient(135deg, #E3F2FD, #F1F8E9); border-radius: 12px; border: 2px solid #7BC043;">
+                                        <h4 style="color: #1976D2; font-weight: 700;">
+                                            <i class="bi bi-shop me-2"></i>Alwathba Branch
+                                        </h4>
+                                        <p class="mb-2">
+                                            <i class="bi bi-geo-alt me-2" style="color: #7BC043;"></i>
+                                            Alwathba Mall, opposite to Medicina Pharmacy, Shop 26
+                                        </p>
+                                        <a href="https://maps.app.goo.gl/12J3mbtkGsk6FKLp9?g_st=aw" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-success mt-2">
+                                            <i class="bi bi-map me-2"></i>View on Map
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="contact-info text-center mt-4 p-4" style="background: #E3F2FD; border-radius: 12px;">
+                                <h5 style="color: #1976D2; font-weight: 700; margin-bottom: 1rem;">
+                                    <i class="bi bi-telephone-fill me-2"></i>Contact Us
+                                </h5>
+                                <p class="mb-0">
+                                    <strong>Tel:</strong> <a href="tel:+97167678985" style="color: #7BC043; font-weight: 700;">+971 67 67 8985</a>
+                                    <br/>
+                                    <strong>Mobile:</strong> <a href="tel:+971507700559" style="color: #7BC043; font-weight: 700;">+971 50 770 0559</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <p style="line-height: 1.8; color: #555; font-size: 1.05rem;">
+                                Ideal Weight is Best Bodybuilding & nutritional supplements in the UAE. 
+                                Buy your quality protein, pre-workout, weight loss and gaining supplements online. 
+                                Ideal Weight having full range of healthy snacks and supplements.
+                            </p>
+                            <p style="line-height: 1.8; color: #555; font-size: 1.05rem;">
+                                Ideal Weight UAE Store is #1 for bodybuilding supplements & Nutrition stores. 
+                                Lowest prices on bodybuilding supplements, with the fastest shipping.
+                            </p>
+                            <p style="line-height: 1.8; color: #555; font-size: 1.05rem;">
+                                Also carrying Adonis, Nano, and Applied Nutrition full range as well-known brand.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+

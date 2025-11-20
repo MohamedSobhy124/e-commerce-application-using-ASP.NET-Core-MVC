@@ -142,15 +142,45 @@
 
                         <div class="col-lg-3 col-md-4">
                             <div class="image-upload-wrapper">
-                                <label for="file-input" class="upload-button">
+                                <h5 class="mb-3" style="color: #1976D2; font-weight: 700;">
+                                    <i class="bi bi-images me-2"></i>Product Images
+                                </h5>
+                                
+                                <!-- Upload Multiple Images -->
+                                <label for="files-input" class="upload-button" style="display: block; text-align: center; padding: 1rem; background: linear-gradient(135deg, #3B9DD5, #7BC043); color: white; border-radius: 10px; cursor: pointer; margin-bottom: 1.5rem;">
                                     <span class="upload-icon">
-                                        <i class="bi bi-cloud-upload"></i>
+                                        <i class="bi bi-cloud-upload" style="font-size: 1.5rem;"></i>
                                     </span>
-                                    <span>Upload Image</span>
-                                    <input id="file-input" type="file" onchange="previewImage(event)" name="file" class="file-input" accept="image/*" />
+                                    <span style="display: block; margin-top: 0.5rem; font-weight: 600;">Upload Images</span>
+                                    <small style="display: block; margin-top: 0.25rem; opacity: 0.9;">(At least 1 required)</small>
+                                    <input id="files-input" type="file" name="files" class="file-input" accept="image/*" multiple style="display: none;" />
                                 </label>
 
-                                <img src="@Model.product.ImageUrl" id="preview" class="image-preview" alt="Product Image Preview" />
+                                <!-- Existing Images Gallery -->
+                                <div id="images-gallery" class="images-gallery">
+                                    @if (Model.product.ProductImages != null && Model.product.ProductImages.Any())
+                                    {
+                                        @foreach (var image in Model.product.ProductImages.OrderBy(pi => pi.DisplayOrder))
+                                        {
+                                            <div class="image-item" data-image-id="@image.Id">
+                                                <img src="@image.ImageUrl" alt="Product Image" class="gallery-image" />
+                                                <button type="button" class="delete-image-btn" onclick="deleteImage(@image.Id, this)" title="Delete Image">
+                                                    <i class="bi bi-x-circle-fill"></i>
+                                                </button>
+                                            </div>
+                                        }
+                                    }
+                                    else if (!string.IsNullOrEmpty(Model.product.ImageUrl))
+                                    {
+                                        <div class="image-item" data-image-id="0">
+                                            <img src="@Model.product.ImageUrl" alt="Product Image" class="gallery-image" />
+                                            <span class="main-image-badge">Main</span>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Preview for new images -->
+                                <div id="preview-container" class="preview-container mt-3"></div>
                             </div>
                         </div>
                     </div>
@@ -162,17 +192,169 @@
 
 @section scripts{
     <script>
-        function previewImage(event) {
-            var input = event.target;
-            var reader = new FileReader();
-            reader.onload = function () {
-                var output = document.getElementById('preview');
-                output.src = reader.result;
+        // Preview multiple images
+        document.getElementById('files-input')?.addEventListener('change', function(e) {
+            const previewContainer = document.getElementById('preview-container');
+            previewContainer.innerHTML = '';
+            
+            if (this.files && this.files.length > 0) {
+                Array.from(this.files).forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'preview-image-item';
+                        div.innerHTML = `
+                            <img src="${e.target.result}" alt="Preview ${index + 1}" class="preview-image" />
+                            <span class="preview-badge">New</span>
+                        `;
+                        previewContainer.appendChild(div);
             };
-            reader.readAsDataURL(input.files[0]);
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+
+        // Delete image function
+        function deleteImage(imageId, button) {
+            if (!confirm('Are you sure you want to delete this image?')) {
+                return;
+            }
+
+            const imageItem = button.closest('.image-item');
+            
+            fetch('/Admin/Product/DeleteImage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ imageId: imageId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    imageItem.remove();
+                    
+                    // Check if any images remain
+                    const remainingImages = document.querySelectorAll('.image-item').length;
+                    if (remainingImages === 0) {
+                        const gallery = document.getElementById('images-gallery');
+                        if (gallery) {
+                            gallery.innerHTML = '<p class="text-muted text-center">No images. Please upload at least one image.</p>';
+                        }
+                    }
+                } else {
+                    alert('Error deleting image: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting image. Please try again.');
+            });
         }
     </script>
     @{
         <partial name="_ValidationScriptsPartial" />
     }
 }
+
+<style>
+    .images-gallery {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .image-item {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+
+    .image-item:hover {
+        border-color: #3B9DD5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .gallery-image {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .delete-image-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .delete-image-btn:hover {
+        background: #dc3545;
+        transform: scale(1.1);
+    }
+
+    .main-image-badge {
+        position: absolute;
+        bottom: 5px;
+        left: 5px;
+        background: rgba(59, 157, 213, 0.9);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .preview-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+
+    .preview-image-item {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px dashed #7BC043;
+    }
+
+    .preview-image {
+        width: 100%;
+        height: 80px;
+        object-fit: cover;
+    }
+
+    .preview-badge {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: #7BC043;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 768px) {
+        .images-gallery {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+</style>

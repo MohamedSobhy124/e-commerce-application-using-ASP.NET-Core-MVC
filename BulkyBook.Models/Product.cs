@@ -43,5 +43,9 @@ namespace BulkyBook.Models
         public Categry categry { get; set; }
         [ValidateNever]
         public string ImageUrl { get; set; }
+        
+        // Navigation property for multiple images
+        [ValidateNever]
+        public ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
     }
 }

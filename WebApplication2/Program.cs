@@ -48,8 +48,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 IServiceCollection serviceCollection = builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
-
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+builder.Services.Configure<WhatsAppSettings>(builder.Configuration.GetSection("WhatsApp"));
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDBContext>().AddDefaultTokenProviders();
 builder.Services.ConfigureApplicationCookie(option =>

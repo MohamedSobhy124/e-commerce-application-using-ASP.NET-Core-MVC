@@ -29,7 +29,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             ViewBag.SortBy = sortBy;
             
             // Get products with optional filtering
-            var query = _unitOfWork.product.GetAll(includeProperties: "categry").AsQueryable();
+            var query = _unitOfWork.product.GetAll(includeProperties: "categry,ProductImages").AsQueryable();
             
             // Filter by category
             if (categoryId.HasValue && categoryId.Value > 0)
@@ -77,7 +77,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         [HttpGet]
         public IActionResult LoadMoreProducts(int page = 1, int pageSize = 20)
         {
-            var allProducts = _unitOfWork.product.GetAll(includeProperties: "categry").ToList();
+            var allProducts = _unitOfWork.product.GetAll(includeProperties: "categry,ProductImages").ToList();
             var totalProducts = allProducts.Count;
             var productsToSkip = page * pageSize;
             
@@ -238,7 +238,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         {
             ShoppingCart cart = new()
             {
-                product = _unitOfWork.product.Get(U => U.Id == productId, includeProperties: "categry"),
+                product = _unitOfWork.product.Get(U => U.Id == productId, includeProperties: "categry,ProductImages"),
                 Count=1,
                 ProductId=productId
 
@@ -280,7 +280,37 @@ namespace BulkyBook.Areas.Customer.Controllers
             return RedirectToAction("Index");
         }
 
+        public IActionResult AboutUs()
+        {
+            return View();
+        }
+
         public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        public IActionResult PrivacyPolicy()
+        {
+            return View();
+        }
+
+        public IActionResult Terms()
+        {
+            return View();
+        }
+
+        public IActionResult Shipping()
+        {
+            return View();
+        }
+
+        public IActionResult Returns()
+        {
+            return View();
+        }
+
+        public IActionResult HelpCenter()
         {
             return View();
         }

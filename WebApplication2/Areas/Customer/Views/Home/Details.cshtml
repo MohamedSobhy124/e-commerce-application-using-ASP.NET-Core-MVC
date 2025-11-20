@@ -1,4 +1,5 @@
-﻿@model ShoppingCart
+﻿@inject IConfiguration Configuration
+@model ShoppingCart
   
 <form method="post">
     <input hidden asp-for="ProductId" />
@@ -22,7 +23,53 @@
                 <div class="row">
                     <div class="col-md-5">
                         <div class="product-main-image">
-                            <img class="img-fluid" src="@Model.product.ImageUrl" alt="@Model.product.Title">
+                            @{
+                                var productImages = Model.product.ProductImages != null && Model.product.ProductImages.Any() 
+                                    ? Model.product.ProductImages.OrderBy(pi => pi.DisplayOrder).Select(pi => pi.ImageUrl).ToList()
+                                    : new List<string>();
+                                
+                                // If no ProductImages but has ImageUrl, use that
+                                if (!productImages.Any() && !string.IsNullOrEmpty(Model.product.ImageUrl))
+                                {
+                                    productImages.Add(Model.product.ImageUrl);
+                                }
+                            }
+                            
+                            @if (productImages.Count > 1)
+                            {
+                                <div id="productDetailsCarousel" class="carousel slide product-details-carousel" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        @for (int i = 0; i < productImages.Count; i++)
+                                        {
+                                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                <img class="img-fluid" src="@productImages[i]" alt="@Model.product.Title - Image @(i+1)">
+                                            </div>
+                                        }
+                                    </div>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#productDetailsCarousel" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#productDetailsCarousel" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                    <div class="carousel-indicators">
+                                        @for (int i = 0; i < productImages.Count; i++)
+                                        {
+                                            <button type="button" data-bs-target="#productDetailsCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i+1)"></button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else if (productImages.Count == 1)
+                            {
+                                <img class="img-fluid" src="@productImages[0]" alt="@Model.product.Title">
+                            }
+                            else
+                            {
+                                <img class="img-fluid" src="@Model.product.ImageUrl" alt="@Model.product.Title">
+                            }
                         </div>
                     </div>
 
@@ -52,6 +99,26 @@
                                 </button>
                                 <input type="number" asp-for="Count" value="1" min="1" class="product-quantity-input">
                             </div>
+                          
+                            <!-- WhatsApp Inquiry Button -->
+                            @{
+                                var whatsAppPhone = Configuration["WhatsApp:PhoneNumber"] ?? "971507700559"; ;
+                                var productName = Model.product.Title;
+                                var productUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+                                var currentLang = System.Globalization.CultureInfo.CurrentUICulture.Name;
+                                var whatsAppMsg = currentLang == "ar"
+                                    ? $"مرحباً! أنا مهتم بهذا المنتج: {productName}\n{productUrl}"
+                                    : $"Hello! I'm interested in this product: {productName}\n{productUrl}";
+                                var whatsAppProductUrl = $"https://wa.me/{whatsAppPhone}?text={Uri.EscapeDataString(whatsAppMsg)}";
+                            }
+                            <div class="mt-3">
+                                <a href="@whatsAppProductUrl" 
+                                   target="_blank" 
+                                   class="whatsapp-product-btn">
+                                    <i class="bi bi-whatsapp"></i>
+                                    @Localizer["AskAboutProduct"]
+                                </a>
+                            </div>
 
                             <div class="product-details-section">
                                 <h4 class="product-details-title">
@@ -68,3 +135,177 @@
         </div>
     </div>
 </form>
+
+<!-- Reviews Section (OUTSIDE the Add to Cart form) -->
+<div class="container my-4">
+    <div class="row">
+        <div class="col-12">
+                <div class="product-reviews-section mt-5">
+                    <div class="reviews-header">
+                        <h4>
+                            <i class="bi bi-star-fill me-2"></i>
+                            @Localizer["CustomerReviews"]
+                        </h4>
+                        <div class="reviews-rating-summary">
+                            <div class="rating-stars" id="averageRating">
+                                <i class="bi bi-star"></i>
+                                <i class="bi bi-star"></i>
+                                <i class="bi bi-star"></i>
+                                <i class="bi bi-star"></i>
+                                <i class="bi bi-star"></i>
+                            </div>
+                            <span class="rating-average" id="averageRatingText">0.0</span>
+                            <span class="rating-count">(<span id="reviewCount">0</span> @Localizer["Reviews"])</span>
+                        </div>
+                    </div>
+
+                    <!-- Review Submission Form -->
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <div class="review-form-section">
+                            <h5>@Localizer["WriteReview"]</h5>
+                            <form asp-area="Customer" asp-controller="Review" asp-action="Submit" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@Model.ProductId" />
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">@Localizer["YourRating"] *</label>
+                                    <div class="star-rating-input">
+                                        <input type="radio" name="rating" value="5" id="star5" required />
+                                        <label for="star5"><i class="bi bi-star-fill"></i></label>
+                                        
+                                        <input type="radio" name="rating" value="4" id="star4" />
+                                        <label for="star4"><i class="bi bi-star-fill"></i></label>
+                                        
+                                        <input type="radio" name="rating" value="3" id="star3" />
+                                        <label for="star3"><i class="bi bi-star-fill"></i></label>
+                                        
+                                        <input type="radio" name="rating" value="2" id="star2" />
+                                        <label for="star2"><i class="bi bi-star-fill"></i></label>
+                                        
+                                        <input type="radio" name="rating" value="1" id="star1" />
+                                        <label for="star1"><i class="bi bi-star-fill"></i></label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">@Localizer["YourReview"] *</label>
+                                    <textarea name="comment" class="form-control" rows="4" 
+                                              placeholder="@Localizer["ShareYourExperience"]" 
+                                              minlength="10" maxlength="1000" required></textarea>
+                                    <small class="text-muted">@Localizer["MinimumCharacters"]: 10</small>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-send me-2"></i>
+                                    @Localizer["SubmitReview"]
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            @Localizer["LoginToReview"]
+                        </div>
+                    }
+
+                    <!-- Reviews Display -->
+                    <div class="reviews-list" id="reviewsList">
+                        <div class="reviews-loading">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Load reviews when page loads
+        $(document).ready(function() {
+            loadReviews(@Model.ProductId);
+            loadProductRating(@Model.ProductId);
+        });
+
+        function loadProductRating(productId) {
+            fetch(`/Customer/Review/GetProductRating?productId=${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    $('#averageRatingText').text(data.averageRating.toFixed(1));
+                    $('#reviewCount').text(data.reviewCount);
+                    displayStars(data.averageRating, '#averageRating');
+                })
+                .catch(error => {
+                    console.error('Error loading rating:', error);
+                });
+        }
+
+        function loadReviews(productId) {
+            fetch(`/Customer/Review/GetReviews?productId=${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.reviews.length > 0) {
+                        let html = '';
+                        data.reviews.forEach(review => {
+                            html += createReviewHTML(review);
+                        });
+                        $('#reviewsList').html(html);
+                    } else {
+                        $('#reviewsList').html('<div class="reviews-empty"><i class="bi bi-star"></i><p>@Localizer["NoReviewsYet"]</p></div>');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading reviews:', error);
+                    $('#reviewsList').html('<p class="text-muted text-center">@Localizer["NoReviewsYet"]</p>');
+                });
+        }
+
+        function createReviewHTML(review) {
+            const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+            const verifiedBadge = review.isVerifiedPurchase 
+                ? '<span class="badge bg-success ms-2"><i class="bi bi-check-circle"></i> @Localizer["VerifiedPurchase"]</span>' 
+                : '';
+            
+            return `
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="review-user">
+                            <strong>${review.userName}</strong>
+                            ${verifiedBadge}
+                        </div>
+                        <div class="review-meta">
+                            <span class="review-rating">${stars}</span>
+                            <span class="review-date">${review.date}</span>
+                        </div>
+                    </div>
+                    <div class="review-comment">
+                        ${review.comment}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayStars(rating, selector) {
+            const fullStars = Math.floor(rating);
+            const hasHalf = (rating % 1) >= 0.5;
+            let html = '';
+            
+            for (let i = 0; i < fullStars; i++) {
+                html += '<i class="bi bi-star-fill"></i>';
+            }
+            if (hasHalf) {
+                html += '<i class="bi bi-star-half"></i>';
+            }
+            for (let i = fullStars + (hasHalf ? 1 : 0); i < 5; i++) {
+                html += '<i class="bi bi-star"></i>';
+            }
+            
+            $(selector).html(html);
+        }
+    </script>
+}
