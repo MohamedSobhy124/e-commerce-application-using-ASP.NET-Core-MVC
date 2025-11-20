@@ -22,6 +22,7 @@ namespace BulkyBook.DataAccess.Repository
         public IOrderHeaderRepository OrderHeader { get; private set; }
         public IOrderDetailRepository OrderDetail { get; private set; }
         public INotificationRepository notification { get; private set; }
+        public IReviewRepository review { get; private set; }
 
         public UnitOfWork(ApplicationDBContext db) 
         {
@@ -34,6 +35,7 @@ namespace BulkyBook.DataAccess.Repository
             OrderHeader = new OrderHeaderRepository(_db);
             OrderDetail = new OrderDetailRepository(_db);
             notification = new NotificationRepository(_db);
+            review = new ReviewRepository(_db);
 
         }
 

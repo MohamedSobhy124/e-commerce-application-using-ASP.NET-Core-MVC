@@ -1,5 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Localization
 @using Microsoft.Extensions.Localization
+@inject IConfiguration Configuration
+
 @inject IStringLocalizer<BulkyBook.SharedResources> Localizer
 @{
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
@@ -11,9 +13,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - BulkyBook</title>
+    <title>@ViewData["Title"] - Ideal Weight</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-   
+	<link rel="icon" type="image/png" href="~/Images/Products/logo_white_bg.png" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="~/css/order-details.css" asp-append-version="true" />
 
@@ -29,6 +31,13 @@
     <link rel="stylesheet" href="~/css/external-login.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/notification-bell.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/rtl.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/ideal-weight-theme.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/whatsapp.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/back-to-top.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/reviews.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/enhanced-navigation.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modern-product-grid.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/auth-pages.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BulkyBook.styles.css" asp-append-version="true" />
 
 
@@ -41,11 +50,14 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-book-half me-2"></i>Ideal Weight
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span style="font-family: Cairo;">@Localizer["IdealWeight"]</span>
+
+                    <img src="~/images/Products/3.png" alt="Logo" class="img-fluid me-2" style="max-height: 40px;">
                 </a>
+
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
@@ -56,38 +68,42 @@
                             </a>
                         </li>
 
-                        @*@if(User.IsInRole(SD.Role_Admin)){*@
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-gear me-1"></i>@Localizer["Management"]
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Order" asp-action="Index">
-                                        <i class="bi bi-receipt me-2"></i>@Localizer["Orders"]
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Categries" asp-action="Index">
-                                        <i class="bi bi-tag me-2"></i>@Localizer["Category"]
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">
-                                        <i class="bi bi-box me-2"></i>@Localizer["Product"]
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Companies" asp-action="Index">
-                                        <i class="bi bi-building me-2"></i>@Localizer["Company"]
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        @if (User.IsInRole("Admin"))
-                        {
+                        @if(User.IsInRole(SD.Role_Admin)){ 
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-gear me-1"></i>@Localizer["Management"]
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Order" asp-action="Index">
+                                            <i class="bi bi-receipt me-2"></i>@Localizer["Orders"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Review" asp-action="Index">
+                                            <i class="bi bi-star-fill me-2"></i>@Localizer["Reviews"]
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Categries" asp-action="Index">
+                                            <i class="bi bi-tag me-2"></i>@Localizer["Category"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">
+                                            <i class="bi bi-box me-2"></i>@Localizer["Product"]
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="User" asp-action="CreateAdminUser">
+                                            <i class="bi bi-person-plus-fill me-2"></i> @Localizer["CreateNewUser"]
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
                             <li class="nav-item">
                                 <div class="notification-bell-container">
                                     <button id="notificationBell" class="notification-bell" onclick="toggleNotifications()">
@@ -119,10 +135,10 @@
                         }
                         <li class="nav-item">
                             <a class="nav-link" asp-area="Customer" asp-controller="Cart" asp-action="Index">
-                               @await Component.InvokeAsync("ShoppingCart")
+                                @await Component.InvokeAsync("ShoppingCart")
                             </a>
                         </li>
-                        
+
                         <!-- Language Switcher -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -137,17 +153,17 @@
                             <ul class="dropdown-menu" aria-labelledby="languageDropdown">
                                 <li>
                                     <a href="javascript:void(0);" 
-                                       onclick="switchToArabic()" 
-                                       id="langButtonAr"
-                                       class="dropdown-item @(currentCulture == "ar" ? "active" : "")">
+                                    onclick="switchToArabic()" 
+                                    id="langButtonAr"
+                                    class="dropdown-item @(currentCulture == "ar" ? "active" : "")">
                                         <i class="bi bi-translate me-2"></i> العربية
                                     </a>
                                 </li>
                                 <li>
                                     <a href="javascript:void(0);" 
-                                       onclick="switchToEnglish()" 
-                                       id="langButtonEn"
-                                       class="dropdown-item @(currentCulture == "en" ? "active" : "")">
+                                    onclick="switchToEnglish()" 
+                                    id="langButtonEn"
+                                    class="dropdown-item @(currentCulture == "en" ? "active" : "")">
                                         <i class="bi bi-translate me-2"></i> English
                                     </a>
                                 </li>
@@ -171,12 +187,11 @@
                 <!-- Company Info -->
                 <div class="footer-section">
                     <h3 class="footer-logo">
-                        <i class="bi bi-book-half me-2"></i>
-                        BulkyBook
+                        <i class="bi bi-heart-pulse me-2"></i>
+                        @Localizer["IdealWeight"]
                     </h3>
                     <p class="footer-description">
-                        Your trusted online bookstore offering thousands of books from top authors worldwide. 
-                        Discover, read, and grow with BulkyBook.
+                        @Localizer["YourTrustedHealthPartner"]
                     </p>
                     <div class="social-links">
                         <a href="#" class="social-link" title="Facebook">
@@ -205,21 +220,21 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="footer-link">
+                            <a asp-area="Customer" asp-controller="Home" asp-action="AboutUs" class="footer-link">
                                 <i class="bi bi-chevron-right"></i>
                                 @Localizer["AboutUs"]
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="footer-link">
+                            <a asp-area="Customer" asp-controller="Home" asp-action="PrivacyPolicy" class="footer-link">
                                 <i class="bi bi-chevron-right"></i>
-                                @Localizer["ContactUs"]
+                                @Localizer["PrivacyPolicy"]
                             </a>
                         </li>
                         <li>
-                            <a asp-area="" asp-controller="Home" asp-action="Privacy" class="footer-link">
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Terms" class="footer-link">
                                 <i class="bi bi-chevron-right"></i>
-                                @Localizer["PrivacyPolicy"]
+                                @Localizer["TermsAndConditions"]
                             </a>
                         </li>
                     </ul>
@@ -230,19 +245,19 @@
                     <h4 class="footer-title">@Localizer["CustomerService"]</h4>
                     <ul class="footer-links">
                         <li>
-                            <a href="#" class="footer-link">
+                            <a asp-area="Customer" asp-controller="Home" asp-action="HelpCenter" class="footer-link">
                                 <i class="bi bi-chevron-right"></i>
                                 @Localizer["HelpCenter"]
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="footer-link">
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Shipping" class="footer-link">
                                 <i class="bi bi-chevron-right"></i>
                                 @Localizer["ShippingInfo"]
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="footer-link">
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Returns" class="footer-link">
                                 <i class="bi bi-chevron-right"></i>
                                 @Localizer["Returns"]
                             </a>
@@ -257,7 +272,7 @@
                 </div>
 
                 <!-- Newsletter -->
-                <div class="footer-section">
+             @*    <div class="footer-section">
                     <h4 class="footer-title">@Localizer["Newsletter"]</h4>
                     <p class="footer-description">
                         Subscribe to get special offers, free giveaways, and updates.
@@ -268,11 +283,14 @@
                             <i class="bi bi-send"></i>
                         </button>
                     </form>
-                </div>
+                </div> *@
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2024 BulkyBook by <strong>Mohamed Sobhy</strong>. @Localizer["AllRightsReserved"]</p>
+                <p>&copy; 2025 Ideal Weight by <strong>Mohamed Sobhy</strong>. @Localizer["AllRightsReserved"]</p>
+                <button id="backToTopBtn" class="back-to-top-btn" title="@Localizer["BackToTop"]">
+                    <i class="bi bi-arrow-up"></i>
+                </button>
             </div>
         </div>
     </footer>
@@ -285,23 +303,105 @@
     <script src="~/js/notification-handler.js" asp-append-version="true"></script>
     <script src="~/js/language-switcher.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Back to Top Functionality -->
+    <script>
+        // Back to Top Button
+        const backToTopBtn = document.getElementById('backToTopBtn');
+        const navbar = document.querySelector('.navbar');
+
+        // Show/hide button based on scroll position + sticky navbar effect
+        window.addEventListener('scroll', function() {
+        // Back to top button
+        if (window.pageYOffset > 300) {
+        backToTopBtn.classList.add('show');
+        } else {
+        backToTopBtn.classList.remove('show');
+        }
+
+        // Sticky navbar effect
+        if (window.pageYOffset > 50) {
+        navbar.classList.add('scrolled');
+        } else {
+        navbar.classList.remove('scrolled');
+        }
+        });
+
+        // Smooth scroll to top
+        backToTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+        });
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+        const navbar = document.querySelector('.navbar-collapse');
+        const toggler = document.querySelector('.navbar-toggler');
+
+        if (navbar && navbar.classList.contains('show')) {
+        if (!navbar.contains(event.target) && !toggler.contains(event.target)) {
+        const bsCollapse = new bootstrap.Collapse(navbar, {
+        toggle: false
+        });
+        bsCollapse.hide();
+        }
+        }
+        });
+
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('.navbar-nav .nav-link:not(.dropdown-toggle)').forEach(link => {
+        link.addEventListener('click', function() {
+        const navbar = document.querySelector('.navbar-collapse');
+        if (navbar && navbar.classList.contains('show')) {
+        const bsCollapse = new bootstrap.Collapse(navbar);
+        bsCollapse.hide();
+        }
+        });
+        });
+    </script>
+
     @if (User.Identity.IsAuthenticated)
     {
         <script>
             // Set user roles for SignalR
             const userRoles = '@(string.Join(",", User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value)))';
             if (typeof setUserRoles === 'function') {
-                setUserRoles(userRoles);
+            setUserRoles(userRoles);
             }
         </script>
+        @if (User.IsInRole(SD.Role_Admin))
+        {
+        }
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                loadNotifications();  // Load notifications count on page load
+            });
+        </script>
     }
- 
+
 
     <script src="https://cdn.tiny.cloud/1/it1906a6ew4dupngfx15tu2vmarmq8tpdnpg3nhx5r4vexcs/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     @await RenderSectionAsync("Scripts", required: false)
     <script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- Floating WhatsApp Button -->
+    @{
+        var whatsAppPhone = Configuration["WhatsApp:PhoneNumber"] ?? "971507700559"; ;  
+        var whatsAppMessage = currentCulture == "ar"
+        ? (Configuration["WhatsApp:DefaultMessageAr"] ?? "مرحباً! أنا مهتم بمنتجاتكم.")
+        : (Configuration["WhatsApp:DefaultMessage"] ?? "Hello! I'm interested in your products.");
+        var whatsAppUrl = $"https://wa.me/{whatsAppPhone}?text={Uri.EscapeDataString(whatsAppMessage)}";
+    }
+    <a href="@whatsAppUrl" 
+       target="_blank" 
+       class="floating-whatsapp-btn whatsapp-pulse"
+       title="@Localizer["ChatOnWhatsApp"]">
+        <i class="bi bi-whatsapp"></i>
+        <span class="whatsapp-tooltip">@Localizer["ChatWithUs"]</span>
+    </a>
 
 </body>
 </html>

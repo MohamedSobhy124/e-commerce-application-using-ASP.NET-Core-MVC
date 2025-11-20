@@ -1,5 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -31,7 +90,7 @@
               <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" msdata:Ordinal="5" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -58,8 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  
-  <!-- Navigation & Common -->
   <data name="Home" xml:space="preserve">
     <value>الرئيسية</value>
   </data>
@@ -73,7 +130,7 @@
     <value>السلة</value>
   </data>
   <data name="Checkout" xml:space="preserve">
-    <value>إتمام الشراء</value>
+    <value>إتمام الدفع</value>
   </data>
   <data name="Orders" xml:space="preserve">
     <value>الطلبات</value>
@@ -96,8 +153,6 @@
   <data name="Dashboard" xml:space="preserve">
     <value>لوحة التحكم</value>
   </data>
-  
-  <!-- Product Related -->
   <data name="ProductDetails" xml:space="preserve">
     <value>تفاصيل المنتج</value>
   </data>
@@ -131,8 +186,6 @@
   <data name="Quantity" xml:space="preserve">
     <value>الكمية</value>
   </data>
-  
-  <!-- Cart & Checkout -->
   <data name="ShoppingCart" xml:space="preserve">
     <value>سلة التسوق</value>
   </data>
@@ -184,8 +237,6 @@
   <data name="PaymentMethod" xml:space="preserve">
     <value>طريقة الدفع</value>
   </data>
-  
-  <!-- Order Status -->
   <data name="OrderStatus" xml:space="preserve">
     <value>حالة الطلب</value>
   </data>
@@ -207,8 +258,6 @@
   <data name="Cancelled" xml:space="preserve">
     <value>ملغي</value>
   </data>
-  
-  <!-- Admin Panel -->
   <data name="Categories" xml:space="preserve">
     <value>الفئات</value>
   </data>
@@ -239,8 +288,6 @@
   <data name="Create" xml:space="preserve">
     <value>إنشاء</value>
   </data>
-  
-  <!-- Messages -->
   <data name="Success" xml:space="preserve">
     <value>نجح</value>
   </data>
@@ -259,8 +306,6 @@
   <data name="OrderPlacedSuccessfully" xml:space="preserve">
     <value>تم تقديم الطلب بنجاح</value>
   </data>
-  
-  <!-- Search & Filter -->
   <data name="Search" xml:space="preserve">
     <value>بحث</value>
   </data>
@@ -282,8 +327,6 @@
   <data name="Newest" xml:space="preserve">
     <value>الأحدث</value>
   </data>
-  
-  <!-- Footer -->
   <data name="AboutUs" xml:space="preserve">
     <value>من نحن</value>
   </data>
@@ -308,8 +351,6 @@
   <data name="AllRightsReserved" xml:space="preserve">
     <value>جميع الحقوق محفوظة</value>
   </data>
-  
-  <!-- Guest Checkout -->
   <data name="GuestCheckout" xml:space="preserve">
     <value>الشراء كضيف</value>
   </data>
@@ -319,8 +360,6 @@
   <data name="OrderNumber" xml:space="preserve">
     <value>رقم الطلب</value>
   </data>
-  
-  <!-- Common Actions -->
   <data name="Remove" xml:space="preserve">
     <value>إزالة</value>
   </data>
@@ -342,8 +381,6 @@
   <data name="Confirm" xml:space="preserve">
     <value>تأكيد</value>
   </data>
-  
-  <!-- Language Switcher -->
   <data name="Language" xml:space="preserve">
     <value>اللغة</value>
   </data>
@@ -353,8 +390,6 @@
   <data name="English" xml:space="preserve">
     <value>الإنجليزية</value>
   </data>
-  
-  <!-- Additional Footer -->
   <data name="QuickLinks" xml:space="preserve">
     <value>روابط سريعة</value>
   </data>
@@ -373,8 +408,6 @@
   <data name="StreetAddress" xml:space="preserve">
     <value>عنوان الشارع</value>
   </data>
-  
-  <!-- Order Actions -->
   <data name="StartProcessing" xml:space="preserve">
     <value>بدء المعالجة</value>
   </data>
@@ -438,8 +471,6 @@
   <data name="View" xml:space="preserve">
     <value>عرض</value>
   </data>
-  
-  <!-- Home Page Hero -->
   <data name="DiscoverYourNextGreatRead" xml:space="preserve">
     <value>اكتشف كتابك القادم المميز</value>
   </data>
@@ -450,7 +481,7 @@
     <value>ابحث بالعنوان أو المؤلف أو الوصف...</value>
   </data>
   <data name="AllBooks" xml:space="preserve">
-    <value>جميع الكتب</value>
+    <value>جميع المنتجات</value>
   </data>
   <data name="FilterAndSort" xml:space="preserve">
     <value>تصفية وترتيب</value>
@@ -470,8 +501,6 @@
   <data name="NameAZ" xml:space="preserve">
     <value>الاسم (أ-ي)</value>
   </data>
-  
-  <!-- Features Section -->
   <data name="WhyChooseBulkyBook" xml:space="preserve">
     <value>لماذا تختار BulkyBook؟</value>
   </data>
@@ -499,8 +528,6 @@
   <data name="Support247Desc" xml:space="preserve">
     <value>فريق دعم العملاء لدينا متاح على مدار الساعة لمساعدتك في أي أسئلة أو مخاوف.</value>
   </data>
-  
-  <!-- Statistics -->
   <data name="BooksAvailable" xml:space="preserve">
     <value>كتاب متاح</value>
   </data>
@@ -513,8 +540,6 @@
   <data name="CustomerSatisfaction" xml:space="preserve">
     <value>رضا العملاء</value>
   </data>
-  
-  <!-- Cart Page -->
   <data name="YourCart" xml:space="preserve">
     <value>سلتك</value>
   </data>
@@ -530,8 +555,6 @@
   <data name="ProceedToSummary" xml:space="preserve">
     <value>المتابعة إلى الملخص</value>
   </data>
-  
-  <!-- Checkout -->
   <data name="BackToCart" xml:space="preserve">
     <value>العودة للسلة</value>
   </data>
@@ -547,8 +570,6 @@
   <data name="SaveYourOrderNumber" xml:space="preserve">
     <value>احفظ رقم طلبك! ستحتاجه لتتبع طلبك.</value>
   </data>
-  
-  <!-- Order Confirmation -->
   <data name="OrderPlacedSuccessful" xml:space="preserve">
     <value>تم تقديم الطلب بنجاح!</value>
   </data>
@@ -576,8 +597,6 @@
   <data name="ContactSupport" xml:space="preserve">
     <value>اتصل بفريق الدعم</value>
   </data>
-  
-  <!-- Admin Orders -->
   <data name="OrdersManagement" xml:space="preserve">
     <value>إدارة الطلبات</value>
   </data>
@@ -602,8 +621,6 @@
   <data name="TrackAnotherOrder" xml:space="preserve">
     <value>تتبع طلب آخر</value>
   </data>
-  
-  <!-- Messages & Notifications -->
   <data name="OrderNotFound" xml:space="preserve">
     <value>الطلب غير موجود</value>
   </data>
@@ -625,8 +642,6 @@
   <data name="OrderDetails" xml:space="preserve">
     <value>تفاصيل الطلب</value>
   </data>
-  
-  <!-- Newsletter -->
   <data name="SubscribeToNewsletter" xml:space="preserve">
     <value>اشترك للحصول على عروض خاصة وهدايا مجانية وتحديثات</value>
   </data>
@@ -636,8 +651,6 @@
   <data name="ThankYouForSubscribing" xml:space="preserve">
     <value>شكراً لاشتراكك!</value>
   </data>
-  
-  <!-- Product Details Page -->
   <data name="BackToProducts" xml:space="preserve">
     <value>العودة للمنتجات</value>
   </data>
@@ -650,21 +663,14 @@
   <data name="AdditionalTaxMayApply" xml:space="preserve">
     <value>(قد يتم تطبيق ضرائب إضافية عند الدفع)</value>
   </data>
-  
-  <!-- Cart Sidebar -->
-  <data name="Checkout" xml:space="preserve">
-    <value>إتمام الدفع</value>
-  </data>
   <data name="ViewFullCart" xml:space="preserve">
     <value>عرض السلة الكاملة</value>
   </data>
-  
-  <!-- Login/Register -->
   <data name="CreateAccount" xml:space="preserve">
     <value>إنشاء حساب</value>
   </data>
-  <data name="JoinBulkyBookToday" xml:space="preserve">
-    <value>انضم إلى BulkyBook اليوم</value>
+  <data name="JoinIdealWeightToday" xml:space="preserve">
+    <value> انضم اليوم إلى ايديال وايت</value>
   </data>
   <data name="QuickSignUpWith" xml:space="preserve">
     <value>تسجيل سريع باستخدام</value>
@@ -684,7 +690,177 @@
   <data name="ConfirmPassword" xml:space="preserve">
     <value>تأكيد كلمة المرور</value>
   </data>
+  <data name="IdealWeight" xml:space="preserve">
+    <value> ايديال وايت</value>
+  </data>
+  <data name="DiscoverIdealWeight" xml:space="preserve">
+    <value>اكتشف طريقك للوزن المثالي</value>
+  </data>
+  <data name="InnovativeSupplements" xml:space="preserve">
+    <value>مكملات غذائية مبتكرة ووجبات خفيفة صحية لتحقيق أهدافك الصحية</value>
+  </data>
+  <data name="SearchSupplements" xml:space="preserve">
+    <value>ابحث عن المكملات، الفيتامينات، الوجبات الخفيفة...</value>
+  </data>
+  <data name="WhyChooseIdealWeight" xml:space="preserve">
+    <value>لماذا تختار ايديال وايت؟</value>
+  </data>
+  <data name="PremiumQualityTitle" xml:space="preserve">
+    <value>جودة فائقة</value>
+  </data>
+  <data name="PremiumQualityDesc" xml:space="preserve">
+    <value>منتجات أصلية 100% من علامات تجارية عالمية موثوقة. جودة مضمونة ومعتمدة.</value>
+  </data>
+  <data name="ExpertGuidanceTitle" xml:space="preserve">
+    <value>إرشاد متخصص</value>
+  </data>
+  <data name="ExpertGuidanceDesc" xml:space="preserve">
+    <value>أخصائيو تغذية وخبراء صحة متاحون لمساعدتك في رحلتك الصحية وتحقيق أهدافك.</value>
+  </data>
+  <data name="FastDeliveryTitle" xml:space="preserve">
+    <value>توصيل سريع</value>
+  </data>
+  <data name="FastDeliveryDesc" xml:space="preserve">
+    <value>توصيل في نفس اليوم للمدن الرئيسية. منتجاتك الصحية تصلك طازجة وبسرعة.</value>
+  </data>
+  <data name="HealthGuaranteeTitle" xml:space="preserve">
+    <value>ضمان صحي</value>
+  </data>
+  <data name="HealthGuaranteeDesc" xml:space="preserve">
+    <value>منتجات معتمدة مع ضمان الجودة والسلامة. رضاك وصحتك أولويتنا.</value>
+  </data>
+  <data name="HealthProducts" xml:space="preserve">
+    <value>منتجات صحية</value>
+  </data>
+  <data name="SatisfiedCustomers" xml:space="preserve">
+    <value>عميل راضٍ</value>
+  </data>
+  <data name="TrustedBrandsCount" xml:space="preserve">
+    <value>علامة موثوقة</value>
+  </data>
+  <data name="AuthenticProductsPercent" xml:space="preserve">
+    <value>منتجات أصلية</value>
+  </data>
+  <data name="YourTrustedHealthPartner" xml:space="preserve">
+    <value>شريكك الموثوق للصحة والعافية، نوفر لك مكملات غذائية فاخرة ووجبات خفيفة صحية.
+حقق وزنك المثالي وصحتك الأفضل مع ايديال وايت</value>
+  </data>
+  <data name="AchieveOptimalHealth" xml:space="preserve">
+    <value>احصل على الوزن المثالي والصحة المثلى مع الحيال وايت</value>
+  </data>
+  <data name="ChatOnWhatsApp" xml:space="preserve">
+    <value>تحدث على واتساب</value>
+  </data>
+  <data name="ChatWithUs" xml:space="preserve">
+    <value>تحدث معنا</value>
+  </data>
+  <data name="AskAboutProduct" xml:space="preserve">
+    <value>استفسر عن المنتج</value>
+  </data>
+  <data name="QuickSupport" xml:space="preserve">
+    <value>دعم سريع</value>
+  </data>
+  <data name="ContactUsOnWhatsApp" xml:space="preserve">
+    <value>تواصل معنا على واتساب</value>
+  </data>
+  <data name="BackToTop" xml:space="preserve">
+    <value>العودة للأعلى</value>
+  </data>
+  <data name="CustomerReviews" xml:space="preserve">
+    <value>تقييمات العملاء</value>
+  </data>
+  <data name="Reviews" xml:space="preserve">
+    <value>المراجعات</value>
+  </data>
+  <data name="WriteReview" xml:space="preserve">
+    <value>اكتب تقييمك</value>
+  </data>
+  <data name="YourRating" xml:space="preserve">
+    <value>تقييمك</value>
+  </data>
+  <data name="YourReview" xml:space="preserve">
+    <value>رأيك</value>
+  </data>
+  <data name="ShareYourExperience" xml:space="preserve">
+    <value>شارك تجربتك مع هذا المنتج...</value>
+  </data>
+  <data name="MinimumCharacters" xml:space="preserve">
+    <value>الحد الأدنى للأحرف</value>
+  </data>
+  <data name="SubmitReview" xml:space="preserve">
+    <value>إرسال التقييم</value>
+  </data>
+  <data name="LoginToReview" xml:space="preserve">
+    <value>سجل الدخول لكتابة تقييم</value>
+  </data>
+  <data name="VerifiedPurchase" xml:space="preserve">
+    <value>شراء موثق</value>
+  </data>
+  <data name="NoReviewsYet" xml:space="preserve">
+    <value>لا توجد تقييمات بعد. كن أول من يقيّم!</value>
+  </data>
+  <data name="ReviewPendingApproval" xml:space="preserve">
+    <value>تم إرسال تقييمك وهو قيد المراجعة</value>
+  </data>
+  <data name="AlreadyReviewed" xml:space="preserve">
+    <value>لقد قمت بتقييم هذا المنتج مسبقاً</value>
+  </data>
+  <data name="ReviewsManagement" xml:space="preserve">
+    <value>إدارة التقييمات</value>
+  </data>
+  <data name="AllReviews" xml:space="preserve">
+    <value>جميع التقييمات</value>
+  </data>
+  <data name="PendingApproval" xml:space="preserve">
+    <value>قيد الموافقة</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>التاريخ</value>
+  </data>
+  <data name="Approve" xml:space="preserve">
+    <value>موافقة</value>
+  </data>
+  <data name="Reject" xml:space="preserve">
+    <value>رفض</value>
+  </data>
+  <data name="Hello" xml:space="preserve">
+    <value>مرحبا</value>
+  </data>
+  <data name="Manage" xml:space="preserve">
+    <value>ألادارة</value>
+  </data>
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>هل نسيت كلمة السر؟</value>
+  </data>
+  <data name="DontHaveAccount" xml:space="preserve">
+    <value>هل لديك حساب بالفعل ؟</value>
+  </data>
+  <data name="RegisterNow" xml:space="preserve">
+    <value>سجل الان</value>
+  </data>
+  <data name="AlreadyHaveAccount" xml:space="preserve">
+    <value>لديك حساب بالفعل ؟</value>
+  </data>
+  <data name="SignInHere" xml:space="preserve">
+    <value>تسجيل دخول من هنا</value>
+  </data>
+  <data name="InternalUserRegistrationHeaderMassage" xml:space="preserve">
+    <value>.استخدم هذه الصفحة لأضافة موظف</value>
+  </data>
+  <data name="InternalUserRegistrationFooterMassage" xml:space="preserve">
+    <value>الموظفين لهم صالحية كاملة على الموقع واستخدام هذه الصفحة</value>
+  </data>
+  <data name="CreateNewUser" xml:space="preserve">
+    <value>اضافة موظف جديد</value>
+  </data>
+  <data name="ManageMyAccount" xml:space="preserve">
+    <value>ادارة حسابى</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>ملحوظه</value>
+  </data>
+  <data name="YourTrustedHealth" xml:space="preserve">
+    <value>شريكك الموثوق للصحة والعافية، نوفر لك مكملات غذائية فاخرة ووجبات خفيفة صحية.
+حقق وزنك المثالي وصحتك الأفضل مع ايديال وايت</value>
+  </data>
 </root>
-
-
-

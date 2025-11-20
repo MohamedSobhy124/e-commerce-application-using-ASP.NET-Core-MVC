@@ -117,18 +117,8 @@
     padding-right: 0;
 }
 
-/* Tables */
-[dir="rtl"] .table {
-    text-align: right;
-}
-
-[dir="rtl"] .table thead th {
-    text-align: right;
-}
-
-[dir="rtl"] .table tbody td {
-    text-align: right;
-}
+ 
+ 
 
 /* Breadcrumbs */
 [dir="rtl"] .breadcrumb-item + .breadcrumb-item::before {
@@ -166,11 +156,7 @@
     transform: translateX(0);
 }
 
-/* Floating Cart Button */
-[dir="rtl"] .floating-cart-btn {
-    right: auto;
-    left: 20px;
-}
+ 
 
 /* Footer */
 [dir="rtl"] .footer-section {
@@ -235,17 +221,9 @@
 [dir="rtl"] .badge {
     direction: rtl;
 }
+ 
 
-/* Carousel - if using */
-[dir="rtl"] .carousel-control-prev {
-    right: 0;
-    left: auto;
-}
-
-[dir="rtl"] .carousel-control-next {
-    right: auto;
-    left: 0;
-}
+ 
 
 /* Product Grid */
 [dir="rtl"] .product-col {

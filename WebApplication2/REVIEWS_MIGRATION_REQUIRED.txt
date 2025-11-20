@@ -1,0 +1,61 @@
+===========================================
+REVIEWS SYSTEM - DATABASE MIGRATION REQUIRED
+===========================================
+
+The Reviews & Ratings system has been implemented!
+
+BEFORE YOU CAN USE IT, YOU MUST RUN A MIGRATION:
+
+METHOD 1: Package Manager Console (Visual Studio)
+--------------------------------------------------
+1. Open: Tools → NuGet Package Manager → Package Manager Console
+
+2. Run:
+   Add-Migration AddReviewsSystem -Project BulkyBook.DataAccess
+
+3. Then:
+   Update-Database -Project BulkyBook.DataAccess
+
+
+METHOD 2: .NET CLI (Command Line)
+----------------------------------
+1. Open terminal in project directory
+
+2. Run:
+   dotnet ef migrations add AddReviewsSystem --project BulkyBook.DataAccess --startup-project WebApplication2
+
+3. Then:
+   dotnet ef database update --project BulkyBook.DataAccess --startup-project WebApplication2
+
+
+WHAT THE MIGRATION CREATES:
+----------------------------
+- Reviews table with columns:
+  * Id (Primary Key)
+  * ProductId (Foreign Key to Products)
+  * UserId (Foreign Key to Users)
+  * Rating (1-5)
+  * Comment (Text)
+  * CreatedAt (DateTime)
+  * IsApproved (Boolean - for moderation)
+  * IsVerifiedPurchase (Boolean - bought product)
+  * HelpfulCount (Integer - future feature)
+
+
+AFTER MIGRATION:
+----------------
+1. Rebuild your project: dotnet build
+2. Run your app: dotnet run
+3. Go to any product details page
+4. See the reviews section!
+5. Submit a review (must be logged in)
+6. Admin can approve/reject reviews in admin panel
+
+
+IMPORTANT:
+----------
+DO NOT skip the migration!
+The Reviews table must exist in the database.
+
+===========================================
+

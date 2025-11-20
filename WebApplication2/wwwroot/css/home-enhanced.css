@@ -453,7 +453,7 @@
 .footer-logo {
     font-size: 1.75rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    background: linear-gradient(135deg, #88c043 0%, #3394d4 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -661,6 +661,290 @@
 
     .stat-number {
         font-size: 2.5rem;
+    }
+}
+
+/* About Us Section */
+.about-us-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.about-us-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(59, 157, 213, 0.1) 0%, transparent 70%);
+    animation: pulse 15s ease-in-out infinite;
+}
+
+.about-content {
+    position: relative;
+    z-index: 1;
+}
+
+.about-title {
+    animation: fadeInLeft 0.8s ease;
+}
+
+.about-description {
+    animation: fadeInLeft 1s ease;
+}
+
+.about-features {
+    animation: fadeInLeft 1.2s ease;
+}
+
+.about-us-section .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(59, 157, 213, 0.4);
+}
+
+.about-us-section .carousel-item img {
+    transition: transform 0.5s ease;
+}
+
+.about-us-section .carousel-item:hover img {
+    transform: scale(1.05);
+}
+
+.about-us-section .carousel-control-prev,
+.about-us-section .carousel-control-next {
+    width: 50px;
+    height: 50px;
+    background: rgba(59, 157, 213, 0.8);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.about-us-section .carousel-control-prev {
+    left: 20px;
+}
+
+.about-us-section .carousel-control-next {
+    right: 20px;
+}
+
+.about-us-section .carousel-control-prev:hover,
+.about-us-section .carousel-control-next:hover {
+    opacity: 1;
+    background: rgba(59, 157, 213, 1);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.about-us-section .carousel-indicators button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(59, 157, 213, 0.5);
+    border: 2px solid white;
+    transition: all 0.3s ease;
+}
+
+.about-us-section .carousel-indicators button.active {
+    background-color: #3B9DD5;
+    width: 30px;
+    border-radius: 6px;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 992px) {
+    .about-us-section {
+        padding: 3rem 0 !important;
+    }
+    
+    .about-title {
+        font-size: 2rem !important;
+    }
+    
+    .about-description {
+        font-size: 1rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .about-us-section .carousel-item img {
+        height: 300px !important;
+    }
+    
+    .about-us-section .carousel-control-prev,
+    .about-us-section .carousel-control-next {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .about-us-section .carousel-control-prev {
+        left: 10px;
+    }
+    
+    .about-us-section .carousel-control-next {
+        right: 10px;
+    }
+}
+
+/* Branches Map Section */
+.branches-map-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.branches-title {
+    animation: fadeInUp 0.8s ease;
+}
+
+.branches-subtitle {
+    animation: fadeInUp 1s ease;
+}
+
+.branch-map-card {
+    transition: all 0.3s ease;
+}
+
+.branch-map-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15) !important;
+}
+
+.branch-map-container {
+    position: relative;
+}
+
+.branch-map-container iframe {
+    transition: transform 0.3s ease;
+}
+
+.branch-map-card:hover .branch-map-container iframe {
+    transform: scale(1.02);
+}
+
+.branch-header {
+    transition: all 0.3s ease;
+}
+
+.branch-map-card:hover .branch-header {
+    background: linear-gradient(135deg, #3B9DD5, #7BC043) !important;
+    color: white;
+}
+
+.branch-map-card:hover .branch-header h3,
+.branch-map-card:hover .branch-header p {
+    color: white !important;
+}
+
+.branch-map-card:hover .branch-header i {
+    color: white !important;
+}
+
+.branch-footer .btn {
+    transition: all 0.3s ease;
+}
+
+.branch-footer .btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(59, 157, 213, 0.4);
+}
+
+.contact-card {
+    animation: fadeInUp 1.2s ease;
+}
+
+.contact-card a:hover {
+    text-decoration: underline !important;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 992px) {
+    .branches-title {
+        font-size: 2rem !important;
+    }
+    
+    .branches-subtitle {
+        font-size: 1rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .branch-map-container {
+        height: 300px !important;
+    }
+    
+    .branches-map-section {
+        padding: 3rem 0 !important;
+    }
+}
+
+/* Load More Button */
+#loadMoreBtn {
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(59, 157, 213, 0.3);
+}
+
+#loadMoreBtn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(59, 157, 213, 0.5);
+}
+
+#loadMoreBtn:active {
+    transform: translateY(-1px);
+}
+
+#loadMoreBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+#loadMoreContainer {
+    margin: 3rem 0;
+}
+
+#loadingIndicator .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3em;
+}
+
+@media (max-width: 768px) {
+    #loadMoreBtn {
+        padding: 0.6rem 2rem !important;
+        font-size: 0.95rem;
     }
 }
 

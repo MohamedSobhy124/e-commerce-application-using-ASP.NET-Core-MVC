@@ -1,0 +1,200 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<BulkyBook.SharedResources> Localizer
+@{
+    ViewData["Title"] = Localizer["Returns"];
+    var currentLang = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="page-header text-center mb-5">
+                <h1 class="display-4" style="color: #1976D2; font-weight: 800;">
+                    <i class="bi bi-arrow-left-right me-3"></i>
+                    @if(currentLang == "ar") {
+                        <text>سياسة الإرجاع والتبديل</text>
+                    } else {
+                        <text>Return and Exchange Policy</text>
+                    }
+                </h1>
+                <div class="underline" style="width: 100px; height: 4px; background: linear-gradient(90deg, #3B9DD5, #7BC043); margin: 1rem auto;"></div>
+            </div>
+
+            @if(currentLang == "ar") 
+            {
+                <!-- Arabic Content -->
+                <div class="content-section" style="direction: rtl; text-align: right;">
+                    <!-- Policy Overview -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #3B9DD5; font-weight: 700;">
+                                <i class="bi bi-info-circle me-3"></i>سياسة الإرجاع والتبديل في Ideal Weight
+                            </h2>
+                            <p class="lead" style="line-height: 1.8; color: #555;">
+                                سياسة الإرجاع في Ideal Weight واضحة وبسيطة لعملائنا الأعزاء: 
+                                الإرجاع أو التبديل سيكون خلال 48 ساعة من استلام الطلب، وفي حالة خدمات استشارة الطعام، 14 يومًا، 
+                                وذلك بالاتصال بـ: <a href="mailto:customer.service@whitefit.co" style="color: #7BC043; font-weight: 600;">customer.service@whitefit.co</a> 
+                                أو الاتصال بالرقم: <a href="tel:+971507700559" style="color: #7BC043; font-weight: 600;">+971 50 770 0559</a>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Eligibility -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-check-circle me-3"></i>شروط الأهلية للإرجاع
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                لكي تكون مؤهلاً لإرجاع طلبك، يجب أن تكون المنتجات المطلوبة غير مستخدمة وغير مفتوحة، خاصة منتجات التجميل والمكملات الغذائية، 
+                                ما لم يكن المنتج به عيوب في التخزين أو في نفس الحالة التي استلمتها بها. يجب أن تكون أيضًا في العبوة الأصلية.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                لإكمال الإرجاع، نحتاج إلى إيصال أو إثبات الشراء.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Refunds -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                                <i class="bi bi-currency-exchange me-3"></i>المبالغ المستردة إذا تمت الموافقة على الإرجاع
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                بمجرد استلامنا وفحص طلب الإرجاع الخاص بك، سنرسل لك بريدًا إلكترونيًا أو نتصل بك مباشرة عبر رقم الهاتف الخاص بنا لإخطارك بأننا قد استلمنا العنصر المرتجع. 
+                                سنخطرك أيضًا بالموافقة أو الرفض على استردادك. إذا تمت الموافقة عليك، سيتم معالجة الاسترداد، وسيتم تحويل الرصيد تلقائيًا إلى بطاقة الائتمان الخاصة بك 
+                                أو طريقة الدفع الأصلية مثل النقد أو نقاط الولاء (في حالة الدفع نقدًا أو ببطاقة الائتمان عند الاستلام) فقط يرجى تزويدنا بتفاصيل الحساب المراد التحويل إليه.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Delayed Refunds -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #3B9DD5; font-weight: 700;">
+                                <i class="bi bi-clock-history me-3"></i>المبالغ التي تمت الموافقة على إرجاعها، ولكن تأخر استلامها بعد الموافقة
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                إذا لم تستلم استردادًا، تحقق أولاً من حسابك المصرفي مرة أخرى. ثم اتصل بشركة بطاقة الائتمان الخاصة بك، قد يستغرق الأمر بعض الوقت قبل أن يتم نشر استردادك رسميًا. 
+                                بعد ذلك، اتصل ببنكك. إذا تم اتخاذ الخطوات السابقة، لكنك لم تلاحظ أن الأموال تم إرجاعها إلى حسابك أو إلى طريقة الدفع التي قمت بها، 
+                                اتصل بنا على الرقم: <a href="tel:+971507700559" style="color: #7BC043; font-weight: 600;">+971 50 770 0559</a>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Send Product Back -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-box-arrow-left me-3"></i>إرسال المنتج المطلوب مرة أخرى
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                لإرجاع طلبك، يمكنك طلب الإرجاع خلال 48 ساعة من استلام طلبك، وسنرتب الإرجاع. بمجرد الاستلام والمراجعة.
+                            </p>
+                            <div class="contact-info text-center mt-4 p-4" style="background: #E3F2FD; border-radius: 12px;">
+                                <h5 style="color: #1976D2; font-weight: 700; margin-bottom: 1rem;">
+                                    <i class="bi bi-telephone-fill me-2"></i>للتواصل معنا
+                                </h5>
+                                <p class="mb-2">
+                                    <strong>البريد الإلكتروني:</strong> <a href="mailto:customer.service@whitefit.co" style="color: #7BC043; font-weight: 700;">customer.service@whitefit.co</a>
+                                </p>
+                                <p class="mb-0">
+                                    <strong>رقم الجوال:</strong> <a href="tel:+971507700559" style="color: #7BC043; font-weight: 700;">+971 50 770 0559</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- English Content -->
+                <div class="content-section">
+                    <!-- Policy Overview -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #3B9DD5; font-weight: 700;">
+                                <i class="bi bi-info-circle me-3"></i>Ideal Weight products or services return policy
+                            </h2>
+                            <p class="lead" style="line-height: 1.8; color: #555;">
+                                The return policy at Ideal Weight is clear and simple to our dear customers: 
+                                Return or exchange will be within 48 hours of receiving the order, and in the case of food consulting services, 14 days, 
+                                and by contacting: <a href="mailto:customer.service@whitefit.co" style="color: #7BC043; font-weight: 600;">customer.service@whitefit.co</a> 
+                                Or contact the Mobile number: <a href="tel:+971507700559" style="color: #7BC043; font-weight: 600;">+971 50 770 0559</a>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Eligibility -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-check-circle me-3"></i>In order to be eligible to return your order
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                In order to be eligible to return your order, the ordered products must be unused and unopened, especially beauty products and nutritional supplements, 
+                                unless the product has storage defects or in the same condition in which you received it. It must also be in the original packaging.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                To complete the return, we require a receipt or proof of purchase.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Refunds -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                                <i class="bi bi-currency-exchange me-3"></i>Refunds if the return is approved
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                Once we receive and inspect your return request, we will send you an email or call you directly via our phone number notifying you that we have received the returned item. 
+                                We will also notify you of the approval or denial of your refund. If you are approved, the refund will be processed, and a balance will be automatically transferred to your credit card 
+                                or original method of payment such as cash or loyalty points (in the case of cash or credit card payment upon receipt) only Please provide us with the account details to be transferred to.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Delayed Refunds -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #3B9DD5; font-weight: 700;">
+                                <i class="bi bi-clock-history me-3"></i>Amounts that have been approved to be returned, but their receipt was delayed after approval
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                If you haven't received a refund, first check your bank account again. Then contact your credit card company, it may take some time before your refund is officially posted. 
+                                Next, contact your bank. If the previous steps were taken, but you did not notice that the money was returned to your account or to the method of payment that you made, 
+                                contact us on the Mobile number: <a href="tel:+971507700559" style="color: #7BC043; font-weight: 600;">+971 50 770 0559</a>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Send Product Back -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-box-arrow-left me-3"></i>Send the requested product back
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                To return your order, you can request a return within 48 hours of receiving your order, and we will arrange the return. Once received and reviewed.
+                            </p>
+                            <div class="contact-info text-center mt-4 p-4" style="background: #E3F2FD; border-radius: 12px;">
+                                <h5 style="color: #1976D2; font-weight: 700; margin-bottom: 1rem;">
+                                    <i class="bi bi-telephone-fill me-2"></i>Contact Us
+                                </h5>
+                                <p class="mb-2">
+                                    <strong>Email:</strong> <a href="mailto:customer.service@whitefit.co" style="color: #7BC043; font-weight: 700;">customer.service@whitefit.co</a>
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Mobile number:</strong> <a href="tel:+971507700559" style="color: #7BC043; font-weight: 700;">+971 50 770 0559</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

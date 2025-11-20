@@ -1,0 +1,286 @@
+/* ====================================
+   IDEAL WEIGHT - Health & Wellness Theme
+   Brand Colors: Blue (#3B9DD5) & Green (#7BC043)
+   ==================================== */
+
+:root {
+    /* Ideal Weight Brand Colors (from logo) */
+    --iw-blue: #3B9DD5;
+    --iw-green: #7BC043;
+    --iw-dark-blue: #1976D2;
+    --iw-dark-green: #558B2F;
+    --iw-light-blue: #E3F2FD;
+    --iw-light-green: #F1F8E9;
+    
+    /* Replace old purple with blue/green */
+    --primary-color: var(--iw-blue);
+    --primary-dark: var(--iw-dark-blue);
+    --secondary-color: var(--iw-green);
+    --accent-color: var(--iw-dark-green);
+}
+
+/* Navigation Bar - Blue/Green Gradient */
+.navbar-dark {
+    background: linear-gradient(135deg, var(--iw-blue) 0%, var(--iw-green) 100%) !important;
+}
+
+/* Buttons - Blue Theme */
+.btn-primary, .hero-search-btn, .details-btn {
+    background: linear-gradient(135deg, var(--iw-blue), var(--iw-dark-blue)) !important;
+    border: none;
+}
+
+.btn-primary:hover, .hero-search-btn:hover, .details-btn:hover {
+    background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-blue)) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3);
+}
+
+/* Success/Add to Cart Buttons - Green Theme */
+.btn-success, .add-to-cart-btn, .place-order-btn, .btn-checkout {
+    background: linear-gradient(135deg, var(--iw-green), var(--iw-dark-green)) !important;
+    border: none;
+}
+
+.btn-success:hover, .add-to-cart-btn:hover, .place-order-btn:hover {
+    background: linear-gradient(135deg, var(--iw-dark-green), var(--iw-green)) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(123, 192, 67, 0.3);
+}
+
+/* Hero Section - Light Blue/Green Gradient */
+.hero-section {
+    background: linear-gradient(135deg, var(--iw-light-blue) 0%, var(--iw-light-green) 100%) !important;
+    color: var(--iw-dark-blue);
+}
+
+.hero-title {
+    color: var(--iw-dark-blue) !important;
+}
+
+.hero-subtitle {
+    color: var(--iw-dark-green) !important;
+}
+
+/* Category Badges - Blue/Green */
+.hero-category-badge {
+    background: white;
+    border: 2px solid var(--iw-blue);
+    color: var(--iw-dark-blue);
+}
+
+.hero-category-badge.active {
+    background: linear-gradient(135deg, var(--iw-blue), var(--iw-green));
+    color: white;
+    border-color: var(--iw-green);
+}
+
+.hero-category-badge:hover {
+    border-color: var(--iw-green);
+    color: var(--iw-green);
+    box-shadow: 0 4px 12px rgba(123, 192, 67, 0.2);
+}
+
+/* Product Cards - Health Theme */
+.product-card {
+    border: 2px solid var(--iw-light-blue);
+    transition: all 0.3s ease;
+}
+
+.product-card:hover {
+    border-color: var(--iw-blue);
+    box-shadow: 0 8px 24px rgba(59, 157, 213, 0.2);
+}
+
+.product-badge {
+    background: linear-gradient(135deg, var(--iw-green), var(--iw-dark-green));
+}
+
+/* Feature Cards - Health Colors */
+.feature-card {
+    border: 2px solid var(--iw-light-blue);
+}
+
+.feature-icon {
+    background: linear-gradient(135deg, var(--iw-blue), var(--iw-green));
+    color: white;
+}
+
+.feature-card:hover {
+    border-color: var(--iw-green);
+    box-shadow: 0 8px 20px rgba(59, 157, 213, 0.15);
+}
+
+.feature-card:hover .feature-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Statistics - Blue/Green */
+.stats-section {
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%);
+}
+
+.stat-number {
+    color: var(--iw-green);
+}
+
+.stat-label {
+    color: var(--iw-light-blue);
+}
+
+/* Filter Section */
+.filter-tab {
+    border-color: var(--iw-blue);
+    color: var(--iw-dark-blue);
+}
+
+.filter-tab.active {
+    background: linear-gradient(135deg, var(--iw-blue), var(--iw-green)) !important;
+    border-color: var(--iw-green);
+}
+
+.filter-tab:hover {
+    border-color: var(--iw-green);
+    color: var(--iw-green);
+    box-shadow: 0 4px 12px rgba(123, 192, 67, 0.2);
+}
+
+/* Cart - Health Theme */
+.cart-summary-btn, .floating-cart-btn {
+    background: linear-gradient(135deg, var(--iw-green), var(--iw-dark-green)) !important;
+}
+
+.cart-sidebar {
+    border-left: 4px solid var(--iw-blue);
+}
+
+.cart-header {
+    background: linear-gradient(135deg, var(--iw-blue), var(--iw-green));
+}
+
+/* Order Status Badges - Health Colors */
+.badge-success, .status-badge.approved {
+    background: linear-gradient(135deg, var(--iw-green), var(--iw-dark-green)) !important;
+}
+
+.badge-primary, .status-badge.shipped {
+    background: linear-gradient(135deg, var(--iw-blue), var(--iw-dark-blue)) !important;
+}
+
+.badge-info, .status-badge.processing {
+    background: linear-gradient(135deg, #17a2b8, #138496) !important;
+}
+
+/* Footer - Subtle Blue/Green */
+.enhanced-footer {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.footer-logo {
+    color: var(--iw-green);
+}
+
+.footer-link:hover {
+    color: var(--iw-green);
+}
+
+.social-link:hover {
+    background: var(--iw-green);
+}
+
+/* Admin Panel - Professional Blue */
+.admin-card-header {
+    background: linear-gradient(135deg, var(--iw-blue), var(--iw-dark-blue));
+}
+
+/* Notification Bell - Blue */
+.notification-bell {
+    background: var(--iw-blue);
+}
+
+.notification-bell:hover {
+    background: var(--iw-green);
+}
+
+/* Forms - Clean Blue Focus */
+.form-control:focus {
+    border-color: var(--iw-blue);
+    box-shadow: 0 0 0 0.25rem rgba(59, 157, 213, 0.25);
+}
+
+/* Links - Blue/Green */
+a {
+    color: var(--iw-blue);
+}
+
+a:hover {
+    color: var(--iw-dark-green);
+}
+
+/* Health Product Specific Styles */
+.organic-badge {
+    background: var(--iw-green);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.protein-badge {
+    background: var(--iw-blue);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+/* Health Icons Color */
+.bi-heart-pulse, .bi-heartbeat, .bi-activity {
+    color: var(--iw-green);
+}
+
+/* Override any remaining purple */
+[style*="7c3aed"], [style*="6d28d9"], [style*="purple"] {
+    background: linear-gradient(135deg, var(--iw-blue), var(--iw-green)) !important;
+}
+
+/* Product Price - Green for emphasis */
+.current-price, .product-new-price {
+    color: var(--iw-dark-green) !important;
+    font-weight: bold;
+}
+
+/* Discount Badge - Green */
+.list-price {
+    color: #999;
+}
+
+/* Trust Badges */
+.trust-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--iw-light-green);
+    border: 1px solid var(--iw-green);
+    border-radius: 8px;
+    color: var(--iw-dark-green);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* Health & Wellness Accents */
+.wellness-accent {
+    border-left: 4px solid var(--iw-green);
+    padding-left: 1rem;
+}
+
+.health-highlight {
+    background: var(--iw-light-blue);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--iw-blue);
+}
+

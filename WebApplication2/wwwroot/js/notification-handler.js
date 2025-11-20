@@ -39,7 +39,7 @@ async function loadNotifications() {
             displayNotifications(notifications);
         }
     } catch (error) {
-        console.error('Error loading notifications:', error);
+         
     }
 }
 

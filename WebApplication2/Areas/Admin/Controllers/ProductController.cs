@@ -1,4 +1,5 @@
 ﻿using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.DataAccess.Data;
 using BulkyBook.Models;
 using BulkyBook.Models.ViewModels;
 using BulkyBook.Utility;
@@ -10,17 +11,23 @@ using System.Data;
 
 namespace BulkyBook.Areas.Admin.Controllers
 {
+    public class DeleteImageRequest
+    {
+        public int imageId { get; set; }
+    }
+
     [Area("Admin")]
     [Authorize(Roles = SD.Role_Admin)]
-
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+        private readonly ApplicationDBContext _dbContext;
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, ApplicationDBContext dbContext)
         {
             _unitOfWork = unitOfWork;
-            _webHostEnvironment = webHostEnvironment;   
+            _webHostEnvironment = webHostEnvironment;
+            _dbContext = dbContext;
         }
 
         // GET: Categries
@@ -67,8 +74,8 @@ namespace BulkyBook.Areas.Admin.Controllers
             }
             else
             {
-                //update    
-                productVM.product=_unitOfWork.product.Get(a=>a.Id==id); 
+                //update - load product with images
+                productVM.product = _unitOfWork.product.Get(a => a.Id == id, includeProperties: "ProductImages"); 
                 return View(productVM);  
             }
 
@@ -79,57 +86,125 @@ namespace BulkyBook.Areas.Admin.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        public  IActionResult UpSert( ProductVM productVM,IFormFile? file )
+        public IActionResult UpSert(ProductVM productVM, List<IFormFile>? files)
         {
+            // Validate at least one image is required
+            if (productVM.product.Id == 0 && (files == null || files.Count == 0))
+            {
+                ModelState.AddModelError("", "At least one image is required.");
+            }
+
             if (ModelState.IsValid)
             {
                 string WWWRootPath = _webHostEnvironment.WebRootPath;
-                if (file !=null)
-                {
-                   string FileName=Guid.NewGuid().ToString()+Path.GetExtension(file.FileName);   
-                    string ProductPath=Path.Combine(WWWRootPath,@"Images\Products");
+                string ProductPath = Path.Combine(WWWRootPath, @"Images\Products");
 
-                    if (!string.IsNullOrEmpty(productVM.product.ImageUrl))
+                // Handle multiple image uploads
+                if (files != null && files.Count > 0)
+                {
+                    // Get existing product if updating
+                    Product existingProduct = null;
+                    if (productVM.product.Id != 0)
                     {
-                        //delete old img
-                        var OldImagePath=
-                            Path.Combine(WWWRootPath,productVM.product.ImageUrl.Trim('\\'));  
-                        if(System.IO.File.Exists(OldImagePath))
+                        existingProduct = _unitOfWork.product.Get(a => a.Id == productVM.product.Id, includeProperties: "ProductImages");
+                    }
+
+                    int displayOrder = 0;
+                    if (existingProduct != null && existingProduct.ProductImages != null)
+                    {
+                        displayOrder = existingProduct.ProductImages.Any() 
+                            ? existingProduct.ProductImages.Max(pi => pi.DisplayOrder) + 1 
+                            : 0;
+                    }
+
+                    foreach (var file in files)
+                    {
+                        if (file != null && file.Length > 0)
                         {
-                            System.IO.File.Delete(OldImagePath);    
+                            string FileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                            
+                            using (var fileStream = new FileStream(Path.Combine(ProductPath, FileName), FileMode.Create))
+                            {
+                                file.CopyTo(fileStream);
+                            }
+
+                            // Set first image as main ImageUrl for backward compatibility
+                            if (string.IsNullOrEmpty(productVM.product.ImageUrl))
+                            {
+                                productVM.product.ImageUrl = @"\Images\Products\" + FileName;
+                            }
+
+                            // Add ProductImage
+                            if (productVM.product.Id == 0)
+                            {
+                                // New product - add to collection
+                                if (productVM.product.ProductImages == null)
+                                {
+                                    productVM.product.ProductImages = new List<ProductImage>();
+                                }
+                                productVM.product.ProductImages.Add(new ProductImage
+                                {
+                                    ImageUrl = @"\Images\Products\" + FileName,
+                                    DisplayOrder = displayOrder++
+                                });
+                            }
+                            else
+                            {
+                                // Existing product - add to DbContext
+                                var productImage = new ProductImage
+                                {
+                                    ProductId = productVM.product.Id,
+                                    ImageUrl = @"\Images\Products\" + FileName,
+                                    DisplayOrder = displayOrder++
+                                };
+                                _dbContext.ProductImages.Add(productImage);
+                            }
                         }
                     }
-
-                    using(var fileSteam =new FileStream(Path.Combine(ProductPath, FileName), FileMode.Create))
-                    {
-                        file.CopyTo(fileSteam); 
-                    }
-                    productVM.product.ImageUrl = @"\Images\Products\" + FileName;   
                 }
-                if (productVM.product.Id == 0) { 
-                _unitOfWork.product.add(productVM.product);
-                    TempData["success"] = "product Created Successfully";
+
+                if (productVM.product.Id == 0)
+                {
+                    _unitOfWork.product.add(productVM.product);
+                    _unitOfWork.save(); // Save first to get the ProductId
+                    
+                    // Update ProductImages with correct ProductId
+                    if (productVM.product.ProductImages != null && productVM.product.ProductImages.Any())
+                    {
+                        foreach (var img in productVM.product.ProductImages)
+                        {
+                            img.ProductId = productVM.product.Id;
+                            _dbContext.ProductImages.Add(img);
+                        }
+                        _dbContext.SaveChanges();
+                    }
+                    
+                    TempData["success"] = "Product Created Successfully";
                 }
                 else
                 {
                     _unitOfWork.product.update(productVM.product);
-                    TempData["success"] = "product Updated Successfully";
-
+                    _unitOfWork.save();
+                    TempData["success"] = "Product Updated Successfully";
                 }
-                _unitOfWork.save();
                 
                 return RedirectToAction("Index");
             }
             else
             {
-
                 productVM.CategryList = _unitOfWork.categry.GetAll().Select(a => new SelectListItem
                 {
                     Text = a.Name,
                     Value = a.Id.ToString()
                 });
+                
+                // Reload product with images if updating
+                if (productVM.product.Id != 0)
+                {
+                    productVM.product = _unitOfWork.product.Get(a => a.Id == productVM.product.Id, includeProperties: "ProductImages");
+                }
+                
                 return View(productVM);
-
             }
         }
 
@@ -182,21 +257,84 @@ namespace BulkyBook.Areas.Admin.Controllers
         //    return View(Product);
         //}
 
+        // Delete Product Image
+        [HttpPost]
+        public IActionResult DeleteImage([FromBody] DeleteImageRequest request)
+        {
+            var productImage = _dbContext.ProductImages.FirstOrDefault(pi => pi.Id == request.imageId);
+            if (productImage == null)
+            {
+                return Json(new { success = false, message = "Image not found" });
+            }
+
+            // Delete physical file
+            var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, productImage.ImageUrl.Trim('\\'));
+            if (System.IO.File.Exists(imagePath))
+            {
+                System.IO.File.Delete(imagePath);
+            }
+
+            // Get product to check if this is the main image
+            var product = _unitOfWork.product.Get(p => p.Id == productImage.ProductId);
+            if (product != null && product.ImageUrl == productImage.ImageUrl)
+            {
+                // If this was the main image, set the first remaining image as main
+                var remainingImages = _dbContext.ProductImages
+                    .Where(pi => pi.ProductId == productImage.ProductId && pi.Id != request.imageId)
+                    .OrderBy(pi => pi.DisplayOrder)
+                    .FirstOrDefault();
+                
+                if (remainingImages != null)
+                {
+                    product.ImageUrl = remainingImages.ImageUrl;
+                    _unitOfWork.product.update(product);
+                }
+                else
+                {
+                    product.ImageUrl = null;
+                    _unitOfWork.product.update(product);
+                }
+            }
+
+            // Delete from database
+            _dbContext.ProductImages.Remove(productImage);
+            _dbContext.SaveChanges();
+
+            return Json(new { success = true, message = "Image deleted successfully" });
+        }
+
         // GET: Categries/Delete/5
         [HttpDelete]
         public IActionResult Delete(int? id)
         {
-           var Product = _unitOfWork.product.Get(m => m.Id == id);
+           var Product = _unitOfWork.product.Get(m => m.Id == id, includeProperties: "ProductImages");
             if (Product == null)
             {
                 return Json(new { success = false, massage = "Error While Deleting" });
             }
 
-            var OldImagePath =
-                           Path.Combine(_webHostEnvironment.WebRootPath, Product.ImageUrl.Trim('\\'));
-            if (System.IO.File.Exists(OldImagePath))
+            // Delete main image if exists
+            if (!string.IsNullOrEmpty(Product.ImageUrl))
             {
-                System.IO.File.Delete(OldImagePath);
+                var OldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, Product.ImageUrl.Trim('\\'));
+                if (System.IO.File.Exists(OldImagePath))
+                {
+                    System.IO.File.Delete(OldImagePath);
+                }
+            }
+
+            // Delete all product images
+            if (Product.ProductImages != null && Product.ProductImages.Any())
+            {
+                foreach (var productImage in Product.ProductImages)
+                {
+                    var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, productImage.ImageUrl.Trim('\\'));
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        System.IO.File.Delete(imagePath);
+                    }
+                }
+                _dbContext.ProductImages.RemoveRange(Product.ProductImages);
             }
 
             _unitOfWork.product.remove(Product);
