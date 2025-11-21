@@ -19,5 +19,9 @@ namespace BulkyBook.DataAccess.Repository
         {
             _db.ShoppingCarts.Update(obj);
         }
+        public void Add(ShoppingCart obj)
+        {
+            _db.ShoppingCarts.Add(obj);
+        }
     }
 }

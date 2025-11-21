@@ -80,6 +80,76 @@ namespace BulkyBook.DataAccess.Migrations
                     b.ToTable("Companys");
                 });
 
+            modelBuilder.Entity("BulkyBook.Models.FlashSale", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FlashSales");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.FlashSaleItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AddedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FlashSaleId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("FlashSalePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("FlashSaleQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FlashSaleQuantityCreated")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FlashSaleId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("FlashSaleItems");
+                });
+
             modelBuilder.Entity("BulkyBook.Models.Notification", b =>
                 {
                     b.Property<int>("Id")
@@ -121,7 +191,6 @@ namespace BulkyBook.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -144,6 +213,10 @@ namespace BulkyBook.DataAccess.Migrations
                     b.Property<int>("Count")
                         .HasColumnType("int");
 
+                    b.Property<int?>("FlashSaleItemId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
                     b.Property<int>("OrderHeaderId")
                         .HasColumnType("int");
 
@@ -154,6 +227,8 @@ namespace BulkyBook.DataAccess.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FlashSaleItemId");
 
                     b.HasIndex("OrderHeaderId");
 
@@ -386,12 +461,21 @@ namespace BulkyBook.DataAccess.Migrations
                     b.Property<int>("Count")
                         .HasColumnType("int");
 
+                    b.Property<int?>("FlashSaleItemId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("FlashSalePrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("FlashSaleItemId");
 
                     b.HasIndex("ProductId");
 
@@ -633,6 +717,25 @@ namespace BulkyBook.DataAccess.Migrations
                     b.HasDiscriminator().HasValue("ApplicationUser");
                 });
 
+            modelBuilder.Entity("BulkyBook.Models.FlashSaleItem", b =>
+                {
+                    b.HasOne("BulkyBook.Models.FlashSale", "FlashSale")
+                        .WithMany("FlashSaleItems")
+                        .HasForeignKey("FlashSaleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BulkyBook.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FlashSale");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("BulkyBook.Models.Notification", b =>
                 {
                     b.HasOne("BulkyBook.Models.OrderHeader", "OrderHeader")
@@ -641,9 +744,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasOne("BulkyBook.Models.ApplicationUser", "ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("ApplicationUser");
 
@@ -652,6 +753,12 @@ namespace BulkyBook.DataAccess.Migrations
 
             modelBuilder.Entity("BulkyBook.Models.OrderDetail", b =>
                 {
+                    b.HasOne("BulkyBook.Models.FlashSaleItem", "FlashSaleItem")
+                        .WithMany()
+                        .HasForeignKey("FlashSaleItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BulkyBook.Models.OrderHeader", "OrderHeader")
                         .WithMany()
                         .HasForeignKey("OrderHeaderId")
@@ -663,6 +770,8 @@ namespace BulkyBook.DataAccess.Migrations
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("FlashSaleItem");
 
                     b.Navigation("OrderHeader");
 
@@ -727,11 +836,19 @@ namespace BulkyBook.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BulkyBook.Models.FlashSaleItem", "FlashSaleItem")
+                        .WithMany()
+                        .HasForeignKey("FlashSaleItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BulkyBook.Models.Product", "product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("FlashSaleItem");
 
                     b.Navigation("applicationUser");
 
@@ -798,6 +915,11 @@ namespace BulkyBook.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("company");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.FlashSale", b =>
+                {
+                    b.Navigation("FlashSaleItems");
                 });
 
             modelBuilder.Entity("BulkyBook.Models.Product", b =>

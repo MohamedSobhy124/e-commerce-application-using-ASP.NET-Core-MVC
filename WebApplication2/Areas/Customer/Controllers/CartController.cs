@@ -40,8 +40,9 @@ namespace BulkyBook.Areas.Customer.Controllers
                 // Authenticated user - load from database
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var UserId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+                // 🔥 Include FlashSaleItem to check for flash sale prices
                 cartList = _unitOfWork.shoppingCart.GetAll(a=>a.ApplicationUserId==UserId,
-                    includeProperties: "product");
+                    includeProperties: "product,FlashSaleItem");
             }
             else
             {
@@ -51,6 +52,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                 {
                     ProductId = gc.ProductId,
                     Count = gc.Count,
+                    FlashSaleItemId = gc.FlashSaleItemId, // 🔥 Include flash sale info
+                    FlashSalePrice = (decimal?)gc.FlashSalePrice, // 🔥 Include flash sale price
                     product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry")
                 }).ToList();
             }
@@ -62,7 +65,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
             foreach(var cart  in ShoppingCartVM.ShoppingCartList)
             {
-                cart.Price=GetPriceBasedOnQty(cart);
+                cart.Price = GetCartItemPrice(cart); // 🔥 Use new method that checks flash sale price
                 ShoppingCartVM.OrderTotal +=(cart.Price*cart.Count);
             }
             return View(ShoppingCartVM);
@@ -77,7 +80,8 @@ namespace BulkyBook.Areas.Customer.Controllers
             {
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-                cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "product");
+                // 🔥 Include FlashSaleItem to check for flash sale prices
+                cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "product,FlashSaleItem");
             }
             else
             {
@@ -87,6 +91,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                 {
                     ProductId = gc.ProductId,
                     Count = gc.Count,
+                    FlashSaleItemId = gc.FlashSaleItemId, // 🔥 Include flash sale info
+                    FlashSalePrice = (decimal?)gc.FlashSalePrice, // 🔥 Include flash sale price
                     product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry")
                 }).ToList();
             }
@@ -96,12 +102,13 @@ namespace BulkyBook.Areas.Customer.Controllers
                 productId = cart.ProductId,
                 title = cart.product.Title,
                 imageUrl = cart.product.ImageUrl,
-                price = GetPriceBasedOnQty(cart),
+                price = GetCartItemPrice(cart), // 🔥 Use new method that checks flash sale price
                 count = cart.Count,
-                cartId = cart.Id
+                cartId = cart.Id,
+                isFlashSale = cart.FlashSaleItemId.HasValue // 🔥 Indicate if it's a flash sale item
             }).ToList();
 
-            var subtotal = cartItems.Sum(cart => GetPriceBasedOnQty(cart) * cart.Count);
+            var subtotal = cartItems.Sum(cart => GetCartItemPrice(cart) * cart.Count);
 
             return Json(new { items = items, subtotal = subtotal });
         }
@@ -115,10 +122,19 @@ namespace BulkyBook.Areas.Customer.Controllers
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-                var cartItem = _unitOfWork.shoppingCart.Get(u => u.ApplicationUserId == userId && u.ProductId == productId);
+                var cartItem = _unitOfWork.shoppingCart.Get(u => u.ApplicationUserId == userId && u.ProductId == productId, 
+                    includeProperties: "product,FlashSaleItem");
                 
                 if (cartItem != null)
                 {
+                    // 🔥 Validate quantity limits
+                    var validationResult = ValidateQuantityUpdate(productId, cartItem.FlashSaleItemId, count);
+                    
+                    if (!validationResult.isValid)
+                    {
+                        return Json(new { success = false, message = validationResult.message });
+                    }
+
                     cartItem.Count = count;
                     _unitOfWork.shoppingCart.update(cartItem);
                     _unitOfWork.save();
@@ -128,20 +144,178 @@ namespace BulkyBook.Areas.Customer.Controllers
             }
             else
             {
-                // Guest user - update session
-                BulkyBook.Utility.GuestCartHelper.UpdateQuantity(HttpContext.Session, productId, count);
-                return Json(new { success = true, message = "Quantity updated successfully!" });
+                // Guest user - get flash sale info from session
+                var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
+                var guestItem = guestCart.FirstOrDefault(c => c.ProductId == productId);
+                
+                if (guestItem != null)
+                {
+                    // 🔥 Validate quantity limits
+                    var validationResult = ValidateQuantityUpdate(productId, guestItem.FlashSaleItemId, count);
+                    
+                    if (!validationResult.isValid)
+                    {
+                        return Json(new { success = false, message = validationResult.message });
+                    }
+
+                    BulkyBook.Utility.GuestCartHelper.UpdateQuantity(HttpContext.Session, productId, count);
+                    return Json(new { success = true, message = "Quantity updated successfully!" });
+                }
             }
 
             return Json(new { success = false, message = "Item not found in cart" });
+        }
+
+        // Add Flash Sale Item to Cart
+        [HttpPost]
+        public IActionResult AddFlashSaleToCart(int productId, int flashSaleItemId, decimal flashSalePrice, int count = 1)
+        {
+            try
+            {
+                // Validate flash sale item
+                var flashSaleItem = _unitOfWork.FlashSaleItem.Get(
+                    f => f.Id == flashSaleItemId,
+                    includeProperties: "FlashSale,Product");
+
+                if (flashSaleItem == null)
+                {
+                    return Json(new { success = false, message = "Flash sale item not found" });
+                }
+
+                // Check if flash sale is active
+                var now = DateTime.Now;
+                if (!flashSaleItem.FlashSale.IsActive || 
+                    now < flashSaleItem.FlashSale.StartDate || 
+                    now > flashSaleItem.FlashSale.EndDate)
+                {
+                    return Json(new { success = false, message = "This flash sale is no longer active" });
+                }
+
+                // Check if item has stock
+                if (flashSaleItem.FlashSaleQuantity <= 0)
+                {
+                    return Json(new { success = false, message = "This item is sold out" });
+                }
+
+                // Check if requested quantity is available
+                if (count > flashSaleItem.FlashSaleQuantity)
+                {
+                    return Json(new { success = false, message = $"Only {flashSaleItem.FlashSaleQuantity} units available" });
+                }
+
+                if (User.Identity.IsAuthenticated)
+                {
+                    // Authenticated user - add to database
+                    var claimsIdentity = (ClaimsIdentity)User.Identity;
+                    var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+                    // Check if item already in cart
+                    var cartFromDb = _unitOfWork.shoppingCart.Get(
+                        u => u.ApplicationUserId == userId && 
+                             u.ProductId == productId && 
+                             u.FlashSaleItemId == flashSaleItemId);
+
+                    if (cartFromDb != null)
+                    {
+                        // Item exists, update quantity
+                        var newCount = cartFromDb.Count + count;
+                        if (newCount > flashSaleItem.FlashSaleQuantity)
+                        {
+                            return Json(new { success = false, message = $"Only {flashSaleItem.FlashSaleQuantity} units available" });
+                        }
+                        cartFromDb.Count = newCount;
+                        _unitOfWork.shoppingCart.update(cartFromDb);
+                    }
+                    else
+                    {
+                        // Add new item
+                        ShoppingCart cart = new()
+                        {
+                            ProductId = productId,
+                            Count = count,
+                            ApplicationUserId = userId,
+                            FlashSaleItemId = flashSaleItemId,
+                            FlashSalePrice = flashSalePrice
+                        };
+                        _unitOfWork.shoppingCart.Add(cart);
+                    }
+
+                    _unitOfWork.save();
+
+                    // Get cart count
+                    var cartCount = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId).Count();
+
+                    return Json(new { 
+                        success = true, 
+                        message = "Flash sale item added to cart!",
+                        cartCount = cartCount
+                    });
+                }
+                else
+                {
+                    // Guest user - add to session
+                    var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
+                    
+                    // Check if item already in cart (as flash sale)
+                    var existingItem = guestCart.FirstOrDefault(c => c.ProductId == productId && c.FlashSaleItemId == flashSaleItemId);
+                    
+                    if (existingItem != null)
+                    {
+                        var newCount = existingItem.Count + count;
+                        if (newCount > flashSaleItem.FlashSaleQuantity)
+                        {
+                            return Json(new { success = false, message = $"Only {flashSaleItem.FlashSaleQuantity} units available" });
+                        }
+                        existingItem.Count = newCount;
+                    }
+                    else
+                    {
+                        // Add new item
+                        guestCart.Add(new GuestCartItem
+                        {
+                            ProductId = productId,
+                            Count = count,
+                            FlashSaleItemId = flashSaleItemId,
+                            FlashSalePrice = (double)flashSalePrice,
+                            ProductTitle = flashSaleItem.Product?.Title,
+                            ProductPrice = flashSaleItem.Product?.Price ?? 0
+                        });
+                    }
+
+                    BulkyBook.Utility.GuestCartHelper.SaveGuestCart(HttpContext.Session, guestCart);
+
+                    return Json(new { 
+                        success = true, 
+                        message = "Flash sale item added to cart!",
+                        cartCount = guestCart.Count
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "An error occurred: " + ex.Message });
+            }
         }
 
         public IActionResult Pluse(int CartId, int? ProductId)
         {
             if (User.Identity.IsAuthenticated)
             {
-                var cartFromDD=_unitOfWork.shoppingCart.Get(a=>a.Id==CartId);
-                cartFromDD.Count += 1;
+                // Load cart item with product and flash sale info
+                var cartFromDD = _unitOfWork.shoppingCart.Get(a => a.Id == CartId, includeProperties: "product,FlashSaleItem");
+                var newQuantity = cartFromDD.Count + 1;
+
+                // 🔥 Validate quantity limits
+                var validationResult = ValidateQuantityUpdate(cartFromDD.ProductId, cartFromDD.FlashSaleItemId, newQuantity);
+                
+                if (!validationResult.isValid)
+                {
+                    TempData["error"] = validationResult.message;
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Update quantity
+                cartFromDD.Count = newQuantity;
                 _unitOfWork.shoppingCart.update(cartFromDD);
                 _unitOfWork.save();
             }
@@ -149,9 +323,21 @@ namespace BulkyBook.Areas.Customer.Controllers
             {
                 var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
                 var item = guestCart.FirstOrDefault(c => c.ProductId == ProductId.Value);
+                
                 if (item != null)
                 {
-                    BulkyBook.Utility.GuestCartHelper.UpdateQuantity(HttpContext.Session, ProductId.Value, item.Count + 1);
+                    var newQuantity = item.Count + 1;
+
+                    // 🔥 Validate quantity limits
+                    var validationResult = ValidateQuantityUpdate(item.ProductId, item.FlashSaleItemId, newQuantity);
+                    
+                    if (!validationResult.isValid)
+                    {
+                        TempData["error"] = validationResult.message;
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                    BulkyBook.Utility.GuestCartHelper.UpdateQuantity(HttpContext.Session, ProductId.Value, newQuantity);
                 }
             }
             return RedirectToAction(nameof(Index));    
@@ -215,50 +401,53 @@ namespace BulkyBook.Areas.Customer.Controllers
 				OrderHeader = new()
 			};
 
-			if (User.Identity.IsAuthenticated)
+		if (User.Identity.IsAuthenticated)
+		{
+			// Authenticated user
+			var claimsIdentity = (ClaimsIdentity)User.Identity;
+			var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+			// 🔥 Include FlashSaleItem to check for flash sale prices
+			cartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId,
+				includeProperties: "product,FlashSaleItem");
+
+			ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.applicationUser.Get(u => u.Id == userId);
+			ShoppingCartVM.OrderHeader.Name = ShoppingCartVM.OrderHeader.ApplicationUser.Name;
+			ShoppingCartVM.OrderHeader.PhoneNumber = ShoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
+			ShoppingCartVM.OrderHeader.StreetAddress = ShoppingCartVM.OrderHeader.ApplicationUser.StreetAddress;
+			ShoppingCartVM.OrderHeader.City = ShoppingCartVM.OrderHeader.ApplicationUser.City;
+			ShoppingCartVM.OrderHeader.State = ShoppingCartVM.OrderHeader.ApplicationUser.State;
+			ShoppingCartVM.OrderHeader.PostalCode = ShoppingCartVM.OrderHeader.ApplicationUser.PostalCode;
+		}
+		else
+		{
+			// Guest user - load from session
+			var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
+			if (guestCart.Count == 0)
 			{
-				// Authenticated user
-				var claimsIdentity = (ClaimsIdentity)User.Identity;
-				var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-
-				cartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId,
-					includeProperties: "product");
-
-				ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.applicationUser.Get(u => u.Id == userId);
-				ShoppingCartVM.OrderHeader.Name = ShoppingCartVM.OrderHeader.ApplicationUser.Name;
-				ShoppingCartVM.OrderHeader.PhoneNumber = ShoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
-				ShoppingCartVM.OrderHeader.StreetAddress = ShoppingCartVM.OrderHeader.ApplicationUser.StreetAddress;
-				ShoppingCartVM.OrderHeader.City = ShoppingCartVM.OrderHeader.ApplicationUser.City;
-				ShoppingCartVM.OrderHeader.State = ShoppingCartVM.OrderHeader.ApplicationUser.State;
-				ShoppingCartVM.OrderHeader.PostalCode = ShoppingCartVM.OrderHeader.ApplicationUser.PostalCode;
-			}
-			else
-			{
-				// Guest user - load from session
-				var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
-				if (guestCart.Count == 0)
-				{
-					TempData["error"] = "Your cart is empty";
-					return RedirectToAction("Index", "Home");
-				}
-
-				cartList = guestCart.Select(gc => new ShoppingCart
-				{
-					ProductId = gc.ProductId,
-					Count = gc.Count,
-					product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry")
-				}).ToList();
-
-				// Initialize empty fields for guest
-				ShoppingCartVM.OrderHeader.IsGuestOrder = true;
+				TempData["error"] = "Your cart is empty";
+				return RedirectToAction("Index", "Home");
 			}
 
-			ShoppingCartVM.ShoppingCartList = cartList;
-
-			foreach (var cart in ShoppingCartVM.ShoppingCartList)
+			cartList = guestCart.Select(gc => new ShoppingCart
 			{
-				cart.Price = GetPriceBasedOnQuantity(cart);
-				ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
+				ProductId = gc.ProductId,
+				Count = gc.Count,
+				FlashSaleItemId = gc.FlashSaleItemId, // 🔥 Include flash sale info
+				FlashSalePrice = (decimal?)gc.FlashSalePrice, // 🔥 Include flash sale price
+				product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry")
+			}).ToList();
+
+			// Initialize empty fields for guest
+			ShoppingCartVM.OrderHeader.IsGuestOrder = true;
+		}
+
+		ShoppingCartVM.ShoppingCartList = cartList;
+
+		foreach (var cart in ShoppingCartVM.ShoppingCartList)
+		{
+			cart.Price = GetCartItemPrice(cart); // 🔥 Use new method that checks flash sale price
+			ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
 			}
 			return View(ShoppingCartVM);
 		}
@@ -295,6 +484,8 @@ namespace BulkyBook.Areas.Customer.Controllers
 				cartList = guestCart.Select(gc => new ShoppingCart
 				{
 					ProductId = gc.ProductId,
+					FlashSaleItemId = gc.FlashSaleItemId,
+					FlashSalePrice= (decimal?)gc.FlashSalePrice,
 					Count = gc.Count,
 					product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry")
 				}).ToList();
@@ -344,7 +535,8 @@ namespace BulkyBook.Areas.Customer.Controllers
 						ProductId = cart.ProductId,
 						OrderHeaderId = ShoppingCartVM.OrderHeader.Id,
 						Price = cart.Price,
-						Count = cart.Count
+						Count = cart.Count,
+						FlashSaleItemId = cart.FlashSaleItemId // Copy flash sale item ID if exists
 					};
 					_unitOfWork.OrderDetail.add(orderDetail);
 					_unitOfWork.save();
@@ -742,6 +934,76 @@ namespace BulkyBook.Areas.Customer.Controllers
                 }
             }
         
+        }
+
+        // 🔥 NEW: Get cart item price - uses flash sale price if available, otherwise quantity-based pricing
+        private double GetCartItemPrice(ShoppingCart shoppingCart)
+        {
+            // If this item is from a flash sale, use the flash sale price
+            if (shoppingCart.FlashSaleItemId.HasValue && shoppingCart.FlashSalePrice.HasValue)
+            {
+                return (double)shoppingCart.FlashSalePrice.Value;
+            }
+
+            // Otherwise, use the regular quantity-based pricing
+            return GetPriceBasedOnQty(shoppingCart);
+        }
+
+        // 🔥 NEW: Validate quantity update against product stock and flash sale limits
+        private (bool isValid, string message) ValidateQuantityUpdate(int productId, int? flashSaleItemId, int requestedQuantity)
+        {
+            if (requestedQuantity <= 0)
+            {
+                return (false, "Quantity must be at least 1");
+            }
+
+            // Get product information
+            var product = _unitOfWork.product.Get(p => p.Id == productId);
+            
+            if (product == null)
+            {
+                return (false, "Product not found");
+            }
+
+            // If it's a flash sale item, check flash sale quantity first
+            if (flashSaleItemId.HasValue)
+            {
+                var flashSaleItem = _unitOfWork.FlashSaleItem.Get(f => f.Id == flashSaleItemId.Value, includeProperties: "FlashSale");
+                
+                if (flashSaleItem != null)
+                {
+                    // Check if flash sale is still active
+                    var now = DateTime.Now;
+                    if (!flashSaleItem.FlashSale.IsActive || 
+                        now < flashSaleItem.FlashSale.StartDate || 
+                        now > flashSaleItem.FlashSale.EndDate)
+                    {
+                        return (false, "This flash sale has ended");
+                    }
+
+                    // Check flash sale quantity limit
+                    if (requestedQuantity > flashSaleItem.FlashSaleQuantity)
+                    {
+                        if (flashSaleItem.FlashSaleQuantity == 0)
+                        {
+                            return (false, "Flash sale item is sold out");
+                        }
+                        return (false, $"Only {flashSaleItem.FlashSaleQuantity} units available for this flash sale");
+                    }
+                }
+            }
+
+            // Check product stock quantity
+            if (requestedQuantity > product.StockQuantity)
+            {
+                if (product.StockQuantity == 0)
+                {
+                    return (false, "This product is out of stock");
+                }
+                return (false, $"Only {product.StockQuantity} units available in stock");
+            }
+
+            return (true, "Valid");
         }
         private double GetPriceBasedOnQuantity(ShoppingCart shoppingCart)
         {

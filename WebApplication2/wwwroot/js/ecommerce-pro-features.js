@@ -261,11 +261,16 @@
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
             
-            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+            // Check if elements exist before updating
+            const hoursEl = document.getElementById('hours');
+            const minutesEl = document.getElementById('minutes');
+            const secondsEl = document.getElementById('seconds');
             
-            if (distance < 0) {
+            if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
+            if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
+            if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
+            
+            if (distance < 0 && banner) {
                 banner.remove();
             }
         }
@@ -450,7 +455,7 @@
     // ========================================
     // 10. PRODUCT IMAGE ZOOM
     // ========================================
-    function initImageZoom() {
+    function initImageZoom() { //product-image-wrapper product-image-zoom
         document.querySelectorAll('.product-image-wrapper').forEach(wrapper => {
             wrapper.classList.add('product-image-zoom');
             
@@ -475,15 +480,15 @@
     document.addEventListener('DOMContentLoaded', () => {
         console.log('🛍️ E-Commerce Pro Features Initialized!');
         
-        initQuickView();
+        //initQuickView();
         initWishlist();
         //initSocialProof();
-        initFlashSale();
+        //initFlashSale(); // Disabled - using new flash sale system
         //initLiveViewers();
 /*        initStickyCart();*/
         initTrustBadges();
         initRecentlyViewed();
-        initImageZoom();
+        //initImageZoom();
         
         console.log('✨ All e-commerce features ready!');
     });

@@ -25,6 +25,10 @@ namespace BulkyBook.Areas.Customer.Controllers
             decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
             int? minRating = null, string availability = null)
         {
+            // Get active flash sales for homepage
+            var activeFlashSales = _unitOfWork.FlashSale.GetActiveFlashSales();
+            ViewBag.ActiveFlashSales = activeFlashSales;
+
             // Get all categories for filter (cached - only load once per request)
             ViewBag.Categories = _unitOfWork.categry.GetAll().ToList();
             ViewBag.SelectedCategory = categoryId;
@@ -263,7 +267,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
                 // Get updated cart count (total quantity, not just distinct items)
                 var cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == UserId);
-                cartCount = cartItems.Sum(c => c.Count);
+                cartCount = cartItems.Count();
             }
             else
             {
@@ -288,7 +292,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
                 // Get total quantity from guest cart
                   guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
-                cartCount = guestCart.Sum(gc => gc.Count);
+                cartCount = guestCart.Count;
             }
 
             return Json(new { success = true, message = message, isAdded = isAdded, cartCount = cartCount });
@@ -308,14 +312,14 @@ namespace BulkyBook.Areas.Customer.Controllers
                 {
                     // Authenticated user - get total quantity from database
                     var cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId);
-                    cartCount = cartItems.Sum(c => c.Count);
+                    cartCount = cartItems.Count();
                 }
             }
             else
             {
                 // Guest user - get total quantity from session
                 var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
-                cartCount = guestCart.Sum(gc => gc.Count);
+                cartCount = guestCart.Count;
             }
             
             return Json(new { cartCount = cartCount });

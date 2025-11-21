@@ -1,0 +1,205 @@
+@model IEnumerable<FlashSale>
+
+@{
+    ViewData["Title"] = "Flash Sales - Limited Time Offers!";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<partial name="_Notifications" />
+@Html.AntiForgeryToken()
+
+<!-- Page Header -->
+<section class="flash-sale-hero" style="margin-top: 1rem;">
+    <div class="container">
+        <div class="flash-sale-hero-content">
+            <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap;">
+                <i class="bi bi-lightning-charge-fill lightning-icon"></i>
+                <h1 class="flash-sale-title">ALL FLASH SALES</h1>
+                <i class="bi bi-fire fire-icon lightning-icon"></i>
+            </div>
+            <p class="flash-sale-subtitle">
+                Don't miss out on these incredible deals! Limited quantities available! ⚡🔥
+            </p>
+        </div>
+    </div>
+</section>
+
+@if (!Model.Any())
+{
+    <!-- Empty State -->
+    <div class="flash-sale-empty-state">
+        <div class="empty-state-icon">
+            <i class="bi bi-inbox"></i>
+        </div>
+        <h2 class="empty-state-title">No Active Flash Sales</h2>
+        <p class="empty-state-text">
+            Check back soon for amazing deals! Flash sales are added regularly.
+        </p>
+        <a href="@Url.Action("Index", "Home")" class="view-all-flash-sales-btn mt-4">
+            <i class="bi bi-house-fill me-2"></i>
+            Back to Home
+        </a>
+    </div>
+}
+else
+{
+    @foreach (var flashSale in Model)
+    {
+        var flashSaleItems = flashSale.FlashSaleItems.Where(i => i.FlashSaleQuantity > 0 && i.Product != null).ToList();
+        
+        if (!flashSaleItems.Any()) continue;
+
+        <!-- Flash Sale Section -->
+        <section class="flash-sale-products">
+            <div class="container">
+                <!-- Flash Sale Header -->
+                <div class="card mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 20px; padding: 2rem; color: white;">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 1rem;">
+                                <i class="bi bi-lightning-charge-fill me-3"></i>
+                                @flashSale.Name
+                            </h2>
+                            @if (!string.IsNullOrEmpty(flashSale.Description))
+                            {
+                                <p style="font-size: 1.2rem; opacity: 0.95; margin-bottom: 0;">
+                                    @flashSale.Description
+                                </p>
+                            }
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); padding: 1.5rem; border-radius: 15px;">
+                                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">ENDS IN</div>
+                                <div id="timer_@flashSale.Id" data-flash-sale-end="@flashSale.EndDate.ToString("o")" style="font-size: 1.5rem; font-weight: 900;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="row g-4">
+                    @foreach (var item in flashSaleItems)
+                    {
+                        var product = item.Product;
+                        var imageUrl = product.ProductImages?.FirstOrDefault()?.ImageUrl ?? "/images/default-product.jpg";
+                        var stockPercentage = (double)item.FlashSaleQuantity / Math.Max(product.StockQuantity, 1) * 100;
+                        var isLowStock = item.FlashSaleQuantity <= 5;
+                        var isCriticalStock = item.FlashSaleQuantity <= 2;
+
+                        <div class="col-md-6 col-lg-4 col-xl-3">
+                            <div class="flash-sale-product-card">
+                                <!-- Flash Sale Badge -->
+                                <div class="flash-sale-badge">
+                                    <i class="bi bi-lightning-fill"></i>
+                                    -@Math.Round(item.DiscountPercentage)% OFF
+                                </div>
+
+                                <!-- Product Image -->
+                                <div class="flash-sale-product-image-wrapper">
+                                    <a href="@Url.Action("Details", "Product", new { id = product.Id })">
+                                        <img src="@imageUrl" alt="@product.Title" class="flash-sale-product-image" />
+                                    </a>
+                                    <div class="fire-effect">🔥</div>
+                                </div>
+
+                                <!-- Product Info -->
+                                <div class="flash-sale-product-info">
+                                    <!-- Product Timer -->
+                                    <div class="flash-sale-product-timer">
+                                        <i class="bi bi-clock-fill me-2"></i>
+                                        Ends in: <span id="productTimer_@item.Id" data-product-timer-end="@flashSale.EndDate.ToString("o")"></span>
+                                    </div>
+
+                                    <!-- Product Title -->
+                                    <h4 class="flash-sale-product-title">
+                                        <a href="@Url.Action("Details", "Product", new { id = product.Id })" style="color: inherit; text-decoration: none;">
+                                            @product.Title
+                                        </a>
+                                    </h4>
+
+                                    <!-- Price Section -->
+                                    <div class="flash-sale-price-section">
+                                        <div class="flash-sale-prices">
+                                            <span class="flash-sale-normal-price">$@product.Price.ToString("N2")</span>
+                                            <span class="flash-sale-current-price">$@item.FlashSalePrice.ToString("N2")</span>
+                                        </div>
+                                        <div class="flash-sale-discount-badge">
+                                            SAVE $@((product.Price - (double)item.FlashSalePrice).ToString("N2"))
+                                        </div>
+                                    </div>
+
+                                    <!-- Stock Progress -->
+                                    <div class="flash-sale-stock-info">
+                                        @if (isCriticalStock)
+                                        {
+                                            <div class="stock-urgent">
+                                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                                Only @item.FlashSaleQuantity left! Hurry!
+                                            </div>
+                                        }
+                                        else if (isLowStock)
+                                        {
+                                            <div class="stock-urgent" style="color: #f39c12;">
+                                                <i class="bi bi-exclamation-circle-fill me-1"></i>
+                                                Almost gone! @item.FlashSaleQuantity remaining
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="stock-progress-label">
+                                                <span><i class="bi bi-box-seam me-1"></i>Available:</span>
+                                                <span><strong>@item.FlashSaleQuantity</strong> units</span>
+                                            </div>
+                                        }
+                                        <div class="stock-progress-bar-wrapper" data-stock-percentage="@stockPercentage">
+                                            <div class="stock-progress-bar-fill" style="width: 0%;"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Add to Cart Button -->
+                                    <button type="button" 
+                                            onclick="addFlashSaleToCart(@item.Id, @product.Id, @item.FlashSalePrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture))" 
+                                            class="flash-sale-add-to-cart-btn"
+                                            @(item.FlashSaleQuantity <= 0 ? "disabled" : "")>
+                                        <i class="bi bi-cart-plus-fill me-2"></i>
+                                        Add to Cart
+                                    </button>
+                                </div>
+
+                                <!-- Sold Out Overlay (if applicable) -->
+                                @if (item.FlashSaleQuantity <= 0)
+                                {
+                                    <div class="sold-out-overlay">
+                                        <div class="sold-out-text">SOLD OUT</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <hr style="margin: 4rem 0; border: none; height: 2px; background: linear-gradient(90deg, transparent, #ddd, transparent);" />
+            </div>
+        </section>
+    }
+}
+
+@section Scripts {
+    <script>
+        // Initialize all flash sale timers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Main timers for each flash sale
+            document.querySelectorAll('[data-flash-sale-end]').forEach(timerElement => {
+                if (timerElement.id.startsWith('timer_')) {
+                    const endDate = timerElement.getAttribute('data-flash-sale-end');
+                    const timerId = timerElement.id;
+                    const timer = new FlashSaleTimer(endDate, timerId, () => {
+                        location.reload(); // Reload when timer expires
+                    });
+                    timer.start();
+                }
+            });
+        });
+    </script>
+}
+
