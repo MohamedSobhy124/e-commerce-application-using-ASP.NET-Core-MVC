@@ -95,10 +95,56 @@
 									}
 
 									<li class="order-item order-total-item">
-										<small class="order-total-label">@Localizer["Total"] (USD)</small>
-										<strong class="order-total-value">@Model.OrderHeader.OrderTotal.ToString("c")</strong>
+										<small class="order-total-label">@Localizer["Subtotal"]</small>
+										<strong class="order-subtotal-value">@Model.OrderHeader.OrderTotal.ToString("c")</strong>
 									</li>
 								</ul>
+							</div>
+
+							<!-- Promo Code Section -->
+							<div class="promo-code-section mt-4">
+								<h4>
+									<i class="bi bi-tag me-2"></i>
+									@Localizer["PromoCode"]
+								</h4>
+								<div class="promo-code-input-group">
+									<input type="text" id="promoCodeInput" class="form-control" placeholder="@Localizer["EnterPromoCode"]" />
+									<button type="button" id="applyPromoBtn" class="btn btn-primary">
+										<i class="bi bi-check-circle"></i> @Localizer["Apply"]
+									</button>
+								</div>
+								<div id="promoCodeMessage" class="mt-2"></div>
+								<div id="promoCodeDetails" class="promo-applied-box mt-3" style="display: none;">
+									<div class="d-flex justify-content-between align-items-center">
+										<div>
+											<i class="bi bi-check-circle-fill text-success me-2"></i>
+											<strong id="appliedPromoCode"></strong>
+											<span id="promoDiscountText" class="text-muted ms-2"></span>
+										</div>
+										<button type="button" id="removePromoBtn" class="btn btn-sm btn-danger">
+											<i class="bi bi-x"></i> @Localizer["Remove"]
+										</button>
+									</div>
+									<div class="discount-details mt-2">
+										<div class="d-flex justify-content-between">
+											<span>@Localizer["Discount"]:</span>
+											<span class="text-success" id="discountAmount">-$0.00</span>
+										</div>
+									</div>
+								</div>
+								<input type="hidden" asp-for="OrderHeader.PromoCodeId" id="promoCodeIdInput" />
+								<input type="hidden" asp-for="OrderHeader.PromoCodeText" id="promoCodeTextInput" />
+							</div>
+
+							<!-- Order Total -->
+							<div class="order-total-section mt-4">
+								<div class="d-flex justify-content-between align-items-center">
+									<h4 class="mb-0">
+										<i class="bi bi-wallet2 me-2"></i>
+										@Localizer["Total"]
+									</h4>
+									<strong class="order-final-total" id="finalTotal">@Model.OrderHeader.OrderTotal.ToString("c")</strong>
+								</div>
 							</div>
 
 							<!-- Payment Method Selection -->
@@ -113,7 +159,7 @@
 										<label for="paymentStripe" class="payment-method-label">
 											<i class="bi bi-stripe me-2"></i>
 											<span>Stripe</span>
-											<small>Credit/Debit Card</small>
+											<small>@Localizer["CreditDebitCard"]</small>
 										</label>
 									</div>
 									<div class="payment-method-option">
@@ -121,7 +167,7 @@
 										<label for="paymentTappy" class="payment-method-label">
 											<i class="bi bi-wallet2 me-2"></i>
 											<span>Tappy</span>
-											<small>Digital Wallet</small>
+											<small>@Localizer["DigitalWallet"]</small>
 										</label>
 									</div>
 									<div class="payment-method-option">
@@ -129,7 +175,7 @@
 										<label for="paymentTamara" class="payment-method-label">
 											<i class="bi bi-calendar-check me-2"></i>
 											<span>Tamara</span>
-											<small>Buy Now, Pay Later</small>
+											<small>@Localizer["BuyNowPayLater"]</small>
 										</label>
 									</div>
 								</div>
@@ -269,4 +315,180 @@
 			font-size: 1rem;
 		}
 	}
+
+	/* Promo Code Section Styles */
+	.promo-code-section {
+		padding: 1.5rem;
+		background: #f8f9fa;
+		border-radius: 12px;
+		border: 2px solid #e0e0e0;
+	}
+
+	.promo-code-section h4 {
+		color: #1976D2;
+		font-weight: 700;
+		margin-bottom: 1rem;
+		font-size: 1.25rem;
+	}
+
+	.promo-code-input-group {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.promo-code-input-group input {
+		flex: 1;
+		padding: 0.75rem;
+		border: 2px solid #e0e0e0;
+		border-radius: 8px;
+		font-size: 1rem;
+		text-transform: uppercase;
+	}
+
+	.promo-code-input-group button {
+		padding: 0.75rem 1.5rem;
+		border-radius: 8px;
+		font-weight: 600;
+		background: #7BC043;
+		border: none;
+		color: white;
+		transition: all 0.3s ease;
+	}
+
+	.promo-code-input-group button:hover {
+		background: #6AA139;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(123, 192, 67, 0.3);
+	}
+
+	.promo-applied-box {
+		padding: 1rem;
+		background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+		border: 2px solid #7BC043;
+		border-radius: 8px;
+	}
+
+	.discount-details {
+		font-size: 0.95rem;
+		padding-top: 0.5rem;
+		border-top: 1px solid rgba(123, 192, 67, 0.3);
+	}
+
+	.order-total-section {
+		padding: 1.5rem;
+		background: linear-gradient(135deg, #E3F2FD 0%, #F1F8E9 100%);
+		border-radius: 12px;
+		border: 2px solid #3B9DD5;
+	}
+
+	.order-total-section h4 {
+		color: #1976D2;
+		font-weight: 700;
+	}
+
+	.order-final-total {
+		font-size: 1.75rem;
+		color: #7BC043;
+		font-weight: 700;
+	}
 </style>
+
+@section Scripts {
+	<script>
+		var subtotal = @Model.OrderHeader.OrderTotal;
+		var currentDiscount = 0;
+		var currentPromoCodeId = null;
+
+		$(document).ready(function() {
+			// Apply promo code
+			$('#applyPromoBtn').click(function() {
+				var promoCode = $('#promoCodeInput').val().trim().toUpperCase();
+				
+				if (!promoCode) {
+					showPromoMessage('@Localizer["PleaseEnterPromoCode"]', 'danger');
+					return;
+				}
+
+				// Disable button and show loading
+				$(this).prop('disabled', true).html('<i class="spinner-border spinner-border-sm"></i> @Localizer["Applying"]');
+
+				$.ajax({
+					url: '@Url.Action("ValidatePromoCode", "Cart")',
+					type: 'POST',
+					data: { 
+						promoCode: promoCode,
+						__RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+					},
+					success: function(response) {
+						if (response.success) {
+							// Show promo details
+							$('#appliedPromoCode').text(response.promoCode);
+							$('#promoDiscountText').text('(' + response.discountText + ')');
+							$('#discountAmount').text('-' + formatCurrency(response.discountAmount));
+							$('#promoCodeDetails').slideDown();
+							$('#promoCodeInput').prop('disabled', true);
+							
+							// Update hidden fields
+							$('#promoCodeIdInput').val(response.promoCodeId);
+							$('#promoCodeTextInput').val(response.promoCode);
+							
+							// Update totals
+							currentDiscount = response.discountAmount;
+							currentPromoCodeId = response.promoCodeId;
+							updateTotals();
+							
+							showPromoMessage(response.message, 'success');
+						} else {
+							showPromoMessage(response.message, 'danger');
+						}
+					},
+					error: function() {
+						showPromoMessage('@Localizer["AnErrorOccurredPleaseTryAgain"]', 'danger');
+					},
+					complete: function() {
+						$('#applyPromoBtn').prop('disabled', false).html('<i class="bi bi-check-circle"></i> @Localizer["Apply"]');
+					}
+				});
+			});
+
+			// Remove promo code
+			$('#removePromoBtn').click(function() {
+				$('#promoCodeDetails').slideUp();
+				$('#promoCodeInput').val('').prop('disabled', false);
+				$('#promoCodeIdInput').val('');
+				$('#promoCodeTextInput').val('');
+				$('#promoCodeMessage').html('');
+				
+				currentDiscount = 0;
+				currentPromoCodeId = null;
+				updateTotals();
+			});
+
+			// Convert input to uppercase
+			$('#promoCodeInput').on('input', function() {
+				$(this).val($(this).val().toUpperCase());
+			});
+		});
+
+		function updateTotals() {
+			var finalTotal = subtotal - currentDiscount;
+			$('#finalTotal').text(formatCurrency(finalTotal));
+		}
+
+		function showPromoMessage(message, type) {
+			var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+			var icon = type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill';
+			
+			$('#promoCodeMessage').html(
+				'<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+				'<i class="bi bi-' + icon + ' me-2"></i>' + message +
+				'<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+				'</div>'
+			);
+		}
+
+		function formatCurrency(amount) {
+			return '$' + amount.toFixed(2);
+		}
+	</script>
+}

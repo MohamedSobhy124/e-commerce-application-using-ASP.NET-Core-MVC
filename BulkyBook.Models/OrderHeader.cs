@@ -51,5 +51,18 @@ namespace BulkyBook.Models
         [Required]
         public string Name { get; set; } = default!;
 
+        // Promo Code fields
+        public int? PromoCodeId { get; set; }
+        
+        [ForeignKey("PromoCodeId")]
+        [ValidateNever]
+        public PromoCode? PromoCode { get; set; }
+
+        public string? PromoCodeText { get; set; }
+        
+        public double? DiscountAmount { get; set; }
+
+        public double? OrderSubtotal { get; set; }
+
     }
 }

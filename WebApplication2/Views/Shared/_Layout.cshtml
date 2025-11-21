@@ -103,7 +103,12 @@
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-area="Admin" asp-controller="FlashSale" asp-action="Index">
-                                            <i class="bi bi-lightning-charge-fill me-2"></i>Flash Sales
+                                            <i class="bi bi-lightning-charge-fill me-2"></i>@Localizer["FlashSales"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="PromoCode" asp-action="Index">
+                                            <i class="bi bi-tag-fill me-2"></i>@Localizer["PromoCodes"]
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
@@ -125,20 +130,20 @@
                                     <div id="notificationDropdown" class="notification-dropdown">
                                         <div class="notification-dropdown-header">
                                             <h5 class="notification-dropdown-title">
-                                                <i class="bi bi-bell me-2"></i>Notifications
+                                                <i class="bi bi-bell me-2"></i>@Localizer["Notifications"]
                                             </h5>
                                             <button class="mark-all-read-btn" onclick="markAllAsRead()">
-                                                Mark all read
+                                                @Localizer["MarkAllRead"]
                                             </button>
                                         </div>
                                         <div id="notificationList" class="notification-list">
                                             <div class="notification-empty">
                                                 <i class="bi bi-bell-slash"></i>
-                                                <p>No notifications yet</p>
+                                                <p>@Localizer["NoNotificationsYet"]</p>
                                             </div>
                                         </div>
                                         <div class="notification-dropdown-footer">
-                                            <a href="#" class="view-all-notifications">View All Notifications</a>
+                                            <a href="#" class="view-all-notifications">@Localizer["ViewAllNotifications"]</a>
                                         </div>
                                     </div>
                                 </div>

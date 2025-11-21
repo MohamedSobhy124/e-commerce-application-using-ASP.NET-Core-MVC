@@ -1,0 +1,245 @@
+@model BulkyBook.Models.PromoCode
+
+@{
+    ViewData["Title"] = Localizer["EditPromoCode"];
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-pencil-square me-3" style="font-size: 2rem;"></i>
+                            <div>
+                                <h2 class="mb-0">@Localizer["EditPromoCode"]</h2>
+                                <small class="opacity-75">@Localizer["Code"]: <strong>@Model.Code</strong></small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge @(Model.IsActive ? "bg-success" : "bg-secondary") fs-6">
+                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>
+                                @(Model.IsActive ? Localizer["Active"] : Localizer["Inactive"])
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Usage Statistics Card -->
+                    <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                        <i class="bi bi-info-circle-fill me-3" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <strong>@Localizer["UsageStatistics"]:</strong>
+                            @Localizer["Currently used"]: <strong>@Model.TimesUsed</strong> @Localizer["times"]
+                            @if (Model.UsageLimit.HasValue)
+                            {
+                                <span> / @Model.UsageLimit @Localizer["total"]</span>
+                            }
+                        </div>
+                    </div>
+
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="CreatedDate" />
+                        <input type="hidden" asp-for="CreatedBy" />
+                        <input type="hidden" asp-for="TimesUsed" />
+                        
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <!-- Code and Discount Type -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-tag-fill text-primary me-2"></i>@Localizer["Code"]
+                                </label>
+                                <input asp-for="Code" class="form-control form-control-lg text-uppercase" />
+                                <span asp-validation-for="Code" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-percent text-success me-2"></i>@Localizer["DiscountType"]
+                                </label>
+                                <select asp-for="DiscountType" class="form-select form-select-lg" id="discountType">
+                                    <option value="1">@Localizer["Percentage"]</option>
+                                    <option value="2">@Localizer["FixedAmount"]</option>
+                                </select>
+                                <span asp-validation-for="DiscountType" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-file-text text-info me-2"></i>@Localizer["Description"]
+                                </label>
+                                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Discount Value and Minimum Order -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-cash-coin text-warning me-2"></i>@Localizer["DiscountValue"]
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <input asp-for="DiscountValue" class="form-control" type="number" step="0.01" />
+                                    <span class="input-group-text bg-primary text-white fw-bold" id="discountSymbol">@(Model.DiscountType == BulkyBook.Models.DiscountType.Percentage ? "%" : "AED")</span>
+                                </div>
+                                <span asp-validation-for="DiscountValue" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-cart-check text-danger me-2"></i>@Localizer["MinimumOrder"]
+                                </label>
+                                <input asp-for="MinimumOrderAmount" class="form-control form-control-lg" type="number" step="0.01" />
+                                <span asp-validation-for="MinimumOrderAmount" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Start and End Date -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-calendar-check text-success me-2"></i>@Localizer["StartDate"]
+                                </label>
+                                <input asp-for="StartDate" class="form-control form-control-lg" type="datetime-local" />
+                                <span asp-validation-for="StartDate" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-calendar-x text-danger me-2"></i>@Localizer["EndDate"]
+                                </label>
+                                <input asp-for="EndDate" class="form-control form-control-lg" type="datetime-local" />
+                                <span asp-validation-for="EndDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Usage Limits -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-arrow-repeat text-primary me-2"></i>@Localizer["UsageLimit"]
+                                </label>
+                                <input asp-for="UsageLimit" class="form-control form-control-lg" type="number" />
+                                <span asp-validation-for="UsageLimit" class="text-danger"></span>
+                                <small class="form-text text-muted">
+                                    @Localizer["Currently used"]: <strong>@Model.TimesUsed</strong> @Localizer["times"]
+                                </small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-person-badge text-warning me-2"></i>@Localizer["PerUserLimit"]
+                                </label>
+                                <input asp-for="UsageLimitPerUser" class="form-control form-control-lg" type="number" />
+                                <span asp-validation-for="UsageLimitPerUser" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Maximum Discount and Active Status -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-shield-check text-info me-2"></i>@Localizer["MaximumDiscount"]
+                                </label>
+                                <input asp-for="MaximumDiscountAmount" class="form-control form-control-lg" type="number" step="0.01" />
+                                <span asp-validation-for="MaximumDiscountAmount" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold d-block">
+                                    <i class="bi bi-toggle-on text-success me-2"></i>@Localizer["Status"]
+                                </label>
+                                <div class="form-check form-switch mt-3">
+                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" style="width: 3rem; height: 1.5rem;" />
+                                    <label class="form-check-label ms-2 fw-bold">@Localizer["Active"]</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Action Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-lg btn-warning px-5 me-2">
+                                    <i class="bi bi-save me-2"></i>@Localizer["UpdatePromoCode"]
+                                </button>
+                                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-lg btn-outline-info px-4 me-2">
+                                    <i class="bi bi-eye me-2"></i>@Localizer["ViewDetails"]
+                                </a>
+                                <a asp-action="Index" class="btn btn-lg btn-outline-secondary px-4">
+                                    <i class="bi bi-arrow-left me-2"></i>@Localizer["BackToList"]
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .bg-gradient::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: pulse 3s ease-in-out infinite;
+    }
+    
+    @@keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #f5576c;
+        box-shadow: 0 0 0 0.25rem rgba(245, 87, 108, 0.25);
+    }
+
+    .card {
+        border-radius: 15px;
+    }
+
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+
+    .form-check-input:checked {
+        background-color: #f5576c;
+        border-color: #f5576c;
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Update discount symbol based on discount type
+        $('#discountType').change(function() {
+            var symbol = $(this).val() == '1' ? '%' : 'AED';
+            $('#discountSymbol').text(symbol);
+        });
+
+        // Convert code to uppercase
+        $('input[name="Code"]').on('input', function() {
+            $(this).val($(this).val().toUpperCase());
+        });
+    </script>
+}

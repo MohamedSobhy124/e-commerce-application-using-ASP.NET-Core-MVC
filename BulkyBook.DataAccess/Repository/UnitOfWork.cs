@@ -25,6 +25,8 @@ namespace BulkyBook.DataAccess.Repository
         public IReviewRepository review { get; private set; }
         public IFlashSaleRepository FlashSale { get; private set; }
         public IFlashSaleItemRepository FlashSaleItem { get; private set; }
+        public IPromoCodeRepository PromoCode { get; private set; }
+        public IPromoCodeUsageRepository PromoCodeUsage { get; private set; }
 
         public UnitOfWork(ApplicationDBContext db) 
         {
@@ -40,6 +42,8 @@ namespace BulkyBook.DataAccess.Repository
             review = new ReviewRepository(_db);
             FlashSale = new FlashSaleRepository(_db);
             FlashSaleItem = new FlashSaleItemRepository(_db);
+            PromoCode = new PromoCodeRepository(_db);
+            PromoCodeUsage = new PromoCodeUsageRepository(_db);
 
         }
 

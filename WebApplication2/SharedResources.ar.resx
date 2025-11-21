@@ -450,6 +450,27 @@
   <data name="Product" xml:space="preserve">
     <value>المنتج</value>
   </data>
+  <data name="PromoCodes" xml:space="preserve">
+    <value>أكواد الخصم</value>
+  </data>
+  <data name="PromoCode" xml:space="preserve">
+    <value>كود الخصم</value>
+  </data>
+  <data name="EnterPromoCode" xml:space="preserve">
+    <value>أدخل كود الخصم</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>تطبيق</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>إزالة</value>
+  </data>
+  <data name="Discount" xml:space="preserve">
+    <value>الخصم</value>
+  </data>
+  <data name="Subtotal" xml:space="preserve">
+    <value>المجموع الفرعي</value>
+  </data>
   <data name="CartUpdatedSuccessfully" xml:space="preserve">
     <value>تم تحديث السلة بنجاح</value>
   </data>
@@ -880,5 +901,443 @@
   </data>
   <data name="ApplyFilters" xml:space="preserve">
     <value>تطبيق الفلتر</value>
+  </data>
+  
+  <!-- Promo Code Translations -->
+  <data name="Code" xml:space="preserve">
+    <value>الكود</value>
+  </data>
+  <data name="ValidPeriod" xml:space="preserve">
+    <value>فترة الصلاحية</value>
+  </data>
+  <data name="Usage" xml:space="preserve">
+    <value>الاستخدام</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>الإجراءات</value>
+  </data>
+  <data name="Expired" xml:space="preserve">
+    <value>منتهي</value>
+  </data>
+  <data name="Upcoming" xml:space="preserve">
+    <value>قريباً</value>
+  </data>
+  <data name="LimitReached" xml:space="preserve">
+    <value>تم الوصول للحد</value>
+  </data>
+  <data name="Unlimited" xml:space="preserve">
+    <value>غير محدود</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>نشط</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>غير نشط</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>التفاصيل</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>تعديل</value>
+  </data>
+  <data name="ToggleActive" xml:space="preserve">
+    <value>تبديل الحالة</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="PromoCodesManagement" xml:space="preserve">
+    <value>إدارة أكواد الخصم</value>
+  </data>
+  <data name="CreateNewPromoCode" xml:space="preserve">
+    <value>إنشاء كود خصم جديد</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>الكود</value>
+  </data>
+  <data name="DiscountType" xml:space="preserve">
+    <value>نوع الخصم</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>الوصف</value>
+  </data>
+  <data name="DiscountValue" xml:space="preserve">
+    <value>قيمة الخصم</value>
+  </data>
+  <data name="MinimumOrder" xml:space="preserve">
+    <value>الحد الأدنى للطلب</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>تاريخ البدء</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>تاريخ الانتهاء</value>
+  </data>
+  <data name="UsageLimit" xml:space="preserve">
+    <value>حد الاستخدام</value>
+  </data>
+  <data name="PerUserLimit" xml:space="preserve">
+    <value>حد الاستخدام لكل مستخدم</value>
+  </data>
+  <data name="MaximumDiscount" xml:space="preserve">
+    <value>الحد الأقصى للخصم</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>الحالة</value>
+  </data>
+  <data name="UsageStatistics" xml:space="preserve">
+    <value>إحصائيات الاستخدام</value>
+  </data>
+  <data name="total" xml:space="preserve">
+    <value>المجموع</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>عرض التفاصيل</value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>العودة إلى القائمة</value>
+  </data>
+  <data name="CreatePromoCode" xml:space="preserve">
+    <value>إنشاء كود خصم</value>
+  </data>
+  <data name="EditPromoCode" xml:space="preserve">
+    <value>تعديل كود الخصم</value>
+  </data>
+  <data name="UpdatePromoCode" xml:space="preserve">
+    <value>تحديث كود الخصم</value>
+  </data>
+  <data name="DeletePromoCode" xml:space="preserve">
+    <value>حذف كود الخصم</value>
+  </data>
+  <data name="PromoCodeDetails" xml:space="preserve">
+    <value>تفاصيل كود الخصم</value>
+  </data>
+  <data name="DiscountInformation" xml:space="preserve">
+    <value>معلومات الخصم</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>النوع</value>
+  </data>
+  <data name="Value" xml:space="preserve">
+    <value>القيمة</value>
+  </data>
+  <data name="Percentage" xml:space="preserve">
+    <value>نسبة مئوية</value>
+  </data>
+  <data name="FixedAmount" xml:space="preserve">
+    <value>مبلغ ثابت</value>
+  </data>
+  <data name="MinimumOrder" xml:space="preserve">
+    <value>الحد الأدنى للطلب</value>
+  </data>
+  <data name="MaximumDiscount" xml:space="preserve">
+    <value>الحد الأقصى للخصم</value>
+  </data>
+  <data name="ValidityPeriod" xml:space="preserve">
+    <value>فترة الصلاحية</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>تاريخ البدء</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>تاريخ الانتهاء</value>
+  </data>
+  <data name="CurrentlyValid" xml:space="preserve">
+    <value>ساري حالياً</value>
+  </data>
+  <data name="NotStartedYet" xml:space="preserve">
+    <value>لم يبدأ بعد</value>
+  </data>
+  <data name="UsageStatistics" xml:space="preserve">
+    <value>إحصائيات الاستخدام</value>
+  </data>
+  <data name="TimesUsed" xml:space="preserve">
+    <value>مرات الاستخدام</value>
+  </data>
+  <data name="UsageLimit" xml:space="preserve">
+    <value>حد الاستخدام</value>
+  </data>
+  <data name="PerUserLimit" xml:space="preserve">
+    <value>الحد لكل مستخدم</value>
+  </data>
+  <data name="UsageHistory" xml:space="preserve">
+    <value>سجل الاستخدام</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>التاريخ</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>المستخدم</value>
+  </data>
+  <data name="OrderID" xml:space="preserve">
+    <value>رقم الطلب</value>
+  </data>
+  <data name="OrderTotal" xml:space="preserve">
+    <value>إجمالي الطلب</value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>العودة للقائمة</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>تحذير</value>
+  </data>
+  <data name="AreYouSureDeletePromoCode" xml:space="preserve">
+    <value>هل أنت متأكد من حذف كود الخصم هذا؟ لا يمكن التراجع عن هذا الإجراء.</value>
+  </data>
+  <data name="YesDelete" xml:space="preserve">
+    <value>نعم، احذف</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+  
+  <!-- Promo Code Messages -->
+  <data name="EndDateMustBeAfterStartDate" xml:space="preserve">
+    <value>يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء</value>
+  </data>
+  <data name="ThisPromoCodeAlreadyExists" xml:space="preserve">
+    <value>كود الخصم هذا موجود بالفعل</value>
+  </data>
+  <data name="PercentageDiscountCannotExceed100" xml:space="preserve">
+    <value>لا يمكن أن يتجاوز خصم النسبة المئوية 100٪</value>
+  </data>
+  <data name="PromoCodeCreatedSuccessfully" xml:space="preserve">
+    <value>تم إنشاء كود الخصم بنجاح</value>
+  </data>
+  <data name="PromoCodeUpdatedSuccessfully" xml:space="preserve">
+    <value>تم تحديث كود الخصم بنجاح</value>
+  </data>
+  <data name="CannotDeleteUsedPromoCode" xml:space="preserve">
+    <value>لا يمكن حذف كود خصم تم استخدامه. يرجى تعطيله بدلاً من ذلك.</value>
+  </data>
+  <data name="PromoCodeDeletedSuccessfully" xml:space="preserve">
+    <value>تم حذف كود الخصم بنجاح</value>
+  </data>
+  <data name="PromoCodeNotFound" xml:space="preserve">
+    <value>كود الخصم غير موجود</value>
+  </data>
+  <data name="PromoCodeActivated" xml:space="preserve">
+    <value>تم تفعيل كود الخصم</value>
+  </data>
+  <data name="PromoCodeDeactivated" xml:space="preserve">
+    <value>تم تعطيل كود الخصم</value>
+  </data>
+  <data name="PleaseEnterPromoCode" xml:space="preserve">
+    <value>الرجاء إدخال كود الخصم</value>
+  </data>
+  <data name="InvalidPromoCode" xml:space="preserve">
+    <value>كود خصم غير صالح</value>
+  </data>
+  <data name="PromoCodeNoLongerActive" xml:space="preserve">
+    <value>كود الخصم هذا لم يعد نشطاً</value>
+  </data>
+  <data name="PromoCodeNotYetValid" xml:space="preserve">
+    <value>كود الخصم هذا لم يصبح صالحاً بعد</value>
+  </data>
+  <data name="PromoCodeExpired" xml:space="preserve">
+    <value>انتهت صلاحية كود الخصم هذا</value>
+  </data>
+  <data name="PromoCodeUsageLimitReached" xml:space="preserve">
+    <value>وصل كود الخصم هذا إلى حد الاستخدام</value>
+  </data>
+  <data name="PromoCodeUserLimitReached" xml:space="preserve">
+    <value>لقد استخدمت كود الخصم هذا الحد الأقصى من المرات</value>
+  </data>
+  <data name="MinimumOrderAmountRequired" xml:space="preserve">
+    <value>الحد الأدنى للطلب {0} مطلوب لاستخدام كود الخصم هذا</value>
+  </data>
+  <data name="PromoCodeAppliedSuccessfully" xml:space="preserve">
+    <value>تم تطبيق كود الخصم بنجاح!</value>
+  </data>
+  <data name="AnErrorOccurredPleaseTryAgain" xml:space="preserve">
+    <value>حدث خطأ. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="Paused" xml:space="preserve">
+    <value>متوقف</value>
+  </data>
+  <data name="times" xml:space="preserve">
+    <value>مرات</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>ضيف</value>
+  </data>
+  <data name="EnterUniqueCode" xml:space="preserve">
+    <value>أدخل كوداً فريداً سيستخدمه العملاء</value>
+  </data>
+  <data name="ExampleSAVE20" xml:space="preserve">
+    <value>مثال: SAVE20</value>
+  </data>
+  <data name="Example20PercentOff" xml:space="preserve">
+    <value>مثال: خصم 20٪ على جميع المنتجات</value>
+  </data>
+  <data name="LeaveEmptyForNoMinimum" xml:space="preserve">
+    <value>اتركه فارغاً لعدم وجود حد أدنى</value>
+  </data>
+  <data name="TotalTimesCodeCanBeUsed" xml:space="preserve">
+    <value>إجمالي المرات التي يمكن استخدام الكود فيها</value>
+  </data>
+  <data name="TimesEachUserCanUseCode" xml:space="preserve">
+    <value>المرات التي يمكن لكل مستخدم استخدام هذا الكود</value>
+  </data>
+  <data name="NoLimit" xml:space="preserve">
+    <value>بلا حد</value>
+  </data>
+  <data name="MaximumDiscountForPercentageCodes" xml:space="preserve">
+    <value>الحد الأقصى للخصم لأكواد النسبة المئوية</value>
+  </data>
+  <data name="CurrentlyUsed" xml:space="preserve">
+    <value>المستخدم حالياً</value>
+  </data>
+  <data name="NotStartedYet" xml:space="preserve">
+    <value>لم يبدأ بعد</value>
+  </data>
+  <data name="FixedAmount" xml:space="preserve">
+    <value>مبلغ ثابت</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>الحالة</value>
+  </data>
+  
+  <!-- Payment Method Translations -->
+  <data name="CreditDebitCard" xml:space="preserve">
+    <value>بطاقة ائتمان/خصم</value>
+  </data>
+  <data name="DigitalWallet" xml:space="preserve">
+    <value>محفظة رقمية</value>
+  </data>
+  <data name="BuyNowPayLater" xml:space="preserve">
+    <value>اشتر الآن وادفع لاحقاً</value>
+  </data>
+  
+  <!-- JavaScript Messages -->
+  <data name="Applying" xml:space="preserve">
+    <value>جاري التطبيق...</value>
+  </data>
+  <data name="WelcomeBack" xml:space="preserve">
+    <value>مرحباً بعودتك</value>
+  </data>
+  <data name="SignInToYourAccount" xml:space="preserve">
+    <value>سجل الدخول إلى حسابك</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>تذكرني</value>
+  </data>
+  <data name="ThankYourForSubscribing" xml:space="preserve">
+    <value>شكراً لاشتراكك!</value>
+  </data>
+  
+  <!-- Home Page Additional Translations -->
+  <data name="WelcomeToHealthFitness" xml:space="preserve">
+    <value>مرحباً بك في عالم الصحة واللياقة</value>
+  </data>
+  <data name="AuthenticProducts" xml:space="preserve">
+    <value>منتجات أصلية 100%</value>
+  </data>
+  <data name="QualityGuaranteed" xml:space="preserve">
+    <value>جودة مضمونة</value>
+  </data>
+  <data name="HotDealsRightNow" xml:space="preserve">
+    <value>عروض ساخنة الآن!</value>
+  </data>
+  <data name="FlashSale" xml:space="preserve">
+    <value>عرض خاطف</value>
+  </data>
+  <data name="LimitedTimeOffers" xml:space="preserve">
+    <value>عروض لوقت محدود!</value>
+  </data>
+  <data name="ViewAllFlashSales" xml:space="preserve">
+    <value>عرض جميع العروض الخاطفة</value>
+  </data>
+  <data name="Previous" xml:space="preserve">
+    <value>السابق</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>التالي</value>
+  </data>
+  <data name="OFF" xml:space="preserve">
+    <value>خصم</value>
+  </data>
+  <data name="LoadMoreProducts" xml:space="preserve">
+    <value>تحميل المزيد من المنتجات</value>
+  </data>
+  <data name="LoadingMoreProducts" xml:space="preserve">
+    <value>جاري تحميل المزيد...</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>جاري التحميل...</value>
+  </data>
+  <data name="AboutIdealWeight" xml:space="preserve">
+    <value>نبذة عن ايديال وايت</value>
+  </data>
+  <data name="AboutUsDescription" xml:space="preserve">
+    <value>في "مركز ايديال ويت"، نطمح لأن نكون روادًا في مجال الصحة والعافية في الشرق الأوسط. نقدم مكملات غذائية مبتكرة، ووجبات خفيفة مغذية، وإرشادات صحية متخصصة. نلتزم بتمكين الأفراد في رحلة لياقتهم البدنية، من خلال توفير الأدوات والمعرفة اللازمة لتحقيق أفضل صحة.</value>
+  </data>
+  <data name="PremiumQualityProducts" xml:space="preserve">
+    <value>منتجات عالية الجودة</value>
+  </data>
+  <data name="ExcellentCustomerService" xml:space="preserve">
+    <value>خدمة عملاء متميزة</value>
+  </data>
+  <data name="FastReliableShipping" xml:space="preserve">
+    <value>شحن سريع وموثوق</value>
+  </data>
+  <data name="BranchesInUAE" xml:space="preserve">
+    <value>فروع في الإمارات</value>
+  </data>
+  <data name="LearnMoreAboutUs" xml:space="preserve">
+    <value>اعرف المزيد عنا</value>
+  </data>
+  <data name="OurBranches" xml:space="preserve">
+    <value>فروعنا</value>
+  </data>
+  <data name="VisitUsAtBranches" xml:space="preserve">
+    <value>زورنا في أحد فروعنا في الإمارات العربية المتحدة</value>
+  </data>
+  <data name="AlshamkhaBranch" xml:space="preserve">
+    <value>فرع الشامخة</value>
+  </data>
+  <data name="AlshamkhaAddress" xml:space="preserve">
+    <value>الشامخة مول, بجوار الفردان للصرافة, محل رقم 38</value>
+  </data>
+  <data name="OpenInGoogleMaps" xml:space="preserve">
+    <value>فتح في خرائط Google</value>
+  </data>
+  <data name="AlwathbaBranch" xml:space="preserve">
+    <value>فرع الوثبة</value>
+  </data>
+  <data name="AlwathbaAddress" xml:space="preserve">
+    <value>الوثبة مول, مقابل صيدلية ميدسينا, محل رقم 26</value>
+  </data>
+  <data name="ContactUsTitle" xml:space="preserve">
+    <value>للتواصل معنا</value>
+  </data>
+  <data name="PhoneLabel" xml:space="preserve">
+    <value>الهاتف:</value>
+  </data>
+  <data name="MobileLabel" xml:space="preserve">
+    <value>الجوال:</value>
+  </data>
+  <data name="YourCartIsEmpty" xml:space="preserve">
+    <value>سلتك فارغة</value>
+  </data>
+  <data name="InCart" xml:space="preserve">
+    <value>في السلة</value>
+  </data>
+  
+  <!-- Layout/Navigation Translations -->
+  <data name="FlashSales" xml:space="preserve">
+    <value>العروض الخاطفة</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>الإشعارات</value>
+  </data>
+  <data name="MarkAllRead" xml:space="preserve">
+    <value>تحديد الكل كمقروء</value>
+  </data>
+  <data name="NoNotificationsYet" xml:space="preserve">
+    <value>لا توجد إشعارات بعد</value>
+  </data>
+  <data name="ViewAllNotifications" xml:space="preserve">
+    <value>عرض جميع الإشعارات</value>
   </data>
 </root>

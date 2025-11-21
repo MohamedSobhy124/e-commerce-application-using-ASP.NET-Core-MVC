@@ -19,6 +19,8 @@ namespace BulkyBook.DataAccess.Repository.IRepository
         IReviewRepository review { get; }
         IFlashSaleRepository FlashSale { get; }
         IFlashSaleItemRepository FlashSaleItem { get; }
+        IPromoCodeRepository PromoCode { get; }
+        IPromoCodeUsageRepository PromoCodeUsage { get; }
 
         void save();
     }

@@ -36,11 +36,7 @@
             <div class="hero-welcome">
                 <p class="hero-welcome-text">
                     <i class="bi bi-stars"></i>
-                    @if(System.Globalization.CultureInfo.CurrentUICulture.Name == "ar") {
-                        <span>مرحباً بك في عالم الصحة واللياقة</span>
-                    } else {
-                        <span>Welcome to Your Health & Fitness Journey</span>
-                    }
+                    <span>@Localizer["WelcomeToHealthFitness"]</span>
                 </p>
             </div>
 
@@ -56,27 +52,15 @@
             <div class="hero-trust-badges mb-2">
                 <div class="trust-badge">
                     <i class="bi bi-shield-check"></i>
-                    @if(System.Globalization.CultureInfo.CurrentUICulture.Name == "ar") {
-                        <span>منتجات أصلية 100%</span>
-                    } else {
-                        <span>100% Authentic</span>
-                    }
+                    <span>@Localizer["AuthenticProducts"]</span>
                 </div>
                 <div class="trust-badge">
                     <i class="bi bi-truck"></i>
-                    @if(System.Globalization.CultureInfo.CurrentUICulture.Name == "ar") {
-                        <span>شحن سريع</span>
-                    } else {
-                        <span>Fast Delivery</span>
-                    }
+                    <span>@Localizer["FastDeliveryTitle"]</span>
                 </div>
                 <div class="trust-badge">
                     <i class="bi bi-award"></i>
-                    @if(System.Globalization.CultureInfo.CurrentUICulture.Name == "ar") {
-                        <span>جودة مضمونة</span>
-                    } else {
-                        <span>Quality Guaranteed</span>
-                    }
+                    <span>@Localizer["QualityGuaranteed"]</span>
                 </div>
             </div>
 
@@ -128,7 +112,7 @@
        <div class="flash-sale-section-header">
         <h3 class="flash-sale-section-title">
             <i class="bi bi-star-fill"></i>
-            Hot Deals Right Now!
+            @Localizer["HotDealsRightNow"]
             <i class="bi bi-star-fill"></i>
         </h3>
     </div>
@@ -139,9 +123,9 @@
             <div class="flash-sale-hero-content">
                 <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                     <i class="bi bi-lightning-charge-fill lightning-icon"></i>
-                    <h2 class="flash-sale-title">FLASH SALE</h2>
+                    <h2 class="flash-sale-title">@Localizer["FlashSale"]</h2>
                 </div>
-                <p class="flash-sale-subtitle">Limited Time Offers!</p>
+                <p class="flash-sale-subtitle">@Localizer["LimitedTimeOffers"]</p>
 
                 @{
                     var nearestEndingSale = activeFlashSales.OrderBy(f => f.EndDate).FirstOrDefault();
@@ -156,7 +140,7 @@
 
                 <div class="text-center mt-2">
                     <a href="@Url.Action("Index", "FlashSale", new { area = "Customer" })" class="view-all-flash-sales-btn">
-                        View All Flash Sales
+                        @Localizer["ViewAllFlashSales"]
                         <i class="bi bi-arrow-right ms-1"></i>
                     </a>
                 </div>
@@ -324,11 +308,11 @@
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel_@Product.Id" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
+                        <span class="visually-hidden">@Localizer["Previous"]</span>
                     </button>
                     <button class="carousel-control-next" type="button" data-bs-target="#productCarousel_@Product.Id" data-bs-slide="next">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
+                        <span class="visually-hidden">@Localizer["Next"]</span>
                     </button>
                     <div class="carousel-indicators">
                         @for (int i = 0; i < productImages.Count; i++)
@@ -380,7 +364,7 @@
                     @if (discount > 0)
                     {
                         <span class="list-price">@Product.ListPrice.ToString("c")</span>
-                        <span class="discount-percent">@discount% OFF</span>
+                        <span class="discount-percent">@discount% @Localizer["OFF"]</span>
                     }
                 </div>
             </div>
@@ -408,22 +392,14 @@
 <div class="text-center my-5" id="loadMoreContainer" style="display: none;">
     <button id="loadMoreBtn" class="btn btn-lg" onclick="loadMoreProducts()" style="background: linear-gradient(135deg, #3B9DD5, #7BC043); color: white; border: none; padding: 0.75rem 2.5rem; border-radius: 50px; font-weight: 700; transition: all 0.3s ease;">
         <i class="bi bi-arrow-down-circle me-2"></i>
-        @if(System.Globalization.CultureInfo.CurrentUICulture.Name == "ar") {
-            <text>تحميل المزيد</text>
-        } else {
-            <text>Load More Products</text>
-        }
+        @Localizer["LoadMoreProducts"]
     </button>
     <div id="loadingIndicator" class="text-center mt-3" style="display: none;">
         <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
+        <span class="visually-hidden">@Localizer["Loading"]</span>
     </div>
         <p class="mt-2 text-muted">
-            @if(System.Globalization.CultureInfo.CurrentUICulture.Name == "ar") {
-                <text>جاري التحميل...</text>
-            } else {
-                <text>Loading more products...</text>
-            }
+            @Localizer["LoadingMoreProducts"]
         </p>
     </div>
 </div>
@@ -1029,7 +1005,7 @@
                         updateFloatingCartBadge(data.items.length);
                         console.log('Cart items loaded successfully:', data.items.length, 'items');
                     } else {
-                        container.innerHTML = '<div class="cart-empty"><i class="bi bi-cart-x"></i><p>Your cart is empty</p></div>';
+                        container.innerHTML = '<div class="cart-empty"><i class="bi bi-cart-x"></i><p>@Localizer["YourCartIsEmpty"]</p></div>';
                         countElement.textContent = '0';
                         subtotalElement.textContent = 'AED 0.00';
                         
