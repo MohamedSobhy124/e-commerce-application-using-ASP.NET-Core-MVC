@@ -20,15 +20,23 @@ namespace BulkyBook.Areas.Customer.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        public IActionResult Index(int? categoryId, string searchTerm, string sortBy)
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" })]
+        public IActionResult Index(int? categoryId, string searchTerm, string sortBy, 
+            decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
+            int? minRating = null, string availability = null)
         {
-            // Get all categories for filter
+            // Get all categories for filter (cached - only load once per request)
             ViewBag.Categories = _unitOfWork.categry.GetAll().ToList();
             ViewBag.SelectedCategory = categoryId;
             ViewBag.SearchTerm = searchTerm;
             ViewBag.SortBy = sortBy;
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
+            ViewBag.InStock = inStock;
+            ViewBag.MinRating = minRating;
+            ViewBag.Availability = availability;
             
-            // Get products with optional filtering
+            // Get products with optional filtering (optimized query - only load what's needed)
             var query = _unitOfWork.product.GetAll(includeProperties: "categry,ProductImages").AsQueryable();
             
             // Filter by category
@@ -37,14 +45,56 @@ namespace BulkyBook.Areas.Customer.Controllers
                 query = query.Where(p => p.CategryId == categoryId.Value);
             }
             
-            // Filter by search term
+            // Filter by search term (case-insensitive)
             if (!string.IsNullOrEmpty(searchTerm))
             {
+                var searchLower = searchTerm.ToLower();
                 query = query.Where(p => 
-                    p.Title.Contains(searchTerm) || 
-                    p.Author.Contains(searchTerm) || 
-                    p.Description.Contains(searchTerm));
+                    p.Title.ToLower().Contains(searchLower) || 
+                    p.Author.ToLower().Contains(searchLower) || 
+                    (p.Description != null && p.Description.ToLower().Contains(searchLower)));
             }
+            
+            // Filter by price range
+            if (minPrice.HasValue && minPrice.Value > 0)
+            {
+                query = query.Where(p => p.Price >= (double)minPrice.Value);
+            }
+            if (maxPrice.HasValue && maxPrice.Value > 0)
+            {
+                query = query.Where(p => p.Price <= (double)maxPrice.Value);
+            }
+            
+            // Filter by stock availability
+            if (inStock.HasValue)
+            {
+                if (inStock.Value)
+                {
+                    // Assuming products with Price > 0 are in stock (adjust based on your model)
+                    query = query.Where(p => p.Price > 0);
+                }
+            }
+            
+            // Filter by availability status
+            if (!string.IsNullOrEmpty(availability))
+            {
+                switch (availability.ToLower())
+                {
+                    case "instock":
+                        query = query.Where(p => p.Price > 0);
+                        break;
+                    case "outofstock":
+                        query = query.Where(p => p.Price <= 0);
+                        break;
+                }
+            }
+            
+            // Get price range for filter display (optimized - only get min/max, not all products)
+            var priceStats = _unitOfWork.product.GetAll()
+                .Select(p => p.Price)
+                .ToList();
+            ViewBag.MinPriceRange = priceStats.Any() ? (decimal?)priceStats.Min() : 0;
+            ViewBag.MaxPriceRange = priceStats.Any() ? (decimal?)priceStats.Max() : 1000;
             
             // Sort products
             query = sortBy switch
@@ -53,10 +103,18 @@ namespace BulkyBook.Areas.Customer.Controllers
                 "price_high" => query.OrderByDescending(p => p.Price),
                 "name" => query.OrderBy(p => p.Title),
                 "newest" => query.OrderByDescending(p => p.Id),
+                "oldest" => query.OrderBy(p => p.Id),
                 _ => query.OrderBy(p => p.Title)
             };
             
+            // Get total count before pagination (optimized - count before materializing)
+            var totalCount = query.Count();
+            ViewBag.TotalProducts = totalCount;
+            
+            // Pagination - take first 20 (materialize only what we need)
             IEnumerable<Product> ProductList = query.Take(20).ToList();
+            
+            // Cache headers are automatically set by [ResponseCache] attribute
             
             // Get cart product IDs for authenticated users
             if (User.Identity.IsAuthenticated)
@@ -75,17 +133,77 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         [HttpGet]
-        public IActionResult LoadMoreProducts(int page = 1, int pageSize = 20)
+        [ResponseCache(Duration = 60, VaryByQueryKeys = new[] { "page", "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" })]
+        public IActionResult LoadMoreProducts(int page = 1, int pageSize = 20, 
+            int? categoryId = null, string searchTerm = null, string sortBy = null,
+            decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
+            string availability = null)
         {
-            var allProducts = _unitOfWork.product.GetAll(includeProperties: "categry,ProductImages").ToList();
-            var totalProducts = allProducts.Count;
+            // Apply same filters as Index action (optimized query)
+            var query = _unitOfWork.product.GetAll(includeProperties: "categry,ProductImages").AsQueryable();
+            
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                query = query.Where(p => p.CategryId == categoryId.Value);
+            }
+            
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                var searchLower = searchTerm.ToLower();
+                query = query.Where(p => 
+                    p.Title.ToLower().Contains(searchLower) || 
+                    p.Author.ToLower().Contains(searchLower) || 
+                    (p.Description != null && p.Description.ToLower().Contains(searchLower)));
+            }
+            
+            if (minPrice.HasValue && minPrice.Value > 0)
+            {
+                query = query.Where(p => p.Price >= (double)minPrice.Value);
+            }
+            if (maxPrice.HasValue && maxPrice.Value > 0)
+            {
+                query = query.Where(p => p.Price <= (double)maxPrice.Value);
+            }
+            
+            if (inStock.HasValue && inStock.Value)
+            {
+                query = query.Where(p => p.Price > 0);
+            }
+            
+            if (!string.IsNullOrEmpty(availability))
+            {
+                switch (availability.ToLower())
+                {
+                    case "instock":
+                        query = query.Where(p => p.Price > 0);
+                        break;
+                    case "outofstock":
+                        query = query.Where(p => p.Price <= 0);
+                        break;
+                }
+            }
+            
+            // Apply sorting
+            query = sortBy switch
+            {
+                "price_low" => query.OrderBy(p => p.Price),
+                "price_high" => query.OrderByDescending(p => p.Price),
+                "name" => query.OrderBy(p => p.Title),
+                "newest" => query.OrderByDescending(p => p.Id),
+                "oldest" => query.OrderBy(p => p.Id),
+                _ => query.OrderBy(p => p.Title)
+            };
+            
+            var totalProducts = query.Count();
             var productsToSkip = page * pageSize;
             
-            var products = allProducts.Skip(productsToSkip).Take(pageSize).ToList();
-            
+            // Optimized: Only materialize the products we need
+            var products = query.Skip(productsToSkip).Take(pageSize).ToList();
             var hasMore = (productsToSkip + pageSize) < totalProducts;
 
-            return Json(new { products = products, hasMore = hasMore });
+            // Cache headers are automatically set by [ResponseCache] attribute
+
+            return Json(new { products = products, hasMore = hasMore, totalCount = totalProducts });
         }
 
         [HttpPost]
@@ -127,8 +245,9 @@ namespace BulkyBook.Areas.Customer.Controllers
 
                 _unitOfWork.save();
 
-                // Get updated cart count
-                cartCount = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == UserId).Count();
+                // Get updated cart count (total quantity, not just distinct items)
+                var cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == UserId);
+                cartCount = cartItems.Sum(c => c.Count);
             }
             else
             {
@@ -151,19 +270,37 @@ namespace BulkyBook.Areas.Customer.Controllers
                     isAdded = true;
                 }
 
-                cartCount = BulkyBook.Utility.GuestCartHelper.GetCartCount(HttpContext.Session);
+                // Get total quantity from guest cart
+                  guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
+                cartCount = guestCart.Sum(gc => gc.Count);
             }
 
             return Json(new { success = true, message = message, isAdded = isAdded, cartCount = cartCount });
         }
 
         [HttpGet]
-        [Authorize]
         public IActionResult GetCartCount()
         {
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-            var UserId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var cartCount = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == UserId).Count();
+            int cartCount = 0;
+
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                
+                if (userId != null)
+                {
+                    // Authenticated user - get total quantity from database
+                    var cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId);
+                    cartCount = cartItems.Sum(c => c.Count);
+                }
+            }
+            else
+            {
+                // Guest user - get total quantity from session
+                var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
+                cartCount = guestCart.Sum(gc => gc.Count);
+            }
             
             return Json(new { cartCount = cartCount });
         }

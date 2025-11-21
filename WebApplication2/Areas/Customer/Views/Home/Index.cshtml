@@ -5,6 +5,13 @@
     var selectedCategory = ViewBag.SelectedCategory as int?;
     var searchTerm = ViewBag.SearchTerm as string ?? "";
     var sortBy = ViewBag.SortBy as string ?? "";
+    var minPrice = ViewBag.MinPrice as decimal?;
+    var maxPrice = ViewBag.MaxPrice as decimal?;
+    var inStock = ViewBag.InStock as bool?;
+    var availability = ViewBag.Availability as string ?? "";
+    var minPriceRange = ViewBag.MinPriceRange as decimal? ?? 0;
+    var maxPriceRange = ViewBag.MaxPriceRange as decimal? ?? 1000;
+    var totalProducts = ViewBag.TotalProducts as int? ?? 0;
 }
 
 <!-- Hero Section -->
@@ -58,35 +65,40 @@
 @Html.AntiForgeryToken()
 
 <div class="container-fluid px-3">
-    <!-- Filter Section -->
-    <div class="filter-section">
+    <!-- Enhanced Filter Section -->
+    <div class="filter-section enhanced-filters">
         <div class="filter-header">
-            <h2 class="filter-title">
-                <i class="bi bi-funnel"></i>
-                @Localizer["FilterAndSort"]
-            </h2>
+            <div class="filter-header-left">
+                <h2 class="filter-title">
+                    <i class="bi bi-funnel-fill"></i>
+                    @Localizer["FilterAndSort"]
+                </h2>
+            </div>
             <div class="filter-actions">
-                @if (selectedCategory.HasValue || !string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(sortBy))
+                @if (selectedCategory.HasValue || !string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(sortBy) || minPrice.HasValue || maxPrice.HasValue || !string.IsNullOrEmpty(availability))
                 {
                     <a href="@Url.Action("Index")" class="clear-filters-btn">
                         <i class="bi bi-x-circle me-2"></i>
                         @Localizer["ClearFilters"]
                     </a>
                 }
+                <button type="button" class="filter-toggle-btn" id="filterToggleBtn" aria-label="Toggle filters">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
             </div>
         </div>
 
-        <form asp-action="Index" method="get">
+        <form asp-action="Index" method="get" id="filterForm" class="filter-form">
             <input type="hidden" name="searchTerm" value="@searchTerm" />
             
-            <div class="filter-groups">
+            <div class="filter-groups" id="filterGroups">
                 <!-- Category Filter -->
                 <div class="filter-group">
                     <label class="filter-label">
-                        <i class="bi bi-folder"></i>
+                        <i class="bi bi-folder-fill"></i>
                         @Localizer["Category"]
                     </label>
-                    <select name="categoryId" class="filter-select" onchange="this.form.submit()">
+                    <select name="categoryId" class="filter-select modern-select">
                         <option value="">@Localizer["AllCategories"]</option>
                         @foreach (var category in categories)
                         {
@@ -97,19 +109,75 @@
                     </select>
                 </div>
 
+                <!-- Price Range Filter -->
+                <div class="filter-group price-filter-group">
+                    <label class="filter-label">
+                        <i class="bi bi-currency-darham"></i>
+                        @Localizer["PriceRange"]
+                    </label>
+                    <div class="price-range-container">
+                        <div class="price-input-group">
+                            <input type="number" name="minPrice" class="price-input" 
+                                   placeholder="@Localizer["Min"]"
+                                   value="@(minPrice?.ToString("F2") ?? "")" 
+                                   min="0" step="0.01" />
+                            <span class="price-separator">-</span>
+                            <input type="number" name="maxPrice" class="price-input" 
+                                   placeholder="@Localizer["Max"]"
+                                   value="@(maxPrice?.ToString("F2") ?? "")" 
+                                   min="0" step="0.01" />
+                        </div>
+                        <div class="price-range-slider">
+                            <input type="range" id="priceRangeMin" class="range-input" 
+                                   min="@minPriceRange" max="@maxPriceRange" 
+                                   value="@(minPrice ?? minPriceRange)" step="1" />
+                            <input type="range" id="priceRangeMax" class="range-input" 
+                                   min="@minPriceRange" max="@maxPriceRange" 
+                                   value="@(maxPrice ?? maxPriceRange)" step="1" />
+                        </div>
+                        <div class="price-display">
+                            <span id="priceMinDisplay">@(minPrice?.ToString("C") ?? minPriceRange.ToString("C"))</span>
+                            <span> - </span>
+                            <span id="priceMaxDisplay">@(maxPrice?.ToString("C") ?? maxPriceRange.ToString("C"))</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Availability Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="bi bi-check-circle-fill"></i>
+                        @Localizer["Availability"]
+                    </label>
+                    <select name="availability" class="filter-select modern-select">
+                        <option value="">@Localizer["All"]</option>
+                        <option value="instock" selected="@(availability == "instock")">@Localizer["InStock"]</option>
+                        <option value="outofstock" selected="@(availability == "outofstock")">@Localizer["OutOfStock"]</option>
+                    </select>
+                </div>
+
                 <!-- Sort By Filter -->
                 <div class="filter-group">
                     <label class="filter-label">
-                        <i class="bi bi-sort-down"></i>
+                        <i class="bi bi-sort-down-alt"></i>
                         @Localizer["SortBy"]
                     </label>
-                    <select name="sortBy" class="filter-select" onchange="this.form.submit()">
+                    <select name="sortBy" class="filter-select modern-select">
                         <option value="" selected="@(string.IsNullOrEmpty(sortBy))">@Localizer["Default"]</option>
                         <option value="name" selected="@(sortBy == "name")">@Localizer["NameAZ"]</option>
                         <option value="price_low" selected="@(sortBy == "price_low")">@Localizer["PriceLowToHigh"]</option>
                         <option value="price_high" selected="@(sortBy == "price_high")">@Localizer["PriceHighToLow"]</option>
                         <option value="newest" selected="@(sortBy == "newest")">@Localizer["Newest"]</option>
+                        <option value="oldest" selected="@(sortBy == "oldest")">@Localizer["Oldest"]</option>
                     </select>
+                </div>
+
+                <!-- Apply Filters Button -->
+                <div class="filter-group filter-actions-group">
+                    <button type="submit" class="apply-filters-btn">
+                        <i class="bi bi-check-lg me-2"></i>
+                        @Localizer["ApplyFilters"]
+                    </button>
                 </div>
             </div>
         </form>
@@ -635,13 +703,16 @@
     <div class="cart-footer">
         <div class="cart-subtotal">
             <span>@Localizer["Subtotal"]:</span>
-            <span id="cartSubtotal" class="cart-subtotal-amount">$0.00</span>
+            <span id="cartSubtotal" class="cart-subtotal-amount">AED 0.00</span>
         </div>
         <a href="/Customer/Cart/Summary" class="btn btn-checkout w-100">
             <i class="bi bi-lock-fill me-2"></i>@Localizer["Checkout"]
+        </a>   
+        <a href="/Customer/Cart/Index" class="btn btn-view-cart w-100 mt-2 d-none">
+            <i class="bi bi-lock-fill me-2"></i>@Localizer["ViewFullCart"]1
         </a>
         <a href="/Customer/Cart/Index" class="btn btn-view-cart w-100 mt-2">
-            @Localizer["ViewFullCart"]
+            @Localizer["ViewFullCart"] 
         </a>
     </div>
 </div>
@@ -681,7 +752,7 @@
             restoreScrollPosition();
             // Clear the saved position after restoring
             sessionStorage.removeItem('scrollPosition');
-            
+            loadCartItems();
             // Initialize floating cart badge for all users
                 const initialCount = cartProductIds.length;
                 updateFloatingCartBadge(initialCount);
@@ -702,21 +773,73 @@
 
         // Function to update cart widget using AJAX
         function updateCartWidget() {
-            fetch('/Customer/Home/GetCartWidget')
-                .then(response => response.text())
+            // Add timestamp to prevent caching
+            const timestamp = new Date().getTime();
+            fetch(`/Customer/Home/GetCartWidget?t=${timestamp}`, {
+                method: 'GET',
+                cache: 'no-cache',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
                 .then(html => {
-                    // Find the cart link and update its content
-                    const cartLink = document.querySelector('a[href*="/Customer/Cart/Index"]');
+                    // Find the cart link by ID first, then by href
+                    const cartLink = document.getElementById('cartNavLink') || document.querySelector('a[href*="/Customer/Cart/Index"]');
                     if (cartLink) {
                         cartLink.innerHTML = html;
                         console.log('Cart widget updated successfully via AJAX');
                     } else {
-                        console.error('Cart link not found');
+                        console.error('Cart link not found for AJAX update');
                     }
                 })
                 .catch(error => {
                     console.error('Error updating cart widget:', error);
                 });
+        }
+
+        // Function to update navigation cart count directly
+        function updateNavigationCartCount(count) {
+            // Try to find cart link by ID first, then by href
+            const cartLink = document.getElementById('cartNavLink') || document.querySelector('a[href*="/Customer/Cart/Index"]');
+            
+            if (cartLink) {
+                // Find the count span inside the cart link - try multiple selectors
+                let countSpan = cartLink.querySelector('span[style*="background"]');
+                if (!countSpan) {
+                    // Try finding by looking for the span with gradient background
+                    const spans = cartLink.querySelectorAll('span');
+                    countSpan = Array.from(spans).find(span => {
+                        const bg = window.getComputedStyle(span).background || span.style.background || '';
+                        return bg.includes('gradient') || bg.includes('linear-gradient');
+                    });
+                }
+                if (!countSpan) {
+                    // Try finding the last span (usually the count)
+                    const spans = cartLink.querySelectorAll('span');
+                    if (spans.length > 0) {
+                        countSpan = spans[spans.length - 1];
+                    }
+                }
+                
+                if (countSpan) {
+                    countSpan.textContent = count;
+                    console.log('Cart count updated directly to:', count);
+                    return true;
+                } else {
+                    // If span doesn't exist, update the entire link content via AJAX
+                    console.log('Count span not found, will update via AJAX');
+                    return false;
+                }
+            } else {
+                console.error('Cart link not found');
+                return false;
+            }
         }
 
         // Function to update floating cart badge
@@ -786,7 +909,7 @@
                     } else {
                         container.innerHTML = '<div class="cart-empty"><i class="bi bi-cart-x"></i><p>Your cart is empty</p></div>';
                         countElement.textContent = '0';
-                        subtotalElement.textContent = '$0.00';
+                        subtotalElement.textContent = 'AED 0.00';
                         
                         // Update floating cart badge
                         updateFloatingCartBadge(0);
@@ -878,8 +1001,15 @@
                     // Update floating cart badge
                     updateFloatingCartBadge(data.cartCount);
                     
+                    // Update navigation cart count immediately
+                    updateNavigationCartCount(data.cartCount);
+                    
                     loadCartItems();
-                    updateCartWidget();
+                    
+                    // Always update via AJAX to ensure it's synced (with small delay)
+                    setTimeout(() => {
+                        updateCartWidget();
+                    }, 150);
                     
                     if (typeof toastr !== 'undefined') {
                         toastr.info('Product removed from cart');
@@ -934,6 +1064,14 @@
                         // Update floating cart badge
                         updateFloatingCartBadge(data.cartCount);
                         
+                        // Update navigation cart count immediately
+                        updateNavigationCartCount(data.cartCount);
+                        
+                        // Always update via AJAX to ensure it's synced (with small delay)
+                        setTimeout(() => {
+                            updateCartWidget();
+                        }, 150);
+                        
                         console.log('About to open cart sidebar...');
                         // Open the cart sidebar to show the added item
                         openCartSidebar();
@@ -951,10 +1089,15 @@
                         
                         // Update floating cart badge
                         updateFloatingCartBadge(data.cartCount);
+                        
+                        // Update navigation cart count immediately
+                        updateNavigationCartCount(data.cartCount);
+                        
+                        // Always update via AJAX to ensure it's synced (with small delay)
+                        setTimeout(() => {
+                            updateCartWidget();
+                        }, 150);
                     }
-                    
-                    // Update cart widget in navbar using AJAX
-                    updateCartWidget();
                 } else {
                     throw new Error(data.message || 'Failed to update cart');
                 }
@@ -1081,7 +1224,23 @@
             `;
         }
 
-        // Function to load more products
+        // Function to get current filter parameters
+        function getFilterParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const params = new URLSearchParams();
+            
+            if (urlParams.get('categoryId')) params.append('categoryId', urlParams.get('categoryId'));
+            if (urlParams.get('searchTerm')) params.append('searchTerm', urlParams.get('searchTerm'));
+            if (urlParams.get('sortBy')) params.append('sortBy', urlParams.get('sortBy'));
+            if (urlParams.get('minPrice')) params.append('minPrice', urlParams.get('minPrice'));
+            if (urlParams.get('maxPrice')) params.append('maxPrice', urlParams.get('maxPrice'));
+            if (urlParams.get('inStock')) params.append('inStock', urlParams.get('inStock'));
+            if (urlParams.get('availability')) params.append('availability', urlParams.get('availability'));
+            
+            return params.toString();
+        }
+
+        // Function to load more products with filters
         function loadMoreProducts() {
             if (isLoading || !hasMoreProducts) return;
 
@@ -1094,7 +1253,10 @@
             if (loadMoreBtn) loadMoreBtn.style.display = 'none';
             if (loadingIndicator) loadingIndicator.style.display = 'block';
 
-            fetch(`/Customer/Home/LoadMoreProducts?page=${currentPage}&pageSize=20`)
+            const filterParams = getFilterParams();
+            const url = `/Customer/Home/LoadMoreProducts?page=${currentPage}&pageSize=20${filterParams ? '&' + filterParams : ''}`;
+
+            fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     const container = document.getElementById('productContainer');
@@ -1200,9 +1362,115 @@
             }
         });
 
+        // Enhanced Filter Interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter toggle for mobile
+            const filterToggleBtn = document.getElementById('filterToggleBtn');
+            const filterGroups = document.getElementById('filterGroups');
+            
+            if (filterToggleBtn && filterGroups) {
+                filterToggleBtn.addEventListener('click', function() {
+                    filterGroups.classList.toggle('active');
+                    filterToggleBtn.classList.toggle('active');
+                });
+            }
+            
+            // Price range slider interactions
+            const priceRangeMin = document.getElementById('priceRangeMin');
+            const priceRangeMax = document.getElementById('priceRangeMax');
+            const priceMinInput = document.querySelector('input[name="minPrice"]');
+            const priceMaxInput = document.querySelector('input[name="maxPrice"]');
+            const priceMinDisplay = document.getElementById('priceMinDisplay');
+            const priceMaxDisplay = document.getElementById('priceMaxDisplay');
+            
+            if (priceRangeMin && priceRangeMax && priceMinInput && priceMaxInput) {
+                const minPrice = parseFloat(priceRangeMin.getAttribute('min')) || 0;
+                const maxPrice = parseFloat(priceRangeMax.getAttribute('max')) || 1000;
+                
+                // Update display when sliders change
+                priceRangeMin.addEventListener('input', function() {
+                    const value = parseFloat(this.value);
+                    if (priceMinInput) priceMinInput.value = value.toFixed(2);
+                    if (priceMinDisplay) priceMinDisplay.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AED' }).format(value);
+                });
+                
+                priceRangeMax.addEventListener('input', function() {
+                    const value = parseFloat(this.value);
+                    if (priceMaxInput) priceMaxInput.value = value.toFixed(2);
+                    if (priceMaxDisplay) priceMaxDisplay.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AED' }).format(value);
+                });
+                
+                // Update sliders when inputs change
+                if (priceMinInput) {
+                    priceMinInput.addEventListener('input', function() {
+                        const value = Math.max(minPrice, Math.min(maxPrice, parseFloat(this.value) || minPrice));
+                        priceRangeMin.value = value;
+                        if (priceMinDisplay) priceMinDisplay.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AED' }).format(value);
+                    });
+                }
+                
+                if (priceMaxInput) {
+                    priceMaxInput.addEventListener('input', function() {
+                        const value = Math.max(minPrice, Math.min(maxPrice, parseFloat(this.value) || maxPrice));
+                        priceRangeMax.value = value;
+                        if (priceMaxDisplay) priceMaxDisplay.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AED' }).format(value);
+                    });
+                }
+            }
+            
+            // Auto-submit on filter change (with debounce for price inputs)
+            let filterTimeout;
+            const filterForm = document.getElementById('filterForm');
+            const priceInputs = document.querySelectorAll('.price-input');
+            
+            priceInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    clearTimeout(filterTimeout);
+                    filterTimeout = setTimeout(() => {
+                        // Don't auto-submit price, let user click Apply
+                    }, 500);
+                });
+            });
+            
+            // Select filters auto-submit
+            const autoSubmitSelects = document.querySelectorAll('.modern-select:not([name="minPrice"]):not([name="maxPrice"])');
+            autoSubmitSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    if (filterForm) {
+                        filterForm.submit();
+                    }
+                });
+            });
+            
+            // Initialize filter state from URL
+            initializeFiltersFromURL();
+        });
+        
+        // Initialize filters from URL parameters
+        function initializeFiltersFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const minPrice = urlParams.get('minPrice');
+            const maxPrice = urlParams.get('maxPrice');
+            
+            if (minPrice) {
+                const priceMinInput = document.querySelector('input[name="minPrice"]');
+                const priceRangeMin = document.getElementById('priceRangeMin');
+                if (priceMinInput) priceMinInput.value = minPrice;
+                if (priceRangeMin) priceRangeMin.value = minPrice;
+            }
+            
+            if (maxPrice) {
+                const priceMaxInput = document.querySelector('input[name="maxPrice"]');
+                const priceRangeMax = document.getElementById('priceRangeMax');
+                if (priceMaxInput) priceMaxInput.value = maxPrice;
+                if (priceRangeMax) priceRangeMax.value = maxPrice;
+            }
+        }
+
         // Load ratings for all products and check for load more button
         document.addEventListener('DOMContentLoaded', function() {
             loadAllProductRatings();
+
             // Check if we need to show the Load More button after products are rendered
             setTimeout(function() {
                 checkAndShowLoadMoreButton();

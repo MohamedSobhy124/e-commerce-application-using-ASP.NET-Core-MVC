@@ -870,4 +870,22 @@
   <data name="YourTrustedHealth" xml:space="preserve">
     <value>Your trusted health and wellness partner offering premium supplements and nutritious snacks. Achieve your ideal weight and optimal health with Ideal Weight.</value>
   </data>
+  <data name="PriceRange" xml:space="preserve">
+    <value>Price Range</value>
+  </data>
+  <data name="Max" xml:space="preserve">
+    <value>Max</value>
+  </data>
+  <data name="Min" xml:space="preserve">
+    <value>Min</value>
+  </data>
+  <data name="Availability" xml:space="preserve">
+    <value>Availability</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="ApplyFilters" xml:space="preserve">
+    <value>Apply Filters</value>
+  </data>
 </root>

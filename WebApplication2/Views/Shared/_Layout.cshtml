@@ -134,7 +134,7 @@
                             </li>
                         }
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="Customer" asp-controller="Cart" asp-action="Index">
+                            <a class="nav-link" id="cartNavLink" asp-area="Customer" asp-controller="Cart" asp-action="Index">
                                 @await Component.InvokeAsync("ShoppingCart")
                             </a>
                         </li>
@@ -287,7 +287,7 @@
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2025 Ideal Weight by <strong>Mohamed Sobhy</strong>. @Localizer["AllRightsReserved"]</p>
+                <p>&copy; 2025 <strong>Ideal Weight </strong>. @Localizer["AllRightsReserved"]</p>
                 <button id="backToTopBtn" class="back-to-top-btn" title="@Localizer["BackToTop"]">
                     <i class="bi bi-arrow-up"></i>
                 </button>

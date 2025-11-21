@@ -36,6 +36,7 @@ namespace BulkyBook.Models
 
         public string? SessionId { get; set; }
         public string? PaymentIntentId { get; set; }
+        public string? PaymentMethod { get; set; }
 
         [Required]
         public string PhoneNumber { get; set; } = default!;

@@ -52,7 +52,7 @@ namespace BulkyBook.Services
                 var emailBody = GenerateAdminEmailTemplate(orderHeader);
                 await _emailSender.SendEmailAsync(
                     admin.Email,
-                    $"New Order #{orderHeader.Id} - BulkyBook",
+                    $"New Order #{orderHeader.Id} - Ideal Weight",
                     emailBody
                 );
             }
@@ -92,7 +92,7 @@ namespace BulkyBook.Services
             var emailBody = GenerateCustomerEmailTemplate(orderHeader, orderDetails, customer);
             await _emailSender.SendEmailAsync(
                 customer.Email,
-                $"Order Confirmation #{orderHeader.Id} - BulkyBook",
+                $"Order Confirmation #{orderHeader.Id} - Ideal Weight",
                 emailBody
             );
 
@@ -244,7 +244,7 @@ namespace BulkyBook.Services
         <!-- Footer -->
         <div style='background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;'>
             <p style='color: #6b7280; margin: 0; font-size: 14px;'>
-                © 2024 BulkyBook. All rights reserved.
+                © 2025 Ideal Weight. All rights reserved.
             </p>
         </div>
     </div>
@@ -363,7 +363,7 @@ namespace BulkyBook.Services
         <!-- Footer -->
         <div style='background: #f9fafb; padding: 25px; text-align: center; border-top: 1px solid #e5e7eb;'>
             <p style='color: #6b7280; margin: 0 0 10px 0; font-size: 14px;'>
-                © 2024 BulkyBook. All rights reserved.
+                © 2025 Ideal Weight. All rights reserved.
             </p>
             <p style='color: #9ca3af; margin: 0; font-size: 12px;'>
                 This is an automated email. Please do not reply to this message.
