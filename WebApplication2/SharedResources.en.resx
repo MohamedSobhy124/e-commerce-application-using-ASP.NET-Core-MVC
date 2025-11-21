@@ -450,6 +450,27 @@
   <data name="Product" xml:space="preserve">
     <value>Product</value>
   </data>
+  <data name="PromoCodes" xml:space="preserve">
+    <value>Promo Codes</value>
+  </data>
+  <data name="PromoCode" xml:space="preserve">
+    <value>Promo Code</value>
+  </data>
+  <data name="EnterPromoCode" xml:space="preserve">
+    <value>Enter promo code</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Discount" xml:space="preserve">
+    <value>Discount</value>
+  </data>
+  <data name="Subtotal" xml:space="preserve">
+    <value>Subtotal</value>
+  </data>
   <data name="CartUpdatedSuccessfully" xml:space="preserve">
     <value>Cart updated successfully</value>
   </data>
@@ -887,5 +908,443 @@
   </data>
   <data name="ApplyFilters" xml:space="preserve">
     <value>Apply Filters</value>
+  </data>
+  
+  <!-- Promo Code Translations -->
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="ValidPeriod" xml:space="preserve">
+    <value>Valid Period</value>
+  </data>
+  <data name="Usage" xml:space="preserve">
+    <value>Usage</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Expired" xml:space="preserve">
+    <value>Expired</value>
+  </data>
+  <data name="Upcoming" xml:space="preserve">
+    <value>Upcoming</value>
+  </data>
+  <data name="LimitReached" xml:space="preserve">
+    <value>Limit Reached</value>
+  </data>
+  <data name="Unlimited" xml:space="preserve">
+    <value>Unlimited</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="ToggleActive" xml:space="preserve">
+    <value>Toggle Active</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="PromoCodesManagement" xml:space="preserve">
+    <value>Promo Codes Management</value>
+  </data>
+  <data name="CreateNewPromoCode" xml:space="preserve">
+    <value>Create New Promo Code</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="DiscountType" xml:space="preserve">
+    <value>Discount Type</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="DiscountValue" xml:space="preserve">
+    <value>Discount Value</value>
+  </data>
+  <data name="MinimumOrder" xml:space="preserve">
+    <value>Minimum Order</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Start Date</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="UsageLimit" xml:space="preserve">
+    <value>Usage Limit</value>
+  </data>
+  <data name="PerUserLimit" xml:space="preserve">
+    <value>Per User Limit</value>
+  </data>
+  <data name="MaximumDiscount" xml:space="preserve">
+    <value>Maximum Discount</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="UsageStatistics" xml:space="preserve">
+    <value>Usage Statistics</value>
+  </data>
+  <data name="total" xml:space="preserve">
+    <value>total</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>View Details</value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>Back to List</value>
+  </data>
+  <data name="CreatePromoCode" xml:space="preserve">
+    <value>Create Promo Code</value>
+  </data>
+  <data name="EditPromoCode" xml:space="preserve">
+    <value>Edit Promo Code</value>
+  </data>
+  <data name="UpdatePromoCode" xml:space="preserve">
+    <value>Update Promo Code</value>
+  </data>
+  <data name="DeletePromoCode" xml:space="preserve">
+    <value>Delete Promo Code</value>
+  </data>
+  <data name="PromoCodeDetails" xml:space="preserve">
+    <value>Promo Code Details</value>
+  </data>
+  <data name="DiscountInformation" xml:space="preserve">
+    <value>Discount Information</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Percentage" xml:space="preserve">
+    <value>Percentage</value>
+  </data>
+  <data name="FixedAmount" xml:space="preserve">
+    <value>Fixed Amount</value>
+  </data>
+  <data name="MinimumOrder" xml:space="preserve">
+    <value>Minimum Order</value>
+  </data>
+  <data name="MaximumDiscount" xml:space="preserve">
+    <value>Maximum Discount</value>
+  </data>
+  <data name="ValidityPeriod" xml:space="preserve">
+    <value>Validity Period</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Start Date</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="CurrentlyValid" xml:space="preserve">
+    <value>Currently Valid</value>
+  </data>
+  <data name="NotStartedYet" xml:space="preserve">
+    <value>Not Started Yet</value>
+  </data>
+  <data name="UsageStatistics" xml:space="preserve">
+    <value>Usage Statistics</value>
+  </data>
+  <data name="TimesUsed" xml:space="preserve">
+    <value>Times Used</value>
+  </data>
+  <data name="UsageLimit" xml:space="preserve">
+    <value>Usage Limit</value>
+  </data>
+  <data name="PerUserLimit" xml:space="preserve">
+    <value>Per User Limit</value>
+  </data>
+  <data name="UsageHistory" xml:space="preserve">
+    <value>Usage History</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="OrderID" xml:space="preserve">
+    <value>Order ID</value>
+  </data>
+  <data name="OrderTotal" xml:space="preserve">
+    <value>Order Total</value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>Back to List</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="AreYouSureDeletePromoCode" xml:space="preserve">
+    <value>Are you sure you want to delete this promo code? This action cannot be undone.</value>
+  </data>
+  <data name="YesDelete" xml:space="preserve">
+    <value>Yes, Delete</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  
+  <!-- Promo Code Messages -->
+  <data name="EndDateMustBeAfterStartDate" xml:space="preserve">
+    <value>End date must be after start date</value>
+  </data>
+  <data name="ThisPromoCodeAlreadyExists" xml:space="preserve">
+    <value>This promo code already exists</value>
+  </data>
+  <data name="PercentageDiscountCannotExceed100" xml:space="preserve">
+    <value>Percentage discount cannot exceed 100%</value>
+  </data>
+  <data name="PromoCodeCreatedSuccessfully" xml:space="preserve">
+    <value>Promo code created successfully</value>
+  </data>
+  <data name="PromoCodeUpdatedSuccessfully" xml:space="preserve">
+    <value>Promo code updated successfully</value>
+  </data>
+  <data name="CannotDeleteUsedPromoCode" xml:space="preserve">
+    <value>Cannot delete promo code that has been used. Consider deactivating it instead.</value>
+  </data>
+  <data name="PromoCodeDeletedSuccessfully" xml:space="preserve">
+    <value>Promo code deleted successfully</value>
+  </data>
+  <data name="PromoCodeNotFound" xml:space="preserve">
+    <value>Promo code not found</value>
+  </data>
+  <data name="PromoCodeActivated" xml:space="preserve">
+    <value>Promo code activated</value>
+  </data>
+  <data name="PromoCodeDeactivated" xml:space="preserve">
+    <value>Promo code deactivated</value>
+  </data>
+  <data name="PleaseEnterPromoCode" xml:space="preserve">
+    <value>Please enter a promo code</value>
+  </data>
+  <data name="InvalidPromoCode" xml:space="preserve">
+    <value>Invalid promo code</value>
+  </data>
+  <data name="PromoCodeNoLongerActive" xml:space="preserve">
+    <value>This promo code is no longer active</value>
+  </data>
+  <data name="PromoCodeNotYetValid" xml:space="preserve">
+    <value>This promo code is not yet valid</value>
+  </data>
+  <data name="PromoCodeExpired" xml:space="preserve">
+    <value>This promo code has expired</value>
+  </data>
+  <data name="PromoCodeUsageLimitReached" xml:space="preserve">
+    <value>This promo code has reached its usage limit</value>
+  </data>
+  <data name="PromoCodeUserLimitReached" xml:space="preserve">
+    <value>You have already used this promo code the maximum number of times</value>
+  </data>
+  <data name="MinimumOrderAmountRequired" xml:space="preserve">
+    <value>Minimum order amount of {0} required to use this promo code</value>
+  </data>
+  <data name="PromoCodeAppliedSuccessfully" xml:space="preserve">
+    <value>Promo code applied successfully!</value>
+  </data>
+  <data name="AnErrorOccurredPleaseTryAgain" xml:space="preserve">
+    <value>An error occurred. Please try again.</value>
+  </data>
+  <data name="Paused" xml:space="preserve">
+    <value>Paused</value>
+  </data>
+  <data name="times" xml:space="preserve">
+    <value>times</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>Guest</value>
+  </data>
+  <data name="EnterUniqueCode" xml:space="preserve">
+    <value>Enter a unique code that customers will use</value>
+  </data>
+  <data name="ExampleSAVE20" xml:space="preserve">
+    <value>e.g., SAVE20</value>
+  </data>
+  <data name="Example20PercentOff" xml:space="preserve">
+    <value>e.g., 20% off on all products</value>
+  </data>
+  <data name="LeaveEmptyForNoMinimum" xml:space="preserve">
+    <value>Leave empty for no minimum</value>
+  </data>
+  <data name="TotalTimesCodeCanBeUsed" xml:space="preserve">
+    <value>Total times this code can be used</value>
+  </data>
+  <data name="TimesEachUserCanUseCode" xml:space="preserve">
+    <value>Times each user can use this code</value>
+  </data>
+  <data name="NoLimit" xml:space="preserve">
+    <value>No limit</value>
+  </data>
+  <data name="MaximumDiscountForPercentageCodes" xml:space="preserve">
+    <value>Maximum discount for percentage codes</value>
+  </data>
+  <data name="CurrentlyUsed" xml:space="preserve">
+    <value>Currently used</value>
+  </data>
+  <data name="NotStartedYet" xml:space="preserve">
+    <value>Not Started Yet</value>
+  </data>
+  <data name="FixedAmount" xml:space="preserve">
+    <value>Fixed Amount</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  
+  <!-- Payment Method Translations -->
+  <data name="CreditDebitCard" xml:space="preserve">
+    <value>Credit/Debit Card</value>
+  </data>
+  <data name="DigitalWallet" xml:space="preserve">
+    <value>Digital Wallet</value>
+  </data>
+  <data name="BuyNowPayLater" xml:space="preserve">
+    <value>Buy Now, Pay Later</value>
+  </data>
+  
+  <!-- JavaScript Messages -->
+  <data name="Applying" xml:space="preserve">
+    <value>Applying...</value>
+  </data>
+  <data name="WelcomeBack" xml:space="preserve">
+    <value>Welcome Back</value>
+  </data>
+  <data name="SignInToYourAccount" xml:space="preserve">
+    <value>Sign in to your account</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Remember me</value>
+  </data>
+  <data name="ThankYourForSubscribing" xml:space="preserve">
+    <value>Thank you for subscribing!</value>
+  </data>
+  
+  <!-- Home Page Additional Translations -->
+  <data name="WelcomeToHealthFitness" xml:space="preserve">
+    <value>Welcome to Your Health And Fitness Journey</value>
+  </data>
+  <data name="AuthenticProducts" xml:space="preserve">
+    <value>100% Authentic</value>
+  </data>
+  <data name="QualityGuaranteed" xml:space="preserve">
+    <value>Quality Guaranteed</value>
+  </data>
+  <data name="HotDealsRightNow" xml:space="preserve">
+    <value>Hot Deals Right Now!</value>
+  </data>
+  <data name="FlashSale" xml:space="preserve">
+    <value>FLASH SALE</value>
+  </data>
+  <data name="LimitedTimeOffers" xml:space="preserve">
+    <value>Limited Time Offers!</value>
+  </data>
+  <data name="ViewAllFlashSales" xml:space="preserve">
+    <value>View All Flash Sales</value>
+  </data>
+  <data name="Previous" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="OFF" xml:space="preserve">
+    <value>OFF</value>
+  </data>
+  <data name="LoadMoreProducts" xml:space="preserve">
+    <value>Load More Products</value>
+  </data>
+  <data name="LoadingMoreProducts" xml:space="preserve">
+    <value>Loading more products...</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="AboutIdealWeight" xml:space="preserve">
+    <value>About Ideal Weight</value>
+  </data>
+  <data name="AboutUsDescription" xml:space="preserve">
+    <value>At Ideal Weight, we envision becoming the pioneers of health and wellness in the Middle East. We offer innovative supplements, nutritious snacks, and expert health guidance. Our commitment is to empower individuals on their fitness journey, providing the tools and knowledge to achieve optimal well-being.</value>
+  </data>
+  <data name="PremiumQualityProducts" xml:space="preserve">
+    <value>Premium Quality Products</value>
+  </data>
+  <data name="ExcellentCustomerService" xml:space="preserve">
+    <value>Excellent Customer Service</value>
+  </data>
+  <data name="FastReliableShipping" xml:space="preserve">
+    <value>Fast And Reliable Shipping</value>
+  </data>
+  <data name="BranchesInUAE" xml:space="preserve">
+    <value>Branches in UAE</value>
+  </data>
+  <data name="LearnMoreAboutUs" xml:space="preserve">
+    <value>Learn More About Us</value>
+  </data>
+  <data name="OurBranches" xml:space="preserve">
+    <value>Our Branches</value>
+  </data>
+  <data name="VisitUsAtBranches" xml:space="preserve">
+    <value>Visit us at one of our branches in the United Arab Emirates</value>
+  </data>
+  <data name="AlshamkhaBranch" xml:space="preserve">
+    <value>Alshamkha Branch</value>
+  </data>
+  <data name="AlshamkhaAddress" xml:space="preserve">
+    <value>Alshamkha Mall, beside Alfardan Exchange, shop 38</value>
+  </data>
+  <data name="OpenInGoogleMaps" xml:space="preserve">
+    <value>Open in Google Maps</value>
+  </data>
+  <data name="AlwathbaBranch" xml:space="preserve">
+    <value>Alwathba Branch</value>
+  </data>
+  <data name="AlwathbaAddress" xml:space="preserve">
+    <value>Alwathba Mall, opposite to Medicina Pharmacy, Shop 26</value>
+  </data>
+  <data name="ContactUsTitle" xml:space="preserve">
+    <value>Contact Us</value>
+  </data>
+  <data name="PhoneLabel" xml:space="preserve">
+    <value>Phone:</value>
+  </data>
+  <data name="MobileLabel" xml:space="preserve">
+    <value>Mobile:</value>
+  </data>
+  <data name="YourCartIsEmpty" xml:space="preserve">
+    <value>Your cart is empty</value>
+  </data>
+  <data name="InCart" xml:space="preserve">
+    <value>In Cart</value>
+  </data>
+  
+  <!-- Layout/Navigation Translations -->
+  <data name="FlashSales" xml:space="preserve">
+    <value>Flash Sales</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="MarkAllRead" xml:space="preserve">
+    <value>Mark all read</value>
+  </data>
+  <data name="NoNotificationsYet" xml:space="preserve">
+    <value>No notifications yet</value>
+  </data>
+  <data name="ViewAllNotifications" xml:space="preserve">
+    <value>View All Notifications</value>
   </data>
 </root>

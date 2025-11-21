@@ -25,6 +25,8 @@ namespace BulkyBook.DataAccess.Data
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<FlashSale> FlashSales { get; set; }
         public DbSet<FlashSaleItem> FlashSaleItems { get; set; }
+        public DbSet<PromoCode> PromoCodes { get; set; }
+        public DbSet<PromoCodeUsage> PromoCodeUsages { get; set; }
 
 
 
