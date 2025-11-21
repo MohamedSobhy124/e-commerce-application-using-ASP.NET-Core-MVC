@@ -19,24 +19,42 @@ namespace BulkyBook.Services
         private readonly IEmailSender _emailSender;
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly UserManager<IdentityUser> _userManager;
-
+        private readonly IConfiguration _configuration;
         public NotificationService(
             IUnitOfWork unitOfWork,
             IEmailSender emailSender,
             IHubContext<NotificationHub> hubContext,
-            UserManager<IdentityUser> userManager)
+            UserManager<IdentityUser> userManager,
+            IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _emailSender = emailSender;
             _hubContext = hubContext;
             _userManager = userManager;
+            _configuration = configuration;
         }
 
         public async Task SendOrderNotificationToAdmins(OrderHeader orderHeader)
         {
             // Get all admin users
-            var adminUsers = await _userManager.GetUsersInRoleAsync(SD.Role_Admin);
+            var adminNotificationEmail = _configuration["StockAlerts:AdminEmail"];
+            var adminUser = await _userManager.FindByEmailAsync(adminNotificationEmail ?? string.Empty);
 
+            if (!string.IsNullOrEmpty(adminUser?.Id))
+            {
+           
+                // Send email to admin
+                var emailBody = GenerateAdminEmailTemplate(orderHeader);
+                await _emailSender.SendEmailAsync(
+                    adminUser.Email??string.Empty,
+                    $"New Order #{orderHeader.Id} - Ideal Weight",
+                    emailBody
+                );
+
+
+                 
+            }
+            var adminUsers = await _userManager.GetUsersInRoleAsync(SD.Role_Admin);
             foreach (var admin in adminUsers)
             {
                 // Log notification in database
@@ -47,16 +65,7 @@ namespace BulkyBook.Services
                     "Order",
                     orderHeader.Id
                 );
-
-                // Send email to admin
-                var emailBody = GenerateAdminEmailTemplate(orderHeader);
-                await _emailSender.SendEmailAsync(
-                    admin.Email,
-                    $"New Order #{orderHeader.Id} - Ideal Weight",
-                    emailBody
-                );
             }
-
             // Send real-time push notification to all connected admins
             await _hubContext.Clients.Group("Admins").SendAsync(
                 "ReceiveOrderNotification",
@@ -69,6 +78,7 @@ namespace BulkyBook.Services
                     timestamp = DateTime.Now
                 }
             );
+
         }
 
         public async Task SendOrderConfirmationToCustomer(OrderHeader orderHeader, ApplicationUser customer)

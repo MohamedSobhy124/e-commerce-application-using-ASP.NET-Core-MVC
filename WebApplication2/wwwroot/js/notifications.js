@@ -60,6 +60,50 @@ function initializeNotifications() {
         }
     });
 
+    // Handle stock alerts (for admins)
+    notificationConnection.on("ReceiveStockAlert", function (data) {
+        console.log('Stock alert received:', data);
+        
+        // Determine alert type
+        const toastrType = data.isOutOfStock ? 'error' : 'warning';
+        const icon = data.isOutOfStock ? '❌' : '⚠️';
+        
+        // Show toastr notification
+        if (typeof toastr !== 'undefined') {
+            toastr[toastrType](
+                `${icon} ${data.message}<br><strong>Product:</strong> ${data.productName}<br><strong>Stock:</strong> ${data.stockQuantity} units`,
+                data.title,
+                {
+                    timeOut: data.isOutOfStock ? 0 : 15000, // Don't auto-close out of stock alerts
+                    extendedTimeOut: 10000,
+                    closeButton: true,
+                    progressBar: true,
+                    onclick: function() {
+                        window.location.href = `/Admin/Product/UpSert/${data.productId}`;
+                    },
+                    escapeHtml: false
+                }
+            );
+        }
+
+        // Play urgent sound for out of stock
+        if (data.isOutOfStock) {
+            playNotificationSound();
+            playNotificationSound(); // Play twice for urgency
+        } else {
+            playNotificationSound();
+        }
+
+        // Update notification bell
+        updateNotificationBell();
+
+        // Show browser notification
+        showBrowserNotification(
+            `${data.urgency}: ${data.title}`,
+            `${data.productName} - ${data.message}`
+        );
+    });
+
     // Start connection
     notificationConnection.start()
         .then(function () {

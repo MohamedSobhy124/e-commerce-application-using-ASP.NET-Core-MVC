@@ -1,0 +1,466 @@
+/* ===================================
+   Enhanced Hero Welcome Section
+   Modern E-Commerce Design
+   =================================== */
+
+/* Animated Gradient Background */
+@keyframes gradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-100px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInFromRight {
+    0% {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes shimmerWave {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(59, 157, 213, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(123, 192, 67, 0.6);
+    }
+}
+
+/* Hero Section Container */
+.hero-section {
+    position: relative;
+    background: linear-gradient(-45deg, #3B9DD5, #7BC043, #2980b9, #5a9c2a);
+    background-size: 400% 400%;
+    animation: gradientFlow 15s ease infinite;
+    padding: 5rem 0 4rem 0;
+    margin-bottom: 3rem;
+    overflow: hidden;
+}
+
+/* Decorative Elements */
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.hero-section::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to top, #f9fafb 0%, transparent 100%);
+    pointer-events: none;
+}
+
+/* Hero Content */
+.hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Welcome Message */
+.hero-welcome {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 0.75rem 2rem;
+    border-radius: 50px;
+    margin-bottom: 1.5rem;
+    animation: fadeInScale 0.6s ease-out;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.hero-welcome-text {
+    color: #3B9DD5;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.hero-welcome-text i {
+    font-size: 1.2rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Hero Title */
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation: slideInFromLeft 0.8s ease-out 0.2s both;
+}
+
+.hero-title i {
+    color: #FFE5DC;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* Hero Subtitle */
+.hero-subtitle {
+    font-size: 1.4rem;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 2.5rem;
+    font-weight: 500;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    animation: slideInFromRight 0.8s ease-out 0.4s both;
+}
+
+/* Enhanced Search Box */
+.hero-search-box {
+    max-width: 700px;
+    margin: 0 auto 2rem auto;
+    animation: fadeInScale 1s ease-out 0.6s both;
+}
+
+.advanced-search-container {
+    display: flex;
+    gap: 1rem;
+    background: white;
+    padding: 0.75rem;
+    border-radius: 60px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    transition: var(--transition);
+}
+
+.advanced-search-container:focus-within {
+    box-shadow: 0 16px 48px rgba(59, 157, 213, 0.3);
+    transform: translateY(-2px);
+}
+
+.search-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1.5rem;
+    font-size: 1.3rem;
+    color: #3B9DD5;
+    pointer-events: none;
+}
+
+.hero-search-input {
+    width: 100%;
+    padding: 1rem 1.5rem 1rem 3.5rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.05rem;
+    color: var(--gray-800);
+    background: transparent;
+    outline: none;
+}
+
+.hero-search-input::placeholder {
+    color: var(--gray-400);
+}
+
+.hero-search-btn {
+    background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%);
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 16px rgba(59, 157, 213, 0.3);
+    white-space: nowrap;
+}
+
+.hero-search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(59, 157, 213, 0.5);
+    background: linear-gradient(135deg, #2980b9 0%, #5a9c2a 100%);
+}
+
+.hero-search-btn i {
+    margin-right: 0.5rem;
+}
+
+/* Category Badges */
+.hero-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    animation: fadeInScale 1.2s ease-out 0.8s both;
+}
+
+.hero-category-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--gray-700);
+    padding: 0.625rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+}
+
+.hero-category-badge:hover {
+    background: white;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    border-color: #3B9DD5;
+    color: #3B9DD5;
+}
+
+.hero-category-badge.active {
+    background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%);
+    color: white;
+    box-shadow: 0 6px 20px rgba(59, 157, 213, 0.4);
+}
+
+.hero-category-badge.active:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(59, 157, 213, 0.5);
+}
+
+.hero-category-badge i {
+    margin-right: 0.5rem;
+    font-size: 1rem;
+}
+
+/* Floating Icons Animation */
+.floating-icon {
+    position: absolute;
+    font-size: 3rem;
+    opacity: 0.1;
+    color: white;
+    animation: float 6s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.floating-icon:nth-child(1) {
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.floating-icon:nth-child(2) {
+    top: 70%;
+    left: 80%;
+    animation-delay: 2s;
+}
+
+.floating-icon:nth-child(3) {
+    top: 40%;
+    right: 15%;
+    animation-delay: 4s;
+}
+
+/* Trust Badges */
+.hero-trust-badges {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+    animation: fadeInScale 1.4s ease-out 1s both;
+}
+
+.trust-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    font-weight: 600;
+    font-size: 0.95rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+}
+
+.trust-badge i {
+    font-size: 1.2rem;
+    color: #FFE5DC;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .hero-section {
+        padding: 4rem 0 3rem 0;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+
+    .hero-search-btn {
+        padding: 1rem 2rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 3rem 0 2.5rem 0;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .advanced-search-container {
+        flex-direction: column;
+        border-radius: 20px;
+        padding: 1rem;
+    }
+
+    .hero-search-input {
+        padding: 1rem 1rem 1rem 3rem;
+    }
+
+    .hero-search-btn {
+        width: 100%;
+        border-radius: 15px;
+    }
+
+    .hero-category-badge {
+        font-size: 0.875rem;
+        padding: 0.5rem 1.25rem;
+    }
+
+    .hero-trust-badges {
+        gap: 1rem;
+    }
+
+    .trust-badge {
+        font-size: 0.85rem;
+        padding: 0.4rem 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 1.75rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .hero-welcome-text {
+        font-size: 0.875rem;
+        letter-spacing: 1.5px;
+    }
+
+    .hero-search-btn {
+        font-size: 0.95rem;
+    }
+}
+
+/* Additional Sparkle Effect */
+@keyframes sparkle {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    animation: sparkle 2s ease-in-out infinite;
+    pointer-events: none;
+}
+

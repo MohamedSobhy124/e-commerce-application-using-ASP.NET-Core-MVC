@@ -22,6 +22,11 @@ namespace BulkyBook.DataAccess.Repository
         {
             _db.Notifications.Update(notification);
         }
+           
+        public void Add(Notification notification)
+        {
+            _db.Notifications.Add(notification);
+        }
 
         public IEnumerable<Notification> GetUnreadNotifications(string userId)
         {

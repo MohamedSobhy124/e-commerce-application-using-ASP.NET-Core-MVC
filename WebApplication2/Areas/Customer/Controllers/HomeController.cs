@@ -70,8 +70,11 @@ namespace BulkyBook.Areas.Customer.Controllers
             {
                 if (inStock.Value)
                 {
-                    // Assuming products with Price > 0 are in stock (adjust based on your model)
-                    query = query.Where(p => p.Price > 0);
+                    query = query.Where(p => p.StockQuantity > 0);
+                }
+                else
+                {
+                    query = query.Where(p => p.StockQuantity == 0);
                 }
             }
             
@@ -81,10 +84,13 @@ namespace BulkyBook.Areas.Customer.Controllers
                 switch (availability.ToLower())
                 {
                     case "instock":
-                        query = query.Where(p => p.Price > 0);
+                        query = query.Where(p => p.StockQuantity > 0);
                         break;
                     case "outofstock":
-                        query = query.Where(p => p.Price <= 0);
+                        query = query.Where(p => p.StockQuantity == 0);
+                        break;
+                    case "lowstock":
+                        query = query.Where(p => p.StockQuantity > 0 && p.StockQuantity <= p.MinimumStockAlert);
                         break;
                 }
             }
@@ -165,9 +171,16 @@ namespace BulkyBook.Areas.Customer.Controllers
                 query = query.Where(p => p.Price <= (double)maxPrice.Value);
             }
             
-            if (inStock.HasValue && inStock.Value)
+            if (inStock.HasValue)
             {
-                query = query.Where(p => p.Price > 0);
+                if (inStock.Value)
+                {
+                    query = query.Where(p => p.StockQuantity > 0);
+                }
+                else
+                {
+                    query = query.Where(p => p.StockQuantity == 0);
+                }
             }
             
             if (!string.IsNullOrEmpty(availability))
@@ -175,10 +188,13 @@ namespace BulkyBook.Areas.Customer.Controllers
                 switch (availability.ToLower())
                 {
                     case "instock":
-                        query = query.Where(p => p.Price > 0);
+                        query = query.Where(p => p.StockQuantity > 0);
                         break;
                     case "outofstock":
-                        query = query.Where(p => p.Price <= 0);
+                        query = query.Where(p => p.StockQuantity == 0);
+                        break;
+                    case "lowstock":
+                        query = query.Where(p => p.StockQuantity > 0 && p.StockQuantity <= p.MinimumStockAlert);
                         break;
                 }
             }

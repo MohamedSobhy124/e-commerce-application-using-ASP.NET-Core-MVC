@@ -1,0 +1,731 @@
+/* ===================================
+   ULTRA COOL EFFECTS - Next Level
+   Modern Web App Features
+   =================================== */
+
+/* ========================================
+   1. PARALLAX SCROLLING HERO
+   ======================================== */
+.parallax-container {
+    position: relative;
+    overflow: hidden;
+    perspective: 1px;
+}
+
+.parallax-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.parallax-layer-back {
+    transform: translateZ(-1px) scale(2);
+}
+
+.parallax-layer-base {
+    transform: translateZ(0);
+}
+
+/* ========================================
+   2. FLOATING PARTICLES SYSTEM
+   ======================================== */
+.particles-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.particle-orb {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(59,157,213,0.4) 100%);
+    animation: floatParticle 20s infinite ease-in-out;
+    filter: blur(2px);
+}
+
+@keyframes floatParticle {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.3;
+    }
+    25% {
+        transform: translate(100px, -100px) scale(1.2);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translate(-50px, -200px) scale(0.8);
+        opacity: 0.4;
+    }
+    75% {
+        transform: translate(-150px, -100px) scale(1.1);
+        opacity: 0.5;
+    }
+}
+
+.particle-orb:nth-child(1) {
+    width: 100px;
+    height: 100px;
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+    animation-duration: 25s;
+}
+
+.particle-orb:nth-child(2) {
+    width: 150px;
+    height: 150px;
+    top: 60%;
+    left: 70%;
+    animation-delay: 3s;
+    animation-duration: 20s;
+}
+
+.particle-orb:nth-child(3) {
+    width: 80px;
+    height: 80px;
+    top: 40%;
+    right: 15%;
+    animation-delay: 6s;
+    animation-duration: 22s;
+}
+
+.particle-orb:nth-child(4) {
+    width: 120px;
+    height: 120px;
+    top: 10%;
+    right: 30%;
+    animation-delay: 9s;
+    animation-duration: 28s;
+}
+
+/* ========================================
+   3. MORPHING SHAPES BACKGROUND
+   ======================================== */
+.morphing-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.morph-shape {
+    position: absolute;
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    background: linear-gradient(135deg, rgba(59,157,213,0.15), rgba(123,192,67,0.15));
+    animation: morph 15s ease-in-out infinite;
+    filter: blur(40px);
+}
+
+@keyframes morph {
+    0%, 100% {
+        border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+        border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+        transform: translate(50px, 50px) rotate(90deg);
+    }
+    50% {
+        border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+        transform: translate(-30px, 80px) rotate(180deg);
+    }
+    75% {
+        border-radius: 70% 30% 50% 50% / 30% 70% 50% 50%;
+        transform: translate(30px, -30px) rotate(270deg);
+    }
+}
+
+.morph-shape:nth-child(1) {
+    width: 500px;
+    height: 500px;
+    top: -100px;
+    left: -100px;
+    animation-duration: 20s;
+}
+
+.morph-shape:nth-child(2) {
+    width: 400px;
+    height: 400px;
+    bottom: -100px;
+    right: -100px;
+    animation-duration: 25s;
+    animation-delay: 5s;
+}
+
+/* ========================================
+   4. GLOWING NEON TEXT EFFECTS
+   ======================================== */
+.neon-text {
+    color: #fff;
+    text-shadow: 
+        0 0 10px rgba(59,157,213,0.8),
+        0 0 20px rgba(59,157,213,0.6),
+        0 0 30px rgba(59,157,213,0.4),
+        0 0 40px rgba(123,192,67,0.3);
+    animation: neonPulse 2s ease-in-out infinite;
+}
+
+@keyframes neonPulse {
+    0%, 100% {
+        text-shadow: 
+            0 0 10px rgba(59,157,213,0.8),
+            0 0 20px rgba(59,157,213,0.6),
+            0 0 30px rgba(59,157,213,0.4),
+            0 0 40px rgba(123,192,67,0.3);
+    }
+    50% {
+        text-shadow: 
+            0 0 20px rgba(59,157,213,1),
+            0 0 30px rgba(59,157,213,0.8),
+            0 0 40px rgba(59,157,213,0.6),
+            0 0 50px rgba(123,192,67,0.5),
+            0 0 60px rgba(123,192,67,0.3);
+    }
+}
+
+/* ========================================
+   5. 3D CARD FLIP EFFECT
+   ======================================== */
+.flip-card {
+    perspective: 1000px;
+    cursor: pointer;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 16px;
+}
+
+.flip-card-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(135deg, #3B9DD5, #7BC043);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+/* ========================================
+   6. RIPPLE EFFECT ON CLICK
+   ======================================== */
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple::after {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transform: scale(0);
+    opacity: 1;
+    pointer-events: none;
+}
+
+.ripple:active::after {
+    animation: rippleEffect 0.6s ease-out;
+}
+
+@keyframes rippleEffect {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ========================================
+   7. MAGNETIC BUTTON EFFECT
+   ======================================== */
+.magnetic-btn {
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.magnetic-btn:hover {
+    transform: scale(1.1);
+}
+
+.magnetic-btn::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #3B9DD5, #7BC043, #FF6B35, #3B9DD5);
+    background-size: 300% 300%;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s;
+    animation: gradientRotate 4s ease infinite;
+}
+
+.magnetic-btn:hover::before {
+    opacity: 1;
+}
+
+@keyframes gradientRotate {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* ========================================
+   8. GLASS MORPHISM CARDS
+   ======================================== */
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(59, 157, 213, 0.2);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 16px 48px 0 rgba(59, 157, 213, 0.3);
+}
+
+/* ========================================
+   9. ANIMATED GRADIENT BORDER
+   ======================================== */
+.gradient-border {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+}
+
+.gradient-border::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(45deg, #3B9DD5, #7BC043, #FF6B35, #3B9DD5);
+    background-size: 300% 300%;
+    border-radius: 18px;
+    z-index: -1;
+    animation: gradientRotate 4s ease infinite;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.gradient-border:hover::before {
+    opacity: 1;
+}
+
+/* ========================================
+   10. TILT EFFECT (3D)
+   ======================================== */
+.tilt-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+}
+
+.tilt-3d:hover {
+    transform: perspective(1000px) rotateX(10deg) rotateY(10deg) scale3d(1.05, 1.05, 1.05);
+}
+
+.tilt-3d-inner {
+    transform: translateZ(50px);
+}
+
+/* ========================================
+   11. INFINITE SCROLLING BRANDS
+   ======================================== */
+.infinite-scroll {
+    overflow: hidden;
+    padding: 3rem 0;
+    background: linear-gradient(135deg, #E3F2FD, #F1F8E9);
+}
+
+.scroll-track {
+    display: flex;
+    animation: infiniteScroll 30s linear infinite;
+}
+
+.scroll-track:hover {
+    animation-play-state: paused;
+}
+
+@keyframes infiniteScroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.brand-item {
+    flex: 0 0 auto;
+    margin: 0 3rem;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+    filter: grayscale(100%);
+}
+
+.brand-item:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    filter: grayscale(0%);
+}
+
+/* ========================================
+   12. STAGGERED REVEAL ON SCROLL
+   ======================================== */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.scroll-reveal-left {
+    opacity: 0;
+    transform: translateX(-100px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal-left.revealed {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.scroll-reveal-right {
+    opacity: 0;
+    transform: translateX(100px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal-right.revealed {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* ========================================
+   13. TYPING EFFECT
+   ======================================== */
+.typing-effect {
+    overflow: hidden;
+    border-right: 3px solid #3B9DD5;
+    white-space: nowrap;
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: #3B9DD5 }
+}
+
+/* ========================================
+   14. SPOTLIGHT EFFECT
+   ======================================== */
+.spotlight {
+    position: relative;
+    overflow: hidden;
+}
+
+.spotlight::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+}
+
+.spotlight:hover::before {
+    opacity: 1;
+    animation: spotlightMove 2s ease infinite;
+}
+
+@keyframes spotlightMove {
+    0% { transform: translate(-25%, -25%); }
+    50% { transform: translate(0%, 0%); }
+    100% { transform: translate(-25%, -25%); }
+}
+
+/* ========================================
+   15. LOADING BAR ANIMATION
+   ======================================== */
+.loading-bar {
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #3B9DD5, #7BC043);
+    background-size: 200% 100%;
+    animation: loadingSlide 2s ease-in-out infinite;
+    border-radius: 10px;
+}
+
+@keyframes loadingSlide {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+}
+
+/* ========================================
+   16. FLOATING ACTION BUTTON (FAB)
+   ======================================== */
+.fab-container {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    z-index: 1000;
+}
+
+.fab-main {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #3B9DD5, #7BC043);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(59, 157, 213, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fab-main:hover {
+    transform: scale(1.15) rotate(90deg);
+    box-shadow: 0 12px 36px rgba(59, 157, 213, 0.6);
+}
+
+.fab-options {
+    position: absolute;
+    bottom: 80px;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.fab-container:hover .fab-options {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.fab-option {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3B9DD5;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    transform: scale(0);
+}
+
+.fab-container:hover .fab-option {
+    transform: scale(1);
+}
+
+.fab-option:nth-child(1) { transition-delay: 0.05s; }
+.fab-option:nth-child(2) { transition-delay: 0.1s; }
+.fab-option:nth-child(3) { transition-delay: 0.15s; }
+
+.fab-option:hover {
+    transform: scale(1.2);
+    background: linear-gradient(135deg, #3B9DD5, #7BC043);
+    color: white;
+}
+
+/* ========================================
+   17. PROGRESS CIRCLE
+   ======================================== */
+.progress-circle {
+    width: 150px;
+    height: 150px;
+    position: relative;
+}
+
+.progress-circle svg {
+    transform: rotate(-90deg);
+}
+
+.progress-circle-bg {
+    fill: none;
+    stroke: #e0e0e0;
+    stroke-width: 10;
+}
+
+.progress-circle-fill {
+    fill: none;
+    stroke: url(#gradient);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 440;
+    stroke-dashoffset: 440;
+    animation: fillProgress 2s ease-out forwards;
+}
+
+@keyframes fillProgress {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* ========================================
+   18. HOVER ZOOM IMAGE
+   ======================================== */
+.zoom-container {
+    overflow: hidden;
+    border-radius: 16px;
+}
+
+.zoom-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.zoom-container:hover .zoom-image {
+    transform: scale(1.2) rotate(3deg);
+}
+
+/* ========================================
+   19. COUNTER ANIMATION
+   ======================================== */
+.animated-counter {
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #3B9DD5, #7BC043);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========================================
+   20. SKELETON LOADER
+   ======================================== */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeletonLoading 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes skeletonLoading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+    height: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-title {
+    height: 2rem;
+    width: 70%;
+    margin-bottom: 1rem;
+}
+
+.skeleton-image {
+    height: 200px;
+    margin-bottom: 1rem;
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+@media (max-width: 768px) {
+    .morph-shape {
+        width: 300px !important;
+        height: 300px !important;
+    }
+    
+    .particle-orb {
+        width: 60px !important;
+        height: 60px !important;
+    }
+    
+    .fab-container {
+        bottom: 20px;
+        left: 20px;
+    }
+    
+    .fab-main {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+

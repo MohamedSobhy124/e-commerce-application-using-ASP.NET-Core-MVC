@@ -2,7 +2,7 @@
    Layout - Navigation & Footer
    =================================== */
 
-/* Navbar Styles */
+/* Navbar Styles - Enhanced */
 .navbar {
     position: fixed;
     top: 0;
@@ -10,31 +10,37 @@
     right: 0;
     z-index: 1000;
     padding: 0;
-    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border-bottom: 2px solid rgba(124, 58, 237, 0.3);
+    background: linear-gradient(135deg, #1976D2 0%, #3B9DD5 100%);
+    box-shadow: 0 4px 16px rgba(59, 157, 213, 0.25);
+    border-bottom: 3px solid rgba(123, 192, 67, 0.4);
+    transition: all 0.3s ease;
+}
+
+.navbar.scrolled {
+    box-shadow: 0 8px 24px rgba(59, 157, 213, 0.35);
+    background: linear-gradient(135deg, #1565C0 0%, #2980b9 100%);
 }
 
 .navbar .container-fluid {
-    padding: 0.75rem 2rem;
+    padding: 0.875rem 2rem;
 }
 
 .navbar-brand {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--white) !important;
-    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: white !important;
     text-decoration: none;
-    transition: var(--transition);
+    transition: all 0.3s ease;
     padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .navbar-brand:hover {
-    transform: scale(1.05);
-    filter: brightness(1.2);
+    transform: scale(1.05) translateY(-2px);
+    text-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
 }
 
 .navbar-toggler {
@@ -59,34 +65,37 @@
 }
 
 .nav-link {
-    color: rgba(255, 255, 255, 0.85) !important;
-    font-weight: 500;
-    padding: 0.625rem 1rem !important;
-    border-radius: var(--border-radius-sm);
-    transition: var(--transition);
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-weight: 600;
+    padding: 0.625rem 1.25rem !important;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
 }
 
 .nav-link:hover {
-    color: var(--white) !important;
-    background-color: rgba(124, 58, 237, 0.2);
+    color: white !important;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .nav-link::after {
     content: '';
     position: absolute;
-    bottom: 0;
+    bottom: 5px;
     left: 50%;
     transform: translateX(-50%);
     width: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #7c3aed, #ec4899);
-    transition: var(--transition);
+    height: 3px;
+    background: linear-gradient(90deg, #7BC043, #FFE5DC);
+    border-radius: 10px;
+    transition: width 0.3s ease;
 }
 
 .nav-link:hover::after {
-    width: 80%;
+    width: 70%;
 }
 
 /* Dropdown Menu */
@@ -131,13 +140,15 @@
 }
 
 #cartCount {
-    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
-    color: var(--white);
-    padding: 0.125rem 0.5rem;
+    background: linear-gradient(135deg, #7BC043 0%, #5a9c2a 100%);
+    color: white;
+    padding: 0.2rem 0.6rem;
     border-radius: 50px;
     font-size: 0.875rem;
-    font-weight: 700;
-    margin-left: 0.25rem;
+    font-weight: 800;
+    margin-left: 0.3rem;
+    box-shadow: 0 2px 8px rgba(123, 192, 67, 0.4);
+    animation: pulse 2s ease-in-out infinite;
 }
 
  
