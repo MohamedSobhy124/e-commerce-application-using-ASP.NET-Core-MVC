@@ -107,6 +107,41 @@
                                     </div>
                                 </div>
 
+                                <!-- Stock Management Section -->
+                                <div class="admin-form-section-title" style="margin-top: 2rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb;">
+                                    <h4 style="color: #3B9DD5; font-weight: 700;">
+                                        <i class="bi bi-box-seam me-2"></i>Stock Management
+                                    </h4>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label asp-for="product.StockQuantity" class="admin-form-label">
+                                                <i class="bi bi-boxes me-2"></i>Stock Quantity
+                                            </label>
+                                            <input asp-for="product.StockQuantity" class="admin-form-control" type="number" min="0" placeholder="Enter available stock" />
+                                            <span asp-validation-for="product.StockQuantity" class="text-danger"></span>
+                                            <small class="form-text text-muted">
+                                                <i class="bi bi-info-circle me-1"></i>Current quantity in stock
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label asp-for="product.MinimumStockAlert" class="admin-form-label">
+                                                <i class="bi bi-exclamation-triangle me-2"></i>Low Stock Alert Level
+                                            </label>
+                                            <input asp-for="product.MinimumStockAlert" class="admin-form-control" type="number" min="0" placeholder="Set alert threshold" />
+                                            <span asp-validation-for="product.MinimumStockAlert" class="text-danger"></span>
+                                            <small class="form-text text-muted">
+                                                <i class="bi bi-info-circle me-1"></i>Show warning when stock falls to this level
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="admin-form-group">
                                     <label asp-for="product.CategryId" class="admin-form-label">
                                         <i class="bi bi-folder me-2"></i>Category

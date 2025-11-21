@@ -166,18 +166,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                 if (productVM.product.Id == 0)
                 {
                     _unitOfWork.product.add(productVM.product);
-                    _unitOfWork.save(); // Save first to get the ProductId
-                    
-                    // Update ProductImages with correct ProductId
-                    if (productVM.product.ProductImages != null && productVM.product.ProductImages.Any())
-                    {
-                        foreach (var img in productVM.product.ProductImages)
-                        {
-                            img.ProductId = productVM.product.Id;
-                            _dbContext.ProductImages.Add(img);
-                        }
-                        _dbContext.SaveChanges();
-                    }
+                    _unitOfWork.save(); // This automatically saves ProductImages too!
                     
                     TempData["success"] = "Product Created Successfully";
                 }

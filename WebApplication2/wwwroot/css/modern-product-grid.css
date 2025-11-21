@@ -26,9 +26,26 @@
 }
 
 .product-card:hover {
-    transform: translateY(-12px);
-    box-shadow: 0 12px 32px rgba(59, 157, 213, 0.2);
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(59, 157, 213, 0.25), 0 0 0 1px rgba(59, 157, 213, 0.1);
     border-color: #3B9DD5;
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(59, 157, 213, 0.05), rgba(123, 192, 67, 0.05));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.product-card:hover::before {
+    opacity: 1;
 }
 
 /* Product Image Section - Shorter */
@@ -78,18 +95,31 @@
     text-transform: uppercase;
     box-shadow: 0 4px 12px rgba(123, 192, 67, 0.4);
     text-align: center;
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
 }
 
 .badge-discount {
-    background: linear-gradient(135deg, #FF5252, #D32F2F);
+    background: linear-gradient(135deg, #FF6B35, #f59e0b);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
 }
 
 .badge-organic {
-    background: linear-gradient(135deg, #66BB6A, #388E3C);
+    background: linear-gradient(135deg, #7BC043, #5a9c2a);
+    box-shadow: 0 4px 12px rgba(123, 192, 67, 0.4);
 }
 
 .badge-new {
-    background: linear-gradient(135deg, #42A5F5, #1976D2);
+    background: linear-gradient(135deg, #3B9DD5, #2980b9);
+    box-shadow: 0 4px 12px rgba(59, 157, 213, 0.4);
 }
 
 /* Product Content - Tighter Padding */
@@ -107,6 +137,11 @@
     text-transform: uppercase;
     letter-spacing: 0.3px;
     margin-bottom: 0.3rem;
+    transition: color 0.3s ease;
+}
+
+.product-card:hover .product-category {
+    color: #3B9DD5;
 }
 
 .product-title {
@@ -120,6 +155,11 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    transition: color 0.3s ease;
+}
+
+.product-card:hover .product-title {
+    color: #3B9DD5;
 }
 
 /* Star Rating on Cards - Smaller */
@@ -161,6 +201,10 @@
     font-weight: 800;
     color: #558B2F;
     margin: 0;
+    background: linear-gradient(135deg, #7BC043, #558B2F);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .list-price {

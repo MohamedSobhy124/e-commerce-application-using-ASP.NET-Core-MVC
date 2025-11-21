@@ -17,8 +17,7 @@ namespace BulkyBook.Models
 
         [Required]
         public string Type { get; set; } // "Order", "System", "Alert"
-
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
         [ForeignKey("UserId")]
         public ApplicationUser ApplicationUser { get; set; }
 
@@ -33,6 +32,7 @@ namespace BulkyBook.Models
         public string Icon { get; set; } // Icon class for display
         
         public string Link { get; set; } // Link to related page
+        public int? RelatedId { get; set; }
     }
 }
 

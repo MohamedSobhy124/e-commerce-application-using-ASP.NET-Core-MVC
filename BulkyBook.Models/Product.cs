@@ -44,8 +44,27 @@ namespace BulkyBook.Models
         [ValidateNever]
         public string ImageUrl { get; set; }
         
+        // Stock Management
+        [Display(Name = "Stock Quantity")]
+        [Range(0, int.MaxValue, ErrorMessage = "Stock quantity must be 0 or greater")]
+        public int StockQuantity { get; set; } = 0;
+        
+        [Display(Name = "Minimum Stock Alert")]
+        [Range(0, int.MaxValue, ErrorMessage = "Minimum stock must be 0 or greater")]
+        public int MinimumStockAlert { get; set; } = 5;
+        
         // Navigation property for multiple images
         [ValidateNever]
         public ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
+        
+        // Calculated property for stock status
+        [NotMapped]
+        public bool IsInStock => StockQuantity > 0;
+        
+        [NotMapped]
+        public bool IsLowStock => StockQuantity > 0 && StockQuantity <= MinimumStockAlert;
+        
+        [NotMapped]
+        public bool IsOutOfStock => StockQuantity == 0;
     }
 }

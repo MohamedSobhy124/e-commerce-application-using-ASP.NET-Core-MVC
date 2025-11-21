@@ -76,6 +76,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IEmailSender,EmailSender>();
 builder.Services.AddScoped<BulkyBook.Services.INotificationService, BulkyBook.Services.NotificationService>();
+builder.Services.AddScoped<BulkyBook.Services.IStockService, BulkyBook.Services.StockService>();
 
 // Register SharedResources for localization
 builder.Services.AddSingleton<BulkyBook.SharedResources>();

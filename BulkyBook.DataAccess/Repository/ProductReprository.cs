@@ -28,6 +28,8 @@ namespace BulkyBook.DataAccess.Repository
                 obgFromDB.Price100  = obj.Price100;
                 obgFromDB.CategryId = obj.CategryId;
                 obgFromDB.Description   = obj.Description;
+                obgFromDB.StockQuantity   = obj.StockQuantity;
+                obgFromDB.MinimumStockAlert   = obj.MinimumStockAlert;
                 if(obj.ImageUrl != null)
                 {
                     obgFromDB.ImageUrl = obj.ImageUrl;

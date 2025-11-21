@@ -16,15 +16,69 @@
 
 <!-- Hero Section -->
 <section class="hero-section">
+    <!-- Morphing Shapes Background -->
+    <div class="morphing-bg">
+        <div class="morph-shape"></div>
+        <div class="morph-shape"></div>
+    </div>
+    
+    <!-- Floating Particles -->
+    <div class="particles-container">
+        <div class="particle-orb"></div>
+        <div class="particle-orb"></div>
+        <div class="particle-orb"></div>
+        <div class="particle-orb"></div>
+    </div>
+    
     <div class="container">
         <div class="hero-content">
-            <h1 class="hero-title">
+            <!-- Welcome Message -->
+            <div class="hero-welcome">
+                <p class="hero-welcome-text">
+                    <i class="bi bi-stars"></i>
+                    @if(System.Globalization.CultureInfo.CurrentUICulture.Name == "ar") {
+                        <span>مرحباً بك في عالم الصحة واللياقة</span>
+                    } else {
+                        <span>Welcome to Your Health & Fitness Journey</span>
+                    }
+                </p>
+            </div>
+
+            <h1 class="hero-title neon-text">
                 <i class="bi bi-heart-pulse me-3"></i>
                 @Localizer["DiscoverIdealWeight"]
             </h1>
             <p class="hero-subtitle">
                 @Localizer["InnovativeSupplements"]
             </p>
+
+            <!-- Trust Badges -->
+            <div class="hero-trust-badges">
+                <div class="trust-badge">
+                    <i class="bi bi-shield-check"></i>
+                    @if(System.Globalization.CultureInfo.CurrentUICulture.Name == "ar") {
+                        <span>منتجات أصلية 100%</span>
+                    } else {
+                        <span>100% Authentic</span>
+                    }
+                </div>
+                <div class="trust-badge">
+                    <i class="bi bi-truck"></i>
+                    @if(System.Globalization.CultureInfo.CurrentUICulture.Name == "ar") {
+                        <span>شحن سريع</span>
+                    } else {
+                        <span>Fast Delivery</span>
+                    }
+                </div>
+                <div class="trust-badge">
+                    <i class="bi bi-award"></i>
+                    @if(System.Globalization.CultureInfo.CurrentUICulture.Name == "ar") {
+                        <span>جودة مضمونة</span>
+                    } else {
+                        <span>Quality Guaranteed</span>
+                    }
+                </div>
+            </div>
 
             <div class="hero-search-box">
                 <form asp-action="Index" method="get">
@@ -37,7 +91,7 @@
                                    class="hero-search-input" 
                                    placeholder="@Localizer["SearchSupplements"]" />
                         </div>
-                        <button type="submit" class="hero-search-btn">
+                        <button type="submit" class="hero-search-btn magnetic-btn ripple">
                             <i class="bi bi-search me-2"></i>
                             @Localizer["Search"]
                         </button>
@@ -192,7 +246,9 @@
     var cartProductIds = ViewBag.CartProductIds as List<int> ?? new List<int>();
     var isInCart = cartProductIds.Contains(Product.Id);
     
-    <div class="product-card">
+    <div class="product-card stagger-item" 
+         data-stock-quantity="@Product.StockQuantity" 
+         data-minimum-stock="@Product.MinimumStockAlert">
         <!-- Product Image Carousel -->
         <div class="product-image-wrapper">
             @{
@@ -325,11 +381,11 @@
 </div>
 
 <!-- Features Section -->
-<section class="features-section">
+<section class="features-section scroll-reveal">
     <div class="container">
         <h2 class="features-title">@Localizer["WhyChooseIdealWeight"]</h2>
         <div class="features-grid">
-            <div class="feature-card">
+            <div class="feature-card glass-card tilt-3d scroll-reveal">
                 <div class="feature-icon">
                     <i class="bi bi-award"></i>
                 </div>
@@ -339,7 +395,7 @@
                 </p>
             </div>
 
-            <div class="feature-card">
+            <div class="feature-card glass-card tilt-3d scroll-reveal">
                 <div class="feature-icon">
                     <i class="bi bi-people"></i>
                 </div>
@@ -349,7 +405,7 @@
                 </p>
             </div>
 
-            <div class="feature-card">
+            <div class="feature-card glass-card tilt-3d scroll-reveal">
                 <div class="feature-icon">
                     <i class="bi bi-rocket-takeoff"></i>
                 </div>
@@ -359,7 +415,7 @@
                 </p>
             </div>
 
-            <div class="feature-card">
+            <div class="feature-card glass-card tilt-3d scroll-reveal">
                 <div class="feature-icon">
                     <i class="bi bi-shield-check"></i>
                 </div>
@@ -661,23 +717,23 @@
 </section>
 
 <!-- Statistics Section -->
-<section class="stats-section">
+<section class="stats-section scroll-reveal">
     <div class="container">
         <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-number">5K+</div>
+            <div class="stat-item glass-card">
+                <div class="stat-number animated-counter" data-target="5000" data-duration="2000">0</div>
                 <div class="stat-label">@Localizer["HealthProducts"]</div>
             </div>
-            <div class="stat-item">
-                <div class="stat-number">20K+</div>
+            <div class="stat-item glass-card">
+                <div class="stat-number animated-counter" data-target="20000" data-duration="2000">0</div>
                 <div class="stat-label">@Localizer["SatisfiedCustomers"]</div>
             </div>
-            <div class="stat-item">
-                <div class="stat-number">50+</div>
+            <div class="stat-item glass-card">
+                <div class="stat-number animated-counter" data-target="50" data-duration="2000">0</div>
                 <div class="stat-label">@Localizer["TrustedBrandsCount"]</div>
             </div>
-            <div class="stat-item">
-                <div class="stat-number">100%</div>
+            <div class="stat-item glass-card">
+                <div class="stat-number animated-counter" data-target="100" data-duration="2000">0</div>
                 <div class="stat-label">@Localizer["AuthenticProductsPercent"]</div>
             </div>
         </div>
@@ -726,6 +782,24 @@
         <span id="floatingCartBadge" class="floating-cart-badge">0</span>
     </button>
 
+<!-- Floating Action Button (FAB) Menu 
+<div class="fab-container">
+    <div class="fab-main" title="Quick Actions">
+        <i class="bi bi-plus-lg"></i>
+    </div>
+    <div class="fab-options">
+        <div class="fab-option" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Back to Top">
+            <i class="bi bi-arrow-up"></i>
+        </div>
+        <div class="fab-option" onclick="window.location.href='@Url.Action("Index", "Home")#features'" title="Features">
+            <i class="bi bi-star"></i>
+        </div>
+        <div class="fab-option" onclick="openCartSidebar()" title="Cart">
+            <i class="bi bi-cart"></i>
+        </div>
+    </div>
+</div>
+-->
 @section Scripts {
     <script>
         let currentPage = 1;
@@ -1182,7 +1256,9 @@
             }
             
             return `
-                <div class="product-card">
+                <div class="product-card stagger-item" 
+                     data-stock-quantity="${product.stockQuantity || 0}" 
+                     data-minimum-stock="${product.minimumStockAlert || 5}">
                     <div class="product-image-wrapper">
                         ${imageHtml}
                         <div class="product-badges">
@@ -1267,6 +1343,11 @@
 
                     // Load ratings for newly added products
                     loadAllProductRatings();
+                    
+                    // Initialize badges for newly loaded products
+                    if (typeof initProductBadges === 'function') {
+                        initProductBadges();
+                    }
 
                     hasMoreProducts = data.hasMore;
                     currentPage++;

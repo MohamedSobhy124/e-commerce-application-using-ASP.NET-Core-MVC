@@ -10,6 +10,7 @@ namespace BulkyBook.DataAccess.Repository.IRepository
     public interface INotificationRepository : IRepository<Notification>
     {
         void Update(Notification notification);
+        void Add(Notification notification);
         IEnumerable<Notification> GetUnreadNotifications(string userId);
         void MarkAsRead(int notificationId);
         void MarkAllAsRead(string userId);

@@ -17,15 +17,17 @@ namespace BulkyBook.Areas.Customer.Controllers
         private readonly IUnitOfWork _unitOfWork;
 		private readonly IEmailSender _emailSender;
 		private readonly BulkyBook.Services.INotificationService _notificationService;
+		private readonly BulkyBook.Services.IStockService _stockService;
 		private readonly TappySettings _tappySettings;
 		private readonly TamaraSettings _tamaraSettings;
 		public ShoppingCartVM  ShoppingCartVM { get; set; }
 
-        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, BulkyBook.Services.INotificationService notificationService, IOptions<TappySettings> tappySettings, IOptions<TamaraSettings> tamaraSettings) 
+        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, BulkyBook.Services.INotificationService notificationService, BulkyBook.Services.IStockService stockService, IOptions<TappySettings> tappySettings, IOptions<TamaraSettings> tamaraSettings) 
         {
          _unitOfWork = unitOfWork;
 			_emailSender = emailSender;
 			_notificationService = notificationService;
+			_stockService = stockService;
 			_tappySettings = tappySettings.Value;
 			_tamaraSettings = tamaraSettings.Value;
         }
@@ -566,6 +568,9 @@ namespace BulkyBook.Areas.Customer.Controllers
 					_unitOfWork.OrderHeader.Update(orderHeader);
 					_unitOfWork.save();
 					
+					// ⚡ PROCESS STOCK DEDUCTION AFTER TAPPY PAYMENT
+					await _stockService.ProcessOrderStockDeduction(orderId);
+
 					return RedirectToAction(nameof(OrderConfirmation), new { id = orderId });
 				}
 				else
@@ -611,6 +616,9 @@ namespace BulkyBook.Areas.Customer.Controllers
 						orderHeader.PaymentDate = DateTime.Now;
 						_unitOfWork.OrderHeader.Update(orderHeader);
 						_unitOfWork.save();
+						
+						// ⚡ PROCESS STOCK DEDUCTION AFTER TAMARA PAYMENT
+						await _stockService.ProcessOrderStockDeduction(orderId);
 						
 						return RedirectToAction(nameof(OrderConfirmation), new { id = orderId });
 					}
@@ -679,6 +687,9 @@ namespace BulkyBook.Areas.Customer.Controllers
 				//HttpContext.Session.Clear();
 
 			}
+
+			// ⚡ PROCESS STOCK DEDUCTION AFTER PAYMENT CONFIRMED
+			await _stockService.ProcessOrderStockDeduction(id);
 
 			// Send notifications to all admins
 			await _notificationService.SendOrderNotificationToAdmins(orderHeader);
