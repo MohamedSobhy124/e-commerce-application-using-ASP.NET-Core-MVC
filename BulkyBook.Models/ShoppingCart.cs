@@ -24,5 +24,17 @@ namespace BulkyBook.Models
         public ApplicationUser applicationUser { get; set; }
         [NotMapped]
         public double Price { get; set; }
+
+        // Flash Sale Support
+        public int? FlashSaleItemId { get; set; }
+        [ForeignKey(nameof(FlashSaleItemId))]
+        [ValidateNever]
+        public FlashSaleItem? FlashSaleItem { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? FlashSalePrice { get; set; }
+
+        [NotMapped]
+        public bool IsFlashSale => FlashSaleItemId.HasValue;
     }
 }

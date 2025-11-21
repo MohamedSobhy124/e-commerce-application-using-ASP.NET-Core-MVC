@@ -23,6 +23,8 @@ namespace BulkyBook.DataAccess.Repository
         public IOrderDetailRepository OrderDetail { get; private set; }
         public INotificationRepository notification { get; private set; }
         public IReviewRepository review { get; private set; }
+        public IFlashSaleRepository FlashSale { get; private set; }
+        public IFlashSaleItemRepository FlashSaleItem { get; private set; }
 
         public UnitOfWork(ApplicationDBContext db) 
         {
@@ -36,6 +38,8 @@ namespace BulkyBook.DataAccess.Repository
             OrderDetail = new OrderDetailRepository(_db);
             notification = new NotificationRepository(_db);
             review = new ReviewRepository(_db);
+            FlashSale = new FlashSaleRepository(_db);
+            FlashSaleItem = new FlashSaleItemRepository(_db);
 
         }
 

@@ -529,7 +529,7 @@
         //initChatWidget();
         initStaggerAnimations();
         initAutoEffects();
-        initPriceDropAlerts();
+        //initPriceDropAlerts();
         
         // Optional features (uncomment to activate)
         //initSpinWheel();           // Spin wheel popup

@@ -35,15 +35,21 @@ namespace BulkyBook.Services
         {
             try
             {
-                // Get order details
+                // Get order details (include FlashSaleItem to check if from flash sale)
                 var orderDetails = _unitOfWork.OrderDetail.GetAll(
                     o => o.OrderHeaderId == orderId,
-                    includeProperties: "Product"
+                    includeProperties: "Product,FlashSaleItem"
                 ).ToList();
 
                 foreach (var detail in orderDetails)
                 {
-                    // Decrease stock
+                    // 🔥 FLASH SALE DEDUCTION: Deduct from flash sale quantity first
+                    if (detail.FlashSaleItemId.HasValue && detail.FlashSaleItem != null)
+                    {
+                        await DeductFlashSaleQuantity(detail.FlashSaleItemId.Value, detail.Count);
+                    }
+
+                    // Decrease product stock (regular stock)
                     bool stockDecreased = await DecreaseStock(detail.ProductId, detail.Count);
 
                     if (stockDecreased)
@@ -57,6 +63,54 @@ namespace BulkyBook.Services
             {
                 Console.WriteLine($"Error processing stock deduction for order {orderId}: {ex.Message}");
                 // Don't throw - we don't want stock errors to break order confirmation
+            }
+        }
+
+        // 🔥 NEW METHOD: Deduct Flash Sale Quantity
+        private async Task<bool> DeductFlashSaleQuantity(int flashSaleItemId, int quantity)
+        {
+            try
+            {
+                var flashSaleItem = _unitOfWork.FlashSaleItem.Get(
+                    f => f.Id == flashSaleItemId,
+                    includeProperties: "Product,FlashSale"
+                );
+
+                if (flashSaleItem == null)
+                {
+                    Console.WriteLine($"Flash sale item {flashSaleItemId} not found");
+                    return false;
+                }
+
+                // Check if we have enough flash sale quantity
+                if (flashSaleItem.FlashSaleQuantity < quantity)
+                {
+                    Console.WriteLine($"⚠️ Insufficient flash sale quantity for item {flashSaleItemId}. Available: {flashSaleItem.FlashSaleQuantity}, Requested: {quantity}");
+                    // Still decrease to 0 to prevent negative
+                    flashSaleItem.FlashSaleQuantity = 0;
+                }
+                else
+                {
+                    flashSaleItem.FlashSaleQuantity -= quantity;
+                }
+
+                _unitOfWork.FlashSaleItem.Update(flashSaleItem);
+                _unitOfWork.save();
+
+                Console.WriteLine($"🔥 Flash sale quantity deducted for item {flashSaleItemId}: {quantity} units. Remaining: {flashSaleItem.FlashSaleQuantity}");
+                
+                // Log if flash sale item is now sold out
+                if (flashSaleItem.FlashSaleQuantity == 0)
+                {
+                    Console.WriteLine($"🔥💥 Flash sale item {flashSaleItemId} ({flashSaleItem.Product?.Title}) is now SOLD OUT!");
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deducting flash sale quantity for item {flashSaleItemId}: {ex.Message}");
+                return false;
             }
         }
 

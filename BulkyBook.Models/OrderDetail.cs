@@ -27,5 +27,14 @@ namespace BulkyBook.Models
 
         public int Count { get; set; }
         public double Price { get; set; }
+
+        // Flash Sale Support
+        public int? FlashSaleItemId { get; set; }
+        [ForeignKey(nameof(FlashSaleItemId))]
+        [ValidateNever]
+        public FlashSaleItem FlashSaleItem { get; set; }
+
+        [NotMapped]
+        public bool IsFromFlashSale => FlashSaleItemId.HasValue;
     }
 }
