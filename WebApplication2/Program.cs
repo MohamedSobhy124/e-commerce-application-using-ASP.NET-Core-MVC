@@ -19,6 +19,9 @@ var builder = WebApplication.CreateBuilder(args);
             .AddViewLocalization()
             .AddDataAnnotationsLocalization();
         
+        // Add Response Caching for performance
+        builder.Services.AddResponseCaching();
+        
         // Configure Localization
         builder.Services.AddLocalization();
         
@@ -49,6 +52,8 @@ var builder = WebApplication.CreateBuilder(args);
 IServiceCollection serviceCollection = builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+builder.Services.Configure<TappySettings>(builder.Configuration.GetSection("Tappy"));
+builder.Services.Configure<TamaraSettings>(builder.Configuration.GetSection("Tamara"));
 builder.Services.Configure<WhatsAppSettings>(builder.Configuration.GetSection("WhatsApp"));
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDBContext>().AddDefaultTokenProviders();
@@ -90,10 +95,20 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-    app.UseExceptionHandler("/Home/Error");
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+    else
+    {
+        app.UseExceptionHandler("/Customer/Home/Error");
+    }
  
 
 app.UseStaticFiles();
+
+// Use Response Caching (must be before UseRouting)
+app.UseResponseCaching();
 
 // Configure Request Localization
 var localizationOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;

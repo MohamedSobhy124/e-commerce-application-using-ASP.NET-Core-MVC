@@ -5,6 +5,7 @@ using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Stripe.Checkout;
 using System.Security.Claims;
 
@@ -16,13 +17,17 @@ namespace BulkyBook.Areas.Customer.Controllers
         private readonly IUnitOfWork _unitOfWork;
 		private readonly IEmailSender _emailSender;
 		private readonly BulkyBook.Services.INotificationService _notificationService;
+		private readonly TappySettings _tappySettings;
+		private readonly TamaraSettings _tamaraSettings;
 		public ShoppingCartVM  ShoppingCartVM { get; set; }
 
-        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, BulkyBook.Services.INotificationService notificationService) 
+        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, BulkyBook.Services.INotificationService notificationService, IOptions<TappySettings> tappySettings, IOptions<TamaraSettings> tamaraSettings) 
         {
          _unitOfWork = unitOfWork;
 			_emailSender = emailSender;
 			_notificationService = notificationService;
+			_tappySettings = tappySettings.Value;
+			_tamaraSettings = tamaraSettings.Value;
         }
         public IActionResult Index()
         {
@@ -259,7 +264,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
 		[HttpPost]
 		[ActionName("Summary")]
-		public IActionResult SummaryPOST(ShoppingCartVM ShoppingCartVM)
+		public async Task<IActionResult> SummaryPOST(ShoppingCartVM ShoppingCartVM)
 		{
 			IEnumerable<ShoppingCart> cartList;
 			bool isGuest = !User.Identity.IsAuthenticated;
@@ -346,42 +351,186 @@ namespace BulkyBook.Areas.Customer.Controllers
 				if (isGuest || applicationUser.CompanyId.GetValueOrDefault() == 0)
 				{
 					//it is a guest or regular customer account and we need to capture payment
-					//stripe logic
 					var domain = Request.Scheme + "://" + Request.Host.Value + "/";
-					var options = new SessionCreateOptions
+					
+					// Check payment method
+					if (ShoppingCartVM.OrderHeader.PaymentMethod == SD.PaymentMethodTappy)
 					{
-						SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
-						CancelUrl = domain + "customer/cart/index",
-						LineItems = new List<SessionLineItemOptions>(),
-						Mode = "payment",
-					};
-
-					foreach (var item in ShoppingCartVM.ShoppingCartList)
-					{
-						var sessionLineItem = new SessionLineItemOptions
+						// Tappy payment logic
+						if (_tappySettings.Enabled)
 						{
-							PriceData = new SessionLineItemPriceDataOptions
+							// Store payment method
+							var orderHeader = _unitOfWork.OrderHeader.Get(o => o.Id == ShoppingCartVM.OrderHeader.Id);
+							orderHeader.PaymentMethod = SD.PaymentMethodTappy;
+							_unitOfWork.OrderHeader.Update(orderHeader);
+							_unitOfWork.save();
+							
+							// Create Tappy payment
+							var tappyHelper = new TappyHelper(_tappySettings);
+							var tappyRequest = new TappyPaymentRequest
 							{
-								UnitAmount = (long)(item.Price * 100), // $20.50 => 2050
+								MerchantId = _tappySettings.MerchantId,
+								Amount = (decimal)ShoppingCartVM.OrderHeader.OrderTotal,
 								Currency = "AED",
-								ProductData = new SessionLineItemPriceDataProductDataOptions
-								{
-									Name = item.product.Title
-								}
-							},
-							Quantity = item.Count
-						};
-						options.LineItems.Add(sessionLineItem);
+								OrderId = ShoppingCartVM.OrderHeader.Id.ToString(),
+								CustomerName = ShoppingCartVM.OrderHeader.Name,
+								CustomerEmail = ShoppingCartVM.OrderHeader.Email ?? "",
+								CustomerPhone = ShoppingCartVM.OrderHeader.PhoneNumber,
+								ReturnUrl = domain + $"customer/cart/TappyCallback?orderId={ShoppingCartVM.OrderHeader.Id}",
+								CancelUrl = domain + "customer/cart/index",
+								Description = $"Order #{ShoppingCartVM.OrderHeader.Id} - {ShoppingCartVM.ShoppingCartList.Count()} items"
+							};
+
+							var tappyResponse = await tappyHelper.CreatePaymentAsync(tappyRequest);
+							
+							if (tappyResponse.Success && !string.IsNullOrEmpty(tappyResponse.PaymentUrl))
+							{
+								// Store Tappy transaction ID
+								orderHeader.SessionId = tappyResponse.TransactionId;
+								_unitOfWork.OrderHeader.Update(orderHeader);
+								_unitOfWork.save();
+								
+								// Redirect to Tappy payment page
+								Response.Headers.Add("Location", tappyResponse.PaymentUrl);
+								return new StatusCodeResult(303);
+							}
+							else
+							{
+								TempData["error"] = "Failed to create Tappy payment: " + tappyResponse.Message;
+								return RedirectToAction("Summary");
+							}
+						}
+						else
+						{
+							TempData["error"] = "Tappy payment is currently unavailable";
+							return RedirectToAction("Summary");
+						}
 					}
+					else if (ShoppingCartVM.OrderHeader.PaymentMethod == SD.PaymentMethodTamara)
+					{
+						// Tamara payment logic (Buy Now, Pay Later)
+						if (_tamaraSettings.Enabled)
+						{
+							// Store payment method
+							var orderHeader = _unitOfWork.OrderHeader.Get(o => o.Id == ShoppingCartVM.OrderHeader.Id);
+							orderHeader.PaymentMethod = SD.PaymentMethodTamara;
+							_unitOfWork.OrderHeader.Update(orderHeader);
+							_unitOfWork.save();
+							
+							// Create Tamara checkout
+							var tamaraHelper = new TamaraHelper(_tamaraSettings);
+							
+							// Split customer name
+							var nameParts = ShoppingCartVM.OrderHeader.Name.Split(' ', 2);
+							var firstName = nameParts[0];
+							var lastName = nameParts.Length > 1 ? nameParts[1] : "";
+							
+							var tamaraRequest = new TamaraPaymentRequest
+							{
+								OrderReferenceId = ShoppingCartVM.OrderHeader.Id.ToString(),
+								TotalAmount = new TamaraAmount
+								{
+									Amount = (decimal)ShoppingCartVM.OrderHeader.OrderTotal,
+									Currency = "AED"
+								},
+								Description = $"Order #{ShoppingCartVM.OrderHeader.Id}",
+								CountryCode = "AE",
+								PaymentType = "PAY_BY_INSTALMENTS",
+								Locale = "en_US",
+								MerchantUrl = new TamaraMerchantUrl
+								{
+									Success = domain + $"customer/cart/TamaraCallback?orderId={ShoppingCartVM.OrderHeader.Id}&status=success",
+									Failure = domain + $"customer/cart/TamaraCallback?orderId={ShoppingCartVM.OrderHeader.Id}&status=failure",
+									Cancel = domain + "customer/cart/index",
+									Notification = domain + $"customer/cart/TamaraNotification"
+								},
+								Consumer = new TamaraConsumer
+								{
+									FirstName = firstName,
+									LastName = lastName,
+									PhoneNumber = ShoppingCartVM.OrderHeader.PhoneNumber,
+									Email = ShoppingCartVM.OrderHeader.Email ?? ""
+								},
+								Items = ShoppingCartVM.ShoppingCartList.Select(item => new TamaraItem
+								{
+									ReferenceId = item.ProductId.ToString(),
+									Name = item.product.Title,
+									Quantity = item.Count,
+									TotalAmount = new TamaraAmount
+									{
+										Amount = (decimal)(item.Price * item.Count),
+										Currency = "AED"
+									}
+								}).ToList()
+							};
 
+							var tamaraResponse = await tamaraHelper.CreateCheckoutAsync(tamaraRequest);
+							
+							if (tamaraResponse.Success && !string.IsNullOrEmpty(tamaraResponse.CheckoutUrl))
+							{
+								// Store Tamara checkout ID
+								orderHeader.SessionId = tamaraResponse.CheckoutId;
+								_unitOfWork.OrderHeader.Update(orderHeader);
+								_unitOfWork.save();
+								
+								// Redirect to Tamara checkout page
+								Response.Headers.Add("Location", tamaraResponse.CheckoutUrl);
+								return new StatusCodeResult(303);
+							}
+							else
+							{
+								TempData["error"] = "Failed to create Tamara checkout: " + tamaraResponse.Message;
+								return RedirectToAction("Summary");
+							}
+						}
+						else
+						{
+							TempData["error"] = "Tamara payment is currently unavailable";
+							return RedirectToAction("Summary");
+						}
+					}
+					else
+					{
+						// Stripe payment logic (default)
+						var options = new SessionCreateOptions
+						{
+							SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
+							CancelUrl = domain + "customer/cart/index",
+							LineItems = new List<SessionLineItemOptions>(),
+							Mode = "payment",
+						};
 
-					var service = new SessionService();
-					Session session = service.Create(options);
-					_unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
-					_unitOfWork.save();
-					Response.Headers.Add("Location", session.Url);
-					return new StatusCodeResult(303);
+						foreach (var item in ShoppingCartVM.ShoppingCartList)
+						{
+							var sessionLineItem = new SessionLineItemOptions
+							{
+								PriceData = new SessionLineItemPriceDataOptions
+								{
+									UnitAmount = (long)(item.Price * 100), // $20.50 => 2050
+									Currency = "AED",
+									ProductData = new SessionLineItemPriceDataProductDataOptions
+									{
+										Name = item.product.Title
+									}
+								},
+								Quantity = item.Count
+							};
+							options.LineItems.Add(sessionLineItem);
+						}
 
+						var service = new SessionService();
+						Session session = service.Create(options);
+						
+						// Store payment method and Stripe info
+						_unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
+						var orderHeader = _unitOfWork.OrderHeader.Get(o => o.Id == ShoppingCartVM.OrderHeader.Id);
+						orderHeader.PaymentMethod = SD.PaymentMethodStripe;
+						_unitOfWork.OrderHeader.Update(orderHeader);
+						_unitOfWork.save();
+						
+						Response.Headers.Add("Location", session.Url);
+						return new StatusCodeResult(303);
+					}
 				}
 
 				return RedirectToAction(nameof(OrderConfirmation), new { id = ShoppingCartVM.OrderHeader.Id });
@@ -391,6 +540,106 @@ namespace BulkyBook.Areas.Customer.Controllers
 			return RedirectToAction(nameof(Index),"Home");
 		}
 
+
+		// Tappy Payment Callback
+		public async Task<IActionResult> TappyCallback(int orderId, string status = "")
+		{
+			var orderHeader = _unitOfWork.OrderHeader.Get(o => o.Id == orderId);
+			
+			if (orderHeader == null)
+			{
+				TempData["error"] = "Order not found";
+				return RedirectToAction("Index", "Home");
+			}
+
+			// Verify payment with Tappy API
+			if (!string.IsNullOrEmpty(orderHeader.SessionId))
+			{
+				var tappyHelper = new TappyHelper(_tappySettings);
+				var verificationResponse = await tappyHelper.VerifyPaymentAsync(orderHeader.SessionId);
+				
+				if (verificationResponse.Success && verificationResponse.IsPaid)
+				{
+					// Payment successful
+					_unitOfWork.OrderHeader.UpdateStatus(orderId, SD.StatusPaid, SD.PaymentStatusPaid);
+					orderHeader.PaymentDate = DateTime.Now;
+					_unitOfWork.OrderHeader.Update(orderHeader);
+					_unitOfWork.save();
+					
+					return RedirectToAction(nameof(OrderConfirmation), new { id = orderId });
+				}
+				else
+				{
+					// Payment failed or pending
+					TempData["error"] = "Payment verification failed. Please contact support with your order ID: " + orderId;
+					return RedirectToAction("Index", "Home");
+				}
+			}
+			else
+			{
+				TempData["error"] = "Invalid payment session";
+				return RedirectToAction("Index", "Home");
+			}
+		}
+
+		// Tamara Payment Callback
+		public async Task<IActionResult> TamaraCallback(int orderId, string status = "")
+		{
+			var orderHeader = _unitOfWork.OrderHeader.Get(o => o.Id == orderId);
+			
+			if (orderHeader == null)
+			{
+				TempData["error"] = "Order not found";
+				return RedirectToAction("Index", "Home");
+			}
+
+			if (status == "success" && !string.IsNullOrEmpty(orderHeader.SessionId))
+			{
+				// Authorize the order with Tamara
+				var tamaraHelper = new TamaraHelper(_tamaraSettings);
+				var authResponse = await tamaraHelper.AuthorizeOrderAsync(orderHeader.SessionId);
+				
+				if (authResponse.Success)
+				{
+					// Get order details to verify
+					var orderDetails = await tamaraHelper.GetOrderDetailsAsync(orderHeader.SessionId);
+					
+					if (orderDetails.Success && orderDetails.PaymentStatus?.ToLower() == "approved")
+					{
+						// Payment successful
+						_unitOfWork.OrderHeader.UpdateStatus(orderId, SD.StatusPaid, SD.PaymentStatusPaid);
+						orderHeader.PaymentDate = DateTime.Now;
+						_unitOfWork.OrderHeader.Update(orderHeader);
+						_unitOfWork.save();
+						
+						return RedirectToAction(nameof(OrderConfirmation), new { id = orderId });
+					}
+				}
+				
+				// Payment not authorized
+				TempData["error"] = "Payment authorization failed. Please contact support with your order ID: " + orderId;
+				return RedirectToAction("Index", "Home");
+			}
+			else if (status == "failure")
+			{
+				TempData["error"] = "Payment was declined. Please try again with a different payment method.";
+				return RedirectToAction("Summary");
+			}
+			else
+			{
+				TempData["info"] = "Payment was cancelled";
+				return RedirectToAction("Index", "Cart");
+			}
+		}
+
+		// Tamara Notification Webhook (for async notifications)
+		[HttpPost]
+		public async Task<IActionResult> TamaraNotification()
+		{
+			// Handle Tamara webhook notification
+			// This is called by Tamara to notify about payment status changes
+			return Ok();
+		}
 
 		public async Task<IActionResult> OrderConfirmation(int id)
 		{
@@ -412,16 +661,21 @@ namespace BulkyBook.Areas.Customer.Controllers
 			if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
 			{
 				//this is an order by customer
-
-				var service = new SessionService();
-				Session session = service.Get(orderHeader.SessionId);
-
-				if (session.PaymentStatus.ToLower() == "paid")
+				
+				// Handle Stripe payment verification
+				if (orderHeader.PaymentMethod == SD.PaymentMethodStripe)
 				{
-					_unitOfWork.OrderHeader.UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
-					_unitOfWork.OrderHeader.UpdateStatus(id, SD.StatusPaid, SD.PaymentStatusPaid);
-					_unitOfWork.save();
+					var service = new SessionService();
+					Session session = service.Get(orderHeader.SessionId);
+
+					if (session.PaymentStatus.ToLower() == "paid")
+					{
+						_unitOfWork.OrderHeader.UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
+						_unitOfWork.OrderHeader.UpdateStatus(id, SD.StatusPaid, SD.PaymentStatusPaid);
+						_unitOfWork.save();
+					}
 				}
+				// Tappy and Tamara payments are already verified in their respective callbacks
 				//HttpContext.Session.Clear();
 
 			}

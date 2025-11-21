@@ -215,10 +215,7 @@ main {
         background-color: rgba(124, 58, 237, 0.3);
         color: var(--white);
     }
-
-    body {
-        padding-top: 60px;
-    }
+ 
 }
 
 @media (max-width: 576px) {

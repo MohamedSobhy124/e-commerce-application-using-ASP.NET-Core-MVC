@@ -13,22 +13,28 @@ namespace BulkyBookWeb.ViewComponents {
 
         public async Task<IViewComponentResult> InvokeAsync() 
         {
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+            int count = 0;
 
-            if (claim != null) {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
 
-                //if (HttpContext.Session.GetInt32(SD.SessionCart) == null) {
-                //    HttpContext.Session.SetInt32(SD.SessionCart,
-                  var count=  _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == claim.Value).Count();
-                //}
-                
-                return View(count);
+                if (claim != null)
+                {
+                    // Authenticated user - get total count from database
+                    var cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == claim.Value);
+                    count = cartItems.Sum(c => c.Count);
+                }
             }
-            else {
-                //HttpContext.Session.Clear();
-                return View(0);
+            else
+            {
+                // Guest user - get total count from session
+                var guestCart = GuestCartHelper.GetGuestCart(HttpContext.Session);
+                count = guestCart.Sum(gc => gc.Count);
             }
+            
+            return View(count);
         }
 
     }

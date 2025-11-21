@@ -863,4 +863,22 @@
     <value>شريكك الموثوق للصحة والعافية، نوفر لك مكملات غذائية فاخرة ووجبات خفيفة صحية.
 حقق وزنك المثالي وصحتك الأفضل مع ايديال وايت</value>
   </data>
+  <data name="PriceRange" xml:space="preserve">
+    <value>سعر ما بين </value>
+  </data>
+  <data name="Max" xml:space="preserve">
+    <value>أعلى</value>
+  </data>
+  <data name="Min" xml:space="preserve">
+    <value>أقل</value>
+  </data>
+  <data name="Availability" xml:space="preserve">
+    <value>الاتاحة</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>الكل</value>
+  </data>
+  <data name="ApplyFilters" xml:space="preserve">
+    <value>تطبيق الفلتر</value>
+  </data>
 </root>

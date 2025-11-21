@@ -30,6 +30,11 @@ namespace BulkyBook.Utility
 		public const string PaymentStatusDelayedPayment = "ApprovedForDelayedPayment";
 		public const string PaymentStatusRejected = "Rejected";
 
+		// Payment Methods
+		public const string PaymentMethodStripe = "Stripe";
+		public const string PaymentMethodTappy = "Tappy";
+		public const string PaymentMethodTamara = "Tamara";
+
 
 		public const string SessionCart = "SessionShoppingCart";
 
