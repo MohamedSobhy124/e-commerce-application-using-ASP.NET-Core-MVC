@@ -133,10 +133,31 @@ namespace BulkyBook.Areas.Customer.Controllers
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
                 var cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId);
                 ViewBag.CartProductIds = cartItems.Select(c => c.ProductId).ToList();
+                
+                // Get wishlist product IDs for authenticated users
+                try
+                {
+                    // Check if wishlist repository exists by trying to access it
+                    if (_unitOfWork.wishlist != null)
+                    {
+                        var wishlistItems = _unitOfWork.wishlist.GetAll(u => u.ApplicationUserId == userId);
+                        ViewBag.WishlistProductIds = wishlistItems.Select(w => w.ProductId).ToList();
+                    }
+                    else
+                    {
+                        ViewBag.WishlistProductIds = new List<int>();
+                    }
+                }
+                catch
+                {
+                    // Wishlist repository not set up yet
+                    ViewBag.WishlistProductIds = new List<int>();
+                }
             }
             else
             {
                 ViewBag.CartProductIds = new List<int>();
+                ViewBag.WishlistProductIds = new List<int>();
             }
             
             return View(ProductList);
@@ -389,6 +410,159 @@ namespace BulkyBook.Areas.Customer.Controllers
             }
             
             return Json(new { productIds = productIds });
+        }
+
+        // ==========================================
+        // WISHLIST ACTIONS
+        // ==========================================
+        [HttpPost]
+        [Authorize]
+        public IActionResult ToggleWishlist(int productId)
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Json(new { success = false, message = "Please login to use wishlist", requiresLogin = true });
+            }
+
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            // Check if Wishlist repository exists and use it
+            try
+            {
+                var existingWishlist = _unitOfWork.wishlist.Get(w => w.ProductId == productId && w.ApplicationUserId == userId);
+                
+                string message;
+                bool isAdded;
+
+                if (existingWishlist != null)
+                {
+                    // Remove from wishlist
+                    _unitOfWork.wishlist.Remove(existingWishlist);
+                    _unitOfWork.save();
+                    message = "Removed from wishlist";
+                    isAdded = false;
+                }
+                else
+                {
+                    // Add to wishlist
+                    var wishlistItem = new Wishlist
+                    {
+                        ProductId = productId,
+                        ApplicationUserId = userId
+                    };
+                    _unitOfWork.wishlist.Add(wishlistItem);
+                    _unitOfWork.save();
+                    message = "Added to wishlist! ❤️";
+                    isAdded = true;
+                }
+
+                // Get wishlist count
+                var wishlistItems = _unitOfWork.wishlist.GetAll(w => w.ApplicationUserId == userId);
+                int wishlistCount = wishlistItems.Count();
+
+                return Json(new { success = true, message = message, isAdded = isAdded, wishlistCount = wishlistCount });
+            }
+            catch (Exception ex)
+            {
+                // Wishlist repository doesn't exist yet
+                return Json(new { success = false, message = "Wishlist feature is being set up. Please make sure all repository files are created.", requiresLogin = false });
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult GetWishlistItems()
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Json(new { success = false, items = new List<object>(), count = 0 });
+            }
+
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            try
+            {
+                var wishlistItems = _unitOfWork.wishlist.GetAll(w => w.ApplicationUserId == userId, 
+                    includeProperties: "product,product.ProductImages").ToList();
+
+                var items = wishlistItems.Select(item => new
+                {
+                    id = item.Id,
+                    productId = item.ProductId,
+                    title = item.product.Title,
+                    imageUrl = item.product.ProductImages?.FirstOrDefault()?.ImageUrl ?? item.product.ImageUrl ?? "/images/no-image.png",
+                    price = (double)item.product.Price,
+                    listPrice = item.product.ListPrice > 0 ? (double?)item.product.ListPrice : null
+                }).ToList();
+
+                return Json(new { success = true, items = items, count = items.Count });
+            }
+            catch
+            {
+                return Json(new { success = false, items = new List<object>(), count = 0 });
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult GetWishlistProductIds()
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Json(new { productIds = new List<int>() });
+            }
+
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            try
+            {
+                var wishlistItems = _unitOfWork.wishlist.GetAll(w => w.ApplicationUserId == userId);
+                if (wishlistItems != null)
+                {
+                    var productIds = wishlistItems.Select(w => w.ProductId).ToList();
+                    return Json(new { productIds = productIds });
+                }
+                return Json(new { productIds = new List<int>() });
+            }
+            catch
+            {
+                return Json(new { productIds = new List<int>() });
+            }
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public IActionResult RemoveFromWishlist(int wishlistId)
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Json(new { success = false, message = "Please login" });
+            }
+
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            try
+            {
+                var wishlistItem = _unitOfWork.wishlist.Get(w => w.Id == wishlistId && w.ApplicationUserId == userId);
+                if (wishlistItem != null)
+                {
+                    _unitOfWork.wishlist.Remove(wishlistItem);
+                    _unitOfWork.save();
+                    
+                    var wishlistItems = _unitOfWork.wishlist.GetAll(w => w.ApplicationUserId == userId);
+                    int wishlistCount = wishlistItems != null ? wishlistItems.Count() : 0;
+                    return Json(new { success = true, message = "Removed from wishlist", wishlistCount = wishlistCount });
+                }
+                return Json(new { success = false, message = "Item not found" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error removing item: {ex.Message}" });
+            }
         }
         
         public IActionResult Details(int productId)

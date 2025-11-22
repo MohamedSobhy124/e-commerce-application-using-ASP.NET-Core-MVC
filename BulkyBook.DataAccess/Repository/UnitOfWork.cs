@@ -1,5 +1,6 @@
 ﻿using BulkyBook.DataAccess.Data;
 using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +28,7 @@ namespace BulkyBook.DataAccess.Repository
         public IFlashSaleItemRepository FlashSaleItem { get; private set; }
         public IPromoCodeRepository PromoCode { get; private set; }
         public IPromoCodeUsageRepository PromoCodeUsage { get; private set; }
+        public IWishlistRepository wishlist { get; private set; }
 
         public UnitOfWork(ApplicationDBContext db) 
         {
@@ -44,6 +46,7 @@ namespace BulkyBook.DataAccess.Repository
             FlashSaleItem = new FlashSaleItemRepository(_db);
             PromoCode = new PromoCodeRepository(_db);
             PromoCodeUsage = new PromoCodeUsageRepository(_db);
+            wishlist = new WishlistRepository(_db);
 
         }
 

@@ -255,7 +255,7 @@
     letter-spacing: 1px;
     position: absolute;
     top: 0.5rem;
-    right: 0.5rem;
+    left: 0.5rem;
     z-index: 10;
     animation: trendingShake 0.5s ease-in-out infinite;
 }

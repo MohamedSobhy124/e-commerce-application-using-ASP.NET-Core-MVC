@@ -112,59 +112,179 @@
     }
 
     // ========================================
-    // 2. WISHLIST HEART ANIMATION
+    // 2. WISHLIST FUNCTIONALITY (Logged-in users only)
     // ========================================
     function initWishlist() {
-        document.querySelectorAll('.product-card').forEach(card => {
-            const wishlistBtn = document.createElement('button');
-            wishlistBtn.className = 'wishlist-btn';
-            wishlistBtn.innerHTML = '<i class="bi bi-heart"></i>';
-            wishlistBtn.style.cssText = `
-                position: absolute;
-                top: 1rem;
-                right: 1rem;
-                z-index: 10;
-            `;
-            
-            const imageWrapper = card.querySelector('.product-image-wrapper');
-            if (imageWrapper) {
-                imageWrapper.appendChild(wishlistBtn);
-                
-                wishlistBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleWishlist(wishlistBtn);
-                });
-            }
-        });
+        // Wishlist buttons are now rendered server-side for logged-in users
+        // Just initialize any additional functionality here
+        
+        // Load wishlist items on page load if user is authenticated
+        const isAuthenticated = document.body.getAttribute('data-is-authenticated') === 'true' || 
+                                typeof window.isAuthenticated !== 'undefined' && window.isAuthenticated;
+        
+        if (isAuthenticated) {
+            loadWishlistItems();
+            loadWishlistCount();
+        }
+    }
+    
+    // Load wishlist items
+    function loadWishlistItems() {
+        fetch('/Customer/Home/GetWishlistItems')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateFloatingWishlistBadge(data.count);
+                    // Update wishlist buttons on page
+                    data.items.forEach(item => {
+                        const btn = document.querySelector(`.wishlist-btn[data-product-id="${item.productId}"]`);
+                        if (btn) {
+                            btn.classList.add('active');
+                            btn.querySelector('i').className = 'bi bi-heart-fill';
+                            btn.title = 'Remove from wishlist';
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error loading wishlist:', error));
+    }
+    
+    // Load wishlist count
+    function loadWishlistCount() {
+        fetch('/Customer/Home/GetWishlistProductIds')
+            .then(response => response.json())
+            .then(data => {
+                if (data.productIds) {
+                    updateFloatingWishlistBadge(data.productIds.length);
+                }
+            })
+            .catch(error => console.error('Error loading wishlist count:', error));
     }
 
-    function toggleWishlist(btn) {
-        btn.classList.toggle('active');
-        const isActive = btn.classList.contains('active');
+    // Global function for wishlist toggle (called from onclick in view)
+    window.toggleWishlist = function(productId, btn) {
+        // Check if user is authenticated
+        const isAuthenticated = document.body.getAttribute('data-is-authenticated') === 'true' || 
+                                typeof window.isAuthenticated !== 'undefined' && window.isAuthenticated;
         
-        if (isActive) {
-            // Change icon to filled
-            btn.querySelector('i').className = 'bi bi-heart-fill';
-            
-            // Create particles
-            for (let i = 0; i < 6; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'wishlist-particle';
-                const angle = (Math.PI * 2 * i) / 6;
-                const distance = 30;
-                particle.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
-                particle.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
-                btn.appendChild(particle);
-                
-                setTimeout(() => particle.remove(), 1000);
+        if (!isAuthenticated) {
+            if (typeof toastr !== 'undefined') {
+                toastr.warning('Please login to use wishlist');
+            } else {
+                alert('Please login to use wishlist');
             }
+            return;
+        }
+
+        const isCurrentlyActive = btn.classList.contains('active');
+        const originalIcon = btn.querySelector('i').className;
+        
+        // Show loading state
+        btn.disabled = true;
+        btn.querySelector('i').className = 'bi bi-arrow-repeat';
+        btn.querySelector('i').style.animation = 'spin 1s linear infinite';
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        const formData = new FormData();
+        formData.append('productId', productId);
+        formData.append('__RequestVerificationToken', token);
+
+        fetch('/Customer/Home/ToggleWishlist', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.querySelector('i').style.animation = '';
             
-            // Show notification
-            showNotification('Added to wishlist! ❤️');
-        } else {
-            btn.querySelector('i').className = 'bi bi-heart';
-            showNotification('Removed from wishlist');
+            if (data.success) {
+                if (data.isAdded) {
+                    // Product was added to wishlist
+                    btn.classList.add('active');
+                    btn.querySelector('i').className = 'bi bi-heart-fill';
+                    btn.title = 'Remove from wishlist';
+                    
+                    // Create particles
+                    for (let i = 0; i < 6; i++) {
+                        const particle = document.createElement('div');
+                        particle.className = 'wishlist-particle';
+                        const angle = (Math.PI * 2 * i) / 6;
+                        const distance = 30;
+                        particle.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
+                        particle.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
+                        btn.appendChild(particle);
+                        setTimeout(() => particle.remove(), 1000);
+                    }
+                    
+                    // Update floating wishlist badge
+                    updateFloatingWishlistBadge(data.wishlistCount);
+                    
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success(data.message);
+                    }
+                } else {
+                    // Product was removed from wishlist
+                    btn.classList.remove('active');
+                    btn.querySelector('i').className = 'bi bi-heart';
+                    btn.title = 'Add to wishlist';
+                    
+                    // Update floating wishlist badge
+                    updateFloatingWishlistBadge(data.wishlistCount);
+                    
+                    if (typeof toastr !== 'undefined') {
+                        toastr.info(data.message);
+                    }
+                }
+            } else {
+                // Error handling
+                if (data.requiresLogin) {
+                    if (typeof toastr !== 'undefined') {
+                        toastr.warning(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                } else {
+                    btn.querySelector('i').className = originalIcon;
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error(data.message || 'Failed to update wishlist');
+                    } else {
+                        alert(data.message || 'Failed to update wishlist');
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            btn.disabled = false;
+            btn.querySelector('i').className = originalIcon;
+            btn.querySelector('i').style.animation = '';
+            if (typeof toastr !== 'undefined') {
+                toastr.error('Failed to update wishlist. Please try again.');
+            } else {
+                alert('Failed to update wishlist. Please try again.');
+            }
+        });
+    };
+
+    // Function to update floating wishlist badge
+    function updateFloatingWishlistBadge(count) {
+        const floatingBadge = document.getElementById('floatingWishlistBadge');
+        const floatingBtn = document.querySelector('.floating-wishlist-btn');
+        if (floatingBadge) {
+            floatingBadge.textContent = count;
+            if (count > 0) {
+                floatingBadge.style.display = 'flex';
+            } else {
+                floatingBadge.style.display = 'none';
+            }
+            // Add pulse animation
+            if (floatingBtn) {
+                floatingBtn.classList.add('pulse');
+                setTimeout(() => {
+                    floatingBtn.classList.remove('pulse');
+                }, 600);
+            }
         }
     }
 
