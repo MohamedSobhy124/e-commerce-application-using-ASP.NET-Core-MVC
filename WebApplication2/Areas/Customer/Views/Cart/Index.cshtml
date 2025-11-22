@@ -23,10 +23,27 @@
 
                 @foreach(var item in Model.ShoppingCartList)
                 {
+                     
+                        // Get product image - check ProductImages first, then fallback to ImageUrl
+                        string productImageUrl = null;
+                        if (item.product.ProductImages != null && item.product.ProductImages.Any())
+                        {
+                            var firstImage = item.product.ProductImages.OrderBy(pi => pi.DisplayOrder).FirstOrDefault();
+                            productImageUrl = firstImage?.ImageUrl;
+                        }
+                        if (string.IsNullOrEmpty(productImageUrl))
+                        {
+                            productImageUrl = item.product.ImageUrl;
+                        }
+                        if (string.IsNullOrEmpty(productImageUrl))
+                        {
+                            productImageUrl = "/images/no-image.png";
+                        }
+                    
                     <div class="cart-item-card">
                         <div class="row d-flex justify-content-between align-items-center">
                             <div class="col-md-2 col-lg-2 col-xl-2">
-                                <img src="@item.product.ImageUrl" class="cart-item-image" alt="@item.product.Title">
+                                <img src="@productImageUrl" class="cart-item-image" alt="@item.product.Title">
                             </div>
                             <div class="col-md-3 col-lg-3 col-xl-3">
                                 <p class="cart-item-title">@item.product.Title</p>

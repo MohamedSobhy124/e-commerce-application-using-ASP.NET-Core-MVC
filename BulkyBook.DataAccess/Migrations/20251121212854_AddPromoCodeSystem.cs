@@ -11,9 +11,9 @@ namespace BulkyBook.DataAccess.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ShoppingCarts_FlashSaleItems_FlashSaleItemId",
-                table: "ShoppingCarts");
+            //migrationBuilder.DropForeignKey(
+            //    name: "FK_ShoppingCarts_FlashSaleItems_FlashSaleItemId",
+            //    table: "ShoppingCarts");
 
             migrationBuilder.AlterColumn<int>(
                 name: "FlashSaleItemId",
@@ -134,12 +134,12 @@ namespace BulkyBook.DataAccess.Migrations
                 principalTable: "PromoCodes",
                 principalColumn: "Id");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_ShoppingCarts_FlashSaleItems_FlashSaleItemId",
-                table: "ShoppingCarts",
-                column: "FlashSaleItemId",
-                principalTable: "FlashSaleItems",
-                principalColumn: "Id");
+            //migrationBuilder.AddForeignKey(
+            //    name: "FK_ShoppingCarts_FlashSaleItems_FlashSaleItemId",
+            //    table: "ShoppingCarts",
+            //    column: "FlashSaleItemId",
+            //    principalTable: "FlashSaleItems",
+            //    principalColumn: "Id");
         }
 
         /// <inheritdoc />

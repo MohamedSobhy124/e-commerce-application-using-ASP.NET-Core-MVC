@@ -243,6 +243,91 @@ function openCartSidebar() {
         console.error('Cart sidebar or overlay not found!');
     }
 }
+// Helper function to format currency
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-AE', {
+        style: 'currency',
+        currency: 'AED',
+        minimumFractionDigits: 2
+    }).format(amount);
+}
+
+// Helper function to get product image URL (handles null/empty images)
+function getProductImageUrl(imageUrl) {
+    if (!imageUrl || imageUrl.trim() === '') {
+        return '/images/no-image.png'; // Default placeholder image
+    }
+    return imageUrl;
+}
+
+// Create HTML for a cart item in the sidebar
+function createCartItemHTML(item) {
+    const imageUrl = getProductImageUrl(item.imageUrl);
+    const price = formatCurrency(item.price);
+    const total = formatCurrency(item.price * item.count);
+    
+    return `
+        <div class="cart-sidebar-item" data-cart-id="${item.cartId || ''}" data-product-id="${item.productId}">
+            <div class="cart-item-image-wrapper">
+                <img src="${imageUrl}" alt="${item.title}" class="cart-sidebar-item-image" 
+                     onerror="this.src='/images/no-image.png'">
+            </div>
+            <div class="cart-item-details">
+                <h6 class="cart-item-title">${item.title}</h6>
+                <div class="cart-item-meta">
+                    <span class="cart-item-quantity">Qty: ${item.count}</span>
+                    <span class="cart-item-price">${price}</span>
+                </div>
+                ${item.isFlashSale ? '<span class="badge bg-danger" style="font-size: 0.7rem; margin-top: 0.25rem;">Flash Sale</span>' : ''}
+            </div>
+            <button class="cart-item-remove" onclick="removeCartItem(${item.productId}, ${item.cartId || 'null'})" title="Remove">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    `;
+}
+
+// Remove item from cart
+function removeCartItem(productId, cartId) {
+    console.log('Removing cart item:', { productId, cartId });
+    
+    // Build URL based on whether we have cartId
+    let url = '/Customer/Cart/Remove';
+    if (cartId && cartId !== 'null') {
+        url += `?CartId=${cartId}&ProductId=${productId}`;
+    } else if (productId) {
+        url += `?ProductId=${productId}`;
+    } else {
+        console.error('Cannot remove item: missing productId');
+        return;
+    }
+
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // Reload cart items
+            loadCartItems();
+            // Show success message
+            if (typeof toastr !== 'undefined') {
+                toastr.success('Item removed from cart');
+            }
+        } else {
+            throw new Error('Failed to remove item');
+        }
+    })
+    .catch(error => {
+        console.error('Error removing cart item:', error);
+        if (typeof toastr !== 'undefined') {
+            toastr.error('Failed to remove item. Please try again.');
+        }
+    });
+}
+
 function loadCartItems() {
     console.log('loadCartItems called, isAuthenticated:', isAuthenticated);
 
