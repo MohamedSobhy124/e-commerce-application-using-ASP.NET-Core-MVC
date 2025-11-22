@@ -56,7 +56,7 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark">
+        <nav class="navbar navbar-expand-lg navbar-toggleable-lg navbar-dark">
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
                     <span style="font-family: Cairo;">@Localizer["IdealWeight"]</span>
@@ -64,12 +64,12 @@
                     <img src="~/images/Products/3.png" alt="Logo" class="img-fluid me-2" style="max-height: 40px;">
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav"
                 aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav me-auto">
+                <div class="navbar-collapse collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
                             <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Index">
                                 <i class="bi bi-house-door me-1"></i>@Localizer["Home"]
@@ -122,31 +122,29 @@
                                 </ul>
                             </li>
 
-                            <li class="nav-item">
-                                <div class="notification-bell-container">
-                                    <button id="notificationBell" class="notification-bell" onclick="toggleNotifications()">
-                                        <i class="bi bi-bell-fill"></i>
-                                        <span id="notificationBadge" class="notification-badge">0</span>
-                                        <span class="notification-dot" id="notificationDot"></span>
-                                    </button>
-                                    <div id="notificationDropdown" class="notification-dropdown">
-                                        <div class="notification-dropdown-header">
-                                            <h5 class="notification-dropdown-title">
-                                                <i class="bi bi-bell me-2"></i>@Localizer["Notifications"]
-                                            </h5>
-                                            <button class="mark-all-read-btn" onclick="markAllAsRead()">
-                                                @Localizer["MarkAllRead"]
-                                            </button>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle notification-nav-link" href="#" id="notificationDropdownToggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-bell-fill me-1"></i>@Localizer["Notifications"]
+                                    <span id="notificationBadge" class="notification-badge">0</span>
+                                    <span class="notification-dot" id="notificationDot"></span>
+                                </a>
+                                <div id="notificationDropdown" class="dropdown-menu notification-dropdown-menu" aria-labelledby="notificationDropdownToggle">
+                                    <div class="notification-dropdown-header">
+                                        <h5 class="notification-dropdown-title">
+                                            <i class="bi bi-bell me-2"></i>@Localizer["Notifications"]
+                                        </h5>
+                                        <button class="mark-all-read-btn" onclick="markAllAsRead(); event.stopPropagation();">
+                                            @Localizer["MarkAllRead"]
+                                        </button>
+                                    </div>
+                                    <div id="notificationList" class="notification-list">
+                                        <div class="notification-empty">
+                                            <i class="bi bi-bell-slash"></i>
+                                            <p>@Localizer["NoNotificationsYet"]</p>
                                         </div>
-                                        <div id="notificationList" class="notification-list">
-                                            <div class="notification-empty">
-                                                <i class="bi bi-bell-slash"></i>
-                                                <p>@Localizer["NoNotificationsYet"]</p>
-                                            </div>
-                                        </div>
-                                        <div class="notification-dropdown-footer">
-                                            <a href="#" class="view-all-notifications">@Localizer["ViewAllNotifications"]</a>
-                                        </div>
+                                    </div>
+                                    <div class="notification-dropdown-footer">
+                                        <a href="#" class="view-all-notifications">@Localizer["ViewAllNotifications"]</a>
                                     </div>
                                 </div>
                             </li>
@@ -328,6 +326,18 @@
 
     <!-- Back to Top Functionality -->
     <script>
+        // Initialize navbar toggler state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const navbarCollapse = document.querySelector('#navbarNav');
+            
+            if (navbarToggler && navbarCollapse) {
+                // Force collapsed state by default (shows hamburger)
+                navbarToggler.classList.add('collapsed');
+                navbarToggler.setAttribute('aria-expanded', 'false');
+            }
+        });
+        
         // Back to Top Button
         const backToTopBtn = document.getElementById('backToTopBtn');
         const navbar = document.querySelector('.navbar');
@@ -357,10 +367,61 @@
         });
         });
 
+        // Handle navbar toggle icon change (hamburger to X)
+        const navbarToggler = document.querySelector('.navbar-toggler');
+        const navbarCollapse = document.querySelector('#navbarNav');
+        
+        if (navbarToggler && navbarCollapse) {
+            // Initialize: Always ensure collapsed class and aria-expanded='false' on page load
+            // This ensures hamburger icon shows by default
+            function initializeToggler() {
+                // Force collapsed state on initial load
+                navbarToggler.classList.add('collapsed');
+                navbarToggler.setAttribute('aria-expanded', 'false');
+                console.log('Toggler initialized - should show hamburger');
+            }
+            
+            // Set initial state immediately and on load
+            initializeToggler();
+            window.addEventListener('load', initializeToggler);
+            
+            // Listen for Bootstrap collapse events
+            navbarCollapse.addEventListener('show.bs.collapse', function() {
+                // Menu opening - remove collapsed class (shows X)
+                navbarToggler.classList.remove('collapsed');
+                navbarToggler.setAttribute('aria-expanded', 'true');
+                console.log('Menu opening - showing X');
+            });
+            
+            navbarCollapse.addEventListener('shown.bs.collapse', function() {
+                // Menu fully open - ensure X icon
+                navbarToggler.classList.remove('collapsed');
+                navbarToggler.setAttribute('aria-expanded', 'true');
+            });
+            
+            navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                // Menu closing - add collapsed class (shows hamburger)
+                navbarToggler.classList.add('collapsed');
+                navbarToggler.setAttribute('aria-expanded', 'false');
+                console.log('Menu closing - showing hamburger');
+            });
+            
+            navbarCollapse.addEventListener('hidden.bs.collapse', function() {
+                // Menu fully closed - ensure hamburger icon
+                navbarToggler.classList.add('collapsed');
+                navbarToggler.setAttribute('aria-expanded', 'false');
+            });
+        }
+
         // Close mobile menu when clicking outside
         document.addEventListener('click', function(event) {
         const navbar = document.querySelector('.navbar-collapse');
         const toggler = document.querySelector('.navbar-toggler');
+
+        // Don't close if clicking on a dropdown toggle or inside a dropdown menu
+        if (event.target.closest('.dropdown-toggle') || event.target.closest('.dropdown-menu')) {
+        return;
+        }
 
         if (navbar && navbar.classList.contains('show')) {
         if (!navbar.contains(event.target) && !toggler.contains(event.target)) {
@@ -372,9 +433,13 @@
         }
         });
 
-        // Close mobile menu when clicking a link
+        // Close mobile menu when clicking a link (but not dropdown toggles)
         document.querySelectorAll('.navbar-nav .nav-link:not(.dropdown-toggle)').forEach(link => {
-        link.addEventListener('click', function() {
+        link.addEventListener('click', function(e) {
+        // Don't close if clicking on a dropdown toggle or inside a dropdown
+        if (e.target.closest('.dropdown-toggle') || e.target.closest('.dropdown-menu')) {
+        return;
+        }
         const navbar = document.querySelector('.navbar-collapse');
         if (navbar && navbar.classList.contains('show')) {
         const bsCollapse = new bootstrap.Collapse(navbar);

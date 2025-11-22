@@ -52,8 +52,23 @@
     box-shadow: none;
 }
 
+/* Default: Hamburger icon */
 .navbar-toggler-icon {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.85)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.85)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Ensure hamburger when collapsed (default/closed state) */
+.navbar-toggler.collapsed .navbar-toggler-icon,
+.navbar-toggler[aria-expanded='false'] .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.85)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+    background-size: 1em;
+}
+
+/* X icon ONLY when menu is explicitly open (NOT collapsed AND aria-expanded='true') */
+.navbar-toggler:not(.collapsed)[aria-expanded='true'] .navbar-toggler-icon,
+.navbar-toggler[aria-expanded='true']:not(.collapsed) .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") !important;
+    background-size: 1.5em;
 }
 
 .navbar-nav {
@@ -155,6 +170,19 @@
 
 main {
     min-height: calc(100vh - 132px);
+    padding-top: 80px;
+}
+
+@media (max-width: 991px) {
+    main {
+        padding-top: 75px;
+    }
+}
+
+@media (max-width: 576px) {
+    main {
+        padding-top: 70px;
+    }
 }
 
 /* Footer Styles */
@@ -191,14 +219,49 @@ main {
 @media (max-width: 768px) {
     .navbar .container-fluid {
         padding: 0.75rem 1rem;
+        flex-wrap: wrap !important;
+        justify-content: flex-start;
+    }
+    
+    /* Toggle and brand together on left */
+    .navbar-toggler {
+        order: 1 !important;
+        margin-left: 0 !important;
+        margin-right: 0.75rem !important;
+    }
+    
+    .navbar-brand {
+        order: 2 !important;
+        margin-left: 0 !important;
+        margin-right: auto !important;
+    }
+    
+    /* Hide toggler if inside collapse */
+    .navbar-collapse .navbar-toggler {
+        display: none !important;
     }
 
     .navbar-collapse {
         background-color: rgba(17, 24, 39, 0.98);
-        margin: 0.5rem -1rem -0.75rem;
+        margin: 0.75rem -1rem -0.75rem;
         padding: 1rem;
         border-radius: var(--border-radius);
         box-shadow: var(--shadow-md);
+        order: 3 !important;
+        width: 100%;
+    }
+    
+    /* Default: Hamburger icon */
+    .navbar-toggler.collapsed .navbar-toggler-icon,
+    .navbar-toggler[aria-expanded='false'] .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+    
+    /* X icon when menu is open */
+    .navbar-toggler:not(.collapsed) .navbar-toggler-icon,
+    .navbar-toggler[aria-expanded='true'] .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e");
+        background-size: 1.5em;
     }
 
     .nav-item {

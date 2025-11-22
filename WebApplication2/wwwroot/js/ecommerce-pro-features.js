@@ -485,7 +485,7 @@
         //initSocialProof();
         //initFlashSale(); // Disabled - using new flash sale system
         //initLiveViewers();
-         initStickyCart(); 
+         //initStickyCart(); 
         initTrustBadges();
         initRecentlyViewed();
         //initImageZoom();
