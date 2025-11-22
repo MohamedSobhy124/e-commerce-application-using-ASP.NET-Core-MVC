@@ -184,43 +184,204 @@
     box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
 }
 
-.navbar-toggler-icon {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+/* ===========================================
+   NAVBAR TOGGLER ICON STATES
+   Default: Hamburger (3 lines)
+   Open: X icon
+   =========================================== */
+
+/* Base/Default State: Always show hamburger icon */
+.navbar-toggler .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+    transition: background-image 0.3s ease;
+    background-size: 1em !important;
+}
+
+/* Explicitly show hamburger when collapsed (default/closed state) */
+.navbar-toggler.collapsed .navbar-toggler-icon,
+.navbar-toggler[aria-expanded='false'] .navbar-toggler-icon,
+.navbar-toggler.collapsed[aria-expanded='false'] .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+    background-size: 1em !important;
+}
+
+/* X icon ONLY when menu is open - requires BOTH: not collapsed AND aria-expanded='true' */
+.navbar-toggler:not(.collapsed)[aria-expanded='true'] .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") !important;
+    background-size: 1.5em !important;
 }
 
 /* Mobile Navigation */
 @media (max-width: 991px) {
+    .navbar {
+        position: relative;
+        flex-wrap: wrap;
+    }
+    
+    .navbar .container-fluid {
+        padding: 0.75rem 1rem !important;
+        display: flex;
+        flex-wrap: wrap !important;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+    }
+    
+    /* Toggle and brand together on left */
+    .navbar-toggler {
+        order: 1 !important;
+        margin-left: 0 !important;
+        margin-right: 0.75rem !important;
+        position: relative !important;
+        z-index: 1050;
+        flex-shrink: 0;
+        display: block !important;
+    }
+    
+    /* Hide toggler if it somehow gets inside collapse */
+    .navbar-collapse .navbar-toggler {
+        display: none !important;
+    }
+    
+    .navbar-brand {
+        order: 2 !important;
+        flex: 1;
+        min-width: 0;
+        font-size: 1.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-left: 0 !important;
+        margin-right: auto;
+        padding: 0.5rem 0 !important;
+    }
+    
+    .navbar-brand img {
+        max-height: 35px !important;
+    }
+    
     .navbar-collapse {
+        order: 3 !important;
+        width: 100% !important;
+        flex-basis: 100% !important;
+        flex-grow: 1 !important;
         background: linear-gradient(135deg, #1976D2, #558B2F);
-        margin-top: 1rem;
+        margin-top: 0.75rem;
         padding: 1rem;
         border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
+    }
+    
+    /* Default: Always show hamburger unless explicitly open */
+    .navbar-toggler .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+    }
+    
+    /* Ensure hamburger when collapsed (default state) */
+    .navbar-toggler.collapsed .navbar-toggler-icon,
+    .navbar-toggler[aria-expanded='false'] .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+        background-size: 1em;
+    }
+    
+    /* X icon ONLY when menu is explicitly open (BOTH conditions must be true) */
+    .navbar-toggler:not(.collapsed)[aria-expanded='true'] .navbar-toggler-icon,
+    .navbar-toggler[aria-expanded='true']:not(.collapsed) .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") !important;
+        background-size: 1.5em;
     }
     
     .navbar-nav {
         gap: 0.5rem;
+        width: 100%;
+        flex-direction: column;
     }
     
     .navbar-nav .nav-link {
         padding: 1rem !important;
-        margin: 0;
+        margin: 0.25rem 0;
         border-radius: 8px;
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    .navbar-nav .nav-item {
+        width: 100%;
     }
     
     .dropdown-menu {
         background: rgba(255, 255, 255, 0.95);
         margin-top: 0.5rem;
-        margin-left: 1rem;
+        margin-left: 0;
+        width: 100%;
+        position: relative !important;
+        transform: none !important;
+        border: none;
+        box-shadow: none;
+    }
+}
+
+/* Small Mobile Navigation */
+@media (max-width: 576px) {
+    .navbar .container-fluid {
+        padding: 0.5rem 0.75rem !important;
+        flex-wrap: wrap !important;
+    }
+    
+    .navbar-toggler {
+        padding: 0.375rem 0.5rem;
+        font-size: 1rem;
+        order: 1 !important;
+        margin-left: 0 !important;
+        margin-right: 0.5rem !important;
+        flex-shrink: 0;
+        display: block !important;
     }
     
     .navbar-brand {
-        font-size: 1.25rem;
+        font-size: 1rem;
+        padding: 0.5rem 10% !important;
+        margin-left: 0 !important;
+        margin-right: auto;
+        order: 2 !important;
+    }
+    
+    .navbar-brand img {
+        max-height: 30px !important;
+    }
+    
+    /* Ensure toggler never appears in collapse */
+    .navbar-collapse .navbar-toggler {
+        display: none !important;
+    }
+    
+    .navbar-collapse {
+        order: 3 !important;
+        margin-top: 0.75rem;
+        padding: 0.875rem;
+    }
+}
+    
+    .navbar-nav .nav-link {
+        padding: 0.875rem 0.75rem !important;
+        font-size: 0.95rem;
+    }
+    
+    .navbar .container-fluid {
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    .dropdown-item {
+        padding: 0.625rem 0.75rem !important;
+        font-size: 0.9rem;
     }
 }
 
 /* Tablet Navigation */
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 577px) and (max-width: 991px) {
     .navbar-nav .nav-link {
         padding: 0.625rem 1rem !important;
     }
@@ -252,7 +413,7 @@
     transition: all 0.35s ease;
 }
 
-/* RTL Support */
+/* RTL Support - Desktop */
 [dir="rtl"] .navbar-nav {
     text-align: right;
 }
@@ -267,6 +428,36 @@
 
 [dir="rtl"] .navbar-brand {
     flex-direction: row-reverse;
+}
+
+/* RTL Support - Mobile Responsive */
+@media (max-width: 991px) {
+    [dir="rtl"] .navbar-nav {
+        text-align: right;
+        flex-direction: column;
+    }
+    
+    [dir="rtl"] .navbar-nav .nav-link {
+        text-align: right;
+        justify-content: flex-start;
+    }
+    
+    [dir="rtl"] .dropdown-item:hover {
+        transform: translateX(5px);
+    }
+    
+    [dir="rtl"] .dropdown-menu {
+        position: relative !important;
+        width: 100%;
+        margin-right: 0;
+        margin-left: 0;
+    }
+    
+    [dir="rtl"] .navbar-toggler {
+        order: 2;
+        margin-left: 0;
+        margin-right: auto;
+    }
 }
 
 /* Active State */

@@ -14,8 +14,16 @@
     margin-left: 1rem;
 }
 
+/* Navbar Nav - Only row on desktop, column on mobile */
 [dir="rtl"] .navbar-nav {
     flex-direction: row;
+}
+
+/* Mobile: Keep column direction for collapsed menu */
+@media (max-width: 991px) {
+    [dir="rtl"] .navbar-nav {
+        flex-direction: column;
+    }
 }
 
 [dir="rtl"] .nav-link {
@@ -39,12 +47,14 @@
 [dir="rtl"] .me-3 { margin-right: 0 !important; margin-left: 1rem !important; }
 [dir="rtl"] .me-4 { margin-right: 0 !important; margin-left: 1.5rem !important; }
 [dir="rtl"] .me-5 { margin-right: 0 !important; margin-left: 3rem !important; }
+[dir="rtl"] .me-auto { margin-right: 0 !important; margin-left: auto !important; }
 
 [dir="rtl"] .ms-1 { margin-left: 0 !important; margin-right: 0.25rem !important; }
 [dir="rtl"] .ms-2 { margin-left: 0 !important; margin-right: 0.5rem !important; }
 [dir="rtl"] .ms-3 { margin-left: 0 !important; margin-right: 1rem !important; }
 [dir="rtl"] .ms-4 { margin-left: 0 !important; margin-right: 1.5rem !important; }
 [dir="rtl"] .ms-5 { margin-left: 0 !important; margin-right: 3rem !important; }
+[dir="rtl"] .ms-auto { margin-left: 0 !important; margin-right: auto !important; }
 
 [dir="rtl"] .pe-1 { padding-right: 0 !important; padding-left: 0.25rem !important; }
 [dir="rtl"] .pe-2 { padding-right: 0 !important; padding-left: 0.5rem !important; }
@@ -178,6 +188,44 @@
     left: 0;
 }
 
+/* RTL Mobile Notification Dropdown */
+@media (max-width: 991px) {
+    [dir="rtl"] .notification-dropdown {
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%);
+        top: 80px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    [dir="rtl"] .notification-dropdown {
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%);
+        top: 75px !important;
+    }
+}
+
+@media (max-width: 375px) {
+    [dir="rtl"] .notification-dropdown {
+        top: 70px !important;
+    }
+    
+    [dir="rtl"] .notification-dropdown-header {
+        text-align: right;
+    }
+    
+    [dir="rtl"] .notification-item {
+        text-align: right;
+        flex-direction: row-reverse;
+    }
+    
+    [dir="rtl"] .notification-content {
+        text-align: right;
+    }
+}
+
 /* Order Details */
 [dir="rtl"] .order-details-card {
     text-align: right;
@@ -307,13 +355,54 @@
 }
 
 /* Responsive RTL Adjustments */
-@media (max-width: 768px) {
+@media (max-width: 991px) {
     [dir="rtl"] .navbar-collapse {
         text-align: right;
     }
     
     [dir="rtl"] .dropdown-menu {
         text-align: right;
+        right: auto;
+        left: auto;
+        margin-right: 0;
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    [dir="rtl"] .navbar-nav .nav-link {
+        text-align: right;
+        justify-content: flex-start;
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+    
+    /* RTL - toggler and brand together on right (visual left in RTL) */
+    [dir="rtl"] .navbar-toggler {
+        order: 1 !important;
+        margin-right: 0 !important;
+        margin-left: 0.75rem !important;
+    }
+    
+    [dir="rtl"] .navbar-brand {
+        order: 2 !important;
+        margin-right: 0 !important;
+        margin-left: auto !important;
+    }
+    
+    [dir="rtl"] .navbar-collapse {
+        order: 3 !important;
+    }
+    
+    [dir="rtl"] .navbar-brand {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    [dir="rtl"] .navbar-nav .nav-link {
+        text-align: right;
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
     }
 }
 

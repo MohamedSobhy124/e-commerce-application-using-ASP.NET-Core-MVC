@@ -1,31 +1,126 @@
 // Notification Bell Handler
 let notificationDropdownOpen = false;
 
-// Toggle notification dropdown
-function toggleNotifications() {
+// Initialize notification dropdown behavior
+document.addEventListener('DOMContentLoaded', function() {
     const dropdown = document.getElementById('notificationDropdown');
-    const bell = document.getElementById('notificationBell');
+    const toggle = document.getElementById('notificationDropdownToggle');
+    const dot = document.getElementById('notificationDot');
+    
+    if (!dropdown || !toggle) return;
+    
+    // Function to check if mobile
+    function isMobile() {
+        return window.innerWidth <= 991;
+    }
+    
+    // Listen for Bootstrap dropdown show/hide events
+    toggle.addEventListener('show.bs.dropdown', function(e) {
+        console.log('Notification dropdown showing... (show.bs.dropdown)');
+        // Prevent event from bubbling up
+        e.stopPropagation();
+    });
+    
+    toggle.addEventListener('shown.bs.dropdown', function(e) {
+        console.log('Notification dropdown shown (shown.bs.dropdown)');
+        notificationDropdownOpen = true;
+        console.log('Notification dropdown state:', notificationDropdownOpen);
+        loadNotifications();
+        if (dot) {
+            dot.classList.remove('active');
+        }
+        e.stopPropagation();
+    });
+    
+    toggle.addEventListener('hide.bs.dropdown', function(e) {
+        console.log('Notification dropdown hiding... (hide.bs.dropdown)');
+        console.trace('Hide triggered from:');
+    });
+    
+    toggle.addEventListener('hidden.bs.dropdown', function(e) {
+        console.log('Notification dropdown hidden (hidden.bs.dropdown)');
+        notificationDropdownOpen = false;
+        console.log('Notification dropdown state:', notificationDropdownOpen);
+    });
+    
+    // Desktop - override default behavior
+    if (!isMobile()) {
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleNotificationsDesktop();
+        });
+        
+        // Remove Bootstrap toggle on desktop
+        toggle.removeAttribute('data-bs-toggle');
+    } else {
+        // On mobile, let Bootstrap auto-initialize via data-bs-toggle
+        // Don't create a new instance if one already exists
+        // Bootstrap will handle it automatically
+    }
+    
+    // Handle window resize
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            const nowMobile = isMobile();
+            if (nowMobile && !toggle.hasAttribute('data-bs-toggle')) {
+                toggle.setAttribute('data-bs-toggle', 'dropdown');
+            } else if (!nowMobile && toggle.hasAttribute('data-bs-toggle')) {
+                toggle.removeAttribute('data-bs-toggle');
+            }
+        }, 250);
+    });
+});
+
+// Desktop toggle function
+function toggleNotificationsDesktop() {
+    const dropdown = document.getElementById('notificationDropdown');
     const dot = document.getElementById('notificationDot');
     
     notificationDropdownOpen = !notificationDropdownOpen;
     
     if (notificationDropdownOpen) {
-        dropdown.classList.add('active');
+        dropdown.classList.add('show', 'active');
         loadNotifications();
-        
-        // Hide dot indicator when opening
-        if (dot) {
-            dot.classList.remove('active');
-        }
     } else {
-        dropdown.classList.remove('active');
+        dropdown.classList.remove('show', 'active');
+    }
+    
+    // Hide dot indicator when opening
+    if (dot && notificationDropdownOpen) {
+        dot.classList.remove('active');
     }
 }
 
-// Close dropdown when clicking outside
+// Legacy toggle function for backward compatibility
+function toggleNotifications() {
+    const isMobile = window.innerWidth <= 991;
+    if (isMobile) {
+        // On mobile, Bootstrap handles dropdown via data-bs-toggle
+        // Don't interfere - return immediately to prevent double-toggling
+        console.log('toggleNotifications() called on mobile - Bootstrap handles this');
+        return;
+    } else {
+        toggleNotificationsDesktop();
+    }
+}
+
+// Close dropdown when clicking outside (desktop)
 document.addEventListener('click', function(event) {
-    const container = document.querySelector('.notification-bell-container');
-    if (container && !container.contains(event.target) && notificationDropdownOpen) {
+    const dropdown = document.getElementById('notificationDropdown');
+    const toggle = document.getElementById('notificationDropdownToggle');
+    const isMobile = window.innerWidth <= 991;
+    
+    if (isMobile) {
+        // Bootstrap handles this on mobile
+        return;
+    }
+    
+    if (toggle && !toggle.contains(event.target) && 
+        dropdown && !dropdown.contains(event.target) && 
+        notificationDropdownOpen) {
         toggleNotifications();
     }
 });
