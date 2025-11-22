@@ -24,12 +24,12 @@ namespace BulkyBook.DataAccess.Migrations
                 nullable: true);
 
             
-            migrationBuilder.AddForeignKey(
-                name: "FK_ShoppingCarts_FlashSaleItems_FlashSaleItemId",
-                table: "ShoppingCarts",
-                column: "FlashSaleItemId",
-                principalTable: "FlashSaleItems",
-                principalColumn: "Id" );
+            //migrationBuilder.AddForeignKey(
+            //    name: "FK_ShoppingCarts_FlashSaleItems_FlashSaleItemId",
+            //    table: "ShoppingCarts",
+            //    column: "FlashSaleItemId",
+            //    principalTable: "FlashSaleItems",
+            //    principalColumn: "Id" );
         }
 
         /// <inheritdoc />

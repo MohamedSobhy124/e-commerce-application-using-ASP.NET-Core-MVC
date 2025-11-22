@@ -43,9 +43,9 @@ namespace BulkyBook.Areas.Customer.Controllers
                 // Authenticated user - load from database
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var UserId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-                // 🔥 Include FlashSaleItem to check for flash sale prices
+                // 🔥 Include FlashSaleItem and ProductImages to check for flash sale prices and display images
                 cartList = _unitOfWork.shoppingCart.GetAll(a=>a.ApplicationUserId==UserId,
-                    includeProperties: "product,FlashSaleItem");
+                    includeProperties: "product,FlashSaleItem,product.ProductImages");
             }
             else
             {
@@ -57,7 +57,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     Count = gc.Count,
                     FlashSaleItemId = gc.FlashSaleItemId, // 🔥 Include flash sale info
                     FlashSalePrice = (decimal?)gc.FlashSalePrice, // 🔥 Include flash sale price
-                    product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry")
+                    product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry,ProductImages")
                 }).ToList();
             }
 
@@ -84,7 +84,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
                 // 🔥 Include FlashSaleItem to check for flash sale prices
-                cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "product,FlashSaleItem");
+                cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "product,FlashSaleItem,product.ProductImages");
             }
             else
             {
@@ -96,7 +96,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     Count = gc.Count,
                     FlashSaleItemId = gc.FlashSaleItemId, // 🔥 Include flash sale info
                     FlashSalePrice = (decimal?)gc.FlashSalePrice, // 🔥 Include flash sale price
-                    product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry")
+                    product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry,ProductImages")
                 }).ToList();
             }
             
@@ -104,7 +104,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             {
                 productId = cart.ProductId,
                 title = cart.product.Title,
-                imageUrl = cart.product.ImageUrl,
+                imageUrl = GetProductImageUrl(cart.product), // 🔥 Use helper method to get correct image
                 price = GetCartItemPrice(cart), // 🔥 Use new method that checks flash sale price
                 count = cart.Count,
                 cartId = cart.Id,
@@ -1250,6 +1250,35 @@ namespace BulkyBook.Areas.Customer.Controllers
                     return shoppingCart.product.Price100;
                 }
             }
+        }
+
+        // 🔥 Helper method to get product image URL (checks ProductImages first, then falls back to ImageUrl)
+        private string GetProductImageUrl(Product product)
+        {
+            if (product == null)
+            {
+                return "/images/no-image.png"; // Default placeholder image
+            }
+
+            // Check if product has ProductImages
+            if (product.ProductImages != null && product.ProductImages.Any())
+            {
+                // Get the first image ordered by DisplayOrder
+                var firstImage = product.ProductImages.OrderBy(pi => pi.DisplayOrder).FirstOrDefault();
+                if (firstImage != null && !string.IsNullOrEmpty(firstImage.ImageUrl))
+                {
+                    return firstImage.ImageUrl;
+                }
+            }
+
+            // Fallback to ImageUrl if no ProductImages
+            if (!string.IsNullOrEmpty(product.ImageUrl))
+            {
+                return product.ImageUrl;
+            }
+
+            // Return placeholder if no image found
+            return "/images/no-image.png";
         }
     }
 
