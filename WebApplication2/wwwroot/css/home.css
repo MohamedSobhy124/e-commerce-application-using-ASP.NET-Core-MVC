@@ -44,7 +44,7 @@
 /* Product Badge */
 .product-badge {
     position: absolute;
-    top: 12px;
+    top: 35px;
     right: 12px;
     background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
     color: var(--white);

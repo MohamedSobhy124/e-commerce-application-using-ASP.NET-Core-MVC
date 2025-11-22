@@ -21,6 +21,7 @@ namespace BulkyBook.DataAccess.Repository.IRepository
         IFlashSaleItemRepository FlashSaleItem { get; }
         IPromoCodeRepository PromoCode { get; }
         IPromoCodeUsageRepository PromoCodeUsage { get; }
+        IWishlistRepository wishlist { get; }
 
         void save();
     }

@@ -277,12 +277,26 @@
     var discount = Product.ListPrice > 0 ? (int)((Product.ListPrice - Product.Price) / Product.ListPrice * 100) : 0;
     var cartProductIds = ViewBag.CartProductIds as List<int> ?? new List<int>();
     var isInCart = cartProductIds.Contains(Product.Id);
+    var wishlistProductIds = ViewBag.WishlistProductIds as List<int> ?? new List<int>();
+    var isInWishlist = wishlistProductIds.Contains(Product.Id);
+    var isAuthenticated = User.Identity.IsAuthenticated;
     
     <div class="product-card stagger-item" 
          data-stock-quantity="@Product.StockQuantity" 
-         data-minimum-stock="@Product.MinimumStockAlert">
+         data-minimum-stock="@Product.MinimumStockAlert"
+         data-product-id="@Product.Id">
         <!-- Product Image Carousel -->
         <div class="product-image-wrapper">
+            @if (isAuthenticated)
+            {
+                <!-- Wishlist Button (Only for logged-in users) -->
+                <button class="wishlist-btn @(isInWishlist ? "active" : "")" 
+                        data-product-id="@Product.Id" 
+                        onclick="toggleWishlist(@Product.Id, this); event.stopPropagation();"
+                        title="@(isInWishlist ? "Remove from wishlist" : "Add to wishlist")">
+                    <i class="bi @(isInWishlist ? "bi-heart-fill" : "bi-heart")"></i>
+                </button>
+            }
             @{
                 var productImages = Product.ProductImages != null && Product.ProductImages.Any() 
                     ? Product.ProductImages.OrderBy(pi => pi.DisplayOrder).Select(pi => pi.ImageUrl).ToList()
@@ -806,6 +820,44 @@
         <span id="floatingCartBadge" class="floating-cart-badge">0</span>
     </button>
 
+@if (User.Identity.IsAuthenticated)
+{
+    <!-- Floating Wishlist Button -->
+    <button class="floating-wishlist-btn" onclick="openWishlistSidebar()" title="View Wishlist">
+        <i class="bi bi-heart-fill"></i>
+        <span id="floatingWishlistBadge" class="floating-wishlist-badge" style="display: none;">0</span>
+    </button>
+
+    <!-- Wishlist Sidebar -->
+    <div id="wishlistSidebar" class="wishlist-sidebar">
+        <div class="wishlist-header">
+            <h5 class="wishlist-title">
+                <i class="bi bi-heart-fill me-2"></i>
+                @Localizer["Wishlist"] (<span id="sidebarWishlistCount">0</span>)
+            </h5>
+            <button class="wishlist-close-btn" onclick="closeWishlistSidebar()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        
+        <div id="wishlistItemsContainer" class="wishlist-items-container">
+            <div class="wishlist-empty">
+                <i class="bi bi-heart"></i>
+                <p>@Localizer["YourWishlistIsEmpty"]</p>
+            </div>
+        </div>
+        
+        <div class="wishlist-footer">
+            <a href="/Customer/Home/Index" class="btn btn-view-all w-100">
+                <i class="bi bi-arrow-left me-2"></i>@Localizer["ContinueShopping"]
+            </a>
+        </div>
+    </div>
+
+    <!-- Wishlist Overlay -->
+    <div id="wishlistOverlay" class="wishlist-overlay" onclick="closeWishlistSidebar()"></div>
+}
+
 <!-- Floating Action Button (FAB) Menu 
 <div class="fab-container">
     <div class="fab-main" title="Quick Actions">
@@ -831,6 +883,9 @@
         let hasMoreProducts = true;
         const isAuthenticated = @Json.Serialize(User.Identity.IsAuthenticated);
         let cartProductIds = @Html.Raw(Json.Serialize(ViewBag.CartProductIds ?? new List<int>()));
+        let wishlistProductIds = @Html.Raw(Json.Serialize(ViewBag.WishlistProductIds ?? new List<int>()));
+        window.isAuthenticated = isAuthenticated; // Make available globally
+        document.body.setAttribute('data-is-authenticated', isAuthenticated.toString());
 
         // Save scroll position before any operation
         function saveScrollPosition() {
@@ -1634,6 +1689,200 @@
             }
             
             return html;
+        }
+
+        // ==========================================
+        // WISHLIST FUNCTIONS
+        // ==========================================
+        
+        @if (User.Identity.IsAuthenticated)
+        {
+            <text>
+            // Wishlist Sidebar Functions
+            function openWishlistSidebar() {
+                const sidebar = document.getElementById('wishlistSidebar');
+                const overlay = document.getElementById('wishlistOverlay');
+                
+                if (sidebar && overlay) {
+                    sidebar.classList.add('active');
+                    overlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                    loadWishlistItemsToSidebar();
+                }
+            }
+
+            function closeWishlistSidebar() {
+                const sidebar = document.getElementById('wishlistSidebar');
+                const overlay = document.getElementById('wishlistOverlay');
+                
+                if (sidebar) sidebar.classList.remove('active');
+                if (overlay) overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            function loadWishlistItemsToSidebar() {
+                fetch('/Customer/Home/GetWishlistItems')
+                    .then(response => response.json())
+                    .then(data => {
+                        const container = document.getElementById('wishlistItemsContainer');
+                        const countElement = document.getElementById('sidebarWishlistCount');
+
+                        if (data.success && data.items && data.items.length > 0) {
+                            container.innerHTML = data.items.map(item => createWishlistItemHTML(item)).join('');
+                            if (countElement) countElement.textContent = data.count;
+                            updateFloatingWishlistBadge(data.count);
+                        } else {
+                            container.innerHTML = '<div class="wishlist-empty"><i class="bi bi-heart"></i><p>@Localizer["YourWishlistIsEmpty"]</p></div>';
+                            if (countElement) countElement.textContent = '0';
+                            updateFloatingWishlistBadge(0);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading wishlist items:', error);
+                        const container = document.getElementById('wishlistItemsContainer');
+                        if (container) {
+                            container.innerHTML = '<div class="wishlist-empty"><p>Error loading wishlist</p></div>';
+                        }
+                    });
+            }
+
+            function createWishlistItemHTML(item) {
+                const discount = item.listPrice && item.listPrice > item.price 
+                    ? Math.floor((item.listPrice - item.price) / item.listPrice * 100) 
+                    : 0;
+                
+                return `
+                    <div class="wishlist-item" data-product-id="${item.productId}">
+                        <img src="${item.imageUrl}" alt="${item.title}" class="wishlist-item-image">
+                        <div class="wishlist-item-details">
+                            <h6 class="wishlist-item-title">${item.title}</h6>
+                            <div class="wishlist-item-price">
+                                ${discount > 0 
+                                    ? `<span class="current-price">AED ${item.price.toFixed(2)}</span>
+                                       <span class="list-price">AED ${item.listPrice.toFixed(2)}</span>`
+                                    : `<span class="current-price">AED ${item.price.toFixed(2)}</span>`
+                                }
+                            </div>
+                            <div class="wishlist-item-actions">
+                                <button class="btn btn-add-cart-from-wishlist" onclick="addToCartFromWishlist(${item.productId}, ${item.id})" title="Add to Cart">
+                                    <i class="bi bi-cart-plus me-1"></i>@Localizer["AddToCart"]
+                                </button>
+                                <button class="btn btn-remove-wishlist" onclick="removeFromWishlist(${item.id}, ${item.productId})" title="Remove">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function addToCartFromWishlist(productId, wishlistId) {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                const formData = new FormData();
+                formData.append('productId', productId);
+                formData.append('__RequestVerificationToken', token);
+
+                fetch('/Customer/Home/ToggleCart', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.isAdded) {
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success('Added to cart!');
+                        }
+                        if (typeof updateFloatingCartBadge === 'function') {
+                            updateFloatingCartBadge(data.cartCount);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to cart:', error);
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error('Failed to add to cart');
+                    }
+                });
+            }
+
+            function removeFromWishlist(wishlistId, productId) {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                const formData = new FormData();
+                formData.append('wishlistId', wishlistId);
+                formData.append('__RequestVerificationToken', token);
+
+                fetch('/Customer/Home/RemoveFromWishlist', {
+                    method: 'DELETE',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const item = document.querySelector(`.wishlist-item[data-product-id="${productId}"]`);
+                        if (item) item.remove();
+                        
+                        const btn = document.querySelector(`.wishlist-btn[data-product-id="${productId}"]`);
+                        if (btn) {
+                            btn.classList.remove('active');
+                            btn.querySelector('i').className = 'bi bi-heart';
+                            btn.title = 'Add to wishlist';
+                        }
+                        
+                        updateFloatingWishlistBadge(data.wishlistCount);
+                        
+                        const countElement = document.getElementById('sidebarWishlistCount');
+                        if (countElement) countElement.textContent = data.wishlistCount;
+                        
+                        if (data.wishlistCount === 0) {
+                            loadWishlistItemsToSidebar();
+                        }
+                        
+                        if (typeof toastr !== 'undefined') {
+                            toastr.info(data.message);
+                        }
+                        
+                        wishlistProductIds = wishlistProductIds.filter(id => id !== productId);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error removing from wishlist:', error);
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error('Failed to remove from wishlist');
+                    }
+                });
+            }
+
+            function updateFloatingWishlistBadge(count) {
+                const floatingBadge = document.getElementById('floatingWishlistBadge');
+                const floatingBtn = document.querySelector('.floating-wishlist-btn');
+                if (floatingBadge) {
+                    floatingBadge.textContent = count;
+                    if (count > 0) {
+                        floatingBadge.style.display = 'flex';
+                    } else {
+                        floatingBadge.style.display = 'none';
+                    }
+                    if (floatingBtn) {
+                        floatingBtn.classList.add('pulse');
+                        setTimeout(() => {
+                            floatingBtn.classList.remove('pulse');
+                        }, 600);
+                    }
+                }
+            }
+
+            // Load wishlist on page load
+            window.addEventListener('load', function() {
+                fetch('/Customer/Home/GetWishlistProductIds')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.productIds) {
+                            updateFloatingWishlistBadge(data.productIds.length);
+                        }
+                    })
+                    .catch(error => console.error('Error loading wishlist count:', error));
+            });
+            </text>
         }
     </script>
 }

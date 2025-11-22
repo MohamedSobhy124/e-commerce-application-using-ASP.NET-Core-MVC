@@ -1,0 +1,50 @@
+===========================================
+UPDATE UnitOfWork Class
+===========================================
+File Location: BulkyBook.DataAccess/Repository/UnitOfWork.cs
+
+STEP 1: Add this property to the class:
+
+    public IWishlistRepository wishlist { get; private set; }
+
+STEP 2: In the constructor, add this line:
+
+    wishlist = new WishlistRepository(_db);
+
+Example:
+--------
+public class UnitOfWork : IUnitOfWork
+{
+    private ApplicationDBContext _db;
+    
+    // Existing properties
+    public ICategoryRepository categry { get; private set; }
+    public IProductRepository product { get; private set; }
+    public IShoppingCartRepository shoppingCart { get; private set; }
+    // ... other repositories ...
+    
+    // ADD THIS:
+    public IWishlistRepository wishlist { get; private set; }
+    
+    public UnitOfWork(ApplicationDBContext db)
+    {
+        _db = db;
+        
+        // Existing initializations
+        categry = new CategoryRepository(_db);
+        product = new ProductRepository(_db);
+        shoppingCart = new ShoppingCartRepository(_db);
+        // ... other initializations ...
+        
+        // ADD THIS LINE:
+        wishlist = new WishlistRepository(_db);
+    }
+    
+    public void save()
+    {
+        _db.SaveChanges();
+    }
+}
+
+===========================================
+
