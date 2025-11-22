@@ -1,4 +1,4 @@
-﻿using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
 using BulkyBook.Models.ViewModels;
 using BulkyBook.Utility;
@@ -602,8 +602,9 @@ namespace BulkyBook.Areas.Customer.Controllers
 				// Authenticated user
 				var claimsIdentity = (ClaimsIdentity)User.Identity;
 				userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+				// 🔥 Include FlashSaleItem to check for flash sale prices
 				cartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId,
-					includeProperties: "product");
+					includeProperties: "product,FlashSaleItem");
 				applicationUser = _unitOfWork.applicationUser.Get(u => u.Id == userId);
 			}
 			else
@@ -642,11 +643,11 @@ namespace BulkyBook.Areas.Customer.Controllers
 					ShoppingCartVM.OrderHeader.ApplicationUserId = userId;
 				}
 
-				// Calculate subtotal
+				// Calculate subtotal - 🔥 Use GetCartItemPrice to include flash sale prices
 				double subtotal = 0;
 				foreach (var cart in ShoppingCartVM.ShoppingCartList)
 				{
-					cart.Price = GetPriceBasedOnQuantity(cart);
+					cart.Price = GetCartItemPrice(cart); // 🔥 Fixed: Use GetCartItemPrice instead of GetPriceBasedOnQuantity
 					subtotal += (cart.Price * cart.Count);
 				}
 
@@ -902,13 +903,32 @@ namespace BulkyBook.Areas.Customer.Controllers
 							Mode = "payment",
 						};
 
+						// Calculate the total from line items (subtotal before discount)
+						double lineItemsSubtotal = 0;
 						foreach (var item in ShoppingCartVM.ShoppingCartList)
 						{
+							lineItemsSubtotal += (item.Price * item.Count);
+						}
+
+						// Calculate discount ratio if promo code was applied
+						// This ensures line items total matches the discounted OrderTotal
+						double discountRatio = 1.0;
+						if (ShoppingCartVM.OrderHeader.DiscountAmount > 0 && lineItemsSubtotal > 0)
+						{
+							discountRatio = (double)ShoppingCartVM.OrderHeader.OrderTotal / lineItemsSubtotal;
+						}
+
+						// Add line items with adjusted prices to match the discounted total
+						foreach (var item in ShoppingCartVM.ShoppingCartList)
+						{
+							// Calculate adjusted price per unit to account for discount proportionally
+							double adjustedUnitPrice = item.Price * discountRatio;
+							
 							var sessionLineItem = new SessionLineItemOptions
 							{
 								PriceData = new SessionLineItemPriceDataOptions
 								{
-									UnitAmount = (long)(item.Price * 100), // $20.50 => 2050
+									UnitAmount = (long)Math.Round(adjustedUnitPrice * 100), // Convert to cents, ensure non-negative
 									Currency = "AED",
 									ProductData = new SessionLineItemPriceDataProductDataOptions
 									{

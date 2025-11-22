@@ -157,20 +157,41 @@ namespace BulkyBook.Services
 
         private string GenerateAdminEmailTemplate(OrderHeader orderHeader)
         {
-            var orderDetails = _unitOfWork.OrderDetail.GetAll(
-                o => o.OrderHeaderId == orderHeader.Id,
-                includeProperties: "Product"
-            ).ToList();
-
             var itemsHtml = new StringBuilder();
-            foreach (var item in orderDetails)
+            
+            try
             {
+                var orderDetails = _unitOfWork.OrderDetail.GetAll(
+                    o => o.OrderHeaderId == orderHeader.Id,
+                    includeProperties: "Product"
+                ).ToList();
+
+                foreach (var item in orderDetails)
+                {
+                    // Handle null Product gracefully
+                    var productTitle = item.Product?.Title ?? "Unknown Product";
+                    var productAuthor = item.Product?.Author ?? "";
+                    
+                    itemsHtml.AppendLine($@"
+                        <tr>
+                            <td style='padding: 12px; border-bottom: 1px solid #e5e7eb;'>{productTitle}</td>
+                            <td style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;'>{item.Count}</td>
+                            <td style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;'>{item.Price:C}</td>
+                            <td style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 700;'>{(item.Price * item.Count):C}</td>
+                        </tr>
+                    ");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error and return basic template without order details
+                // In production, you might want to log this to a logging service
+                itemsHtml.Clear();
                 itemsHtml.AppendLine($@"
                     <tr>
-                        <td style='padding: 12px; border-bottom: 1px solid #e5e7eb;'>{item.Product.Title}</td>
-                        <td style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;'>{item.Count}</td>
-                        <td style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;'>{item.Price:C}</td>
-                        <td style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 700;'>{(item.Price * item.Count):C}</td>
+                        <td colspan='4' style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center; color: #ef4444;'>
+                            Unable to load order details. Please check the order in the admin panel.
+                        </td>
                     </tr>
                 ");
             }
@@ -267,11 +288,15 @@ namespace BulkyBook.Services
             var itemsHtml = new StringBuilder();
             foreach (var item in orderDetails)
             {
+                // Handle null Product gracefully
+                var productTitle = item.Product?.Title ?? "Unknown Product";
+                var productAuthor = item.Product?.Author ?? "";
+                
                 itemsHtml.AppendLine($@"
                     <tr>
                         <td style='padding: 12px; border-bottom: 1px solid #e5e7eb;'>
-                            <strong style='color: #1f2937; display: block; margin-bottom: 5px;'>{item.Product.Title}</strong>
-                            <small style='color: #6b7280;'>by {item.Product.Author}</small>
+                            <strong style='color: #1f2937; display: block; margin-bottom: 5px;'>{productTitle}</strong>
+                            {(!string.IsNullOrEmpty(productAuthor) ? $"<small style='color: #6b7280;'>by {productAuthor}</small>" : "")}
                         </td>
                         <td style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;'>{item.Count}</td>
                         <td style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;'>{item.Price:C}</td>

@@ -1,7 +1,7 @@
 @model FlashSale
 
 @{
-    ViewData["Title"] = "Create Flash Sale";
+    ViewData["Title"] = Localizer["CreateFlashSale"];
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -11,7 +11,7 @@
             <div class="admin-form-header">
                 <h2 class="admin-form-title">
                     <i class="bi bi-lightning-charge-fill me-3"></i>
-                    Create New Flash Sale
+                    @Localizer["CreateNewFlashSale"]
                 </h2>
             </div>
 
@@ -25,34 +25,34 @@
                         <div class="card-header bg-primary text-white">
                             <h5 class="mb-0">
                                 <i class="bi bi-info-circle me-2"></i>
-                                Flash Sale Information
+                                @Localizer["FlashSaleInformation"]
                             </h5>
                         </div>
                         <div class="card-body">
                             <!-- Name -->
                             <div class="admin-form-group">
-                                <label asp-for="Name" class="admin-form-label">
-                                    <i class="bi bi-tag me-2"></i>Flash Sale Name
+                                <label class="admin-form-label">
+                                    <i class="bi bi-tag me-2"></i>@Localizer["FlashSaleName"]
                                     <span class="text-danger">*</span>
                                 </label>
-                                <input asp-for="Name" class="admin-form-control" placeholder="e.g., Black Friday Sale, Weekend Special" />
+                                <input asp-for="Name" class="admin-form-control" placeholder="@Localizer["ExampleFlashSaleName"]" />
                                 <span asp-validation-for="Name" class="text-danger"></span>
                                 <small class="form-text text-muted">
                                     <i class="bi bi-info-circle me-1"></i>
-                                    Give your flash sale a catchy name
+                                    @Localizer["GiveCatchyName"]
                                 </small>
                             </div>
 
                             <!-- Description -->
                             <div class="admin-form-group">
-                                <label asp-for="Description" class="admin-form-label">
-                                    <i class="bi bi-text-paragraph me-2"></i>Description
+                                <label class="admin-form-label">
+                                    <i class="bi bi-text-paragraph me-2"></i>@Localizer["Description"]
                                 </label>
-                                <textarea asp-for="Description" class="admin-form-control" rows="3" placeholder="Describe your flash sale..."></textarea>
+                                <textarea asp-for="Description" class="admin-form-control" rows="3" placeholder="@Localizer["DescribeFlashSale"]"></textarea>
                                 <span asp-validation-for="Description" class="text-danger"></span>
                                 <small class="form-text text-muted">
                                     <i class="bi bi-info-circle me-1"></i>
-                                    Optional: Add a description for internal reference
+                                    @Localizer["OptionalDescription"]
                                 </small>
                             </div>
                         </div>
@@ -63,27 +63,27 @@
                         <div class="card-header bg-success text-white">
                             <h5 class="mb-0">
                                 <i class="bi bi-calendar-event me-2"></i>
-                                Schedule
+                                @Localizer["Schedule"]
                             </h5>
                         </div>
                         <div class="card-body">
                             <div class="alert alert-info">
                                 <i class="bi bi-lightbulb me-2"></i>
-                                <strong>Tip:</strong> Set start and end times carefully. The flash sale will automatically activate and deactivate based on these times.
+                                <strong>@Localizer["Tip"]:</strong> @Localizer["SetTimesCarefully"]
                             </div>
 
                             <div class="row">
                                 <!-- Start Date & Time -->
                                 <div class="col-md-6">
                                     <div class="admin-form-group">
-                                        <label asp-for="StartDate" class="admin-form-label">
-                                            <i class="bi bi-calendar-check text-success me-2"></i>Start Date & Time
+                                        <label class="admin-form-label">
+                                            <i class="bi bi-calendar-check text-success me-2"></i>@Localizer["StartDateTime"]
                                             <span class="text-danger">*</span>
                                         </label>
                                         <input asp-for="StartDate" type="datetime-local" class="admin-form-control" />
                                         <span asp-validation-for="StartDate" class="text-danger"></span>
                                         <small class="form-text text-muted">
-                                            When the flash sale becomes active
+                                            @Localizer["WhenFlashSaleStarts"]
                                         </small>
                                     </div>
                                 </div>
@@ -91,24 +91,24 @@
                                 <!-- End Date & Time -->
                                 <div class="col-md-6">
                                     <div class="admin-form-group">
-                                        <label asp-for="EndDate" class="admin-form-label">
-                                            <i class="bi bi-calendar-x text-danger me-2"></i>End Date & Time
+                                        <label class="admin-form-label">
+                                            <i class="bi bi-calendar-x text-danger me-2"></i>@Localizer["EndDateTime"]
                                             <span class="text-danger">*</span>
                                         </label>
                                         <input asp-for="EndDate" type="datetime-local" class="admin-form-control" />
                                         <span asp-validation-for="EndDate" class="text-danger"></span>
                                         <small class="form-text text-muted">
-                                            When the flash sale ends
+                                            @Localizer["WhenFlashSaleEnds"]
                                         </small>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Duration Display -->
-                            <div class="alert alert-secondary mt-3" id="durationAlert" style="display: none;">
+                       @*      <div class="alert alert-secondary mt-3" id="durationAlert" style="display: none;">
                                 <i class="bi bi-clock me-2"></i>
                                 <strong>Duration:</strong> <span id="durationText"></span>
-                            </div>
+                            </div> *@
                         </div>
                     </div>
 
@@ -117,14 +117,14 @@
                         <div class="card-body">
                             <div class="form-check form-switch">
                                 <input asp-for="IsActive" class="form-check-input" type="checkbox" style="width: 3rem; height: 1.5rem;" checked />
-                                <label asp-for="IsActive" class="form-check-label ms-2" style="font-size: 1.1rem; font-weight: 600;">
+                                <label class="form-check-label ms-2" style="font-size: 1.1rem; font-weight: 600;">
                                     <i class="bi bi-toggle-on text-success me-2"></i>
-                                    Active (Flash sale will be available based on schedule)
+                                    @Localizer["ActiveBasedOnSchedule"]
                                 </label>
                             </div>
                             <small class="form-text text-muted ms-5">
                                 <i class="bi bi-info-circle me-1"></i>
-                                You can deactivate the flash sale later if needed
+                                @Localizer["CanDeactivateLater"]
                             </small>
                         </div>
                     </div>
@@ -133,17 +133,17 @@
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary btn-lg">
                             <i class="bi bi-check-circle me-2"></i>
-                            Create Flash Sale
+                            @Localizer["CreateFlashSale"]
                         </button>
                         <a asp-action="Index" class="btn btn-secondary btn-lg">
                             <i class="bi bi-x-circle me-2"></i>
-                            Cancel
+                            @Localizer["Cancel"]
                         </a>
                     </div>
 
                     <div class="alert alert-warning mt-4">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Next Step:</strong> After creating the flash sale, you'll be able to add products to it with special prices and quantities.
+                        <strong>@Localizer["NextStep"]:</strong> @Localizer["AfterCreatingAddProducts"]
                     </div>
                 </form>
             </div>
@@ -175,9 +175,9 @@
                     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
                     let durationStr = '';
-                    if (days > 0) durationStr += days + ' day' + (days > 1 ? 's' : '') + ' ';
-                    if (hours > 0) durationStr += hours + ' hour' + (hours > 1 ? 's' : '') + ' ';
-                    if (minutes > 0) durationStr += minutes + ' minute' + (minutes > 1 ? 's' : '');
+                    if (days > 0) durationStr += days + ' @Localizer["day"]' + (days > 1 ? '@Localizer["s"]' : '') + ' ';
+                    if (hours > 0) durationStr += hours + ' @Localizer["hour"]' + (hours > 1 ? '@Localizer["s"]' : '') + ' ';
+                    if (minutes > 0) durationStr += minutes + ' @Localizer["minute"]' + (minutes > 1 ? '@Localizer["s"]' : '');
 
                     durationText.textContent = durationStr.trim();
                     durationAlert.style.display = 'block';
@@ -194,6 +194,4 @@
         updateDuration();
     </script>
 }
-
-
 

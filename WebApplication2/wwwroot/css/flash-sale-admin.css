@@ -1,0 +1,514 @@
+/* ============================================
+   ADMIN FLASH SALE STYLES - ORGANIZED & SMOOTH
+   ============================================ */
+
+/* Flash Sale Cards */
+.flash-sale-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid #e5e7eb;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.flash-sale-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3B9DD5, #1976D2);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.flash-sale-card:hover::before {
+    transform: scaleX(1);
+}
+
+.flash-sale-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    border-color: #3B9DD5;
+}
+
+.flash-sale-card.border-success::before {
+    background: linear-gradient(90deg, #7BC043, #558B2F);
+}
+
+.flash-sale-card.border-danger::before {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.flash-sale-card.border-warning::before {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.flash-sale-card.border-secondary::before {
+    background: linear-gradient(90deg, #6b7280, #4b5563);
+}
+
+/* Status Badges */
+.flash-sale-card .badge {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Card Title */
+.flash-sale-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+}
+
+.flash-sale-card .card-title i {
+    color: #3B9DD5;
+    font-size: 1.2rem;
+}
+
+/* Stats Section */
+.flash-sale-card .bg-light {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%) !important;
+    border-radius: 8px;
+    padding: 0.75rem !important;
+    border: 1px solid #e5e7eb;
+}
+
+.flash-sale-card .bg-light .text-center {
+    transition: transform 0.2s ease;
+}
+
+.flash-sale-card .bg-light .text-center:hover {
+    transform: scale(1.05);
+}
+
+.flash-sale-card .bg-light div[style*="font-size: 1.5rem"] {
+    font-size: 1.4rem !important;
+    font-weight: 800;
+    background: linear-gradient(135deg, #3B9DD5, #1976D2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.flash-sale-card .bg-light .border-start {
+    border-left: 2px solid #e5e7eb !important;
+}
+
+/* Action Buttons */
+.flash-sale-card .btn-group {
+    gap: 0.25rem;
+}
+
+.flash-sale-card .btn-sm {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.flash-sale-card .btn-sm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.flash-sale-card .btn-outline-primary:hover {
+    background: linear-gradient(135deg, #3B9DD5, #1976D2);
+    border-color: #3B9DD5;
+    color: white;
+}
+
+.flash-sale-card .btn-outline-secondary:hover {
+    background: #6b7280;
+    border-color: #6b7280;
+    color: white;
+}
+
+.flash-sale-card .btn-outline-info:hover {
+    background: #17a2b8;
+    border-color: #17a2b8;
+    color: white;
+}
+
+/* Form Cards */
+.admin-form-wrapper .card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.admin-form-wrapper .card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.admin-form-wrapper .card-header {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+}
+
+.admin-form-wrapper .card-body {
+    padding: 1.5rem;
+}
+
+/* Form Groups */
+.admin-form-group {
+    margin-bottom: 1.25rem;
+}
+
+.admin-form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+    font-size: 0.9rem;
+}
+
+.admin-form-label i {
+    color: #3B9DD5;
+    font-size: 1rem;
+}
+
+.admin-form-control {
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.admin-form-control:focus {
+    border-color: #3B9DD5;
+    box-shadow: 0 0 0 3px rgba(59, 157, 213, 0.1);
+    outline: none;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 1.25rem;
+    border-radius: 12px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transition: all 0.5s ease;
+}
+
+.stat-card:hover::before {
+    top: -20%;
+    right: -20%;
+    width: 200%;
+    height: 200%;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.stat-card i {
+    font-size: 1.75rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0.5rem 0;
+    position: relative;
+    z-index: 1;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    opacity: 0.95;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #3B9DD5 0%, #1976D2 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #7BC043 0%, #558B2F 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+}
+
+/* Product Cards in Add Products */
+.flash-product-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.flash-product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: #3B9DD5;
+}
+
+.flash-product-card .card-body {
+    padding: 1rem;
+}
+
+.flash-product-card .card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+}
+
+.product-info {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e5e7eb;
+    transition: background 0.2s ease;
+}
+
+.info-row:hover {
+    background: rgba(59, 157, 213, 0.05);
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-radius: 4px;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-row .label {
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+.info-row .value {
+    font-weight: 700;
+    color: #1f2937;
+}
+
+/* Tables */
+.table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-bottom: 2px solid #e5e7eb;
+    font-weight: 700;
+    color: #374151;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    padding: 1rem;
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background: #f9fafb;
+    transform: scale(1.01);
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.table tfoot {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+}
+
+.table tfoot td {
+    padding: 1rem;
+    font-weight: 700;
+}
+
+/* Action Buttons */
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #e5e7eb;
+}
+
+.form-actions .btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-actions .btn-lg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.form-actions .btn-primary {
+    background: linear-gradient(135deg, #3B9DD5, #1976D2);
+    border: none;
+}
+
+.form-actions .btn-primary:hover {
+    background: linear-gradient(135deg, #1976D2, #1565C0);
+}
+
+.form-actions .btn-success {
+    background: linear-gradient(135deg, #7BC043, #558B2F);
+    border: none;
+}
+
+.form-actions .btn-success:hover {
+    background: linear-gradient(135deg, #558B2F, #4a7c28);
+}
+
+/* Empty States */
+.text-center.py-5 {
+    padding: 3rem 1rem !important;
+}
+
+.text-center.py-5 i {
+    opacity: 0.3;
+    transition: all 0.3s ease;
+}
+
+.text-center.py-5:hover i {
+    opacity: 0.5;
+    transform: scale(1.1);
+}
+
+/* Alerts */
+.alert {
+    border-radius: 10px;
+    border: none;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    color: #0369a1;
+    border-left: 4px solid #3B9DD5;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border-left: 4px solid #f59e0b;
+}
+
+.alert-secondary {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    color: #374151;
+    border-left: 4px solid #6b7280;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .flash-sale-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn-lg {
+        width: 100%;
+    }
+}
+
+/* Smooth Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.flash-sale-card,
+.admin-form-wrapper .card {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Loading States */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+

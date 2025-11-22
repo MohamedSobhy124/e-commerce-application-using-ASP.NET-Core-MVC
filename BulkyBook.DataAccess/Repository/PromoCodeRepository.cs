@@ -1,6 +1,8 @@
 using BulkyBook.DataAccess.Data;
 using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
+using BulkyBook.Utility;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,7 +84,7 @@ namespace BulkyBook.DataAccess.Repository
             // Check per-user usage limit
             if (promoCode.UsageLimitPerUser.HasValue)
             {
-                var userUsageCount = _db.PromoCodeUsages
+                var userUsageCount = _db.PromoCodeUsages.Include(_=>_.OrderHeader).Where(_=>_.OrderHeader.OrderStatus!=SD.StatusPending)
                     .Count(u => u.PromoCodeId == promoCodeId && u.UserId == userId);
                 
                 if (userUsageCount >= promoCode.UsageLimitPerUser.Value)
