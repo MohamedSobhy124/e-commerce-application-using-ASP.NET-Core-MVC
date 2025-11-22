@@ -22,16 +22,16 @@ namespace BulkyBookWeb.ViewComponents {
 
                 if (claim != null)
                 {
-                    // Authenticated user - get total count from database
+                    // Authenticated user - get count of unique products (not sum of quantities)
                     var cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == claim.Value);
-                    count = cartItems.Sum(c => c.Count);
+                    count = cartItems.Count(); // Count unique products, not sum of quantities
                 }
             }
             else
             {
-                // Guest user - get total count from session
+                // Guest user - get count of unique products from session
                 var guestCart = GuestCartHelper.GetGuestCart(HttpContext.Session);
-                count = guestCart.Sum(gc => gc.Count);
+                count = guestCart.Count; // Count unique products, not sum of quantities
             }
             
             return View(count);

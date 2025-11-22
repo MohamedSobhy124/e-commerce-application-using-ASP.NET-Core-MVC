@@ -48,12 +48,12 @@ namespace BulkyBook.DataAccess.Migrations
                 table: "Wishlists",
                 column: "ProductId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_orderDetails_FlashSaleItems_FlashSaleItemId",
-                table: "orderDetails",
-                column: "FlashSaleItemId",
-                principalTable: "FlashSaleItems",
-                principalColumn: "Id");
+            //migrationBuilder.AddForeignKey(
+            //    name: "FK_orderDetails_FlashSaleItems_FlashSaleItemId",
+            //    table: "orderDetails",
+            //    column: "FlashSaleItemId",
+            //    principalTable: "FlashSaleItems",
+            //    principalColumn: "Id");
         }
 
         /// <inheritdoc />

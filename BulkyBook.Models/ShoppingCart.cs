@@ -35,6 +35,8 @@ namespace BulkyBook.Models
         public decimal? FlashSalePrice { get; set; }
 
         [NotMapped]
-        public bool IsFlashSale => FlashSaleItemId.HasValue;
+        public bool IsFlashSale => FlashSaleItemId.HasValue; 
+        [NotMapped]
+        public bool CanReview { get; set; } =false;
     }
 }

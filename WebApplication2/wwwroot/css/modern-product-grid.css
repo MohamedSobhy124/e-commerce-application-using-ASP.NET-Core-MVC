@@ -288,6 +288,43 @@
     animation: checkmarkPop 0.3s ease;
 }
 
+.btn-add-cart-quick:disabled,
+.btn-add-cart-quick.out-of-stock {
+    background: linear-gradient(135deg, #9ca3af, #6b7280) !important;
+    color: white !important;
+    cursor: not-allowed !important;
+    opacity: 0.7 !important;
+    pointer-events: none !important;
+    position: relative;
+    border: 2px solid #ef4444;
+}
+
+.btn-add-cart-quick:disabled:hover,
+.btn-add-cart-quick.out-of-stock:hover {
+    background: linear-gradient(135deg, #9ca3af, #6b7280) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.btn-add-cart-quick:disabled::before,
+.btn-add-cart-quick.out-of-stock::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(239, 68, 68, 0.1) 10px,
+        rgba(239, 68, 68, 0.1) 20px
+    );
+    border-radius: 8px;
+    pointer-events: none;
+}
+
 @keyframes checkmarkPop {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.3); }

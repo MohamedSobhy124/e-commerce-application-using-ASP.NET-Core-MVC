@@ -160,7 +160,7 @@
                     </div>
 
                     <!-- Review Submission Form -->
-                    @if (User.Identity.IsAuthenticated)
+                @if (User.Identity.IsAuthenticated && Model.CanReview)
                     {
                         <div class="review-form-section">
                             <h5>@Localizer["WriteReview"]</h5>
@@ -203,7 +203,7 @@
                             </form>
                         </div>
                     }
-                    else
+                else if (User.Identity.IsAuthenticated)
                     {
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle me-2"></i>

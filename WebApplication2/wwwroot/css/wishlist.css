@@ -45,11 +45,10 @@
     opacity: 0.6;
     cursor: not-allowed;
 }
-
-/* Floating Wishlist Button */
+ 
 .floating-wishlist-btn {
     position: fixed;
-    bottom: 120px;
+    bottom: 190px;
     right: 20px;
     width: 60px;
     height: 60px;

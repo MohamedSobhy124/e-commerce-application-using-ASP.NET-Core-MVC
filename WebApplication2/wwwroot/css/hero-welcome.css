@@ -164,10 +164,10 @@
     animation: slideInFromLeft 0.8s ease-out 0.2s both;
 }
 
-.hero-title i {
-    color: #FFE5DC;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-}
+    .hero-title i {
+        color: #72bb58;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
 
 /* Hero Subtitle */
 .hero-subtitle {
@@ -354,10 +354,10 @@
     backdrop-filter: blur(10px);
 }
 
-.trust-badge i {
-    font-size: 1.2rem;
-    color: #FFE5DC;
-}
+    .trust-badge i {
+        font-size: 1.2rem;
+        color: #72bb58;
+    }
 
 /* Responsive Design */
 @media (max-width: 992px) {

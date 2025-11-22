@@ -181,13 +181,17 @@
                         content.insertBefore(stockAlert, priceSection);
                     }
                     
-                    // Disable add to cart button
+                    // Disable add to cart button with proper styling
                     const addButton = card.querySelector('.btn-add-cart-quick');
                     if (addButton) {
                         addButton.disabled = true;
-                        addButton.style.opacity = '0.5';
-                        addButton.style.cursor = 'not-allowed';
-                        addButton.innerHTML = '<i class="bi bi-x-circle me-2"></i>Out of Stock';
+                        addButton.classList.add('out-of-stock');
+                        // Update button text and icon
+                        addButton.innerHTML = '<i class="bi bi-x-circle"></i>';
+                        addButton.title = 'Out of Stock';
+                        // Make button wider to show it's disabled
+                        addButton.style.width = '40px';
+                        addButton.style.height = '40px';
                     }
                 }
             } else if (isLowStock) {
