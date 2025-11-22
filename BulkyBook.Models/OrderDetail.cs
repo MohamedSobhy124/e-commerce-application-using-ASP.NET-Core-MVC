@@ -32,7 +32,7 @@ namespace BulkyBook.Models
         public int? FlashSaleItemId { get; set; }
         [ForeignKey(nameof(FlashSaleItemId))]
         [ValidateNever]
-        public FlashSaleItem FlashSaleItem { get; set; }
+        public FlashSaleItem? FlashSaleItem { get; set; }
 
         [NotMapped]
         public bool IsFromFlashSale => FlashSaleItemId.HasValue;

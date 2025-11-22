@@ -292,3 +292,4 @@ The error happens because the database has incomplete records with NULL values t
 
 
 
+

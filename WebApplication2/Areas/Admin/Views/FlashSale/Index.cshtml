@@ -1,7 +1,7 @@
 @model IEnumerable<FlashSale>
 
 @{
-    ViewData["Title"] = "Flash Sales Management";
+    ViewData["Title"] = Localizer["FlashSalesManagement"];
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -14,7 +14,7 @@
             <div class="admin-card-header">
                 <h2 class="admin-card-title">
                     <i class="bi bi-lightning-charge-fill me-3"></i>
-                    Flash Sales Management
+                    @Localizer["FlashSalesManagement"]
                 </h2>
             </div>
 
@@ -22,7 +22,7 @@
                 <div class="text-end mb-4">
                     <a asp-action="Create" class="btn btn-primary btn-lg">
                         <i class="bi bi-plus-circle me-2"></i>
-                        Create New Flash Sale
+                        @Localizer["CreateNewFlashSale"]
                     </a>
                 </div>
 
@@ -30,11 +30,11 @@
                 {
                     <div class="alert alert-info text-center py-5">
                         <i class="bi bi-info-circle" style="font-size: 3rem; color: #3B9DD5;"></i>
-                        <h4 class="mt-3">No Flash Sales Yet</h4>
-                        <p class="mb-3">Create your first flash sale to boost sales and create urgency!</p>
+                        <h4 class="mt-3">@Localizer["NoFlashSalesYet"]</h4>
+                        <p class="mb-3">@Localizer["CreateFlashSaleToBoostSales"]</p>
                         <a asp-action="Create" class="btn btn-primary">
                             <i class="bi bi-plus-circle me-2"></i>
-                            Create First Flash Sale
+                            @Localizer["CreateFirstFlashSale"]
                         </a>
                     </div>
                 }
@@ -87,26 +87,26 @@
                                             <i class="bi @statusIcon me-1"></i>
                                             @if (!flashSale.IsActive)
                                             {
-                                                <text>Inactive</text>
+                                                <text>@Localizer["Inactive"]</text>
                                             }
                                             else if (hasEnded)
                                             {
-                                                <text>Ended</text>
+                                                <text>@Localizer["Ended"]</text>
                                             }
                                             else if (isActive)
                                             {
-                                                <text>Active</text>
+                                                <text>@Localizer["Active"]</text>
                                             }
                                             else
                                             {
-                                                <text>Scheduled</text>
+                                                <text>@Localizer["Scheduled"]</text>
                                             }
                                         </span>
                                     </div>
 
                                     <div class="card-body">
                                         <!-- Title -->
-                                        <h4 class="card-title mb-3" style="color: #1976D2; font-weight: 700;">
+                                        <h4 class="card-title mb-3">
                                             <i class="bi bi-lightning-charge-fill me-2"></i>
                                             @flashSale.Name
                                         </h4>
@@ -121,50 +121,50 @@
                                         <div class="mb-3">
                                             <small class="d-block mb-1">
                                                 <i class="bi bi-calendar-event text-success me-1"></i>
-                                                <strong>Start:</strong> @flashSale.StartDate.ToString("MMM dd, yyyy HH:mm")
+                                                <strong>@Localizer["Start"]:</strong> @flashSale.StartDate.ToString("MMM dd, yyyy HH:mm")
                                             </small>
                                             <small class="d-block">
                                                 <i class="bi bi-calendar-x text-danger me-1"></i>
-                                                <strong>End:</strong> @flashSale.EndDate.ToString("MMM dd, yyyy HH:mm")
+                                                <strong>@Localizer["End"]:</strong> @flashSale.EndDate.ToString("MMM dd, yyyy HH:mm")
                                             </small>
                                         </div>
 
                                         <!-- Stats -->
                                         <div class="d-flex justify-content-between mb-3 p-2 bg-light rounded">
                                             <div class="text-center flex-fill">
-                                                <div style="font-size: 1.5rem; font-weight: 700; color: #3B9DD5;">
+                                                <div style="font-size: 1.4rem; font-weight: 800;">
                                                     @itemCount
                                                 </div>
-                                                <small class="text-muted">Products</small>
+                                                <small class="text-muted">@Localizer["Products"]</small>
                                             </div>
                                             <div class="text-center flex-fill border-start">
-                                                <div style="font-size: 1.5rem; font-weight: 700; color: #7BC043;">
+                                                <div style="font-size: 1.4rem; font-weight: 800; color: #7BC043;">
                                                     @totalQty
                                                 </div>
-                                                <small class="text-muted">Total Qty</small>
+                                                <small class="text-muted">@Localizer["TotalQty"]</small>
                                             </div>
                                         </div>
 
                                         <!-- Action Buttons -->
                                         <div class="d-grid gap-2">
                                             <a asp-action="Details" asp-route-id="@flashSale.Id" class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-eye me-1"></i> View Details
+                                                <i class="bi bi-eye me-1"></i> @Localizer["ViewDetails"]
                                             </a>
                                             <div class="btn-group">
                                                 <a asp-action="Edit" asp-route-id="@flashSale.Id" class="btn btn-sm btn-outline-secondary">
-                                                    <i class="bi bi-pencil me-1"></i> Edit
+                                                    <i class="bi bi-pencil me-1"></i> @Localizer["Edit"]
                                                 </a>
                                                 <a asp-action="AddProducts" asp-route-id="@flashSale.Id" class="btn btn-sm btn-outline-info">
-                                                    <i class="bi bi-plus-circle me-1"></i> Add Products
+                                                    <i class="bi bi-plus-circle me-1"></i> @Localizer["AddProducts"]
                                                 </a>
                                             </div>
                                             <div class="btn-group">
                                                 <button onclick="toggleActive(@flashSale.Id)" class="btn btn-sm @(flashSale.IsActive ? "btn-warning" : "btn-success")" id="toggleBtn_@flashSale.Id">
                                                     <i class="bi @(flashSale.IsActive ? "bi-pause" : "bi-play") me-1"></i>
-                                                    @(flashSale.IsActive ? "Deactivate" : "Activate")
+                                                    @(flashSale.IsActive ? Localizer["Deactivate"] : Localizer["Activate"])
                                                 </button>
                                                 <button onclick="deleteFlashSale(@flashSale.Id)" class="btn btn-sm btn-danger">
-                                                    <i class="bi bi-trash me-1"></i> Delete
+                                                    <i class="bi bi-trash me-1"></i> @Localizer["Delete"]
                                                 </button>
                                             </div>
                                         </div>
@@ -179,29 +179,19 @@
     </div>
 </div>
 
-<style>
-    .flash-sale-card {
-        transition: all 0.3s ease;
-        height: 100%;
-    }
-
-    .flash-sale-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    }
-</style>
 
 @section Scripts {
     <script>
         function toggleActive(id) {
             Swal.fire({
-                title: 'Toggle Active Status',
-                text: 'Are you sure you want to change the active status?',
+                title: '@Localizer["ToggleActiveStatus"]',
+                text: '@Localizer["ChangeActiveStatusConfirm"]',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#3B9DD5',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, toggle it!'
+                confirmButtonText: '@Localizer["YesToggleIt"]',
+                cancelButtonText: '@Localizer["Cancel"]'
             }).then((result) => {
                 if (result.isConfirmed) {
                     fetch(`/Admin/FlashSale/ToggleActive?id=${id}`, {
@@ -221,7 +211,7 @@
                         }
                     })
                     .catch(error => {
-                        toastr.error('An error occurred');
+                        toastr.error('@Localizer["AnErrorOccurred"]');
                         console.error('Error:', error);
                     });
                 }
@@ -230,13 +220,14 @@
 
         function deleteFlashSale(id) {
             Swal.fire({
-                title: 'Delete Flash Sale?',
-                text: 'This will delete the flash sale and all its products. This cannot be undone!',
+                title: '@Localizer["DeleteFlashSaleConfirm"]',
+                text: '@Localizer["DeleteFlashSaleWarning"]',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, delete it!'
+                confirmButtonText: '@Localizer["YesDeleteIt"]',
+                cancelButtonText: '@Localizer["Cancel"]'
             }).then((result) => {
                 if (result.isConfirmed) {
                     fetch(`/Admin/FlashSale/Delete?id=${id}`, {
@@ -249,14 +240,14 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            Swal.fire('Deleted!', data.message, 'success');
+                            Swal.fire('@Localizer["Deleted"]', data.message, 'success');
                             setTimeout(() => location.reload(), 1000);
                         } else {
                             toastr.error(data.message);
                         }
                     })
                     .catch(error => {
-                        toastr.error('An error occurred');
+                        toastr.error('@Localizer["AnErrorOccurred"]');
                         console.error('Error:', error);
                     });
                 }
@@ -264,5 +255,3 @@
         }
     </script>
 }
-
-
