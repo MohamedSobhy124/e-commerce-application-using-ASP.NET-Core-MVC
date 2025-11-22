@@ -1,5 +1,6 @@
 ﻿using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
+using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -286,7 +287,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
                 _unitOfWork.save();
 
-                // Get updated cart count (total quantity, not just distinct items)
+                // Get updated cart count (count of unique products, not sum of quantities)
                 var cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == UserId);
                 cartCount = cartItems.Count();
             }
@@ -331,14 +332,14 @@ namespace BulkyBook.Areas.Customer.Controllers
                 
                 if (userId != null)
                 {
-                    // Authenticated user - get total quantity from database
+                    // Authenticated user - get count of unique products (not sum of quantities)
                     var cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId);
                     cartCount = cartItems.Count();
                 }
             }
             else
             {
-                // Guest user - get total quantity from session
+                // Guest user - get count of unique products from session (not sum of quantities)
                 var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
                 cartCount = guestCart.Count;
             }
@@ -567,11 +568,30 @@ namespace BulkyBook.Areas.Customer.Controllers
         
         public IActionResult Details(int productId)
         {
+            var hasPurchased = false;
+            try
+            {
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+                hasPurchased = _unitOfWork.OrderDetail.GetAll(
+                    od => od.ProductId == productId,
+                    includeProperties: "OrderHeader"
+                ).Any(od => od.OrderHeader != null &&
+                            od.OrderHeader.ApplicationUserId == userId &&
+                            od.OrderHeader.OrderStatus == SD.StatusDelivered);
+            }
+            catch
+            {
+                // If error checking purchase, just set to false
+                hasPurchased = false;
+            }
+
             ShoppingCart cart = new()
             {
                 product = _unitOfWork.product.Get(U => U.Id == productId, includeProperties: "categry,ProductImages"),
                 Count=1,
-                ProductId=productId
+                ProductId=productId,
+                CanReview= hasPurchased
 
             };
         

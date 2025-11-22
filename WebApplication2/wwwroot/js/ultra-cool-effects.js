@@ -406,8 +406,8 @@
         initTypingEffect();
         initLazyLoading();
         initScrollProgress();
-        initSpotlight();
-        initFAB();
+        //initSpotlight();
+        //initFAB();
         //createParticles();
         
         // Optional: Uncomment for cursor trail
