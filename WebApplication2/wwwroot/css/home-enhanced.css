@@ -1402,32 +1402,190 @@
 }
 
 @media (max-width: 768px) {
+    .filter-section {
+        padding: 1rem !important;
+        margin-bottom: 1.5rem;
+    }
+    
     .filter-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+    }
+    
+    .filter-title {
+        font-size: 1.1rem !important;
+        margin: 0;
+    }
+    
+    .filter-title i {
+        font-size: 1.2rem !important;
+    }
+    
+    .filter-actions {
+        gap: 0.5rem;
     }
     
     .filter-toggle-btn {
-        display: block;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 0.75rem;
+        min-width: 40px;
+        height: 40px;
+        border-radius: 8px;
+    }
+    
+    .filter-toggle-btn i {
+        font-size: 1.1rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .filter-toggle-btn.active i {
+        transform: rotate(180deg);
+    }
+    
+    .clear-filters-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        white-space: nowrap;
     }
     
     .filter-groups {
         display: none;
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
         margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 2px solid rgba(124, 58, 237, 0.1);
     }
     
     .filter-groups.active {
-        display: grid;
+        display: grid !important;
+    }
+    
+    .filter-group {
+        width: 100%;
+        gap: 0.5rem;
+    }
+    
+    .filter-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .filter-select,
+    .modern-select {
+        width: 100%;
+        padding: 0.75rem 2.5rem 0.75rem 1rem;
+        font-size: 0.95rem;
     }
     
     .price-filter-group {
-        grid-column: span 1;
+        grid-column: span 1 !important;
+        width: 100%;
+    }
+    
+    .price-range-container {
+        width: 100%;
+    }
+    
+    .price-input-group {
+        flex-direction: column;
+        gap: 0.75rem;
+        width: 100%;
+    }
+    
+    .price-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+    }
+    
+    .price-separator {
+        display: none;
+    }
+    
+    .price-range-slider {
+        width: 100%;
+        margin: 0.75rem 0;
+    }
+    
+    .price-display {
+        font-size: 0.85rem;
+        flex-wrap: wrap;
     }
     
     .filter-actions-group {
-        grid-column: span 1;
+        grid-column: span 1 !important;
+        width: 100%;
+    }
+    
+    .apply-filters-btn {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        font-size: 0.95rem;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .filter-section {
+        padding: 0.875rem !important;
+        border-radius: 12px;
+    }
+    
+    .filter-header {
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .filter-title {
+        font-size: 1rem !important;
+    }
+    
+    .filter-title i {
+        font-size: 1rem !important;
+    }
+    
+    .filter-toggle-btn {
+        padding: 0.4rem 0.6rem;
+        min-width: 36px;
+        height: 36px;
+    }
+    
+    .clear-filters-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .filter-groups {
+        gap: 0.875rem;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+    }
+    
+    .filter-label {
+        font-size: 0.85rem;
+    }
+    
+    .filter-select,
+    .modern-select {
+        padding: 0.625rem 2.25rem 0.625rem 0.875rem;
+        font-size: 0.9rem;
+    }
+    
+    .price-input {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.9rem;
+    }
+    
+    .apply-filters-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
     }
 }
 
