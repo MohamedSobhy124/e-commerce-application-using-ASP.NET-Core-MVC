@@ -129,6 +129,29 @@
                         </div>
                     </div>
 
+                    <!-- Notify Subscribers -->
+                    <div class="card mb-4 border-info">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-envelope-heart me-2"></i>
+                                @Localizer["NotifySubscribers"]
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input" id="notifySubscribers" name="notifySubscribers" style="width: 3rem; height: 1.5rem;" />
+                                <label class="form-check-label ms-2" for="notifySubscribers" style="font-size: 1.1rem; font-weight: 600;">
+                                    <i class="bi bi-bell-fill text-primary me-2"></i>
+                                    @Localizer["SendToAllSubscribers"]
+                                </label>
+                            </div>
+                            <small class="form-text text-muted ms-5">
+                                <i class="bi bi-info-circle me-1"></i>
+                                @Localizer["SendFlashSaleNotificationToSubscribers"]
+                            </small>
+                        </div>
+                    </div>
+
                     <!-- Action Buttons -->
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary btn-lg">
@@ -194,4 +217,5 @@
         updateDuration();
     </script>
 }
+
 

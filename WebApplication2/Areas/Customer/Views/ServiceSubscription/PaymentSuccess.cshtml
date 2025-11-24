@@ -1,0 +1,148 @@
+@model BulkyBook.Models.ServicePurchase
+
+@{
+    ViewData["Title"] = "Payment Success";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="success-card text-center">
+                <div class="success-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <h1 class="success-title">Payment Successful!</h1>
+                <p class="success-message">Your service subscription has been confirmed.</p>
+
+                <div class="purchase-details mt-5">
+                    <div class="detail-card">
+                        <h3>Purchase Details</h3>
+                        <div class="detail-row">
+                            <span>Purchase ID:</span>
+                            <strong>#@Model.Id</strong>
+                        </div>
+                        <div class="detail-row">
+                            <span>Service:</span>
+                            <strong>@Model.ServiceSubscription?.Title</strong>
+                        </div>
+                        <div class="detail-row">
+                            <span>Total Amount:</span>
+                            <strong>@Model.TotalAmount.ToString("C")</strong>
+                        </div>
+                        <div class="detail-row">
+                            <span>Amount Paid:</span>
+                            <strong class="text-success">@Model.AmountPaid.ToString("C")</strong>
+                        </div>
+                        @if (Model.ServiceSubscription?.ServiceType == BulkyBook.Models.ServiceType.Offline)
+                        {
+                            <div class="detail-row">
+                                <span>Remaining Amount:</span>
+                                <strong>@((Model.TotalAmount - Model.AmountPaid).ToString("C"))</strong>
+                            </div>
+                            @if (Model.ServiceSubscription.OfflinePaymentPercent.HasValue)
+                            {
+                                var minRequired = Model.TotalAmount * (Model.ServiceSubscription.OfflinePaymentPercent.Value / 100);
+                                if (Model.AmountPaid > minRequired)
+                                {
+                                    <div class="alert alert-success mt-3">
+                                        <i class="bi bi-check-circle"></i> 
+                                        You paid @((Model.AmountPaid - minRequired).ToString("C")) more than the minimum required. Thank you!
+                                    </div>
+                                }
+                            }
+                            <div class="alert alert-info mt-3">
+                                <i class="bi bi-info-circle"></i> 
+                                You will pay the remaining amount of @((Model.TotalAmount - Model.AmountPaid).ToString("C")) at the service location.
+                            </div>
+                        }
+                        <div class="detail-row">
+                            <span>Purchase Date:</span>
+                            <strong>@Model.PurchaseDate.ToString("MMM dd, yyyy hh:mm tt")</strong>
+                        </div>
+                        <div class="detail-row">
+                            <span>Status:</span>
+                            <span class="badge bg-success">@Model.PaymentStatus</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons mt-5">
+                    <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg me-3">
+                        <i class="bi bi-house me-2"></i>Go to Home
+                    </a>
+                    <a asp-area="Customer" asp-controller="ServiceSubscription" asp-action="Index" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-briefcase me-2"></i>View More Services
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .success-card {
+        background: white;
+        border-radius: 20px;
+        padding: 50px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .success-icon {
+        font-size: 5rem;
+        color: #10b981;
+        margin-bottom: 20px;
+        animation: scaleIn 0.5s ease;
+    }
+
+    .success-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 15px;
+    }
+
+    .success-message {
+        font-size: 1.2rem;
+        color: #6b7280;
+    }
+
+    .purchase-details {
+        text-align: left;
+    }
+
+    .detail-card {
+        background: #f9fafb;
+        border-radius: 15px;
+        padding: 30px;
+        border: 2px solid #e5e7eb;
+    }
+
+    .detail-card h3 {
+        color: #1f2937;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .action-buttons {
+        margin-top: 30px;
+    }
+
+    @@keyframes scaleIn {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+</style>
+

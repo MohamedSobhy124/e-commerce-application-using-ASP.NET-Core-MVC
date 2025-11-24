@@ -4,6 +4,9 @@ using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 
 namespace BulkyBook.Areas.Admin.Controllers
 {
@@ -12,10 +15,20 @@ namespace BulkyBook.Areas.Admin.Controllers
     public class FlashSaleController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailSender _emailSender;
+        private readonly IStringLocalizer<SharedResources> _localizer;
+        private readonly ILogger<FlashSaleController> _logger;
 
-        public FlashSaleController(IUnitOfWork unitOfWork)
+        public FlashSaleController(
+            IUnitOfWork unitOfWork, 
+            IEmailSender emailSender,
+            IStringLocalizer<SharedResources> localizer,
+            ILogger<FlashSaleController> logger)
         {
             _unitOfWork = unitOfWork;
+            _emailSender = emailSender;
+            _localizer = localizer;
+            _logger = logger;
         }
 
         // GET: Flash Sales List
@@ -39,7 +52,7 @@ namespace BulkyBook.Areas.Admin.Controllers
         // POST: Create Flash Sale
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(FlashSale flashSale)
+        public async Task<IActionResult> Create(FlashSale flashSale, bool notifySubscribers = false)
         {
             // Validate dates
             if (flashSale.EndDate <= flashSale.StartDate)
@@ -51,11 +64,116 @@ namespace BulkyBook.Areas.Admin.Controllers
             {
                 _unitOfWork.FlashSale.Add(flashSale);
                 _unitOfWork.save();
-                TempData["success"] = "Flash sale created successfully! Now add products to it.";
+                
+                // Send notification to subscribers if requested
+                if (notifySubscribers)
+                {
+                    try
+                    {
+                        var activeSubscribers = _unitOfWork.NewsletterSubscription.GetAll(s => s.IsActive).ToList();
+                        int sentCount = 0;
+                        int failedCount = 0;
+
+                        foreach (var subscriber in activeSubscribers)
+                        {
+                            try
+                            {
+                                var flashSaleUrl = Url.Action("Index", "FlashSale", new { area = "Customer" }, Request.Scheme);
+                                var subject = _localizer["NewFlashSaleNotification"].ToString();
+                                var message = GenerateFlashSaleEmailHtml(flashSale, flashSaleUrl);
+
+                                await _emailSender.SendEmailAsync(subscriber.Email, subject, message);
+                                sentCount++;
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error sending flash sale email to {Email}", subscriber.Email);
+                                failedCount++;
+                            }
+                        }
+
+                        if (sentCount > 0)
+                        {
+                            TempData["success"] = $"Flash sale created successfully! Notification sent to {sentCount} subscriber(s).";
+                            if (failedCount > 0)
+                            {
+                                TempData["warning"] = $"Failed to send notification to {failedCount} subscriber(s).";
+                            }
+                        }
+                        else
+                        {
+                            TempData["success"] = "Flash sale created successfully!";
+                            TempData["warning"] = "Failed to send notifications to subscribers.";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error sending flash sale notifications to subscribers");
+                        TempData["success"] = "Flash sale created successfully!";
+                        TempData["warning"] = "Failed to send notifications to subscribers.";
+                    }
+                }
+                else
+                {
+                    TempData["success"] = "Flash sale created successfully! Now add products to it.";
+                }
+                
                 return RedirectToAction(nameof(AddProducts), new { id = flashSale.Id });
             }
 
             return View(flashSale);
+        }
+
+        private string GenerateFlashSaleEmailHtml(FlashSale flashSale, string flashSaleUrl)
+        {
+            var startDate = flashSale.StartDate.ToString("MMMM dd, yyyy HH:mm");
+            var endDate = flashSale.EndDate.ToString("MMMM dd, yyyy HH:mm");
+            
+            return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+        .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }}
+        .flash-sale-name {{ font-size: 28px; font-weight: bold; margin-bottom: 10px; }}
+        .flash-sale-desc {{ font-size: 16px; margin-bottom: 20px; }}
+        .details {{ background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }}
+        .detail-row {{ margin: 10px 0; }}
+        .detail-label {{ font-weight: bold; color: #667eea; }}
+        .cta-button {{ display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin-top: 20px; font-weight: bold; }}
+        .footer {{ text-align: center; margin-top: 30px; color: #666; font-size: 12px; }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <div class='flash-sale-name'>⚡ {flashSale.Name}</div>
+            <div class='flash-sale-desc'>{_localizer["FlashSale"]}</div>
+        </div>
+        <div class='content'>
+            {(string.IsNullOrEmpty(flashSale.Description) ? "" : $"<p>{flashSale.Description}</p>")}
+            <div class='details'>
+                <div class='detail-row'>
+                    <span class='detail-label'>{_localizer["StartDate"]}:</span> {startDate}
+                </div>
+                <div class='detail-row'>
+                    <span class='detail-label'>{_localizer["EndDate"]}:</span> {endDate}
+                </div>
+            </div>
+            <div style='text-align: center;'>
+                <a href='{flashSaleUrl}' class='cta-button'>{_localizer["ViewFlashSale"]}</a>
+            </div>
+            <div class='footer'>
+                <p>{_localizer["FlashSaleEmailFooter"]}</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>";
         }
 
         // GET: Add Products to Flash Sale

@@ -29,6 +29,10 @@ namespace BulkyBook.DataAccess.Repository
         public IPromoCodeRepository PromoCode { get; private set; }
         public IPromoCodeUsageRepository PromoCodeUsage { get; private set; }
         public IWishlistRepository wishlist { get; private set; }
+        public IServicePurchaseRepository ServicePurchases { get; private set; }
+        public IServiceSubscriptionRepository ServiceSubscriptions { get; private set; }
+        public IServiceOfferRepository ServiceOffers { get; private set; }
+        public INewsletterSubscriptionRepository NewsletterSubscription { get; private set; }
 
         public UnitOfWork(ApplicationDBContext db) 
         {
@@ -47,6 +51,10 @@ namespace BulkyBook.DataAccess.Repository
             PromoCode = new PromoCodeRepository(_db);
             PromoCodeUsage = new PromoCodeUsageRepository(_db);
             wishlist = new WishlistRepository(_db);
+            ServiceOffers = new ServiceOfferRepository(_db);
+            ServiceSubscriptions = new ServiceSubscriptionRepository(_db);
+            ServicePurchases = new ServicePurchaseRepository(_db);
+            NewsletterSubscription = new NewsletterSubscriptionRepository(_db);
 
         }
 

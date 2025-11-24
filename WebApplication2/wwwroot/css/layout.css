@@ -170,20 +170,10 @@
 
 main {
     min-height: calc(100vh - 132px);
-    padding-top: 80px;
+     
 }
 
-@media (max-width: 991px) {
-    main {
-        padding-top: 75px;
-    }
-}
-
-@media (max-width: 576px) {
-    main {
-        padding-top: 70px;
-    }
-}
+ 
 
 /* Footer Styles */
 .footer {

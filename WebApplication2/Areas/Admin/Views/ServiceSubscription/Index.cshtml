@@ -1,0 +1,49 @@
+@model IEnumerable<BulkyBook.Models.ServiceSubscription>
+
+@{
+    ViewData["Title"] = Localizer["ServiceSubscriptions"];
+}
+
+<partial name="_Notifications" />
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">
+                    <i class="bi bi-briefcase me-3"></i>
+                    @Localizer["ServiceSubscriptionsManagement"]
+                </h2>
+                <a asp-action="Create" class="create-new-btn">
+                    <i class="bi bi-plus-circle"></i>
+                    @Localizer["CreateNewService"]
+                </a>
+            </div>
+
+            <div class="admin-card-body">
+                <div class="admin-table-wrapper">
+                    <table id="tblData" class="table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>@Localizer["ID"]</th>
+                                <th>@Localizer["Image"]</th>
+                                <th>@Localizer["Title"]</th>
+                                <th>@Localizer["Type"]</th>
+                                <th>@Localizer["Price"]</th>
+                                <th>@Localizer["OfflinePercent"]</th>
+                                <th>@Localizer["Status"]</th>
+                                <th>@Localizer["Purchases"]</th>
+                                <th>@Localizer["Actions"]</th>
+                            </tr>   
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript" src="~/js/ServiceSubscription.js"></script>
+}
+

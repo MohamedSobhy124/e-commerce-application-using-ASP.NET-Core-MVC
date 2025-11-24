@@ -22,7 +22,10 @@ namespace BulkyBook.DataAccess.Repository.IRepository
         IPromoCodeRepository PromoCode { get; }
         IPromoCodeUsageRepository PromoCodeUsage { get; }
         IWishlistRepository wishlist { get; }
-
+        IServicePurchaseRepository ServicePurchases { get; }
+        IServiceSubscriptionRepository ServiceSubscriptions { get; }
+        IServiceOfferRepository ServiceOffers { get; }
+        INewsletterSubscriptionRepository NewsletterSubscription { get; }
         void save();
     }
 }

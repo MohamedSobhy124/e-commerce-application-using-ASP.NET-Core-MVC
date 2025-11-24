@@ -3,6 +3,7 @@ using BulkyBook.Models;
 using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using System.Diagnostics;
 using System.Security.Claims;
 
@@ -14,11 +15,13 @@ namespace BulkyBook.Areas.Customer.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStringLocalizer<BulkyBook.SharedResources> _localizer;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IStringLocalizer<BulkyBook.SharedResources> localizer)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _localizer = localizer;
         }
 
         [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" })]
@@ -30,8 +33,40 @@ namespace BulkyBook.Areas.Customer.Controllers
             var activeFlashSales = _unitOfWork.FlashSale.GetActiveFlashSales();
             ViewBag.ActiveFlashSales = activeFlashSales;
 
+            // Get active service subscriptions for homepage
+            var activeServices = _unitOfWork.ServiceSubscriptions.GetAll(s => s.IsActive, includeProperties: "ServiceImages")
+                .OrderBy(s => s.DisplayOrder)
+                .ThenByDescending(s => s.CreatedDate)
+                .Take(6)
+                .ToList();
+            ViewBag.ActiveServices = activeServices;
+
             // Get all categories for filter (cached - only load once per request)
-            ViewBag.Categories = _unitOfWork.categry.GetAll().ToList();
+            var allCategories = _unitOfWork.categry.GetAll().ToList();
+            ViewBag.Categories = allCategories;
+            
+            // Get best sellers (products with most orders)
+            var bestSellers = _unitOfWork.product.GetAll(includeProperties: "categry,ProductImages")
+                .Where(p => p.StockQuantity > 0)
+                .OrderByDescending(p => p.Id) // For now, use ID as proxy for popularity
+                .Take(8)
+                .ToList();
+            ViewBag.BestSellers = bestSellers;
+            
+            // Get new arrivals (recently added products)
+            var newArrivals = _unitOfWork.product.GetAll(includeProperties: "categry,ProductImages")
+                .Where(p => p.StockQuantity > 0)
+                .OrderByDescending(p => p.Id)
+                .Take(8)
+                .ToList();
+            ViewBag.NewArrivals = newArrivals;
+            
+            // Get top categories (categories with most products)
+            var topCategories = allCategories
+                .OrderByDescending(c => _unitOfWork.product.GetAll(p => p.CategryId == c.Id).Count())
+                .Take(6)
+                .ToList();
+            ViewBag.TopCategories = topCategories;
             ViewBag.SelectedCategory = categoryId;
             ViewBag.SearchTerm = searchTerm;
             ViewBag.SortBy = sortBy;
@@ -40,6 +75,26 @@ namespace BulkyBook.Areas.Customer.Controllers
             ViewBag.InStock = inStock;
             ViewBag.MinRating = minRating;
             ViewBag.Availability = availability;
+            
+            // Check if logged-in user is subscribed to newsletter
+            if (User.Identity.IsAuthenticated)
+            {
+                var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                if (!string.IsNullOrEmpty(userEmail))
+                {
+                    var userSubscription = _unitOfWork.NewsletterSubscription.GetByEmail(userEmail);
+                    ViewBag.IsNewsletterSubscribed = userSubscription != null && userSubscription.IsActive;
+                    ViewBag.UserEmail = userEmail;
+                }
+                else
+                {
+                    ViewBag.IsNewsletterSubscribed = false;
+                }
+            }
+            else
+            {
+                ViewBag.IsNewsletterSubscribed = false;
+            }
             
             // Get products with optional filtering (optimized query - only load what's needed)
             var query = _unitOfWork.product.GetAll(includeProperties: "categry,ProductImages").AsQueryable();
@@ -698,6 +753,139 @@ namespace BulkyBook.Areas.Customer.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        // Newsletter Subscription
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public IActionResult SubscribeNewsletter(string email, string source = "HomePage")
+        {
+            try
+            {
+                // If user is logged in, use their email from claims
+                if (User.Identity.IsAuthenticated)
+                {
+                    var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                    if (!string.IsNullOrEmpty(userEmail))
+                    {
+                        email = userEmail;
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    return Json(new { success = false, message = _localizer["PleaseEnterValidEmail"].ToString() });
+                }
+
+                // Validate email format
+                if (!System.Text.RegularExpressions.Regex.IsMatch(email, 
+                    @"^[^@\s]+@[^@\s]+\.[^@\s]+$", 
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                {
+                    return Json(new { success = false, message = _localizer["PleaseEnterValidEmail"].ToString() });
+                }
+
+                // Check if email already exists
+                var existingSubscription = _unitOfWork.NewsletterSubscription.GetByEmail(email);
+                
+                if (existingSubscription != null)
+                {
+                    if (existingSubscription.IsActive)
+                    {
+                        return Json(new { success = false, message = _localizer["EmailAlreadySubscribed"].ToString() });
+                    }
+                    else
+                    {
+                        // Reactivate subscription
+                        existingSubscription.IsActive = true;
+                        existingSubscription.SubscribedDate = DateTime.Now;
+                        existingSubscription.UnsubscribedDate = null;
+                        existingSubscription.Source = source;
+                        _unitOfWork.NewsletterSubscription.Update(existingSubscription);
+                        _unitOfWork.save();
+                        
+                        return Json(new { 
+                            success = true, 
+                            message = _localizer["ThankYouForSubscribing"].ToString(),
+                            isReactivated = true
+                        });
+                    }
+                }
+
+                // Create new subscription
+                var subscription = new NewsletterSubscription
+                {
+                    Email = email.Trim().ToLower(),
+                    SubscribedDate = DateTime.Now,
+                    IsActive = true,
+                    Source = source
+                };
+
+                _unitOfWork.NewsletterSubscription.Add(subscription);
+                _unitOfWork.save();
+
+                return Json(new { 
+                    success = true, 
+                    message = _localizer["ThankYouForSubscribing"].ToString(),
+                    isReactivated = false
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error subscribing to newsletter: {Email}", email);
+                return Json(new { success = false, message = _localizer["SubscriptionError"].ToString() });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public IActionResult UnsubscribeNewsletter()
+        {
+            try
+            {
+                if (!User.Identity.IsAuthenticated)
+                {
+                    return Json(new { success = false, message = _localizer["PleaseLogin"].ToString() });
+                }
+
+                var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    return Json(new { success = false, message = _localizer["EmailNotFound"].ToString() });
+                }
+
+                // Find subscription
+                var subscription = _unitOfWork.NewsletterSubscription.GetByEmail(userEmail);
+                
+                if (subscription == null)
+                {
+                    return Json(new { success = false, message = _localizer["SubscriptionNotFound"].ToString() });
+                }
+
+                if (!subscription.IsActive)
+                {
+                    return Json(new { success = false, message = _localizer["AlreadyUnsubscribed"].ToString() });
+                }
+
+                // Deactivate subscription
+                subscription.IsActive = false;
+                subscription.UnsubscribedDate = DateTime.Now;
+                _unitOfWork.NewsletterSubscription.Update(subscription);
+                _unitOfWork.save();
+                
+                return Json(new { 
+                    success = true, 
+                    message = _localizer["UnsubscribedSuccessfully"].ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error unsubscribing from newsletter");
+                return Json(new { success = false, message = _localizer["SubscriptionError"].ToString() });
+            }
         }
     }
 

@@ -353,7 +353,7 @@
                         <form method="post" asp-action="CancelOrder">
                             <input type="hidden" name="id" value="@Model.OrderHeader.Id" />
                             <button type="submit" class="action-btn action-btn-danger" 
-                                    onclick="return confirm('Are you sure you want to cancel this order?')">
+                                    onclick="event.preventDefault(); Swal.fire({title: 'Cancel Order', text: 'Are you sure you want to cancel this order?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', cancelButtonColor: '#6b7280', confirmButtonText: 'Yes, Cancel It', cancelButtonText: 'No'}).then((result) => { if (result.isConfirmed) { this.closest('form').submit(); } }); return false;">
                                 <i class="bi bi-x-circle"></i>
                                 Cancel Order
                             </button>
@@ -446,8 +446,23 @@
         // Add confirmation for cancel button
         document.querySelectorAll('.action-btn-danger').forEach(btn => {
             btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+                if (btn.type === 'submit') {
                     e.preventDefault();
+                    Swal.fire({
+                        title: 'Cancel Order',
+                        text: 'Are you sure you want to cancel this order? This action cannot be undone.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc2626',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Yes, Cancel It',
+                        cancelButtonText: 'No',
+                        dangerMode: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            btn.closest('form').submit();
+                        }
+                    });
                 }
             });
         });
