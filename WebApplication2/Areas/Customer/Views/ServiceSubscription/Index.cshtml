@@ -1,0 +1,341 @@
+@model IEnumerable<BulkyBook.Models.ServiceSubscription>
+
+@{
+    ViewData["Title"] = Localizer["ServiceSubscriptions"];
+}
+
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                <i class="bi bi-briefcase-fill me-3"></i>@Localizer["OurServices"]
+            </h1>
+            <p class="lead text-muted">@Localizer["ChoosePerfectServiceSubscription"]</p>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="row">
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                <p class="text-muted mt-3">@Localizer["NoServicesAvailable"]</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var service in Model)
+            {
+                var activeOffers = ViewBag.Offers as IEnumerable<BulkyBook.Models.ServiceOffer> ?? Enumerable.Empty<BulkyBook.Models.ServiceOffer>();
+                var serviceOffers = activeOffers.Where(o => o.ServiceSubscriptionId == service.Id).ToList();
+                var hasOffer = serviceOffers.Any();
+                var bestOffer = serviceOffers.OrderByDescending(o => o.DiscountValue).FirstOrDefault();
+
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="service-card h-100">
+                        <div class="service-card-header">
+                            @{
+                                var serviceImages = service.ServiceImages != null && service.ServiceImages.Any() 
+                                    ? service.ServiceImages.OrderBy(si => si.DisplayOrder).Select(si => si.ImageUrl).ToList()
+                                    : new List<string>();
+                                
+                                // If no ServiceImages but has ImageUrl, use that
+                                if (!serviceImages.Any() && !string.IsNullOrEmpty(service.ImageUrl))
+                                {
+                                    serviceImages.Add(service.ImageUrl);
+                                }
+                            }
+                            
+                            @if (serviceImages.Count > 1)
+                            {
+                                <div id="serviceCarousel_@service.Id" class="carousel slide service-image-carousel" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        @for (int i = 0; i < serviceImages.Count; i++)
+                                        {
+                                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                <img src="@serviceImages[i]" class="service-image" alt="@service.Title - Image @(i+1)" />
+                                            </div>
+                                        }
+                                    </div>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">@Localizer["Previous"]</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">@Localizer["Next"]</span>
+                                    </button>
+                                    <div class="carousel-indicators">
+                                        @for (int i = 0; i < serviceImages.Count; i++)
+                                        {
+                                            <button type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-label="Slide @(i+1)"></button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else if (serviceImages.Count == 1)
+                            {
+                                <img src="@serviceImages[0]" class="service-image" alt="@service.Title" />
+                            }
+                            else
+                            {
+                                <div class="service-image-placeholder">
+                                    <i class="bi bi-briefcase" style="font-size: 3rem;"></i>
+                                </div>
+                            }
+                            @if (hasOffer && bestOffer != null)
+                            {
+                                <div class="offer-badge">
+                                    @if (bestOffer.DiscountType == BulkyBook.Models.DiscountType.Percentage)
+                                    {
+                                        <span>@bestOffer.DiscountValue% @Localizer["OFF"]</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@bestOffer.DiscountValue.ToString("C") @Localizer["OFF"]</span>
+                                    }
+                                </div>
+                            }
+                            @if (service.ServiceType == BulkyBook.Models.ServiceType.Online)
+                            {
+                                <div class="service-type-badge online">
+                                    <i class="bi bi-globe"></i> @Localizer["Online"]
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="service-type-badge offline">
+                                    <i class="bi bi-building"></i> @Localizer["Offline"]
+                                </div>
+                            }
+                        </div>
+                        <div class="service-card-body">
+                            <h3 class="service-title">@service.Title</h3>
+                            @if (!string.IsNullOrEmpty(service.Description))
+                            {
+                                <p class="service-description">@(service.Description.Length > 100 ? service.Description.Substring(0, 100) + "..." : service.Description)</p>
+                            }
+                            <div class="service-pricing">
+                                @if (hasOffer && bestOffer != null)
+                                {
+                                    decimal originalPrice = service.Price;
+                                    decimal discount = 0;
+                                    if (bestOffer.DiscountType == BulkyBook.Models.DiscountType.Percentage)
+                                    {
+                                        discount = originalPrice * (bestOffer.DiscountValue / 100);
+                                    }
+                                    else
+                                    {
+                                        discount = bestOffer.DiscountValue;
+                                    }
+                                    decimal finalPrice = originalPrice - discount;
+                                    
+                                    <div class="price-original">@originalPrice.ToString("C")</div>
+                                    <div class="price-final">@finalPrice.ToString("C")</div>
+                                }
+                                else
+                                {
+                                    <div class="price-final">@service.Price.ToString("C")</div>
+                                }
+                            </div>
+                            @if (service.ServiceType == BulkyBook.Models.ServiceType.Offline && service.OfflinePaymentPercent.HasValue)
+                            {
+                                <div class="offline-payment-info">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle"></i> 
+                                        @Localizer["PayPercentNow", service.OfflinePaymentPercent.Value, (service.Price * service.OfflinePaymentPercent.Value / 100).ToString("C")]
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                        <div class="service-card-footer">
+                            <a asp-action="Details" asp-route-id="@service.Id" class="btn btn-primary w-100">
+                                <i class="bi bi-arrow-right me-2"></i>@Localizer["ViewDetails"]
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .service-card {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+
+    .service-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+    }
+
+    .service-card-header {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .service-image-carousel {
+        height: 100%;
+    }
+
+    .service-image-carousel .carousel-inner {
+        height: 100%;
+    }
+
+    .service-image-carousel .carousel-item {
+        height: 100%;
+    }
+
+    .service-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .service-image-carousel .carousel-control-prev,
+    .service-image-carousel .carousel-control-next {
+        opacity: 0.7;
+        width: 10%;
+    }
+
+    .service-image-carousel .carousel-control-prev:hover,
+    .service-image-carousel .carousel-control-next:hover {
+        opacity: 1;
+    }
+
+    .service-image-carousel .carousel-indicators {
+        margin-bottom: 10px;
+    }
+
+    .service-image-carousel .carousel-indicators button {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.5);
+        border: none;
+    }
+
+    .service-image-carousel .carousel-indicators button.active {
+        background-color: white;
+    }
+
+    .service-image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .offer-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #ef4444;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        animation: pulse 2s infinite;
+    }
+
+    .service-type-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    .service-type-badge.online {
+        background: rgba(16, 185, 129, 0.9);
+    }
+
+    .service-type-badge.offline {
+        background: rgba(59, 130, 246, 0.9);
+    }
+
+    .service-card-body {
+        padding: 25px;
+    }
+
+    .service-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 15px;
+    }
+
+    .service-description {
+        color: #6b7280;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        min-height: 60px;
+    }
+
+    .service-pricing {
+        margin-bottom: 15px;
+    }
+
+    .price-original {
+        font-size: 1rem;
+        color: #9ca3af;
+        text-decoration: line-through;
+        margin-bottom: 5px;
+    }
+
+    .price-final {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #059669;
+    }
+
+    .offline-payment-info {
+        margin-top: 10px;
+        padding: 10px;
+        background: #f0f9ff;
+        border-radius: 8px;
+        border-left: 3px solid #3b82f6;
+    }
+
+    .service-card-footer {
+        padding: 20px 25px;
+        background: #f9fafb;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .service-card-footer .btn {
+        padding: 12px;
+        font-weight: 600;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .service-card-footer .btn:hover {
+        transform: scale(1.05);
+    }
+
+    @@keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+</style>
+

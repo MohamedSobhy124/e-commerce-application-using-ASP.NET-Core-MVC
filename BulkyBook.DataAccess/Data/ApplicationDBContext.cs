@@ -28,6 +28,11 @@ namespace BulkyBook.DataAccess.Data
         public DbSet<PromoCode> PromoCodes { get; set; }
         public DbSet<PromoCodeUsage> PromoCodeUsages { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
+        public DbSet<ServiceOffer> ServiceOffers { get; set; }
+        public DbSet<ServicePurchase> ServicePurchases { get; set; }
+        public DbSet<ServiceSubscription> ServiceSubscriptions { get; set; }
+        public DbSet<ServiceImage> ServiceImages { get; set; }
+        public DbSet<NewsletterSubscription> NewsletterSubscriptions { get; set; }
 
 
 

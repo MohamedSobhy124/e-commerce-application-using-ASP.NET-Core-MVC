@@ -47,6 +47,8 @@
     <link rel="stylesheet" href="~/css/modern-product-grid.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/auth-pages.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/wishlist.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/services-home.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/home-enhanced-sections.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BulkyBook.styles.css" asp-append-version="true" />
 
 
@@ -74,6 +76,11 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Index">
                                 <i class="bi bi-house-door me-1"></i>@Localizer["Home"]
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Customer" asp-controller="ServiceSubscription" asp-action="Index">
+                                <i class="bi bi-briefcase me-1"></i>@Localizer["OurServices"]
                             </a>
                         </li>
 
@@ -112,6 +119,26 @@
                                     <li>
                                         <a class="dropdown-item" asp-area="Admin" asp-controller="PromoCode" asp-action="Index">
                                             <i class="bi bi-tag-fill me-2"></i>@Localizer["PromoCodes"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="ServiceSubscription" asp-action="Index">
+                                            <i class="bi bi-briefcase-fill me-2"></i>@Localizer["ServiceSubscriptions"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="ServiceSubscription" asp-action="Purchases">
+                                            <i class="bi bi-cart-check me-2"></i>@Localizer["ServicePurchases"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="ServiceOffer" asp-action="Index">
+                                            <i class="bi bi-tag me-2"></i>@Localizer["ServiceOffers"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="NewsletterSubscription" asp-action="Index">
+                                            <i class="bi bi-envelope-heart me-2"></i>@Localizer["NewsletterSubscribers"]
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>

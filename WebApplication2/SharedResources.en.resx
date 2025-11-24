@@ -202,7 +202,7 @@
     <value>Subtotal</value>
   </data>
   <data name="Total" xml:space="preserve">
-    <value>Total</value>
+    <value>total</value>
   </data>
   <data name="OrderSummary" xml:space="preserve">
     <value>Order Summary</value>
@@ -271,7 +271,7 @@
     <value>Delete</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>Save</value>
+    <value>SAVE</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
@@ -449,27 +449,6 @@
   </data>
   <data name="Product" xml:space="preserve">
     <value>Product</value>
-  </data>
-  <data name="PromoCodes" xml:space="preserve">
-    <value>Promo Codes</value>
-  </data>
-  <data name="PromoCode" xml:space="preserve">
-    <value>Promo Code</value>
-  </data>
-  <data name="EnterPromoCode" xml:space="preserve">
-    <value>Enter promo code</value>
-  </data>
-  <data name="Apply" xml:space="preserve">
-    <value>Apply</value>
-  </data>
-  <data name="Remove" xml:space="preserve">
-    <value>Remove</value>
-  </data>
-  <data name="Discount" xml:space="preserve">
-    <value>Discount</value>
-  </data>
-  <data name="Subtotal" xml:space="preserve">
-    <value>Subtotal</value>
   </data>
   <data name="CartUpdatedSuccessfully" xml:space="preserve">
     <value>Cart updated successfully</value>
@@ -668,6 +647,9 @@
   </data>
   <data name="YourEmailAddress" xml:space="preserve">
     <value>Your email address</value>
+  </data>
+  <data name="ThankYouForSubscribing" xml:space="preserve">
+    <value>Thank you for subscribing! We'll keep you updated with our latest offers.</value>
   </data>
   <data name="BackToProducts" xml:space="preserve">
     <value>Back to Products</value>
@@ -909,8 +891,21 @@
   <data name="ApplyFilters" xml:space="preserve">
     <value>Apply Filters</value>
   </data>
-  
-  <!-- Promo Code Translations -->
+  <data name="PromoCodes" xml:space="preserve">
+    <value>Promo Codes</value>
+  </data>
+  <data name="PromoCode" xml:space="preserve">
+    <value>Promo Code</value>
+  </data>
+  <data name="EnterPromoCode" xml:space="preserve">
+    <value>Enter promo code</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="Discount" xml:space="preserve">
+    <value>Discount</value>
+  </data>
   <data name="Code" xml:space="preserve">
     <value>Code</value>
   </data>
@@ -919,9 +914,6 @@
   </data>
   <data name="Usage" xml:space="preserve">
     <value>Usage</value>
-  </data>
-  <data name="Actions" xml:space="preserve">
-    <value>Actions</value>
   </data>
   <data name="Expired" xml:space="preserve">
     <value>Expired</value>
@@ -941,17 +933,8 @@
   <data name="Inactive" xml:space="preserve">
     <value>Inactive</value>
   </data>
-  <data name="Details" xml:space="preserve">
-    <value>Details</value>
-  </data>
-  <data name="Edit" xml:space="preserve">
-    <value>Edit</value>
-  </data>
   <data name="ToggleActive" xml:space="preserve">
     <value>Toggle Active</value>
-  </data>
-  <data name="Delete" xml:space="preserve">
-    <value>Delete</value>
   </data>
   <data name="PromoCodesManagement" xml:space="preserve">
     <value>Promo Codes Management</value>
@@ -959,14 +942,8 @@
   <data name="CreateNewPromoCode" xml:space="preserve">
     <value>Create New Promo Code</value>
   </data>
-  <data name="Code" xml:space="preserve">
-    <value>Code</value>
-  </data>
   <data name="DiscountType" xml:space="preserve">
     <value>Discount Type</value>
-  </data>
-  <data name="Description" xml:space="preserve">
-    <value>Description</value>
   </data>
   <data name="DiscountValue" xml:space="preserve">
     <value>Discount Value</value>
@@ -994,12 +971,6 @@
   </data>
   <data name="UsageStatistics" xml:space="preserve">
     <value>Usage Statistics</value>
-  </data>
-  <data name="total" xml:space="preserve">
-    <value>total</value>
-  </data>
-  <data name="ViewDetails" xml:space="preserve">
-    <value>View Details</value>
   </data>
   <data name="BackToList" xml:space="preserve">
     <value>Back to List</value>
@@ -1034,20 +1005,8 @@
   <data name="FixedAmount" xml:space="preserve">
     <value>Fixed Amount</value>
   </data>
-  <data name="MinimumOrder" xml:space="preserve">
-    <value>Minimum Order</value>
-  </data>
-  <data name="MaximumDiscount" xml:space="preserve">
-    <value>Maximum Discount</value>
-  </data>
   <data name="ValidityPeriod" xml:space="preserve">
     <value>Validity Period</value>
-  </data>
-  <data name="StartDate" xml:space="preserve">
-    <value>Start Date</value>
-  </data>
-  <data name="EndDate" xml:space="preserve">
-    <value>End Date</value>
   </data>
   <data name="CurrentlyValid" xml:space="preserve">
     <value>Currently Valid</value>
@@ -1055,38 +1014,17 @@
   <data name="NotStartedYet" xml:space="preserve">
     <value>Not Started Yet</value>
   </data>
-  <data name="UsageStatistics" xml:space="preserve">
-    <value>Usage Statistics</value>
-  </data>
   <data name="TimesUsed" xml:space="preserve">
     <value>Times Used</value>
-  </data>
-  <data name="UsageLimit" xml:space="preserve">
-    <value>Usage Limit</value>
-  </data>
-  <data name="PerUserLimit" xml:space="preserve">
-    <value>Per User Limit</value>
   </data>
   <data name="UsageHistory" xml:space="preserve">
     <value>Usage History</value>
   </data>
-  <data name="Date" xml:space="preserve">
-    <value>Date</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>User</value>
   </data>
-  <data name="OrderID" xml:space="preserve">
-    <value>Order ID</value>
-  </data>
   <data name="OrderTotal" xml:space="preserve">
     <value>Order Total</value>
-  </data>
-  <data name="BackToList" xml:space="preserve">
-    <value>Back to List</value>
-  </data>
-  <data name="Warning" xml:space="preserve">
-    <value>Warning</value>
   </data>
   <data name="AreYouSureDeletePromoCode" xml:space="preserve">
     <value>Are you sure you want to delete this promo code? This action cannot be undone.</value>
@@ -1094,11 +1032,6 @@
   <data name="YesDelete" xml:space="preserve">
     <value>Yes, Delete</value>
   </data>
-  <data name="Cancel" xml:space="preserve">
-    <value>Cancel</value>
-  </data>
-  
-  <!-- Promo Code Messages -->
   <data name="EndDateMustBeAfterStartDate" xml:space="preserve">
     <value>End date must be after start date</value>
   </data>
@@ -1195,17 +1128,6 @@
   <data name="CurrentlyUsed" xml:space="preserve">
     <value>Currently used</value>
   </data>
-  <data name="NotStartedYet" xml:space="preserve">
-    <value>Not Started Yet</value>
-  </data>
-  <data name="FixedAmount" xml:space="preserve">
-    <value>Fixed Amount</value>
-  </data>
-  <data name="Status" xml:space="preserve">
-    <value>Status</value>
-  </data>
-  
-  <!-- Payment Method Translations -->
   <data name="CreditDebitCard" xml:space="preserve">
     <value>Credit/Debit Card</value>
   </data>
@@ -1215,25 +1137,9 @@
   <data name="BuyNowPayLater" xml:space="preserve">
     <value>Buy Now, Pay Later</value>
   </data>
-  
-  <!-- JavaScript Messages -->
   <data name="Applying" xml:space="preserve">
     <value>Applying...</value>
   </data>
-  <data name="WelcomeBack" xml:space="preserve">
-    <value>Welcome Back</value>
-  </data>
-  <data name="SignInToYourAccount" xml:space="preserve">
-    <value>Sign in to your account</value>
-  </data>
-  <data name="RememberMe" xml:space="preserve">
-    <value>Remember me</value>
-  </data>
-  <data name="ThankYourForSubscribing" xml:space="preserve">
-    <value>Thank you for subscribing!</value>
-  </data>
-  
-  <!-- Home Page Additional Translations -->
   <data name="WelcomeToHealthFitness" xml:space="preserve">
     <value>Welcome to Your Health And Fitness Journey</value>
   </data>
@@ -1254,12 +1160,6 @@
   </data>
   <data name="ViewAllFlashSales" xml:space="preserve">
     <value>View All Flash Sales</value>
-  </data>
-  <data name="Previous" xml:space="preserve">
-    <value>Previous</value>
-  </data>
-  <data name="Next" xml:space="preserve">
-    <value>Next</value>
   </data>
   <data name="OFF" xml:space="preserve">
     <value>OFF</value>
@@ -1324,14 +1224,9 @@
   <data name="MobileLabel" xml:space="preserve">
     <value>Mobile:</value>
   </data>
-  <data name="YourCartIsEmpty" xml:space="preserve">
-    <value>Your cart is empty</value>
-  </data>
   <data name="InCart" xml:space="preserve">
     <value>In Cart</value>
   </data>
-  
-  <!-- Layout/Navigation Translations -->
   <data name="FlashSales" xml:space="preserve">
     <value>Flash Sales</value>
   </data>
@@ -1347,8 +1242,6 @@
   <data name="ViewAllNotifications" xml:space="preserve">
     <value>View All Notifications</value>
   </data>
-  
-  <!-- Flash Sale Translations -->
   <data name="FlashSalesLimitedTimeOffers" xml:space="preserve">
     <value>Flash Sales - Limited Time Offers</value>
   </data>
@@ -1368,13 +1261,7 @@
     <value>Back to Home</value>
   </data>
   <data name="ENDSIN" xml:space="preserve">
-    <value>ENDS IN</value>
-  </data>
-  <data name="EndsIn" xml:space="preserve">
     <value>Ends In</value>
-  </data>
-  <data name="SAVE" xml:space="preserve">
-    <value>SAVE</value>
   </data>
   <data name="Only" xml:space="preserve">
     <value>Only</value>
@@ -1394,8 +1281,6 @@
   <data name="SOLDOUT" xml:space="preserve">
     <value>SOLD OUT</value>
   </data>
-  
-  <!-- Admin Flash Sale Translations -->
   <data name="FlashSalesManagement" xml:space="preserve">
     <value>Flash Sales Management</value>
   </data>
@@ -1632,5 +1517,431 @@
   </data>
   <data name="AvailableStock" xml:space="preserve">
     <value>Available Stock</value>
+  </data>
+  <data name="ServiceSubscriptions" xml:space="preserve">
+    <value>Services Managment</value>
+  </data>
+  <data name="OurServices" xml:space="preserve">
+    <value>Our Services</value>
+  </data>
+  <data name="ChoosePerfectServiceSubscription" xml:space="preserve">
+    <value>Choose the perfect service subscription for your needs</value>
+  </data>
+  <data name="NoServicesAvailable" xml:space="preserve">
+    <value>No services available at the moment.</value>
+  </data>
+  <data name="Online" xml:space="preserve">
+    <value>Online</value>
+  </data>
+  <data name="Offline" xml:space="preserve">
+    <value>Offline</value>
+  </data>
+  <data name="PayPercentNow" xml:space="preserve">
+    <value>Pay {0}% now ({1})</value>
+  </data>
+  <data name="OnlineService" xml:space="preserve">
+    <value>Online Service</value>
+  </data>
+  <data name="OfflineService" xml:space="preserve">
+    <value>Offline Service</value>
+  </data>
+  <data name="SubscriptionDetails" xml:space="preserve">
+    <value>Subscription Details</value>
+  </data>
+  <data name="ServicePrice" xml:space="preserve">
+    <value>Service Price</value>
+  </data>
+  <data name="MinimumAmountToPayNow" xml:space="preserve">
+    <value>Minimum Amount to Pay Now ({0}%)</value>
+  </data>
+  <data name="OfflinePaymentInfo" xml:space="preserve">
+    <value>You must pay at least {0}% ({1}) now. The remaining amount will be paid at the service location.</value>
+  </data>
+  <data name="ActiveOffers" xml:space="preserve">
+    <value>Active Offers</value>
+  </data>
+  <data name="ValidUntil" xml:space="preserve">
+    <value>Valid until</value>
+  </data>
+  <data name="PromoCodeOptional" xml:space="preserve">
+    <value>Promo Code (Optional)</value>
+  </data>
+  <data name="AmountToPayNow" xml:space="preserve">
+    <value>Amount to Pay Now</value>
+  </data>
+  <data name="Minimum" xml:space="preserve">
+    <value>Minimum</value>
+  </data>
+  <data name="AmountMustBeAtLeast" xml:space="preserve">
+    <value>Amount must be at least {0} ({1}% of total)</value>
+  </data>
+  <data name="OfflinePaymentAmountInfo" xml:space="preserve">
+    <value>You can pay more than the minimum, but not less. Maximum: {0}</value>
+  </data>
+  <data name="SubscribeNow" xml:space="preserve">
+    <value>Subscribe Now</value>
+  </data>
+  <data name="PayNow" xml:space="preserve">
+    <value>Pay Now</value>
+  </data>
+  <data name="OurPremiumServices" xml:space="preserve">
+    <value>Our Premium Services</value>
+  </data>
+  <data name="DiscoverProfessionalServices" xml:space="preserve">
+    <value>Discover our professional services designed to help you achieve your goals</value>
+  </data>
+  <data name="ViewAllServices" xml:space="preserve">
+    <value>View All Services</value>
+  </data>
+  <data name="CreateServiceSubscription" xml:space="preserve">
+    <value>Create Service Subscription</value>
+  </data>
+  <data name="CreateNewServiceSubscription" xml:space="preserve">
+    <value>Create New Service Subscription</value>
+  </data>
+  <data name="AddNewServiceForCustomers" xml:space="preserve">
+    <value>Add a new service for customers to subscribe</value>
+  </data>
+  <data name="TitleEnglish" xml:space="preserve">
+    <value>Title (English)</value>
+  </data>
+  <data name="TitleArabic" xml:space="preserve">
+    <value>Title (Arabic)</value>
+  </data>
+  <data name="ServiceTitle" xml:space="preserve">
+    <value>Service Title</value>
+  </data>
+  <data name="ServiceTitleAr" xml:space="preserve">
+    <value>عنوان الخدمة</value>
+  </data>
+  <data name="DescriptionEnglish" xml:space="preserve">
+    <value>Description (English)</value>
+  </data>
+  <data name="DescriptionArabic" xml:space="preserve">
+    <value>Description (Arabic)</value>
+  </data>
+  <data name="ServiceDescription" xml:space="preserve">
+    <value>Service description</value>
+  </data>
+  <data name="ServiceDescriptionAr" xml:space="preserve">
+    <value>وصف الخدمة</value>
+  </data>
+  <data name="OnlineFullPayment" xml:space="preserve">
+    <value>Online (Full Payment)</value>
+  </data>
+  <data name="OfflinePartialPayment" xml:space="preserve">
+    <value>Offline (Partial Payment)</value>
+  </data>
+  <data name="PriceAED" xml:space="preserve">
+    <value>Price (AED)</value>
+  </data>
+  <data name="OfflinePaymentPercentage" xml:space="preserve">
+    <value>Offline Payment Percentage</value>
+  </data>
+  <data name="OfflinePaymentPercentageInfo" xml:space="preserve">
+    <value>Percentage of total amount to be paid online (1-100%)</value>
+  </data>
+  <data name="ServiceImages" xml:space="preserve">
+    <value>Service Images</value>
+  </data>
+  <data name="UploadImages" xml:space="preserve">
+    <value>Upload Images</value>
+  </data>
+  <data name="AtLeastOneRequired" xml:space="preserve">
+    <value>At least 1 required</value>
+  </data>
+  <data name="AtLeastOneImageRequired" xml:space="preserve">
+    <value>At least one image is required.</value>
+  </data>
+  <data name="LowerNumbersAppearFirst" xml:space="preserve">
+    <value>Lower numbers appear first</value>
+  </data>
+  <data name="CreateService" xml:space="preserve">
+    <value>Create Service</value>
+  </data>
+  <data name="EditServiceSubscription" xml:space="preserve">
+    <value>Edit Service Subscription</value>
+  </data>
+  <data name="UpdateServiceDetails" xml:space="preserve">
+    <value>Update service details</value>
+  </data>
+  <data name="UploadAdditionalImages" xml:space="preserve">
+    <value>Upload Additional Images</value>
+  </data>
+  <data name="UpdateService" xml:space="preserve">
+    <value>Update Service</value>
+  </data>
+  <data name="ConfirmDeleteImage" xml:space="preserve">
+    <value>Are you sure you want to delete this image? At least one image is required.</value>
+  </data>
+  <data name="AtLeastOneImageRequiredAddNew" xml:space="preserve">
+    <value>At least one image is required. Please add a new image before deleting this one.</value>
+  </data>
+  <data name="NoImagesPleaseUpload" xml:space="preserve">
+    <value>No images. Please upload at least one image.</value>
+  </data>
+  <data name="ErrorDeletingImage" xml:space="preserve">
+    <value>Error deleting image</value>
+  </data>
+  <data name="UnknownError" xml:space="preserve">
+    <value>Unknown error</value>
+  </data>
+  <data name="ErrorDeletingImageTryAgain" xml:space="preserve">
+    <value>Error deleting image. Please try again.</value>
+  </data>
+  <data name="ServiceDetails" xml:space="preserve">
+    <value>Service Details</value>
+  </data>
+  <data name="ServiceSubscriptionDetails" xml:space="preserve">
+    <value>Service Subscription Details</value>
+  </data>
+  <data name="OnlinePayment" xml:space="preserve">
+    <value>online payment</value>
+  </data>
+  <data name="CreatedDate" xml:space="preserve">
+    <value>Created Date</value>
+  </data>
+  <data name="LastUpdated" xml:space="preserve">
+    <value>Last Updated</value>
+  </data>
+  <data name="PurchaseHistory" xml:space="preserve">
+    <value>Purchase History</value>
+  </data>
+  <data name="PurchaseID" xml:space="preserve">
+    <value>Purchase ID</value>
+  </data>
+  <data name="AmountPaid" xml:space="preserve">
+    <value>Amount Paid</value>
+  </data>
+  <data name="ServicePurchases" xml:space="preserve">
+    <value>Service Purchases</value>
+  </data>
+  <data name="ServiceOffers" xml:space="preserve">
+    <value>Service Offers</value>
+  </data>
+  <data name="ServiceSubscriptionsManagement" xml:space="preserve">
+    <value>Services Management</value>
+  </data>
+  <data name="CreateNewService" xml:space="preserve">
+    <value>Create New Service</value>
+  </data>
+  <data name="ID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="Image" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="OfflinePercent" xml:space="preserve">
+    <value>Offline %</value>
+  </data>
+  <data name="Purchases" xml:space="preserve">
+    <value>Purchases</value>
+  </data>
+  <data name="ServicePurchasesManagement" xml:space="preserve">
+    <value>Service Purchases Management</value>
+  </data>
+  <data name="Service" xml:space="preserve">
+    <value>Service</value>
+  </data>
+  <data name="PurchaseDate" xml:space="preserve">
+    <value>Purchase Date</value>
+  </data>
+  <data name="ServicePurchaseDetails" xml:space="preserve">
+    <value>Service Purchase Details</value>
+  </data>
+  <data name="BackToPurchases" xml:space="preserve">
+    <value>Back to Purchases</value>
+  </data>
+  <data name="Purchase" xml:space="preserve">
+    <value>Purchase</value>
+  </data>
+  <data name="PurchasedOn" xml:space="preserve">
+    <value>Purchased on</value>
+  </data>
+  <data name="ServiceInformation" xml:space="preserve">
+    <value>Service Information</value>
+  </data>
+  <data name="NA" xml:space="preserve">
+    <value>N/A</value>
+  </data>
+  <data name="UserType" xml:space="preserve">
+    <value>User Type</value>
+  </data>
+  <data name="RegisteredUser" xml:space="preserve">
+    <value>Registered User</value>
+  </data>
+  <data name="GuestUser" xml:space="preserve">
+    <value>Guest User</value>
+  </data>
+  <data name="PaymentInformation" xml:space="preserve">
+    <value>Payment Information</value>
+  </data>
+  <data name="RemainingAmount" xml:space="preserve">
+    <value>Remaining Amount</value>
+  </data>
+  <data name="PurchaseStatus" xml:space="preserve">
+    <value>Purchase Status</value>
+  </data>
+  <data name="PaymentIntentID" xml:space="preserve">
+    <value>Payment Intent ID</value>
+  </data>
+  <data name="SessionID" xml:space="preserve">
+    <value>Session ID</value>
+  </data>
+  <data name="AppliedOffer" xml:space="preserve">
+    <value>Applied Offer</value>
+  </data>
+  <data name="OfflineServiceNote" xml:space="preserve">
+    <value>Offline Service Note</value>
+  </data>
+  <data name="OfflineServiceNoteText" xml:space="preserve">
+    <value>Customer has paid {0} online. The remaining amount of {1} will be collected at the service location.</value>
+  </data>
+  <data name="ShopByCategory" xml:space="preserve">
+    <value>Shop by Category</value>
+  </data>
+  <data name="BrowseOurCategories" xml:space="preserve">
+    <value>Browse our categories and find what you need</value>
+  </data>
+  <data name="BestSellers" xml:space="preserve">
+    <value>Best Sellers</value>
+  </data>
+  <data name="NewArrivals" xml:space="preserve">
+    <value>New Arrivals</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="WeAccept" xml:space="preserve">
+    <value>We Accept</value>
+  </data>
+  <data name="CreditCard" xml:space="preserve">
+    <value>Credit Card</value>
+  </data>
+  <data name="BankTransfer" xml:space="preserve">
+    <value>Bank Transfer</value>
+  </data>
+  <data name="CashOnDelivery" xml:space="preserve">
+    <value>Cash on Delivery</value>
+  </data>
+  <data name="GetLatestOffersAndUpdates" xml:space="preserve">
+    <value>Get the latest offers and updates delivered to your inbox</value>
+  </data>
+  <data name="WeRespectYourPrivacy" xml:space="preserve">
+    <value>We respect your privacy. Unsubscribe at any time.</value>
+  </data>
+  <data name="PleaseEnterValidEmail" xml:space="preserve">
+    <value>Please enter a valid email address</value>
+  </data>
+  <data name="EmailAlreadySubscribed" xml:space="preserve">
+    <value>This email is already subscribed to our newsletter</value>
+  </data>
+  <data name="SubscriptionError" xml:space="preserve">
+    <value>An error occurred. Please try again later.</value>
+  </data>
+  <data name="Subscribing" xml:space="preserve">
+    <value>Subscribing</value>
+  </data>
+  <data name="NewsletterSubscribers" xml:space="preserve">
+    <value>Newsletter Subscribers</value>
+  </data>
+  <data name="NewsletterSubscriptionDetails" xml:space="preserve">
+    <value>Newsletter Subscription Details</value>
+  </data>
+  <data name="SubscribedDate" xml:space="preserve">
+    <value>Subscribed Date</value>
+  </data>
+  <data name="UnsubscribedDate" xml:space="preserve">
+    <value>Unsubscribed Date</value>
+  </data>
+  <data name="Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="Subscription" xml:space="preserve">
+    <value>Subscription</value>
+  </data>
+  <data name="SubscribedOn" xml:space="preserve">
+    <value>Subscribed On</value>
+  </data>
+  <data name="EmailInformation" xml:space="preserve">
+    <value>Email Information</value>
+  </data>
+  <data name="SubscriptionInformation" xml:space="preserve">
+    <value>Subscription Information</value>
+  </data>
+  <data name="SubscriptionNotFound" xml:space="preserve">
+    <value>Subscription not found</value>
+  </data>
+  <data name="SubscriptionActivated" xml:space="preserve">
+    <value>Subscription activated successfully</value>
+  </data>
+  <data name="SubscriptionDeactivated" xml:space="preserve">
+    <value>Subscription deactivated successfully</value>
+  </data>
+  <data name="SubscriptionDeleted" xml:space="preserve">
+    <value>Subscription deleted successfully</value>
+  </data>
+  <data name="ErrorUpdatingSubscription" xml:space="preserve">
+    <value>Error updating subscription</value>
+  </data>
+  <data name="ErrorDeletingSubscription" xml:space="preserve">
+    <value>Error deleting subscription</value>
+  </data>
+  <data name="ConfirmToggleStatus" xml:space="preserve">
+    <value>Are you sure you want to change the subscription status?</value>
+  </data>
+  <data name="ConfirmDeleteSubscription" xml:space="preserve">
+    <value>Are you sure you want to delete subscription for</value>
+  </data>
+  <data name="ExportCSV" xml:space="preserve">
+    <value>Export CSV</value>
+  </data>
+  <data name="ErrorExportingSubscriptions" xml:space="preserve">
+    <value>Error exporting subscriptions</value>
+  </data>
+  <data name="PleaseLogin" xml:space="preserve">
+    <value>Please login to continue</value>
+  </data>
+  <data name="EmailNotFound" xml:space="preserve">
+    <value>Email address not found</value>
+  </data>
+  <data name="AlreadyUnsubscribed" xml:space="preserve">
+    <value>You are already unsubscribed from the newsletter</value>
+  </data>
+  <data name="UnsubscribedSuccessfully" xml:space="preserve">
+    <value>You have been unsubscribed from the newsletter successfully</value>
+  </data>
+  <data name="ConfirmUnsubscribe" xml:space="preserve">
+    <value>Are you sure you want to unsubscribe from the newsletter?</value>
+  </data>
+  <data name="Unsubscribing" xml:space="preserve">
+    <value>Unsubscribing</value>
+  </data>
+  <data name="Unsubscribe" xml:space="preserve">
+    <value>Unsubscribe</value>
+  </data>
+  <data name="YouAreSubscribedToNewsletter" xml:space="preserve">
+    <value>You are subscribed to our newsletter</value>
+  </data>
+  <data name="NotifySubscribers" xml:space="preserve">
+    <value>Notify Subscribers</value>
+  </data>
+  <data name="SendToAllSubscribers" xml:space="preserve">
+    <value>Send notification to all active subscribers</value>
+  </data>
+  <data name="SendFlashSaleNotificationToSubscribers" xml:space="preserve">
+    <value>If enabled, all active newsletter subscribers will receive an email notification about this flash sale</value>
+  </data>
+  <data name="NewFlashSaleNotification" xml:space="preserve">
+    <value>⚡ New Flash Sale Available!</value>
+  </data>
+  <data name="ViewFlashSale" xml:space="preserve">
+    <value>View Flash Sale</value>
+  </data>
+  <data name="FlashSaleEmailFooter" xml:space="preserve">
+    <value>Don't miss out on these amazing deals! Shop now before the sale ends.</value>
   </data>
 </root>

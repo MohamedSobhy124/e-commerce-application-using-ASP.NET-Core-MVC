@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<Product>
+@inject BulkyBook.DataAccess.Repository.IRepository.IUnitOfWork _unitOfWork
 
 @{
     var categories = ViewBag.Categories as IEnumerable<BulkyBook.Models.Categry> ?? Enumerable.Empty<BulkyBook.Models.Categry>();
@@ -148,6 +149,171 @@
         </div>
     </section>
      
+}
+
+<!-- Services Section -->
+@{
+    var activeServices = ViewBag.ActiveServices as IEnumerable<BulkyBook.Models.ServiceSubscription> ?? Enumerable.Empty<BulkyBook.Models.ServiceSubscription>();
+    var hasServices = activeServices.Any();
+}
+
+@if (hasServices)
+{
+    <section class="services-showcase-section">
+        <div class="container">
+            <div class="services-header">
+                <div class="services-header-content">
+                    <h2 class="services-title">
+                        <i class="bi bi-briefcase-fill me-3"></i>
+                        @Localizer["OurPremiumServices"]
+                    </h2>
+                    <p class="services-subtitle">@Localizer["DiscoverProfessionalServices"]</p>
+                </div>
+                <a asp-area="Customer" asp-controller="ServiceSubscription" asp-action="Index" class="view-all-services-btn">
+                    @Localizer["ViewAllServices"]
+                    <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
+
+            <div class="services-grid">
+                @foreach (var service in activeServices.Take(3))
+                {
+                    var activeOffers = _unitOfWork.ServiceOffers.GetAll(
+                        o => o.ServiceSubscriptionId == service.Id && 
+                             o.IsActive && 
+                             o.StartDate <= DateTime.Now && 
+                             o.EndDate >= DateTime.Now
+                    ).ToList();
+                    var hasOffer = activeOffers.Any();
+                    var bestOffer = activeOffers.OrderByDescending(o => o.DiscountValue).FirstOrDefault();
+
+                    <div class="service-card-home">
+                        <div class="service-card-image-wrapper">
+                            @{
+                                var serviceImages = service.ServiceImages != null && service.ServiceImages.Any() 
+                                    ? service.ServiceImages.OrderBy(si => si.DisplayOrder).Select(si => si.ImageUrl).ToList()
+                                    : new List<string>();
+                                
+                                // If no ServiceImages but has ImageUrl, use that
+                                if (!serviceImages.Any() && !string.IsNullOrEmpty(service.ImageUrl))
+                                {
+                                    serviceImages.Add(service.ImageUrl);
+                                }
+                            }
+                            
+                            @if (serviceImages.Count > 1)
+                            {
+                                <div id="homeServiceCarousel_@service.Id" class="carousel slide service-home-carousel" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        @for (int i = 0; i < serviceImages.Count; i++)
+                                        {
+                                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                <img src="@serviceImages[i]" class="service-card-image" alt="@service.Title - Image @(i+1)" />
+                                            </div>
+                                        }
+                                    </div>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#homeServiceCarousel_@service.Id" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">@Localizer["Previous"]</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#homeServiceCarousel_@service.Id" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">@Localizer["Next"]</span>
+                                    </button>
+                                    <div class="carousel-indicators">
+                                        @for (int i = 0; i < serviceImages.Count; i++)
+                                        {
+                                            <button type="button" data-bs-target="#homeServiceCarousel_@service.Id" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-label="Slide @(i+1)"></button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else if (serviceImages.Count == 1)
+                            {
+                                <img src="@serviceImages[0]" class="service-card-image" alt="@service.Title" />
+                            }
+                            else
+                            {
+                                <div class="service-card-image-placeholder">
+                                    <i class="bi bi-briefcase"></i>
+                                </div>
+                            }
+                            @if (hasOffer && bestOffer != null)
+                            {
+                                <div class="service-offer-badge">
+                                    @if (bestOffer.DiscountType == BulkyBook.Models.DiscountType.Percentage)
+                                    {
+                                        <span>@bestOffer.DiscountValue% @Localizer["OFF"]</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@bestOffer.DiscountValue.ToString("C") @Localizer["OFF"]</span>
+                                    }
+                                </div>
+                            }
+                            @if (service.ServiceType == BulkyBook.Models.ServiceType.Online)
+                            {
+                                <div class="service-type-badge-home online">
+                                    <i class="bi bi-globe"></i> @Localizer["Online"]
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="service-type-badge-home offline">
+                                    <i class="bi bi-building"></i> @Localizer["Offline"]
+                                </div>
+                            }
+                        </div>
+                        <div class="service-card-content">
+                            <h3 class="service-card-title">@service.Title</h3>
+                            @if (!string.IsNullOrEmpty(service.Description))
+                            {
+                                <p class="service-card-description">
+                                    @(service.Description.Length > 80 ? service.Description.Substring(0, 80) + "..." : service.Description)
+                                </p>
+                            }
+                            <div class="service-card-pricing">
+                                @if (hasOffer && bestOffer != null)
+                                {
+                                    decimal originalPrice = service.Price;
+                                    decimal discount = 0;
+                                    if (bestOffer.DiscountType == BulkyBook.Models.DiscountType.Percentage)
+                                    {
+                                        discount = originalPrice * (bestOffer.DiscountValue / 100);
+                                    }
+                                    else
+                                    {
+                                        discount = bestOffer.DiscountValue;
+                                    }
+                                    decimal finalPrice = originalPrice - discount;
+                                    
+                                    <span class="service-price-original">@originalPrice.ToString("C")</span>
+                                    <span class="service-price-final">@finalPrice.ToString("C")</span>
+                                }
+                                else
+                                {
+                                    <span class="service-price-final">@service.Price.ToString("C")</span>
+                                }
+                            </div>
+                            @if (service.ServiceType == BulkyBook.Models.ServiceType.Offline && service.OfflinePaymentPercent.HasValue)
+                            {
+                                <div class="service-payment-info">
+                                    <small>
+                                        <i class="bi bi-info-circle"></i> 
+                                        @Localizer["PayPercentNow", service.OfflinePaymentPercent.Value, (service.Price * service.OfflinePaymentPercent.Value / 100).ToString("C")]
+                                    </small>
+                                </div>
+                            }
+                            <a asp-area="Customer" asp-controller="ServiceSubscription" asp-action="Details" asp-route-id="@service.Id" class="service-card-btn">
+                                @Localizer["ViewDetails"]
+                                <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
 }
 
 <div class="container-fluid px-3">
@@ -754,6 +920,61 @@
     </div>
 </section>
 
+<!-- Newsletter Section - Only for Logged-in Users -->
+@if (User.Identity.IsAuthenticated)
+{
+    var isSubscribed = ViewBag.IsNewsletterSubscribed as bool? ?? false;
+    var userEmail = ViewBag.UserEmail as string ?? "";
+    
+    <section class="newsletter-section">
+        <div class="container">
+            <div class="newsletter-content">
+                <div class="newsletter-icon">
+                    <i class="bi bi-envelope-heart"></i>
+                </div>
+                
+                @if (isSubscribed)
+                {
+                    <h2 class="newsletter-title">@Localizer["NewsletterSubscription"]</h2>
+                    <p class="newsletter-subtitle">@Localizer["YouAreSubscribedToNewsletter"]</p>
+                    <div class="newsletter-subscribed-info">
+                        <p class="newsletter-email-display">
+                            <i class="bi bi-envelope-check me-2"></i>
+                            <strong>@userEmail</strong>
+                        </p>
+                        <button type="button" class="newsletter-unsubscribe-btn" id="unsubscribeBtn">
+                            <i class="bi bi-x-circle me-2"></i>
+                            @Localizer["Unsubscribe"]
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <h2 class="newsletter-title">@Localizer["SubscribeToNewsletter"]</h2>
+                    <p class="newsletter-subtitle">@Localizer["GetLatestOffersAndUpdates"]</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" 
+                               class="newsletter-input" 
+                               placeholder="@Localizer["EnterYourEmail"]" 
+                               value="@userEmail"
+                               required 
+                               id="newsletterEmail" />
+                        <button type="submit" class="newsletter-submit-btn">
+                            <i class="bi bi-send me-2"></i>
+                            @Localizer["Subscribe"]
+                        </button>
+                    </form>
+                }
+                
+                <p class="newsletter-privacy">
+                    <i class="bi bi-shield-check me-2"></i>
+                    @Localizer["WeRespectYourPrivacy"]
+                </p>
+            </div>
+        </div>
+    </section>
+}
+
 <!-- Statistics Section -->
 <section class="stats-section scroll-reveal">
     <div class="container">
@@ -878,6 +1099,151 @@
 -->
 @section Scripts {
     <script>
+        // Newsletter Form Handler - Fully Implemented
+        document.getElementById('newsletterForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const emailInput = document.getElementById('newsletterEmail');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const email = emailInput.value.trim();
+            
+            if (!email) {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('@Localizer["PleaseEnterValidEmail"]', '@Localizer["Newsletter"]');
+                }
+                return;
+            }
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>@Localizer["Subscribing"]...';
+            
+            // Get anti-forgery token
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('source', 'HomePage');
+            if (token) {
+                formData.append('__RequestVerificationToken', token);
+            }
+            
+            // Make AJAX call
+            fetch('@Url.Action("SubscribeNewsletter", "Home", new { area = "Customer" })', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': token || ''
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success(data.message, '@Localizer["Newsletter"]');
+                    }
+                    // Reload page to update subscription status
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    // Show error message
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error(data.message, '@Localizer["Newsletter"]');
+                    }
+                    // Reset button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>@Localizer["Subscribe"]';
+                }
+            })
+            .catch(error => {
+                console.error('Newsletter subscription error:', error);
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('@Localizer["SubscriptionError"]', '@Localizer["Newsletter"]');
+                }
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>@Localizer["Subscribe"]';
+            });
+        });
+
+        // Unsubscribe Button Handler
+        document.getElementById('unsubscribeBtn')?.addEventListener('click', function() {
+            const btn = this;
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            
+            Swal.fire({
+                title: '@Localizer["Unsubscribe"]',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '@Localizer["Unsubscribe"]',
+                cancelButtonText: '@Localizer["Cancel"]'
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    return;
+                }
+            
+                // Disable button
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>@Localizer["Unsubscribing"]...';
+                
+                // Create form data
+                const formData = new FormData();
+                if (token) {
+                    formData.append('__RequestVerificationToken', token);
+                }
+                
+                // Make AJAX call
+                fetch('@Url.Action("UnsubscribeNewsletter", "Home", new { area = "Customer" })', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': token || ''
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message with SweetAlert
+                        Swal.fire({
+                            icon: 'success',
+                            title: '@Localizer["Success"]',
+                            text: data.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        // Show error message with SweetAlert
+                        Swal.fire({
+                            icon: 'error',
+                            title: '@Localizer["Error"]',
+                            text: data.message
+                        });
+                        // Reset button
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-x-circle me-2"></i>@Localizer["Unsubscribe"]';
+                    }
+                })
+                .catch(error => {
+                    console.error('Newsletter unsubscribe error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: '@Localizer["Error"]',
+                        text: '@Localizer["SubscriptionError"]'
+                    });
+                    // Reset button
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-x-circle me-2"></i>@Localizer["Unsubscribe"]';
+                });
+            });
+        });
+        
         let currentPage = 1;
         let isLoading = false;
         let hasMoreProducts = true;
@@ -1263,7 +1629,11 @@
                 if (typeof toastr !== 'undefined') {
                     toastr.error('Failed to update cart. Please try again.');
                 } else {
-                    alert('Failed to update cart. Please try again.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to update cart. Please try again.'
+                    });
                 }
             });
         }

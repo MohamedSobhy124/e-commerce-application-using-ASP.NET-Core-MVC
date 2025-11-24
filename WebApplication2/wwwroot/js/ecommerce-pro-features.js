@@ -94,7 +94,7 @@
             <h2 style="font-size: 2rem; font-weight: 800; color: #1976D2; margin-bottom: 1rem;">${title}</h2>
             <div style="font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, #7BC043, #558B2F); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem;">${price}</div>
             <p style="color: #6b7280; line-height: 1.8; margin-bottom: 2rem;">Premium quality supplement designed to help you achieve your fitness goals. Made with natural ingredients.</p>
-            <button class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;" onclick="alert('Added to cart!')">
+            <button class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;" onclick="Swal.fire({icon: 'success', title: 'Success', text: 'Added to cart!', timer: 1500, showConfirmButton: false})">
                 <i class="bi bi-cart-plus me-2"></i> Add to Cart
             </button>
         `;
@@ -171,7 +171,11 @@
             if (typeof toastr !== 'undefined') {
                 toastr.warning('Please login to use wishlist');
             } else {
-                alert('Please login to use wishlist');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Login Required',
+                    text: 'Please login to use wishlist'
+                });
             }
             return;
         }
@@ -242,14 +246,22 @@
                     if (typeof toastr !== 'undefined') {
                         toastr.warning(data.message);
                     } else {
-                        alert(data.message);
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Login Required',
+                            text: data.message
+                        });
                     }
                 } else {
                     btn.querySelector('i').className = originalIcon;
                     if (typeof toastr !== 'undefined') {
                         toastr.error(data.message || 'Failed to update wishlist');
                     } else {
-                        alert(data.message || 'Failed to update wishlist');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'Failed to update wishlist'
+                        });
                     }
                 }
             }
@@ -262,7 +274,11 @@
             if (typeof toastr !== 'undefined') {
                 toastr.error('Failed to update wishlist. Please try again.');
             } else {
-                alert('Failed to update wishlist. Please try again.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to update wishlist. Please try again.'
+                });
             }
         });
     };

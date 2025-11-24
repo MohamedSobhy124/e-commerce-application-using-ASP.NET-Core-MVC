@@ -1,0 +1,52 @@
+@model IEnumerable<BulkyBook.Models.NewsletterSubscription>
+
+@{
+    ViewData["Title"] = Localizer["NewsletterSubscribers"];
+}
+
+<partial name="_Notifications" />
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">
+                    <i class="bi bi-envelope-heart me-3"></i>
+                    @Localizer["NewsletterSubscribers"]
+                </h2>
+                <div class="admin-header-actions">
+                    <a href="@Url.Action("Export")" class="btn btn-success">
+                        <i class="bi bi-download me-2"></i>
+                        @Localizer["ExportCSV"]
+                    </a>
+                </div>
+            </div>
+
+            <div class="admin-card-body">
+                <div class="admin-table-wrapper" style="overflow-x: auto;">
+                    <table id="tblData" class="table table-bordered table-striped table-hover" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>@Localizer["ID"]</th>
+                                <th>@Localizer["Email"]</th>
+                                <th>@Localizer["SubscribedDate"]</th>
+                                <th>@Localizer["Source"]</th>
+                                <th>@Localizer["Status"]</th>
+                                <th>@Localizer["UnsubscribedDate"]</th>
+                                <th>@Localizer["Actions"]</th>
+                            </tr>   
+                        </thead>
+                        <tbody>
+                            <!-- DataTable will populate this -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript" src="~/js/NewsletterSubscription.js"></script>
+}
+

@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
+    <Folder Include="BulkyBook.Models\" />
     <Folder Include="wwwroot\Images\Products\" />
   </ItemGroup>
 

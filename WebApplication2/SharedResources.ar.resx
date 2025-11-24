@@ -202,7 +202,7 @@
     <value>المجموع الفرعي</value>
   </data>
   <data name="Total" xml:space="preserve">
-    <value>المجموع الكلي</value>
+    <value>المجموع</value>
   </data>
   <data name="OrderSummary" xml:space="preserve">
     <value>ملخص الطلب</value>
@@ -271,7 +271,7 @@
     <value>حذف</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>حفظ</value>
+    <value>وفر</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>إلغاء</value>
@@ -343,7 +343,7 @@
     <value>سياسة الإرجاع</value>
   </data>
   <data name="Newsletter" xml:space="preserve">
-    <value>النشرة البريدية</value>
+    <value>النشرة الإخبارية</value>
   </data>
   <data name="Subscribe" xml:space="preserve">
     <value>اشترك</value>
@@ -449,27 +449,6 @@
   </data>
   <data name="Product" xml:space="preserve">
     <value>المنتج</value>
-  </data>
-  <data name="PromoCodes" xml:space="preserve">
-    <value>أكواد الخصم</value>
-  </data>
-  <data name="PromoCode" xml:space="preserve">
-    <value>كود الخصم</value>
-  </data>
-  <data name="EnterPromoCode" xml:space="preserve">
-    <value>أدخل كود الخصم</value>
-  </data>
-  <data name="Apply" xml:space="preserve">
-    <value>تطبيق</value>
-  </data>
-  <data name="Remove" xml:space="preserve">
-    <value>إزالة</value>
-  </data>
-  <data name="Discount" xml:space="preserve">
-    <value>الخصم</value>
-  </data>
-  <data name="Subtotal" xml:space="preserve">
-    <value>المجموع الفرعي</value>
   </data>
   <data name="CartUpdatedSuccessfully" xml:space="preserve">
     <value>تم تحديث السلة بنجاح</value>
@@ -670,7 +649,7 @@
     <value>عنوان بريدك الإلكتروني</value>
   </data>
   <data name="ThankYouForSubscribing" xml:space="preserve">
-    <value>شكراً لاشتراكك!</value>
+    <value>شكراً لك على الاشتراك! سنبقيك على اطلاع بأحدث عروضنا.</value>
   </data>
   <data name="BackToProducts" xml:space="preserve">
     <value>العودة للمنتجات</value>
@@ -844,11 +823,23 @@
   <data name="Reject" xml:space="preserve">
     <value>رفض</value>
   </data>
+  <data name="ThankYourForSubscribing" xml:space="preserve">
+    <value>شكراً لاشتراكك!</value>
+  </data>
   <data name="Hello" xml:space="preserve">
     <value>مرحبا</value>
   </data>
   <data name="Manage" xml:space="preserve">
     <value>ألادارة</value>
+  </data>
+  <data name="WelcomeBack" xml:space="preserve">
+    <value>مرحباً بعودتك</value>
+  </data>
+  <data name="SignInToYourAccount" xml:space="preserve">
+    <value>سجل الدخول إلى حسابك</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>تذكرني</value>
   </data>
   <data name="ForgotPassword" xml:space="preserve">
     <value>هل نسيت كلمة السر؟</value>
@@ -902,19 +893,29 @@
   <data name="ApplyFilters" xml:space="preserve">
     <value>تطبيق الفلتر</value>
   </data>
-  
-  <!-- Promo Code Translations -->
+  <data name="PromoCodes" xml:space="preserve">
+    <value>أكواد الخصم</value>
+  </data>
+  <data name="PromoCode" xml:space="preserve">
+    <value>كود الخصم</value>
+  </data>
+  <data name="EnterPromoCode" xml:space="preserve">
+    <value>أدخل رمز الخصم</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>تطبيق</value>
+  </data>
+  <data name="Discount" xml:space="preserve">
+    <value>الخصم</value>
+  </data>
   <data name="Code" xml:space="preserve">
     <value>الكود</value>
   </data>
   <data name="ValidPeriod" xml:space="preserve">
-    <value>فترة الصلاحية</value>
+    <value>الفترة الصالحة</value>
   </data>
   <data name="Usage" xml:space="preserve">
     <value>الاستخدام</value>
-  </data>
-  <data name="Actions" xml:space="preserve">
-    <value>الإجراءات</value>
   </data>
   <data name="Expired" xml:space="preserve">
     <value>منتهي</value>
@@ -934,17 +935,8 @@
   <data name="Inactive" xml:space="preserve">
     <value>غير نشط</value>
   </data>
-  <data name="Details" xml:space="preserve">
-    <value>التفاصيل</value>
-  </data>
-  <data name="Edit" xml:space="preserve">
-    <value>تعديل</value>
-  </data>
   <data name="ToggleActive" xml:space="preserve">
     <value>تبديل الحالة</value>
-  </data>
-  <data name="Delete" xml:space="preserve">
-    <value>حذف</value>
   </data>
   <data name="PromoCodesManagement" xml:space="preserve">
     <value>إدارة أكواد الخصم</value>
@@ -952,14 +944,8 @@
   <data name="CreateNewPromoCode" xml:space="preserve">
     <value>إنشاء كود خصم جديد</value>
   </data>
-  <data name="Code" xml:space="preserve">
-    <value>الكود</value>
-  </data>
   <data name="DiscountType" xml:space="preserve">
     <value>نوع الخصم</value>
-  </data>
-  <data name="Description" xml:space="preserve">
-    <value>الوصف</value>
   </data>
   <data name="DiscountValue" xml:space="preserve">
     <value>قيمة الخصم</value>
@@ -977,7 +963,7 @@
     <value>حد الاستخدام</value>
   </data>
   <data name="PerUserLimit" xml:space="preserve">
-    <value>حد الاستخدام لكل مستخدم</value>
+    <value>الحد لكل مستخدم</value>
   </data>
   <data name="MaximumDiscount" xml:space="preserve">
     <value>الحد الأقصى للخصم</value>
@@ -987,12 +973,6 @@
   </data>
   <data name="UsageStatistics" xml:space="preserve">
     <value>إحصائيات الاستخدام</value>
-  </data>
-  <data name="total" xml:space="preserve">
-    <value>المجموع</value>
-  </data>
-  <data name="ViewDetails" xml:space="preserve">
-    <value>عرض التفاصيل</value>
   </data>
   <data name="BackToList" xml:space="preserve">
     <value>العودة إلى القائمة</value>
@@ -1027,20 +1007,8 @@
   <data name="FixedAmount" xml:space="preserve">
     <value>مبلغ ثابت</value>
   </data>
-  <data name="MinimumOrder" xml:space="preserve">
-    <value>الحد الأدنى للطلب</value>
-  </data>
-  <data name="MaximumDiscount" xml:space="preserve">
-    <value>الحد الأقصى للخصم</value>
-  </data>
   <data name="ValidityPeriod" xml:space="preserve">
     <value>فترة الصلاحية</value>
-  </data>
-  <data name="StartDate" xml:space="preserve">
-    <value>تاريخ البدء</value>
-  </data>
-  <data name="EndDate" xml:space="preserve">
-    <value>تاريخ الانتهاء</value>
   </data>
   <data name="CurrentlyValid" xml:space="preserve">
     <value>ساري حالياً</value>
@@ -1048,38 +1016,17 @@
   <data name="NotStartedYet" xml:space="preserve">
     <value>لم يبدأ بعد</value>
   </data>
-  <data name="UsageStatistics" xml:space="preserve">
-    <value>إحصائيات الاستخدام</value>
-  </data>
   <data name="TimesUsed" xml:space="preserve">
     <value>مرات الاستخدام</value>
-  </data>
-  <data name="UsageLimit" xml:space="preserve">
-    <value>حد الاستخدام</value>
-  </data>
-  <data name="PerUserLimit" xml:space="preserve">
-    <value>الحد لكل مستخدم</value>
   </data>
   <data name="UsageHistory" xml:space="preserve">
     <value>سجل الاستخدام</value>
   </data>
-  <data name="Date" xml:space="preserve">
-    <value>التاريخ</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>المستخدم</value>
   </data>
-  <data name="OrderID" xml:space="preserve">
-    <value>رقم الطلب</value>
-  </data>
   <data name="OrderTotal" xml:space="preserve">
     <value>إجمالي الطلب</value>
-  </data>
-  <data name="BackToList" xml:space="preserve">
-    <value>العودة للقائمة</value>
-  </data>
-  <data name="Warning" xml:space="preserve">
-    <value>تحذير</value>
   </data>
   <data name="AreYouSureDeletePromoCode" xml:space="preserve">
     <value>هل أنت متأكد من حذف كود الخصم هذا؟ لا يمكن التراجع عن هذا الإجراء.</value>
@@ -1087,11 +1034,6 @@
   <data name="YesDelete" xml:space="preserve">
     <value>نعم، احذف</value>
   </data>
-  <data name="Cancel" xml:space="preserve">
-    <value>إلغاء</value>
-  </data>
-  
-  <!-- Promo Code Messages -->
   <data name="EndDateMustBeAfterStartDate" xml:space="preserve">
     <value>يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء</value>
   </data>
@@ -1188,17 +1130,6 @@
   <data name="CurrentlyUsed" xml:space="preserve">
     <value>المستخدم حالياً</value>
   </data>
-  <data name="NotStartedYet" xml:space="preserve">
-    <value>لم يبدأ بعد</value>
-  </data>
-  <data name="FixedAmount" xml:space="preserve">
-    <value>مبلغ ثابت</value>
-  </data>
-  <data name="Status" xml:space="preserve">
-    <value>الحالة</value>
-  </data>
-  
-  <!-- Payment Method Translations -->
   <data name="CreditDebitCard" xml:space="preserve">
     <value>بطاقة ائتمان/خصم</value>
   </data>
@@ -1208,25 +1139,9 @@
   <data name="BuyNowPayLater" xml:space="preserve">
     <value>اشتر الآن وادفع لاحقاً</value>
   </data>
-  
-  <!-- JavaScript Messages -->
   <data name="Applying" xml:space="preserve">
     <value>جاري التطبيق...</value>
   </data>
-  <data name="WelcomeBack" xml:space="preserve">
-    <value>مرحباً بعودتك</value>
-  </data>
-  <data name="SignInToYourAccount" xml:space="preserve">
-    <value>سجل الدخول إلى حسابك</value>
-  </data>
-  <data name="RememberMe" xml:space="preserve">
-    <value>تذكرني</value>
-  </data>
-  <data name="ThankYourForSubscribing" xml:space="preserve">
-    <value>شكراً لاشتراكك!</value>
-  </data>
-  
-  <!-- Home Page Additional Translations -->
   <data name="WelcomeToHealthFitness" xml:space="preserve">
     <value>مرحباً بك في عالم الصحة واللياقة</value>
   </data>
@@ -1247,12 +1162,6 @@
   </data>
   <data name="ViewAllFlashSales" xml:space="preserve">
     <value>عرض جميع العروض الخاطفة</value>
-  </data>
-  <data name="Previous" xml:space="preserve">
-    <value>السابق</value>
-  </data>
-  <data name="Next" xml:space="preserve">
-    <value>التالي</value>
   </data>
   <data name="OFF" xml:space="preserve">
     <value>خصم</value>
@@ -1317,14 +1226,9 @@
   <data name="MobileLabel" xml:space="preserve">
     <value>الجوال:</value>
   </data>
-  <data name="YourCartIsEmpty" xml:space="preserve">
-    <value>سلتك فارغة</value>
-  </data>
   <data name="InCart" xml:space="preserve">
     <value>في السلة</value>
   </data>
-  
-  <!-- Layout/Navigation Translations -->
   <data name="FlashSales" xml:space="preserve">
     <value>العروض الخاطفة</value>
   </data>
@@ -1340,8 +1244,6 @@
   <data name="ViewAllNotifications" xml:space="preserve">
     <value>عرض جميع الإشعارات</value>
   </data>
-  
-  <!-- Flash Sale Translations -->
   <data name="FlashSalesLimitedTimeOffers" xml:space="preserve">
     <value>العروض الخاطفة - عروض محدودة الوقت</value>
   </data>
@@ -1363,12 +1265,6 @@
   <data name="ENDSIN" xml:space="preserve">
     <value>ينتهي خلال</value>
   </data>
-  <data name="EndsIn" xml:space="preserve">
-    <value>ينتهي خلال</value>
-  </data>
-  <data name="SAVE" xml:space="preserve">
-    <value>وفر</value>
-  </data>
   <data name="Only" xml:space="preserve">
     <value>فقط</value>
   </data>
@@ -1387,8 +1283,6 @@
   <data name="SOLDOUT" xml:space="preserve">
     <value>نفدت الكمية</value>
   </data>
-  
-  <!-- Admin Flash Sale Translations -->
   <data name="FlashSalesManagement" xml:space="preserve">
     <value>إدارة العروض الخاطفة</value>
   </data>
@@ -1625,5 +1519,431 @@
   </data>
   <data name="AvailableStock" xml:space="preserve">
     <value>المخزون المتاح</value>
+  </data>
+  <data name="ServiceSubscriptions" xml:space="preserve">
+    <value>إدارة الخدمات</value>
+  </data>
+  <data name="OurServices" xml:space="preserve">
+    <value>خدماتنا</value>
+  </data>
+  <data name="ChoosePerfectServiceSubscription" xml:space="preserve">
+    <value>اختر اشتراك الخدمة المثالي لاحتياجاتك</value>
+  </data>
+  <data name="NoServicesAvailable" xml:space="preserve">
+    <value>لا توجد خدمات متاحة في الوقت الحالي.</value>
+  </data>
+  <data name="Online" xml:space="preserve">
+    <value>عبر الإنترنت</value>
+  </data>
+  <data name="Offline" xml:space="preserve">
+    <value>في الموقع</value>
+  </data>
+  <data name="PayPercentNow" xml:space="preserve">
+    <value>ادفع {0}% الآن ({1})</value>
+  </data>
+  <data name="OnlineService" xml:space="preserve">
+    <value>خدمة عبر الإنترنت</value>
+  </data>
+  <data name="OfflineService" xml:space="preserve">
+    <value>خدمة في الموقع</value>
+  </data>
+  <data name="SubscriptionDetails" xml:space="preserve">
+    <value>تفاصيل الاشتراك</value>
+  </data>
+  <data name="ServicePrice" xml:space="preserve">
+    <value>سعر الخدمة</value>
+  </data>
+  <data name="MinimumAmountToPayNow" xml:space="preserve">
+    <value>الحد الأدنى للمبلغ المطلوب دفعه الآن ({0}%)</value>
+  </data>
+  <data name="OfflinePaymentInfo" xml:space="preserve">
+    <value>يجب عليك دفع ما لا يقل عن {0}% ({1}) الآن. سيتم دفع المبلغ المتبقي في موقع الخدمة.</value>
+  </data>
+  <data name="ActiveOffers" xml:space="preserve">
+    <value>العروض النشطة</value>
+  </data>
+  <data name="ValidUntil" xml:space="preserve">
+    <value>صالح حتى</value>
+  </data>
+  <data name="PromoCodeOptional" xml:space="preserve">
+    <value>رمز الخصم (اختياري)</value>
+  </data>
+  <data name="AmountToPayNow" xml:space="preserve">
+    <value>المبلغ المطلوب دفعه الآن</value>
+  </data>
+  <data name="Minimum" xml:space="preserve">
+    <value>الحد الأدنى</value>
+  </data>
+  <data name="AmountMustBeAtLeast" xml:space="preserve">
+    <value>يجب أن يكون المبلغ على الأقل {0} ({1}% من الإجمالي)</value>
+  </data>
+  <data name="OfflinePaymentAmountInfo" xml:space="preserve">
+    <value>يمكنك دفع أكثر من الحد الأدنى، ولكن ليس أقل. الحد الأقصى: {0}</value>
+  </data>
+  <data name="SubscribeNow" xml:space="preserve">
+    <value>اشترك الآن</value>
+  </data>
+  <data name="PayNow" xml:space="preserve">
+    <value>ادفع الآن</value>
+  </data>
+  <data name="OurPremiumServices" xml:space="preserve">
+    <value>خدماتنا المميزة</value>
+  </data>
+  <data name="DiscoverProfessionalServices" xml:space="preserve">
+    <value>اكتشف خدماتنا المهنية المصممة لمساعدتك في تحقيق أهدافك</value>
+  </data>
+  <data name="ViewAllServices" xml:space="preserve">
+    <value>عرض جميع الخدمات</value>
+  </data>
+  <data name="CreateServiceSubscription" xml:space="preserve">
+    <value>إنشاء اشتراك خدمة</value>
+  </data>
+  <data name="CreateNewServiceSubscription" xml:space="preserve">
+    <value>إنشاء اشتراك خدمة جديد</value>
+  </data>
+  <data name="AddNewServiceForCustomers" xml:space="preserve">
+    <value>إضافة خدمة جديدة للعملاء للاشتراك</value>
+  </data>
+  <data name="TitleEnglish" xml:space="preserve">
+    <value>العنوان (الإنجليزية)</value>
+  </data>
+  <data name="TitleArabic" xml:space="preserve">
+    <value>العنوان (العربية)</value>
+  </data>
+  <data name="ServiceTitle" xml:space="preserve">
+    <value>عنوان الخدمة</value>
+  </data>
+  <data name="ServiceTitleAr" xml:space="preserve">
+    <value>عنوان الخدمة</value>
+  </data>
+  <data name="DescriptionEnglish" xml:space="preserve">
+    <value>الوصف (الإنجليزية)</value>
+  </data>
+  <data name="DescriptionArabic" xml:space="preserve">
+    <value>الوصف (العربية)</value>
+  </data>
+  <data name="ServiceDescription" xml:space="preserve">
+    <value>وصف الخدمة</value>
+  </data>
+  <data name="ServiceDescriptionAr" xml:space="preserve">
+    <value>وصف الخدمة</value>
+  </data>
+  <data name="OnlineFullPayment" xml:space="preserve">
+    <value>عبر الإنترنت (دفع كامل)</value>
+  </data>
+  <data name="OfflinePartialPayment" xml:space="preserve">
+    <value>في الموقع (دفع جزئي)</value>
+  </data>
+  <data name="PriceAED" xml:space="preserve">
+    <value>السعر (درهم)</value>
+  </data>
+  <data name="OfflinePaymentPercentage" xml:space="preserve">
+    <value>نسبة الدفع في الموقع</value>
+  </data>
+  <data name="OfflinePaymentPercentageInfo" xml:space="preserve">
+    <value>نسبة المبلغ الإجمالي المطلوب دفعه عبر الإنترنت (1-100%)</value>
+  </data>
+  <data name="ServiceImages" xml:space="preserve">
+    <value>صور الخدمة</value>
+  </data>
+  <data name="UploadImages" xml:space="preserve">
+    <value>رفع الصور</value>
+  </data>
+  <data name="AtLeastOneRequired" xml:space="preserve">
+    <value>مطلوب صورة واحدة على الأقل</value>
+  </data>
+  <data name="AtLeastOneImageRequired" xml:space="preserve">
+    <value>مطلوب صورة واحدة على الأقل.</value>
+  </data>
+  <data name="LowerNumbersAppearFirst" xml:space="preserve">
+    <value>الأرقام الأقل تظهر أولاً</value>
+  </data>
+  <data name="CreateService" xml:space="preserve">
+    <value>إنشاء الخدمة</value>
+  </data>
+  <data name="EditServiceSubscription" xml:space="preserve">
+    <value>تعديل اشتراك الخدمة</value>
+  </data>
+  <data name="UpdateServiceDetails" xml:space="preserve">
+    <value>تحديث تفاصيل الخدمة</value>
+  </data>
+  <data name="UploadAdditionalImages" xml:space="preserve">
+    <value>رفع صور إضافية</value>
+  </data>
+  <data name="UpdateService" xml:space="preserve">
+    <value>تحديث الخدمة</value>
+  </data>
+  <data name="ConfirmDeleteImage" xml:space="preserve">
+    <value>هل أنت متأكد من حذف هذه الصورة؟ مطلوب صورة واحدة على الأقل.</value>
+  </data>
+  <data name="AtLeastOneImageRequiredAddNew" xml:space="preserve">
+    <value>مطلوب صورة واحدة على الأقل. يرجى إضافة صورة جديدة قبل حذف هذه.</value>
+  </data>
+  <data name="NoImagesPleaseUpload" xml:space="preserve">
+    <value>لا توجد صور. يرجى رفع صورة واحدة على الأقل.</value>
+  </data>
+  <data name="ErrorDeletingImage" xml:space="preserve">
+    <value>خطأ في حذف الصورة</value>
+  </data>
+  <data name="UnknownError" xml:space="preserve">
+    <value>خطأ غير معروف</value>
+  </data>
+  <data name="ErrorDeletingImageTryAgain" xml:space="preserve">
+    <value>خطأ في حذف الصورة. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="ServiceDetails" xml:space="preserve">
+    <value>تفاصيل الخدمة</value>
+  </data>
+  <data name="ServiceSubscriptionDetails" xml:space="preserve">
+    <value>تفاصيل اشتراك الخدمة</value>
+  </data>
+  <data name="OnlinePayment" xml:space="preserve">
+    <value>دفع عبر الإنترنت</value>
+  </data>
+  <data name="CreatedDate" xml:space="preserve">
+    <value>تاريخ الإنشاء</value>
+  </data>
+  <data name="LastUpdated" xml:space="preserve">
+    <value>آخر تحديث</value>
+  </data>
+  <data name="PurchaseHistory" xml:space="preserve">
+    <value>سجل المشتريات</value>
+  </data>
+  <data name="PurchaseID" xml:space="preserve">
+    <value>معرف الشراء</value>
+  </data>
+  <data name="AmountPaid" xml:space="preserve">
+    <value>المبلغ المدفوع</value>
+  </data>
+  <data name="ServicePurchases" xml:space="preserve">
+    <value>مشتريات الخدمات</value>
+  </data>
+  <data name="ServiceOffers" xml:space="preserve">
+    <value>عروض الخدمات</value>
+  </data>
+  <data name="ServiceSubscriptionsManagement" xml:space="preserve">
+    <value>إدارة الخدمات</value>
+  </data>
+  <data name="CreateNewService" xml:space="preserve">
+    <value>إنشاء خدمة جديدة</value>
+  </data>
+  <data name="ID" xml:space="preserve">
+    <value>المعرف</value>
+  </data>
+  <data name="Image" xml:space="preserve">
+    <value>الصورة</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>العنوان</value>
+  </data>
+  <data name="OfflinePercent" xml:space="preserve">
+    <value>في الموقع %</value>
+  </data>
+  <data name="Purchases" xml:space="preserve">
+    <value>المشتريات</value>
+  </data>
+  <data name="ServicePurchasesManagement" xml:space="preserve">
+    <value>إدارة مشتريات الخدمات</value>
+  </data>
+  <data name="Service" xml:space="preserve">
+    <value>الخدمة</value>
+  </data>
+  <data name="PurchaseDate" xml:space="preserve">
+    <value>تاريخ الشراء</value>
+  </data>
+  <data name="ServicePurchaseDetails" xml:space="preserve">
+    <value>تفاصيل شراء الخدمة</value>
+  </data>
+  <data name="BackToPurchases" xml:space="preserve">
+    <value>العودة إلى المشتريات</value>
+  </data>
+  <data name="Purchase" xml:space="preserve">
+    <value>الشراء</value>
+  </data>
+  <data name="PurchasedOn" xml:space="preserve">
+    <value>تم الشراء في</value>
+  </data>
+  <data name="ServiceInformation" xml:space="preserve">
+    <value>معلومات الخدمة</value>
+  </data>
+  <data name="NA" xml:space="preserve">
+    <value>غير متاح</value>
+  </data>
+  <data name="UserType" xml:space="preserve">
+    <value>نوع المستخدم</value>
+  </data>
+  <data name="RegisteredUser" xml:space="preserve">
+    <value>مستخدم مسجل</value>
+  </data>
+  <data name="GuestUser" xml:space="preserve">
+    <value>مستخدم ضيف</value>
+  </data>
+  <data name="PaymentInformation" xml:space="preserve">
+    <value>معلومات الدفع</value>
+  </data>
+  <data name="RemainingAmount" xml:space="preserve">
+    <value>المبلغ المتبقي</value>
+  </data>
+  <data name="PurchaseStatus" xml:space="preserve">
+    <value>حالة الشراء</value>
+  </data>
+  <data name="PaymentIntentID" xml:space="preserve">
+    <value>معرف نية الدفع</value>
+  </data>
+  <data name="SessionID" xml:space="preserve">
+    <value>معرف الجلسة</value>
+  </data>
+  <data name="AppliedOffer" xml:space="preserve">
+    <value>العرض المطبق</value>
+  </data>
+  <data name="OfflineServiceNote" xml:space="preserve">
+    <value>ملاحظة خدمة في الموقع</value>
+  </data>
+  <data name="OfflineServiceNoteText" xml:space="preserve">
+    <value>دفع العميل {0} عبر الإنترنت. سيتم تحصيل المبلغ المتبقي البالغ {1} في موقع الخدمة.</value>
+  </data>
+  <data name="ShopByCategory" xml:space="preserve">
+    <value>تسوق حسب الفئة</value>
+  </data>
+  <data name="BrowseOurCategories" xml:space="preserve">
+    <value>تصفح فئاتنا وابحث عما تحتاجه</value>
+  </data>
+  <data name="BestSellers" xml:space="preserve">
+    <value>الأكثر مبيعاً</value>
+  </data>
+  <data name="NewArrivals" xml:space="preserve">
+    <value>وصل حديثاً</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>جديد</value>
+  </data>
+  <data name="WeAccept" xml:space="preserve">
+    <value>نقبل</value>
+  </data>
+  <data name="CreditCard" xml:space="preserve">
+    <value>بطاقة ائتمان</value>
+  </data>
+  <data name="BankTransfer" xml:space="preserve">
+    <value>تحويل بنكي</value>
+  </data>
+  <data name="CashOnDelivery" xml:space="preserve">
+    <value>الدفع عند الاستلام</value>
+  </data>
+  <data name="GetLatestOffersAndUpdates" xml:space="preserve">
+    <value>احصل على أحدث العروض والتحديثات في بريدك الإلكتروني</value>
+  </data>
+  <data name="WeRespectYourPrivacy" xml:space="preserve">
+    <value>نحترم خصوصيتك. يمكنك إلغاء الاشتراك في أي وقت.</value>
+  </data>
+  <data name="PleaseEnterValidEmail" xml:space="preserve">
+    <value>يرجى إدخال عنوان بريد إلكتروني صحيح</value>
+  </data>
+  <data name="EmailAlreadySubscribed" xml:space="preserve">
+    <value>هذا البريد الإلكتروني مشترك بالفعل في نشرتنا الإخبارية</value>
+  </data>
+  <data name="SubscriptionError" xml:space="preserve">
+    <value>حدث خطأ. يرجى المحاولة مرة أخرى لاحقاً.</value>
+  </data>
+  <data name="Subscribing" xml:space="preserve">
+    <value>جاري الاشتراك</value>
+  </data>
+  <data name="NewsletterSubscribers" xml:space="preserve">
+    <value>مشتركو النشرة الإخبارية</value>
+  </data>
+  <data name="NewsletterSubscriptionDetails" xml:space="preserve">
+    <value>تفاصيل الاشتراك في النشرة الإخبارية</value>
+  </data>
+  <data name="SubscribedDate" xml:space="preserve">
+    <value>تاريخ الاشتراك</value>
+  </data>
+  <data name="UnsubscribedDate" xml:space="preserve">
+    <value>تاريخ إلغاء الاشتراك</value>
+  </data>
+  <data name="Source" xml:space="preserve">
+    <value>المصدر</value>
+  </data>
+  <data name="Subscription" xml:space="preserve">
+    <value>الاشتراك</value>
+  </data>
+  <data name="SubscribedOn" xml:space="preserve">
+    <value>تم الاشتراك في</value>
+  </data>
+  <data name="EmailInformation" xml:space="preserve">
+    <value>معلومات البريد الإلكتروني</value>
+  </data>
+  <data name="SubscriptionInformation" xml:space="preserve">
+    <value>معلومات الاشتراك</value>
+  </data>
+  <data name="SubscriptionNotFound" xml:space="preserve">
+    <value>لم يتم العثور على الاشتراك</value>
+  </data>
+  <data name="SubscriptionActivated" xml:space="preserve">
+    <value>تم تفعيل الاشتراك بنجاح</value>
+  </data>
+  <data name="SubscriptionDeactivated" xml:space="preserve">
+    <value>تم إلغاء تفعيل الاشتراك بنجاح</value>
+  </data>
+  <data name="SubscriptionDeleted" xml:space="preserve">
+    <value>تم حذف الاشتراك بنجاح</value>
+  </data>
+  <data name="ErrorUpdatingSubscription" xml:space="preserve">
+    <value>خطأ في تحديث الاشتراك</value>
+  </data>
+  <data name="ErrorDeletingSubscription" xml:space="preserve">
+    <value>خطأ في حذف الاشتراك</value>
+  </data>
+  <data name="ConfirmToggleStatus" xml:space="preserve">
+    <value>هل أنت متأكد من تغيير حالة الاشتراك؟</value>
+  </data>
+  <data name="ConfirmDeleteSubscription" xml:space="preserve">
+    <value>هل أنت متأكد من حذف الاشتراك لـ</value>
+  </data>
+  <data name="ExportCSV" xml:space="preserve">
+    <value>تصدير CSV</value>
+  </data>
+  <data name="ErrorExportingSubscriptions" xml:space="preserve">
+    <value>خطأ في تصدير الاشتراكات</value>
+  </data>
+  <data name="PleaseLogin" xml:space="preserve">
+    <value>يرجى تسجيل الدخول للمتابعة</value>
+  </data>
+  <data name="EmailNotFound" xml:space="preserve">
+    <value>لم يتم العثور على عنوان البريد الإلكتروني</value>
+  </data>
+  <data name="AlreadyUnsubscribed" xml:space="preserve">
+    <value>لقد ألغيت الاشتراك في النشرة الإخبارية بالفعل</value>
+  </data>
+  <data name="UnsubscribedSuccessfully" xml:space="preserve">
+    <value>تم إلغاء الاشتراك في النشرة الإخبارية بنجاح</value>
+  </data>
+  <data name="ConfirmUnsubscribe" xml:space="preserve">
+    <value>هل أنت متأكد من إلغاء الاشتراك في النشرة الإخبارية؟</value>
+  </data>
+  <data name="Unsubscribing" xml:space="preserve">
+    <value>جاري إلغاء الاشتراك</value>
+  </data>
+  <data name="Unsubscribe" xml:space="preserve">
+    <value>إلغاء الاشتراك</value>
+  </data>
+  <data name="YouAreSubscribedToNewsletter" xml:space="preserve">
+    <value>أنت مشترك في نشرتنا الإخبارية</value>
+  </data>
+  <data name="NotifySubscribers" xml:space="preserve">
+    <value>إشعار المشتركين</value>
+  </data>
+  <data name="SendToAllSubscribers" xml:space="preserve">
+    <value>إرسال إشعار لجميع المشتركين النشطين</value>
+  </data>
+  <data name="SendFlashSaleNotificationToSubscribers" xml:space="preserve">
+    <value>إذا تم التفعيل، سيتم إرسال إشعار بريد إلكتروني لجميع المشتركين النشطين في النشرة الإخبارية حول هذا العرض الخاطف</value>
+  </data>
+  <data name="NewFlashSaleNotification" xml:space="preserve">
+    <value>⚡ عرض خاطف جديد متاح!</value>
+  </data>
+  <data name="ViewFlashSale" xml:space="preserve">
+    <value>عرض العرض الخاطف</value>
+  </data>
+  <data name="FlashSaleEmailFooter" xml:space="preserve">
+    <value>لا تفوت هذه العروض الرائعة! تسوق الآن قبل انتهاء العرض.</value>
   </data>
 </root>
