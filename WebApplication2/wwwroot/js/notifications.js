@@ -20,7 +20,7 @@ function initializeNotifications() {
         // Show toastr notification
         if (typeof toastr !== 'undefined') {
             toastr.success(
-                `Order #${data.orderId} - ${data.message}<br>Total: $${data.total.toFixed(2)}`,
+                `Order #${data.orderId} - ${data.message}<br>Total: ${(typeof getCurrencySymbol === 'function' ? getCurrencySymbol() : (typeof getCurrentLanguage === 'function' && getCurrentLanguage() === 'ar' ? 'د.إ' : 'AED'))} ${data.total.toFixed(2)}`,
                 data.title,
                 {
                     timeOut: 10000,

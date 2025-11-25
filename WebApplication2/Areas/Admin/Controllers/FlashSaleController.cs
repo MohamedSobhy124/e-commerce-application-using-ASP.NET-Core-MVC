@@ -1,4 +1,5 @@
 using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.DataAccess.Data;
 using BulkyBook.Models;
 using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace BulkyBook.Areas.Admin.Controllers
 {
@@ -18,17 +20,20 @@ namespace BulkyBook.Areas.Admin.Controllers
         private readonly IEmailSender _emailSender;
         private readonly IStringLocalizer<SharedResources> _localizer;
         private readonly ILogger<FlashSaleController> _logger;
+        private readonly ApplicationDBContext _dbContext;
 
         public FlashSaleController(
             IUnitOfWork unitOfWork, 
             IEmailSender emailSender,
             IStringLocalizer<SharedResources> localizer,
-            ILogger<FlashSaleController> logger)
+            ILogger<FlashSaleController> logger,
+            ApplicationDBContext dbContext)
         {
             _unitOfWork = unitOfWork;
             _emailSender = emailSender;
             _localizer = localizer;
             _logger = logger;
+            _dbContext = dbContext;
         }
 
         // GET: Flash Sales List
@@ -218,7 +223,7 @@ namespace BulkyBook.Areas.Admin.Controllers
         // POST: Add Product to Flash Sale
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult AddProductToSale(int flashSaleId, int productId, int quantity, decimal price)
+        public IActionResult AddProductToSale(int flashSaleId, int productId, int quantity, decimal price, int? productVariantId = null)
         {
             var flashSale = _unitOfWork.FlashSale.Get(f => f.Id == flashSaleId);
             if (flashSale == null)
@@ -232,15 +237,29 @@ namespace BulkyBook.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Product not found" });
             }
 
-            // Validation
-            if (quantity > product.StockQuantity)
+            // Get variant if provided
+            ProductVariant? variant = null;
+            if (productVariantId.HasValue && productVariantId.Value > 0)
             {
-                return Json(new { success = false, message = $"Quantity cannot exceed stock quantity ({product.StockQuantity})" });
+                variant = _unitOfWork.ProductVariant.Get(v => v.Id == productVariantId.Value && v.ProductId == productId);
+                if (variant == null)
+                {
+                    return Json(new { success = false, message = "Variant not found" });
+                }
+            }
+
+            // Validation - use variant stock/price if variant exists
+            int availableStock = variant?.StockQuantity ?? product.StockQuantity;
+            decimal originalPrice = variant?.Price ?? (decimal)product.Price;
+
+            if (quantity > availableStock)
+            {
+                return Json(new { success = false, message = $"Quantity cannot exceed stock quantity ({availableStock})" });
             }
              
-            if ((double)price >= product.Price)
+            if (price >= originalPrice)
             {
-                return Json(new { success = false, message = $"Price cannot exceed or equal original ({product.Price})" });
+                return Json(new { success = false, message = $"Price cannot exceed or equal original ({originalPrice})" });
             }
 
             if (quantity <= 0)
@@ -253,13 +272,15 @@ namespace BulkyBook.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Price must be greater than 0" });
             }
 
-            // Check if product already in this flash sale
+            // Check if product/variant already in this flash sale
             var existingItem = _unitOfWork.FlashSaleItem.Get(
-                i => i.FlashSaleId == flashSaleId && i.ProductId == productId);
+                i => i.FlashSaleId == flashSaleId && 
+                     i.ProductId == productId && 
+                     i.ProductVariantId == productVariantId);
 
             if (existingItem != null)
             {
-                return Json(new { success = false, message = "Product is already in this flash sale" });
+                return Json(new { success = false, message = "This product/variant is already in this flash sale" });
             }
 
             // 🔥 NEW: Check if product is in another active flash sale during overlapping time
@@ -287,6 +308,7 @@ namespace BulkyBook.Areas.Admin.Controllers
             {
                 FlashSaleId = flashSaleId,
                 ProductId = productId,
+                ProductVariantId = productVariantId,
                 FlashSaleQuantity = quantity,
                 FlashSaleQuantityCreated = quantity,
                 FlashSalePrice = price,
@@ -418,19 +440,82 @@ namespace BulkyBook.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult GetProductInfo(int productId)
         {
-            var product = _unitOfWork.product.Get(p => p.Id == productId);
+            var product = _unitOfWork.product.Get(p => p.Id == productId, includeProperties: "ProductVariants,ProductOptions");
+            
+            // Load variant option values for variable products
+            if (product?.ProductType == ProductType.Variable && product.ProductVariants != null)
+            {
+                foreach (var variant in product.ProductVariants)
+                {
+                    // Load variant option values using DbContext
+                    variant.VariantOptionValues = _dbContext.ProductVariantOptionValues
+                        .Include(vov => vov.OptionValue)
+                            .ThenInclude(ov => ov.ProductOption)
+                        .Where(vov => vov.ProductVariantId == variant.Id)
+                        .ToList();
+                }
+            }
             
             if (product == null)
             {
                 return Json(new { success = false, message = "Product not found" });
             }
 
-            return Json(new { 
+            var result = new { 
                 success = true, 
                 stockQuantity = product.StockQuantity,
                 price = product.Price,
-                title = product.Title
-            });
+                title = product.Title,
+                productType = (int)product.ProductType
+            };
+
+            // If variable product, include variants
+            if (product.ProductType == ProductType.Variable && product.ProductVariants != null)
+            {
+                var variants = product.ProductVariants.Select(v => 
+                {
+                    // Build variant name from option values
+                    string variantDisplayName = "Default";
+                    if (v.VariantOptionValues != null && v.VariantOptionValues.Any())
+                    {
+                        var optionValues = v.VariantOptionValues
+                            .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                            .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+                            .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                            .Where(s => !string.IsNullOrEmpty(s))
+                            .ToList();
+                        
+                        if (optionValues.Any())
+                        {
+                            variantDisplayName = string.Join(" / ", optionValues);
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(v.VariantName))
+                    {
+                        variantDisplayName = v.VariantName;
+                    }
+
+                    return new
+                    {
+                        id = v.Id,
+                        name = variantDisplayName,
+                        price = v.Price,
+                        stockQuantity = v.StockQuantity,
+                        imageUrl = v.ImageUrl
+                    };
+                }).ToList();
+
+                return Json(new { 
+                    success = true, 
+                    stockQuantity = product.StockQuantity,
+                    price = product.Price,
+                    title = product.Title,
+                    productType = (int)product.ProductType,
+                    variants = variants
+                });
+            }
+
+            return Json(result);
         }
     }
 }

@@ -43,9 +43,9 @@ namespace BulkyBook.Areas.Customer.Controllers
                 // Authenticated user - load from database
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var UserId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-                // 🔥 Include FlashSaleItem and ProductImages to check for flash sale prices and display images
+                // 🔥 Include FlashSaleItem, ProductVariant, and ProductImages to check for flash sale prices, variant prices, and display images
                 cartList = _unitOfWork.shoppingCart.GetAll(a=>a.ApplicationUserId==UserId,
-                    includeProperties: "product,FlashSaleItem,product.ProductImages");
+                    includeProperties: "product,FlashSaleItem,ProductVariant,product.ProductImages");
             }
             else
             {
@@ -55,9 +55,11 @@ namespace BulkyBook.Areas.Customer.Controllers
                 {
                     ProductId = gc.ProductId,
                     Count = gc.Count,
+                    ProductVariantId = gc.ProductVariantId, // 🔥 Include variant info
                     FlashSaleItemId = gc.FlashSaleItemId, // 🔥 Include flash sale info
                     FlashSalePrice = (decimal?)gc.FlashSalePrice, // 🔥 Include flash sale price
-                    product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry,ProductImages")
+                    product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry,ProductImages"),
+                    ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value) : null
                 }).ToList();
             }
 
@@ -83,8 +85,8 @@ namespace BulkyBook.Areas.Customer.Controllers
             {
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-                // 🔥 Include FlashSaleItem to check for flash sale prices
-                cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "product,FlashSaleItem,product.ProductImages");
+                // 🔥 Include FlashSaleItem, ProductVariant to check for flash sale prices and variant prices
+                cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "product,FlashSaleItem,ProductVariant,product.ProductImages");
             }
             else
             {
@@ -94,9 +96,11 @@ namespace BulkyBook.Areas.Customer.Controllers
                 {
                     ProductId = gc.ProductId,
                     Count = gc.Count,
+                    ProductVariantId = gc.ProductVariantId, // 🔥 Include variant info
                     FlashSaleItemId = gc.FlashSaleItemId, // 🔥 Include flash sale info
                     FlashSalePrice = (decimal?)gc.FlashSalePrice, // 🔥 Include flash sale price
-                    product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry,ProductImages")
+                    product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry,ProductImages"),
+                    ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value) : null
                 }).ToList();
             }
             
@@ -171,7 +175,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
         // Add Flash Sale Item to Cart
         [HttpPost]
-        public IActionResult AddFlashSaleToCart(int productId, int flashSaleItemId, decimal flashSalePrice, int count = 1)
+        public IActionResult AddFlashSaleToCart(int productId, int flashSaleItemId, decimal flashSalePrice, int count = 1, int? productVariantId = null)
         {
             try
             {
@@ -212,11 +216,12 @@ namespace BulkyBook.Areas.Customer.Controllers
                     var claimsIdentity = (ClaimsIdentity)User.Identity;
                     var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-                    // Check if item already in cart
+                    // Check if item already in cart (considering variant)
                     var cartFromDb = _unitOfWork.shoppingCart.Get(
                         u => u.ApplicationUserId == userId && 
                              u.ProductId == productId && 
-                             u.FlashSaleItemId == flashSaleItemId);
+                             u.FlashSaleItemId == flashSaleItemId &&
+                             u.ProductVariantId == productVariantId);
 
                     if (cartFromDb != null)
                     {
@@ -235,6 +240,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                         ShoppingCart cart = new()
                         {
                             ProductId = productId,
+                            ProductVariantId = productVariantId,
                             Count = count,
                             ApplicationUserId = userId,
                             FlashSaleItemId = flashSaleItemId,
@@ -259,8 +265,10 @@ namespace BulkyBook.Areas.Customer.Controllers
                     // Guest user - add to session
                     var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
                     
-                    // Check if item already in cart (as flash sale)
-                    var existingItem = guestCart.FirstOrDefault(c => c.ProductId == productId && c.FlashSaleItemId == flashSaleItemId);
+                    // Check if item already in cart (as flash sale, considering variant)
+                    var existingItem = guestCart.FirstOrDefault(c => c.ProductId == productId && 
+                                                                     c.FlashSaleItemId == flashSaleItemId &&
+                                                                     c.ProductVariantId == productVariantId);
                     
                     if (existingItem != null)
                     {
@@ -277,6 +285,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                         guestCart.Add(new GuestCartItem
                         {
                             ProductId = productId,
+                            ProductVariantId = productVariantId,
                             Count = count,
                             FlashSaleItemId = flashSaleItemId,
                             FlashSalePrice = (double)flashSalePrice,
@@ -454,19 +463,21 @@ namespace BulkyBook.Areas.Customer.Controllers
 			{
 				var claimsIdentity = (ClaimsIdentity)User.Identity;
 				var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-				cartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "product,FlashSaleItem");
+				cartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "product,FlashSaleItem,ProductVariant");
 			}
 			else
 			{
 				var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
-				cartList = guestCart.Select(gc => new ShoppingCart
-				{
-					ProductId = gc.ProductId,
-					Count = gc.Count,
-					FlashSaleItemId = gc.FlashSaleItemId,
-					FlashSalePrice = (decimal?)gc.FlashSalePrice,
-					product = _unitOfWork.product.Get(p => p.Id == gc.ProductId)
-				}).ToList();
+			cartList = guestCart.Select(gc => new ShoppingCart
+			{
+				ProductId = gc.ProductId,
+				Count = gc.Count,
+				ProductVariantId = gc.ProductVariantId,
+				FlashSaleItemId = gc.FlashSaleItemId,
+				FlashSalePrice = (decimal?)gc.FlashSalePrice,
+				product = _unitOfWork.product.Get(p => p.Id == gc.ProductId),
+				ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value) : null
+			}).ToList();
 			}
 
 			double subtotal = 0;
@@ -568,9 +579,11 @@ namespace BulkyBook.Areas.Customer.Controllers
 			{
 				ProductId = gc.ProductId,
 				Count = gc.Count,
+				ProductVariantId = gc.ProductVariantId,
 				FlashSaleItemId = gc.FlashSaleItemId, // 🔥 Include flash sale info
 				FlashSalePrice = (decimal?)gc.FlashSalePrice, // 🔥 Include flash sale price
-				product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry")
+				product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry"),
+				ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value) : null
 			}).ToList();
 
 			// Initialize empty fields for guest
@@ -620,10 +633,12 @@ namespace BulkyBook.Areas.Customer.Controllers
 				cartList = guestCart.Select(gc => new ShoppingCart
 				{
 					ProductId = gc.ProductId,
+					Count = gc.Count,
+					ProductVariantId = gc.ProductVariantId,
 					FlashSaleItemId = gc.FlashSaleItemId,
 					FlashSalePrice= (decimal?)gc.FlashSalePrice,
-					Count = gc.Count,
-					product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry")
+					product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry"),
+					ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value) : null
 				}).ToList();
 			}
 
@@ -1145,32 +1160,32 @@ namespace BulkyBook.Areas.Customer.Controllers
 
 		private double  GetPriceBasedOnQty(ShoppingCart  shoppingCart) 
         { 
-            if(shoppingCart.Count<=50)
-            {
-                return shoppingCart.product.Price;
-            }
-            else
-            {
-                if (shoppingCart.Count <= 100)
-                {
-                    return shoppingCart.product.Price50;
-                }
-                else
-                {
-                    return shoppingCart.product.Price100;  
-
-                }
-            }
-        
+            // Use base price for all quantities
+            return shoppingCart.product.Price;
         }
 
-        // 🔥 NEW: Get cart item price - uses flash sale price if available, otherwise quantity-based pricing
+        // 🔥 NEW: Get cart item price - uses flash sale price if available, then variant price, otherwise quantity-based pricing
         private double GetCartItemPrice(ShoppingCart shoppingCart)
         {
             // If this item is from a flash sale, use the flash sale price
             if (shoppingCart.FlashSaleItemId.HasValue && shoppingCart.FlashSalePrice.HasValue)
             {
                 return (double)shoppingCart.FlashSalePrice.Value;
+            }
+
+            // If this item has a variant, use the variant price
+            if (shoppingCart.ProductVariantId.HasValue && shoppingCart.ProductVariantId.Value > 0)
+            {
+                // Load variant if not already loaded
+                if (shoppingCart.ProductVariant == null)
+                {
+                    shoppingCart.ProductVariant = _unitOfWork.ProductVariant.Get(v => v.Id == shoppingCart.ProductVariantId.Value);
+                }
+                
+                if (shoppingCart.ProductVariant != null)
+                {
+                    return (double)shoppingCart.ProductVariant.Price;
+                }
             }
 
             // Otherwise, use the regular quantity-based pricing
@@ -1235,21 +1250,8 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
         private double GetPriceBasedOnQuantity(ShoppingCart shoppingCart)
         {
-            if (shoppingCart.Count <= 50)
-            {
-                return shoppingCart.product.Price;
-            }
-            else
-            {
-                if (shoppingCart.Count <= 100)
-                {
-                    return shoppingCart.product.Price50;
-                }
-                else
-                {
-                    return shoppingCart.product.Price100;
-                }
-            }
+            // Use base price for all quantities
+            return shoppingCart.product.Price;
         }
 
         // 🔥 Helper method to get product image URL (checks ProductImages first, then falls back to ImageUrl)

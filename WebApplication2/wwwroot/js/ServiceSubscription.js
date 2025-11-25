@@ -39,7 +39,8 @@ function loadDataTable() {
                 "data": "price",
                 "width": "10%",
                 "render": function (data) {
-                    return new Intl.NumberFormat('en-AE', { style: 'currency', currency: 'AED' }).format(data);
+                    const currencySymbol = (typeof getCurrencySymbol === 'function' ? getCurrencySymbol() : (typeof getCurrentLanguage === 'function' && getCurrentLanguage() === 'ar' ? 'د.إ' : 'AED'));
+                    return currencySymbol + ' ' + data.toFixed(2);
                 }
             },
             {

@@ -1,7 +1,12 @@
+@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
 @model OrderVM
 
 @{
     ViewData["Title"] = "Order Details";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
 }
 
 <partial name="_Notifications" />
@@ -149,7 +154,7 @@
                         </div>
                         <div class="info-row">
                             <span class="info-label">Order Total</span>
-                            <span class="info-value highlight">@Model.OrderHeader.OrderTotal.ToString("c")</span>
+                            <span class="info-value highlight">@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2")</span>
                         </div>
                     </div>
                 </div>
@@ -223,10 +228,10 @@
                                         <span class="quantity-badge">@detail.Count</span>
                                     </td>
                                     <td style="text-align: right;" class="price-cell">
-                                        @detail.Price.ToString("c")
+                                        @Html.Raw(currencySymbol) @detail.Price.ToString("N2")
                                     </td>
                                     <td style="text-align: right;" class="total-cell">
-                                        @((detail.Price * detail.Count).ToString("c"))
+                                        @Html.Raw(currencySymbol) @((detail.Price * detail.Count).ToString("N2"))
                                     </td>
                                 </tr>
                             }
@@ -234,7 +239,7 @@
                         <tfoot>
                             <tr>
                                 <td colspan="3" class="label">Order Total:</td>
-                                <td class="value">@Model.OrderHeader.OrderTotal.ToString("c")</td>
+                                <td class="value">@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2")</td>
                             </tr>
                         </tfoot>
                     </table>

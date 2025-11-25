@@ -16,11 +16,9 @@ namespace BulkyBook.Models
         public   String Title { get; set; }
         [Required]
         public string Description { get; set; }
-        [Required]
 
-        public   string Author { get; set; }
-        [Required]
-        public   string ISBN { get; set; }
+        public   string? Author { get; set; }
+        public   string? ISBN { get; set; }
         [Range(0, 1000)]
         [Display(Name = "List Price")]
         [Required]
@@ -31,11 +29,10 @@ namespace BulkyBook.Models
         public   double Price { get; set; }
         [Range(0,100)]
         [Display(Name = "Price For 50+")]
-        public   double Price50 { get; set; }
+        public   double? Price50 { get; set; }
         [Range(0, 1000)]
         [Display(Name = "Price For 100+")]
-        [Required]
-        public   double Price100 { get; set; }
+        public   double? Price100 { get; set; }
         [Required]
         public int CategryId { get; set; }
         [ForeignKey("CategryId")]
@@ -66,5 +63,31 @@ namespace BulkyBook.Models
         
         [NotMapped]
         public bool IsOutOfStock => StockQuantity == 0;
+        
+        // Variant System Support
+        [Display(Name = "Product Type")]
+        [Required]
+        public ProductType ProductType { get; set; } = ProductType.Simple;
+        
+        // Navigation properties for variant system
+        [ValidateNever]
+        public ICollection<ProductOption> ProductOptions { get; set; } = new List<ProductOption>();
+        
+        [ValidateNever]
+        public ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
+        
+        // Helper property to check if product has variants
+        [NotMapped]
+        public bool HasVariants => ProductType == ProductType.Variable && ProductVariants != null && ProductVariants.Any();
+        
+        // Helper property to get default variant (for simple products or fallback)
+        [NotMapped]
+        public ProductVariant? DefaultVariant => ProductVariants?.FirstOrDefault();
+    }
+    
+    public enum ProductType
+    {
+        Simple = 0,
+        Variable = 1
     }
 }

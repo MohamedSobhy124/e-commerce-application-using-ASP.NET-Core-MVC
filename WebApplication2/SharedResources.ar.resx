@@ -1946,4 +1946,310 @@
   <data name="FlashSaleEmailFooter" xml:space="preserve">
     <value>لا تفوت هذه العروض الرائعة! تسوق الآن قبل انتهاء العرض.</value>
   </data>
+  <data name="ProductTypeAndVariants" xml:space="preserve">
+    <value>نوع المنتج والمتغيرات</value>
+  </data>
+  <data name="ConfigureProductVariantsDescription" xml:space="preserve">
+    <value>تكوين ما إذا كان هذا المنتج يحتوي على خيارات (الحجم، اللون، إلخ) وإدارة المتغيرات</value>
+  </data>
+  <data name="ProductType" xml:space="preserve">
+    <value>نوع المنتج</value>
+  </data>
+  <data name="SimpleProduct" xml:space="preserve">
+    <value>منتج بسيط (بدون خيارات)</value>
+  </data>
+  <data name="VariableProduct" xml:space="preserve">
+    <value>منتج متغير (مع خيارات)</value>
+  </data>
+  <data name="ProductTypeHelp" xml:space="preserve">
+    <value>بسيط: سعر واحد، مخزون واحد. متغير: خيارات متعددة (الحجم، اللون، إلخ)</value>
+  </data>
+  <data name="ProductOptionsAndVariants" xml:space="preserve">
+    <value>خيارات المنتج والمتغيرات</value>
+  </data>
+  <data name="ManageProductVariantsDescription" xml:space="preserve">
+    <value>إضافة خيارات وإنشاء جميع التركيبات الممكنة للمتغيرات</value>
+  </data>
+  <data name="ProductOptions" xml:space="preserve">
+    <value>خيارات المنتج</value>
+  </data>
+  <data name="AddOptionsLikeSizeColor" xml:space="preserve">
+    <value>أضف خيارات مثل الحجم، اللون، النكهة، إلخ</value>
+  </data>
+  <data name="AddOption" xml:space="preserve">
+    <value>إضافة خيار</value>
+  </data>
+  <data name="ProductVariants" xml:space="preserve">
+    <value>متغيرات المنتج</value>
+  </data>
+  <data name="AllCombinationsOfOptions" xml:space="preserve">
+    <value>جميع تركيبات خياراتك</value>
+  </data>
+  <data name="GenerateVariants" xml:space="preserve">
+    <value>إنشاء المتغيرات</value>
+  </data>
+  <data name="Variant" xml:space="preserve">
+    <value>المتغير</value>
+  </data>
+  <data name="ListPrice" xml:space="preserve">
+    <value>سعر القائمة</value>
+  </data>
+  <data name="Stock" xml:space="preserve">
+    <value>المخزون</value>
+  </data>
+  <data name="MinStockAlert" xml:space="preserve">
+    <value>تنبيه الحد الأدنى للمخزون</value>
+  </data>
+  <data name="Image" xml:space="preserve">
+    <value>الصورة</value>
+  </data>
+  <data name="Upload" xml:space="preserve">
+    <value>رفع</value>
+  </data>
+  <data name="DeleteOption" xml:space="preserve">
+    <value>حذف الخيار</value>
+  </data>
+  <data name="AddValuePlaceholder" xml:space="preserve">
+    <value>أضف قيمة (مثل: صغير، متوسط، كبير)</value>
+  </data>
+  <data name="NoValuesAddedYet" xml:space="preserve">
+    <value>لم تتم إضافة قيم بعد.</value>
+  </data>
+  <data name="RemoveValue" xml:space="preserve">
+    <value>إزالة القيمة</value>
+  </data>
+  <data name="NoOptionsAddedYet" xml:space="preserve">
+    <value>لم تتم إضافة خيارات بعد. انقر على "إضافة خيار" للبدء.</value>
+  </data>
+  <data name="NoVariantsGeneratedYet" xml:space="preserve">
+    <value>لم يتم إنشاء متغيرات بعد. أضف خيارات وانقر على "إنشاء المتغيرات".</value>
+  </data>
+  <data name="OptionAddedSuccessfully" xml:space="preserve">
+    <value>تمت إضافة الخيار بنجاح</value>
+  </data>
+  <data name="FailedToAddOption" xml:space="preserve">
+    <value>فشل في إضافة الخيار</value>
+  </data>
+  <data name="SaveProductFirst" xml:space="preserve">
+    <value>احفظ المنتج أولاً</value>
+  </data>
+  <data name="PleaseSaveProductBeforeAddingOptions" xml:space="preserve">
+    <value>يرجى حفظ المنتج قبل إضافة الخيارات.</value>
+  </data>
+  <data name="AddNewOption" xml:space="preserve">
+    <value>إضافة خيار جديد</value>
+  </data>
+  <data name="OptionNameExample" xml:space="preserve">
+    <value>اسم الخيار (مثل: الحجم، اللون، النكهة)</value>
+  </data>
+  <data name="EnterOptionName" xml:space="preserve">
+    <value>أدخل اسم الخيار</value>
+  </data>
+  <data name="OptionNameRequired" xml:space="preserve">
+    <value>اسم الخيار مطلوب!</value>
+  </data>
+  <data name="PleaseEnterValue" xml:space="preserve">
+    <value>يرجى إدخال قيمة</value>
+  </data>
+  <data name="FailedToAddValue" xml:space="preserve">
+    <value>فشل في إضافة القيمة</value>
+  </data>
+  <data name="DeleteOptionWarning" xml:space="preserve">
+    <value>سيؤدي هذا إلى حذف الخيار وجميع قيمه. لا يمكن التراجع عن هذا الإجراء!</value>
+  </data>
+  <data name="YesDeleteIt" xml:space="preserve">
+    <value>نعم، احذفه</value>
+  </data>
+  <data name="Deleted" xml:space="preserve">
+    <value>تم الحذف</value>
+  </data>
+  <data name="OptionDeletedSuccessfully" xml:space="preserve">
+    <value>تم حذف الخيار بنجاح</value>
+  </data>
+  <data name="FailedToDeleteOption" xml:space="preserve">
+    <value>فشل في حذف الخيار</value>
+  </data>
+  <data name="FailedToDeleteValue" xml:space="preserve">
+    <value>فشل في حذف القيمة</value>
+  </data>
+  <data name="PleaseSaveProductFirst" xml:space="preserve">
+    <value>يرجى حفظ المنتج أولاً</value>
+  </data>
+  <data name="GenerateVariantsWarning" xml:space="preserve">
+    <value>سيؤدي هذا إلى إنشاء جميع التركيبات الممكنة للخيارات. سيتم الحفاظ على المتغيرات الموجودة، وسيتم إضافة المتغيرات الجديدة.</value>
+  </data>
+  <data name="YesGenerate" xml:space="preserve">
+    <value>نعم، أنشئ</value>
+  </data>
+  <data name="Generating" xml:space="preserve">
+    <value>جاري الإنشاء...</value>
+  </data>
+  <data name="PleaseWaitGeneratingVariants" xml:space="preserve">
+    <value>يرجى الانتظار أثناء إنشاء المتغيرات</value>
+  </data>
+  <data name="VariantsGeneratedSuccessfully" xml:space="preserve">
+    <value>تم إنشاء المتغيرات بنجاح</value>
+  </data>
+  <data name="FailedToGenerateVariants" xml:space="preserve">
+    <value>فشل في إنشاء المتغيرات</value>
+  </data>
+  <data name="FailedToGenerateVariantsCheckConsole" xml:space="preserve">
+    <value>فشل في إنشاء المتغيرات. يرجى التحقق من وحدة التحكم للتفاصيل.</value>
+  </data>
+  <data name="FailedToUploadImage" xml:space="preserve">
+    <value>فشل في رفع الصورة</value>
+  </data>
+  <data name="DeleteVariant" xml:space="preserve">
+    <value>حذف المتغير</value>
+  </data>
+  <data name="DeleteVariantWarning" xml:space="preserve">
+    <value>لا يمكن التراجع عن هذا الإجراء!</value>
+  </data>
+  <data name="DeleteImage" xml:space="preserve">
+    <value>حذف الصورة</value>
+  </data>
+  <data name="AreYouSureDeleteImage" xml:space="preserve">
+    <value>هل أنت متأكد أنك تريد حذف هذه الصورة؟</value>
+  </data>
+  <data name="ErrorDeletingImage" xml:space="preserve">
+    <value>خطأ في حذف الصورة</value>
+  </data>
+  <data name="UnknownError" xml:space="preserve">
+    <value>خطأ غير معروف</value>
+  </data>
+  <data name="ErrorDeletingImageTryAgain" xml:space="preserve">
+    <value>خطأ في حذف الصورة. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>العنوان</value>
+  </data>
+  <data name="EnterProductTitle" xml:space="preserve">
+    <value>أدخل عنوان المنتج</value>
+  </data>
+  <data name="EnterProductDescription" xml:space="preserve">
+    <value>أدخل وصف المنتج</value>
+  </data>
+  <data name="EnterISBN" xml:space="preserve">
+    <value>أدخل رقم ISBN</value>
+  </data>
+  <data name="EnterAuthorName" xml:space="preserve">
+    <value>أدخل اسم المؤلف</value>
+  </data>
+  <data name="Price50" xml:space="preserve">
+    <value>السعر لـ 50+</value>
+  </data>
+  <data name="Price100" xml:space="preserve">
+    <value>السعر لـ 100+</value>
+  </data>
+  <data name="StockManagement" xml:space="preserve">
+    <value>إدارة المخزون</value>
+  </data>
+  <data name="StockQuantity" xml:space="preserve">
+    <value>كمية المخزون</value>
+  </data>
+  <data name="EnterAvailableStock" xml:space="preserve">
+    <value>أدخل المخزون المتاح</value>
+  </data>
+  <data name="CurrentQuantityInStock" xml:space="preserve">
+    <value>الكمية الحالية في المخزون</value>
+  </data>
+  <data name="LowStockAlertLevel" xml:space="preserve">
+    <value>مستوى تنبيه المخزون المنخفض</value>
+  </data>
+  <data name="SetAlertThreshold" xml:space="preserve">
+    <value>تعيين عتبة التنبيه</value>
+  </data>
+  <data name="ShowWarningWhenStockFalls" xml:space="preserve">
+    <value>إظهار تحذير عندما ينخفض المخزون إلى هذا المستوى</value>
+  </data>
+  <data name="SelectCategory" xml:space="preserve">
+    <value>اختر الفئة</value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>العودة إلى القائمة</value>
+  </data>
+  <data name="ProductImages" xml:space="preserve">
+    <value>صور المنتج</value>
+  </data>
+  <data name="UploadImages" xml:space="preserve">
+    <value>رفع الصور</value>
+  </data>
+  <data name="NoImagesPleaseUpload" xml:space="preserve">
+    <value>لا توجد صور. يرجى رفع صورة واحدة على الأقل.</value>
+  </data>
+  <data name="AtLeastOneRequired" xml:space="preserve">
+    <value>مطلوب واحد على الأقل</value>
+  </data>
+  <data name="Step1Title" xml:space="preserve">
+    <value>الخطوة 1: اختر نوع المنتج</value>
+  </data>
+  <data name="Step1Description" xml:space="preserve">
+    <value>حدد ما إذا كان هذا المنتج يحتوي على متغيرات (مثل أحجام أو ألوان مختلفة) أو منتج بسيط بسعر واحد ومستوى مخزون واحد.</value>
+  </data>
+  <data name="Step2Title" xml:space="preserve">
+    <value>الخطوة 2: إضافة خيارات المنتج</value>
+  </data>
+  <data name="Step2Description" xml:space="preserve">
+    <value>أنشئ خيارات لمنتجك (مثل الحجم، اللون، المادة). هذه هي السمات التي ستختلف بين متغيرات المنتج.</value>
+  </data>
+  <data name="Step3Title" xml:space="preserve">
+    <value>الخطوة 3: إضافة قيم الخيارات</value>
+  </data>
+  <data name="Step3Description" xml:space="preserve">
+    <value>لكل خيار، أضف القيم الممكنة (مثل الحجم: صغير، متوسط، كبير). يجب أن يحتوي كل خيار على قيمة واحدة على الأقل.</value>
+  </data>
+  <data name="Step3Info" xml:space="preserve">
+    <value>أضف قيماً لكل خيار باستخدام حقل الإدخال أسفل كل بطاقة خيار. انقر على "إضافة" بعد إدخال كل قيمة.</value>
+  </data>
+  <data name="Step4Title" xml:space="preserve">
+    <value>الخطوة 4: إنشاء المتغيرات</value>
+  </data>
+  <data name="Step4Description" xml:space="preserve">
+    <value>انقر على الزر أدناه لإنشاء جميع التركيبات الممكنة لخياراتك تلقائياً. سيتم الحفاظ على المتغيرات الموجودة.</value>
+  </data>
+  <data name="Step4Info" xml:space="preserve">
+    <value>سيقوم النظام بإنشاء جميع التركيبات الممكنة. على سبيل المثال: الحجم (صغير، متوسط، كبير) × اللون (أحمر، أزرق) = 6 متغيرات.</value>
+  </data>
+  <data name="Step5Title" xml:space="preserve">
+    <value>الخطوة 5: تعديل تفاصيل المتغيرات</value>
+  </data>
+  <data name="Step5Description" xml:space="preserve">
+    <value>قم بتعيين السعر وكمية المخزون وتنبيه الحد الأدنى للمخزون ورفع الصور لكل متغير. جميع الحقول قابلة للتعديل مباشرة في الجدول أدناه.</value>
+  </data>
+  <data name="SaveStep" xml:space="preserve">
+    <value>حفظ الخطوة</value>
+  </data>
+  <data name="StepSavedSuccessfully" xml:space="preserve">
+    <value>تم حفظ الخطوة بنجاح!</value>
+  </data>
+  <data name="FailedToSaveStep" xml:space="preserve">
+    <value>فشل في حفظ الخطوة. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="SelectOptions" xml:space="preserve">
+    <value>اختر الخيارات</value>
+  </data>
+  <data name="VariantNotFound" xml:space="preserve">
+    <value>المتغير غير موجود</value>
+  </data>
+  <data name="PleaseSelect" xml:space="preserve">
+    <value>يرجى اختيار</value>
+  </data>
+  <data name="MoreOptions" xml:space="preserve">
+    <value>خيارات أخرى</value>
+  </data>
+  <data name="SelectAllOptions" xml:space="preserve">
+    <value>يرجى اختيار جميع الخيارات قبل إضافة المنتج إلى السلة</value>
+  </data>
+  <data name="SelectVariant" xml:space="preserve">
+    <value>اختر المتغير</value>
+  </data>
+  <data name="VariantPrice" xml:space="preserve">
+    <value>سعر المتغير</value>
+  </data>
+  <data name="VariantStock" xml:space="preserve">
+    <value>مخزون المتغير</value>
+  </data>
+  <data name="Stock" xml:space="preserve">
+    <value>المخزون</value>
+  </data>
 </root>

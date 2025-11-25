@@ -36,6 +36,11 @@ namespace BulkyBook.DataAccess.Repository
                 .Include(f => f.FlashSaleItems)
                     .ThenInclude(i => i.Product)
                         .ThenInclude(p => p.ProductImages)
+                .Include(f => f.FlashSaleItems)
+                    .ThenInclude(i => i.ProductVariant)
+                        .ThenInclude(v => v.VariantOptionValues)
+                            .ThenInclude(vov => vov.OptionValue)
+                                .ThenInclude(ov => ov.ProductOption)
                 .Where(f => f.IsActive 
                     && f.StartDate <= now 
                     && f.EndDate >= now 
@@ -50,6 +55,11 @@ namespace BulkyBook.DataAccess.Repository
                 .Include(f => f.FlashSaleItems)
                     .ThenInclude(i => i.Product)
                         .ThenInclude(p => p.ProductImages)
+                .Include(f => f.FlashSaleItems)
+                    .ThenInclude(i => i.ProductVariant)
+                        .ThenInclude(v => v.VariantOptionValues)
+                            .ThenInclude(vov => vov.OptionValue)
+                                .ThenInclude(ov => ov.ProductOption)
                 .FirstOrDefault(f => f.Id == flashSaleId);
         }
     }

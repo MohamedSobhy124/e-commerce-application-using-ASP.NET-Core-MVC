@@ -144,7 +144,7 @@ function initFlashSaleTimers() {
 }
 
 // Add flash sale item to cart
-function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
+function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice, productVariantId = null) {
     // Show loading state
     const btn = event.target;
     const originalText = btn.innerHTML;
@@ -157,6 +157,9 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
     formData.append('flashSaleItemId', flashSaleItemId);
     formData.append('flashSalePrice', flashSalePrice);
     formData.append('count', 1);
+    if (productVariantId && productVariantId !== 'null') {
+        formData.append('productVariantId', productVariantId);
+    }
 
     // Add to cart
     fetch('/Customer/Cart/AddFlashSaleToCart', {

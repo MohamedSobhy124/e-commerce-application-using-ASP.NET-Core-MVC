@@ -1,5 +1,12 @@
-﻿@inject IConfiguration Configuration
+﻿@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
+@inject IConfiguration Configuration
 @model ShoppingCart
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+}
   
 <form method="post">
     <input hidden asp-for="ProductId" />
@@ -8,7 +15,6 @@
         <div class="product-details-header">
             <div class="text-center">
                 <h2>@Model.product.Title</h2>
-                <p>@Localizer["By"]: <strong>@Model.product.Author</strong></p>
             </div>
         </div>
 
@@ -32,6 +38,20 @@
                                 if (!productImages.Any() && !string.IsNullOrEmpty(Model.product.ImageUrl))
                                 {
                                     productImages.Add(Model.product.ImageUrl);
+                                }
+                                
+                                // For Variable products, add variant images
+                                if (Model.product.ProductType == BulkyBook.Models.ProductType.Variable && 
+                                    Model.product.ProductVariants != null && Model.product.ProductVariants.Any())
+                                {
+                                    var variantImages = Model.product.ProductVariants
+                                        .Where(v => !string.IsNullOrEmpty(v.ImageUrl))
+                                        .Select(v => v.ImageUrl)
+                                        .Distinct()
+                                        .ToList();
+                                    
+                                    // Append variant images to product images
+                                    productImages.AddRange(variantImages);
                                 }
                             }
                             
@@ -81,23 +101,66 @@
 
                             <h3 class="product-category-name">@Model.product.Title</h3>
 
+                            <!-- Product Options (for Variable Products) -->
+                            @if (Model.product.ProductType == BulkyBook.Models.ProductType.Variable && Model.product.ProductOptions != null && Model.product.ProductOptions.Any())
+                            {
+                                <div id="productOptionsSection" class="product-options-section mb-4">
+                                    @foreach (var option in Model.product.ProductOptions.OrderBy(o => o.DisplayOrder))
+                                    {
+                                        <div class="product-option-group mb-3">
+                                            <label class="product-option-label">
+                                                <strong>@option.Name:</strong>
+                                            </label>
+                                            <div class="product-option-values d-flex flex-wrap gap-2 mt-2">
+                                                @foreach (var value in option.OptionValues.OrderBy(v => v.DisplayOrder))
+                                                {
+                                                    <button type="button" 
+                                                            class="btn btn-outline-primary product-option-value-btn" 
+                                                            data-option-id="@option.Id" 
+                                                            data-value-id="@value.Id"
+                                                            onclick="selectOptionValue(@option.Id, @value.Id, '@value.Value')">
+                                                        @value.Value
+                                                    </button>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                    <input type="hidden" id="selectedVariantId" name="ProductVariantId" />
+                                    <div id="variantInfo" class="alert alert-info mt-2" style="display: none;">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        <span id="variantInfoText"></span>
+                                    </div>
+                                </div>
+                            }
+
                             <div class="product-price-area">
-                                @if (Model.product.ListPrice > Model.product.Price)
+                                @if (Model.product.ProductType == BulkyBook.Models.ProductType.Simple)
                                 {
-                                    <p class="product-old-price">
-                                        @Localizer["OriginalPrice"]: @Model.product.ListPrice.ToString("c")
-                                    </p>
+                                    @if (Model.product.ListPrice > Model.product.Price)
+                                    {
+                                        <p class="product-old-price">
+                                            @Localizer["OriginalPrice"]: @Html.Raw(currencySymbol) @Model.product.ListPrice.ToString("N2")
+                                        </p>
+                                    }
+                                    <p class="product-new-price" id="productPrice">@Html.Raw(currencySymbol) @Model.product.Price.ToString("N2")</p>
                                 }
-                                <p class="product-new-price">@Model.product.Price.ToString("c")</p>
+                                else
+                                {
+                                    <p class="product-old-price" id="variantListPrice" style="display: none;"></p>
+                                    <p class="product-new-price" id="variantPrice">@Localizer["SelectOptions"]</p>
+                                }
                                 <p class="product-tax-notice">@Localizer["AdditionalTaxMayApply"]</p>
+                                <div id="stockInfo" class="stock-info mt-2" style="display: none;">
+                                    <span id="stockStatus" class="badge"></span>
+                                </div>
                             </div>
 
                             <div class="product-actions">
-                                <button type="submit" class="add-to-cart-button">
+                                <button type="submit" class="add-to-cart-button" id="addToCartBtn" @(Model.product.ProductType == BulkyBook.Models.ProductType.Variable ? "disabled" : "")>
                                     <i class="bi bi-cart-plus"></i>
                                     @Localizer["AddToCart"]
                                 </button>
-                                <input type="number" asp-for="Count" value="1" min="1" class="product-quantity-input">
+                                <input type="number" asp-for="Count" value="1" min="1" class="product-quantity-input" id="quantityInput">
                             </div>
                           
                             <!-- WhatsApp Inquiry Button -->
@@ -226,10 +289,249 @@
 
 @section Scripts {
     <script>
+        const productId = @Model.ProductId;
+        const productType = @((int)Model.product.ProductType);
+        let selectedOptions = {};
+        let variants = @Html.Raw(Json.Serialize(Model.product.ProductVariants?.Select(v => new {
+            Id = v.Id,
+            Price = v.Price,
+            ListPrice = v.ListPrice,
+            StockQuantity = v.StockQuantity,
+            ImageUrl = v.ImageUrl,
+            OptionValueIds = v.VariantOptionValues?.Select(vov => vov.OptionValue.Id).ToList()
+        }) ));
+        
+        // Store all product images for carousel
+        let allProductImages = @Html.Raw(Json.Serialize(
+            Model.product.ProductType == BulkyBook.Models.ProductType.Variable && 
+            Model.product.ProductVariants != null && Model.product.ProductVariants.Any()
+                ? (Model.product.ProductImages != null && Model.product.ProductImages.Any()
+                    ? Model.product.ProductImages.OrderBy(pi => pi.DisplayOrder).Select(pi => pi.ImageUrl).ToList()
+                    : (!string.IsNullOrEmpty(Model.product.ImageUrl) ? new List<string> { Model.product.ImageUrl } : new List<string>()))
+                    .Concat(Model.product.ProductVariants
+                        .Where(v => !string.IsNullOrEmpty(v.ImageUrl))
+                        .Select(v => v.ImageUrl)
+                        .Distinct())
+                    .ToList()
+                : (Model.product.ProductImages != null && Model.product.ProductImages.Any()
+                    ? Model.product.ProductImages.OrderBy(pi => pi.DisplayOrder).Select(pi => pi.ImageUrl).ToList()
+                    : (!string.IsNullOrEmpty(Model.product.ImageUrl) ? new List<string> { Model.product.ImageUrl } : new List<string>()))
+        ));
+        let options = @Html.Raw(Json.Serialize(Model.product.ProductOptions?.Select(o => new {
+            Id = o.Id,
+            Name = o.Name,
+            Values = o.OptionValues?.Select(v => new { Id = v.Id, Value = v.Value }).ToList() 
+        }) ));
+
+        // Localized strings for JavaScript
+        const localizations = {
+            selectOptions: '@Html.Raw(Localizer["SelectOptions"])',
+            originalPrice: '@Html.Raw(Localizer["OriginalPrice"])',
+            inStock: '@Html.Raw(Localizer["InStock"])',
+            outOfStock: '@Html.Raw(Localizer["OutOfStock"])',
+            variantNotFound: '@Html.Raw(Localizer["VariantNotFound"])',
+            pleaseSelect: '@Html.Raw(Localizer["PleaseSelect"])',
+            moreOptions: '@Html.Raw(Localizer["MoreOptions"])',
+            selectAllOptions: '@Html.Raw(Localizer["SelectAllOptions"])'
+        };
+
         // Load reviews when page loads
         $(document).ready(function() {
-            loadReviews(@Model.ProductId);
-            loadProductRating(@Model.ProductId);
+            loadReviews(productId);
+            loadProductRating(productId);
+            
+            if (productType === 1) {
+                initializeVariantSelection();
+            }
+        });
+
+        function initializeVariantSelection() {
+            // Reset all option buttons
+            $('.product-option-value-btn').removeClass('active');
+            selectedOptions = {};
+            updateVariantInfo();
+            
+            // Reset to first product image
+            resetToFirstImage();
+        }
+        
+        function resetToFirstImage() {
+            const carousel = document.getElementById('productDetailsCarousel');
+            if (carousel) {
+                const carouselInstance = bootstrap.Carousel.getOrCreateInstance(carousel);
+                carouselInstance.to(0);
+            }
+        }
+
+        function selectOptionValue(optionId, valueId, valueText) {
+            // Toggle selection
+            const btn = $(`.product-option-value-btn[data-option-id="${optionId}"][data-value-id="${valueId}"]`);
+            
+            // Deselect other values in the same option
+            $(`.product-option-value-btn[data-option-id="${optionId}"]`).removeClass('active');
+            btn.addClass('active');
+            
+            selectedOptions[optionId] = valueId;
+            
+            // Check if all options are selected
+            const allOptionsSelected = options.every(opt => selectedOptions[opt.id] !== undefined);
+            
+            if (allOptionsSelected) {
+                findAndDisplayVariant();
+            } else {
+                // Reset variant info
+                $('#selectedVariantId').val('');
+                $('#variantPrice').text(localizations.selectOptions);
+                $('#variantListPrice').hide();
+                $('#stockInfo').hide();
+                $('#addToCartBtn').prop('disabled', true);
+                
+                // Reset to first product image
+                resetToFirstImage();
+            }
+        }
+
+        function findAndDisplayVariant() {
+            const selectedValueIds = Object.values(selectedOptions).map(id => parseInt(id)).sort((a, b) => a - b);
+            
+            // Find matching variant
+            const variant = variants.find(v => {
+                const variantValueIds = (v.optionValueIds || []).map(id => parseInt(id)).sort((a, b) => a - b);
+                return variantValueIds.length === selectedValueIds.length &&
+                       variantValueIds.every((id, index) => id === selectedValueIds[index]);
+            });
+            
+            if (variant) {
+                $('#selectedVariantId').val(variant.id);
+                $('#variantPrice').text(formatCurrency(variant.price));
+                
+                if (variant.listPrice && variant.listPrice > variant.price) {
+                    $('#variantListPrice').text(localizations.originalPrice + ': ' + formatCurrency(variant.listPrice)).show();
+                } else {
+                    $('#variantListPrice').hide();
+                }
+                
+                // Update stock info
+                const stockStatus = $('#stockStatus');
+                if (variant.stockQuantity > 0) {
+                    stockStatus.removeClass('bg-danger bg-warning').addClass('bg-success');
+                    stockStatus.text(localizations.inStock + ': ' + variant.stockQuantity);
+                } else {
+                    stockStatus.removeClass('bg-success bg-warning').addClass('bg-danger');
+                    stockStatus.text(localizations.outOfStock);
+                }
+                $('#stockInfo').show();
+                
+                $('#addToCartBtn').prop('disabled', variant.stockQuantity === 0);
+                $('#variantInfo').hide();
+                
+                // Update product image to show variant image if available
+                updateProductImage(variant.imageUrl);
+            } else {
+                $('#selectedVariantId').val('');
+                $('#variantPrice').text(localizations.variantNotFound);
+                $('#variantListPrice').hide();
+                $('#stockInfo').hide();
+                $('#addToCartBtn').prop('disabled', true);
+                $('#variantInfo').show().find('#variantInfoText').text(localizations.variantNotFound);
+            }
+        }
+
+        const currencySymbol = '@Html.Raw(currencySymbol)';
+        function formatCurrency(amount) {
+            return currencySymbol + ' ' + amount.toFixed(2);
+        }
+        
+        function updateProductImage(variantImageUrl) {
+            if (!variantImageUrl) return;
+            
+            const carousel = document.getElementById('productDetailsCarousel');
+            if (carousel) {
+                // Normalize the variant image URL (handle both relative and absolute paths)
+                const normalizedVariantUrl = variantImageUrl.replace(/\\/g, '/');
+                const variantFileName = normalizedVariantUrl.split('/').pop();
+                
+                // Find the carousel item with this image
+                const carouselItems = carousel.querySelectorAll('.carousel-item');
+                let targetIndex = -1;
+                
+                carouselItems.forEach((item, index) => {
+                    const img = item.querySelector('img');
+                    if (img) {
+                        const imgSrc = img.src || img.getAttribute('src') || '';
+                        const imgFileName = imgSrc.split('/').pop();
+                        
+                        // Check if the image matches by filename or full path
+                        if (imgFileName === variantFileName || 
+                            imgSrc.includes(variantFileName) || 
+                            imgSrc.includes(normalizedVariantUrl)) {
+                            targetIndex = index;
+                        }
+                    }
+                });
+                
+                // If image not found in carousel, check allProductImages array
+                if (targetIndex === -1 && allProductImages) {
+                    allProductImages.forEach((imgUrl, index) => {
+                        const normalizedImgUrl = imgUrl.replace(/\\/g, '/');
+                        if (normalizedImgUrl === normalizedVariantUrl || 
+                            normalizedImgUrl.includes(variantFileName) ||
+                            normalizedImgUrl.endsWith(variantFileName)) {
+                            targetIndex = index;
+                        }
+                    });
+                }
+                
+                if (targetIndex >= 0) {
+                    // Switch to the variant image
+                    const carouselInstance = bootstrap.Carousel.getOrCreateInstance(carousel);
+                    carouselInstance.to(targetIndex);
+                }
+            } else {
+                // Single image display - replace it
+                const imgElement = document.querySelector('.product-main-image img');
+                if (imgElement) {
+                    imgElement.src = variantImageUrl;
+                }
+            }
+        }
+
+        function updateVariantInfo() {
+            const selectedCount = Object.keys(selectedOptions).length;
+            const totalOptions = options.length;
+            
+            if (selectedCount < totalOptions) {
+                $('#variantInfo').show().find('#variantInfoText').text(
+                    `${localizations.pleaseSelect} ${totalOptions - selectedCount} ${localizations.moreOptions}`
+                );
+            } else {
+                $('#variantInfo').hide();
+            }
+        }
+
+        // Update form submission to include variant ID
+        $('form').on('submit', function(e) {
+            if (productType === 1) {
+                const variantId = $('#selectedVariantId').val();
+                if (!variantId) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: localizations.selectOptions,
+                        text: localizations.selectAllOptions
+                    });
+                    return false;
+                }
+                
+                // Add variant ID to form
+                if (!$('input[name="ProductVariantId"]').length) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'ProductVariantId',
+                        value: variantId
+                    }).appendTo(this);
+                }
+            }
         });
 
         function loadProductRating(productId) {

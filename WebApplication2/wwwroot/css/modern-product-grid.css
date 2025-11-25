@@ -258,6 +258,35 @@
     font-size: 0.9rem;
 }
 
+.btn-select-options {
+    flex: 1;
+    background: linear-gradient(135deg, #FF9800, #F57C00);
+    color: white;
+    border: none;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+}
+
+.btn-select-options:hover {
+    background: linear-gradient(135deg, #F57C00, #FF9800);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(255, 152, 0, 0.4);
+    color: white;
+}
+
+.btn-select-options i {
+    font-size: 0.9rem;
+}
+
 .btn-add-cart-quick {
     background: linear-gradient(135deg, #7BC043, #558B2F);
     color: white;

@@ -8,6 +8,9 @@ namespace BulkyBook.Models
         public int Count { get; set; }
         public DateTime AddedAt { get; set; } = DateTime.Now;
         
+        // Variant Support
+        public int? ProductVariantId { get; set; }
+        
         // Flash Sale Support
         public int? FlashSaleItemId { get; set; }
         public double? FlashSalePrice { get; set; }

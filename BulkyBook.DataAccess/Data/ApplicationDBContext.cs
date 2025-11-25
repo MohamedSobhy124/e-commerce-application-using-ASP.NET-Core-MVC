@@ -33,6 +33,10 @@ namespace BulkyBook.DataAccess.Data
         public DbSet<ServiceSubscription> ServiceSubscriptions { get; set; }
         public DbSet<ServiceImage> ServiceImages { get; set; }
         public DbSet<NewsletterSubscription> NewsletterSubscriptions { get; set; }
+        public DbSet<ProductOption> ProductOptions { get; set; }
+        public DbSet<ProductOptionValue> ProductOptionValues { get; set; }
+        public DbSet<ProductVariant> ProductVariants { get; set; }
+        public DbSet<ProductVariantOptionValue> ProductVariantOptionValues { get; set; }
 
 
 

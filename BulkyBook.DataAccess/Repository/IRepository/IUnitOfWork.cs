@@ -26,6 +26,9 @@ namespace BulkyBook.DataAccess.Repository.IRepository
         IServiceSubscriptionRepository ServiceSubscriptions { get; }
         IServiceOfferRepository ServiceOffers { get; }
         INewsletterSubscriptionRepository NewsletterSubscription { get; }
+        IProductOptionRepository ProductOption { get; }
+        IProductOptionValueRepository ProductOptionValue { get; }
+        IProductVariantRepository ProductVariant { get; }
         void save();
     }
 }

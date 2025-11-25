@@ -141,11 +141,16 @@ namespace BulkyBook.DataAccess.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ProductVariantId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("FlashSaleId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
 
                     b.ToTable("FlashSaleItems");
                 });
@@ -256,6 +261,9 @@ namespace BulkyBook.DataAccess.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ProductVariantId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("FlashSaleItemId");
@@ -263,6 +271,8 @@ namespace BulkyBook.DataAccess.Migrations
                     b.HasIndex("OrderHeaderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
 
                     b.ToTable("orderDetails");
                 });
@@ -374,7 +384,6 @@ namespace BulkyBook.DataAccess.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Author")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CategryId")
@@ -385,7 +394,6 @@ namespace BulkyBook.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ISBN")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageUrl")
@@ -401,11 +409,14 @@ namespace BulkyBook.DataAccess.Migrations
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
-                    b.Property<double>("Price100")
+                    b.Property<double?>("Price100")
                         .HasColumnType("float");
 
-                    b.Property<double>("Price50")
+                    b.Property<double?>("Price50")
                         .HasColumnType("float");
+
+                    b.Property<int>("ProductType")
+                        .HasColumnType("int");
 
                     b.Property<int>("StockQuantity")
                         .HasColumnType("int");
@@ -444,6 +455,124 @@ namespace BulkyBook.DataAccess.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductImages");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ProductOption", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductOptions");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ProductOptionValue", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductOptionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductOptionId");
+
+                    b.ToTable("ProductOptionValues");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ProductVariant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("ListPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("MinimumStockAlert")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("Price100")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("Price50")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SKU")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductVariants");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ProductVariantOptionValue", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ProductOptionValueId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductOptionValueId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("ProductVariantOptionValues");
                 });
 
             modelBuilder.Entity("BulkyBook.Models.PromoCode", b =>
@@ -803,6 +932,9 @@ namespace BulkyBook.DataAccess.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ProductVariantId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
@@ -810,6 +942,8 @@ namespace BulkyBook.DataAccess.Migrations
                     b.HasIndex("FlashSaleItemId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
 
                     b.ToTable("ShoppingCarts");
                 });
@@ -1087,9 +1221,15 @@ namespace BulkyBook.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BulkyBook.Models.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId");
+
                     b.Navigation("FlashSale");
 
                     b.Navigation("Product");
+
+                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("BulkyBook.Models.Notification", b =>
@@ -1125,11 +1265,17 @@ namespace BulkyBook.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BulkyBook.Models.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId");
+
                     b.Navigation("FlashSaleItem");
 
                     b.Navigation("OrderHeader");
 
                     b.Navigation("Product");
+
+                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("BulkyBook.Models.OrderHeader", b =>
@@ -1167,6 +1313,58 @@ namespace BulkyBook.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ProductOption", b =>
+                {
+                    b.HasOne("BulkyBook.Models.Product", "Product")
+                        .WithMany("ProductOptions")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ProductOptionValue", b =>
+                {
+                    b.HasOne("BulkyBook.Models.ProductOption", "ProductOption")
+                        .WithMany("OptionValues")
+                        .HasForeignKey("ProductOptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductOption");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ProductVariant", b =>
+                {
+                    b.HasOne("BulkyBook.Models.Product", "Product")
+                        .WithMany("ProductVariants")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ProductVariantOptionValue", b =>
+                {
+                    b.HasOne("BulkyBook.Models.ProductOptionValue", "OptionValue")
+                        .WithMany()
+                        .HasForeignKey("ProductOptionValueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BulkyBook.Models.ProductVariant", "ProductVariant")
+                        .WithMany("VariantOptionValues")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OptionValue");
+
+                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("BulkyBook.Models.PromoCodeUsage", b =>
@@ -1284,7 +1482,13 @@ namespace BulkyBook.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BulkyBook.Models.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId");
+
                     b.Navigation("FlashSaleItem");
+
+                    b.Navigation("ProductVariant");
 
                     b.Navigation("applicationUser");
 
@@ -1380,6 +1584,20 @@ namespace BulkyBook.DataAccess.Migrations
             modelBuilder.Entity("BulkyBook.Models.Product", b =>
                 {
                     b.Navigation("ProductImages");
+
+                    b.Navigation("ProductOptions");
+
+                    b.Navigation("ProductVariants");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ProductOption", b =>
+                {
+                    b.Navigation("OptionValues");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ProductVariant", b =>
+                {
+                    b.Navigation("VariantOptionValues");
                 });
 
             modelBuilder.Entity("BulkyBook.Models.PromoCode", b =>

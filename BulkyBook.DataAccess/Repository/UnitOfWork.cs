@@ -33,6 +33,9 @@ namespace BulkyBook.DataAccess.Repository
         public IServiceSubscriptionRepository ServiceSubscriptions { get; private set; }
         public IServiceOfferRepository ServiceOffers { get; private set; }
         public INewsletterSubscriptionRepository NewsletterSubscription { get; private set; }
+        public IProductOptionRepository ProductOption { get; private set; }
+        public IProductOptionValueRepository ProductOptionValue { get; private set; }
+        public IProductVariantRepository ProductVariant { get; private set; }
 
         public UnitOfWork(ApplicationDBContext db) 
         {
@@ -55,6 +58,9 @@ namespace BulkyBook.DataAccess.Repository
             ServiceSubscriptions = new ServiceSubscriptionRepository(_db);
             ServicePurchases = new ServicePurchaseRepository(_db);
             NewsletterSubscription = new NewsletterSubscriptionRepository(_db);
+            ProductOption = new ProductOptionRepository(_db);
+            ProductOptionValue = new ProductOptionValueRepository(_db);
+            ProductVariant = new ProductVariantRepository(_db);
 
         }
 
