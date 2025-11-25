@@ -1,8 +1,13 @@
+@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
 @model IEnumerable<FlashSale>
 
 @{
     ViewData["Title"] = Localizer["FlashSalesLimitedTimeOffers"];
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
 }
 
 <partial name="_Notifications" />
@@ -81,10 +86,30 @@ else
                     @foreach (var item in flashSaleItems)
                     {
                         var product = item.Product;
-                        var imageUrl = product.ProductImages?.FirstOrDefault()?.ImageUrl ?? "/images/default-product.jpg";
-                        var stockPercentage = (double)item.FlashSaleQuantity / Math.Max(product.StockQuantity, 1) * 100;
+                        var variant = item.ProductVariant;
+                        
+                        // Use variant image if available, otherwise product image
+                        var imageUrl = variant?.ImageUrl ?? (product.ProductImages?.FirstOrDefault()?.ImageUrl ?? "/images/default-product.jpg");
+                        
+                        // Use variant stock/price if variant exists
+                        var availableStock = variant?.StockQuantity ?? product.StockQuantity;
+                        var originalPrice = variant?.Price ?? (decimal)product.Price;
+                        var stockPercentage = (double)item.FlashSaleQuantity / Math.Max(availableStock, 1) * 100;
                         var isLowStock = item.FlashSaleQuantity <= 5;
                         var isCriticalStock = item.FlashSaleQuantity <= 2;
+                        
+                        // Build variant name string
+                        string variantName = "";
+                        if (variant != null && variant.VariantOptionValues != null)
+                        {
+                            var optionValues = variant.VariantOptionValues
+                                .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                                .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+                                .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                                .Where(s => !string.IsNullOrEmpty(s))
+                                .ToList();
+                            variantName = string.Join(", ", optionValues);
+                        }
 
                         <div class="col-md-6 col-lg-4 col-xl-3">
                             <div class="flash-sale-product-card">
@@ -117,14 +142,23 @@ else
                                         </a>
                                     </h4>
 
+                                    <!-- Variant Info (if exists) -->
+                                    @if (!string.IsNullOrEmpty(variantName))
+                                    {
+                                        <div class="flash-sale-variant-info" style="background: #f0f0f0; padding: 0.5rem; border-radius: 6px; margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
+                                            <i class="bi bi-tag-fill me-1"></i>
+                                            <strong>@Localizer["Variant"]:</strong> @variantName
+                                        </div>
+                                    }
+
                                     <!-- Price Section -->
                                     <div class="flash-sale-price-section">
                                         <div class="flash-sale-prices">
-                                            <span class="flash-sale-normal-price">$@product.Price.ToString("N2")</span>
-                                            <span class="flash-sale-current-price">$@item.FlashSalePrice.ToString("N2")</span>
+                                            <span class="flash-sale-normal-price">@Html.Raw(currencySymbol) @originalPrice.ToString("N2")</span>
+                                            <span class="flash-sale-current-price">@Html.Raw(currencySymbol) @item.FlashSalePrice.ToString("N2")</span>
                                         </div>
                                         <div class="flash-sale-discount-badge">
-                                            @Localizer["SAVE"] $@((product.Price - (double)item.FlashSalePrice).ToString("N2"))
+                                            @Localizer["SAVE"] @Html.Raw(currencySymbol) @((originalPrice - (decimal)item.FlashSalePrice).ToString("N2"))
                                         </div>
                                     </div>
 
@@ -158,7 +192,7 @@ else
 
                                     <!-- Add to Cart Button -->
                                     <button type="button" 
-                                            onclick="addFlashSaleToCart(@item.Id, @product.Id, @item.FlashSalePrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture))" 
+                                            onclick="addFlashSaleToCart(@item.Id, @product.Id, @item.FlashSalePrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture), @(item.ProductVariantId?.ToString() ?? "null"))" 
                                             class="flash-sale-add-to-cart-btn"
                                             @(item.FlashSaleQuantity <= 0 ? "disabled" : "")>
                                         <i class="bi bi-cart-plus-fill me-2"></i>

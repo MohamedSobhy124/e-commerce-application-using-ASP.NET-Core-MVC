@@ -1,9 +1,15 @@
+@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
 @{
     ViewData["Title"] = Localizer["AddProductsToFlashSale"];
     Layout = "~/Views/Shared/_Layout.cshtml";
     var flashSale = ViewBag.FlashSale as FlashSale;
     var products = ViewBag.Products as List<SelectListItem>;
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
 }
+@inject BulkyBook.DataAccess.Repository.IRepository.IUnitOfWork _unitOfWork
 
 <div class="admin-wrapper">
     <div class="container-fluid">
@@ -34,7 +40,7 @@
 
                             <div class="row">
                                 <!-- Product Selection -->
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="productSelect" class="form-label fw-bold">
                                             <i class="bi bi-box-seam me-2"></i>@Localizer["SelectProduct"]
@@ -55,8 +61,25 @@
                                     </div>
                                 </div>
 
+                                <!-- Variant Selection (for Variable Products) -->
+                                <div class="col-md-3" id="variantSelectContainer" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="variantSelect" class="form-label fw-bold">
+                                            <i class="bi bi-list-check me-2"></i>@Localizer["SelectVariant"]
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <select id="variantSelect" class="form-select form-select-lg">
+                                            <option value="">-- @Localizer["SelectVariant"] --</option>
+                                        </select>
+                                        <div id="variantInfoBox" class="alert alert-warning mt-2" style="display: none;">
+                                            <strong>@Localizer["VariantPrice"]:</strong> <span id="variantPrice" class="badge bg-info"></span><br />
+                                            <strong>@Localizer["VariantStock"]:</strong> <span id="variantStock" class="badge bg-success"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Flash Sale Quantity -->
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="flashQuantity" class="form-label fw-bold">
                                             <i class="bi bi-hash me-2"></i>@Localizer["FlashSaleQuantity"]
@@ -71,7 +94,7 @@
                                 </div>
 
                                 <!-- Flash Sale Price -->
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="flashPrice" class="form-label fw-bold">
                                             <i class="bi bi-currency-dollar me-2"></i>@Localizer["FlashSalePrice"]
@@ -99,17 +122,19 @@
                 </div>
 
                 <!-- Current Products List -->
-                <div class="card">
-                    <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0">
-                            <i class="bi bi-list-ul me-2"></i>
-                            @Localizer["ProductsInFlashSale"]
-                            <span class="badge bg-light text-dark ms-2" id="productCount">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header text-white" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); border: none;">
+                        <h5 class="mb-0 d-flex align-items-center justify-content-between">
+                            <span>
+                                <i class="bi bi-list-ul me-2"></i>
+                                @Localizer["ProductsInFlashSale"]
+                            </span>
+                            <span class="badge bg-light text-dark px-3 py-2 fs-6" id="productCount">
                                 @(flashSale.FlashSaleItems?.Count ?? 0) @Localizer["Products"]
                             </span>
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-4">
                         @if (flashSale.FlashSaleItems == null || !flashSale.FlashSaleItems.Any())
                         {
                             <div id="emptyState" class="text-center py-5">
@@ -123,51 +148,73 @@
                             <div id="emptyState" style="display: none;"></div>
                         }
 
-                        <div id="productsContainer" class="row g-3">
+                        <div id="productsContainer" class="row g-4">
                             @if (flashSale.FlashSaleItems != null)
                             {
                                 foreach (var item in flashSale.FlashSaleItems)
                                 {
-                                    var discount = item.Product != null && item.Product.Price > 0 
-                                        ? Math.Round(((item.Product.Price - (double)item.FlashSalePrice) / item.Product.Price) * 100, 0)
+                                    var variant = item.ProductVariantId.HasValue 
+                                        ? _unitOfWork.ProductVariant.Get(v => v.Id == item.ProductVariantId.Value, includeProperties: "VariantOptionValues.OptionValue.ProductOption")
+                                        : null;
+                                    
+                                    var originalPrice = variant?.Price ?? (decimal)(item.Product?.Price ?? 0);
+                                    var discount = originalPrice > 0 
+                                        ? Math.Round(((double)originalPrice - (double)item.FlashSalePrice) / (double)originalPrice * 100, 0)
                                         : 0;
+                                    
+                                    string variantName = "";
+                                    if (variant != null && variant.VariantOptionValues != null)
+                                    {
+                                        var optionValues = variant.VariantOptionValues
+                                            .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                                            .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+                                            .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                                            .Where(s => !string.IsNullOrEmpty(s))
+                                            .ToList();
+                                        variantName = string.Join(" / ", optionValues);
+                                    }
 
                                     <div class="col-md-6 col-lg-4" id="product_@item.Id">
-                                        <div class="card flash-product-card">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <h5 class="card-title mb-0">@item.Product?.Title</h5>
-                                                    <button onclick="removeProduct(@item.Id)" class="btn btn-sm btn-danger">
+                                        <div class="card flash-product-card h-100 shadow-sm border-0" style="transition: all 0.3s; border-radius: 12px;">
+                                            <div class="card-body p-4">
+                                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                                    <h5 class="card-title mb-0 fw-bold text-primary">@item.Product?.Title</h5>
+                                                    <button onclick="removeProduct(@item.Id)" class="btn btn-sm btn-danger rounded-circle shadow-sm" style="width: 35px; height: 35px; padding: 0;">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </div>
+                                                
+                                                @if (!string.IsNullOrEmpty(variantName))
+                                                {
+                                                    <div class="mb-3 p-2 rounded" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #ff9800;">
+                                                        <small class="text-muted d-flex align-items-center">
+                                                            <i class="bi bi-tag-fill me-2 text-warning"></i>
+                                                            <strong>@Localizer["Variant"]:</strong>
+                                                            <span class="ms-2 fw-semibold text-dark">@variantName</span>
+                                                        </small>
+                                                    </div>
+                                                }
 
-                                                <div class="product-info mt-3">
-                                                    <div class="info-row">
-                                                        <span class="label">@Localizer["FlashSaleQuantity"]:</span>
-                                                        <span class="value">
-                                                            <span class="badge bg-primary">@item.FlashSaleQuantity @Localizer["units"]</span>
+                                                <div class="product-info">
+                                                    <div class="info-row d-flex justify-content-between align-items-center mb-2 p-2 rounded" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+                                                        <span class="label fw-semibold text-primary">@Localizer["FlashSaleQuantity"]:</span>
+                                                        <span class="badge bg-primary px-3 py-2">@item.FlashSaleQuantity @Localizer["units"]</span>
+                                                    </div>
+                                                    <div class="info-row d-flex justify-content-between align-items-center mb-2">
+                                                        <span class="label text-muted">@Localizer["NormalPrice"]:</span>
+                                                        <span class="value text-decoration-line-through text-muted fw-semibold">
+                                                            @Html.Raw(currencySymbol) @originalPrice.ToString("N2")
                                                         </span>
                                                     </div>
-                                                    <div class="info-row">
-                                                        <span class="label">@Localizer["NormalPrice"]:</span>
-                                                        <span class="value text-decoration-line-through text-muted">
-                                                            $@item.Product?.Price.ToString("N2")
+                                                    <div class="info-row d-flex justify-content-between align-items-center mb-2 p-2 rounded" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);">
+                                                        <span class="label fw-semibold text-danger">@Localizer["FlashSalePrice"]:</span>
+                                                        <span class="value fw-bold" style="color: #ef4444; font-size: 1.3rem;">
+                                                            @Html.Raw(currencySymbol) @item.FlashSalePrice.ToString("N2")
                                                         </span>
                                                     </div>
-                                                    <div class="info-row">
-                                                        <span class="label">@Localizer["FlashSalePrice"]:</span>
-                                                        <span class="value">
-                                                            <strong style="color: #ef4444; font-size: 1.2rem;">
-                                                                $@item.FlashSalePrice.ToString("N2")
-                                                            </strong>
-                                                        </span>
-                                                    </div>
-                                                    <div class="info-row">
-                                                        <span class="label">@Localizer["Discount"]:</span>
-                                                        <span class="value">
-                                                            <span class="badge bg-success">-@discount% @Localizer["OFF"]</span>
-                                                        </span>
+                                                    <div class="info-row d-flex justify-content-between align-items-center">
+                                                        <span class="label text-muted">@Localizer["Discount"]:</span>
+                                                        <span class="badge bg-success px-3 py-2 fs-6">-@discount% @Localizer["OFF"]</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -198,14 +245,28 @@
 
 @section Scripts {
     <script>
+        // Localizations for JavaScript
+        const localizations = {
+            selectVariant: '@Html.Raw(Localizer["SelectVariant"])',
+            variantPrice: '@Html.Raw(Localizer["VariantPrice"])',
+            variantStock: '@Html.Raw(Localizer["VariantStock"])',
+            stock: '@Html.Raw(Localizer["Stock"])',
+            units: '@Html.Raw(Localizer["units"])'
+        };
+
         let currentStockQty = 0;
         let currentPrice = 0;
+        let currentProductType = 0;
+        let selectedVariant = null;
 
         // Get product info when selected
         document.getElementById('productSelect').addEventListener('change', function() {
             const productId = this.value;
             if (!productId) {
                 document.getElementById('productInfoBox').style.display = 'none';
+                document.getElementById('variantSelectContainer').style.display = 'none';
+                document.getElementById('variantSelect').value = '';
+                selectedVariant = null;
                 return;
             }
 
@@ -213,19 +274,99 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        currentProductType = data.productType || 0;
                         currentStockQty = data.stockQuantity;
                         currentPrice = data.price;
 
                         document.getElementById('productName').textContent = data.title;
-                        document.getElementById('productStock').textContent = data.stockQuantity + ' @Localizer["units"]';
-                        document.getElementById('productPrice').textContent = '$' + data.price.toFixed(2);
+                        document.getElementById('productStock').textContent = data.stockQuantity ;
+                        document.getElementById('productPrice').textContent =  data.price.toFixed(2);
                         document.getElementById('productInfoBox').style.display = 'block';
+
+                        // If variable product, show variant dropdown
+                        if (currentProductType === 1 && data.variants && data.variants.length > 0) {
+                            const variantSelect = document.getElementById('variantSelect');
+                            variantSelect.innerHTML = '<option value="">-- ' + localizations.selectVariant + ' --</option>';
+                            data.variants.forEach(variant => {
+                                const option = document.createElement('option');
+                                // Format: "Size: L / Color: Red - AED 20.00 (Stock: 4)"
+                                const displayText = variant.name  + variant.price.toFixed(2) + ' (' + localizations.stock + ': ' + variant.stockQuantity + ')';
+                                option.value = variant.id;
+                                option.textContent = displayText;
+                                option.dataset.price = variant.price;
+                                option.dataset.stock = variant.stockQuantity;
+                                variantSelect.appendChild(option);
+                            });
+                            document.getElementById('variantSelectContainer').style.display = 'block';
+                            document.getElementById('variantInfoBox').style.display = 'none';
+                        } else {
+                            document.getElementById('variantSelectContainer').style.display = 'none';
+                            document.getElementById('variantSelect').value = '';
+                            selectedVariant = null;
+                        }
 
                         // Set max quantity
                         document.getElementById('flashQuantity').max = data.stockQuantity;
+                        updatePriceAndStock();
                     }
                 });
         });
+
+        // Handle variant selection
+        document.getElementById('variantSelect').addEventListener('change', function() {
+            const variantId = this.value;
+            if (!variantId) {
+                selectedVariant = null;
+                document.getElementById('variantInfoBox').style.display = 'none';
+                updatePriceAndStock();
+                return;
+            }
+
+            const option = this.options[this.selectedIndex];
+            selectedVariant = {
+                id: parseInt(variantId),
+                price: parseFloat(option.dataset.price),
+                stockQuantity: parseInt(option.dataset.stock)
+            };
+
+            document.getElementById('variantPrice').textContent =  selectedVariant.price.toFixed(2);
+            document.getElementById('variantStock').textContent = selectedVariant.stockQuantity + ' ' + localizations.units;
+            document.getElementById('variantInfoBox').style.display = 'block';
+            updatePriceAndStock();
+        });
+
+        function updatePriceAndStock() {
+            if (selectedVariant) {
+                currentPrice = selectedVariant.price;
+                currentStockQty = selectedVariant.stockQuantity;
+                document.getElementById('flashQuantity').max = selectedVariant.stockQuantity;
+            } else {
+                // Use product values
+                const productId = document.getElementById('productSelect').value;
+                if (productId) {
+                    fetch(`/Admin/FlashSale/GetProductInfo?productId=${productId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                currentPrice = data.price;
+                                currentStockQty = data.stockQuantity;
+                                document.getElementById('flashQuantity').max = data.stockQuantity;
+                            }
+                        });
+                }
+            }
+            // Update discount calculation
+            const flashPrice = parseFloat(document.getElementById('flashPrice').value);
+            if (flashPrice > 0 && currentPrice > 0) {
+                const discount = Math.round(((currentPrice - flashPrice) / currentPrice) * 100);
+                if (discount > 0) {
+                    document.getElementById('discountBadge').textContent = `-${discount}% @Localizer["OFF"]`;
+                    document.getElementById('discountInfo').style.display = 'block';
+                } else {
+                    document.getElementById('discountInfo').style.display = 'none';
+                }
+            }
+        }
 
         // Calculate discount when price changes
         document.getElementById('flashPrice').addEventListener('input', function() {
@@ -247,12 +388,17 @@
         function addProduct() {
             const flashSaleId = document.getElementById('flashSaleId').value;
             const productId = document.getElementById('productSelect').value;
+            const variantId = document.getElementById('variantSelect').value;
             const quantity = document.getElementById('flashQuantity').value;
             const price = document.getElementById('flashPrice').value;
 
             // Validation
             if (!productId) {
                 toastr.error('@Localizer["PleaseSelectProduct"]');
+                return;
+            }
+            if (currentProductType === 1 && !variantId) {
+                toastr.error('@Localizer["PleaseSelectVariant"]');
                 return;
             }
             if (!quantity || quantity <= 0) {
@@ -278,18 +424,23 @@
             });
 
             // Add product
+            const params = new URLSearchParams({
+                flashSaleId: flashSaleId,
+                productId: productId,
+                quantity: quantity,
+                price: price
+            });
+            if (variantId) {
+                params.append('productVariantId', variantId);
+            }
+
             fetch('/Admin/FlashSale/AddProductToSale', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
                 },
-                body: new URLSearchParams({
-                    flashSaleId: flashSaleId,
-                    productId: productId,
-                    quantity: quantity,
-                    price: price
-                })
+                body: params
             })
             .then(response => response.json())
             .then(data => {
@@ -356,5 +507,51 @@
             });
         }
     </script>
+    
+    <style>
+        /* Enhanced Design Styles */
+        .flash-product-card {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+        }
+        
+        .flash-product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        .form-select-lg, .form-control-lg {
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .form-select-lg:focus, .form-control-lg:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(123, 192, 67, 0.4);
+        }
+        
+        .info-row {
+            transition: background 0.3s;
+        }
+        
+        .alert {
+            border-radius: 8px;
+        }
+        
+        @@media (max-width: 768px) {
+            .row.g-3, .row.g-4 {
+                gap: 1rem !important;
+            }
+            
+            .col-md-3, .col-md-2 {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
 }
 

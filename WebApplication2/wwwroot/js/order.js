@@ -77,7 +77,8 @@ function loadDataTable(status) {
                 "width": "10%",
                 "render": function (data, type, row) {
                     const total = row.orderTotal || row.OrderTotal || 0;
-                    return `<strong style="color: #059669;">$${total.toFixed(2)}</strong>`;
+                    const currencySymbol = (typeof getCurrencySymbol === 'function' ? getCurrencySymbol() : (typeof getCurrentLanguage === 'function' && getCurrentLanguage() === 'ar' ? 'د.إ' : 'AED'));
+                    return `<strong style="color: #059669;">${currencySymbol} ${total.toFixed(2)}</strong>`;
                 }
             },
             { 

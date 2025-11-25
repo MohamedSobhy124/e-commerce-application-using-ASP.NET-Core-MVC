@@ -1,4 +1,6 @@
-﻿@model IEnumerable<Product>
+﻿@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
+@model IEnumerable<Product>
 @inject BulkyBook.DataAccess.Repository.IRepository.IUnitOfWork _unitOfWork
 
 @{
@@ -13,6 +15,11 @@
     var minPriceRange = ViewBag.MinPriceRange as decimal? ?? 0;
     var maxPriceRange = ViewBag.MaxPriceRange as decimal? ?? 1000;
     var totalProducts = ViewBag.TotalProducts as int? ?? 0;
+}
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
 }
 
 <!-- Hero Section -->
@@ -247,7 +254,7 @@
                                     }
                                     else
                                     {
-                                        <span>@bestOffer.DiscountValue.ToString("C") @Localizer["OFF"]</span>
+                                        <span>@Html.Raw(currencySymbol) @bestOffer.DiscountValue.ToString("N2") @Localizer["OFF"]</span>
                                     }
                                 </div>
                             }
@@ -287,12 +294,12 @@
                                     }
                                     decimal finalPrice = originalPrice - discount;
                                     
-                                    <span class="service-price-original">@originalPrice.ToString("C")</span>
-                                    <span class="service-price-final">@finalPrice.ToString("C")</span>
+                                    <span class="service-price-original">@Html.Raw(currencySymbol) @originalPrice.ToString("N2")</span>
+                                    <span class="service-price-final">@Html.Raw(currencySymbol) @finalPrice.ToString("N2")</span>
                                 }
                                 else
                                 {
-                                    <span class="service-price-final">@service.Price.ToString("C")</span>
+                                    <span class="service-price-final">@Html.Raw(currencySymbol) @service.Price.ToString("N2")</span>
                                 }
                             </div>
                             @if (service.ServiceType == BulkyBook.Models.ServiceType.Offline && service.OfflinePaymentPercent.HasValue)
@@ -300,7 +307,7 @@
                                 <div class="service-payment-info">
                                     <small>
                                         <i class="bi bi-info-circle"></i> 
-                                        @Localizer["PayPercentNow", service.OfflinePaymentPercent.Value, (service.Price * service.OfflinePaymentPercent.Value / 100).ToString("C")]
+                                        @Localizer["PayPercentNow", service.OfflinePaymentPercent.Value, currencySymbol + " " + (service.Price * service.OfflinePaymentPercent.Value / 100).ToString("N2")]
                                     </small>
                                 </div>
                             }
@@ -388,9 +395,9 @@
                                    value="@(maxPrice ?? maxPriceRange)" step="1" />
                         </div>
                         <div class="price-display">
-                            <span id="priceMinDisplay">@(minPrice?.ToString("C") ?? minPriceRange.ToString("C"))</span>
+                            <span id="priceMinDisplay">@Html.Raw(currencySymbol) @(minPrice?.ToString("N2") ?? minPriceRange.ToString("N2"))</span>
                             <span> - </span>
-                            <span id="priceMaxDisplay">@(maxPrice?.ToString("C") ?? maxPriceRange.ToString("C"))</span>
+                            <span id="priceMaxDisplay">@Html.Raw(currencySymbol) @(maxPrice?.ToString("N2") ?? maxPriceRange.ToString("N2"))</span>
                         </div>
                     </div>
                 </div>
@@ -540,27 +547,37 @@
             <!-- Price -->
             <div class="price-section">
                 <div class="price-wrapper">
-                    <span class="current-price">@Product.Price.ToString("c")</span>
+                    <span class="current-price">@Html.Raw(currencySymbol) @Product.Price.ToString("N2")</span>
                     @if (discount > 0)
                     {
-                        <span class="list-price">@Product.ListPrice.ToString("c")</span>
+                        <span class="list-price">@Html.Raw(currencySymbol) @Product.ListPrice.ToString("N2")</span>
                         <span class="discount-percent">@discount% @Localizer["OFF"]</span>
                     }
                 </div>
             </div>
             
-            <!-- Actions - View Details + Add to Cart -->
+            <!-- Actions - View Details + Add to Cart / Select Options -->
             <div class="product-actions">
                 <a asp-action="Details" asp-route-productId="@Product.Id" class="btn-view-details">
                     <i class="bi bi-eye"></i>
                     @Localizer["ViewDetails"]
                 </a>
-                <button class="btn-add-cart-quick @(isInCart ? "in-cart" : "")" 
-                        data-product-id="@Product.Id"
-                        onclick="toggleCart(@Product.Id, this)" 
-                        title="@(isInCart ? "In Cart" : "Add to Cart")">
-                    <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart-plus")"></i>
-                </button>
+                @if (Product.ProductType == BulkyBook.Models.ProductType.Variable)
+                {
+                    <a asp-action="Details" asp-route-productId="@Product.Id" class="btn-select-options">
+                        <i class="bi bi-list-check"></i>
+                        @Localizer["SelectOptions"]
+                    </a>
+                }
+                else
+                {
+                    <button class="btn-add-cart-quick @(isInCart ? "in-cart" : "")" 
+                            data-product-id="@Product.Id"
+                            onclick="toggleCart(@Product.Id, this)" 
+                            title="@(isInCart ? "In Cart" : "Add to Cart")">
+                        <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart-plus")"></i>
+                    </button>
+                }
             </div>
         </div>
     </div>
@@ -1018,7 +1035,7 @@
     <div class="cart-footer">
         <div class="cart-subtotal">
             <span>@Localizer["Subtotal"]:</span>
-            <span id="cartSubtotal" class="cart-subtotal-amount">AED 0.00</span>
+            <span id="cartSubtotal" class="cart-subtotal-amount">@Html.Raw(currencySymbol) 0.00</span>
         </div>
         <a href="/Customer/Cart/Summary" class="btn btn-checkout w-100">
             <i class="bi bi-lock-fill me-2"></i>@Localizer["Checkout"]
@@ -1099,6 +1116,11 @@
 -->
 @section Scripts {
     <script>
+        // Localizations for JavaScript
+        const localizations = {
+            selectOptions: '@Html.Raw(Localizer["SelectOptions"])'
+        };
+
         // Newsletter Form Handler - Fully Implemented
         document.getElementById('newsletterForm')?.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -1283,11 +1305,9 @@
         });
 
         // Function to format currency
+        const currencySymbol = '@Html.Raw(currencySymbol)';
         function formatCurrency(value) {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-            }).format(value);
+            return currencySymbol + ' ' + value.toFixed(2);
         }
 
         // Function to update cart widget using AJAX
@@ -1428,7 +1448,7 @@
                     } else {
                         container.innerHTML = '<div class="cart-empty"><i class="bi bi-cart-x"></i><p>@Localizer["YourCartIsEmpty"]</p></div>';
                         countElement.textContent = '0';
-                        subtotalElement.textContent = 'AED 0.00';
+                        subtotalElement.textContent = currencySymbol + ' 0.00';
                         
                         // Update floating cart badge
                         updateFloatingCartBadge(0);
@@ -1737,12 +1757,18 @@
                                 <i class="bi bi-eye"></i>
                                 @Localizer["ViewDetails"]
                             </a>
-                            <button class="btn-add-cart-quick ${cartClass}" 
+                            ${(product.productType === 1 || product.productType === 'Variable')
+                                ? `<a href="/Customer/Home/Details?productId=${product.id}" class="btn-select-options">
+                                    <i class="bi bi-list-check"></i>
+                                    ${localizations.selectOptions}
+                                   </a>`
+                                : `<button class="btn-add-cart-quick ${cartClass}" 
                                     data-product-id="${product.id}"
                                     onclick="toggleCart(${product.id}, this)" 
                                     title="${isInCart ? 'In Cart' : 'Add to Cart'}">
-                                <i class="bi ${cartIcon}"></i>
-                            </button>
+                                    <i class="bi ${cartIcon}"></i>
+                                   </button>`
+                            }
                         </div>
                     </div>
                 </div>
@@ -1921,13 +1947,13 @@
                 priceRangeMin.addEventListener('input', function() {
                     const value = parseFloat(this.value);
                     if (priceMinInput) priceMinInput.value = value.toFixed(2);
-                    if (priceMinDisplay) priceMinDisplay.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AED' }).format(value);
+                    if (priceMinDisplay) priceMinDisplay.textContent = currencySymbol + ' ' + value.toFixed(2);
                 });
                 
                 priceRangeMax.addEventListener('input', function() {
                     const value = parseFloat(this.value);
                     if (priceMaxInput) priceMaxInput.value = value.toFixed(2);
-                    if (priceMaxDisplay) priceMaxDisplay.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AED' }).format(value);
+                    if (priceMaxDisplay) priceMaxDisplay.textContent = currencySymbol + ' ' + value.toFixed(2);
                 });
                 
                 // Update sliders when inputs change
@@ -1935,7 +1961,7 @@
                     priceMinInput.addEventListener('input', function() {
                         const value = Math.max(minPrice, Math.min(maxPrice, parseFloat(this.value) || minPrice));
                         priceRangeMin.value = value;
-                        if (priceMinDisplay) priceMinDisplay.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AED' }).format(value);
+                        if (priceMinDisplay) priceMinDisplay.textContent = currencySymbol + ' ' + value.toFixed(2);
                     });
                 }
                 
@@ -1943,7 +1969,7 @@
                     priceMaxInput.addEventListener('input', function() {
                         const value = Math.max(minPrice, Math.min(maxPrice, parseFloat(this.value) || maxPrice));
                         priceRangeMax.value = value;
-                        if (priceMaxDisplay) priceMaxDisplay.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AED' }).format(value);
+                        if (priceMaxDisplay) priceMaxDisplay.textContent = currencySymbol + ' ' + value.toFixed(2);
                     });
                 }
             }
@@ -2121,6 +2147,8 @@
                     ? Math.floor((item.listPrice - item.price) / item.listPrice * 100) 
                     : 0;
                 
+                const isVariable = item.productType === 1 || item.productType === 'Variable';
+                
                 return `
                     <div class="wishlist-item" data-product-id="${item.productId}">
                         <img src="${item.imageUrl}" alt="${item.title}" class="wishlist-item-image">
@@ -2134,9 +2162,14 @@
                                 }
                             </div>
                             <div class="wishlist-item-actions">
-                                <button class="btn btn-add-cart-from-wishlist" onclick="addToCartFromWishlist(${item.productId}, ${item.id})" title="Add to Cart">
-                                    <i class="bi bi-cart-plus me-1"></i>@Localizer["AddToCart"]
-                                </button>
+                                ${isVariable
+                                    ? `<a href="/Customer/Home/Details?productId=${item.productId}" class="btn btn-select-options-from-wishlist" title="Select Options">
+                                        <i class="bi bi-list-check me-1"></i>${localizations.selectOptions}
+                                       </a>`
+                                    : `<button class="btn btn-add-cart-from-wishlist" onclick="addToCartFromWishlist(${item.productId}, ${item.id})" title="Add to Cart">
+                                        <i class="bi bi-cart-plus me-1"></i>@Localizer["AddToCart"]
+                                       </button>`
+                                }
                                 <button class="btn btn-remove-wishlist" onclick="removeFromWishlist(${item.id}, ${item.productId})" title="Remove">
                                     <i class="bi bi-trash"></i>
                                 </button>

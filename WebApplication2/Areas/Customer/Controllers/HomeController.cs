@@ -1,8 +1,10 @@
 ﻿using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.DataAccess.Data;
 using BulkyBook.Models;
 using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System.Diagnostics;
 using System.Security.Claims;
@@ -16,12 +18,14 @@ namespace BulkyBook.Areas.Customer.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStringLocalizer<BulkyBook.SharedResources> _localizer;
+        private readonly ApplicationDBContext _dbContext;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IStringLocalizer<BulkyBook.SharedResources> localizer)
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IStringLocalizer<BulkyBook.SharedResources> localizer, ApplicationDBContext dbContext)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _localizer = localizer;
+            _dbContext = dbContext;
         }
 
         [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" })]
@@ -111,7 +115,6 @@ namespace BulkyBook.Areas.Customer.Controllers
                 var searchLower = searchTerm.ToLower();
                 query = query.Where(p => 
                     p.Title.ToLower().Contains(searchLower) || 
-                    p.Author.ToLower().Contains(searchLower) || 
                     (p.Description != null && p.Description.ToLower().Contains(searchLower)));
             }
             
@@ -239,7 +242,6 @@ namespace BulkyBook.Areas.Customer.Controllers
                 var searchLower = searchTerm.ToLower();
                 query = query.Where(p => 
                     p.Title.ToLower().Contains(searchLower) || 
-                    p.Author.ToLower().Contains(searchLower) || 
                     (p.Description != null && p.Description.ToLower().Contains(searchLower)));
             }
             
@@ -550,7 +552,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                     title = item.product.Title,
                     imageUrl = item.product.ProductImages?.FirstOrDefault()?.ImageUrl ?? item.product.ImageUrl ?? "/images/no-image.png",
                     price = (double)item.product.Price,
-                    listPrice = item.product.ListPrice > 0 ? (double?)item.product.ListPrice : null
+                    listPrice = item.product.ListPrice > 0 ? (double?)item.product.ListPrice : null,
+                    productType = (int)item.product.ProductType
                 }).ToList();
 
                 return Json(new { success = true, items = items, count = items.Count });
@@ -626,8 +629,8 @@ namespace BulkyBook.Areas.Customer.Controllers
             var hasPurchased = false;
             try
             {
-                var claimsIdentity = (ClaimsIdentity)User.Identity;
-                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+                var claimsIdentity = (ClaimsIdentity)User?.Identity!;
+                var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 hasPurchased = _unitOfWork.OrderDetail.GetAll(
                     od => od.ProductId == productId,
                     includeProperties: "OrderHeader"
@@ -641,19 +644,44 @@ namespace BulkyBook.Areas.Customer.Controllers
                 hasPurchased = false;
             }
 
+            var product = _unitOfWork.product.Get(U => U.Id == productId, includeProperties: "categry,ProductImages,ProductOptions,ProductVariants");
+            
+            // Load option values for each option
+            if (product.ProductOptions != null)
+            {
+                foreach (var option in product.ProductOptions)
+                {
+                    option.OptionValues = _unitOfWork.ProductOptionValue.GetAll(
+                        ov => ov.ProductOptionId == option.Id
+                    ).OrderBy(ov => ov.DisplayOrder).ToList();
+                }
+            }
+            
+            // Load variant option values for each variant
+            if (product.ProductVariants != null)
+            {
+                foreach (var variant in product.ProductVariants)
+                {
+                    variant.VariantOptionValues = _dbContext.ProductVariantOptionValues
+                        .Include(vov => vov.OptionValue)
+                            .ThenInclude(ov => ov.ProductOption)
+                        .Where(vov => vov.ProductVariantId == variant.Id)
+                        .ToList();
+                }
+            }
+            
             ShoppingCart cart = new()
             {
-                product = _unitOfWork.product.Get(U => U.Id == productId, includeProperties: "categry,ProductImages"),
+                product = product,
                 Count=1,
                 ProductId=productId,
                 CanReview= hasPurchased
-
             };
         
             return View(cart);
         }
         [HttpPost]
-        public IActionResult Details(ShoppingCart shoppingCart)
+        public IActionResult Details(ShoppingCart shoppingCart, int? ProductVariantId)
         {
             if (User.Identity.IsAuthenticated)
             {
@@ -661,8 +689,32 @@ namespace BulkyBook.Areas.Customer.Controllers
                 var claimsIdentity=(ClaimsIdentity)User.Identity;
                 var UserId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
                 shoppingCart.ApplicationUserId = UserId;
+                
+                // Handle variant if provided
+                if (ProductVariantId.HasValue && ProductVariantId.Value > 0)
+                {
+                    shoppingCart.ProductVariantId = ProductVariantId.Value;
+                    
+                    // Get variant to check stock
+                    var variant = _unitOfWork.ProductVariant.Get(v => v.Id == ProductVariantId.Value);
+                    if (variant == null)
+                    {
+                        TempData["error"] = "Selected variant not found.";
+                        return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
+                    }
+                    
+                    if (variant.StockQuantity < shoppingCart.Count)
+                    {
+                        TempData["error"] = $"Only {variant.StockQuantity} units available in stock.";
+                        return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
+                    }
+                }
 
-                ShoppingCart shoppingCartFromDB = _unitOfWork.shoppingCart.Get(a => a.ProductId == shoppingCart.ProductId && a.ApplicationUserId == UserId);
+                // Check if item already in cart (considering variant)
+                ShoppingCart shoppingCartFromDB = _unitOfWork.shoppingCart.Get(
+                    a => a.ProductId == shoppingCart.ProductId && 
+                         a.ApplicationUserId == UserId &&
+                         a.ProductVariantId == shoppingCart.ProductVariantId);
 
                 if(shoppingCartFromDB != null)
                 {
@@ -679,7 +731,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             else
             {
                 // Guest user - use session
-                BulkyBook.Utility.GuestCartHelper.AddToCart(HttpContext.Session, shoppingCart.ProductId, shoppingCart.Count);
+                BulkyBook.Utility.GuestCartHelper.AddToCart(HttpContext.Session, shoppingCart.ProductId, shoppingCart.Count, shoppingCart.ProductVariantId);
             }
 
             TempData["success"] = "Cart Updated Successfully";

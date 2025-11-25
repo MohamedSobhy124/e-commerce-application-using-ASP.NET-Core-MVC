@@ -243,13 +243,21 @@ function openCartSidebar() {
         console.error('Cart sidebar or overlay not found!');
     }
 }
+// Helper function to get currency symbol based on language
+function getCurrencySymbol() {
+    // Try to get from cookie if language-switcher.js is loaded
+    if (typeof getCurrentLanguage === 'function') {
+        const lang = getCurrentLanguage();
+        return lang === 'ar' ? 'د.إ' : 'AED';
+    }
+    // Default to Arabic if we can't determine
+    return 'د.إ';
+}
+
 // Helper function to format currency
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-AE', {
-        style: 'currency',
-        currency: 'AED',
-        minimumFractionDigits: 2
-    }).format(amount);
+    const symbol = getCurrencySymbol();
+    return symbol + ' ' + amount.toFixed(2);
 }
 
 // Helper function to get product image URL (handles null/empty images)

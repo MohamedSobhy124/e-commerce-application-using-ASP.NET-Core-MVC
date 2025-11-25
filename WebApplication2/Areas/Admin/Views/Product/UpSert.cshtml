@@ -11,12 +11,13 @@
             <div class="admin-form-header">
                 <h2 class="admin-form-title">
                     <i class="bi bi-@(Model.product.Id != 0 ? "pencil-square" : "plus-circle") me-3"></i>
-                    @(Model.product.Id != 0 ? "Update" : "Create") Product
+                    @(Model.product.Id != 0 ? Localizer["Update"] : Localizer["Create"]) @Localizer["Product"]
                 </h2>
             </div>
 
             <div class="admin-form-body">
-                <form asp-action="UpSert" enctype="multipart/form-data">
+                <form asp-action="UpSert" enctype="multipart/form-data" id="productForm">
+                    @Html.AntiForgeryToken()
                     <input hidden asp-for="product.Id" />
                     <input hidden asp-for="product.ImageUrl" />
 
@@ -27,47 +28,25 @@
 
                                 <div class="admin-form-group">
                                     <label asp-for="product.Title" class="admin-form-label">
-                                        <i class="bi bi-card-heading me-2"></i>Title
+                                        <i class="bi bi-card-heading me-2"></i>@Localizer["Title"]
                                     </label>
-                                    <input asp-for="product.Title" class="admin-form-control" placeholder="Enter product title" />
+                                    <input asp-for="product.Title" class="admin-form-control" placeholder="@Localizer["EnterProductTitle"]" />
                                     <span asp-validation-for="product.Title" class="text-danger"></span>
                                 </div>
 
                                 <div class="admin-form-group">
                                     <label asp-for="product.Description" class="admin-form-label">
-                                        <i class="bi bi-text-paragraph me-2"></i>Description
+                                        <i class="bi bi-text-paragraph me-2"></i>@Localizer["Description"]
                                     </label>
-                                    <textarea asp-for="product.Description" class="admin-form-control" rows="4" placeholder="Enter product description"></textarea>
+                                    <textarea asp-for="product.Description" class="admin-form-control" rows="4" placeholder="@Localizer["EnterProductDescription"]"></textarea>
                                     <span asp-validation-for="product.Description" class="text-danger"></span>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="admin-form-group">
-                                            <label asp-for="product.ISBN" class="admin-form-label">
-                                                <i class="bi bi-upc me-2"></i>ISBN
-                                            </label>
-                                            <input asp-for="product.ISBN" class="admin-form-control" placeholder="Enter ISBN" />
-                                            <span asp-validation-for="product.ISBN" class="text-danger"></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="admin-form-group">
-                                            <label asp-for="product.Author" class="admin-form-label">
-                                                <i class="bi bi-person me-2"></i>Author
-                                            </label>
-                                            <input asp-for="product.Author" class="admin-form-control" placeholder="Enter author name" />
-                                            <span asp-validation-for="product.Author" class="text-danger"></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="admin-form-group">
                                             <label asp-for="product.ListPrice" class="admin-form-label">
-                                                <i class="bi bi-tag me-2"></i>List Price
+                                                <i class="bi bi-tag me-2"></i>@Localizer["ListPrice"]
                                             </label>
                                             <input asp-for="product.ListPrice" class="admin-form-control" type="number" step="0.01" placeholder="0.00" />
                                             <span asp-validation-for="product.ListPrice" class="text-danger"></span>
@@ -77,7 +56,7 @@
                                     <div class="col-md-6">
                                         <div class="admin-form-group">
                                             <label asp-for="product.Price" class="admin-form-label">
-                                                <i class="bi bi-currency-dollar me-2"></i>Price
+                                                <i class="bi bi-currency-dollar me-2"></i>@Localizer["Price"]
                                             </label>
                                             <input asp-for="product.Price" class="admin-form-control" type="number" step="0.01" placeholder="0.00" />
                                             <span asp-validation-for="product.Price" class="text-danger"></span>
@@ -85,32 +64,10 @@
                                     </div>
                                 </div>
 
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="admin-form-group">
-                                            <label asp-for="product.Price50" class="admin-form-label">
-                                                <i class="bi bi-currency-dollar me-2"></i>Price for 50+
-                                            </label>
-                                            <input asp-for="product.Price50" class="admin-form-control" type="number" step="0.01" placeholder="0.00" />
-                                            <span asp-validation-for="product.Price50" class="text-danger"></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="admin-form-group">
-                                            <label asp-for="product.Price100" class="admin-form-label">
-                                                <i class="bi bi-currency-dollar me-2"></i>Price for 100+
-                                            </label>
-                                            <input asp-for="product.Price100" class="admin-form-control" type="number" step="0.01" placeholder="0.00" />
-                                            <span asp-validation-for="product.Price100" class="text-danger"></span>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <!-- Stock Management Section -->
                                 <div class="admin-form-section-title" style="margin-top: 2rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb;">
                                     <h4 style="color: #3B9DD5; font-weight: 700;">
-                                        <i class="bi bi-box-seam me-2"></i>Stock Management
+                                        <i class="bi bi-box-seam me-2"></i>@Localizer["StockManagement"]
                                     </h4>
                                 </div>
 
@@ -118,12 +75,12 @@
                                     <div class="col-md-6">
                                         <div class="admin-form-group">
                                             <label asp-for="product.StockQuantity" class="admin-form-label">
-                                                <i class="bi bi-boxes me-2"></i>Stock Quantity
+                                                <i class="bi bi-boxes me-2"></i>@Localizer["StockQuantity"]
                                             </label>
-                                            <input asp-for="product.StockQuantity" class="admin-form-control" type="number" min="0" placeholder="Enter available stock" />
+                                            <input asp-for="product.StockQuantity" class="admin-form-control" type="number" min="0" placeholder="@Localizer["EnterAvailableStock"]" />
                                             <span asp-validation-for="product.StockQuantity" class="text-danger"></span>
                                             <small class="form-text text-muted">
-                                                <i class="bi bi-info-circle me-1"></i>Current quantity in stock
+                                                <i class="bi bi-info-circle me-1"></i>@Localizer["CurrentQuantityInStock"]
                                             </small>
                                         </div>
                                     </div>
@@ -131,12 +88,12 @@
                                     <div class="col-md-6">
                                         <div class="admin-form-group">
                                             <label asp-for="product.MinimumStockAlert" class="admin-form-label">
-                                                <i class="bi bi-exclamation-triangle me-2"></i>Low Stock Alert Level
+                                                <i class="bi bi-exclamation-triangle me-2"></i>@Localizer["LowStockAlertLevel"]
                                             </label>
-                                            <input asp-for="product.MinimumStockAlert" class="admin-form-control" type="number" min="0" placeholder="Set alert threshold" />
+                                            <input asp-for="product.MinimumStockAlert" class="admin-form-control" type="number" min="0" placeholder="@Localizer["SetAlertThreshold"]" />
                                             <span asp-validation-for="product.MinimumStockAlert" class="text-danger"></span>
                                             <small class="form-text text-muted">
-                                                <i class="bi bi-info-circle me-1"></i>Show warning when stock falls to this level
+                                                <i class="bi bi-info-circle me-1"></i>@Localizer["ShowWarningWhenStockFalls"]
                                             </small>
                                         </div>
                                     </div>
@@ -144,32 +101,187 @@
 
                                 <div class="admin-form-group">
                                     <label asp-for="product.CategryId" class="admin-form-label">
-                                        <i class="bi bi-folder me-2"></i>Category
+                                        <i class="bi bi-folder me-2"></i>@Localizer["Category"]
                                     </label>
                                     <select asp-for="product.CategryId" asp-items="@Model.CategryList" class="admin-form-select">
-                                        <option disabled selected>--- Select Category ---</option>
+                                        <option disabled selected>--- @Localizer["SelectCategory"] ---</option>
                                     </select>
                                     <span asp-validation-for="product.CategryId" class="text-danger"></span>
                                 </div>
 
+                                <!-- Product Type & Variant Management Section -->
+                                <div class="variant-management-wrapper">
+                                    <div class="admin-form-section-title">
+                                        <h4 class="section-title">
+                                            <i class="bi bi-layers-fill me-2"></i>
+                                            @Localizer["ProductTypeAndVariants"]
+                                        </h4>
+                                        <p class="section-subtitle">@Localizer["ConfigureProductVariantsDescription"]</p>
+                                    </div>
+
+                                    <!-- Step-by-Step Wizard -->
+                                    <div class="variant-wizard">
+                                        <!-- Step 1: Choose Product Type -->
+                                        <div class="wizard-step" id="step1">
+                                            <div class="step-header">
+                                                <div class="step-number active">1</div>
+                                                <div class="step-content">
+                                                    <h5 class="step-title">
+                                                        <i class="bi bi-diagram-3-fill me-2"></i>
+                                                        @Localizer["Step1Title"]
+                                                    </h5>
+                                                    <p class="step-description">@Localizer["Step1Description"]</p>
+                                                </div>
+                                            </div>
+                                            <div class="step-body">
+                                                <div class="admin-form-group">
+                                                    <label asp-for="product.ProductType" class="admin-form-label">
+                                                        <i class="bi bi-diagram-3-fill me-2"></i>
+                                                        @Localizer["ProductType"]
+                                                    </label>
+                                                    <select asp-for="product.ProductType" class="admin-form-select product-type-select" id="productTypeSelect" onchange="toggleVariantSection()">
+                                                        <option value="0">@Localizer["SimpleProduct"]</option>
+                                                        <option value="1">@Localizer["VariableProduct"]</option>
+                                                    </select>
+                                                    <span asp-validation-for="product.ProductType" class="text-danger"></span>
+                                                    <div class="form-help-text">
+                                                        <i class="bi bi-info-circle-fill me-1"></i>
+                                                        <span>@Localizer["ProductTypeHelp"]</span>
+                                                    </div>
+                                                </div>
+                                                <div class="step-actions" id="step1Actions" style="display: none;">
+                                                    <button type="button" class="btn btn-primary btn-save-step" onclick="saveStep1()">
+                                                        <i class="bi bi-check-circle me-2"></i>
+                                                        @Localizer["SaveStep"]
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 2: Add Options (shown only for Variable products) -->
+                                        <div id="variantManagementSection" class="variant-management-card" style="display: none;">
+                                            <div class="wizard-step" id="step2">
+                                                <div class="step-header">
+                                                    <div class="step-number" id="step2Number">2</div>
+                                                    <div class="step-content">
+                                                        <h5 class="step-title">
+                                                            <i class="bi bi-list-ul-fill me-2"></i>
+                                                            @Localizer["Step2Title"]
+                                                        </h5>
+                                                        <p class="step-description">@Localizer["Step2Description"]</p>
+                                                    </div>
+                                                </div>
+                                                <div class="step-body">
+                                                    <div id="optionsContainer" class="options-container">
+                                                        <div class="options-header">
+                                                            <button type="button" class="btn btn-primary btn-add-option" onclick="addNewOption()" id="addOptionBtn" style="display: none;">
+                                                                <i class="bi bi-plus-circle-fill me-2"></i>
+                                                                @Localizer["AddOption"]
+                                                            </button>
+                                                        </div>
+                                                        <div id="optionsList" class="options-list"></div>
+                                                    </div>
+                                                   @*  <div class="step-actions">
+                                                        <button type="button" class="btn btn-primary btn-save-step" onclick="saveStep2()" id="saveStep2Btn" style="display: none;">
+                                                            <i class="bi bi-check-circle me-2"></i>
+                                                            @Localizer["SaveStep"]
+                                                        </button>
+                                                    </div> *@
+                                                </div>
+                                            </div>
+
+                                            <!-- Step 3: Generate Variants -->
+                                            <div class="wizard-step" id="step3" style="display: none;">
+                                                <div class="step-header">
+                                                    <div class="step-number" id="step3Number">3</div>
+                                                    <div class="step-content">
+                                                        <h5 class="step-title">
+                                                            <i class="bi bi-magic me-2"></i>
+                                                            @Localizer["Step4Title"]
+                                                        </h5>
+                                                        <p class="step-description">@Localizer["Step4Description"]</p>
+                                                    </div>
+                                                </div>
+                                                <div class="step-body">
+                                                    <div class="generate-variants-section">
+                                                        <button type="button" class="btn btn-success btn-lg btn-generate-variants" onclick="generateVariants()" id="generateVariantsBtn" style="display: none;">
+                                                            <i class="bi bi-arrow-repeat me-2"></i>
+                                                            @Localizer["GenerateVariants"]
+                                                        </button>
+                                                        <div class="step-info-box mt-3">
+                                                            <i class="bi bi-info-circle-fill me-2"></i>
+                                                            <span>@Localizer["Step4Info"]</span>
+                                                        </div>
+                                                    </div>
+                                                  @*   <div class="step-actions">
+                                                        <button type="button" class="btn btn-primary btn-save-step" onclick="saveStep3()" id="saveStep3Btn" style="display: none;">
+                                                            <i class="bi bi-check-circle me-2"></i>
+                                                            @Localizer["SaveStep"]
+                                                        </button>
+                                                    </div> *@
+                                                </div>
+                                            </div>
+
+                                            <!-- Step 4: Edit Variants -->
+                                            <div class="wizard-step" id="step4" style="display: none;">
+                                                <div class="step-header">
+                                                    <div class="step-number completed" id="step4Number">4</div>
+                                                    <div class="step-content">
+                                                        <h5 class="step-title">
+                                                            <i class="bi bi-pencil-square me-2"></i>
+                                                            @Localizer["Step5Title"]
+                                                        </h5>
+                                                        <p class="step-description">@Localizer["Step5Description"]</p>
+                                                    </div>
+                                                </div>
+                                                <div class="step-body">
+                                                    <div id="variantsContainer" class="variants-container">
+                                                        <div id="variantsTableContainer" class="variants-table-wrapper">
+                                                            <table class="table table-variants" id="variantsTable" style="display: none;">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th><i class="bi bi-tag-fill me-1"></i>@Localizer["Variant"]</th>
+                                                                        <th><i class="bi bi-currency-dollar me-1"></i>@Localizer["Price"]</th>
+                                                                        <th><i class="bi bi-tag me-1"></i>@Localizer["ListPrice"]</th>
+                                                                        <th><i class="bi bi-box-seam me-1"></i>@Localizer["Stock"]</th>
+                                                                        <th><i class="bi bi-exclamation-triangle me-1"></i>@Localizer["MinStockAlert"]</th>
+                                                                        <th><i class="bi bi-image me-1"></i>@Localizer["Image"]</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="variantsTableBody"></tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <div class="step-actions">
+                                                        <button type="button" class="btn btn-primary btn-save-step" onclick="saveStep4()" id="saveStep4Btn" style="display: none;">
+                                                            <i class="bi bi-check-circle me-2"></i>
+                                                            @Localizer["SaveStep"]
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                 <div class="form-actions">
                                     @if (Model.product.Id != 0)
                                     {
-                                        <button type="submit" class="btn btn-submit">
+                                        <button type="button" class="btn btn-submit" onclick="saveMainProduct(); return false;" id="saveProductBtn">
                                             <i class="bi bi-check-circle me-2"></i>
-                                            Update Product
+                                            @Localizer["Update"] @Localizer["Product"]
                                         </button>
                                     }
                                     else
                                     {
-                                        <button type="submit" class="btn btn-submit">
+                                        <button type="button" class="btn btn-submit" onclick="saveMainProduct(); return false;" id="saveProductBtn">
                                             <i class="bi bi-plus-circle me-2"></i>
-                                            Create Product
+                                            @Localizer["Create"] @Localizer["Product"]
                                         </button>
                                     }
                                     <a asp-action="Index" class="btn btn-back">
                                         <i class="bi bi-arrow-left me-2"></i>
-                                        Back to List
+                                        @Localizer["BackToList"]
                                     </a>
                                 </div>
                             </div>
@@ -178,7 +290,7 @@
                         <div class="col-lg-3 col-md-4">
                             <div class="image-upload-wrapper">
                                 <h5 class="mb-3" style="color: #1976D2; font-weight: 700;">
-                                    <i class="bi bi-images me-2"></i>Product Images
+                                    <i class="bi bi-images me-2"></i>@Localizer["ProductImages"]
                                 </h5>
                                 
                                 <!-- Upload Multiple Images -->
@@ -186,8 +298,8 @@
                                     <span class="upload-icon">
                                         <i class="bi bi-cloud-upload" style="font-size: 1.5rem;"></i>
                                     </span>
-                                    <span style="display: block; margin-top: 0.5rem; font-weight: 600;">Upload Images</span>
-                                    <small style="display: block; margin-top: 0.25rem; opacity: 0.9;">(At least 1 required)</small>
+                                    <span style="display: block; margin-top: 0.5rem; font-weight: 600;">@Localizer["UploadImages"]</span>
+                                    <small style="display: block; margin-top: 0.25rem; opacity: 0.9;">(@Localizer["AtLeastOneRequired"])</small>
                                     <input id="files-input" type="file" name="files" class="file-input" accept="image/*" multiple style="display: none;" />
                                 </label>
 
@@ -199,7 +311,7 @@
                                         {
                                             <div class="image-item" data-image-id="@image.Id">
                                                 <img src="@image.ImageUrl" alt="Product Image" class="gallery-image" />
-                                                <button type="button" class="delete-image-btn" onclick="deleteImage(@image.Id, this)" title="Delete Image">
+                                                <button type="button" class="delete-image-btn" onclick="deleteImage(@image.Id, this)" title="@Localizer["DeleteImage"]">
                                                     <i class="bi bi-x-circle-fill"></i>
                                                 </button>
                                             </div>
@@ -227,6 +339,1152 @@
 
 @section scripts{
     <script>
+        let productId = @(Model.product.Id);
+        let options = @Html.Raw(Json.Serialize(Model.product.ProductOptions?.Select(o => new {
+            Id = o.Id,
+            Name = o.Name,
+            DisplayOrder = o.DisplayOrder,
+            Values = o.OptionValues?.Select(v => new { Id = v.Id, Value = v.Value, DisplayOrder = v.DisplayOrder })  
+        })  ));
+        let variants = @Html.Raw(Json.Serialize(Model.product.ProductVariants?.Select(v => new {
+            Id = v.Id,
+            Price = v.Price,
+            ListPrice = v.ListPrice,
+            StockQuantity = v.StockQuantity,
+            MinimumStockAlert = v.MinimumStockAlert,
+            ImageUrl = v.ImageUrl,
+            VariantName = v.VariantName
+        })  ));
+
+        // Initialize on page load
+        // Prevent form submission completely
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('productForm') || document.querySelector('form');
+            if (form) {
+                // Remove any existing onsubmit handlers
+                form.onsubmit = null;
+                
+                // Add event listener to prevent all form submissions
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    console.log('Form submission prevented');
+                    return false;
+                }, true); // Use capture phase to catch early
+                
+                // Also prevent Enter key from submitting
+                form.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                        const target = e.target;
+                        if (target.type === 'submit' || target.type === 'button') {
+                            return; // Let button handle it
+                        }
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+                
+                // Prevent save button from submitting form
+                const saveBtn = document.getElementById('saveProductBtn');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        console.log('Save button click - preventing default');
+                        try {
+                            saveMainProduct();
+                        } catch (error) {
+                            console.error('Error in saveMainProduct:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'An error occurred. Please try again.'
+                            });
+                        }
+                        return false;
+                    }, true); // Use capture phase
+                }
+            }
+            
+            // Initialize Step 1 as active
+            const step1Number = document.querySelector('#step1 .step-number');
+            if (step1Number) {
+                step1Number.classList.add('active');
+            }
+            
+            // Show Step 1 save button only if product already exists
+            if (productId > 0) {
+                const step1Actions = document.getElementById('step1Actions');
+                if (step1Actions) step1Actions.style.display = 'block';
+                
+                loadOptions();
+                fetch(`/Admin/Product/GetProductVariants?productId=${productId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.variants) {
+                            variants = data.variants;
+                            if (variants && variants.length > 0) {
+                                renderVariants();
+                            } else {
+                                document.getElementById('variantsContainer').style.display = 'block';
+                            }
+                            updateStepProgress();
+                        }
+                    })
+                    .catch(error => console.error('Error loading variants:', error));
+                
+                // Check product type on load
+                const productType = document.getElementById('productTypeSelect').value;
+                if (productType === '1') {
+                    toggleVariantSection();
+                }
+            }
+        });
+
+        function toggleVariantSection() {
+            const productType = document.getElementById('productTypeSelect').value;
+            const variantSection = document.getElementById('variantManagementSection');
+            const addOptionBtn = document.getElementById('addOptionBtn');
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const step2Number = document.getElementById('step2Number');
+            const saveStep2Btn = document.getElementById('saveStep2Btn');
+            
+            if (productType === '1') {
+                variantSection.style.display = 'block';
+                step2.style.display = 'block';
+                step2Number.classList.add('active');
+                step2Number.classList.remove('completed');
+                if (productId > 0) {
+                    addOptionBtn.style.display = 'inline-block';
+                    if (saveStep2Btn) saveStep2Btn.style.display = 'inline-block';
+                }
+                updateStepProgress();
+            } else {
+                variantSection.style.display = 'none';
+                step2.style.display = 'none';
+                step2Number.classList.remove('active', 'completed');
+                if (saveStep2Btn) saveStep2Btn.style.display = 'none';
+            }
+        }
+
+        function updateStepProgress() {
+            // Step 2: Check if options exist and have values
+            const step2 = document.getElementById('step2');
+            const step2Number = document.getElementById('step2Number');
+            const step3 = document.getElementById('step3');
+            const step3Number = document.getElementById('step3Number');
+            const step4 = document.getElementById('step4');
+            const step4Number = document.getElementById('step4Number');
+
+            // Check if all options have values
+            const allOptionsHaveValues = options && options.length > 0 && 
+                options.every(opt => opt.values && opt.values.length > 0);
+            
+            if (allOptionsHaveValues) {
+                step2Number.classList.add('completed');
+                step2Number.classList.remove('active');
+                step3.style.display = 'block';
+                step3Number.classList.add('active');
+                step3Number.classList.remove('completed');
+                const saveStep3Btn = document.getElementById('saveStep3Btn');
+                if (saveStep3Btn && productId > 0) saveStep3Btn.style.display = 'inline-block';
+            } else {
+                step3.style.display = 'none';
+                step4.style.display = 'none';
+            }
+
+            // Step 3: Check if variants exist
+            if (variants && variants.length > 0) {
+                step3Number.classList.add('completed');
+                step3Number.classList.remove('active');
+                step4.style.display = 'block';
+                step4Number.classList.add('active');
+                step4Number.classList.remove('completed');
+                const saveStep4Btn = document.getElementById('saveStep4Btn');
+                if (saveStep4Btn && productId > 0) saveStep4Btn.style.display = 'inline-block';
+                
+                // Ensure variants are rendered when step 4 is shown
+                if (step4.style.display === 'block') {
+                    renderVariants();
+                }
+            } else {
+                step4.style.display = 'none';
+                const saveStep4Btn = document.getElementById('saveStep4Btn');
+                if (saveStep4Btn) saveStep4Btn.style.display = 'none';
+            }
+        }
+
+        // Localized strings for JavaScript
+        const localizations = {
+            saveProductFirst: '@Html.Raw(Localizer["SaveProductFirst"])',
+            pleaseSaveProductBeforeAddingOptions: '@Html.Raw(Localizer["PleaseSaveProductBeforeAddingOptions"])',
+            addNewOption: '@Html.Raw(Localizer["AddNewOption"])',
+            optionNameExample: '@Html.Raw(Localizer["OptionNameExample"])',
+            enterOptionName: '@Html.Raw(Localizer["EnterOptionName"])',
+            add: '@Html.Raw(Localizer["Add"])',
+            cancel: '@Html.Raw(Localizer["Cancel"])',
+            optionNameRequired: '@Html.Raw(Localizer["OptionNameRequired"])',
+            success: '@Html.Raw(Localizer["Success"])',
+            error: '@Html.Raw(Localizer["Error"])',
+            optionAddedSuccessfully: '@Html.Raw(Localizer["OptionAddedSuccessfully"])',
+            failedToAddOption: '@Html.Raw(Localizer["FailedToAddOption"])',
+            deleteOption: '@Html.Raw(Localizer["DeleteOption"])',
+            deleteOptionWarning: '@Html.Raw(Localizer["DeleteOptionWarning"])',
+            yesDeleteIt: '@Html.Raw(Localizer["YesDeleteIt"])',
+            deleted: '@Html.Raw(Localizer["Deleted"])',
+            optionDeletedSuccessfully: '@Html.Raw(Localizer["OptionDeletedSuccessfully"])',
+            failedToDeleteOption: '@Html.Raw(Localizer["FailedToDeleteOption"])',
+            pleaseEnterValue: '@Html.Raw(Localizer["PleaseEnterValue"])',
+            failedToAddValue: '@Html.Raw(Localizer["FailedToAddValue"])',
+            failedToDeleteValue: '@Html.Raw(Localizer["FailedToDeleteValue"])',
+            generateVariants: '@Html.Raw(Localizer["GenerateVariants"])',
+            generateVariantsWarning: '@Html.Raw(Localizer["GenerateVariantsWarning"])',
+            yesGenerate: '@Html.Raw(Localizer["YesGenerate"])',
+            generating: '@Html.Raw(Localizer["Generating"])',
+            pleaseWaitGeneratingVariants: '@Html.Raw(Localizer["PleaseWaitGeneratingVariants"])',
+            variantsGeneratedSuccessfully: '@Html.Raw(Localizer["VariantsGeneratedSuccessfully"])',
+            failedToGenerateVariants: '@Html.Raw(Localizer["FailedToGenerateVariants"])',
+            failedToGenerateVariantsCheckConsole: '@Html.Raw(Localizer["FailedToGenerateVariantsCheckConsole"])',
+            failedToUploadImage: '@Html.Raw(Localizer["FailedToUploadImage"])',
+            deleteVariant: '@Html.Raw(Localizer["DeleteVariant"])',
+            deleteVariantWarning: '@Html.Raw(Localizer["DeleteVariantWarning"])',
+            deleteImage: '@Html.Raw(Localizer["DeleteImage"])',
+            areYouSureDeleteImage: '@Html.Raw(Localizer["AreYouSureDeleteImage"])',
+            errorDeletingImage: '@Html.Raw(Localizer["ErrorDeletingImage"])',
+            unknownError: '@Html.Raw(Localizer["UnknownError"])',
+            errorDeletingImageTryAgain: '@Html.Raw(Localizer["ErrorDeletingImageTryAgain"])',
+            removeValue: '@Html.Raw(Localizer["RemoveValue"])',
+            variant: '@Html.Raw(Localizer["Variant"])',
+            price: '@Html.Raw(Localizer["Price"])',
+            listPrice: '@Html.Raw(Localizer["ListPrice"])',
+            stock: '@Html.Raw(Localizer["Stock"])',
+            minStockAlert: '@Html.Raw(Localizer["MinStockAlert"])',
+            image: '@Html.Raw(Localizer["Image"])',
+            upload: '@Html.Raw(Localizer["Upload"])',
+            default: '@Html.Raw(Localizer["Default"])',
+            noOptionsAddedYet: '@Html.Raw(Localizer["NoOptionsAddedYet"])',
+            noValuesAddedYet: '@Html.Raw(Localizer["NoValuesAddedYet"])',
+            noVariantsGeneratedYet: '@Html.Raw(Localizer["NoVariantsGeneratedYet"])',
+            addValuePlaceholder: '@Html.Raw(Localizer["AddValuePlaceholder"])',
+            delete: '@Html.Raw(Localizer["Delete"])',
+            pleaseSaveProductFirst: '@Html.Raw(Localizer["PleaseSaveProductFirst"])',
+            saveStep: '@Html.Raw(Localizer["SaveStep"])',
+            stepSavedSuccessfully: '@Html.Raw(Localizer["StepSavedSuccessfully"])',
+            failedToSaveStep: '@Html.Raw(Localizer["FailedToSaveStep"])'
+        };
+
+        // Save Main Product (stays on same page)
+        function saveMainProduct() {
+            console.log('saveMainProduct called');
+            
+            const form = document.getElementById('productForm') || document.querySelector('form');
+            if (!form) {
+                console.error('Form not found');
+                Swal.fire({
+                    icon: 'error',
+                    title: localizations.error,
+                    text: 'Form not found'
+                });
+                return false;
+            }
+
+            // Check for anti-forgery token
+            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (!tokenInput) {
+                console.error('Anti-forgery token not found');
+                Swal.fire({
+                    icon: 'error',
+                    title: localizations.error,
+                    text: 'Security token not found. Please refresh the page.'
+                });
+                return false;
+            }
+
+            console.log('Preparing form data...');
+            const formData = new FormData(form);
+            formData.append('saveOnly', 'true'); // Flag to indicate AJAX save
+
+            Swal.fire({
+                title: localizations.generating,
+                text: 'Saving product...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const formAction = form.getAttribute('action') || '/Admin/Product/UpSert';
+            console.log('Sending request to:', formAction);
+            
+            fetch(formAction, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin', // Include cookies for authentication
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // Identify as AJAX request
+                }
+            })
+            .then(response => {
+                console.log('Response received:', response.status, response.statusText);
+                console.log('Response redirected:', response.redirected);
+                console.log('Response URL:', response.url);
+                
+                // Check if we got redirected (authentication issue)
+                if (response.redirected) {
+                    console.error('Response was redirected - likely authentication issue');
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Authentication Required',
+                        text: 'Your session may have expired. Please refresh the page and try again.',
+                        confirmButtonText: 'Refresh Page',
+                        allowOutsideClick: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.reload();
+                        }
+                    });
+                    return Promise.reject(new Error('Authentication required - redirected'));
+                }
+                
+                if (response.status === 302 || response.status === 401 || response.status === 403) {
+                    console.error('Authentication error:', response.status);
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Authentication Required',
+                        text: 'Your session may have expired. Please refresh the page and try again.',
+                        confirmButtonText: 'Refresh Page',
+                        allowOutsideClick: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.reload();
+                        }
+                    });
+                    return Promise.reject(new Error('Authentication required'));
+                }
+
+                const contentType = response.headers.get("content-type");
+                console.log('Content-Type:', contentType);
+                
+                if (contentType && contentType.includes("application/json")) {
+                    return response.json();
+                } else if (response.ok) {
+                    // If response is OK but not JSON, try to parse as text
+                    return response.text().then(text => {
+                        console.log('Response text (first 200 chars):', text.substring(0, 200));
+                        // Check if it's HTML (likely a redirect or error page)
+                        if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+                            console.error('Received HTML instead of JSON - likely a redirect');
+                            throw new Error('Received HTML response instead of JSON. This may indicate a redirect or error.');
+                        }
+                        // Try to parse as JSON anyway
+                        try {
+                            return JSON.parse(text);
+                        } catch {
+                            throw new Error('Unexpected response format');
+                        }
+                    });
+                } else {
+                    return response.text().then(text => {
+                        console.error('Server error:', response.status, text);
+                        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                    });
+                }
+            })
+            .then(data => {
+                Swal.close();
+                if (data && data.success) {
+                    const newProductId = data.productId;
+                    const wasNewProduct = productId === 0;
+                    
+                    productId = newProductId;
+                    const idInput = document.querySelector('input[name="product.Id"]');
+                    if (idInput) {
+                        idInput.value = productId;
+                    }
+                    
+                    // If this was a new product creation, reload the page with the new ID
+                    if (wasNewProduct && newProductId > 0) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: localizations.success,
+                            text: data.message || 'Product created successfully!',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            // Reload the page with the new product ID in the URL
+                            window.location.href = `/Admin/Product/UpSert?id=${newProductId}`;
+                        });
+                        return;
+                    }
+                    
+                    // For existing products, just show success and stay on page
+                    // Show Step 1 save button after product is saved
+                    const step1Actions = document.getElementById('step1Actions');
+                    if (step1Actions) step1Actions.style.display = 'block';
+                    
+                    // Show add option button if variable product
+                    const productType = document.getElementById('productTypeSelect').value;
+                    if (productType === '1') {
+                        const addOptionBtn = document.getElementById('addOptionBtn');
+                        if (addOptionBtn) addOptionBtn.style.display = 'inline-block';
+                    }
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: localizations.success,
+                        text: data.message || 'Product updated successfully!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: localizations.error,
+                        text: (data && data.message) || 'Failed to save product'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.close();
+                console.error('Error saving product:', error);
+                
+                // Don't show error if user already saw authentication message
+                if (error.message && error.message.includes('Authentication required')) {
+                    return;
+                }
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: localizations.error,
+                    text: error.message || 'Failed to save product. Please check all required fields are filled and try again.'
+                });
+            });
+        }
+
+        // Save Step Functions
+        function saveStep1() {
+            // Check if productId is valid
+            if (!productId || productId === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: localizations.error,
+                    text: localizations.pleaseSaveProductFirst || 'Please save the product first before saving this step.'
+                });
+                return;
+            }
+            
+            saveStep1Data();
+        }
+
+        function saveStep1Data() {
+            // Double check productId is valid
+            if (!productId || productId === 0) {
+                console.error('Invalid productId:', productId);
+                Swal.fire({
+                    icon: 'error',
+                    title: localizations.error,
+                    text: 'Product ID is missing. Please save the product first.'
+                });
+                return;
+            }
+            
+            const productType = document.getElementById('productTypeSelect').value;
+            const formData = new FormData();
+            formData.append('productId', productId);
+            formData.append('productType', productType);
+            formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]')?.value || '');
+
+            console.log('Saving Step 1 - productId:', productId, 'productType:', productType);
+
+            fetch('/Admin/Product/SaveProductStep', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: localizations.success,
+                        text: localizations.stepSavedSuccessfully,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    const step1Number = document.querySelector('#step1 .step-number');
+                    step1Number.classList.add('completed');
+                    step1Number.classList.remove('active');
+                    if (productType === '1') {
+                        toggleVariantSection();
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: localizations.error,
+                        text: data.message || localizations.failedToSaveStep
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: localizations.error,
+                    text: localizations.failedToSaveStep
+                });
+            });
+        }
+
+        function saveStep2() {
+            // Step 2 is about options - they're already saved when added
+            if (options && options.length > 0) {
+                Swal.fire({
+                    icon: 'success',
+                    title: localizations.success,
+                    text: localizations.stepSavedSuccessfully,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                const step2Number = document.getElementById('step2Number');
+                step2Number.classList.add('completed');
+                step2Number.classList.remove('active');
+                updateStepProgress();
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: localizations.error,
+                    text: 'Please add at least one option before saving this step.'
+                });
+            }
+        }
+
+        function saveStep3() {
+            // Step 3 is about generating variants
+            if (variants && variants.length > 0) {
+                Swal.fire({
+                    icon: 'success',
+                    title: localizations.success,
+                    text: localizations.stepSavedSuccessfully,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                const step3Number = document.getElementById('step3Number');
+                step3Number.classList.add('completed');
+                step3Number.classList.remove('active');
+                updateStepProgress();
+            } else {
+                Swal.fire({
+                    icon: 'info',
+                    title: localizations.error,
+                    text: 'Please generate variants first by clicking the "Generate Variants" button.'
+                });
+            }
+        }
+
+        function saveStep4() {
+            // Step 4 is about editing variants - variants are saved automatically when edited
+            Swal.fire({
+                icon: 'success',
+                title: localizations.success,
+                text: localizations.stepSavedSuccessfully,
+                timer: 2000,
+                showConfirmButton: false
+            });
+            const step4Number = document.getElementById('step4Number');
+            step4Number.classList.add('completed');
+            step4Number.classList.remove('active');
+        }
+
+        function saveProductBasicInfo() {
+            return new Promise((resolve, reject) => {
+                const form = document.querySelector('form[asp-action="UpSert"]') || document.querySelector('form');
+                if (!form) {
+                    reject('Form not found');
+                    return;
+                }
+
+                const formData = new FormData(form);
+                formData.append('saveOnly', 'true'); // Flag to indicate partial save
+
+                const formAction = form.getAttribute('action') || '/Admin/Product/UpSert';
+                fetch(formAction, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    // Check if response is JSON or HTML
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.includes("application/json")) {
+                        return response.json();
+                    } else {
+                        // If HTML, try to parse as text and check for errors
+                        return response.text().then(text => {
+                            throw new Error('Unexpected response format');
+                        });
+                    }
+                })
+                .then(data => {
+                    if (data.success) {
+                        productId = data.productId;
+                        const idInput = document.querySelector('input[name="product.Id"]');
+                        if (idInput) {
+                            idInput.value = productId;
+                        }
+                        // Show add option button after product is saved
+                        const addOptionBtn = document.getElementById('addOptionBtn');
+                        if (addOptionBtn) addOptionBtn.style.display = 'inline-block';
+                        resolve();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: localizations.error,
+                            text: data.message || 'Failed to save product'
+                        });
+                        reject(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: localizations.error,
+                        text: 'Failed to save product. Please check all required fields are filled.'
+                    });
+                    reject(error);
+                });
+            });
+        }
+
+        function addNewOption() {
+            if (productId === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: localizations.saveProductFirst,
+                    text: localizations.pleaseSaveProductBeforeAddingOptions
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: localizations.addNewOption,
+                input: 'text',
+                inputLabel: localizations.optionNameExample,
+                inputPlaceholder: localizations.enterOptionName,
+                showCancelButton: true,
+                confirmButtonText: localizations.add,
+                cancelButtonText: localizations.cancel,
+                inputValidator: (value) => {
+                    if (!value) {
+                        return localizations.optionNameRequired;
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/Admin/Product/AddOption', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: JSON.stringify({
+                            productId: productId,
+                            optionName: result.value,
+                            displayOrder: options.length
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadOptions();
+                            Swal.fire(localizations.success, localizations.optionAddedSuccessfully, 'success');
+                        } else {
+                            Swal.fire(localizations.error, data.message || localizations.failedToAddOption, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire(localizations.error, localizations.failedToAddOption, 'error');
+                    });
+                }
+            });
+        }
+
+        function loadOptions() {
+            if (productId === 0) return;
+            
+            fetch(`/Admin/Product/GetProductOptions?productId=${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        options = data.options;
+                        renderOptions();
+                        updateStepProgress();
+                    }
+                })
+                .catch(error => console.error('Error loading options:', error));
+        }
+
+        function renderOptions() {
+            const container = document.getElementById('optionsList');
+            container.innerHTML = '';
+
+            if (!options || options.length === 0) {
+                container.innerHTML = `
+                    <div class="no-options-message">
+                        <i class="bi bi-inbox me-2"></i>
+                        ${localizations.noOptionsAddedYet}
+                    </div>
+                `;
+                document.getElementById('generateVariantsBtn').style.display = 'none';
+                document.getElementById('variantsContainer').style.display = 'none';
+                return;
+            }
+
+            options.forEach((option, optionIndex) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option-card';
+                optionDiv.innerHTML = `
+                    <div class="option-card-header">
+                        <div class="option-card-title-wrapper">
+                            <i class="bi bi-tag-fill option-card-icon"></i>
+                            <strong class="option-card-name">${option.name}</strong>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger btn-delete-option" onclick="deleteOption(${option.id})" title="${localizations.deleteOption}">
+                            <i class="bi bi-trash-fill"></i>
+                            <span class="d-none d-md-inline ms-1">${localizations.delete}</span>
+                        </button>
+                    </div>
+                    <div class="option-card-body">
+                        <div class="option-value-input-group">
+                            <input type="text" class="form-control option-value-input" id="newValue_${option.id}" placeholder="${localizations.addValuePlaceholder}">
+                            <button type="button" class="btn btn-primary btn-add-value" onclick="addOptionValue(${option.id})">
+                                <i class="bi bi-plus-circle-fill me-1"></i>
+                                <span>${localizations.add}</span>
+                            </button>
+                        </div>
+                        <div id="values_${option.id}" class="option-values-list"></div>
+                    </div>
+                `;
+                container.appendChild(optionDiv);
+                renderOptionValues(option.id, option.values || []);
+            });
+
+            // Show generate variants button and variants container when options exist
+            document.getElementById('generateVariantsBtn').style.display = 'inline-block';
+            document.getElementById('variantsContainer').style.display = 'block';
+            const saveStep2Btn = document.getElementById('saveStep2Btn');
+            const saveStep3Btn = document.getElementById('saveStep3Btn');
+            if (saveStep2Btn && productId > 0) saveStep2Btn.style.display = 'inline-block';
+            if (saveStep3Btn && productId > 0) saveStep3Btn.style.display = 'inline-block';
+            updateStepProgress();
+        }
+
+        function renderOptionValues(optionId, values) {
+            const container = document.getElementById(`values_${optionId}`);
+            container.innerHTML = '';
+            
+            if (!values || values.length === 0) {
+                container.innerHTML = `<div class="no-values-message"><i class="bi bi-info-circle me-2"></i>${localizations.noValuesAddedYet}</div>`;
+                return;
+            }
+
+            values.forEach(value => {
+                const valueBadge = document.createElement('div');
+                valueBadge.className = 'option-value-badge';
+                valueBadge.innerHTML = `
+                    <span class="value-text">${value.value}</span>
+                    <button type="button" class="btn-remove-value" onclick="deleteOptionValue(${value.id}, ${optionId})" title="${localizations.removeValue}">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                `;
+                container.appendChild(valueBadge);
+            });
+        }
+
+        function addOptionValue(optionId) {
+            const input = document.getElementById(`newValue_${optionId}`);
+            const value = input.value.trim();
+            
+            if (!value) {
+                Swal.fire({
+                    icon: 'error',
+                    title: localizations.error,
+                    text: localizations.pleaseEnterValue
+                });
+                return;
+            }
+
+            fetch('/Admin/Product/AddOptionValue', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({
+                    optionId: optionId,
+                    value: value,
+                    displayOrder: 0
+                })
+            })
+            .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            input.value = '';
+                            loadOptions();
+                            updateStepProgress();
+                        } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: localizations.error,
+                        text: data.message || localizations.failedToAddValue
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: localizations.error,
+                    text: localizations.failedToAddValue
+                });
+            });
+        }
+
+        function deleteOption(optionId) {
+            Swal.fire({
+                title: localizations.deleteOption + '?',
+                text: localizations.deleteOptionWarning,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: localizations.yesDeleteIt,
+                cancelButtonText: localizations.cancel
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/Admin/Product/DeleteOption?optionId=${optionId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadOptions();
+                            Swal.fire({
+                                icon: 'success',
+                                title: localizations.deleted,
+                                text: localizations.optionDeletedSuccessfully,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: localizations.error,
+                                text: data.message || localizations.failedToDeleteOption
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function deleteOptionValue(valueId, optionId) {
+            fetch(`/Admin/Product/DeleteOptionValue?valueId=${valueId}`, {
+                method: 'DELETE',
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                }
+            })
+            .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadOptions();
+                            updateStepProgress();
+                        } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: localizations.error,
+                        text: data.message || localizations.failedToDeleteValue
+                    });
+                }
+            });
+        }
+
+        function generateVariants() {
+            if (productId === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: localizations.error,
+                    text: localizations.pleaseSaveProductFirst
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: localizations.generateVariants + '?',
+                text: localizations.generateVariantsWarning,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: localizations.yesGenerate,
+                cancelButtonText: localizations.cancel
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: localizations.generating,
+                        text: localizations.pleaseWaitGeneratingVariants,
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    fetch(`/Admin/Product/GenerateVariants?productId=${productId}`, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        Swal.close();
+                        console.log('Generate variants response:', data); // Debug
+                        if (data.success) {
+                            variants = data.variants;
+                            console.log('Variants assigned:', variants); // Debug
+                            
+                            // Show Step 4 before rendering variants
+                            const step4 = document.getElementById('step4');
+                            if (step4) {
+                                step4.style.display = 'block';
+                            }
+                            
+                            renderVariants();
+                            updateStepProgress();
+                            Swal.fire({
+                                icon: 'success',
+                                title: localizations.success,
+                                text: data.message || localizations.variantsGeneratedSuccessfully,
+                                timer: 3000,
+                                showConfirmButton: true
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: localizations.error,
+                                text: data.message || localizations.failedToGenerateVariants
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.close();
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: localizations.error,
+                            text: error.message || localizations.failedToGenerateVariantsCheckConsole
+                        });
+                    });
+                }
+            });
+        }
+
+        function renderVariants() {
+            const container = document.getElementById('variantsTableContainer');
+            const table = document.getElementById('variantsTable');
+            const tbody = document.getElementById('variantsTableBody');
+            
+            // Always show the variants container when this function is called
+            const variantsContainer = document.getElementById('variantsContainer');
+            if (variantsContainer) {
+                variantsContainer.style.display = 'block';
+            }
+            
+            console.log('Rendering variants:', variants); // Debug log
+            
+            if (!variants || variants.length === 0) {
+                if (container) {
+                    container.innerHTML = `
+                        <div class="no-variants-message">
+                            <i class="bi bi-info-circle me-2"></i>
+                            @Localizer["NoVariantsGeneratedYet"]
+                        </div>
+                    `;
+                }
+                if (table) {
+                    table.style.display = 'none';
+                }
+                return;
+            }
+
+            // Clear container but keep table structure
+            if (container) {
+                // Don't clear innerHTML if table is inside - just show the table
+                const existingMessage = container.querySelector('p.text-muted');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+            }
+            
+            if (table) {
+                table.style.display = 'table';
+            }
+            
+            if (tbody) {
+                tbody.innerHTML = '';
+
+                variants.forEach(variant => {
+                    console.log('Rendering variant:', variant); // Debug log
+                    const row = document.createElement('tr');
+                    row.className = 'variant-row';
+                    row.innerHTML = `
+                        <td class="variant-name-cell" data-label="${localizations.variant}">
+                            <div class="variant-name-wrapper">
+                                <i class="bi bi-tag-fill variant-name-icon"></i>
+                                <span class="variant-name-text">${variant.variantName || variant.name || localizations.default}</span>
+                            </div>
+                        </td>
+                        <td data-label="${localizations.price}">
+                            <div class="input-group-sm">
+                                <input type="number" step="0.01" class="form-control variant-input" value="${variant.price || 0}" onchange="updateVariantField(${variant.id}, 'price', this.value)">
+                            </div>
+                        </td>
+                        <td data-label="${localizations.listPrice}">
+                            <div class="input-group-sm">
+                                <input type="number" step="0.01" class="form-control variant-input" value="${variant.listPrice || ''}" onchange="updateVariantField(${variant.id}, 'listPrice', this.value)">
+                            </div>
+                        </td>
+                        <td data-label="${localizations.stock}">
+                            <div class="input-group-sm">
+                                <input type="number" class="form-control variant-input" value="${variant.stockQuantity || 0}" onchange="updateVariantField(${variant.id}, 'stockQuantity', this.value)">
+                            </div>
+                        </td>
+                        <td data-label="${localizations.minStockAlert}">
+                            <div class="input-group-sm">
+                                <input type="number" class="form-control variant-input" value="${variant.minimumStockAlert || 5}" onchange="updateVariantField(${variant.id}, 'minimumStockAlert', this.value)">
+                            </div>
+                        </td>
+                        <td class="variant-image-cell" data-label="${localizations.image}">
+                            <div class="variant-image-upload">
+                                <label class="variant-image-upload-label">
+                                    <input type="file" accept="image/*" class="variant-image-input" onchange="uploadVariantImage(${variant.id}, this)">
+                                    <i class="bi bi-camera-fill"></i>
+                                    <span class="d-none d-md-inline">${localizations.upload}</span>
+                                </label>
+                                ${variant.imageUrl ? `<img src="${variant.imageUrl}" class="variant-image-preview" alt="Variant image">` : ''}
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+
+        function updateVariantField(variantId, field, value) {
+            const variant = variants.find(v => v.id === variantId);
+            if (!variant) return;
+
+            variant[field] = value;
+
+            // Debounce API call
+            clearTimeout(window.variantUpdateTimeout);
+            window.variantUpdateTimeout = setTimeout(() => {
+                fetch('/Admin/Product/UpdateVariant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: JSON.stringify({
+                        variantId: variantId,
+                        price: parseFloat(variant.price) || 0,
+                        listPrice: variant.listPrice ? parseFloat(variant.listPrice) : null,
+                        stockQuantity: parseInt(variant.stockQuantity) || 0,
+                        minimumStockAlert: parseInt(variant.minimumStockAlert) || 5
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        console.error('Failed to update variant:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error updating variant:', error));
+            }, 500);
+        }
+
+        function uploadVariantImage(variantId, input) {
+            if (!input.files || input.files.length === 0) return;
+
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+
+            fetch(`/Admin/Product/UploadVariantImage?variantId=${variantId}`, {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const variant = variants.find(v => v.id === variantId);
+                    if (variant) {
+                        variant.imageUrl = data.imageUrl;
+                        renderVariants();
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: localizations.error,
+                        text: data.message || localizations.failedToUploadImage
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: localizations.error,
+                    text: localizations.failedToUploadImage
+                });
+            });
+        }
+
+        function deleteVariant(variantId) {
+            Swal.fire({
+                title: localizations.deleteVariant + '?',
+                text: localizations.deleteVariantWarning,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: localizations.yesDeleteIt,
+                cancelButtonText: localizations.cancel
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Remove from local array
+                    variants = variants.filter(v => v.id !== variantId);
+                    renderVariants();
+                    // TODO: Add API call to delete from database
+                }
+            });
+        }
+
         // Preview multiple images
         document.getElementById('files-input')?.addEventListener('change', function(e) {
             const previewContainer = document.getElementById('preview-container');
@@ -252,14 +1510,14 @@
         // Delete image function
         function deleteImage(imageId, button) {
             Swal.fire({
-                title: 'Delete Image',
-                text: 'Are you sure you want to delete this image?',
+                title: localizations.deleteImage,
+                text: localizations.areYouSureDeleteImage,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc2626',
                 cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Yes, Delete It',
-                cancelButtonText: 'Cancel',
+                confirmButtonText: localizations.yesDeleteIt,
+                cancelButtonText: localizations.cancel,
                 dangerMode: true
             }).then((result) => {
                 if (!result.isConfirmed) {
@@ -286,14 +1544,14 @@
                     if (remainingImages === 0) {
                         const gallery = document.getElementById('images-gallery');
                         if (gallery) {
-                            gallery.innerHTML = '<p class="text-muted text-center">No images. Please upload at least one image.</p>';
+                            gallery.innerHTML = '<p class="text-muted text-center">@Localizer["NoImagesPleaseUpload"]</p>';
                         }
                     }
                 } else {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Error',
-                        text: 'Error deleting image: ' + (data.message || 'Unknown error')
+                        title: '@Localizer["Error"]',
+                        text: '@Localizer["ErrorDeletingImage"]: ' + (data.message || '@Localizer["UnknownError"]')
                     });
                 }
             })
@@ -301,8 +1559,8 @@
                 console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
-                    text: 'Error deleting image. Please try again.'
+                    title: '@Localizer["Error"]',
+                    text: '@Localizer["ErrorDeletingImageTryAgain"]'
                 });
             });
             });
@@ -410,6 +1668,965 @@
     @@media (max-width: 768px) {
         .images-gallery {
             grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    /* ============================================
+       Variant Management Enhanced Styles
+       ============================================ */
+    
+    .variant-management-wrapper {
+        margin-top: 2rem;
+    }
+
+    .admin-form-section-title {
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .section-title {
+        color: #3B9DD5;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .section-subtitle {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .product-type-select {
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .product-type-select:focus {
+        border-color: #3B9DD5;
+        box-shadow: 0 0 0 0.2rem rgba(59, 157, 213, 0.25);
+    }
+
+    .form-help-text {
+        display: flex;
+        align-items: center;
+        margin-top: 0.5rem;
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+
+    .form-help-text i {
+        color: #3B9DD5;
+    }
+
+    /* Step-by-Step Wizard Styles */
+    .variant-wizard {
+        margin-top: 1.5rem;
+    }
+
+    .wizard-step {
+        margin-bottom: 2rem;
+        background: #ffffff;
+        border-radius: 12px;
+        border: 2px solid #e9ecef;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .wizard-step::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .wizard-step.active::before,
+    .wizard-step.completed::before {
+        opacity: 1;
+    }
+
+    .wizard-step.active {
+        border-color: #3B9DD5;
+        box-shadow: 0 4px 12px rgba(59, 157, 213, 0.15);
+        transform: translateX(5px);
+    }
+
+    .wizard-step.completed {
+        border-color: #7BC043;
+        background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+    }
+
+    .step-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .step-number {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #e9ecef;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+        border: 3px solid transparent;
+    }
+
+    .step-number.active {
+        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        color: white;
+        border-color: #3B9DD5;
+        box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3);
+        transform: scale(1.1);
+    }
+
+    .step-number.completed {
+        background: #7BC043;
+        color: white;
+        border-color: #7BC043;
+    }
+
+    .step-number.completed::after {
+        content: '✓';
+        font-size: 1.2rem;
+    }
+
+    .step-content {
+        flex: 1;
+    }
+
+    .step-title {
+        color: #212529;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .step-title i {
+        color: #3B9DD5;
+        font-size: 1.5rem;
+    }
+
+    .step-description {
+        color: #6c757d;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .step-body {
+        padding-left: 4.5rem;
+        animation: fadeIn 0.4s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .step-info-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #f1f8ff 100%);
+        border-left: 4px solid #3B9DD5;
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .step-info-box i {
+        color: #3B9DD5;
+        font-size: 1.25rem;
+    }
+
+    .step-info-box span {
+        color: #495057;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .generate-variants-section {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .btn-generate-variants {
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .btn-generate-variants:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+    }
+
+    .step-actions {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #e9ecef;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    .btn-save-step {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .btn-save-step:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(59, 157, 213, 0.4);
+        background: linear-gradient(135deg, #2a8bc4, #6ba83a);
+    }
+
+    .btn-save-step:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Variant Management Card */
+    .variant-management-card {
+        display: none;
+        margin-top: 1.5rem;
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .variant-card-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .variant-header-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .variant-header-icon {
+        font-size: 2rem;
+        color: #3B9DD5;
+        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .variant-card-title {
+        color: #212529;
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin: 0;
+    }
+
+    .variant-card-subtitle {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0.25rem 0 0 0;
+    }
+
+    /* Options Container */
+    .options-container {
+        margin-bottom: 2.5rem;
+        padding: 1.5rem;
+        background: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+    }
+
+    .options-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .options-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .options-icon {
+        font-size: 1.5rem;
+        color: #3B9DD5;
+    }
+
+    .options-title {
+        color: #212529;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .options-subtitle {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin: 0.25rem 0 0 0;
+    }
+
+    .btn-add-option {
+        border-radius: 8px;
+        padding: 0.5rem 1.25rem;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(59, 157, 213, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .btn-add-option:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(59, 157, 213, 0.3);
+    }
+
+    .options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    /* Option Card */
+    .option-card {
+        background: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .option-card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .option-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .option-card-title-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .option-card-icon {
+        color: #3B9DD5;
+        font-size: 1.25rem;
+    }
+
+    .option-card-name {
+        color: #212529;
+        font-size: 1.1rem;
+    }
+
+    .btn-delete-option {
+        border-radius: 6px;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .option-card-body {
+        padding: 1.25rem;
+    }
+
+    .option-value-input-group {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .option-value-input {
+        flex: 1;
+        min-width: 200px;
+        border-radius: 6px;
+        border: 1px solid #dee2e6;
+    }
+
+    .btn-add-value {
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        white-space: nowrap;
+    }
+
+    .option-values-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .no-values-message {
+        color: #6c757d;
+        font-style: italic;
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .no-options-message,
+    .no-variants-message {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 2px dashed #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .no-options-message i,
+    .no-variants-message i {
+        font-size: 1.25rem;
+        color: #3B9DD5;
+    }
+
+    /* Option Value Badge */
+    .option-value-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        color: white;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(59, 157, 213, 0.2);
+    }
+
+    .option-value-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(59, 157, 213, 0.3);
+    }
+
+    .value-text {
+        font-weight: 600;
+    }
+
+    .btn-remove-value {
+        background: rgba(255, 255, 255, 0.3);
+        border: none;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 0;
+        font-size: 0.75rem;
+    }
+
+    .btn-remove-value:hover {
+        background: rgba(255, 255, 255, 0.5);
+        transform: scale(1.1);
+    }
+
+    /* Variants Container */
+    .variants-container {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+    }
+
+    .variants-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .variants-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .variants-icon {
+        font-size: 1.5rem;
+        color: #7BC043;
+    }
+
+    .variants-title {
+        color: #212529;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .variants-subtitle {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin: 0.25rem 0 0 0;
+    }
+
+    .btn-generate-variants {
+        border-radius: 8px;
+        padding: 0.5rem 1.25rem;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(123, 192, 67, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .btn-generate-variants:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(123, 192, 67, 0.3);
+    }
+
+    /* Variants Table */
+    .variants-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        display: block;
+        box-sizing: border-box;
+    }
+    
+    .variants-container {
+        width: 100%;
+        overflow: visible;
+    }
+
+    .variants-table-wrapper::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .variants-table-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .variants-table-wrapper::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        border-radius: 10px;
+    }
+
+    .variants-table-wrapper::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #2a8bc4, #6ba83a);
+    }
+
+    .table-variants {
+        width: 100%;
+        margin: 0;
+        background: #ffffff;
+        border-collapse: separate;
+        border-spacing: 0;
+        table-layout: auto;
+        min-width: 100%;
+        display: table;
+    }
+
+    .table-variants thead {
+        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table-variants thead th {
+        border: none;
+        padding: 1.25rem 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .table-variants thead th:nth-child(1) { min-width: 200px; }
+    .table-variants thead th:nth-child(2) { min-width: 120px; }
+    .table-variants thead th:nth-child(3) { min-width: 120px; }
+    .table-variants thead th:nth-child(4) { min-width: 120px; }
+    .table-variants thead th:nth-child(5) { min-width: 150px; }
+    .table-variants thead th:nth-child(6) { min-width: 150px; }
+
+    .table-variants tbody tr {
+        transition: all 0.2s ease;
+        background: #ffffff;
+    }
+
+    .table-variants tbody tr:hover {
+        background: #f0f7ff;
+        box-shadow: 0 2px 8px rgba(59, 157, 213, 0.1);
+    }
+
+    .table-variants tbody tr:nth-child(even) {
+        background: #fafbfc;
+    }
+
+    .table-variants tbody tr:nth-child(even):hover {
+        background: #f0f7ff;
+    }
+
+    .table-variants tbody td {
+        padding: 1.25rem 1rem;
+        vertical-align: middle;
+        border-top: 1px solid #e9ecef;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: nowrap;
+    }
+    
+    .table-variants tbody td:first-child {
+        white-space: normal;
+    }
+
+    .table-variants tbody td .input-group-sm {
+        width: 100%;
+    }
+
+    .variant-row {
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .variant-name-cell {
+        min-width: 200px;
+        max-width: none;
+    }
+
+    .variant-name-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .variant-name-icon {
+        color: #3B9DD5;
+    }
+
+    .variant-name-text {
+        font-weight: 500;
+        color: #212529;
+    }
+
+    .variant-input {
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        width: 100%;
+        min-width: 100px;
+        max-width: none;
+        transition: all 0.2s ease;
+        background: #ffffff;
+        box-sizing: border-box;
+    }
+
+    .variant-input:focus {
+        border-color: #3B9DD5;
+        box-shadow: 0 0 0 0.3rem rgba(59, 157, 213, 0.25);
+        outline: none;
+        background: #f8f9ff;
+    }
+
+    .variant-input:hover {
+        border-color: #adb5bd;
+    }
+
+    .variant-image-cell {
+        min-width: 150px;
+    }
+
+    .variant-image-upload {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .variant-image-upload-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+
+    .variant-image-upload-label:hover {
+        background: #e9ecef;
+        border-color: #3B9DD5;
+        color: #3B9DD5;
+    }
+
+    .variant-image-input {
+        display: none;
+    }
+
+    .variant-image-preview {
+        max-width: 60px;
+        max-height: 60px;
+        border-radius: 6px;
+        object-fit: cover;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1200px) {
+        .table-variants thead th,
+        .table-variants tbody td {
+            padding: 1rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .variant-input {
+            padding: 0.65rem 0.85rem;
+            font-size: 0.95rem;
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .variant-management-card {
+            padding: 1.5rem;
+        }
+
+        .options-header,
+        .variants-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .table-variants {
+            font-size: 0.9rem;
+        }
+
+        .table-variants thead th,
+        .table-variants tbody td {
+            padding: 0.875rem 0.65rem;
+        }
+
+        .variant-input {
+            padding: 0.6rem 0.75rem;
+            font-size: 0.9rem;
+            min-width: 100px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .variant-management-card {
+            padding: 1rem;
+        }
+
+        .option-value-input-group {
+            flex-direction: column;
+        }
+
+        .option-value-input {
+            width: 100%;
+            min-width: auto;
+        }
+
+        .variants-table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 0 -1rem;
+            padding: 0 1rem;
+        }
+
+        .table-variants {
+            min-width: 900px;
+            font-size: 0.875rem;
+            width: auto;
+        }
+
+        .table-variants thead th {
+            font-size: 0.8rem;
+            padding: 0.75rem 0.5rem;
+        }
+
+        .table-variants tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .variant-input {
+            padding: 0.55rem 0.65rem;
+            font-size: 0.875rem;
+            min-width: 90px;
+        }
+
+        .variant-name-cell {
+            min-width: 150px;
+        }
+
+        .variant-image-cell {
+            min-width: 120px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .variant-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .options-header-left,
+        .variants-header-left {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .variants-table-wrapper {
+            margin: 0 -1rem;
+            padding: 0 1rem;
+        }
+
+        .table-variants {
+            display: block;
+            min-width: 100%;
+            font-size: 0.85rem;
+        }
+
+        .table-variants thead {
+            display: none;
+        }
+
+        .table-variants tbody {
+            display: block;
+        }
+
+        .table-variants tbody tr {
+            display: block;
+            margin-bottom: 1.5rem;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1.25rem;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-variants tbody tr:hover {
+            box-shadow: 0 4px 12px rgba(59, 157, 213, 0.15);
+            transform: none;
+        }
+
+        .table-variants tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border: none;
+            border-bottom: 1px solid #f0f0f0;
+            min-width: auto;
+            width: 100%;
+        }
+
+        .table-variants tbody td:last-child {
+            border-bottom: none;
+        }
+
+        .table-variants tbody td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #3B9DD5;
+            margin-right: 1rem;
+            font-size: 0.9rem;
+            min-width: 120px;
+        }
+
+        .variant-input {
+            flex: 1;
+            max-width: 200px;
+            padding: 0.65rem 0.85rem;
+            font-size: 0.9rem;
+        }
+
+        .variant-name-wrapper {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .variant-image-upload {
+            width: 100%;
+        }
+
+        .variant-image-upload-label {
+            width: 100%;
+            justify-content: center;
         }
     }
 </style>

@@ -1,8 +1,13 @@
+@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
 @model FlashSale
 
 @{
     ViewData["Title"] = Localizer["FlashSaleDetails"];
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
     
     var now = DateTime.Now;
     var isActive = Model.IsActive && now >= Model.StartDate && now <= Model.EndDate;
@@ -105,7 +110,7 @@
                                     </div>
                                     <div class="stat-card bg-gradient-info">
                                         <i class="bi bi-currency-dollar"></i>
-                                        <div class="stat-value">$@totalValue.ToString("N2")</div>
+                                        <div class="stat-value">@Html.Raw(currencySymbol) @totalValue.ToString("N2")</div>
                                         <div class="stat-label">@Localizer["TotalValue"]</div>
                                     </div>
                                 </div>
@@ -170,12 +175,12 @@
                                                 </td>
                                                 <td>
                                                     <span class="text-muted text-decoration-line-through">
-                                                        $@item.Product?.Price.ToString("N2")
+                                                        @Html.Raw(currencySymbol) @item.Product?.Price.ToString("N2")
                                                     </span>
                                                 </td>
                                                 <td>
                                                     <strong style="color: #ef4444; font-size: 1.1rem;">
-                                                        $@item.FlashSalePrice.ToString("N2")
+                                                        @Html.Raw(currencySymbol) @item.FlashSalePrice.ToString("N2")
                                                     </strong>
                                                 </td>
                                                 <td>
@@ -185,7 +190,7 @@
                                                     <span class="badge bg-primary">@item.FlashSaleQuantity</span>
                                                 </td>
                                                 <td>
-                                                    <strong>$@totalItemValue.ToString("N2")</strong>
+                                                    <strong>@Html.Raw(currencySymbol) @totalItemValue.ToString("N2")</strong>
                                                 </td>
                                             </tr>
                                             index++;
@@ -195,7 +200,7 @@
                                         <tr>
                                             <td colspan="6" class="text-end fw-bold">@Localizer["TotalFlashSaleValue"]:</td>
                                             <td class="fw-bold" style="color: #3B9DD5; font-size: 1.2rem;">
-                                                $@totalValue.ToString("N2")
+                                                @Html.Raw(currencySymbol) @totalValue.ToString("N2")
                                             </td>
                                         </tr>
                                     </tfoot>

@@ -1,8 +1,13 @@
+@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
 @model FlashSale
 
 @{
     ViewData["Title"] = Model.Name;
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
 }
 
 <partial name="_Notifications" />
@@ -111,11 +116,11 @@ else
                                 <!-- Price Section -->
                                 <div class="flash-sale-price-section">
                                     <div class="flash-sale-prices">
-                                        <span class="flash-sale-normal-price">$@product.Price.ToString("N2")</span>
-                                        <span class="flash-sale-current-price">$@item.FlashSalePrice.ToString("N2")</span>
+                                        <span class="flash-sale-normal-price">@Html.Raw(currencySymbol) @product.Price.ToString("N2")</span>
+                                        <span class="flash-sale-current-price">@Html.Raw(currencySymbol) @item.FlashSalePrice.ToString("N2")</span>
                                     </div>
                                     <div class="flash-sale-discount-badge">
-                                        @Localizer["SAVE"] $@((product.Price - (double)item.FlashSalePrice).ToString("N2"))
+                                        @Localizer["SAVE"] @Html.Raw(currencySymbol) @((product.Price - (double)item.FlashSalePrice).ToString("N2"))
                                     </div>
                                 </div>
 

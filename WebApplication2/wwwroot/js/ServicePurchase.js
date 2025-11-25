@@ -63,7 +63,8 @@ function loadDataTable() {
                 "width": "120px",
                 "className": "text-end",
                 "render": function (data) {
-                    return `<strong class="text-dark">${new Intl.NumberFormat('en-AE', { style: 'currency', currency: 'AED' }).format(data)}</strong>`;
+                    const currencySymbol = (typeof getCurrencySymbol === 'function' ? getCurrencySymbol() : (typeof getCurrentLanguage === 'function' && getCurrentLanguage() === 'ar' ? 'د.إ' : 'AED'));
+                    return `<strong class="text-dark">${currencySymbol} ${data.toFixed(2)}</strong>`;
                 }
             },
             {
@@ -71,7 +72,8 @@ function loadDataTable() {
                 "width": "120px",
                 "className": "text-end",
                 "render": function (data) {
-                    return `<strong class="text-success">${new Intl.NumberFormat('en-AE', { style: 'currency', currency: 'AED' }).format(data)}</strong>`;
+                    const currencySymbol = (typeof getCurrencySymbol === 'function' ? getCurrencySymbol() : (typeof getCurrentLanguage === 'function' && getCurrentLanguage() === 'ar' ? 'د.إ' : 'AED'));
+                    return `<strong class="text-success">${currencySymbol} ${data.toFixed(2)}</strong>`;
                 }
             },
             {

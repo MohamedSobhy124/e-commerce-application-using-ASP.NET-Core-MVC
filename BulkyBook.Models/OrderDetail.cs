@@ -36,5 +36,11 @@ namespace BulkyBook.Models
 
         [NotMapped]
         public bool IsFromFlashSale => FlashSaleItemId.HasValue;
+        
+        // Variant Support
+        public int? ProductVariantId { get; set; }
+        [ForeignKey("ProductVariantId")]
+        [ValidateNever]
+        public ProductVariant? ProductVariant { get; set; }
     }
 }

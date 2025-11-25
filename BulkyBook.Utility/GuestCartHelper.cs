@@ -26,10 +26,11 @@ namespace BulkyBook.Utility
             session.SetString(CartSessionKey, cartJson);
         }
 
-        public static void AddToCart(ISession session, int productId, int count = 1)
+        public static void AddToCart(ISession session, int productId, int count = 1, int? productVariantId = null)
         {
             var cart = GetGuestCart(session);
-            var existingItem = cart.FirstOrDefault(c => c.ProductId == productId);
+            // Check for existing item with same product and variant
+            var existingItem = cart.FirstOrDefault(c => c.ProductId == productId && c.ProductVariantId == productVariantId);
 
             if (existingItem != null)
             {
@@ -40,7 +41,8 @@ namespace BulkyBook.Utility
                 cart.Add(new GuestCartItem
                 {
                     ProductId = productId,
-                    Count = count
+                    Count = count,
+                    ProductVariantId = productVariantId
                 });
             }
 

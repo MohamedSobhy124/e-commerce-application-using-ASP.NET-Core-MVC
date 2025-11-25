@@ -1,4 +1,11 @@
-﻿@model ShoppingCartVM
+﻿@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
+@model ShoppingCartVM
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+}
 
 <form method="post">
 	<div class="order-summary-wrapper">
@@ -90,13 +97,13 @@
 												<h6 class="order-item-title">@details.product.Title</h6>
 												<small class="order-item-quantity">@Localizer["Quantity"]: @details.Count</small>
 											</div>
-											<span class="order-item-price">@((details.Price*details.Count).ToString("c"))</span>
+											<span class="order-item-price">@Html.Raw(currencySymbol) @((details.Price*details.Count).ToString("N2"))</span>
 										</li>
 									}
 
 									<li class="order-item order-total-item">
 										<small class="order-total-label">@Localizer["Subtotal"]</small>
-										<strong class="order-subtotal-value">@Model.OrderHeader.OrderTotal.ToString("c")</strong>
+										<strong class="order-subtotal-value">@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2")</strong>
 									</li>
 								</ul>
 							</div>
@@ -143,7 +150,7 @@
 										<i class="bi bi-wallet2 me-2"></i>
 										@Localizer["Total"]
 									</h4>
-									<strong class="order-final-total" id="finalTotal">@Model.OrderHeader.OrderTotal.ToString("c")</strong>
+									<strong class="order-final-total" id="finalTotal">@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2")</strong>
 								</div>
 							</div>
 
@@ -487,8 +494,9 @@
 			);
 		}
 
+		const currencySymbol = '@Html.Raw(currencySymbol)';
 		function formatCurrency(amount) {
-			return '$' + amount.toFixed(2);
+			return currencySymbol + ' ' + amount.toFixed(2);
 		}
 	</script>
 }

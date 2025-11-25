@@ -32,6 +32,12 @@ function getCurrentLanguage() {
     return 'ar'; // Default to Arabic if no cookie
 }
 
+// Function to get currency symbol based on current language
+function getCurrencySymbol() {
+    const lang = getCurrentLanguage();
+    return lang === 'ar' ? 'د.إ' : 'AED';
+}
+
 // Initialize default language on first visit
 function initializeLanguage() {
     const currentLang = getCurrentLanguage();

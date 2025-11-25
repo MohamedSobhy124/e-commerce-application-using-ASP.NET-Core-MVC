@@ -30,7 +30,7 @@
     border-radius: 12px;
     background: rgb(144 176 96);
     
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: none;
 }
 .navbar-brand:hover {
     background: rgba(255, 255, 255, 0.25);

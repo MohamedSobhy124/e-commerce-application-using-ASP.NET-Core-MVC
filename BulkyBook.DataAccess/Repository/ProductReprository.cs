@@ -20,16 +20,13 @@ namespace BulkyBook.DataAccess.Repository
            var obgFromDB=_db.Products.FirstOrDefault(a=>a.Id == obj.Id);
             if (obgFromDB != null) { 
             obgFromDB.Title = obj.Title;    
-                obgFromDB.ISBN = obj.ISBN;  
-                obgFromDB.Author = obj.Author;
                 obgFromDB.Price = obj.Price;    
                 obgFromDB.ListPrice = obj.ListPrice;
-                obgFromDB.Price50 = obj.Price50;
-                obgFromDB.Price100  = obj.Price100;
                 obgFromDB.CategryId = obj.CategryId;
                 obgFromDB.Description   = obj.Description;
                 obgFromDB.StockQuantity   = obj.StockQuantity;
                 obgFromDB.MinimumStockAlert   = obj.MinimumStockAlert;
+                obgFromDB.ProductType = obj.ProductType;
                 if(obj.ImageUrl != null)
                 {
                     obgFromDB.ImageUrl = obj.ImageUrl;

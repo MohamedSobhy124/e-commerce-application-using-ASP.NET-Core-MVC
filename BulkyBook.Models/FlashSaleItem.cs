@@ -16,6 +16,9 @@ namespace BulkyBook.Models
         [Display(Name = "Product")]
         public int ProductId { get; set; }
 
+        [Display(Name = "Product Variant")]
+        public int? ProductVariantId { get; set; }
+
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
         [Display(Name = "Flash Sale Quantity")]
@@ -43,6 +46,10 @@ namespace BulkyBook.Models
         [ValidateNever]
         public Product Product { get; set; }
 
+        [ForeignKey(nameof(ProductVariantId))]
+        [ValidateNever]
+        public ProductVariant? ProductVariant { get; set; }
+
         // Calculated properties
         [NotMapped]
         public bool IsAvailable => FlashSaleQuantity > 0;
@@ -52,8 +59,8 @@ namespace BulkyBook.Models
         {
             get
             {
-                if (Product == null) return 0;
-                return (decimal)Product.Price - FlashSalePrice;
+                decimal originalPrice = ProductVariant?.Price==0 ?( (decimal)Product.Price): ProductVariant!.Price;
+                return originalPrice - FlashSalePrice;
             }
         }
 
@@ -62,8 +69,9 @@ namespace BulkyBook.Models
         {
             get
             {
-                if (Product == null || Product.Price <= 0) return 0;
-                return Math.Round(((Product.Price - (double)FlashSalePrice) / Product.Price) * 100, 2);
+                decimal originalPrice =( ProductVariant is null || ProductVariant?.Price == 0 )? ((decimal)Product.Price) : ProductVariant!.Price;
+                if (originalPrice <= 0) return 0;
+                return Math.Round(((double)originalPrice - (double)FlashSalePrice) / (double)originalPrice * 100, 2);
             }
         }
     }

@@ -1944,4 +1944,310 @@
   <data name="FlashSaleEmailFooter" xml:space="preserve">
     <value>Don't miss out on these amazing deals! Shop now before the sale ends.</value>
   </data>
+  <data name="ProductTypeAndVariants" xml:space="preserve">
+    <value>Product Type &amp; Variants</value>
+  </data>
+  <data name="ConfigureProductVariantsDescription" xml:space="preserve">
+    <value>Configure whether this product has options (Size, Color, etc.) and manage variants</value>
+  </data>
+  <data name="ProductType" xml:space="preserve">
+    <value>Product Type</value>
+  </data>
+  <data name="SimpleProduct" xml:space="preserve">
+    <value>Simple Product (No Options)</value>
+  </data>
+  <data name="VariableProduct" xml:space="preserve">
+    <value>Variable Product (With Options)</value>
+  </data>
+  <data name="ProductTypeHelp" xml:space="preserve">
+    <value>Simple: One price, one stock. Variable: Multiple options (Size, Color, etc.)</value>
+  </data>
+  <data name="ProductOptionsAndVariants" xml:space="preserve">
+    <value>Product Options &amp; Variants</value>
+  </data>
+  <data name="ManageProductVariantsDescription" xml:space="preserve">
+    <value>Add options and generate all possible variant combinations</value>
+  </data>
+  <data name="ProductOptions" xml:space="preserve">
+    <value>Product Options</value>
+  </data>
+  <data name="AddOptionsLikeSizeColor" xml:space="preserve">
+    <value>Add options like Size, Color, Flavor, etc.</value>
+  </data>
+  <data name="AddOption" xml:space="preserve">
+    <value>Add Option</value>
+  </data>
+  <data name="ProductVariants" xml:space="preserve">
+    <value>Product Variants</value>
+  </data>
+  <data name="AllCombinationsOfOptions" xml:space="preserve">
+    <value>All combinations of your options</value>
+  </data>
+  <data name="GenerateVariants" xml:space="preserve">
+    <value>Generate Variants</value>
+  </data>
+  <data name="Variant" xml:space="preserve">
+    <value>Variant</value>
+  </data>
+  <data name="ListPrice" xml:space="preserve">
+    <value>List Price</value>
+  </data>
+  <data name="Stock" xml:space="preserve">
+    <value>Stock</value>
+  </data>
+  <data name="MinStockAlert" xml:space="preserve">
+    <value>Min Stock Alert</value>
+  </data>
+  <data name="Image" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="Upload" xml:space="preserve">
+    <value>Upload</value>
+  </data>
+  <data name="DeleteOption" xml:space="preserve">
+    <value>Delete Option</value>
+  </data>
+  <data name="AddValuePlaceholder" xml:space="preserve">
+    <value>Add value (e.g., S, M, L)</value>
+  </data>
+  <data name="NoValuesAddedYet" xml:space="preserve">
+    <value>No values added yet.</value>
+  </data>
+  <data name="RemoveValue" xml:space="preserve">
+    <value>Remove Value</value>
+  </data>
+  <data name="NoOptionsAddedYet" xml:space="preserve">
+    <value>No options added yet. Click "Add Option" to get started.</value>
+  </data>
+  <data name="NoVariantsGeneratedYet" xml:space="preserve">
+    <value>No variants generated yet. Add options and click "Generate Variants".</value>
+  </data>
+  <data name="OptionAddedSuccessfully" xml:space="preserve">
+    <value>Option added successfully</value>
+  </data>
+  <data name="FailedToAddOption" xml:space="preserve">
+    <value>Failed to add option</value>
+  </data>
+  <data name="SaveProductFirst" xml:space="preserve">
+    <value>Save Product First</value>
+  </data>
+  <data name="PleaseSaveProductBeforeAddingOptions" xml:space="preserve">
+    <value>Please save the product before adding options.</value>
+  </data>
+  <data name="AddNewOption" xml:space="preserve">
+    <value>Add New Option</value>
+  </data>
+  <data name="OptionNameExample" xml:space="preserve">
+    <value>Option Name (e.g., Size, Color, Flavor)</value>
+  </data>
+  <data name="EnterOptionName" xml:space="preserve">
+    <value>Enter option name</value>
+  </data>
+  <data name="OptionNameRequired" xml:space="preserve">
+    <value>Option name is required!</value>
+  </data>
+  <data name="PleaseEnterValue" xml:space="preserve">
+    <value>Please enter a value</value>
+  </data>
+  <data name="FailedToAddValue" xml:space="preserve">
+    <value>Failed to add value</value>
+  </data>
+  <data name="DeleteOptionWarning" xml:space="preserve">
+    <value>This will delete the option and all its values. This action cannot be undone!</value>
+  </data>
+  <data name="YesDeleteIt" xml:space="preserve">
+    <value>Yes, Delete It</value>
+  </data>
+  <data name="Deleted" xml:space="preserve">
+    <value>Deleted</value>
+  </data>
+  <data name="OptionDeletedSuccessfully" xml:space="preserve">
+    <value>Option deleted successfully</value>
+  </data>
+  <data name="FailedToDeleteOption" xml:space="preserve">
+    <value>Failed to delete option</value>
+  </data>
+  <data name="FailedToDeleteValue" xml:space="preserve">
+    <value>Failed to delete value</value>
+  </data>
+  <data name="PleaseSaveProductFirst" xml:space="preserve">
+    <value>Please save the product first</value>
+  </data>
+  <data name="GenerateVariantsWarning" xml:space="preserve">
+    <value>This will create all possible combinations of options. Existing variants will be preserved, new ones will be added.</value>
+  </data>
+  <data name="YesGenerate" xml:space="preserve">
+    <value>Yes, Generate</value>
+  </data>
+  <data name="Generating" xml:space="preserve">
+    <value>Generating...</value>
+  </data>
+  <data name="PleaseWaitGeneratingVariants" xml:space="preserve">
+    <value>Please wait while variants are being generated</value>
+  </data>
+  <data name="VariantsGeneratedSuccessfully" xml:space="preserve">
+    <value>Variants generated successfully</value>
+  </data>
+  <data name="FailedToGenerateVariants" xml:space="preserve">
+    <value>Failed to generate variants</value>
+  </data>
+  <data name="FailedToGenerateVariantsCheckConsole" xml:space="preserve">
+    <value>Failed to generate variants. Please check the console for details.</value>
+  </data>
+  <data name="FailedToUploadImage" xml:space="preserve">
+    <value>Failed to upload image</value>
+  </data>
+  <data name="DeleteVariant" xml:space="preserve">
+    <value>Delete Variant</value>
+  </data>
+  <data name="DeleteVariantWarning" xml:space="preserve">
+    <value>This action cannot be undone!</value>
+  </data>
+  <data name="DeleteImage" xml:space="preserve">
+    <value>Delete Image</value>
+  </data>
+  <data name="AreYouSureDeleteImage" xml:space="preserve">
+    <value>Are you sure you want to delete this image?</value>
+  </data>
+  <data name="ErrorDeletingImage" xml:space="preserve">
+    <value>Error deleting image</value>
+  </data>
+  <data name="UnknownError" xml:space="preserve">
+    <value>Unknown error</value>
+  </data>
+  <data name="ErrorDeletingImageTryAgain" xml:space="preserve">
+    <value>Error deleting image. Please try again.</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="EnterProductTitle" xml:space="preserve">
+    <value>Enter product title</value>
+  </data>
+  <data name="EnterProductDescription" xml:space="preserve">
+    <value>Enter product description</value>
+  </data>
+  <data name="EnterISBN" xml:space="preserve">
+    <value>Enter ISBN</value>
+  </data>
+  <data name="EnterAuthorName" xml:space="preserve">
+    <value>Enter author name</value>
+  </data>
+  <data name="Price50" xml:space="preserve">
+    <value>Price for 50+</value>
+  </data>
+  <data name="Price100" xml:space="preserve">
+    <value>Price for 100+</value>
+  </data>
+  <data name="StockManagement" xml:space="preserve">
+    <value>Stock Management</value>
+  </data>
+  <data name="StockQuantity" xml:space="preserve">
+    <value>Stock Quantity</value>
+  </data>
+  <data name="EnterAvailableStock" xml:space="preserve">
+    <value>Enter available stock</value>
+  </data>
+  <data name="CurrentQuantityInStock" xml:space="preserve">
+    <value>Current quantity in stock</value>
+  </data>
+  <data name="LowStockAlertLevel" xml:space="preserve">
+    <value>Low Stock Alert Level</value>
+  </data>
+  <data name="SetAlertThreshold" xml:space="preserve">
+    <value>Set alert threshold</value>
+  </data>
+  <data name="ShowWarningWhenStockFalls" xml:space="preserve">
+    <value>Show warning when stock falls to this level</value>
+  </data>
+  <data name="SelectCategory" xml:space="preserve">
+    <value>Select Category</value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>Back to List</value>
+  </data>
+  <data name="ProductImages" xml:space="preserve">
+    <value>Product Images</value>
+  </data>
+  <data name="UploadImages" xml:space="preserve">
+    <value>Upload Images</value>
+  </data>
+  <data name="NoImagesPleaseUpload" xml:space="preserve">
+    <value>No images. Please upload at least one image.</value>
+  </data>
+  <data name="AtLeastOneRequired" xml:space="preserve">
+    <value>At least 1 required</value>
+  </data>
+  <data name="Step1Title" xml:space="preserve">
+    <value>Step 1: Choose Product Type</value>
+  </data>
+  <data name="Step1Description" xml:space="preserve">
+    <value>Select whether this product has variations (like different sizes or colors) or is a simple product with one price and stock level.</value>
+  </data>
+  <data name="Step2Title" xml:space="preserve">
+    <value>Step 2: Add Product Options</value>
+  </data>
+  <data name="Step2Description" xml:space="preserve">
+    <value>Create options for your product (e.g., Size, Color, Material). These are the attributes that will vary between product variants.</value>
+  </data>
+  <data name="Step3Title" xml:space="preserve">
+    <value>Step 3: Add Option Values</value>
+  </data>
+  <data name="Step3Description" xml:space="preserve">
+    <value>For each option, add the possible values (e.g., for Size: Small, Medium, Large). Each option must have at least one value.</value>
+  </data>
+  <data name="Step3Info" xml:space="preserve">
+    <value>Add values to each option using the input field below each option card. Click "Add" after entering each value.</value>
+  </data>
+  <data name="Step4Title" xml:space="preserve">
+    <value>Step 4: Generate Variants</value>
+  </data>
+  <data name="Step4Description" xml:space="preserve">
+    <value>Click the button below to automatically create all possible combinations of your options. Existing variants will be preserved.</value>
+  </data>
+  <data name="Step4Info" xml:space="preserve">
+    <value>The system will create all possible combinations. For example: Size (S, M, L) × Color (Red, Blue) = 6 variants (S-Red, S-Blue, M-Red, M-Blue, L-Red, L-Blue).</value>
+  </data>
+  <data name="Step5Title" xml:space="preserve">
+    <value>Step 5: Edit Variant Details</value>
+  </data>
+  <data name="Step5Description" xml:space="preserve">
+    <value>Set the price, stock quantity, minimum stock alert, and upload images for each variant. All fields are editable directly in the table below.</value>
+  </data>
+  <data name="SaveStep" xml:space="preserve">
+    <value>Save Step</value>
+  </data>
+  <data name="StepSavedSuccessfully" xml:space="preserve">
+    <value>Step saved successfully!</value>
+  </data>
+  <data name="FailedToSaveStep" xml:space="preserve">
+    <value>Failed to save step. Please try again.</value>
+  </data>
+  <data name="SelectOptions" xml:space="preserve">
+    <value>Select Options</value>
+  </data>
+  <data name="VariantNotFound" xml:space="preserve">
+    <value>Variant Not Found</value>
+  </data>
+  <data name="PleaseSelect" xml:space="preserve">
+    <value>Please select</value>
+  </data>
+  <data name="MoreOptions" xml:space="preserve">
+    <value>more options</value>
+  </data>
+  <data name="SelectAllOptions" xml:space="preserve">
+    <value>Please select all options before adding to cart</value>
+  </data>
+  <data name="SelectVariant" xml:space="preserve">
+    <value>Select Variant</value>
+  </data>
+  <data name="VariantPrice" xml:space="preserve">
+    <value>Variant Price</value>
+  </data>
+  <data name="VariantStock" xml:space="preserve">
+    <value>Variant Stock</value>
+  </data>
+  <data name="Stock" xml:space="preserve">
+    <value>Stock</value>
+  </data>
 </root>

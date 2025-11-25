@@ -1,4 +1,11 @@
-﻿@model ShoppingCartVM
+﻿@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
+@model ShoppingCartVM
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+}
 
 <section class="cart-page-wrapper">
     <div class="container py-4">
@@ -65,7 +72,7 @@
                                 </div>
                             </div>
                             <div class="col-md-3 col-lg-2 col-xl-2">
-                                <h5 class="cart-item-price">@item.Price.ToString("c")</h5>
+                                <h5 class="cart-item-price">@Html.Raw(currencySymbol) @item.Price.ToString("N2")</h5>
                             </div>                          
                             <div class="col-md-1 col-lg-1 col-xl-1 text-end">
                                 <a asp-action="Remove" asp-route-CartId="@item.Id" asp-route-ProductId="@item.ProductId" class="cart-delete-btn">
@@ -78,7 +85,7 @@
 
                 <div class="cart-total-card">
                     <p class="cart-total-label">@Localizer["TotalAmount"]</p>
-                    <h2 class="cart-total-amount">@Model.OrderTotal.ToString("c")</h2>
+                    <h2 class="cart-total-amount">@Html.Raw(currencySymbol) @Model.OrderTotal.ToString("N2")</h2>
                     <hr style="border-color: rgba(255,255,255,0.3); margin: 1.5rem 0;" />
                     <a asp-action="Summary" class="cart-summary-btn">
                         <i class="bi bi-arrow-right-circle"></i>
