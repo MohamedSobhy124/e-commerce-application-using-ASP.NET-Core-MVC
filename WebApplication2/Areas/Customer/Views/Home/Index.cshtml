@@ -2,8 +2,23 @@
 @using BulkyBook.Utility
 @model IEnumerable<Product>
 @inject BulkyBook.DataAccess.Repository.IRepository.IUnitOfWork _unitOfWork
+@inject IConfiguration Configuration
 
 @{
+    ViewData["Title"] = Localizer["Home"];
+    var baseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var siteDescription = currentCulture == "ar" 
+        ? (Configuration["SiteSettings:SiteDescriptionAr"] ?? "مكملات صحية ولياقة بدنية متميزة في الإمارات")
+        : (Configuration["SiteSettings:SiteDescription"] ?? "Premium health and fitness supplements in UAE");
+    
+    ViewData["Description"] = siteDescription;
+    ViewData["Keywords"] = currentCulture == "ar" 
+        ? "مكملات غذائية, صحة, لياقة, وزن مثالي, الإمارات, منتجات صحية"
+        : "nutrition supplements, health, fitness, ideal weight, UAE, health products";
+    ViewData["Image"] = baseUrl + "/Images/Products/logo_white_bg.png";
+    
     var categories = ViewBag.Categories as IEnumerable<BulkyBook.Models.Categry> ?? Enumerable.Empty<BulkyBook.Models.Categry>();
     var selectedCategory = ViewBag.SelectedCategory as int?;
     var searchTerm = ViewBag.SearchTerm as string ?? "";
@@ -15,10 +30,6 @@
     var minPriceRange = ViewBag.MinPriceRange as decimal? ?? 0;
     var maxPriceRange = ViewBag.MaxPriceRange as decimal? ?? 1000;
     var totalProducts = ViewBag.TotalProducts as int? ?? 0;
-}
-@{
-    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
-    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
 }
 
@@ -1114,7 +1125,7 @@
     </div>
 </div>
 -->
-@section Scripts {
+    @section Scripts {
     <script>
         // Localizations for JavaScript
         const localizations = {

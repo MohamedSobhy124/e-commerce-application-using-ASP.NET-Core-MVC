@@ -1,11 +1,26 @@
 ﻿@using Microsoft.AspNetCore.Localization
 @using BulkyBook.Utility
+@using BulkyBook.Models.ViewModels
 @inject IConfiguration Configuration
 @model ShoppingCart
 @{
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var baseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
+    
+    // Get SEO data from ViewData (set by controller)
+    var seo = ViewData["SEO"] as SEOViewModel;
+    var productRating = ViewData["ProductRating"] as double?;
+    var productReviewCount = ViewData["ProductReviewCount"] as int?;
+    
+    // Generate breadcrumbs
+    var breadcrumbs = new List<BreadcrumbItem>
+    {
+        new BreadcrumbItem { Name = currentCulture == "ar" ? "الرئيسية" : "Home", Url = $"{baseUrl}/Customer/Home" },
+        new BreadcrumbItem { Name = Model.product.categry?.Name ?? (currentCulture == "ar" ? "الفئات" : "Categories"), Url = $"{baseUrl}/Customer/Home?categoryId={Model.product.CategryId}" },
+        new BreadcrumbItem { Name = Model.product.Title, Url = $"{baseUrl}/Customer/Home/Details?productId={Model.product.Id}" }
+    };
 }
   
 <form method="post">
@@ -286,6 +301,22 @@
         </div>
     </div>
 </div>
+
+@section StructuredData {
+    @if (seo != null)
+    {
+        var productSchema = SEOHelper.GenerateProductStructuredData(Model.product, seo, baseUrl, productRating, productReviewCount);
+        var breadcrumbSchema = SEOHelper.GenerateBreadcrumbStructuredData(breadcrumbs, baseUrl);
+        
+        <script type="application/ld+json">
+        @Html.Raw(productSchema)
+        </script>
+        
+        <script type="application/ld+json">
+        @Html.Raw(breadcrumbSchema)
+        </script>
+    }
+}
 
 @section Scripts {
     <script>

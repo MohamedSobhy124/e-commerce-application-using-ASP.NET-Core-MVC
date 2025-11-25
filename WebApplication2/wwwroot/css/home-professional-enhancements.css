@@ -1,0 +1,509 @@
+/* ===================================
+   PROFESSIONAL DESIGN ENHANCEMENTS
+   For Home Page - Modern & Clean Look
+   =================================== */
+
+/* ===================================
+   1. TYPOGRAPHY IMPROVEMENTS
+   =================================== */
+.hero-title {
+    font-weight: 700 !important;
+    letter-spacing: -0.5px !important;
+    color: #1a1a1a !important;
+}
+
+.hero-subtitle {
+    color: #666 !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.2px !important;
+}
+
+.section-title {
+    font-weight: 600 !important;
+    color: #2c3e50 !important;
+    letter-spacing: -0.3px !important;
+}
+
+/* ===================================
+   2. HERO SECTION - PROFESSIONAL
+   =================================== */
+.hero-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(59, 157, 213, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(123, 192, 67, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-welcome {
+    background: rgba(59, 157, 213, 0.08) !important;
+    border: 1px solid rgba(59, 157, 213, 0.15) !important;
+    backdrop-filter: blur(10px);
+}
+
+.hero-welcome-text {
+    color: #3B9DD5 !important;
+    font-weight: 600 !important;
+}
+
+/* Trust Badges - Professional Look */
+.trust-badge {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.3s ease !important;
+}
+
+.trust-badge:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    border-color: rgba(59, 157, 213, 0.3) !important;
+}
+
+.trust-badge i {
+    color: #3B9DD5 !important;
+}
+
+/* Search Box - Professional */
+.advanced-search-container {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+    backdrop-filter: blur(10px);
+}
+
+.hero-search-input {
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease !important;
+}
+
+.hero-search-input:focus {
+    border-color: #3B9DD5 !important;
+    box-shadow: 0 0 0 3px rgba(59, 157, 213, 0.1) !important;
+    outline: none !important;
+}
+
+.hero-search-btn {
+    background: linear-gradient(135deg, #3B9DD5 0%, #2a7ba8 100%) !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.hero-search-btn:hover {
+    background: linear-gradient(135deg, #2a7ba8 0%, #3B9DD5 100%) !important;
+    box-shadow: 0 6px 18px rgba(59, 157, 213, 0.4) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Category Badges - Refined */
+.hero-category-badge {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    transition: all 0.3s ease !important;
+    font-weight: 500 !important;
+}
+
+.hero-category-badge:hover {
+    background: rgba(59, 157, 213, 0.1) !important;
+    border-color: #3B9DD5 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(59, 157, 213, 0.15) !important;
+}
+
+.hero-category-badge.active {
+    background: linear-gradient(135deg, #3B9DD5 0%, #2a7ba8 100%) !important;
+    color: white !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3) !important;
+}
+
+/* ===================================
+   3. FLASH SALE SECTION - ELEGANT
+   =================================== */
+.flash-sale-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.flash-sale-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.flash-sale-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.flash-sale-section-header {
+    text-align: center;
+    padding: 1.5rem 0 0.5rem 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.flash-sale-section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.flash-sale-section-title i {
+    color: #f59e0b;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* ===================================
+   4. PRODUCT CARDS - PREMIUM LOOK
+   =================================== */
+.product-card {
+    background: #ffffff !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(59, 157, 213, 0.1), rgba(123, 192, 67, 0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.product-card:hover {
+    transform: translateY(-6px) scale(1.01) !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+.product-card:hover::before {
+    opacity: 1;
+}
+
+.product-image-wrapper {
+    background: #f8f9fa !important;
+    border-radius: 10px 10px 0 0 !important;
+    overflow: hidden;
+    position: relative;
+}
+
+.product-image {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.05) !important;
+}
+
+/* Product Content - Clean */
+.product-content {
+    padding: 1rem !important;
+}
+
+.product-category {
+    color: #3B9DD5 !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.product-title {
+    color: #2c3e50 !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Price Section - Professional */
+.price-section {
+    margin: 0.75rem 0 !important;
+}
+
+.current-price {
+    color: #2c3e50 !important;
+    font-weight: 700 !important;
+    font-size: 1.25rem !important;
+}
+
+.list-price {
+    color: #999 !important;
+    text-decoration: line-through !important;
+    font-size: 0.9rem !important;
+}
+
+.discount-percent {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: white !important;
+    padding: 0.25rem 0.6rem !important;
+    border-radius: 12px !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+}
+
+/* Product Actions - Refined Buttons */
+.btn-view-details,
+.btn-select-options {
+    background: rgba(59, 157, 213, 0.1) !important;
+    color: #3B9DD5 !important;
+    border: 1px solid rgba(59, 157, 213, 0.3) !important;
+    transition: all 0.3s ease !important;
+    font-weight: 600 !important;
+}
+
+.btn-view-details:hover,
+.btn-select-options:hover {
+    background: linear-gradient(135deg, #3B9DD5 0%, #2a7ba8 100%) !important;
+    color: white !important;
+    border-color: transparent !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3) !important;
+}
+
+.btn-add-cart-quick {
+    background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(123, 192, 67, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-add-cart-quick:hover {
+    background: linear-gradient(135deg, #6ba836 0%, #7BC043 100%) !important;
+    box-shadow: 0 6px 18px rgba(123, 192, 67, 0.4) !important;
+    transform: translateY(-2px) scale(1.05) !important;
+}
+
+.btn-add-cart-quick.in-cart {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* ===================================
+   5. SERVICES SECTION - ELEGANT
+   =================================== */
+.services-showcase-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
+    position: relative;
+}
+
+.services-title {
+    color: #2c3e50 !important;
+    font-weight: 700 !important;
+}
+
+.services-title i {
+    color: #3B9DD5 !important;
+}
+
+.service-card-home {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.service-card-home:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+    border-color: rgba(59, 157, 213, 0.2) !important;
+}
+
+.service-card-image-wrapper {
+    background: #f8f9fa !important;
+    overflow: hidden;
+}
+
+.service-card-title {
+    color: #2c3e50 !important;
+    font-weight: 600 !important;
+}
+
+.service-card-description {
+    color: #666 !important;
+    line-height: 1.6 !important;
+}
+
+.service-price-final {
+    color: #3B9DD5 !important;
+    font-weight: 700 !important;
+}
+
+.service-card-btn {
+    background: rgba(59, 157, 213, 0.1) !important;
+    color: #3B9DD5 !important;
+    border: 1px solid rgba(59, 157, 213, 0.3) !important;
+    transition: all 0.3s ease !important;
+    font-weight: 600 !important;
+}
+
+.service-card-btn:hover {
+    background: linear-gradient(135deg, #3B9DD5 0%, #2a7ba8 100%) !important;
+    color: white !important;
+    border-color: transparent !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3) !important;
+}
+
+/* ===================================
+   6. FILTER SECTION - CLEAN
+   =================================== */
+.filter-section {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+.filter-title {
+    color: #2c3e50 !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid rgba(59, 157, 213, 0.2) !important;
+    padding-bottom: 0.75rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.filter-title i {
+    color: #3B9DD5 !important;
+}
+
+.form-select:focus,
+.form-control:focus {
+    border-color: #3B9DD5 !important;
+    box-shadow: 0 0 0 3px rgba(59, 157, 213, 0.1) !important;
+    outline: none !important;
+}
+
+/* ===================================
+   7. FEATURES SECTION - PROFESSIONAL
+   =================================== */
+.features-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
+}
+
+.feature-item {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    transition: all 0.3s ease !important;
+}
+
+.feature-item:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+    border-color: rgba(59, 157, 213, 0.2) !important;
+}
+
+.feature-icon {
+    background: linear-gradient(135deg, rgba(59, 157, 213, 0.1), rgba(123, 192, 67, 0.1)) !important;
+    color: #3B9DD5 !important;
+}
+
+.feature-title {
+    color: #2c3e50 !important;
+    font-weight: 600 !important;
+}
+
+.feature-description {
+    color: #666 !important;
+    line-height: 1.6 !important;
+}
+
+ 
+
+/* ===================================
+   9. LOAD MORE BUTTON - REFINED
+   =================================== */
+#loadMoreBtn {
+    background: linear-gradient(135deg, #3B9DD5 0%, #2a7ba8 100%) !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3) !important;
+    transition: all 0.3s ease !important;
+    font-weight: 600 !important;
+}
+
+#loadMoreBtn:hover {
+    background: linear-gradient(135deg, #2a7ba8 0%, #3B9DD5 100%) !important;
+    box-shadow: 0 6px 18px rgba(59, 157, 213, 0.4) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* ===================================
+   10. RESPONSIVE IMPROVEMENTS
+   =================================== */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 1.5rem 0 1rem 0 !important;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-2px) !important;
+    }
+    
+    .service-card-home:hover {
+        transform: translateY(-2px) !important;
+    }
+}
+
+/* ===================================
+   11. SMOOTH SCROLLING
+   =================================== */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ===================================
+   12. SECTION SPACING - CONSISTENT
+   =================================== */
+section {
+    margin-bottom: 3rem !important;
+}
+
+@media (max-width: 768px) {
+    section {
+        margin-bottom: 2rem !important;
+    }
+}
+

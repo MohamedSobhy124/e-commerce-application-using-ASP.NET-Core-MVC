@@ -13,7 +13,69 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Ideal Weight</title>
+    <title>@ViewData["Title"] - Ideal Weight Nutrition</title>
+    
+    <!-- Google Search Console Verification -->
+    <!-- TODO: Replace with your actual verification code from Google Search Console -->
+    <!-- <meta name="google-site-verification" content="YOUR_VERIFICATION_CODE_HERE" /> -->
+    
+    <!-- SEO Meta Tags Partial -->
+    <partial name="_SEOMetaTags" />
+    
+    @{
+        string baseUrl;
+        string siteName;
+        string siteDescription;
+        string pageTitle;
+        string pageDescription;
+        string pageImage;
+        
+        try
+        {
+            baseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
+            siteName = Configuration["SiteSettings:SiteName"] ?? "Ideal Weight Nutrition";
+            siteDescription = currentCulture == "ar" 
+                ? (Configuration["SiteSettings:SiteDescriptionAr"] ?? "مكملات صحية ولياقة بدنية متميزة في الإمارات")
+                : (Configuration["SiteSettings:SiteDescription"] ?? "Premium health and fitness supplements in UAE");
+            pageTitle = ViewData["Title"]?.ToString() ?? (currentCulture == "ar" ? "الرئيسية" : "Home");
+            pageDescription = ViewData["Description"]?.ToString() ?? siteDescription;
+            pageImage = ViewData["Image"]?.ToString() ?? baseUrl + "/Images/Products/logo_white_bg.png";
+        }
+        catch
+        {
+            baseUrl = Context.Request.Scheme + "://" + Context.Request.Host;
+            siteName = "Ideal Weight Nutrition";
+            siteDescription = currentCulture == "ar" 
+                ? "مكملات صحية ولياقة بدنية متميزة في الإمارات"
+                : "Premium health and fitness supplements in UAE";
+            pageTitle = ViewData["Title"]?.ToString() ?? (currentCulture == "ar" ? "الرئيسية" : "Home");
+            pageDescription = ViewData["Description"]?.ToString() ?? siteDescription;
+            pageImage = baseUrl + "/Images/Products/logo_white_bg.png";
+        }
+    }
+    
+    <!-- SEO Meta Tags are now handled by _SEOMetaTags partial above -->
+    
+    <!-- Structured Data (JSON-LD) - Organization, LocalBusiness & Website (Global) -->
+    @{
+        var orgSchema = SEOHelper.GenerateOrganizationStructuredData(baseUrl, siteName, siteDescription);
+        var localBusinessSchema = SEOHelper.GenerateLocalBusinessStructuredData(baseUrl, siteName, siteDescription, Configuration);
+        var websiteSchema = SEOHelper.GenerateWebsiteStructuredData(baseUrl, siteName);
+    }
+    <script type="application/ld+json">
+    @Html.Raw(orgSchema)
+    </script>
+    
+    <script type="application/ld+json">
+    @Html.Raw(localBusinessSchema)
+    </script>
+    
+    <script type="application/ld+json">
+    @Html.Raw(websiteSchema)
+    </script>
+    
+    <!-- Page-Specific Structured Data (will be added by individual pages) -->
+    @RenderSection("StructuredData", required: false)
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
 	<link rel="icon" type="image/png" href="~/Images/Products/logo_white_bg.png" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
@@ -50,6 +112,7 @@
     <link rel="stylesheet" href="~/css/services-home.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/home-enhanced-sections.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/home-compact-mobile.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/home-professional-enhancements.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BulkyBook.styles.css" asp-append-version="true" />
 
 
