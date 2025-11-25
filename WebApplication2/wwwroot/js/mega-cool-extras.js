@@ -165,7 +165,7 @@
                         padding: 0.75rem 1rem;
                         border-radius: 8px;
                         font-weight: 700;
-                        font-size: 0.85rem;
+                        font-size: 0.6rem;
                         display: flex;
                         align-items: center;
                         gap: 0.5rem;
