@@ -19,13 +19,15 @@ namespace BulkyBook.Areas.Customer.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStringLocalizer<BulkyBook.SharedResources> _localizer;
         private readonly ApplicationDBContext _dbContext;
+        private readonly IConfiguration _configuration;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IStringLocalizer<BulkyBook.SharedResources> localizer, ApplicationDBContext dbContext)
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IStringLocalizer<BulkyBook.SharedResources> localizer, ApplicationDBContext dbContext, IConfiguration configuration)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _localizer = localizer;
             _dbContext = dbContext;
+            _configuration = configuration;
         }
 
         [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" })]
@@ -677,6 +679,27 @@ namespace BulkyBook.Areas.Customer.Controllers
                 ProductId=productId,
                 CanReview= hasPurchased
             };
+
+            // Get SEO data
+            var baseUrl = _configuration["SiteSettings:BaseUrl"] ?? Request.Scheme + "://" + Request.Host;
+            var seo = SEOHelper.GetProductSEO(product, baseUrl, _localizer["Culture"]?.ToString() ?? "en");
+            
+            // Get product rating for structured data
+            var averageRating = _unitOfWork.review.GetAverageRating(productId);
+            var reviewCount = _unitOfWork.review.GetReviewCount(productId);
+            if (averageRating > 0 && reviewCount > 0)
+            {
+                seo.Rating = averageRating;
+                seo.ReviewCount = reviewCount;
+            }
+
+            ViewData["SEO"] = seo;
+            ViewData["Title"] = seo.Title;
+            ViewData["Description"] = seo.Description;
+            ViewData["Keywords"] = seo.Keywords;
+            ViewData["Image"] = seo.ImageUrl;
+            ViewData["ProductRating"] = averageRating;
+            ViewData["ProductReviewCount"] = reviewCount;
         
             return View(cart);
         }

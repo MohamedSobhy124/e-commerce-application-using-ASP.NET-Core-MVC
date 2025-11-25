@@ -1,0 +1,87 @@
+@using BulkyBook.Models.ViewModels
+@using BulkyBook.Utility
+@using Microsoft.AspNetCore.Localization
+@inject IConfiguration Configuration
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    
+    var seo = ViewData["SEO"] as SEOViewModel;
+    var baseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
+    var siteName = Configuration["SiteSettings:SiteName"] ?? "Ideal Weight Nutrition";
+    var siteDescription = currentCulture == "ar" 
+        ? (Configuration["SiteSettings:SiteDescriptionAr"] ?? "مكملات صحية ولياقة بدنية متميزة في الإمارات")
+        : (Configuration["SiteSettings:SiteDescription"] ?? "Premium health and fitness supplements in UAE");
+    
+    var pageTitle = seo?.Title ?? ViewData["Title"]?.ToString() ?? (currentCulture == "ar" ? "الرئيسية" : "Home");
+    var pageDescription = seo?.Description ?? ViewData["Description"]?.ToString() ?? siteDescription;
+    var pageKeywords = seo?.Keywords ?? ViewData["Keywords"]?.ToString() ?? (currentCulture == "ar" ? "مكملات غذائية, صحة, لياقة, وزن مثالي, الإمارات" : "nutrition supplements, health, fitness, ideal weight, UAE");
+    var pageImage = seo?.ImageUrl ?? ViewData["Image"]?.ToString() ?? baseUrl + "/Images/Products/logo_white_bg.png";
+    var canonicalUrl = seo?.CanonicalUrl ?? (baseUrl + Context.Request.Path + Context.Request.QueryString);
+    
+    // Ensure image URL is absolute
+    if (!string.IsNullOrEmpty(pageImage) && !pageImage.StartsWith("http"))
+    {
+        pageImage = baseUrl + (pageImage.StartsWith("/") ? "" : "/") + pageImage;
+    }
+}
+
+<!-- Primary Meta Tags -->
+<meta name="title" content="@(pageTitle) - @siteName" />
+<meta name="description" content="@pageDescription" />
+<meta name="keywords" content="@pageKeywords" />
+<meta name="author" content="@siteName" />
+<meta name="robots" content="index, follow" />
+<meta name="language" content="@currentCulture" />
+<meta name="revisit-after" content="7 days" />
+<meta name="distribution" content="global" />
+<meta name="rating" content="general" />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="@(seo?.PageType ?? "website")" />
+<meta property="og:url" content="@canonicalUrl" />
+<meta property="og:title" content="@(pageTitle) - @siteName" />
+<meta property="og:description" content="@pageDescription" />
+<meta property="og:image" content="@pageImage" />
+<meta property="og:site_name" content="@siteName" />
+<meta property="og:locale" content="@(currentCulture == "ar" ? "ar_AE" : "en_US")" />
+@if (seo?.PageType == "product" && seo.Price.HasValue)
+{
+    <meta property="product:price:amount" content="@seo.Price.Value.ToString("F2")" />
+    <meta property="product:price:currency" content="@seo.Currency" />
+    <meta property="product:availability" content="@(seo.InStock ? "in stock" : "out of stock")" />
+}
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content="@canonicalUrl" />
+<meta property="twitter:title" content="@(pageTitle) - @siteName" />
+<meta property="twitter:description" content="@pageDescription" />
+<meta property="twitter:image" content="@pageImage" />
+
+<!-- Canonical URL -->
+<link rel="canonical" href="@canonicalUrl" />
+
+<!-- Alternate Languages -->
+<link rel="alternate" hreflang="ar" href="@(baseUrl + Context.Request.Path)" />
+<link rel="alternate" hreflang="en" href="@(baseUrl + Context.Request.Path)" />
+<link rel="alternate" hreflang="x-default" href="@(baseUrl + Context.Request.Path)" />
+
+<!-- Geo Tags - UAE Specific -->
+<meta name="geo.region" content="AE" />
+<meta name="geo.placename" content="United Arab Emirates" />
+<meta name="geo.position" content="25.2048;55.2708" />
+<meta name="ICBM" content="25.2048, 55.2708" />
+<meta name="geo.region" content="AE-DU" />
+<meta name="DC.title" content="@(pageTitle) - @siteName" />
+<meta name="DC.creator" content="@siteName" />
+<meta name="DC.subject" content="@pageKeywords" />
+<meta name="DC.description" content="@pageDescription" />
+<meta name="DC.publisher" content="@siteName" />
+<meta name="DC.contributor" content="@siteName" />
+<meta name="DC.coverage" content="United Arab Emirates" />
+<meta name="DC.language" content="@currentCulture" />
+
+<!-- UAE-Specific Keywords -->
+<meta name="keywords" content="@pageKeywords, Dubai, Abu Dhabi, Sharjah, UAE delivery, free delivery UAE, nutrition store UAE, supplements online UAE" />
+
