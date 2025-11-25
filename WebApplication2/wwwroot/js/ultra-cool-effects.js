@@ -398,10 +398,10 @@
         
         initScrollReveal();
         initParallax();
-        initMagneticButtons();
-        initRippleEffect();
+        //initMagneticButtons();
+        //initRippleEffect();
         initCounters();
-        init3DTilt();
+        //init3DTilt();
         initSmoothScroll();
         initTypingEffect();
         initLazyLoading();
