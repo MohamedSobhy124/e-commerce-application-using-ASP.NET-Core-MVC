@@ -106,7 +106,43 @@ var app = builder.Build();
     }
  
 
-app.UseStaticFiles();
+// Configure Static Files with Aggressive Caching
+var staticFileOptions = new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        var path = ctx.File.Name.ToLower();
+        var extension = System.IO.Path.GetExtension(path).ToLower();
+        
+        // Different cache durations based on file type
+        if (extension == ".css" || extension == ".js")
+        {
+            // CSS/JS: 1 year (with versioning via asp-append-version)
+            ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000,immutable");
+        }
+        else if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif" || extension == ".webp" || extension == ".svg")
+        {
+            // Images: 1 year
+            ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000,immutable");
+        }
+        else if (extension == ".woff" || extension == ".woff2" || extension == ".ttf" || extension == ".eot")
+        {
+            // Fonts: 1 year
+            ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000,immutable");
+        }
+        else
+        {
+            // Other static files: 1 month
+            ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=2592000");
+        }
+        
+        // Add ETag for cache validation
+        var etag = ctx.File.Name + ctx.File.LastModified.Ticks.ToString();
+        ctx.Context.Response.Headers.Append("ETag", $"\"{etag}\"");
+    }
+};
+
+app.UseStaticFiles(staticFileOptions);
 
 // Use Response Caching (must be before UseRouting)
 app.UseResponseCaching();

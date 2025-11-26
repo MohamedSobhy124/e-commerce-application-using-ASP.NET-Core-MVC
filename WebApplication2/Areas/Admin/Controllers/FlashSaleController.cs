@@ -67,6 +67,8 @@ namespace BulkyBook.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
+                // Set audit fields
+                AuditHelper.SetCreatedAudit(flashSale, User);
                 _unitOfWork.FlashSale.Add(flashSale);
                 _unitOfWork.save();
                 
@@ -315,6 +317,8 @@ namespace BulkyBook.Areas.Admin.Controllers
                 AddedDate = DateTime.Now
             };
 
+            // Set audit fields
+            AuditHelper.SetCreatedAudit(flashSaleItem, User);
             _unitOfWork.FlashSaleItem.Add(flashSaleItem);
             _unitOfWork.save();
 
@@ -331,6 +335,8 @@ namespace BulkyBook.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Item not found" });
             }
 
+            // Soft delete - handled by repository, but set audit fields
+            AuditHelper.SetDeletedAudit(item, User);
             _unitOfWork.FlashSaleItem.Remove(item);
             _unitOfWork.save();
 
@@ -364,6 +370,8 @@ namespace BulkyBook.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
+                // Set audit fields
+                AuditHelper.SetModifiedAudit(flashSale, User);
                 _unitOfWork.FlashSale.Update(flashSale);
                 _unitOfWork.save();
                 TempData["success"] = "Flash sale updated successfully";
@@ -398,16 +406,18 @@ namespace BulkyBook.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Flash sale not found" });
             }
 
-            // Remove all items first
+            // Soft delete all items first
             if (flashSale.FlashSaleItems != null && flashSale.FlashSaleItems.Any())
             {
                 foreach (var item in flashSale.FlashSaleItems.ToList())
                 {
+                    AuditHelper.SetDeletedAudit(item, User);
                     _unitOfWork.FlashSaleItem.Remove(item);
                 }
             }
 
-            // Remove flash sale
+            // Soft delete flash sale
+            AuditHelper.SetDeletedAudit(flashSale, User);
             _unitOfWork.FlashSale.Remove(flashSale);
             _unitOfWork.save();
 

@@ -16,6 +16,11 @@ namespace BulkyBook.DataAccess.Repository
 
         public void Update(FlashSale flashSale)
         {
+            // Set audit fields
+            if (flashSale is BaseEntity baseEntity)
+            {
+                baseEntity.ModifiedDate = DateTime.Now;
+            }
             _db.FlashSales.Update(flashSale);
         }
            
@@ -26,7 +31,17 @@ namespace BulkyBook.DataAccess.Repository
           
         public void Remove(FlashSale flashSale)
         {
-            _db.FlashSales.Remove(flashSale);
+            // Soft delete for BaseEntity types
+            if (flashSale is BaseEntity baseEntity)
+            {
+                baseEntity.IsDeleted = true;
+                baseEntity.ModifiedDate = DateTime.Now;
+                _db.FlashSales.Update(flashSale);
+            }
+            else
+            {
+                _db.FlashSales.Remove(flashSale);
+            }
         }
 
         public IEnumerable<FlashSale> GetActiveFlashSales()
@@ -60,7 +75,8 @@ namespace BulkyBook.DataAccess.Repository
                         .ThenInclude(v => v.VariantOptionValues)
                             .ThenInclude(vov => vov.OptionValue)
                                 .ThenInclude(ov => ov.ProductOption)
-                .FirstOrDefault(f => f.Id == flashSaleId);
+                .Where(f => f.Id == flashSaleId && !f.IsDeleted)
+                .FirstOrDefault();
         }
     }
 }

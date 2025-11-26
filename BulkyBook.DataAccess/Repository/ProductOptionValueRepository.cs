@@ -21,6 +21,11 @@ namespace BulkyBook.DataAccess.Repository
                 objFromDb.Value = obj.Value;
                 objFromDb.ProductOptionId = obj.ProductOptionId;
                 objFromDb.DisplayOrder = obj.DisplayOrder;
+                // Set audit fields
+                if (objFromDb is BaseEntity baseEntity)
+                {
+                    baseEntity.ModifiedDate = DateTime.Now;
+                }
             }
         }
     }

@@ -26,6 +26,11 @@ namespace BulkyBook.DataAccess.Repository
                 objFromDb.StockQuantity = obj.StockQuantity;
                 objFromDb.MinimumStockAlert = obj.MinimumStockAlert;
                 objFromDb.ImageUrl = obj.ImageUrl;
+                // Set audit fields
+                if (objFromDb is BaseEntity baseEntity)
+                {
+                    baseEntity.ModifiedDate = DateTime.Now;
+                }
             }
         }
 

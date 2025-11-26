@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Security.Claims;
 
 namespace BulkyBook.Areas.Admin.Controllers
 {
@@ -33,10 +34,13 @@ namespace BulkyBook.Areas.Admin.Controllers
         // GET: Categries
         public async Task<IActionResult> Index()
         {
-            List<Product> ObjProduct = _unitOfWork.product.GetAll(includeProperties: "categry").ToList();
+            // Get all products including deleted ones for admin view
+            var allProducts = _dbContext.Products
+                .Include(p => p.categry)
+                .OrderByDescending(p => p.Id)
+                .ToList();
             
-                
-                return View(ObjProduct);
+            return View(allProducts);
          }
 
         // GET: Categries/Details/5
@@ -75,28 +79,57 @@ namespace BulkyBook.Areas.Admin.Controllers
             else
             {
                 //update - load product with images, options, and variants
-                productVM.product = _unitOfWork.product.Get(a => a.Id == id, includeProperties: "ProductImages,ProductOptions,ProductVariants"); 
+                // Get product directly from context to include deleted items, then filter in code
+                productVM.product = _dbContext?.Products?
+                    .Include(p => p.ProductImages)?
+                    .Include(p => p.ProductOptions)?
+                    .Include(p => p.ProductVariants)?
+                    .FirstOrDefault(a => a.Id == id)!;
                 
-                // Load option values for each option
+                if (productVM.product == null)
+                {
+                    return NotFound();
+                }
+                
+                // Filter out deleted options and variants
                 if (productVM.product.ProductOptions != null)
                 {
-                    foreach (var option in productVM.product.ProductOptions)
+                    productVM.product.ProductOptions = productVM.product.ProductOptions
+                        .Where(o => !o.IsDeleted)
+                        .ToList();
+                }
+                
+                if (productVM.product.ProductVariants != null)
+                {
+                    productVM.product.ProductVariants = productVM.product.ProductVariants
+                        .Where(v => !v.IsDeleted)
+                        .ToList();
+                } 
+                
+                // Load option values for each option (only non-deleted options and values)
+                if (productVM.product.ProductOptions != null)
+                {
+                    foreach (var option in productVM.product.ProductOptions.Where(o => !o.IsDeleted))
                     {
                         option.OptionValues = _unitOfWork.ProductOptionValue.GetAll(
-                            ov => ov.ProductOptionId == option.Id
+                            ov => ov.ProductOptionId == option.Id && !ov.IsDeleted
                         ).ToList();
                     }
                 }
                 
-                // Load variant option values for each variant
+                // Load variant option values for each variant (only non-deleted variants)
                 if (productVM.product.ProductVariants != null)
                 {
-                    foreach (var variant in productVM.product.ProductVariants)
+                    foreach (var variant in productVM.product.ProductVariants.Where(v => !v.IsDeleted))
                     {
                         variant.VariantOptionValues = _dbContext.ProductVariantOptionValues
                             .Include(vov => vov.OptionValue)
                                 .ThenInclude(ov => ov.ProductOption)
-                            .Where(vov => vov.ProductVariantId == variant.Id)
+                            .Where(vov => vov.ProductVariantId == variant.Id 
+                                && vov.OptionValue != null 
+                                && !vov.OptionValue.IsDeleted
+                                && vov.OptionValue.ProductOption != null
+                                && !vov.OptionValue.ProductOption.IsDeleted)
                             .ToList();
                     }
                 }
@@ -197,6 +230,8 @@ namespace BulkyBook.Areas.Admin.Controllers
 
                 if (productVM.product.Id == 0)
                 {
+                    // Set audit fields for new product
+                    AuditHelper.SetCreatedAudit(productVM.product, User);
                     _unitOfWork.product.add(productVM.product);
                     _unitOfWork.save(); // This automatically saves ProductImages too!
                     
@@ -208,6 +243,8 @@ namespace BulkyBook.Areas.Admin.Controllers
                 }
                 else
                 {
+                    // Set audit fields for updated product
+                    AuditHelper.SetModifiedAudit(productVM.product, User);
                     _unitOfWork.product.update(productVM.product);
                     _unitOfWork.save();
                     
@@ -404,6 +441,8 @@ namespace BulkyBook.Areas.Admin.Controllers
                 _dbContext.ProductImages.RemoveRange(Product.ProductImages);
             }
 
+            // Soft delete - handled by repository, but set audit fields
+            AuditHelper.SetDeletedAudit(Product, User);
             _unitOfWork.product.remove(Product);
             _unitOfWork.save();
             return Json(new { success = true, massage = "Success To Delete Product" });
@@ -444,9 +483,9 @@ namespace BulkyBook.Areas.Admin.Controllers
             }
 
             var options = new List<object>();
-            foreach (var option in product.ProductOptions.OrderBy(o => o.DisplayOrder))
+            foreach (var option in product.ProductOptions.Where(o => !o.IsDeleted).OrderBy(o => o.DisplayOrder))
             {
-                var values = _unitOfWork.ProductOptionValue.GetAll(ov => ov.ProductOptionId == option.Id)
+                var values = _unitOfWork.ProductOptionValue.GetAll(ov => ov.ProductOptionId == option.Id && !ov.IsDeleted)
                     .OrderBy(ov => ov.DisplayOrder)
                     .Select(ov => new { ov.Id, ov.Value, ov.DisplayOrder })
                     .ToList();
@@ -478,6 +517,8 @@ namespace BulkyBook.Areas.Admin.Controllers
                 DisplayOrder = request.DisplayOrder
             };
 
+            // Set audit fields
+            AuditHelper.SetCreatedAudit(option, User);
             _unitOfWork.ProductOption.add(option);
             _unitOfWork.save();
 
@@ -610,6 +651,8 @@ namespace BulkyBook.Areas.Admin.Controllers
                 DisplayOrder = request.DisplayOrder
             };
 
+            // Set audit fields
+            AuditHelper.SetCreatedAudit(optionValue, User);
             _unitOfWork.ProductOptionValue.add(optionValue);
             _unitOfWork.save();
 
@@ -678,7 +721,8 @@ namespace BulkyBook.Areas.Admin.Controllers
                     _unitOfWork.save();
                 }
 
-                // Now safe to delete the option value
+                // Now safe to soft delete the option value (handled by repository)
+                AuditHelper.SetDeletedAudit(optionValue, User);
                 _unitOfWork.ProductOptionValue.remove(optionValue);
                 _unitOfWork.save();
 
@@ -705,22 +749,28 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             try
             {
-                var product = _unitOfWork.product.Get(p => p.Id == productId, includeProperties: "ProductOptions");
+                // Get product with all options (including deleted) to check count
+                var product = _dbContext.Products
+                    .Include(p => p.ProductOptions)
+                    .FirstOrDefault(p => p.Id == productId);
+                    
                 if (product == null)
                 {
                     return Json(new { success = false, message = "Product not found" });
                 }
 
-                if (product.ProductOptions == null || !product.ProductOptions.Any())
+                // Filter to only non-deleted options for processing
+                var nonDeletedOptions = product.ProductOptions?.Where(o => !o.IsDeleted).ToList() ?? new List<ProductOption>();
+                if (!nonDeletedOptions.Any())
                 {
                     return Json(new { success = false, message = "No options defined for this product" });
                 }
 
-                // Load all option values
+                // Load all option values (only non-deleted options and values)
                 var optionsWithValues = new List<OptionWithValues>();
-                foreach (var option in product.ProductOptions.OrderBy(o => o.DisplayOrder))
+                foreach (var option in nonDeletedOptions.OrderBy(o => o.DisplayOrder))
                 {
-                    var values = _unitOfWork.ProductOptionValue.GetAll(ov => ov.ProductOptionId == option.Id)
+                    var values = _unitOfWork.ProductOptionValue.GetAll(ov => ov.ProductOptionId == option.Id && !ov.IsDeleted)
                         .OrderBy(ov => ov.DisplayOrder)
                         .ToList();
                     
@@ -740,10 +790,40 @@ namespace BulkyBook.Areas.Admin.Controllers
                 // Generate all combinations
                 var combinations = GenerateCombinations(optionsWithValues);
 
-                // Get existing variants with their option values to check for duplicates
-                var existingVariants = _unitOfWork.ProductVariant.GetAll(v => v.ProductId == productId).ToList();
+                // Get current ProductOptions count (only non-deleted)
+                var currentOptionsCount = nonDeletedOptions.Count;
+
+                // Get existing variants (only non-deleted ones) with their option values to check for duplicates
+                var existingVariants = _unitOfWork.ProductVariant.GetAll(v => v.ProductId == productId && !v.IsDeleted).ToList();
                 
-                // Load option values for existing variants
+                // Count ProductOptions from existing variants by checking unique ProductOptionIds in ProductVariantOptionValues
+                var existingOptionsCount = 0;
+                if (existingVariants.Any())
+                {
+                    var existingVariantIds = existingVariants.Select(v => v.Id).ToList();
+                    existingOptionsCount = _dbContext.ProductVariantOptionValues
+                        .Include(vov => vov.OptionValue)
+                        .Where(vov => existingVariantIds.Contains(vov.ProductVariantId))
+                        .Select(vov => vov.OptionValue.ProductOptionId)
+                        .Distinct()
+                        .Count();
+                }
+                
+                // If ProductOptions count has changed, mark all old variants as deleted
+                if (existingOptionsCount > 0 && existingOptionsCount != currentOptionsCount)
+                {
+                    foreach (var variant in existingVariants)
+                    {
+                        variant.IsDeleted = true;
+                        _unitOfWork.ProductVariant.Update(variant);
+                    }
+                    _unitOfWork.save();
+                    
+                    // Clear existing variants list since they're now marked as deleted
+                    existingVariants.Clear();
+                }
+                
+                // Load option values for existing variants (only non-deleted ones)
                 var existingVariantCombinations = new HashSet<string>();
                 foreach (var variant in existingVariants)
                 {
@@ -1066,8 +1146,24 @@ namespace BulkyBook.Areas.Admin.Controllers
         #region API Call
         [HttpGet]
         public IActionResult GetAll() {
-            List<Product> ObjProduct = _unitOfWork.product.GetAll(includeProperties: "categry").ToList();
-            return Json(new { data = ObjProduct });
+            // Get all products including deleted ones for admin view
+            // Order by ID descending so newest products appear first
+            var allProducts = _dbContext.Products
+                .Include(p => p.categry)
+                .OrderByDescending(p => p.Id)
+                .Select(p => new
+                {
+                    id = p.Id,
+                    title = p.Title,
+                    isbn = p.ISBN ?? "",
+                    price = p.Price,
+                    author = p.Author ?? "",
+                    categry = new { name = p.categry != null ? p.categry.Name : "" },
+                    isDeleted = p.IsDeleted
+                })
+                .ToList();
+            
+            return Json(new { data = allProducts });
         }
         #endregion
     }

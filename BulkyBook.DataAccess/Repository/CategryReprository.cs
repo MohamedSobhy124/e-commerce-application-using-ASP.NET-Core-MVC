@@ -17,6 +17,11 @@ namespace BulkyBook.DataAccess.Repository
 
         public void update(Categry obj)
         {
+            // Set audit fields
+            if (obj is BaseEntity baseEntity)
+            {
+                baseEntity.ModifiedDate = DateTime.Now;
+            }
             _db.Categries.Update(obj);
         }
     }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BulkyBook.Models
 {
-    public class FlashSaleItem
+    public class FlashSaleItem : BaseEntity
     {
         public int Id { get; set; }
 
@@ -36,6 +36,8 @@ namespace BulkyBook.Models
 
         [Display(Name = "Date Added")]
         public DateTime AddedDate { get; set; } = DateTime.Now;
+        
+        // Note: FlashSaleItem inherits audit fields from BaseEntity
 
         // Navigation properties
         [ForeignKey(nameof(FlashSaleId))]
