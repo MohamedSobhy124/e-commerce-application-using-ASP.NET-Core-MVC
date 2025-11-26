@@ -47,29 +47,40 @@ namespace BulkyBook.Areas.Customer.Controllers
                 .ToList();
             ViewBag.ActiveServices = activeServices;
 
+            // PERFORMANCE: Use AsNoTracking for read-only queries
             // Get all categories for filter (cached - only load once per request)
-            var allCategories = _unitOfWork.categry.GetAll().ToList();
+            var allCategories = _unitOfWork.categry.GetAllAsNoTracking().ToList();
             ViewBag.Categories = allCategories;
             
+            // PERFORMANCE: Optimized query - filter at database level, not in memory
             // Get best sellers (products with most orders)
-            var bestSellers = _unitOfWork.product.GetAll(includeProperties: "categry,ProductImages")
-                .Where(p => p.StockQuantity > 0)
+            var bestSellers = _unitOfWork.product.GetAllAsNoTracking(
+                filter: p => p.StockQuantity > 0,
+                includeProperties: "categry,ProductImages")
                 .OrderByDescending(p => p.Id) // For now, use ID as proxy for popularity
                 .Take(8)
                 .ToList();
             ViewBag.BestSellers = bestSellers;
             
+            // PERFORMANCE: Optimized query
             // Get new arrivals (recently added products)
-            var newArrivals = _unitOfWork.product.GetAll(includeProperties: "categry,ProductImages")
-                .Where(p => p.StockQuantity > 0)
+            var newArrivals = _unitOfWork.product.GetAllAsNoTracking(
+                filter: p => p.StockQuantity > 0,
+                includeProperties: "categry,ProductImages")
                 .OrderByDescending(p => p.Id)
                 .Take(8)
                 .ToList();
             ViewBag.NewArrivals = newArrivals;
             
+            // PERFORMANCE: Optimized - batch count queries instead of N+1
             // Get top categories (categories with most products)
+            var categoryProductCounts = _unitOfWork.product.GetAllAsNoTracking()
+                .GroupBy(p => p.CategryId)
+                .Select(g => new { CategryId = g.Key, Count = g.Count() })
+                .ToDictionary(x => x.CategryId, x => x.Count);
+            
             var topCategories = allCategories
-                .OrderByDescending(c => _unitOfWork.product.GetAll(p => p.CategryId == c.Id).Count())
+                .OrderByDescending(c => categoryProductCounts.GetValueOrDefault(c.Id, 0))
                 .Take(6)
                 .ToList();
             ViewBag.TopCategories = topCategories;
@@ -160,8 +171,9 @@ namespace BulkyBook.Areas.Customer.Controllers
                 }
             }
             
+            // PERFORMANCE: Use AsNoTracking for read-only queries
             // Get price range for filter display (optimized - only get min/max, not all products)
-            var priceStats = _unitOfWork.product.GetAll()
+            var priceStats = _unitOfWork.product.GetAllAsNoTracking()
                 .Select(p => p.Price)
                 .ToList();
             ViewBag.MinPriceRange = priceStats.Any() ? (decimal?)priceStats.Min() : 0;
@@ -419,8 +431,9 @@ namespace BulkyBook.Areas.Customer.Controllers
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
             
-            var cartItems = _unitOfWork.shoppingCart.GetAll(
-                u => u.ApplicationUserId == userId,
+            // PERFORMANCE: Use AsNoTracking for read-only cart queries
+            var cartItems = _unitOfWork.shoppingCart.GetAllAsNoTracking(
+                filter: u => u.ApplicationUserId == userId,
                 includeProperties: "product"
             ).ToList();
 
@@ -646,29 +659,52 @@ namespace BulkyBook.Areas.Customer.Controllers
                 hasPurchased = false;
             }
 
-            var product = _unitOfWork.product.Get(U => U.Id == productId, includeProperties: "categry,ProductImages,ProductOptions,ProductVariants");
+            // PERFORMANCE: Use direct context query with AsNoTracking for read-only
+            var product = _dbContext.Products
+                .AsNoTracking()
+                .Include(p => p.categry)
+                .Include(p => p.ProductImages)
+                .Include(p => p.ProductOptions.Where(o => !o.IsDeleted))
+                    .ThenInclude(o => o.OptionValues.Where(ov => !ov.IsDeleted))
+                .Include(p => p.ProductVariants.Where(v => !v.IsDeleted))
+                    .ThenInclude(v => v.VariantOptionValues)
+                        .ThenInclude(vov => vov.OptionValue)
+                            .ThenInclude(ov => ov.ProductOption)
+                .FirstOrDefault(p => p.Id == productId && !p.IsDeleted);
             
-            // Load option values for each option
+            // Check if product is deleted
+            if (product == null)
+            {
+                return NotFound();
+            }
+            
+            // PERFORMANCE: Filter already done in Include, but ensure in-memory filtering for safety
             if (product.ProductOptions != null)
             {
+                product.ProductOptions = product.ProductOptions.Where(o => !o.IsDeleted).ToList();
                 foreach (var option in product.ProductOptions)
                 {
-                    option.OptionValues = _unitOfWork.ProductOptionValue.GetAll(
-                        ov => ov.ProductOptionId == option.Id
-                    ).OrderBy(ov => ov.DisplayOrder).ToList();
+                    if (option.OptionValues != null)
+                    {
+                        option.OptionValues = option.OptionValues.Where(ov => !ov.IsDeleted).OrderBy(ov => ov.DisplayOrder).ToList();
+                    }
                 }
             }
             
-            // Load variant option values for each variant
             if (product.ProductVariants != null)
             {
+                product.ProductVariants = product.ProductVariants.Where(v => !v.IsDeleted).ToList();
                 foreach (var variant in product.ProductVariants)
                 {
-                    variant.VariantOptionValues = _dbContext.ProductVariantOptionValues
-                        .Include(vov => vov.OptionValue)
-                            .ThenInclude(ov => ov.ProductOption)
-                        .Where(vov => vov.ProductVariantId == variant.Id)
-                        .ToList();
+                    if (variant.VariantOptionValues != null)
+                    {
+                        variant.VariantOptionValues = variant.VariantOptionValues
+                            .Where(vov => vov.OptionValue != null 
+                                && !vov.OptionValue.IsDeleted
+                                && vov.OptionValue.ProductOption != null
+                                && !vov.OptionValue.ProductOption.IsDeleted)
+                            .ToList();
+                    }
                 }
             }
             
@@ -718,9 +754,9 @@ namespace BulkyBook.Areas.Customer.Controllers
                 {
                     shoppingCart.ProductVariantId = ProductVariantId.Value;
                     
-                    // Get variant to check stock
-                    var variant = _unitOfWork.ProductVariant.Get(v => v.Id == ProductVariantId.Value);
-                    if (variant == null)
+                    // Get variant to check stock (only non-deleted variants)
+                    var variant = _unitOfWork.ProductVariant.Get(v => v.Id == ProductVariantId.Value && !v.IsDeleted);
+                    if (variant == null || variant.IsDeleted)
                     {
                         TempData["error"] = "Selected variant not found.";
                         return RedirectToAction("Details", new { productId = shoppingCart.ProductId });

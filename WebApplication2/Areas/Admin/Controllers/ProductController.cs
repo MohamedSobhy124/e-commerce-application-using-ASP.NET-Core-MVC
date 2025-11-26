@@ -243,14 +243,44 @@ namespace BulkyBook.Areas.Admin.Controllers
                 }
                 else
                 {
-                    // Set audit fields for updated product
-                    AuditHelper.SetModifiedAudit(productVM.product, User);
-                    _unitOfWork.product.update(productVM.product);
-                    _unitOfWork.save();
+                    // Get existing product from database to ensure proper tracking
+                    var existingProduct = _dbContext.Products.FirstOrDefault(p => p.Id == productVM.product.Id);
+                    if (existingProduct == null)
+                    {
+                        if (isAjaxRequest)
+                        {
+                            return Json(new { success = false, message = "Product not found" });
+                        }
+                        TempData["error"] = "Product not found";
+                        return RedirectToAction("Index");
+                    }
+                    
+                    // Update properties
+                    existingProduct.Title = productVM.product.Title;
+                    existingProduct.Description = productVM.product.Description;
+                    existingProduct.Price = productVM.product.Price;
+                    existingProduct.ListPrice = productVM.product.ListPrice;
+                    existingProduct.CategryId = productVM.product.CategryId;
+                    existingProduct.StockQuantity = productVM.product.StockQuantity;
+                    existingProduct.MinimumStockAlert = productVM.product.MinimumStockAlert;
+                    existingProduct.ProductType = productVM.product.ProductType;
+                    
+                    // Update ImageUrl only if provided
+                    if (!string.IsNullOrEmpty(productVM.product.ImageUrl))
+                    {
+                        existingProduct.ImageUrl = productVM.product.ImageUrl;
+                    }
+                    
+                    // Set audit fields
+                    AuditHelper.SetModifiedAudit(existingProduct, User);
+                    
+                    // Update and save
+                    _dbContext.Products.Update(existingProduct);
+                    _dbContext.SaveChanges();
                     
                     if (isAjaxRequest)
                     {
-                        return Json(new { success = true, productId = productVM.product.Id, message = "Product Updated Successfully" });
+                        return Json(new { success = true, productId = existingProduct.Id, message = "Product Updated Successfully" });
                     }
                     TempData["success"] = "Product Updated Successfully";
                 }
@@ -291,7 +321,8 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             try
             {
-                var product = _unitOfWork.product.Get(p => p.Id == productId);
+                // Get product directly from context to ensure it's tracked
+                var product = _dbContext.Products.FirstOrDefault(p => p.Id == productId);
                 if (product == null)
                 {
                     return Json(new { success = false, message = "Product not found" });
@@ -300,15 +331,20 @@ namespace BulkyBook.Areas.Admin.Controllers
                 if (productType.HasValue)
                 {
                     product.ProductType = (ProductType)productType.Value;
-                    _unitOfWork.product.update(product);
-                    _unitOfWork.save();
+                    
+                    // Set audit fields
+                    AuditHelper.SetModifiedAudit(product, User);
+                    
+                    // Update the product in the context
+                    _dbContext.Products.Update(product);
+                    _dbContext.SaveChanges();
                 }
 
                 return Json(new { success = true, message = "Step saved successfully" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = $"Error saving step: {ex.Message}" });
             }
         }
 
@@ -749,9 +785,10 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             try
             {
-                // Get product with all options (including deleted) to check count
+                // PERFORMANCE: Single query to get product with options
                 var product = _dbContext.Products
-                    .Include(p => p.ProductOptions)
+                    .AsNoTracking()
+                    .Include(p => p.ProductOptions.Where(o => !o.IsDeleted))
                     .FirstOrDefault(p => p.Id == productId);
                     
                 if (product == null)
@@ -760,18 +797,27 @@ namespace BulkyBook.Areas.Admin.Controllers
                 }
 
                 // Filter to only non-deleted options for processing
-                var nonDeletedOptions = product.ProductOptions?.Where(o => !o.IsDeleted).ToList() ?? new List<ProductOption>();
+                var nonDeletedOptions = product.ProductOptions?.Where(o => !o.IsDeleted).OrderBy(o => o.DisplayOrder).ToList() ?? new List<ProductOption>();
                 if (!nonDeletedOptions.Any())
                 {
                     return Json(new { success = false, message = "No options defined for this product" });
                 }
 
-                // Load all option values (only non-deleted options and values)
+                // PERFORMANCE: Batch load ALL option values in ONE query instead of N queries
+                var optionIds = nonDeletedOptions.Select(o => o.Id).ToList();
+                var allOptionValues = _dbContext.ProductOptionValues
+                    .AsNoTracking()
+                    .Where(ov => optionIds.Contains(ov.ProductOptionId) && !ov.IsDeleted)
+                    .OrderBy(ov => ov.ProductOptionId)
+                    .ThenBy(ov => ov.DisplayOrder)
+                    .ToList();
+
+                // Group option values by option ID
                 var optionsWithValues = new List<OptionWithValues>();
-                foreach (var option in nonDeletedOptions.OrderBy(o => o.DisplayOrder))
+                foreach (var option in nonDeletedOptions)
                 {
-                    var values = _unitOfWork.ProductOptionValue.GetAll(ov => ov.ProductOptionId == option.Id && !ov.IsDeleted)
-                        .OrderBy(ov => ov.DisplayOrder)
+                    var values = allOptionValues
+                        .Where(ov => ov.ProductOptionId == option.Id)
                         .ToList();
                     
                     if (!values.Any())
@@ -793,66 +839,80 @@ namespace BulkyBook.Areas.Admin.Controllers
                 // Get current ProductOptions count (only non-deleted)
                 var currentOptionsCount = nonDeletedOptions.Count;
 
-                // Get existing variants (only non-deleted ones) with their option values to check for duplicates
-                var existingVariants = _unitOfWork.ProductVariant.GetAll(v => v.ProductId == productId && !v.IsDeleted).ToList();
+                // PERFORMANCE: Get existing variants in ONE query
+                var existingVariants = _dbContext.ProductVariants
+                    .AsNoTracking()
+                    .Where(v => v.ProductId == productId && !v.IsDeleted)
+                    .ToList();
                 
-                // Count ProductOptions from existing variants by checking unique ProductOptionIds in ProductVariantOptionValues
+                // PERFORMANCE: Count existing options in ONE query
                 var existingOptionsCount = 0;
                 if (existingVariants.Any())
                 {
                     var existingVariantIds = existingVariants.Select(v => v.Id).ToList();
                     existingOptionsCount = _dbContext.ProductVariantOptionValues
-                        .Include(vov => vov.OptionValue)
+                        .AsNoTracking()
                         .Where(vov => existingVariantIds.Contains(vov.ProductVariantId))
                         .Select(vov => vov.OptionValue.ProductOptionId)
                         .Distinct()
                         .Count();
                 }
                 
-                // If ProductOptions count has changed, mark all old variants as deleted
+                // If ProductOptions count has changed, mark all old variants as deleted (BATCH UPDATE)
                 if (existingOptionsCount > 0 && existingOptionsCount != currentOptionsCount)
                 {
-                    foreach (var variant in existingVariants)
+                    var variantsToDelete = existingVariants.Select(v => v.Id).ToList();
+                    foreach (var variantId in variantsToDelete)
                     {
-                        variant.IsDeleted = true;
-                        _unitOfWork.ProductVariant.Update(variant);
+                        var variant = _dbContext.ProductVariants.Find(variantId);
+                        if (variant != null)
+                        {
+                            variant.IsDeleted = true;
+                            variant.ModifiedDate = DateTime.Now;
+                            AuditHelper.SetDeletedAudit(variant, User);
+                        }
                     }
-                    _unitOfWork.save();
+                    _dbContext.SaveChanges();
                     
                     // Clear existing variants list since they're now marked as deleted
                     existingVariants.Clear();
                 }
                 
-                // Load option values for existing variants (only non-deleted ones)
+                // PERFORMANCE: Batch load ALL existing variant option values in ONE query
                 var existingVariantCombinations = new HashSet<string>();
-                foreach (var variant in existingVariants)
+                if (existingVariants.Any())
                 {
-                    try
+                    var existingVariantIds = existingVariants.Select(v => v.Id).ToList();
+                    var allExistingVariantOptionValues = _dbContext.ProductVariantOptionValues
+                        .AsNoTracking()
+                        .Where(vov => existingVariantIds.Contains(vov.ProductVariantId))
+                        .GroupBy(vov => vov.ProductVariantId)
+                        .ToDictionary(g => g.Key, g => g.Select(vov => vov.ProductOptionValueId).OrderBy(id => id).ToList());
+                    
+                    foreach (var kvp in allExistingVariantOptionValues)
                     {
-                        var variantOptionValues = _dbContext.ProductVariantOptionValues
-                            .Where(vov => vov.ProductVariantId == variant.Id)
-                            .Select(vov => vov.ProductOptionValueId)
-                            .OrderBy(id => id)
-                            .ToList();
-                        
-                        // Create a unique key for this combination
-                        if (variantOptionValues.Any())
+                        if (kvp.Value.Any())
                         {
-                            var combinationKey = string.Join(",", variantOptionValues);
+                            var combinationKey = string.Join(",", kvp.Value);
                             existingVariantCombinations.Add(combinationKey);
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        // Log error but continue - variant might not have option values yet
-                        // This shouldn't stop the generation process
-                        continue;
-                    }
                 }
 
-                // Create new variants (only for combinations that don't exist)
+                // PERFORMANCE: Pre-load ALL option values and options for variant name generation
+                var allValueIds = combinations.SelectMany(c => c).Distinct().ToList();
+                var valueOptionMap = _dbContext.ProductOptionValues
+                    .AsNoTracking()
+                    .Where(ov => allValueIds.Contains(ov.Id))
+                    .Include(ov => ov.ProductOption)
+                    .ToDictionary(ov => ov.Id, ov => new { ov.Value, OptionName = ov.ProductOption != null ? ov.ProductOption.Name : "Unknown" });
+
+                // PERFORMANCE: Batch create variants - collect all new variants first
                 var basePrice = (decimal)product.Price;
-                var variants = new List<object>();
+                var newVariants = new List<ProductVariant>();
+                var newVariantOptionValues = new List<ProductVariantOptionValue>();
+                var variantNames = new Dictionary<int, string>();
+                var variantCombinations = new Dictionary<int, List<int>>(); // Track which combination belongs to which variant
                 var newVariantsCount = 0;
                 var skippedCount = 0;
                 
@@ -868,7 +928,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                         continue; // Skip creating this variant, it already exists
                     }
                     
-                    // Create new variant
+                    // Create new variant (don't save yet)
                     var variant = new ProductVariant
                     {
                         ProductId = productId,
@@ -880,39 +940,97 @@ namespace BulkyBook.Areas.Admin.Controllers
                         MinimumStockAlert = product.MinimumStockAlert
                     };
 
-                    _unitOfWork.ProductVariant.add(variant);
-                    _unitOfWork.save();
+                    var variantIndex = newVariants.Count;
+                    newVariants.Add(variant);
+                    variantCombinations[variantIndex] = combination;
+                    
+                    // Build variant name from pre-loaded data
+                    var variantNameParts = combination
+                        .Where(valueId => valueOptionMap.ContainsKey(valueId))
+                        .Select(valueId => $"{valueOptionMap[valueId].OptionName}: {valueOptionMap[valueId].Value}")
+                        .Where(s => !string.IsNullOrEmpty(s))
+                        .ToList();
+                    
+                    variantNames[variantIndex] = variantNameParts.Any() 
+                        ? string.Join(" / ", variantNameParts) 
+                        : "Variant";
+                }
 
-                    // Add variant option values
-                    foreach (var valueId in combination)
-                    {
-                        var variantOptionValue = new ProductVariantOptionValue
-                        {
-                            ProductVariantId = variant.Id,
-                            ProductOptionValueId = valueId
-                        };
-                        _dbContext.ProductVariantOptionValues.Add(variantOptionValue);
-                    }
-                    _unitOfWork.save();
-                    newVariantsCount++;
+                // PERFORMANCE: Batch insert all new variants at once
+                if (newVariants.Any())
+                {
+                    _dbContext.ProductVariants.AddRange(newVariants);
+                    _dbContext.SaveChanges(); // Single save for all variants
+                    newVariantsCount = newVariants.Count;
 
-                    // Get variant name for response
-                    var variantName = string.Join(" / ", combination.Select(valueId =>
+                    // PERFORMANCE: Batch create all variant option values
+                    for (int i = 0; i < newVariants.Count; i++)
                     {
-                        var value = _unitOfWork.ProductOptionValue.Get(ov => ov.Id == valueId);
-                        if (value != null)
+                        var variant = newVariants[i];
+                        var combination = variantCombinations[i];
+                        foreach (var valueId in combination)
                         {
-                            var option = _unitOfWork.ProductOption.Get(o => o.Id == value.ProductOptionId);
-                            return $"{option?.Name}: {value.Value}";
+                            newVariantOptionValues.Add(new ProductVariantOptionValue
+                            {
+                                ProductVariantId = variant.Id,
+                                ProductOptionValueId = valueId
+                            });
                         }
-                        return "";
-                    }).Where(s => !string.IsNullOrEmpty(s)));
+                    }
+                    
+                    _dbContext.ProductVariantOptionValues.AddRange(newVariantOptionValues);
+                    _dbContext.SaveChanges(); // Single save for all variant option values
+                }
 
+                // PERFORMANCE: Batch load existing variant option values in ONE query
+                var variants = new List<object>();
+                if (existingVariants.Any())
+                {
+                    var existingVariantIds = existingVariants.Select(v => v.Id).ToList();
+                    var allExistingVariantOptionValues = _dbContext.ProductVariantOptionValues
+                        .AsNoTracking()
+                        .Include(vov => vov.OptionValue)
+                            .ThenInclude(ov => ov.ProductOption)
+                        .Where(vov => existingVariantIds.Contains(vov.ProductVariantId))
+                        .ToList()
+                        .GroupBy(vov => vov.ProductVariantId)
+                        .ToDictionary(g => g.Key, g => g.OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                                                          .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+                                                          .ToList());
+                    
+                    foreach (var existingVariant in existingVariants)
+                    {
+                        string variantName = "Default";
+                        if (allExistingVariantOptionValues.ContainsKey(existingVariant.Id))
+                        {
+                            var orderedValues = allExistingVariantOptionValues[existingVariant.Id];
+                            variantName = string.Join(" / ", orderedValues.Select(vov => 
+                                $"{vov.OptionValue?.ProductOption?.Name ?? "Unknown"}: {vov.OptionValue?.Value ?? "Unknown"}"));
+                        }
+                        
+                        variants.Add(new
+                        {
+                            id = existingVariant.Id,
+                            name = variantName,
+                            variantName = variantName,
+                            price = existingVariant.Price,
+                            listPrice = existingVariant.ListPrice,
+                            stockQuantity = existingVariant.StockQuantity,
+                            minimumStockAlert = existingVariant.MinimumStockAlert,
+                            imageUrl = existingVariant.ImageUrl ?? ""
+                        });
+                    }
+                }
+
+                // Add newly created variants to response
+                for (int i = 0; i < newVariants.Count; i++)
+                {
+                    var variant = newVariants[i];
                     variants.Add(new
                     {
                         id = variant.Id,
-                        name = variantName,
-                        variantName = variantName,
+                        name = variantNames[i],
+                        variantName = variantNames[i],
                         price = variant.Price,
                         listPrice = variant.ListPrice,
                         stockQuantity = variant.StockQuantity,
@@ -920,59 +1038,6 @@ namespace BulkyBook.Areas.Admin.Controllers
                         imageUrl = variant.ImageUrl ?? ""
                     });
                 }
-            
-                // Also add existing variants to the response so they show in the table
-                foreach (var existingVariant in existingVariants)
-                {
-                try
-                {
-                    // Load variant option values to get the name
-                    var variantOptionValues = _dbContext.ProductVariantOptionValues
-                        .Include(vov => vov.OptionValue)
-                            .ThenInclude(ov => ov.ProductOption)
-                        .Where(vov => vov.ProductVariantId == existingVariant.Id)
-                        .ToList();
-                    
-                    string variantName = "Default";
-                    if (variantOptionValues.Any())
-                    {
-                        var orderedValues = variantOptionValues
-                            .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
-                            .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
-                            .ToList();
-                        
-                        variantName = string.Join(" / ", orderedValues.Select(vov => 
-                            $"{vov.OptionValue?.ProductOption?.Name ?? "Unknown"}: {vov.OptionValue?.Value ?? "Unknown"}"));
-                    }
-                    
-                    variants.Add(new
-                    {
-                        id = existingVariant.Id,
-                        name = variantName,
-                        variantName = variantName,
-                        price = existingVariant.Price,
-                        listPrice = existingVariant.ListPrice,
-                        stockQuantity = existingVariant.StockQuantity,
-                        minimumStockAlert = existingVariant.MinimumStockAlert,
-                        imageUrl = existingVariant.ImageUrl ?? ""
-                    });
-                }
-                catch (Exception ex)
-                {
-                    // If we can't load option values, still add the variant with a default name
-                    variants.Add(new
-                    {
-                        id = existingVariant.Id,
-                        name = "Variant",
-                        variantName = "Variant",
-                        price = existingVariant.Price,
-                        listPrice = existingVariant.ListPrice,
-                        stockQuantity = existingVariant.StockQuantity,
-                        minimumStockAlert = existingVariant.MinimumStockAlert,
-                        imageUrl = existingVariant.ImageUrl ?? ""
-                    });
-                }
-            }
 
             // Build success message
             var message = "";
@@ -1014,19 +1079,25 @@ namespace BulkyBook.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Invalid request" });
             }
 
-            var variant = _unitOfWork.ProductVariant.Get(v => v.Id == request.VariantId);
+            // Get variant directly from context to ensure proper tracking
+            var variant = _dbContext.ProductVariants.FirstOrDefault(v => v.Id == request.VariantId);
             if (variant == null)
             {
                 return Json(new { success = false, message = "Variant not found" });
             }
 
+            // Update properties
             variant.Price = request.Price;
             variant.ListPrice = request.ListPrice;
             variant.StockQuantity = request.StockQuantity;
             variant.MinimumStockAlert = request.MinimumStockAlert;
 
-            _unitOfWork.ProductVariant.Update(variant);
-            _unitOfWork.save();
+            // Set audit fields
+            AuditHelper.SetModifiedAudit(variant, User);
+
+            // Update and save
+            _dbContext.ProductVariants.Update(variant);
+            _dbContext.SaveChanges();
 
             return Json(new { success = true, message = "Variant updated successfully" });
         }
@@ -1039,7 +1110,8 @@ namespace BulkyBook.Areas.Admin.Controllers
                 return Json(new { success = false, message = "No file uploaded" });
             }
 
-            var variant = _unitOfWork.ProductVariant.Get(v => v.Id == variantId);
+            // Get variant directly from context to ensure proper tracking
+            var variant = _dbContext.ProductVariants.FirstOrDefault(v => v.Id == variantId);
             if (variant == null)
             {
                 return Json(new { success = false, message = "Variant not found" });
@@ -1056,10 +1128,18 @@ namespace BulkyBook.Areas.Admin.Controllers
             // Delete old image if exists
             if (!string.IsNullOrEmpty(variant.ImageUrl))
             {
-                var oldImagePath = Path.Combine(WWWRootPath, variant.ImageUrl.Trim('\\'));
+                var oldImagePath = Path.Combine(WWWRootPath, variant.ImageUrl.TrimStart('\\', '/'));
                 if (System.IO.File.Exists(oldImagePath))
                 {
-                    System.IO.File.Delete(oldImagePath);
+                    try
+                    {
+                        System.IO.File.Delete(oldImagePath);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error but continue with upload
+                        Console.WriteLine($"Error deleting old image: {ex.Message}");
+                    }
                 }
             }
 
@@ -1072,8 +1152,13 @@ namespace BulkyBook.Areas.Admin.Controllers
             }
 
             variant.ImageUrl = @"\Images\Products\Variants\" + FileName;
-            _unitOfWork.ProductVariant.Update(variant);
-            _unitOfWork.save();
+            
+            // Set audit fields
+            AuditHelper.SetModifiedAudit(variant, User);
+            
+            // Update and save
+            _dbContext.ProductVariants.Update(variant);
+            _dbContext.SaveChanges();
 
             return Json(new { success = true, imageUrl = variant.ImageUrl, message = "Image uploaded successfully" });
         }

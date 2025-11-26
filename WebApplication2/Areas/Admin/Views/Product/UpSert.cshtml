@@ -6,7 +6,7 @@
 }
 
 <div class="admin-wrapper">
-    <div class="container">
+    <div class="container-fluid">
         <div class="admin-form-wrapper">
             <div class="admin-form-header">
                 <h2 class="admin-form-title">
@@ -28,17 +28,17 @@
 
                                 <div class="admin-form-group">
                                     <label asp-for="product.Title" class="admin-form-label">
-                                        <i class="bi bi-card-heading me-2"></i>@Localizer["Title"]
+                                        <i class="bi bi-card-heading me-2"></i>@Localizer["Title"] <span class="text-danger" style="font-weight: 700;">*</span>
                                     </label>
-                                    <input asp-for="product.Title" class="admin-form-control" placeholder="@Localizer["EnterProductTitle"]" />
+                                    <input asp-for="product.Title" class="admin-form-control" placeholder="@Localizer["EnterProductTitle"]" required />
                                     <span asp-validation-for="product.Title" class="text-danger"></span>
                                 </div>
 
                                 <div class="admin-form-group">
                                     <label asp-for="product.Description" class="admin-form-label">
-                                        <i class="bi bi-text-paragraph me-2"></i>@Localizer["Description"]
+                                        <i class="bi bi-text-paragraph me-2"></i>@Localizer["Description"] <span class="text-danger" style="font-weight: 700;">*</span>
                                     </label>
-                                    <textarea asp-for="product.Description" class="admin-form-control" rows="4" placeholder="@Localizer["EnterProductDescription"]"></textarea>
+                                    <textarea asp-for="product.Description" class="admin-form-control" rows="4" placeholder="@Localizer["EnterProductDescription"]" required></textarea>
                                     <span asp-validation-for="product.Description" class="text-danger"></span>
                                 </div>
 
@@ -46,9 +46,9 @@
                                     <div class="col-md-6">
                                         <div class="admin-form-group">
                                             <label asp-for="product.ListPrice" class="admin-form-label">
-                                                <i class="bi bi-tag me-2"></i>@Localizer["ListPrice"]
+                                                <i class="bi bi-tag me-2"></i>@Localizer["ListPrice"] <span class="text-danger" style="font-weight: 700;">*</span>
                                             </label>
-                                            <input asp-for="product.ListPrice" class="admin-form-control" type="number" step="0.01" placeholder="0.00" />
+                                            <input asp-for="product.ListPrice" class="admin-form-control" type="number" step="0.01" placeholder="0.00" min="0" required />
                                             <span asp-validation-for="product.ListPrice" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -56,17 +56,17 @@
                                     <div class="col-md-6">
                                         <div class="admin-form-group">
                                             <label asp-for="product.Price" class="admin-form-label">
-                                                <i class="bi bi-currency-dollar me-2"></i>@Localizer["Price"]
+                                                <i class="bi bi-currency-dollar me-2"></i>@Localizer["Price"] <span class="text-danger" style="font-weight: 700;">*</span>
                                             </label>
-                                            <input asp-for="product.Price" class="admin-form-control" type="number" step="0.01" placeholder="0.00" />
+                                            <input asp-for="product.Price" class="admin-form-control" type="number" step="0.01" placeholder="0.00" min="0" required />
                                             <span asp-validation-for="product.Price" class="text-danger"></span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Stock Management Section -->
-                                <div class="admin-form-section-title" style="margin-top: 2rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb;">
-                                    <h4 style="color: #3B9DD5; font-weight: 700;">
+                                <div class="admin-form-section-title">
+                                    <h4>
                                         <i class="bi bi-box-seam me-2"></i>@Localizer["StockManagement"]
                                     </h4>
                                 </div>
@@ -101,189 +101,34 @@
 
                                 <div class="admin-form-group">
                                     <label asp-for="product.CategryId" class="admin-form-label">
-                                        <i class="bi bi-folder me-2"></i>@Localizer["Category"]
+                                        <i class="bi bi-folder me-2"></i>@Localizer["Category"] <span class="text-danger" style="font-weight: 700;">*</span>
                                     </label>
-                                    <select asp-for="product.CategryId" asp-items="@Model.CategryList" class="admin-form-select">
-                                        <option disabled selected>--- @Localizer["SelectCategory"] ---</option>
+                                    <select asp-for="product.CategryId" asp-items="@Model.CategryList" class="admin-form-select" required>
+                                        <option value="" disabled selected>--- @Localizer["SelectCategory"] ---</option>
                                     </select>
                                     <span asp-validation-for="product.CategryId" class="text-danger"></span>
                                 </div>
 
-                                <!-- Product Type & Variant Management Section -->
-                                <div class="variant-management-wrapper">
-                                    <div class="admin-form-section-title">
-                                        <h4 class="section-title">
-                                            <i class="bi bi-layers-fill me-2"></i>
-                                            @Localizer["ProductTypeAndVariants"]
-                                        </h4>
-                                        <p class="section-subtitle">@Localizer["ConfigureProductVariantsDescription"]</p>
+                                <!-- Product Type Field (in main form for new products) -->
+                                @if (Model.product.Id == 0)
+                                {
+                                    <div class="admin-form-group">
+                                        <label asp-for="product.ProductType" class="admin-form-label">
+                                            <i class="bi bi-diagram-3-fill me-2"></i>
+                                            @Localizer["ProductType"] <span class="text-danger" style="font-weight: 700;">*</span>
+                                        </label>
+                                        <select asp-for="product.ProductType" class="admin-form-select product-type-select" id="productTypeSelect" onchange="onProductTypeChange()" required>
+                                            <option value="0">@Localizer["SimpleProduct"]</option>
+                                            <option value="1">@Localizer["VariableProduct"]</option>
+                                        </select>
+                                        <span asp-validation-for="product.ProductType" class="text-danger"></span>
+                                        <div class="form-help-text">
+                                            <i class="bi bi-info-circle-fill me-1"></i>
+                                            <span>@Localizer["ProductTypeHelp"]</span>
+                                        </div>
                                     </div>
+                                }
 
-                                    <!-- Step-by-Step Wizard -->
-                                    <div class="variant-wizard">
-                                        <!-- Step 1: Choose Product Type -->
-                                        <div class="wizard-step" id="step1">
-                                            <div class="step-header">
-                                                <div class="step-number active">1</div>
-                                                <div class="step-content">
-                                                    <h5 class="step-title">
-                                                        <i class="bi bi-diagram-3-fill me-2"></i>
-                                                        @Localizer["Step1Title"]
-                                                    </h5>
-                                                    <p class="step-description">@Localizer["Step1Description"]</p>
-                                                </div>
-                                            </div>
-                                            <div class="step-body">
-                                                <div class="admin-form-group">
-                                                    <label asp-for="product.ProductType" class="admin-form-label">
-                                                        <i class="bi bi-diagram-3-fill me-2"></i>
-                                                        @Localizer["ProductType"]
-                                                    </label>
-                                                    <select asp-for="product.ProductType" class="admin-form-select product-type-select" id="productTypeSelect" onchange="toggleVariantSection()">
-                                                        <option value="0">@Localizer["SimpleProduct"]</option>
-                                                        <option value="1">@Localizer["VariableProduct"]</option>
-                                                    </select>
-                                                    <span asp-validation-for="product.ProductType" class="text-danger"></span>
-                                                    <div class="form-help-text">
-                                                        <i class="bi bi-info-circle-fill me-1"></i>
-                                                        <span>@Localizer["ProductTypeHelp"]</span>
-                                                    </div>
-                                                </div>
-                                                <div class="step-actions" id="step1Actions" style="display: none;">
-                                                    <button type="button" class="btn btn-primary btn-save-step" onclick="saveStep1()">
-                                                        <i class="bi bi-check-circle me-2"></i>
-                                                        @Localizer["SaveStep"]
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 2: Add Options (shown only for Variable products) -->
-                                        <div id="variantManagementSection" class="variant-management-card" style="display: none;">
-                                            <div class="wizard-step" id="step2">
-                                                <div class="step-header">
-                                                    <div class="step-number" id="step2Number">2</div>
-                                                    <div class="step-content">
-                                                        <h5 class="step-title">
-                                                            <i class="bi bi-list-ul-fill me-2"></i>
-                                                            @Localizer["Step2Title"]
-                                                        </h5>
-                                                        <p class="step-description">@Localizer["Step2Description"]</p>
-                                                    </div>
-                                                </div>
-                                                <div class="step-body">
-                                                    <div id="optionsContainer" class="options-container">
-                                                        <div class="options-header">
-                                                            <button type="button" class="btn btn-primary btn-add-option" onclick="addNewOption()" id="addOptionBtn" style="display: none;">
-                                                                <i class="bi bi-plus-circle-fill me-2"></i>
-                                                                @Localizer["AddOption"]
-                                                            </button>
-                                                        </div>
-                                                        <div id="optionsList" class="options-list"></div>
-                                                    </div>
-                                                   @*  <div class="step-actions">
-                                                        <button type="button" class="btn btn-primary btn-save-step" onclick="saveStep2()" id="saveStep2Btn" style="display: none;">
-                                                            <i class="bi bi-check-circle me-2"></i>
-                                                            @Localizer["SaveStep"]
-                                                        </button>
-                                                    </div> *@
-                                                </div>
-                                            </div>
-
-                                            <!-- Step 3: Generate Variants -->
-                                            <div class="wizard-step" id="step3" style="display: none;">
-                                                <div class="step-header">
-                                                    <div class="step-number" id="step3Number">3</div>
-                                                    <div class="step-content">
-                                                        <h5 class="step-title">
-                                                            <i class="bi bi-magic me-2"></i>
-                                                            @Localizer["Step4Title"]
-                                                        </h5>
-                                                        <p class="step-description">@Localizer["Step4Description"]</p>
-                                                    </div>
-                                                </div>
-                                                <div class="step-body">
-                                                    <div class="generate-variants-section">
-                                                        <button type="button" class="btn btn-success btn-lg btn-generate-variants" onclick="generateVariants()" id="generateVariantsBtn" style="display: none;">
-                                                            <i class="bi bi-arrow-repeat me-2"></i>
-                                                            @Localizer["GenerateVariants"]
-                                                        </button>
-                                                        <div class="step-info-box mt-3">
-                                                            <i class="bi bi-info-circle-fill me-2"></i>
-                                                            <span>@Localizer["Step4Info"]</span>
-                                                        </div>
-                                                    </div>
-                                                  @*   <div class="step-actions">
-                                                        <button type="button" class="btn btn-primary btn-save-step" onclick="saveStep3()" id="saveStep3Btn" style="display: none;">
-                                                            <i class="bi bi-check-circle me-2"></i>
-                                                            @Localizer["SaveStep"]
-                                                        </button>
-                                                    </div> *@
-                                                </div>
-                                            </div>
-
-                                            <!-- Step 4: Edit Variants -->
-                                            <div class="wizard-step" id="step4" style="display: none;">
-                                                <div class="step-header">
-                                                    <div class="step-number completed" id="step4Number">4</div>
-                                                    <div class="step-content">
-                                                        <h5 class="step-title">
-                                                            <i class="bi bi-pencil-square me-2"></i>
-                                                            @Localizer["Step5Title"]
-                                                        </h5>
-                                                        <p class="step-description">@Localizer["Step5Description"]</p>
-                                                    </div>
-                                                </div>
-                                                <div class="step-body">
-                                                    <div id="variantsContainer" class="variants-container">
-                                                        <div id="variantsTableContainer" class="variants-table-wrapper">
-                                                            <table class="table table-variants" id="variantsTable" style="display: none;">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th><i class="bi bi-tag-fill me-1"></i>@Localizer["Variant"]</th>
-                                                                        <th><i class="bi bi-currency-dollar me-1"></i>@Localizer["Price"]</th>
-                                                                        <th><i class="bi bi-tag me-1"></i>@Localizer["ListPrice"]</th>
-                                                                        <th><i class="bi bi-box-seam me-1"></i>@Localizer["Stock"]</th>
-                                                                        <th><i class="bi bi-exclamation-triangle me-1"></i>@Localizer["MinStockAlert"]</th>
-                                                                        <th><i class="bi bi-image me-1"></i>@Localizer["Image"]</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody id="variantsTableBody"></tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                    <div class="step-actions">
-                                                        <button type="button" class="btn btn-primary btn-save-step" onclick="saveStep4()" id="saveStep4Btn" style="display: none;">
-                                                            <i class="bi bi-check-circle me-2"></i>
-                                                            @Localizer["SaveStep"]
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                <div class="form-actions">
-                                    @if (Model.product.Id != 0)
-                                    {
-                                        <button type="button" class="btn btn-submit" onclick="saveMainProduct(); return false;" id="saveProductBtn">
-                                            <i class="bi bi-check-circle me-2"></i>
-                                            @Localizer["Update"] @Localizer["Product"]
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button type="button" class="btn btn-submit" onclick="saveMainProduct(); return false;" id="saveProductBtn">
-                                            <i class="bi bi-plus-circle me-2"></i>
-                                            @Localizer["Create"] @Localizer["Product"]
-                                        </button>
-                                    }
-                                    <a asp-action="Index" class="btn btn-back">
-                                        <i class="bi bi-arrow-left me-2"></i>
-                                        @Localizer["BackToList"]
-                                    </a>
-                                </div>
                             </div>
                         </div>
 
@@ -330,7 +175,204 @@
                                 <div id="preview-container" class="preview-container mt-3"></div>
                             </div>
                         </div>
+                            
                     </div>
+                
+                    <!-- Product Type & Variant Management Section -->
+                    @if (Model.product.Id != 0)
+                    {
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="variant-management-wrapper">
+                                    <div class="admin-form-section-title mb-4">
+                                        <h4 class="section-title">
+                                            <i class="bi bi-layers-fill me-2"></i>
+                                            @Localizer["ProductTypeAndVariants"]
+                                        </h4>
+                                        <p class="section-subtitle">@Localizer["ConfigureProductVariantsDescription"]</p>
+                                    </div>
+                                    
+                                    <!-- Step-by-Step Wizard -->
+                                    <div class="variant-wizard">
+                                    <!-- Step 1: Choose Product Type -->
+                                    <div class="wizard-step" id="step1">
+                                        <div class="step-header">
+                                            <div class="step-number active">1</div>
+                                            <div class="step-content">
+                                                <h5 class="step-title">
+                                                    <i class="bi bi-diagram-3-fill me-2"></i>
+                                                    @Localizer["Step1Title"]
+                                                </h5>
+                                                <p class="step-description">@Localizer["Step1Description"]</p>
+                                            </div>
+                                        </div>
+                                        <div class="step-body">
+                                            <div class="admin-form-group">
+                                                <label asp-for="product.ProductType" class="admin-form-label">
+                                                    <i class="bi bi-diagram-3-fill me-2"></i>
+                                                    @Localizer["ProductType"] <span class="text-danger" style="font-weight: 700;">*</span>
+                                                </label>
+                                                <select asp-for="product.ProductType" class="admin-form-select product-type-select" id="productTypeSelect" onchange="onProductTypeChange()" required>
+                                                    <option value="0">@Localizer["SimpleProduct"]</option>
+                                                    <option value="1">@Localizer["VariableProduct"]</option>
+                                                </select>
+                                                <div id="productTypeSaveStatus" class="mt-2" style="display: none;">
+                                                    <small class="text-success" id="productTypeSaveMessage">
+                                                        <i class="bi bi-check-circle me-1"></i>
+                                                        <span>@Html.Raw(Localizer["Saved"] ?? "Saved")</span>
+                                                    </small>
+                                                </div>
+                                                <span asp-validation-for="product.ProductType" class="text-danger"></span>
+                                                <div class="form-help-text">
+                                                    <i class="bi bi-info-circle-fill me-1"></i>
+                                                    <span>@Localizer["ProductTypeHelp"]</span>
+                                                </div>
+                                            </div>
+                                            @* Auto-save is enabled, save button is hidden *@
+                                            <div class="step-actions" id="step1Actions" style="display: none;">
+                                                @* <button type="button" class="btn btn-primary btn-save-step" onclick="saveStep1()">
+                                                    <i class="bi bi-check-circle me-2"></i>
+                                                    @Localizer["SaveStep"]
+                                                </button> *@
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 2: Add Options (shown only for Variable products) -->
+                                    <div id="variantManagementSection" class="variant-management-card" style="display: none;">
+                                        <div class="wizard-step" id="step2">
+                                            <div class="step-header">
+                                                <div class="step-number" id="step2Number">2</div>
+                                                <div class="step-content">
+                                                    <h5 class="step-title">
+                                                        <i class="bi bi-list-ul-fill me-2"></i>
+                                                        @Localizer["Step2Title"]
+                                                    </h5>
+                                                    <p class="step-description">@Localizer["Step2Description"]</p>
+                                                </div>
+                                            </div>
+                                            <div class="step-body">
+                                                <div id="optionsContainer" class="options-container">
+                                                    <div class="options-header">
+                                                        <button type="button" class="btn btn-primary btn-add-option" onclick="addNewOption()" id="addOptionBtn" style="display: none;">
+                                                            <i class="bi bi-plus-circle-fill me-2"></i>
+                                                            @Localizer["AddOption"]
+                                                        </button>
+                                                    </div>
+                                                    <div id="optionsList" class="options-list"></div>
+                                                </div>
+                                                @*  <div class="step-actions">
+                                                        <button type="button" class="btn btn-primary btn-save-step" onclick="saveStep2()" id="saveStep2Btn" style="display: none;">
+                                                            <i class="bi bi-check-circle me-2"></i>
+                                                            @Localizer["SaveStep"]
+                                                        </button>
+                                                    </div> *@
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 3: Generate Variants -->
+                                        <div class="wizard-step" id="step3" style="display: none;">
+                                            <div class="step-header">
+                                                <div class="step-number" id="step3Number">3</div>
+                                                <div class="step-content">
+                                                    <h5 class="step-title">
+                                                        <i class="bi bi-magic me-2"></i>
+                                                        @Localizer["Step4Title"]
+                                                    </h5>
+                                                    <p class="step-description">@Localizer["Step4Description"]</p>
+                                                </div>
+                                            </div>
+                                            <div class="step-body">
+                                                <div class="generate-variants-section">
+                                                    <button type="button" class="btn btn-success btn-lg btn-generate-variants" onclick="generateVariants()" id="generateVariantsBtn" style="display: none;">
+                                                        <i class="bi bi-arrow-repeat me-2"></i>
+                                                        @Localizer["GenerateVariants"]
+                                                    </button>
+                                                    <div class="step-info-box mt-3">
+                                                        <i class="bi bi-info-circle-fill me-2"></i>
+                                                        <span>@Localizer["Step4Info"]</span>
+                                                    </div>
+                                                </div>
+                                                @*   <div class="step-actions">
+                                                        <button type="button" class="btn btn-primary btn-save-step" onclick="saveStep3()" id="saveStep3Btn" style="display: none;">
+                                                            <i class="bi bi-check-circle me-2"></i>
+                                                            @Localizer["SaveStep"]
+                                                        </button>
+                                                    </div> *@
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 4: Edit Variants -->
+                                        <div class="wizard-step" id="step4" style="display: none;">
+                                            <div class="step-header">
+                                                <div class="step-number completed" id="step4Number">4</div>
+                                                <div class="step-content">
+                                                    <h5 class="step-title">
+                                                        <i class="bi bi-pencil-square me-2"></i>
+                                                        @Localizer["Step5Title"]
+                                                    </h5>
+                                                    <p class="step-description">@Localizer["Step5Description"]</p>
+                                                </div>
+                                            </div>
+                                            <div class="step-body">
+                                                <div id="variantsContainer" class="variants-container">
+                                                    <div id="variantsTableContainer" class="variants-table-wrapper">
+                                                        <table class="table table-variants" id="variantsTable" style="display: none;">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th><i class="bi bi-tag-fill me-1"></i>@Localizer["Variant"]</th>
+                                                                    <th><i class="bi bi-currency-dollar me-1"></i>@Localizer["Price"]</th>
+                                                                    <th><i class="bi bi-tag me-1"></i>@Localizer["ListPrice"]</th>
+                                                                    <th><i class="bi bi-box-seam me-1"></i>@Localizer["Stock"]</th>
+                                                                    <th><i class="bi bi-exclamation-triangle me-1"></i>@Localizer["MinStockAlert"]</th>
+                                                                    <th><i class="bi bi-image me-1"></i>@Localizer["Image"]</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="variantsTableBody"></tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="step-actions">
+                                                    <button type="button" class="btn btn-primary btn-save-step" onclick="saveStep4()" id="saveStep4Btn" style="display: none;">
+                                                        <i class="bi bi-check-circle me-2"></i>
+                                                        @Localizer["SaveStep"]
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    }
+
+                    <!-- Form Actions - Always at the bottom -->
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <div class="form-actions">
+                                @if (Model.product.Id != 0)
+                                {
+                                    <button type="button" class="btn btn-submit" onclick="saveMainProduct(); return false;" id="saveProductBtn">
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        @Localizer["Update"] @Localizer["Product"]
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-submit" onclick="saveMainProduct(); return false;" id="saveProductBtn">
+                                        <i class="bi bi-plus-circle me-2"></i>
+                                        @Localizer["Create"] @Localizer["Product"]
+                                    </button>
+                                }
+                                <a asp-action="Index" class="btn btn-back">
+                                    <i class="bi bi-arrow-left me-2"></i>
+                                    @Localizer["BackToList"]
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                
                 </form>
             </div>
         </div>
@@ -443,6 +485,32 @@
             }
         });
 
+        // Auto-save Product Type when changed
+        function onProductTypeChange() {
+            const productType = document.getElementById('productTypeSelect').value;
+            
+            // Only auto-save if product already exists
+            if (productId && productId > 0) {
+                // Hide previous save status
+                const saveStatus = document.getElementById('productTypeSaveStatus');
+                const saveMessage = document.getElementById('productTypeSaveMessage');
+                if (saveStatus) saveStatus.style.display = 'none';
+                
+                // Show saving indicator
+                if (saveMessage) {
+                    saveMessage.className = 'text-info';
+                    saveMessage.innerHTML = '<i class="bi bi-hourglass-split me-1"></i><span>@Html.Raw(Localizer["Saving"] ?? "Saving...")</span>';
+                    saveStatus.style.display = 'block';
+                }
+                
+                // Auto-save the product type
+                saveStep1Data(true); // Pass true to indicate auto-save (no success message)
+            }
+            
+            // Toggle variant section visibility
+            toggleVariantSection();
+        }
+        
         function toggleVariantSection() {
             const productType = document.getElementById('productTypeSelect').value;
             const variantSection = document.getElementById('variantManagementSection');
@@ -573,12 +641,128 @@
             pleaseSaveProductFirst: '@Html.Raw(Localizer["PleaseSaveProductFirst"])',
             saveStep: '@Html.Raw(Localizer["SaveStep"])',
             stepSavedSuccessfully: '@Html.Raw(Localizer["StepSavedSuccessfully"])',
-            failedToSaveStep: '@Html.Raw(Localizer["FailedToSaveStep"])'
+            failedToSaveStep: '@Html.Raw(Localizer["FailedToSaveStep"])',
+            isRequired: '@Html.Raw(Localizer["IsRequired"] ?? "is required")',
+            validationError: '@Html.Raw(Localizer["ValidationError"] ?? "Validation Error")',
+            pleaseFillRequiredFields: '@Html.Raw(Localizer["PleaseFillRequiredFields"] ?? "Please fill in all required fields")',
+            atLeastOneImageRequired: '@Html.Raw(Localizer["AtLeastOneImageRequired"] ?? "At least one image is required")',
+            ok: '@Html.Raw(Localizer["OK"] ?? "OK")'
         };
+
+        // VALIDATION: Validate required fields before saving
+        function validateProductForm() {
+            const errors = [];
+            const errorFields = [];
+            
+            // Clear previous validation errors
+            document.querySelectorAll('.field-error').forEach(el => el.remove());
+            document.querySelectorAll('.admin-form-control.is-invalid').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            
+            // Validate Title (Required)
+            const titleInput = document.querySelector('input[name="product.Title"]');
+            const titleLabel = '@Html.Raw(Localizer["Title"])';
+            if (!titleInput || !titleInput.value || titleInput.value.trim() === '') {
+                errors.push(titleLabel + ' ' + localizations.isRequired);
+                errorFields.push({ field: titleInput, message: titleLabel + ' ' + localizations.isRequired });
+            }
+            
+            // Validate Description (Required)
+            const descriptionInput = document.querySelector('textarea[name="product.Description"]');
+            const descriptionLabel = '@Html.Raw(Localizer["Description"])';
+            if (!descriptionInput || !descriptionInput.value || descriptionInput.value.trim() === '') {
+                errors.push(descriptionLabel + ' ' + localizations.isRequired);
+                errorFields.push({ field: descriptionInput, message: descriptionLabel + ' ' + localizations.isRequired });
+            }
+            
+            // Validate Price (Required)
+            const priceInput = document.querySelector('input[name="product.Price"]');
+            const priceLabel = '@Html.Raw(Localizer["Price"])';
+            if (!priceInput || !priceInput.value || priceInput.value.trim() === '' || parseFloat(priceInput.value) < 0) {
+                errors.push(priceLabel + ' ' + localizations.isRequired);
+                errorFields.push({ field: priceInput, message: priceLabel + ' ' + localizations.isRequired });
+            }
+            
+            // Validate ListPrice (Required)
+            const listPriceInput = document.querySelector('input[name="product.ListPrice"]');
+            const listPriceLabel = '@Html.Raw(Localizer["ListPrice"])';
+            if (!listPriceInput || !listPriceInput.value || listPriceInput.value.trim() === '' || parseFloat(listPriceInput.value) < 0) {
+                errors.push(listPriceLabel + ' ' + localizations.isRequired);
+                errorFields.push({ field: listPriceInput, message: listPriceLabel + ' ' + localizations.isRequired });
+            }
+            
+            // Validate Category (Required)
+            const categorySelect = document.querySelector('select[name="product.CategryId"]');
+            const categoryLabel = '@Html.Raw(Localizer["Category"])';
+            if (!categorySelect || !categorySelect.value || categorySelect.value === '' || categorySelect.value === '0') {
+                errors.push(categoryLabel + ' ' + localizations.isRequired);
+                errorFields.push({ field: categorySelect, message: categoryLabel + ' ' + localizations.isRequired });
+            }
+            
+            // Validate ProductType (Required)
+            const productTypeSelect = document.querySelector('select[name="product.ProductType"]');
+            const productTypeLabel = '@Html.Raw(Localizer["ProductType"])';
+            if (!productTypeSelect || productTypeSelect.value === null || productTypeSelect.value === undefined) {
+                errors.push(productTypeLabel + ' ' + localizations.isRequired);
+                errorFields.push({ field: productTypeSelect, message: productTypeLabel + ' ' + localizations.isRequired });
+            }
+            
+            // Validate Images (Required for new products)
+            if (productId === 0) {
+                const fileInput = document.getElementById('files-input');
+                const existingImages = document.querySelectorAll('#images-gallery .image-item').length;
+                if ((!fileInput || !fileInput.files || fileInput.files.length === 0) && existingImages === 0) {
+                    errors.push(localizations.atLeastOneImageRequired);
+                }
+            }
+            
+            // Display errors
+            if (errors.length > 0) {
+                // Show error messages for each field
+                errorFields.forEach(({ field, message }) => {
+                    if (field) {
+                        field.classList.add('is-invalid');
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'field-error text-danger mt-1';
+                        errorDiv.style.fontSize = '0.875rem';
+                        errorDiv.style.fontWeight = '600';
+                        errorDiv.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>' + message;
+                        field.parentElement.appendChild(errorDiv);
+                    }
+                });
+                
+                // Scroll to first error
+                if (errorFields.length > 0 && errorFields[0].field) {
+                    errorFields[0].field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    errorFields[0].field.focus();
+                }
+                
+                // Show summary alert
+                Swal.fire({
+                    icon: 'error',
+                    title: localizations.validationError,
+                    html: '<div style="text-align: left;"><strong>' + localizations.pleaseFillRequiredFields + '</strong><ul style="margin-top: 1rem; padding-left: 1.5rem;">' +
+                          errors.map(err => '<li>' + err + '</li>').join('') +
+                          '</ul></div>',
+                    confirmButtonText: localizations.ok,
+                    confirmButtonColor: '#3B9DD5'
+                });
+                
+                return false;
+            }
+            
+            return true;
+        }
 
         // Save Main Product (stays on same page)
         function saveMainProduct() {
             console.log('saveMainProduct called');
+            
+            // VALIDATION: Validate form before saving
+            if (!validateProductForm()) {
+                return false;
+            }
             
             const form = document.getElementById('productForm') || document.querySelector('form');
             if (!form) {
@@ -767,6 +951,7 @@
         }
 
         // Save Step Functions
+        // Manual save function (kept for backward compatibility, but auto-save is now enabled)
         function saveStep1() {
             // Check if productId is valid
             if (!productId || productId === 0) {
@@ -778,18 +963,20 @@
                 return;
             }
             
-            saveStep1Data();
+            saveStep1Data(false); // false = manual save (show SweetAlert)
         }
 
-        function saveStep1Data() {
+        function saveStep1Data(isAutoSave = false) {
             // Double check productId is valid
             if (!productId || productId === 0) {
                 console.error('Invalid productId:', productId);
-                Swal.fire({
-                    icon: 'error',
-                    title: localizations.error,
-                    text: 'Product ID is missing. Please save the product first.'
-                });
+                if (!isAutoSave) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: localizations.error,
+                        text: 'Product ID is missing. Please save the product first.'
+                    });
+                }
                 return;
             }
             
@@ -799,43 +986,93 @@
             formData.append('productType', productType);
             formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]')?.value || '');
 
-            console.log('Saving Step 1 - productId:', productId, 'productType:', productType);
+            console.log('Saving Step 1 - productId:', productId, 'productType:', productType, 'isAutoSave:', isAutoSave);
 
             fetch('/Admin/Product/SaveProductStep', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: localizations.success,
-                        text: localizations.stepSavedSuccessfully,
-                        timer: 2000,
-                        showConfirmButton: false
+            .then(response => {
+                console.log('SaveProductStep response status:', response.status);
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        console.error('Error response:', text);
+                        throw new Error(`Server error: ${response.status}`);
                     });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('SaveProductStep response data:', data);
+                if (data && data.success) {
+                    // Update step number visual indicator
                     const step1Number = document.querySelector('#step1 .step-number');
-                    step1Number.classList.add('completed');
-                    step1Number.classList.remove('active');
-                    if (productType === '1') {
-                        toggleVariantSection();
+                    if (step1Number) {
+                        step1Number.classList.add('completed');
+                        step1Number.classList.remove('active');
+                    }
+                    
+                    if (isAutoSave) {
+                        // For auto-save, show subtle success message
+                        const saveStatus = document.getElementById('productTypeSaveStatus');
+                        const saveMessage = document.getElementById('productTypeSaveMessage');
+                        if (saveStatus && saveMessage) {
+                            saveMessage.className = 'text-success';
+                            saveMessage.innerHTML = '<i class="bi bi-check-circle me-1"></i><span>@Html.Raw(Localizer["Saved"] ?? "Saved")</span>';
+                            saveStatus.style.display = 'block';
+                            
+                            // Hide the message after 3 seconds
+                            setTimeout(() => {
+                                if (saveStatus) saveStatus.style.display = 'none';
+                            }, 3000);
+                        }
+                    } else {
+                        // For manual save, show SweetAlert
+                        Swal.fire({
+                            icon: 'success',
+                            title: localizations.success,
+                            text: data.message || localizations.stepSavedSuccessfully,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
                     }
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: localizations.error,
-                        text: data.message || localizations.failedToSaveStep
-                    });
+                    // Show error message
+                    const saveStatus = document.getElementById('productTypeSaveStatus');
+                    const saveMessage = document.getElementById('productTypeSaveMessage');
+                    if (saveStatus && saveMessage && isAutoSave) {
+                        saveMessage.className = 'text-danger';
+                        saveMessage.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i><span>@Html.Raw(Localizer["SaveFailed"] ?? "Save failed")</span>';
+                        saveStatus.style.display = 'block';
+                    } else if (!isAutoSave) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: localizations.error,
+                            text: (data && data.message) || localizations.failedToSaveStep
+                        });
+                    }
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: localizations.error,
-                    text: localizations.failedToSaveStep
-                });
+                console.error('Error saving step:', error);
+                
+                // Show error in status message for auto-save
+                const saveStatus = document.getElementById('productTypeSaveStatus');
+                const saveMessage = document.getElementById('productTypeSaveMessage');
+                if (saveStatus && saveMessage && isAutoSave) {
+                    saveMessage.className = 'text-danger';
+                    saveMessage.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i><span>@Html.Raw(Localizer["SaveFailed"] ?? "Save failed")</span>';
+                    saveStatus.style.display = 'block';
+                } else if (!isAutoSave) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: localizations.error,
+                        text: error.message || localizations.failedToSaveStep
+                    });
+                }
             });
         }
 
@@ -1395,18 +1632,25 @@
 
         function updateVariantField(variantId, field, value) {
             const variant = variants.find(v => v.id === variantId);
-            if (!variant) return;
+            if (!variant) {
+                console.error('Variant not found:', variantId);
+                return;
+            }
 
+            // Update local variant object
             variant[field] = value;
 
-            // Debounce API call
+            // Debounce API call to avoid too many requests
             clearTimeout(window.variantUpdateTimeout);
             window.variantUpdateTimeout = setTimeout(() => {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                
                 fetch('/Admin/Product/UpdateVariant', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'RequestVerificationToken': token
                     },
                     body: JSON.stringify({
                         variantId: variantId,
@@ -1416,13 +1660,49 @@
                         minimumStockAlert: parseInt(variant.minimumStockAlert) || 5
                     })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            console.error('Server error:', response.status, text);
+                            throw new Error(`Server error: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    if (!data.success) {
-                        console.error('Failed to update variant:', data.message);
+                    if (data && data.success) {
+                        console.log('Variant updated successfully:', variantId);
+                        // Show subtle success indicator
+                        const input = document.querySelector(`input[onchange*="updateVariantField(${variantId}"]`);
+                        if (input) {
+                            input.style.borderColor = '#10b981';
+                            setTimeout(() => {
+                                input.style.borderColor = '';
+                            }, 1000);
+                        }
+                    } else {
+                        console.error('Failed to update variant:', data?.message || 'Unknown error');
+                        // Show error indicator
+                        const input = document.querySelector(`input[onchange*="updateVariantField(${variantId}"]`);
+                        if (input) {
+                            input.style.borderColor = '#ef4444';
+                            setTimeout(() => {
+                                input.style.borderColor = '';
+                            }, 2000);
+                        }
                     }
                 })
-                .catch(error => console.error('Error updating variant:', error));
+                .catch(error => {
+                    console.error('Error updating variant:', error);
+                    // Show error indicator
+                    const input = document.querySelector(`input[onchange*="updateVariantField(${variantId}"]`);
+                    if (input) {
+                        input.style.borderColor = '#ef4444';
+                        setTimeout(() => {
+                            input.style.borderColor = '';
+                        }, 2000);
+                    }
+                });
             }, 500);
         }
 
@@ -1835,7 +2115,6 @@
     }
 
     .step-body {
-        padding-left: 4.5rem;
         animation: fadeIn 0.4s ease;
     }
 

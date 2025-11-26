@@ -45,7 +45,35 @@ namespace BulkyBook.DataAccess.Data
 
 			base.OnModelCreating(modelBuilder);
 
+			// ==========================================
+			// PERFORMANCE OPTIMIZATION: Database Indexes
+			// ==========================================
 			
+			// Index on IsDeleted for all BaseEntity tables (CRITICAL for performance)
+			modelBuilder.Entity<Product>().HasIndex(p => p.IsDeleted);
+			modelBuilder.Entity<Product>().HasIndex(p => new { p.IsDeleted, p.CategryId }); // Composite index
+			modelBuilder.Entity<Product>().HasIndex(p => new { p.IsDeleted, p.StockQuantity }); // For stock queries
+			
+			modelBuilder.Entity<Categry>().HasIndex(c => c.IsDeleted);
+			modelBuilder.Entity<ProductOption>().HasIndex(o => new { o.IsDeleted, o.ProductId });
+			modelBuilder.Entity<ProductOptionValue>().HasIndex(ov => new { ov.IsDeleted, ov.ProductOptionId });
+			modelBuilder.Entity<ProductVariant>().HasIndex(v => new { v.IsDeleted, v.ProductId });
+			modelBuilder.Entity<FlashSale>().HasIndex(f => new { f.IsDeleted, f.IsActive, f.StartDate, f.EndDate });
+			modelBuilder.Entity<FlashSaleItem>().HasIndex(i => new { i.IsDeleted, i.FlashSaleId, i.ProductId });
+			
+			// Index on foreign keys for faster joins
+			modelBuilder.Entity<Product>().HasIndex(p => p.CategryId);
+			modelBuilder.Entity<ShoppingCart>().HasIndex(c => new { c.ApplicationUserId, c.ProductId, c.ProductVariantId });
+			modelBuilder.Entity<OrderDetail>().HasIndex(od => new { od.OrderHeaderId, od.ProductId });
+			modelBuilder.Entity<ProductImage>().HasIndex(pi => pi.ProductId);
+			modelBuilder.Entity<Review>().HasIndex(r => new { r.ProductId, r.UserId });
+			modelBuilder.Entity<Wishlist>().HasIndex(w => new { w.ApplicationUserId, w.ProductId });
+			modelBuilder.Entity<ProductVariantOptionValue>().HasIndex(vov => new { vov.ProductVariantId, vov.ProductOptionValueId });
+			
+			// Index on frequently queried fields
+			modelBuilder.Entity<Product>().HasIndex(p => p.StockQuantity);
+			modelBuilder.Entity<ProductVariant>().HasIndex(v => v.StockQuantity);
+			modelBuilder.Entity<FlashSale>().HasIndex(f => new { f.IsActive, f.StartDate, f.EndDate });
 
 			//modelBuilder.Entity<Company>().HasData(
 			//	new Company
