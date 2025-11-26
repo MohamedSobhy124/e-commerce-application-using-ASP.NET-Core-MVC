@@ -11,7 +11,12 @@ namespace BulkyBook.DataAccess.Repository.IRepository
         //void Update (T entity); 
        
         void remove (T entity); 
-        void removeRage(IEnumerable<T> entities);   
+        void removeRage(IEnumerable<T> entities);
+        
+        /// <summary>
+        /// PERFORMANCE: Get all with AsNoTracking for read-only queries (faster, less memory)
+        /// </summary>
+        IEnumerable<T> GetAllAsNoTracking(Expression<Func<T, bool>>? filter = null, string? includeProperties = null);
 
     }
 }

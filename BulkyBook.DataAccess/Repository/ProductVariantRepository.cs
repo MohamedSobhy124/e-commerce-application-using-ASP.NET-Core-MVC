@@ -26,11 +26,13 @@ namespace BulkyBook.DataAccess.Repository
                 objFromDb.StockQuantity = obj.StockQuantity;
                 objFromDb.MinimumStockAlert = obj.MinimumStockAlert;
                 objFromDb.ImageUrl = obj.ImageUrl;
-                // Set audit fields
-                if (objFromDb is BaseEntity baseEntity)
-                {
-                    baseEntity.ModifiedDate = DateTime.Now;
-                }
+                
+                // Set audit fields - use the values from obj (which should already have audit fields set by AuditHelper)
+                objFromDb.ModifiedDate = obj.ModifiedDate;
+                objFromDb.ModifiedBy = obj.ModifiedBy;
+                
+                // Mark entity as modified so EF Core tracks the changes
+                _db.ProductVariants.Update(objFromDb);
             }
         }
 

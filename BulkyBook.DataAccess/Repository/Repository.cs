@@ -38,10 +38,15 @@ namespace BulkyBook.DataAccess.Repository
         {
             IQueryable<T> query = dbSet;
             
-            // Filter out deleted items for BaseEntity types
+            // PERFORMANCE: Use optimized filter instead of casting
             if (typeof(BaseEntity).IsAssignableFrom(typeof(T)))
             {
-                query = query.Where(e => !((BaseEntity)(object)e).IsDeleted);
+                var parameter = Expression.Parameter(typeof(T), "e");
+                var property = Expression.Property(parameter, nameof(BaseEntity.IsDeleted));
+                var constant = Expression.Constant(false);
+                var equality = Expression.Equal(property, constant);
+                var lambda = Expression.Lambda<Func<T, bool>>(equality, parameter);
+                query = query.Where(lambda);
             }
             
             if (!string.IsNullOrEmpty(includeProperties))
@@ -49,7 +54,7 @@ namespace BulkyBook.DataAccess.Repository
                 foreach (var includeprop in includeProperties
                     .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    query = query.Include(includeprop);
+                    query = query.Include(includeprop.Trim());
                 }
             }
             query = query.Where(filter);
@@ -61,10 +66,15 @@ namespace BulkyBook.DataAccess.Repository
 		{
 			IQueryable<T> query = dbSet;
 			
-			// Filter out deleted items for BaseEntity types
+			// PERFORMANCE: Use optimized filter instead of casting
 			if (typeof(BaseEntity).IsAssignableFrom(typeof(T)))
 			{
-				query = query.Where(e => !((BaseEntity)(object)e).IsDeleted);
+				var parameter = Expression.Parameter(typeof(T), "e");
+				var property = Expression.Property(parameter, nameof(BaseEntity.IsDeleted));
+				var constant = Expression.Constant(false);
+				var equality = Expression.Equal(property, constant);
+				var lambda = Expression.Lambda<Func<T, bool>>(equality, parameter);
+				query = query.Where(lambda);
 			}
 			
 			if (filter != null)
@@ -76,7 +86,40 @@ namespace BulkyBook.DataAccess.Repository
 				foreach (var includeProp in includeProperties
 					.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
 				{
-					query = query.Include(includeProp);
+					query = query.Include(includeProp.Trim());
+				}
+			}
+			return query.ToList();
+		}
+		
+		/// <summary>
+		/// PERFORMANCE: Get all with AsNoTracking for read-only queries (faster, less memory)
+		/// </summary>
+		public IEnumerable<T> GetAllAsNoTracking(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
+		{
+			IQueryable<T> query = dbSet.AsNoTracking();
+			
+			// PERFORMANCE: Use optimized filter
+			if (typeof(BaseEntity).IsAssignableFrom(typeof(T)))
+			{
+				var parameter = Expression.Parameter(typeof(T), "e");
+				var property = Expression.Property(parameter, nameof(BaseEntity.IsDeleted));
+				var constant = Expression.Constant(false);
+				var equality = Expression.Equal(property, constant);
+				var lambda = Expression.Lambda<Func<T, bool>>(equality, parameter);
+				query = query.Where(lambda);
+			}
+			
+			if (filter != null)
+			{
+				query = query.Where(filter);
+			}
+			if (!string.IsNullOrEmpty(includeProperties))
+			{
+				foreach (var includeProp in includeProperties
+					.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+				{
+					query = query.Include(includeProp.Trim());
 				}
 			}
 			return query.ToList();

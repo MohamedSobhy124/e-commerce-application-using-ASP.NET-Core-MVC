@@ -72,7 +72,7 @@
                             
                             @if (productImages.Count > 1)
                             {
-                                <div id="productDetailsCarousel" class="carousel slide product-details-carousel" data-bs-ride="carousel">
+                                <div id="productDetailsCarousel" class="carousel slide product-details-carousel" data-bs-ride="false" data-bs-interval="false">
                                     <div class="carousel-inner">
                                         @for (int i = 0; i < productImages.Count; i++)
                                         {
@@ -81,18 +81,18 @@
                                             </div>
                                         }
                                     </div>
-                                    <button class="carousel-control-prev" type="button" data-bs-target="#productDetailsCarousel" data-bs-slide="prev">
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#productDetailsCarousel" data-bs-slide="prev" onclick="pauseCarouselAfterInteraction()">
                                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                         <span class="visually-hidden">Previous</span>
                                     </button>
-                                    <button class="carousel-control-next" type="button" data-bs-target="#productDetailsCarousel" data-bs-slide="next">
+                                    <button class="carousel-control-next" type="button" data-bs-target="#productDetailsCarousel" data-bs-slide="next" onclick="pauseCarouselAfterInteraction()">
                                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                         <span class="visually-hidden">Next</span>
                                     </button>
                                     <div class="carousel-indicators">
                                         @for (int i = 0; i < productImages.Count; i++)
                                         {
-                                            <button type="button" data-bs-target="#productDetailsCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i+1)"></button>
+                                            <button type="button" data-bs-target="#productDetailsCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i+1)" onclick="pauseCarouselAfterInteraction()"></button>
                                         }
                                     </div>
                                 </div>
@@ -371,6 +371,20 @@
             loadReviews(productId);
             loadProductRating(productId);
             
+            // Disable carousel auto-rotation on page load
+            const carousel = document.getElementById('productDetailsCarousel');
+            if (carousel) {
+                // Wait for Bootstrap to initialize, then disable auto-rotation
+                setTimeout(() => {
+                    const carouselInstance = bootstrap.Carousel.getInstance(carousel);
+                    if (carouselInstance) {
+                        carouselInstance._config.interval = false;
+                        carouselInstance._config.ride = false;
+                        carouselInstance.pause();
+                    }
+                }, 100);
+            }
+            
             if (productType === 1) {
                 initializeVariantSelection();
             }
@@ -389,7 +403,18 @@
         function resetToFirstImage() {
             const carousel = document.getElementById('productDetailsCarousel');
             if (carousel) {
-                const carouselInstance = bootstrap.Carousel.getOrCreateInstance(carousel);
+                let carouselInstance = bootstrap.Carousel.getInstance(carousel);
+                if (!carouselInstance) {
+                    carouselInstance = new bootstrap.Carousel(carousel, {
+                        interval: false, // Disable auto-rotation
+                        ride: false // Disable auto-start
+                    });
+                } else {
+                    // Ensure auto-rotation is disabled
+                    carouselInstance._config.interval = false;
+                    carouselInstance._config.ride = false;
+                    carouselInstance.pause(); // Stop any auto-rotation
+                }
                 carouselInstance.to(0);
             }
         }
@@ -514,9 +539,46 @@
                 }
                 
                 if (targetIndex >= 0) {
+                    // Get or create carousel instance
+                    let carouselInstance = bootstrap.Carousel.getInstance(carousel);
+                    if (!carouselInstance) {
+                        carouselInstance = new bootstrap.Carousel(carousel, {
+                            interval: false, // Disable auto-rotation
+                            ride: false // Disable auto-start
+                        });
+                    } else {
+                        // Disable auto-rotation if it's already initialized
+                        carouselInstance._config.interval = false;
+                        carouselInstance._config.ride = false;
+                    }
+                    
+                    // Switch to the variant image and stop auto-rotation
+                    carouselInstance.pause(); // Stop any auto-rotation first
+                    
+                    // Ensure interval is disabled
+                    carouselInstance._config.interval = false;
+                    carouselInstance._config.ride = false;
+                    
                     // Switch to the variant image
-                    const carouselInstance = bootstrap.Carousel.getOrCreateInstance(carousel);
                     carouselInstance.to(targetIndex);
+                    
+                    // Prevent carousel from auto-rotating after slide completes
+                    const pauseAfterSlide = () => {
+                        carouselInstance.pause();
+                        carouselInstance._config.interval = false;
+                    };
+                    
+                    // Remove any existing listeners to avoid duplicates
+                    carousel.removeEventListener('slid.bs.carousel', pauseAfterSlide);
+                    carousel.addEventListener('slid.bs.carousel', pauseAfterSlide, { once: false });
+                    
+                    // Also prevent auto-rotation on any user interaction
+                    const preventAutoRotate = () => {
+                        carouselInstance.pause();
+                        carouselInstance._config.interval = false;
+                    };
+                    carousel.removeEventListener('slide.bs.carousel', preventAutoRotate);
+                    carousel.addEventListener('slide.bs.carousel', preventAutoRotate);
                 }
             } else {
                 // Single image display - replace it
@@ -537,6 +599,21 @@
                 );
             } else {
                 $('#variantInfo').hide();
+            }
+        }
+        
+        // Function to pause carousel after any user interaction (manual navigation)
+        function pauseCarouselAfterInteraction() {
+            const carousel = document.getElementById('productDetailsCarousel');
+            if (carousel) {
+                setTimeout(() => {
+                    const carouselInstance = bootstrap.Carousel.getInstance(carousel);
+                    if (carouselInstance) {
+                        carouselInstance.pause();
+                        carouselInstance._config.interval = false;
+                        carouselInstance._config.ride = false;
+                    }
+                }, 50);
             }
         }
 

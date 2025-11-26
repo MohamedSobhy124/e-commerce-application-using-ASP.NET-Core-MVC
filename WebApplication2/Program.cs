@@ -46,8 +46,30 @@ var builder = WebApplication.CreateBuilder(args);
             options.RequestCultureProviders.Insert(0, new CookieRequestCultureProvider());
         });
         
+        // ==========================================
+        // PERFORMANCE OPTIMIZATION: Database Configuration
+        // ==========================================
         builder.Services.AddDbContext<ApplicationDBContext>(option => 
-        option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        {
+            option.UseSqlServer(
+                builder.Configuration.GetConnectionString("DefaultConnection"),
+                sqlOptions =>
+                {
+                    // Enable connection pooling (default is 128, increase for high traffic)
+                    sqlOptions.MaxBatchSize(100); // Batch multiple commands
+                    sqlOptions.CommandTimeout(30); // 30 second timeout
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(5),
+                        errorNumbersToAdd: null);
+                });
+            
+            // Disable change tracking for read-only queries (use AsNoTracking explicitly)
+            // This reduces memory usage and improves performance
+           
+                option.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            
+        });
 
 IServiceCollection serviceCollection = builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
