@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BulkyBook.Models
 {
-    public class FlashSale
+    public class FlashSale : BaseEntity
     {
         public int Id { get; set; }
 
@@ -27,9 +27,6 @@ namespace BulkyBook.Models
 
         [Display(Name = "Active")]
         public bool IsActive { get; set; } = true;
-
-        [Display(Name = "Created Date")]
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         // Navigation property for items in this flash sale
         [ValidateNever]

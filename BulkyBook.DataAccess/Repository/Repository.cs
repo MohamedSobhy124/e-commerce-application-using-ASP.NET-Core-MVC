@@ -4,6 +4,7 @@ using System.Linq.Expressions;
  
 using BulkyBook.DataAccess.Data;
 using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
 using System.Linq;
 
 namespace BulkyBook.DataAccess.Repository
@@ -21,12 +22,28 @@ namespace BulkyBook.DataAccess.Repository
         }   
         public void add(T entity)
         {
+            // Set audit fields for BaseEntity types
+            if (entity is BaseEntity baseEntity)
+            {
+                if (baseEntity.CreatedDate == default(DateTime))
+                {
+                    baseEntity.CreatedDate = DateTime.Now;
+                }
+                baseEntity.IsDeleted = false;
+            }
             _db.Add(entity);    
         }
 
         public T Get(Expression<Func<T, bool>> filter, string? includeProperties = null )
         {
             IQueryable<T> query = dbSet;
+            
+            // Filter out deleted items for BaseEntity types
+            if (typeof(BaseEntity).IsAssignableFrom(typeof(T)))
+            {
+                query = query.Where(e => !((BaseEntity)(object)e).IsDeleted);
+            }
+            
             if (!string.IsNullOrEmpty(includeProperties))
             {
                 foreach (var includeprop in includeProperties
@@ -43,6 +60,13 @@ namespace BulkyBook.DataAccess.Repository
 		public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includeProperties = null)
 		{
 			IQueryable<T> query = dbSet;
+			
+			// Filter out deleted items for BaseEntity types
+			if (typeof(BaseEntity).IsAssignableFrom(typeof(T)))
+			{
+				query = query.Where(e => !((BaseEntity)(object)e).IsDeleted);
+			}
+			
 			if (filter != null)
 			{
 				query = query.Where(filter);
@@ -57,15 +81,41 @@ namespace BulkyBook.DataAccess.Repository
 			}
 			return query.ToList();
 		}
+		
 		public void remove(T entity)
         {
-            dbSet.Remove(entity);   
+            // Soft delete for BaseEntity types
+            if (entity is BaseEntity baseEntity)
+            {
+                baseEntity.IsDeleted = true;
+                baseEntity.ModifiedDate = DateTime.Now;
+                _db.Update(entity);
+            }
+            else
+            {
+                // Hard delete for non-BaseEntity types
+                dbSet.Remove(entity);
+            }
         }
 
         public void removeRage(IEnumerable<T> entities)
         {
-            dbSet.RemoveRange(entities);
-
+            // Soft delete for BaseEntity types
+            var baseEntities = entities.OfType<BaseEntity>().ToList();
+            if (baseEntities.Any())
+            {
+                foreach (var baseEntity in baseEntities)
+                {
+                    baseEntity.IsDeleted = true;
+                    baseEntity.ModifiedDate = DateTime.Now;
+                }
+                _db.UpdateRange(baseEntities.Cast<T>());
+            }
+            else
+            {
+                // Hard delete for non-BaseEntity types
+                dbSet.RemoveRange(entities);
+            }
         }
 
         //public void Update(T entity)

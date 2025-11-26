@@ -19,6 +19,11 @@ namespace BulkyBook.DataAccess.Repository
 
         public void Update(FlashSaleItem obj)
         {
+            // Set audit fields
+            if (obj is BaseEntity baseEntity)
+            {
+                baseEntity.ModifiedDate = DateTime.Now;
+            }
             _db.FlashSaleItems.Update(obj);
         }   
         public void Add(FlashSaleItem obj)
@@ -27,7 +32,17 @@ namespace BulkyBook.DataAccess.Repository
         }  
         public void Remove(FlashSaleItem obj)
         {
-            _db.FlashSaleItems.Remove(obj);
+            // Soft delete for BaseEntity types
+            if (obj is BaseEntity baseEntity)
+            {
+                baseEntity.IsDeleted = true;
+                baseEntity.ModifiedDate = DateTime.Now;
+                _db.FlashSaleItems.Update(obj);
+            }
+            else
+            {
+                _db.FlashSaleItems.Remove(obj);
+            }
         }
     }
 }

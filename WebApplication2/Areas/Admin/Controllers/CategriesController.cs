@@ -4,6 +4,7 @@ using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace BulkyBook.Areas.Admin.Controllers
 {
@@ -55,6 +56,8 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Set audit fields
+                AuditHelper.SetCreatedAudit(categry, User);
                 _unitOfWork.categry.add(categry);
                 _unitOfWork.save();
                 TempData["success"] = "Categray Created Successfully";
@@ -92,6 +95,8 @@ namespace BulkyBook.Areas.Admin.Controllers
             {
                 try
                 {
+                    // Set audit fields
+                    AuditHelper.SetModifiedAudit(categry, User);
                     _unitOfWork.categry.update(categry);
                     _unitOfWork.save();
                 }
@@ -135,6 +140,8 @@ namespace BulkyBook.Areas.Admin.Controllers
 
             if (categry != null)
             {
+                // Soft delete - handled by repository, but set audit fields
+                AuditHelper.SetDeletedAudit(categry, User);
                 _unitOfWork.categry.remove(categry);
                 _unitOfWork.save();
                 TempData["success"] = "Categray Deleted Successfully";

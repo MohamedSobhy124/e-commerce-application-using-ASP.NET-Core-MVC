@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BulkyBook.Models
 {
-    public class Product
+    public class Product : BaseEntity
     {
         public int Id { get; set; }
         [Required]

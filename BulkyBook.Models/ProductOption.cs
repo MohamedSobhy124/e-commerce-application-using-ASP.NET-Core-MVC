@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BulkyBook.Models
 {
-    public class ProductOption
+    public class ProductOption : BaseEntity
     {
         public int Id { get; set; }
         

@@ -32,6 +32,11 @@ namespace BulkyBook.DataAccess.Repository
                     obgFromDB.ImageUrl = obj.ImageUrl;
 
                 }
+                // Set audit fields
+                if (obgFromDB is BaseEntity baseEntity)
+                {
+                    baseEntity.ModifiedDate = DateTime.Now;
+                }
             }
         }
     }
