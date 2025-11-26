@@ -19,7 +19,7 @@
     {
         new BreadcrumbItem { Name = currentCulture == "ar" ? "الرئيسية" : "Home", Url = $"{baseUrl}/Customer/Home" },
         new BreadcrumbItem { Name = Model.product.categry?.Name ?? (currentCulture == "ar" ? "الفئات" : "Categories"), Url = $"{baseUrl}/Customer/Home?categoryId={Model.product.CategryId}" },
-        new BreadcrumbItem { Name = Model.product.Title, Url = $"{baseUrl}/Customer/Home/Details?productId={Model.product.Id}" }
+        new BreadcrumbItem { Name = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title, Url = $"{baseUrl}/Customer/Home/Details?productId={Model.product.Id}" }
     };
 }
   
@@ -29,7 +29,7 @@
 
         <div class="product-details-header">
             <div class="text-center">
-                <h2>@Model.product.Title</h2>
+                <h2>@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)</h2>
             </div>
         </div>
 
@@ -42,11 +42,16 @@
 
             <div class="container my-4">
                 <div class="row">
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <div class="product-main-image">
                             @{
+                                // Exclude info images (marked with ImageInfo == "INFO_IMAGE")
                                 var productImages = Model.product.ProductImages != null && Model.product.ProductImages.Any() 
-                                    ? Model.product.ProductImages.OrderBy(pi => pi.DisplayOrder).Select(pi => pi.ImageUrl).ToList()
+                                    ? Model.product.ProductImages
+                                        .Where(pi => pi.ImageInfo != "INFO_IMAGE")
+                                        .OrderBy(pi => pi.DisplayOrder)
+                                        .Select(pi => pi.ImageUrl)
+                                        .ToList()
                                     : new List<string>();
                                 
                                 // If no ProductImages but has ImageUrl, use that
@@ -68,6 +73,9 @@
                                     // Append variant images to product images
                                     productImages.AddRange(variantImages);
                                 }
+                                
+                                // Get info image separately
+                                var infoImage = Model.product.ProductImages?.FirstOrDefault(pi => pi.ImageInfo == "INFO_IMAGE");
                             }
                             
                             @if (productImages.Count > 1)
@@ -77,7 +85,7 @@
                                         @for (int i = 0; i < productImages.Count; i++)
                                         {
                                             <div class="carousel-item @(i == 0 ? "active" : "")">
-                                                <img class="img-fluid" src="@productImages[i]" alt="@Model.product.Title - Image @(i+1)">
+                                                <img class="img-fluid" src="@productImages[i]" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title) - Image @(i+1)">
                                             </div>
                                         }
                                     </div>
@@ -99,22 +107,38 @@
                             }
                             else if (productImages.Count == 1)
                             {
-                                <img class="img-fluid" src="@productImages[0]" alt="@Model.product.Title">
+                                <img class="img-fluid" src="@productImages[0]" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)">
                             }
                             else
                             {
-                                <img class="img-fluid" src="@Model.product.ImageUrl" alt="@Model.product.Title">
+                                <img class="img-fluid" src="@Model.product.ImageUrl" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)">
                             }
                         </div>
+                        
+                        <!-- Info Image Section (separate from product images) -->
+                        @if (infoImage != null && !string.IsNullOrEmpty(infoImage.ImageUrl))
+                        {
+                            <div class="product-info-image-section mt-4">
+                                <h5 class="mb-3" style="color: #1976D2; font-weight: 600;">
+                                    <i class="bi bi-info-circle me-2"></i>@Localizer["ProductInformation"]
+                                </h5>
+                                <div class="info-image-container" style="border: 2px solid #dee2e6; border-radius: 8px; padding: 10px; background: #f8f9fa;">
+                                    <img class="img-fluid" 
+                                         src="@infoImage.ImageUrl" 
+                                         alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title) - @Localizer["ProductInformation"]"
+                                         style="max-width: 100%; height: auto; border-radius: 4px;" />
+                                </div>
+                            </div>
+                        }
                     </div>
 
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                         <div class="product-info">
                             <div class="product-category-badge">
                                 <i class="bi bi-tag-fill me-2"></i>@Model.product.categry.Name
                             </div>
 
-                            <h3 class="product-category-name">@Model.product.Title</h3>
+                            <h3 class="product-category-name">@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)</h3>
 
                             <!-- Product Options (for Variable Products) -->
                             @if (Model.product.ProductType == BulkyBook.Models.ProductType.Variable && Model.product.ProductOptions != null && Model.product.ProductOptions.Any())
@@ -124,17 +148,18 @@
                                     {
                                         <div class="product-option-group mb-3">
                                             <label class="product-option-label">
-                                                <strong>@option.Name:</strong>
+                                                <strong>@(currentCulture == "ar" && !string.IsNullOrEmpty(option.NameAr) ? option.NameAr : option.Name):</strong>
                                             </label>
                                             <div class="product-option-values d-flex flex-wrap gap-2 mt-2">
                                                 @foreach (var value in option.OptionValues.OrderBy(v => v.DisplayOrder))
                                                 {
+                                                    var displayValue = currentCulture == "ar" && !string.IsNullOrEmpty(value.ValueAr) ? value.ValueAr : value.Value;
                                                     <button type="button" 
                                                             class="btn btn-outline-primary product-option-value-btn" 
                                                             data-option-id="@option.Id" 
                                                             data-value-id="@value.Id"
-                                                            onclick="selectOptionValue(@option.Id, @value.Id, '@value.Value')">
-                                                        @value.Value
+                                                            onclick="selectOptionValue(@option.Id, @value.Id, '@Html.Raw(displayValue.Replace("'", "\\'"))')">
+                                                        @displayValue
                                                     </button>
                                                 }
                                             </div>
@@ -181,7 +206,7 @@
                             <!-- WhatsApp Inquiry Button -->
                             @{
                                 var whatsAppPhone = Configuration["WhatsApp:PhoneNumber"] ?? "971507700559"; ;
-                                var productName = Model.product.Title;
+                                var productName = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title;
                                 var productUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
                                 var currentLang = System.Globalization.CultureInfo.CurrentUICulture.Name;
                                 var whatsAppMsg = currentLang == "ar"
@@ -198,14 +223,97 @@
                                 </a>
                             </div>
 
-                            <div class="product-details-section">
-                                <h4 class="product-details-title">
-                                    <i class="bi bi-info-circle me-2"></i>@Localizer["ProductDetails"]
-                                </h4>
-                                <div class="product-description">
-                                    @Html.Raw(Model.product.Description)
+                            <!-- Product Details Tabs Section -->
+                            @{
+                                var hasDescription = !string.IsNullOrWhiteSpace(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.DescriptionAr) ? Model.product.DescriptionAr : Model.product.Description);
+                                var hasSuggestedUse = !string.IsNullOrWhiteSpace(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.SuggestedUseAr) ? Model.product.SuggestedUseAr : Model.product.SuggestedUse);
+                                var hasHealthNotes = !string.IsNullOrWhiteSpace(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.HealthNotesAr) ? Model.product.HealthNotesAr : Model.product.HealthNotes);
+                                var hasSpecification = !string.IsNullOrWhiteSpace(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.SpecificationAr) ? Model.product.SpecificationAr : Model.product.Specification);
+                                
+                                var tabsCount = (hasDescription ? 1 : 0) + (hasSuggestedUse ? 1 : 0) + (hasHealthNotes ? 1 : 0) + (hasSpecification ? 1 : 0);
+                            }
+                            
+                            @if (tabsCount > 0)
+                            {
+                                <div class="product-details-tabs-section mt-4">
+                                    <h4 class="product-details-title mb-4">
+                                        <i class="bi bi-info-circle me-2"></i>@Localizer["ProductDetails"]
+                                    </h4>
+                                    
+                                    <!-- Cool Tabs Design -->
+                                    <div class="custom-tabs-wrapper">
+                                        <ul class="nav nav-tabs custom-nav-tabs" id="productDetailsTabs" role="tablist">
+                                            @if (hasDescription)
+                                            {
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">
+                                                        <i class="bi bi-file-text me-2"></i>@Localizer["Description"]
+                                                    </button>
+                                                </li>
+                                            }
+                                            @if (hasSuggestedUse)
+                                            {
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link @(!hasDescription ? "active" : "")" id="suggesteduse-tab" data-bs-toggle="tab" data-bs-target="#suggesteduse" type="button" role="tab" aria-controls="suggesteduse" aria-selected="@(!hasDescription ? "true" : "false")">
+                                                        <i class="bi bi-lightbulb me-2"></i>@Localizer["SuggestedUse"]
+                                                    </button>
+                                                </li>
+                                            }
+                                            @if (hasHealthNotes)
+                                            {
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link @(!hasDescription && !hasSuggestedUse ? "active" : "")" id="healthnotes-tab" data-bs-toggle="tab" data-bs-target="#healthnotes" type="button" role="tab" aria-controls="healthnotes" aria-selected="@(!hasDescription && !hasSuggestedUse ? "true" : "false")">
+                                                        <i class="bi bi-heart-pulse me-2"></i>@Localizer["HealthNotes"]
+                                                    </button>
+                                                </li>
+                                            }
+                                            @if (hasSpecification)
+                                            {
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link @(!hasDescription && !hasSuggestedUse && !hasHealthNotes ? "active" : "")" id="specification-tab" data-bs-toggle="tab" data-bs-target="#specification" type="button" role="tab" aria-controls="specification" aria-selected="@(!hasDescription && !hasSuggestedUse && !hasHealthNotes ? "true" : "false")">
+                                                        <i class="bi bi-list-check me-2"></i>@Localizer["Specification"]
+                                                    </button>
+                                                </li>
+                                            }
+                                        </ul>
+                                        
+                                        <div class="tab-content custom-tab-content" id="productDetailsTabContent">
+                                            @if (hasDescription)
+                                            {
+                                                <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+                                                    <div class="tab-content-body">
+                                                        @Html.Raw(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.DescriptionAr) ? Model.product.DescriptionAr : Model.product.Description)
+                                                    </div>
+                                                </div>
+                                            }
+                                            @if (hasSuggestedUse)
+                                            {
+                                                <div class="tab-pane fade @(!hasDescription ? "show active" : "")" id="suggesteduse" role="tabpanel" aria-labelledby="suggesteduse-tab">
+                                                    <div class="tab-content-body">
+                                                        @Html.Raw(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.SuggestedUseAr) ? Model.product.SuggestedUseAr : Model.product.SuggestedUse)
+                                                    </div>
+                                                </div>
+                                            }
+                                            @if (hasHealthNotes)
+                                            {
+                                                <div class="tab-pane fade @(!hasDescription && !hasSuggestedUse ? "show active" : "")" id="healthnotes" role="tabpanel" aria-labelledby="healthnotes-tab">
+                                                    <div class="tab-content-body">
+                                                        @Html.Raw(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.HealthNotesAr) ? Model.product.HealthNotesAr : Model.product.HealthNotes)
+                                                    </div>
+                                                </div>
+                                            }
+                                            @if (hasSpecification)
+                                            {
+                                                <div class="tab-pane fade @(!hasDescription && !hasSuggestedUse && !hasHealthNotes ? "show active" : "")" id="specification" role="tabpanel" aria-labelledby="specification-tab">
+                                                    <div class="tab-content-body">
+                                                        @Html.Raw(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.SpecificationAr) ? Model.product.SpecificationAr : Model.product.Specification)
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -332,12 +440,16 @@
             OptionValueIds = v.VariantOptionValues?.Select(vov => vov.OptionValue.Id).ToList()
         }) ));
         
-        // Store all product images for carousel
+        // Store all product images for carousel (exclude info images)
         let allProductImages = @Html.Raw(Json.Serialize(
             Model.product.ProductType == BulkyBook.Models.ProductType.Variable && 
             Model.product.ProductVariants != null && Model.product.ProductVariants.Any()
                 ? (Model.product.ProductImages != null && Model.product.ProductImages.Any()
-                    ? Model.product.ProductImages.OrderBy(pi => pi.DisplayOrder).Select(pi => pi.ImageUrl).ToList()
+                    ? Model.product.ProductImages
+                        .Where(pi => pi.ImageInfo != "INFO_IMAGE")
+                        .OrderBy(pi => pi.DisplayOrder)
+                        .Select(pi => pi.ImageUrl)
+                        .ToList()
                     : (!string.IsNullOrEmpty(Model.product.ImageUrl) ? new List<string> { Model.product.ImageUrl } : new List<string>()))
                     .Concat(Model.product.ProductVariants
                         .Where(v => !string.IsNullOrEmpty(v.ImageUrl))
@@ -345,14 +457,21 @@
                         .Distinct())
                     .ToList()
                 : (Model.product.ProductImages != null && Model.product.ProductImages.Any()
-                    ? Model.product.ProductImages.OrderBy(pi => pi.DisplayOrder).Select(pi => pi.ImageUrl).ToList()
+                    ? Model.product.ProductImages
+                        .Where(pi => pi.ImageInfo != "INFO_IMAGE")
+                        .OrderBy(pi => pi.DisplayOrder)
+                        .Select(pi => pi.ImageUrl)
+                        .ToList()
                     : (!string.IsNullOrEmpty(Model.product.ImageUrl) ? new List<string> { Model.product.ImageUrl } : new List<string>()))
         ));
         let options = @Html.Raw(Json.Serialize(Model.product.ProductOptions?.Select(o => new {
             Id = o.Id,
             Name = o.Name,
-            Values = o.OptionValues?.Select(v => new { Id = v.Id, Value = v.Value }).ToList() 
+            NameAr = o.NameAr,
+            Values = o.OptionValues?.Select(v => new { Id = v.Id, Value = v.Value, ValueAr = v.ValueAr }).ToList() 
         }) ));
+        
+        const currentCulture = '@currentCulture';
 
         // Localized strings for JavaScript
         const localizations = {

@@ -538,8 +538,8 @@
         // Optional features (uncomment to activate)
         //initSpinWheel();           // Spin wheel popup
           //initCustomCursor();        // Custom cursor (can be heavy)
-          initSnowEffect();          // Falling snowflakes/stars
-          createFloatingElements();  // Floating emojis
+          //initSnowEffect();          // Falling snowflakes/stars
+          //createFloatingElements();  // Floating emojis
          //initSkeletonLoaders();     // Skeleton loading state
         
         console.log('✨ All MEGA COOL features ready!');

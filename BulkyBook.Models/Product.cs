@@ -14,8 +14,31 @@ namespace BulkyBook.Models
         public int Id { get; set; }
         [Required]
         public   String Title { get; set; }
+        
+        [Required]
+        [MaxLength(500)]
+        public string TitleAr { get; set; }
+        
         [Required]
         public string Description { get; set; }
+        
+        [Required]
+        public string DescriptionAr { get; set; }
+
+        // Suggested Use
+        public string? SuggestedUse { get; set; }
+        
+        public string? SuggestedUseAr { get; set; }
+        
+        // Health Notes
+        public string? HealthNotes { get; set; }
+        
+        public string? HealthNotesAr { get; set; }
+        
+        // Specification
+        public string? Specification { get; set; }
+        
+        public string? SpecificationAr { get; set; }
 
         public   string? Author { get; set; }
         public   string? ISBN { get; set; }

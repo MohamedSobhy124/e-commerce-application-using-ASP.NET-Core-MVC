@@ -95,6 +95,7 @@
     <link rel="stylesheet" href="~/css/home-enhanced.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/product-details.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/cart.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/cool-loader.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/forms.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/animations.css" asp-append-version="true" />
@@ -106,7 +107,6 @@
     <link rel="stylesheet" href="~/css/back-to-top.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/reviews.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/enhanced-navigation.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/modern-product-grid.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/auth-pages.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/wishlist.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/services-home.css" asp-append-version="true" />
@@ -114,6 +114,7 @@
     <link rel="stylesheet" href="~/css/home-compact-mobile.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/home-professional-enhancements.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BulkyBook.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modern-product-grid.css" asp-append-version="true" />
 
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -122,6 +123,14 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
 </head>
 <body>
+    <!-- Simple Page Loader -->
+    <div id="cool-loader">
+        <div style="text-align: center;">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">@(currentCulture == "ar" ? "جاري التحميل..." : "Loading...")</div>
+        </div>
+    </div>
+
     <header>
         <nav class="navbar navbar-expand-lg navbar-toggleable-lg navbar-dark">
             <div class="container-fluid">
@@ -564,6 +573,96 @@
     @await RenderSectionAsync("Scripts", required: false)
     <script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Cool Loader Script -->
+    <script>
+        (function() {
+            const loader = document.getElementById('cool-loader');
+            
+            // Hide loader when page is fully loaded
+            window.addEventListener('load', function() {
+                setTimeout(function() {
+                    loader.classList.add('hidden');
+                    // Remove from DOM after animation completes
+                    setTimeout(function() {
+                        loader.style.display = 'none';
+                    }, 600);
+                }, 500); // Small delay for smooth transition
+            });
+
+            // Show loader on page navigation (for AJAX navigation)
+            document.addEventListener('DOMContentLoaded', function() {
+                // Intercept link clicks
+                document.addEventListener('click', function(e) {
+                    const link = e.target.closest('a[href]');
+                    if (link && link.href && !link.href.startsWith('javascript:') && 
+                        !link.href.startsWith('#') && !link.hasAttribute('data-bs-toggle') &&
+                        !link.hasAttribute('data-bs-target') && link.target !== '_blank') {
+                        const href = link.getAttribute('href');
+                        // Only show loader for internal links
+                        if (href && !href.startsWith('http') && !href.startsWith('//') && 
+                            !href.startsWith('mailto:') && !href.startsWith('tel:')) {
+                            loader.style.display = 'flex';
+                            loader.classList.remove('hidden');
+                        }
+                    }
+                });
+
+                // Show loader on form submissions
+                document.addEventListener('submit', function(e) {
+                    const form = e.target;
+                    if (form.tagName === 'FORM' && form.method.toLowerCase() !== 'get') {
+                        loader.style.display = 'flex';
+                        loader.classList.remove('hidden');
+                    }
+                });
+            });
+
+            // Global function to show/hide loader programmatically
+            window.showLoader = function() {
+                loader.style.display = 'flex';
+                loader.classList.remove('hidden');
+            };
+
+            window.hideLoader = function() {
+                loader.classList.add('hidden');
+                setTimeout(function() {
+                    loader.style.display = 'none';
+                }, 600);
+            };
+
+            // Show loader for AJAX requests
+            if (typeof jQuery !== 'undefined') {
+                $(document).ajaxStart(function() {
+                    loader.style.display = 'flex';
+                    loader.classList.remove('hidden');
+                }).ajaxComplete(function() {
+                    setTimeout(function() {
+                        loader.classList.add('hidden');
+                        setTimeout(function() {
+                            loader.style.display = 'none';
+                        }, 600);
+                    }, 300);
+                });
+            }
+
+            // Also handle fetch API
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                loader.style.display = 'flex';
+                loader.classList.remove('hidden');
+                return originalFetch.apply(this, args)
+                    .finally(function() {
+                        setTimeout(function() {
+                            loader.classList.add('hidden');
+                            setTimeout(function() {
+                                loader.style.display = 'none';
+                            }, 600);
+                        }, 300);
+                    });
+            };
+        })();
+    </script>
 
     <!-- Floating WhatsApp Button -->
     @{

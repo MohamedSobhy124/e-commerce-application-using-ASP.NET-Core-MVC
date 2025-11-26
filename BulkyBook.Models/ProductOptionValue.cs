@@ -20,6 +20,11 @@ namespace BulkyBook.Models
         [StringLength(100)]
         public string Value { get; set; } // e.g., "S", "M", "L" for Size or "Red", "Black" for Color
         
+        [Required]
+        [Display(Name = "Value (Arabic)")]
+        [StringLength(100)]
+        public string ValueAr { get; set; }
+        
         [Display(Name = "Display Order")]
         public int DisplayOrder { get; set; } = 0;
     }

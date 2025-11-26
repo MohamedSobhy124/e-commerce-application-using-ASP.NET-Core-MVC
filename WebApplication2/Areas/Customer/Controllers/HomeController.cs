@@ -316,7 +316,29 @@ namespace BulkyBook.Areas.Customer.Controllers
 
             // Cache headers are automatically set by [ResponseCache] attribute
 
-            return Json(new { products = products, hasMore = hasMore, totalCount = totalProducts });
+            // Return products with AR fields for client-side language switching
+            var productsJson = products.Select(p => new
+            {
+                id = p.Id,
+                title = p.Title,
+                titleAr = p.TitleAr,
+                description = p.Description,
+                descriptionAr = p.DescriptionAr,
+                price = p.Price,
+                listPrice = p.ListPrice,
+                stockQuantity = p.StockQuantity,
+                minimumStockAlert = p.MinimumStockAlert,
+                imageUrl = p.ImageUrl,
+                productType = p.ProductType,
+                categry = p.categry != null ? new { id = p.categry.Id, name = p.categry.Name } : null,
+                productImages = p.ProductImages?
+                    .Where(pi => pi.ImageInfo != "INFO_IMAGE") // Exclude info images
+                    .OrderBy(pi => pi.DisplayOrder)
+                    .Select(pi => pi.ImageUrl)
+                    .ToList() ?? new List<string>()
+            }).ToList();
+
+            return Json(new { products = productsJson, hasMore = hasMore, totalCount = totalProducts });
         }
 
         [HttpPost]
@@ -861,9 +883,14 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Error(int? statusCode = null)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var errorViewModel = new ErrorViewModel 
+            { 
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                StatusCode = statusCode ?? HttpContext.Response.StatusCode
+            };
+            return View(errorViewModel);
         }
 
         // Newsletter Subscription
