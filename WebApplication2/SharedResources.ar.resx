@@ -661,7 +661,7 @@
     <value>السعر الأصلي</value>
   </data>
   <data name="AdditionalTaxMayApply" xml:space="preserve">
-    <value>(قد يتم تطبيق ضرائب إضافية عند الدفع)</value>
+    <value>(السعر شامل الضريبة)</value>
   </data>
   <data name="ViewFullCart" xml:space="preserve">
     <value>عرض السلة الكاملة</value>
@@ -1650,7 +1650,7 @@
     <value>رفع الصور</value>
   </data>
   <data name="AtLeastOneRequired" xml:space="preserve">
-    <value>مطلوب صورة واحدة على الأقل</value>
+    <value>مطلوب واحد على الأقل</value>
   </data>
   <data name="AtLeastOneImageRequired" xml:space="preserve">
     <value>مطلوب صورة واحدة على الأقل.</value>
@@ -1940,9 +1940,6 @@
   <data name="NewFlashSaleNotification" xml:space="preserve">
     <value>⚡ عرض خاطف جديد متاح!</value>
   </data>
-  <data name="ViewFlashSale" xml:space="preserve">
-    <value>عرض العرض الخاطف</value>
-  </data>
   <data name="FlashSaleEmailFooter" xml:space="preserve">
     <value>لا تفوت هذه العروض الرائعة! تسوق الآن قبل انتهاء العرض.</value>
   </data>
@@ -1994,14 +1991,8 @@
   <data name="ListPrice" xml:space="preserve">
     <value>سعر القائمة</value>
   </data>
-  <data name="Stock" xml:space="preserve">
-    <value>المخزون</value>
-  </data>
   <data name="MinStockAlert" xml:space="preserve">
     <value>تنبيه الحد الأدنى للمخزون</value>
-  </data>
-  <data name="Image" xml:space="preserve">
-    <value>الصورة</value>
   </data>
   <data name="Upload" xml:space="preserve">
     <value>رفع</value>
@@ -2057,12 +2048,6 @@
   <data name="DeleteOptionWarning" xml:space="preserve">
     <value>سيؤدي هذا إلى حذف الخيار وجميع قيمه. لا يمكن التراجع عن هذا الإجراء!</value>
   </data>
-  <data name="YesDeleteIt" xml:space="preserve">
-    <value>نعم، احذفه</value>
-  </data>
-  <data name="Deleted" xml:space="preserve">
-    <value>تم الحذف</value>
-  </data>
   <data name="OptionDeletedSuccessfully" xml:space="preserve">
     <value>تم حذف الخيار بنجاح</value>
   </data>
@@ -2111,18 +2096,6 @@
   <data name="AreYouSureDeleteImage" xml:space="preserve">
     <value>هل أنت متأكد أنك تريد حذف هذه الصورة؟</value>
   </data>
-  <data name="ErrorDeletingImage" xml:space="preserve">
-    <value>خطأ في حذف الصورة</value>
-  </data>
-  <data name="UnknownError" xml:space="preserve">
-    <value>خطأ غير معروف</value>
-  </data>
-  <data name="ErrorDeletingImageTryAgain" xml:space="preserve">
-    <value>خطأ في حذف الصورة. يرجى المحاولة مرة أخرى.</value>
-  </data>
-  <data name="Title" xml:space="preserve">
-    <value>العنوان</value>
-  </data>
   <data name="EnterProductTitle" xml:space="preserve">
     <value>أدخل عنوان المنتج</value>
   </data>
@@ -2165,20 +2138,8 @@
   <data name="SelectCategory" xml:space="preserve">
     <value>اختر الفئة</value>
   </data>
-  <data name="BackToList" xml:space="preserve">
-    <value>العودة إلى القائمة</value>
-  </data>
   <data name="ProductImages" xml:space="preserve">
     <value>صور المنتج</value>
-  </data>
-  <data name="UploadImages" xml:space="preserve">
-    <value>رفع الصور</value>
-  </data>
-  <data name="NoImagesPleaseUpload" xml:space="preserve">
-    <value>لا توجد صور. يرجى رفع صورة واحدة على الأقل.</value>
-  </data>
-  <data name="AtLeastOneRequired" xml:space="preserve">
-    <value>مطلوب واحد على الأقل</value>
   </data>
   <data name="Step1Title" xml:space="preserve">
     <value>الخطوة 1: اختر نوع المنتج</value>
@@ -2249,7 +2210,40 @@
   <data name="VariantStock" xml:space="preserve">
     <value>مخزون المتغير</value>
   </data>
-  <data name="Stock" xml:space="preserve">
-    <value>المخزون</value>
+  <data name="SuggestedUse" xml:space="preserve">
+    <value>الاستخدام المقترح</value>
+  </data>
+  <data name="EnterSuggestedUse" xml:space="preserve">
+    <value>أدخل الاستخدام المقترح</value>
+  </data>
+  <data name="HealthNotes" xml:space="preserve">
+    <value>ملاحظات صحية</value>
+  </data>
+  <data name="EnterHealthNotes" xml:space="preserve">
+    <value>أدخل الملاحظات الصحية</value>
+  </data>
+  <data name="Specification" xml:space="preserve">
+    <value>المواصفات</value>
+  </data>
+  <data name="EnterSpecification" xml:space="preserve">
+    <value>أدخل المواصفات</value>
+  </data>
+  <data name="MultipleImages" xml:space="preserve">
+    <value>صور متعددة</value>
+  </data>
+  <data name="ImageInfo" xml:space="preserve">
+    <value>صورة معلومات</value>
+  </data>
+  <data name="UploadImageInfo" xml:space="preserve">
+    <value>رفع صورة معلومات</value>
+  </data>
+  <data name="SelectAnImageFile" xml:space="preserve">
+    <value>اختر ملف صورة</value>
+  </data>
+  <data name="AdditionalInfoImage" xml:space="preserve">
+    <value>معلومات إضافية</value>
+  </data>
+  <data name="ProductInformation" xml:space="preserve">
+    <value>معلومات المنتج</value>
   </data>
 </root>

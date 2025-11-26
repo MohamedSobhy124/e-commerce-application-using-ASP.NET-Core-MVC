@@ -660,9 +660,6 @@
   <data name="OriginalPrice" xml:space="preserve">
     <value>Original Price</value>
   </data>
-  <data name="AdditionalTaxMayApply" xml:space="preserve">
-    <value>(Additional tax may apply on checkout)</value>
-  </data>
   <data name="ViewFullCart" xml:space="preserve">
     <value>View Full Cart</value>
   </data>
@@ -1938,9 +1935,6 @@
   <data name="NewFlashSaleNotification" xml:space="preserve">
     <value>⚡ New Flash Sale Available!</value>
   </data>
-  <data name="ViewFlashSale" xml:space="preserve">
-    <value>View Flash Sale</value>
-  </data>
   <data name="FlashSaleEmailFooter" xml:space="preserve">
     <value>Don't miss out on these amazing deals! Shop now before the sale ends.</value>
   </data>
@@ -1992,14 +1986,8 @@
   <data name="ListPrice" xml:space="preserve">
     <value>List Price</value>
   </data>
-  <data name="Stock" xml:space="preserve">
-    <value>Stock</value>
-  </data>
   <data name="MinStockAlert" xml:space="preserve">
     <value>Min Stock Alert</value>
-  </data>
-  <data name="Image" xml:space="preserve">
-    <value>Image</value>
   </data>
   <data name="Upload" xml:space="preserve">
     <value>Upload</value>
@@ -2055,12 +2043,6 @@
   <data name="DeleteOptionWarning" xml:space="preserve">
     <value>This will delete the option and all its values. This action cannot be undone!</value>
   </data>
-  <data name="YesDeleteIt" xml:space="preserve">
-    <value>Yes, Delete It</value>
-  </data>
-  <data name="Deleted" xml:space="preserve">
-    <value>Deleted</value>
-  </data>
   <data name="OptionDeletedSuccessfully" xml:space="preserve">
     <value>Option deleted successfully</value>
   </data>
@@ -2109,18 +2091,6 @@
   <data name="AreYouSureDeleteImage" xml:space="preserve">
     <value>Are you sure you want to delete this image?</value>
   </data>
-  <data name="ErrorDeletingImage" xml:space="preserve">
-    <value>Error deleting image</value>
-  </data>
-  <data name="UnknownError" xml:space="preserve">
-    <value>Unknown error</value>
-  </data>
-  <data name="ErrorDeletingImageTryAgain" xml:space="preserve">
-    <value>Error deleting image. Please try again.</value>
-  </data>
-  <data name="Title" xml:space="preserve">
-    <value>Title</value>
-  </data>
   <data name="EnterProductTitle" xml:space="preserve">
     <value>Enter product title</value>
   </data>
@@ -2163,20 +2133,8 @@
   <data name="SelectCategory" xml:space="preserve">
     <value>Select Category</value>
   </data>
-  <data name="BackToList" xml:space="preserve">
-    <value>Back to List</value>
-  </data>
   <data name="ProductImages" xml:space="preserve">
     <value>Product Images</value>
-  </data>
-  <data name="UploadImages" xml:space="preserve">
-    <value>Upload Images</value>
-  </data>
-  <data name="NoImagesPleaseUpload" xml:space="preserve">
-    <value>No images. Please upload at least one image.</value>
-  </data>
-  <data name="AtLeastOneRequired" xml:space="preserve">
-    <value>At least 1 required</value>
   </data>
   <data name="Step1Title" xml:space="preserve">
     <value>Step 1: Choose Product Type</value>
@@ -2247,7 +2205,40 @@
   <data name="VariantStock" xml:space="preserve">
     <value>Variant Stock</value>
   </data>
-  <data name="Stock" xml:space="preserve">
-    <value>Stock</value>
+  <data name="SuggestedUse" xml:space="preserve">
+    <value>Suggested Use</value>
+  </data>
+  <data name="EnterSuggestedUse" xml:space="preserve">
+    <value>Enter suggested use</value>
+  </data>
+  <data name="HealthNotes" xml:space="preserve">
+    <value>Health Notes</value>
+  </data>
+  <data name="EnterHealthNotes" xml:space="preserve">
+    <value>Enter health notes</value>
+  </data>
+  <data name="Specification" xml:space="preserve">
+    <value>Specification</value>
+  </data>
+  <data name="EnterSpecification" xml:space="preserve">
+    <value>Enter specification</value>
+  </data>
+  <data name="MultipleImages" xml:space="preserve">
+    <value>Multiple Images</value>
+  </data>
+  <data name="ImageInfo" xml:space="preserve">
+    <value>Image Info</value>
+  </data>
+  <data name="UploadImageInfo" xml:space="preserve">
+    <value>Upload Image Info</value>
+  </data>
+  <data name="SelectAnImageFile" xml:space="preserve">
+    <value>Select an image file</value>
+  </data>
+  <data name="AdditionalInfoImage" xml:space="preserve">
+    <value>Additional Information</value>
+  </data>
+  <data name="ProductInformation" xml:space="preserve">
+    <value>Product Information</value>
   </data>
 </root>

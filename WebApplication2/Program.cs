@@ -125,6 +125,7 @@ var app = builder.Build();
     else
     {
         app.UseExceptionHandler("/Customer/Home/Error");
+        app.UseStatusCodePagesWithReExecute("/Customer/Home/Error", "?statusCode={0}");
     }
  
 

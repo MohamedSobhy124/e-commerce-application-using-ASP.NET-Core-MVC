@@ -12,6 +12,7 @@ namespace BulkyBook.DataAccess.Repository.IRepository
         void Update(Review review);
         double GetAverageRating(int productId);
         int GetReviewCount(int productId);
+        Dictionary<int, (double averageRating, int reviewCount)> GetBatchProductRatings(List<int> productIds);
         IEnumerable<Review> GetApprovedReviewsByProduct(int productId);
     }
 }

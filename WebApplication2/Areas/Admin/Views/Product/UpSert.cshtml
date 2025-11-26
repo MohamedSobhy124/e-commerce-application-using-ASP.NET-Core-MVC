@@ -1,8 +1,12 @@
 ﻿@model ProductVM
+@using Microsoft.AspNetCore.Localization
 
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentLang = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var isArabic = currentLang == "ar";
 }
 
 <div class="admin-wrapper">
@@ -26,20 +30,114 @@
                             <div class="admin-form-container">
                                 <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
 
-                                <div class="admin-form-group">
-                                    <label asp-for="product.Title" class="admin-form-label">
-                                        <i class="bi bi-card-heading me-2"></i>@Localizer["Title"] <span class="text-danger" style="font-weight: 700;">*</span>
-                                    </label>
-                                    <input asp-for="product.Title" class="admin-form-control" placeholder="@Localizer["EnterProductTitle"]" required />
-                                    <span asp-validation-for="product.Title" class="text-danger"></span>
+                                <!-- Title Fields - Both Languages -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label asp-for="product.Title" class="admin-form-label">
+                                                <i class="bi bi-card-heading me-2"></i>@Localizer["Title"] (English) <span class="text-danger" style="font-weight: 700;">*</span>
+                                            </label>
+                                            <input asp-for="product.Title" class="admin-form-control" placeholder="@Localizer["EnterProductTitle"]" required />
+                                            <span asp-validation-for="product.Title" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label asp-for="product.TitleAr" class="admin-form-label">
+                                                <i class="bi bi-card-heading me-2"></i>@Localizer["Title"] (العربية) <span class="text-danger" style="font-weight: 700;">*</span>
+                                            </label>
+                                            <input asp-for="product.TitleAr" class="admin-form-control" placeholder="@Localizer["EnterProductTitle"]" required />
+                                            <span asp-validation-for="product.TitleAr" class="text-danger"></span>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="admin-form-group">
-                                    <label asp-for="product.Description" class="admin-form-label">
-                                        <i class="bi bi-text-paragraph me-2"></i>@Localizer["Description"] <span class="text-danger" style="font-weight: 700;">*</span>
-                                    </label>
-                                    <textarea asp-for="product.Description" class="admin-form-control" rows="4" placeholder="@Localizer["EnterProductDescription"]" required></textarea>
-                                    <span asp-validation-for="product.Description" class="text-danger"></span>
+                                <!-- Description Fields - Both Languages -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label asp-for="product.Description" class="admin-form-label">
+                                                <i class="bi bi-text-paragraph me-2"></i>@Localizer["Description"] (English) <span class="text-danger" style="font-weight: 700;">*</span>
+                                            </label>
+                                            <textarea asp-for="product.Description" class="admin-form-control" rows="4" placeholder="@Localizer["EnterProductDescription"]" required></textarea>
+                                            <span asp-validation-for="product.Description" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label asp-for="product.DescriptionAr" class="admin-form-label">
+                                                <i class="bi bi-text-paragraph me-2"></i>@Localizer["Description"] (العربية) <span class="text-danger" style="font-weight: 700;">*</span>
+                                            </label>
+                                            <textarea asp-for="product.DescriptionAr" class="admin-form-control" rows="4" placeholder="@Localizer["EnterProductDescription"]" required></textarea>
+                                            <span asp-validation-for="product.DescriptionAr" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Suggested Use Fields - Both Languages -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label asp-for="product.SuggestedUse" class="admin-form-label">
+                                                <i class="bi bi-lightbulb me-2"></i>@Localizer["SuggestedUse"] (English) <span class="text-muted">(Optional)</span>
+                                            </label>
+                                            <textarea asp-for="product.SuggestedUse" class="admin-form-control" rows="4" placeholder="@Localizer["EnterSuggestedUse"]"></textarea>
+                                            <span asp-validation-for="product.SuggestedUse" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label asp-for="product.SuggestedUseAr" class="admin-form-label">
+                                                <i class="bi bi-lightbulb me-2"></i>@Localizer["SuggestedUse"] (العربية) <span class="text-muted">(Optional)</span>
+                                            </label>
+                                            <textarea asp-for="product.SuggestedUseAr" class="admin-form-control" rows="4" placeholder="@Localizer["EnterSuggestedUse"]"></textarea>
+                                            <span asp-validation-for="product.SuggestedUseAr" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Health Notes Fields - Both Languages -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label asp-for="product.HealthNotes" class="admin-form-label">
+                                                <i class="bi bi-heart-pulse me-2"></i>@Localizer["HealthNotes"] (English) <span class="text-muted">(Optional)</span>
+                                            </label>
+                                            <textarea asp-for="product.HealthNotes" class="admin-form-control" rows="4" placeholder="@Localizer["EnterHealthNotes"]"></textarea>
+                                            <span asp-validation-for="product.HealthNotes" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label asp-for="product.HealthNotesAr" class="admin-form-label">
+                                                <i class="bi bi-heart-pulse me-2"></i>@Localizer["HealthNotes"] (العربية) <span class="text-muted">(Optional)</span>
+                                            </label>
+                                            <textarea asp-for="product.HealthNotesAr" class="admin-form-control" rows="4" placeholder="@Localizer["EnterHealthNotes"]"></textarea>
+                                            <span asp-validation-for="product.HealthNotesAr" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Specification Fields - Both Languages -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label asp-for="product.Specification" class="admin-form-label">
+                                                <i class="bi bi-list-check me-2"></i>@Localizer["Specification"] (English) <span class="text-muted">(Optional)</span>
+                                            </label>
+                                            <textarea asp-for="product.Specification" class="admin-form-control" rows="4" placeholder="@Localizer["EnterSpecification"]"></textarea>
+                                            <span asp-validation-for="product.Specification" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label asp-for="product.SpecificationAr" class="admin-form-label">
+                                                <i class="bi bi-list-check me-2"></i>@Localizer["Specification"] (العربية) <span class="text-muted">(Optional)</span>
+                                            </label>
+                                            <textarea asp-for="product.SpecificationAr" class="admin-form-control" rows="4" placeholder="@Localizer["EnterSpecification"]"></textarea>
+                                            <span asp-validation-for="product.SpecificationAr" class="text-danger"></span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="row">
@@ -144,7 +242,7 @@
                                         <i class="bi bi-cloud-upload" style="font-size: 1.5rem;"></i>
                                     </span>
                                     <span style="display: block; margin-top: 0.5rem; font-weight: 600;">@Localizer["UploadImages"]</span>
-                                    <small style="display: block; margin-top: 0.25rem; opacity: 0.9;">(@Localizer["AtLeastOneRequired"])</small>
+                                    <small id="upload-requirement-text" style="display: block; margin-top: 0.25rem; opacity: 0.9;">(@Localizer["MultipleImages"])</small>
                                     <input id="files-input" type="file" name="files" class="file-input" accept="image/*" multiple style="display: none;" />
                                 </label>
 
@@ -152,7 +250,7 @@
                                 <div id="images-gallery" class="images-gallery">
                                     @if (Model.product.ProductImages != null && Model.product.ProductImages.Any())
                                     {
-                                        @foreach (var image in Model.product.ProductImages.OrderBy(pi => pi.DisplayOrder))
+                                        @foreach (var image in Model.product.ProductImages.Where(pi => pi.ImageInfo != "INFO_IMAGE").OrderBy(pi => pi.DisplayOrder))
                                         {
                                             <div class="image-item" data-image-id="@image.Id">
                                                 <img src="@image.ImageUrl" alt="Product Image" class="gallery-image" />
@@ -173,10 +271,60 @@
 
                                 <!-- Preview for new images -->
                                 <div id="preview-container" class="preview-container mt-3"></div>
+                                
+                                <!-- Info Image Upload -->
+                                <div class="mt-4 pt-4 border-top">
+                                    <h6 class="mb-3" style="color: #1976D2; font-weight: 600;">
+                                        <i class="bi bi-info-circle me-2"></i>@Localizer["ImageInfo"] <span class="text-muted small">(Optional)</span>
+                                    </h6>
+                                    
+                                    <!-- Upload Info Image Button (styled like multiple images) -->
+                                    <label for="infoImageInput" class="upload-button" style="display: block; text-align: center; padding: 1rem; background: linear-gradient(135deg, #7BC043, #3B9DD5); color: white; border-radius: 10px; cursor: pointer; margin-bottom: 1.5rem;">
+                                        <span class="upload-icon">
+                                            <i class="bi bi-cloud-upload" style="font-size: 1.5rem;"></i>
+                                        </span>
+                                        <span style="display: block; margin-top: 0.5rem; font-weight: 600;">@Localizer["UploadImageInfo"]</span>
+                                        <small style="display: block; margin-top: 0.25rem; opacity: 0.9;">(@Localizer["SelectAnImageFile"])</small>
+                                        <input type="file" 
+                                               id="infoImageInput" 
+                                               name="infoImage" 
+                                               class="file-input" 
+                                               accept="image/*"
+                                               onchange="previewInfoImage(this)" 
+                                               style="display: none;" />
+                                    </label>
+                                    
+                                    <!-- Preview container -->
+                                    <div id="infoImagePreview" class="mt-3" style="@(Model.product.ProductImages != null && Model.product.ProductImages.Any(pi => pi.ImageInfo == "INFO_IMAGE") ? "" : "display: none;")">
+                                        @{
+                                            var existingInfoImage = Model.product.ProductImages?.FirstOrDefault(pi => pi.ImageInfo == "INFO_IMAGE");
+                                        }
+                                        <div class="image-item" style="max-width: 300px; margin: 0 auto;">
+                                            <img id="infoImagePreviewImg" 
+                                                 src="@(existingInfoImage?.ImageUrl ?? "")" 
+                                                 alt="Info Image Preview" 
+                                                 class="gallery-image" 
+                                                 style="max-width: 100%; max-height: 300px; border-radius: 8px;" />
+                                            <button type="button" 
+                                                    class="delete-image-btn" 
+                                                    onclick="clearInfoImage()"
+                                                    title="@Localizer["Remove"]">
+                                                <i class="bi bi-x-circle-fill"></i>
+                                            </button>
+                                        </div>
+                                        @if (existingInfoImage != null)
+                                        {
+                                            <input type="hidden" id="existingInfoImageUrl" value="@existingInfoImage.ImageUrl" />
+                                            <input type="hidden" id="existingInfoImageId" value="@existingInfoImage.Id" />
+                                            <input type="hidden" id="productIdForInfoImage" value="@Model.product.Id" />
+                                        }
+                                    </div>
+                                </div>
                             </div>
                         </div>
                             
                     </div>
+                            
                 
                     <!-- Product Type & Variant Management Section -->
                     @if (Model.product.Id != 0)
@@ -385,9 +533,12 @@
         let options = @Html.Raw(Json.Serialize(Model.product.ProductOptions?.Select(o => new {
             Id = o.Id,
             Name = o.Name,
+            NameAr = o.NameAr,
             DisplayOrder = o.DisplayOrder,
-            Values = o.OptionValues?.Select(v => new { Id = v.Id, Value = v.Value, DisplayOrder = v.DisplayOrder })  
+            Values = o.OptionValues?.Select(v => new { Id = v.Id, Value = v.Value, ValueAr = v.ValueAr, DisplayOrder = v.DisplayOrder })  
         })  ));
+        let currentLang = '@currentLang';
+        let isArabic = currentLang === 'ar';
         let variants = @Html.Raw(Json.Serialize(Model.product.ProductVariants?.Select(v => new {
             Id = v.Id,
             Price = v.Price,
@@ -660,20 +811,30 @@
                 el.classList.remove('is-invalid');
             });
             
-            // Validate Title (Required)
+            // Validate Title (Required) - Both Languages
             const titleInput = document.querySelector('input[name="product.Title"]');
+            const titleArInput = document.querySelector('input[name="product.TitleAr"]');
             const titleLabel = '@Html.Raw(Localizer["Title"])';
             if (!titleInput || !titleInput.value || titleInput.value.trim() === '') {
-                errors.push(titleLabel + ' ' + localizations.isRequired);
-                errorFields.push({ field: titleInput, message: titleLabel + ' ' + localizations.isRequired });
+                errors.push(titleLabel + ' (English) ' + localizations.isRequired);
+                errorFields.push({ field: titleInput, message: titleLabel + ' (English) ' + localizations.isRequired });
+            }
+            if (!titleArInput || !titleArInput.value || titleArInput.value.trim() === '') {
+                errors.push(titleLabel + ' (العربية) ' + localizations.isRequired);
+                errorFields.push({ field: titleArInput, message: titleLabel + ' (العربية) ' + localizations.isRequired });
             }
             
-            // Validate Description (Required)
+            // Validate Description (Required) - Both Languages
             const descriptionInput = document.querySelector('textarea[name="product.Description"]');
+            const descriptionArInput = document.querySelector('textarea[name="product.DescriptionAr"]');
             const descriptionLabel = '@Html.Raw(Localizer["Description"])';
             if (!descriptionInput || !descriptionInput.value || descriptionInput.value.trim() === '') {
-                errors.push(descriptionLabel + ' ' + localizations.isRequired);
-                errorFields.push({ field: descriptionInput, message: descriptionLabel + ' ' + localizations.isRequired });
+                errors.push(descriptionLabel + ' (English) ' + localizations.isRequired);
+                errorFields.push({ field: descriptionInput, message: descriptionLabel + ' (English) ' + localizations.isRequired });
+            }
+            if (!descriptionArInput || !descriptionArInput.value || descriptionArInput.value.trim() === '') {
+                errors.push(descriptionLabel + ' (العربية) ' + localizations.isRequired);
+                errorFields.push({ field: descriptionArInput, message: descriptionLabel + ' (العربية) ' + localizations.isRequired });
             }
             
             // Validate Price (Required)
@@ -790,6 +951,10 @@
             console.log('Preparing form data...');
             const formData = new FormData(form);
             formData.append('saveOnly', 'true'); // Flag to indicate AJAX save
+            
+            // Add image upload option
+            const imageUploadOption = document.querySelector('input[name="imageUploadOption"]:checked')?.value || 'multiple';
+            formData.append('imageUploadOption', imageUploadOption);
 
             Swal.fire({
                 title: localizations.generating,
@@ -1208,19 +1373,34 @@
 
             Swal.fire({
                 title: localizations.addNewOption,
-                input: 'text',
-                inputLabel: localizations.optionNameExample,
-                inputPlaceholder: localizations.enterOptionName,
+                html: `
+                    <div class="mb-3">
+                        <label class="form-label">Option Name (English) <span class="text-danger">*</span></label>
+                        <input type="text" id="swal-option-name" class="swal2-input" placeholder="${localizations.enterOptionName}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Option Name (العربية) <span class="text-danger">*</span></label>
+                        <input type="text" id="swal-option-name-ar" class="swal2-input" placeholder="${localizations.enterOptionName}" required>
+                    </div>
+                `,
                 showCancelButton: true,
                 confirmButtonText: localizations.add,
                 cancelButtonText: localizations.cancel,
-                inputValidator: (value) => {
-                    if (!value) {
-                        return localizations.optionNameRequired;
+                preConfirm: () => {
+                    const name = document.getElementById('swal-option-name').value.trim();
+                    const nameAr = document.getElementById('swal-option-name-ar').value.trim();
+                    if (!name) {
+                        Swal.showValidationMessage('Option Name (English) ' + localizations.isRequired);
+                        return false;
                     }
+                    if (!nameAr) {
+                        Swal.showValidationMessage('Option Name (العربية) ' + localizations.isRequired);
+                        return false;
+                    }
+                    return { name: name, nameAr: nameAr };
                 }
             }).then((result) => {
-                if (result.isConfirmed) {
+                if (result.isConfirmed && result.value) {
                     fetch('/Admin/Product/AddOption', {
                         method: 'POST',
                         headers: {
@@ -1229,7 +1409,8 @@
                         },
                         body: JSON.stringify({
                             productId: productId,
-                            optionName: result.value,
+                            optionName: result.value.name,
+                            optionNameAr: result.value.nameAr,
                             displayOrder: options.length
                         })
                     })
@@ -1288,7 +1469,11 @@
                     <div class="option-card-header">
                         <div class="option-card-title-wrapper">
                             <i class="bi bi-tag-fill option-card-icon"></i>
-                            <strong class="option-card-name">${option.name}</strong>
+                            <div>
+                                <strong class="option-card-name">${option.name || ''} <span class="text-muted">(English)</span></strong>
+                                <br>
+                                <strong class="option-card-name">${option.nameAr || ''} <span class="text-muted">(العربية)</span></strong>
+                            </div>
                         </div>
                         <button type="button" class="btn btn-sm btn-danger btn-delete-option" onclick="deleteOption(${option.id})" title="${localizations.deleteOption}">
                             <i class="bi bi-trash-fill"></i>
@@ -1297,11 +1482,20 @@
                     </div>
                     <div class="option-card-body">
                         <div class="option-value-input-group">
-                            <input type="text" class="form-control option-value-input" id="newValue_${option.id}" placeholder="${localizations.addValuePlaceholder}">
-                            <button type="button" class="btn btn-primary btn-add-value" onclick="addOptionValue(${option.id})">
-                                <i class="bi bi-plus-circle-fill me-1"></i>
-                                <span>${localizations.add}</span>
-                            </button>
+                            <div class="row g-2">
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control option-value-input" id="newValue_${option.id}" placeholder="${localizations.addValuePlaceholder} (English)" required>
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control option-value-input" id="newValueAr_${option.id}" placeholder="${localizations.addValuePlaceholder} (العربية)" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-primary btn-add-value w-100" onclick="addOptionValue(${option.id})">
+                                        <i class="bi bi-plus-circle-fill me-1"></i>
+                                        <span>${localizations.add}</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div id="values_${option.id}" class="option-values-list"></div>
                     </div>
@@ -1333,7 +1527,10 @@
                 const valueBadge = document.createElement('div');
                 valueBadge.className = 'option-value-badge';
                 valueBadge.innerHTML = `
-                    <span class="value-text">${value.value}</span>
+                    <div class="d-flex flex-column">
+                        <span class="value-text">${value.value || ''} <small class="text-muted">(English)</small></span>
+                        <span class="value-text">${value.valueAr || ''} <small class="text-muted">(العربية)</small></span>
+                    </div>
                     <button type="button" class="btn-remove-value" onclick="deleteOptionValue(${value.id}, ${optionId})" title="${localizations.removeValue}">
                         <i class="bi bi-x-lg"></i>
                     </button>
@@ -1344,13 +1541,24 @@
 
         function addOptionValue(optionId) {
             const input = document.getElementById(`newValue_${optionId}`);
-            const value = input.value.trim();
+            const inputAr = document.getElementById(`newValueAr_${optionId}`);
+            const value = input ? input.value.trim() : '';
+            const valueAr = inputAr ? inputAr.value.trim() : '';
             
             if (!value) {
                 Swal.fire({
                     icon: 'error',
                     title: localizations.error,
-                    text: localizations.pleaseEnterValue
+                    text: 'Value (English) ' + localizations.isRequired
+                });
+                return;
+            }
+            
+            if (!valueAr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: localizations.error,
+                    text: 'Value (العربية) ' + localizations.isRequired
                 });
                 return;
             }
@@ -1364,13 +1572,15 @@
                 body: JSON.stringify({
                     optionId: optionId,
                     value: value,
+                    valueAr: valueAr,
                     displayOrder: 0
                 })
             })
             .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            input.value = '';
+                            if (input) input.value = '';
+                            if (inputAr) inputAr.value = '';
                             loadOptions();
                             updateStepProgress();
                         } else {
@@ -1787,6 +1997,154 @@
             }
         });
 
+        // Update image info function
+        // Update image upload option
+        function updateImageUploadOption() {
+            const multipleOption = document.getElementById('imageOptionMultiple');
+            const atLeastOneOption = document.getElementById('imageOptionAtLeastOne');
+            const requirementText = document.getElementById('upload-requirement-text');
+            const fileInput = document.getElementById('files-input');
+            
+            if (atLeastOneOption && atLeastOneOption.checked) {
+                requirementText.textContent = '(@Localizer["AtLeastOneRequired"])';
+                if (fileInput) fileInput.setAttribute('data-required', 'true');
+            } else {
+                requirementText.textContent = '(@Localizer["MultipleImages"])';
+                if (fileInput) fileInput.removeAttribute('data-required');
+            }
+        }
+
+        // Preview info image
+        function previewInfoImage(input) {
+            const preview = document.getElementById('infoImagePreview');
+            const previewImg = document.getElementById('infoImagePreviewImg');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Clear info image
+        function clearInfoImage() {
+            const input = document.getElementById('infoImageInput');
+            const preview = document.getElementById('infoImagePreview');
+            const previewImg = document.getElementById('infoImagePreviewImg');
+            const existingInfoImageId = document.getElementById('existingInfoImageId');
+            const productIdForInfoImage = document.getElementById('productIdForInfoImage');
+            
+            // Clear UI elements
+            if (input) {
+                input.value = '';
+            }
+            if (preview) {
+                preview.style.display = 'none';
+            }
+            if (previewImg) {
+                previewImg.src = '';
+            }
+            
+            // If there's an existing info image in the database, delete it
+            if (productIdForInfoImage && productIdForInfoImage.value) {
+                const productId = parseInt(productIdForInfoImage.value);
+                
+                if (productId > 0) {
+                    // Call API to delete the info image (no need for imageId, it finds by marker)
+                    fetch('/Admin/Product/DeleteInfoImage', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: JSON.stringify({
+                            productId: productId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Clear the hidden fields
+                            if (existingInfoImageId) {
+                                existingInfoImageId.value = '';
+                            }
+                            const existingInfoImageUrl = document.getElementById('existingInfoImageUrl');
+                            if (existingInfoImageUrl) {
+                                existingInfoImageUrl.value = '';
+                            }
+                            
+                            // Show success message if toastr is available
+                            if (typeof toastr !== 'undefined') {
+                                toastr.success('Info image deleted successfully');
+                            }
+                        } else {
+                            console.error('Failed to delete info image:', data.message);
+                            if (typeof toastr !== 'undefined') {
+                                toastr.error(data.message || 'Failed to delete info image');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting info image:', error);
+                        if (typeof toastr !== 'undefined') {
+                            toastr.error('Error deleting info image: ' + error.message);
+                        }
+                    });
+                }
+            }
+        }
+
+        function updateImageInfo(imageId, imageInfo) {
+            if (imageId <= 0) return; // Skip for preview images
+            
+            fetch('/Admin/Product/UpdateImageInfo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    imageId: imageId,
+                    imageInfo: imageInfo || null
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Failed to update image info');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Show success feedback
+                    const input = document.querySelector(`input[data-image-id="${imageId}"]`);
+                    if (input) {
+                        input.style.borderColor = '#28a745';
+                        setTimeout(() => {
+                            input.style.borderColor = '#dee2e6';
+                        }, 2000);
+                    }
+                } else {
+                    console.error('Failed to update image info:', data.message);
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error(data.message || 'Failed to update image info');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error updating image info:', error);
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Error updating image info: ' + error.message);
+                }
+            });
+        }
+
         // Delete image function
         function deleteImage(imageId, button) {
             Swal.fire({
@@ -1918,6 +2276,33 @@
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 0.5rem;
+    }
+
+    .image-info-section {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+
+    .image-info-input-wrapper {
+        margin-top: 0.5rem;
+        width: 100%;
+    }
+
+    .image-info-input {
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        background: white;
+    }
+
+    .image-info-input:focus {
+        outline: none;
+        border-color: #3B9DD5;
+        box-shadow: 0 0 0 0.2rem rgba(59, 157, 213, 0.25);
     }
 
     .preview-image-item {

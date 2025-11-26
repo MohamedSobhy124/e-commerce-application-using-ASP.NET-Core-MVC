@@ -265,6 +265,29 @@ namespace BulkyBook.Areas.Customer.Controllers
                 reviewCount = reviewCount
             });
         }
+
+        [HttpPost]
+        public IActionResult GetBatchProductRatings([FromBody] List<int> productIds)
+        {
+            if (productIds == null || !productIds.Any())
+            {
+                return Json(new { ratings = new Dictionary<int, object>() });
+            }
+
+            var ratings = _unitOfWork.review.GetBatchProductRatings(productIds);
+            
+            // Convert to a format that's easier to work with in JavaScript
+            var result = ratings.ToDictionary(
+                kvp => kvp.Key,
+                kvp => new
+                {
+                    averageRating = kvp.Value.averageRating,
+                    reviewCount = kvp.Value.reviewCount
+                }
+            );
+
+            return Json(new { ratings = result });
+        }
     }
 }
 

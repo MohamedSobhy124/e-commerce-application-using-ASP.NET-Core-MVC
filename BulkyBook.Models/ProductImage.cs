@@ -19,6 +19,9 @@ namespace BulkyBook.Models
         public string ImageUrl { get; set; }
         
         public int DisplayOrder { get; set; } = 0;
+        
+        [StringLength(500)]
+        public string? ImageInfo { get; set; }
     }
 }
 

@@ -468,7 +468,9 @@
     <div class="product-card stagger-item" 
          data-stock-quantity="@Product.StockQuantity" 
          data-minimum-stock="@Product.MinimumStockAlert"
-         data-product-id="@Product.Id">
+         data-product-id="@Product.Id"
+         onclick="window.location.href='@Url.Action("Details", "Home", new { productId = Product.Id })'"
+         style="cursor: pointer;">
         <!-- Product Image Carousel -->
         <div class="product-image-wrapper">
             @if (isAuthenticated)
@@ -526,14 +528,14 @@
             }
             else
             {
-            <img src="@Product.ImageUrl" class="product-image" alt="@Product.Title" />
+            <img src="@Product.ImageUrl" class="product-image" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Product.TitleAr) ? Product.TitleAr : Product.Title)" />
             }
             
             <!-- Badges -->
             <div class="product-badges">
                 @if (discount > 0)
                 {
-                    <span class="product-badge badge-discount">-@discount%</span>
+                    <span class="product-badge badge-discount">@discount% @(currentCulture == "ar" ? "خصم" : "OFF")</span>
                 }
             </div>
         </div>
@@ -541,7 +543,7 @@
         <!-- Product Info -->
         <div class="product-content">
             <div class="product-category">@Product.categry.Name</div>
-            <h3 class="product-title">@Product.Title</h3>
+            <h3 class="product-title">@(currentCulture == "ar" && !string.IsNullOrEmpty(Product.TitleAr) ? Product.TitleAr : Product.Title)</h3>
             
             <!-- Star Rating -->
             <div class="product-card-rating" data-product-id="@Product.Id">
@@ -555,8 +557,8 @@
                 <span class="product-card-rating-text">(0)</span>
             </div>
             
-            <!-- Price -->
-            <div class="price-section">
+            <!-- Price and Actions - Same Line -->
+            <div class="price-actions-row" onclick="event.stopPropagation();">
                 <div class="price-wrapper">
                     <span class="current-price">@Html.Raw(currencySymbol) @Product.Price.ToString("N2")</span>
                     @if (discount > 0)
@@ -565,30 +567,24 @@
                         <span class="discount-percent">@discount% @Localizer["OFF"]</span>
                     }
                 </div>
-            </div>
-            
-            <!-- Actions - View Details + Add to Cart / Select Options -->
-            <div class="product-actions">
-                <a asp-action="Details" asp-route-productId="@Product.Id" class="btn-view-details">
-                    <i class="bi bi-eye"></i>
-                    @Localizer["ViewDetails"]
-                </a>
-                @if (Product.ProductType == BulkyBook.Models.ProductType.Variable)
-                {
-                    <a asp-action="Details" asp-route-productId="@Product.Id" class="btn-select-options">
-                        <i class="bi bi-list-check"></i>
-                        @Localizer["SelectOptions"]
-                    </a>
-                }
-                else
-                {
-                    <button class="btn-add-cart-quick @(isInCart ? "in-cart" : "")" 
-                            data-product-id="@Product.Id"
-                            onclick="toggleCart(@Product.Id, this)" 
-                            title="@(isInCart ? "In Cart" : "Add to Cart")">
-                        <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart-plus")"></i>
-                    </button>
-                }
+                <div class="product-actions">
+                    @if (Product.ProductType == BulkyBook.Models.ProductType.Variable)
+                    {
+                        <a asp-action="Details" asp-route-productId="@Product.Id" class="btn-select-options">
+                            <i class="bi bi-list-check"></i>
+                            @Localizer["SelectOptions"]
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="btn-add-cart-quick @(isInCart ? "in-cart" : "")" 
+                                data-product-id="@Product.Id"
+                                onclick="toggleCart(@Product.Id, this); event.stopPropagation();" 
+                                title="@(isInCart ? "In Cart" : "Add to Cart")">
+                            <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart-plus")"></i>
+                        </button>
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -1128,6 +1124,7 @@
     @section Scripts {
     <script>
         // Localizations for JavaScript
+        const currentCulture = '@currentCulture';
         const localizations = {
             selectOptions: '@Html.Raw(Localizer["SelectOptions"])'
         };
@@ -1672,7 +1669,8 @@
         // Function to create product HTML - NEW DESIGN
         function createProductCard(product, isAuthenticated) {
             const discount = product.listPrice > 0 ? Math.floor((product.listPrice - product.price) / product.listPrice * 100) : 0;
-            const discountBadge = discount > 0 ? `<span class="product-badge badge-discount">-${discount}%</span>` : '';
+            const discountText = '@(currentCulture == "ar" ? "خصم" : "OFF")';
+            const discountBadge = discount > 0 ? `<span class="product-badge badge-discount">${discount}% ${discountText}</span>` : '';
             
             const priceHtml = discount > 0 
                 ? `<span class="current-price">${formatCurrency(product.price)}</span>
@@ -1686,22 +1684,66 @@
             
             // Handle multiple images
             let imageHtml = '';
-            const productImages = product.productImages && product.productImages.length > 0 
-                ? product.productImages.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0)).map(pi => pi.imageUrl)
-                : [];
+            // productImages from API is already an array of image URLs (strings), not objects
+            let productImages = [];
             
-            if (productImages.length === 0 && product.imageUrl) {
-                productImages.push(product.imageUrl);
+            // Check if productImages exists and has items
+            if (product.productImages && Array.isArray(product.productImages) && product.productImages.length > 0) {
+                // If it's an array of strings (URLs), use directly
+                if (typeof product.productImages[0] === 'string') {
+                    productImages = product.productImages.filter(img => img && String(img).trim() !== '');
+                } 
+                // If it's an array of objects, extract URLs
+                else if (product.productImages[0] && typeof product.productImages[0] === 'object') {
+                    productImages = product.productImages
+                        .filter(pi => pi && pi.imageUrl)
+                        .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+                        .map(pi => pi.imageUrl)
+                        .filter(img => img && String(img).trim() !== '');
+                }
             }
+            
+            // Fallback to main imageUrl if no productImages
+            if (productImages.length === 0) {
+                if (product.imageUrl) {
+                    productImages.push(product.imageUrl);
+                } else {
+                    // Last resort: try to get image from first productImage if it exists as object
+                    if (product.productImages && product.productImages.length > 0 && product.productImages[0] && typeof product.productImages[0] === 'object') {
+                        const firstImg = product.productImages[0];
+                        if (firstImg.url) productImages.push(firstImg.url);
+                        else if (firstImg.ImageUrl) productImages.push(firstImg.ImageUrl);
+                    }
+                }
+            }
+            
+            // Normalize image URLs - convert backslashes to forward slashes and ensure leading slash
+            productImages = productImages.map(img => {
+                if (!img) return '';
+                // Convert to string and trim
+                img = String(img).trim();
+                // Replace backslashes with forward slashes
+                img = img.replace(/\\/g, '/');
+                // Remove double slashes (except http:// or https://)
+                img = img.replace(/([^:]\/)\/+/g, '$1');
+                // Ensure it starts with / if it's a relative path
+                if (img && !img.startsWith('http') && !img.startsWith('/') && !img.startsWith('data:')) {
+                    img = '/' + img;
+                }
+                return img;
+            }).filter(img => img && img.trim() !== '');
             
             if (productImages.length > 1) {
                 // Multiple images - carousel
                 let carouselItems = '';
                 let indicators = '';
                 productImages.forEach((img, index) => {
+                    // Image URL is already normalized above
+                    let imageUrl = img || '/images/placeholder.png';
+                    
                     carouselItems += `
                         <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                            <img src="${img}" class="product-image" alt="${product.title} - Image ${index + 1}" />
+                            <img src="${imageUrl}" class="product-image" alt="${product.title || 'Product'} - Image ${index + 1}" onerror="this.src='/images/placeholder.png'; this.onerror=null;" />
                         </div>
                     `;
                     indicators += `
@@ -1730,15 +1772,32 @@
                     </div>
                 `;
             } else {
-                // Single image
-                const imageUrl = productImages.length > 0 ? productImages[0] : product.imageUrl || '';
-                imageHtml = `<img src="${imageUrl}" class="product-image" alt="${product.title}" />`;
+                // Single image - URL is already normalized above
+                let imageUrl = productImages.length > 0 ? productImages[0] : '';
+                
+                // Fallback to main imageUrl if productImages is empty
+                if (!imageUrl && product.imageUrl) {
+                    imageUrl = product.imageUrl.replace(/\\/g, '/');
+                    if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/') && !imageUrl.startsWith('data:')) {
+                        imageUrl = '/' + imageUrl;
+                    }
+                }
+                
+                // Fallback to a placeholder if no image
+                if (!imageUrl) {
+                    imageUrl = '/images/placeholder.png';
+                }
+                
+                const productTitle = (currentCulture === 'ar' && product.titleAr) ? product.titleAr : (product.title || 'Product');
+                imageHtml = `<img src="${imageUrl}" class="product-image" alt="${productTitle}" onerror="this.src='/images/placeholder.png'; this.onerror=null;" />`;
             }
             
             return `
                 <div class="product-card stagger-item" 
                      data-stock-quantity="${product.stockQuantity || 0}" 
-                     data-minimum-stock="${product.minimumStockAlert || 5}">
+                     data-minimum-stock="${product.minimumStockAlert || 5}"
+                     onclick="window.location.href='/Customer/Home/Details?productId=${product.id}'"
+                     style="cursor: pointer;">
                     <div class="product-image-wrapper">
                         ${imageHtml}
                         <div class="product-badges">
@@ -1747,7 +1806,7 @@
                     </div>
                     <div class="product-content">
                         <div class="product-category">${product.categry?.name || 'PRODUCT'}</div>
-                        <h3 class="product-title">${product.title}</h3>
+                        <h3 class="product-title">${(currentCulture === 'ar' && product.titleAr) ? product.titleAr : product.title}</h3>
                         <div class="product-card-rating" data-product-id="${product.id}">
                             <div class="product-card-stars">
                                 <i class="bi bi-star"></i>
@@ -1758,28 +1817,24 @@
                             </div>
                             <span class="product-card-rating-text">(0)</span>
                         </div>
-                        <div class="price-section">
+                        <div class="price-actions-row" onclick="event.stopPropagation();">
                             <div class="price-wrapper">
                                 ${priceHtml}
                             </div>
-                        </div>
-                        <div class="product-actions">
-                            <a href="/Customer/Home/Details?productId=${product.id}" class="btn-view-details">
-                                <i class="bi bi-eye"></i>
-                                @Localizer["ViewDetails"]
-                            </a>
-                            ${(product.productType === 1 || product.productType === 'Variable')
-                                ? `<a href="/Customer/Home/Details?productId=${product.id}" class="btn-select-options">
-                                    <i class="bi bi-list-check"></i>
-                                    ${localizations.selectOptions}
-                                   </a>`
-                                : `<button class="btn-add-cart-quick ${cartClass}" 
-                                    data-product-id="${product.id}"
-                                    onclick="toggleCart(${product.id}, this)" 
-                                    title="${isInCart ? 'In Cart' : 'Add to Cart'}">
-                                    <i class="bi ${cartIcon}"></i>
-                                   </button>`
-                            }
+                            <div class="product-actions">
+                                ${(product.productType === 1 || product.productType === 'Variable')
+                                    ? `<a href="/Customer/Home/Details?productId=${product.id}" class="btn-select-options">
+                                        <i class="bi bi-list-check"></i>
+                                        ${localizations.selectOptions}
+                                       </a>`
+                                    : `<button class="btn-add-cart-quick ${cartClass}" 
+                                        data-product-id="${product.id}"
+                                        onclick="toggleCart(${product.id}, this); event.stopPropagation();" 
+                                        title="${isInCart ? 'In Cart' : 'Add to Cart'}">
+                                        <i class="bi ${cartIcon}"></i>
+                                       </button>`
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1823,8 +1878,61 @@
                 .then(data => {
                     const container = document.getElementById('productContainer');
                     
-                    data.products.forEach(product => {
-                        container.insertAdjacentHTML('beforeend', createProductCard(product, isAuthenticated));
+                    if (!container) {
+                        console.error('Product container not found');
+                        isLoading = false;
+                        if (loadingIndicator) loadingIndicator.style.display = 'none';
+                        if (loadMoreBtn) loadMoreBtn.style.display = 'inline-block';
+                        return;
+                    }
+                    
+                    // Get the number of existing products to calculate stagger delay
+                    const existingProducts = container.querySelectorAll('.product-card.stagger-item').length;
+                    
+                    data.products.forEach((product, index) => {
+                        // Debug: Log product data to console
+                        if (index === 0) {
+                            console.log('Sample product data:', {
+                                id: product.id,
+                                title: product.title,
+                                imageUrl: product.imageUrl,
+                                productImages: product.productImages,
+                                productImagesType: typeof product.productImages,
+                                productImagesLength: product.productImages ? product.productImages.length : 0
+                            });
+                        }
+                        
+                        const productHtml = createProductCard(product, isAuthenticated);
+                        container.insertAdjacentHTML('beforeend', productHtml);
+                    });
+                    
+                    // Get all newly added product cards and make them visible with stagger animation
+                    const allProductCards = container.querySelectorAll('.product-card.stagger-item');
+                    const newProductCards = Array.from(allProductCards).slice(existingProducts);
+                    
+                    // Force image reload and make cards visible
+                    newProductCards.forEach((card, index) => {
+                        // Find all images in this card and ensure they load
+                        const images = card.querySelectorAll('img');
+                        images.forEach(img => {
+                            // Force reload by setting src again
+                            const originalSrc = img.src;
+                            img.src = '';
+                            setTimeout(() => {
+                                img.src = originalSrc;
+                            }, 10);
+                            
+                            // Add error handler
+                            img.onerror = function() {
+                                console.error('Image failed to load:', originalSrc);
+                                this.src = '/images/placeholder.png';
+                            };
+                        });
+                        
+                        // Add visible class with stagger delay for smooth animation
+                        setTimeout(() => {
+                            card.classList.add('visible');
+                        }, (index * 50) + 100);
                     });
 
                     // Load ratings for newly added products
@@ -1834,6 +1942,25 @@
                     if (typeof initProductBadges === 'function') {
                         initProductBadges();
                     }
+                    
+                    // Create or reuse observer for newly loaded products
+                    // This ensures any products that scroll into view later will animate
+                    if (!window.staggerObserver) {
+                        window.staggerObserver = new IntersectionObserver((entries) => {
+                            entries.forEach(entry => {
+                                if (entry.isIntersecting) {
+                                    entry.target.classList.add('visible');
+                                }
+                            });
+                        }, { threshold: 0.1 });
+                    }
+                    
+                    // Observe newly added products that aren't visible yet
+                    newProductCards.forEach(item => {
+                        if (!item.classList.contains('visible')) {
+                            window.staggerObserver.observe(item);
+                        }
+                    });
 
                     hasMoreProducts = data.hasMore;
                     currentPage++;
@@ -1857,12 +1984,20 @@
                 });
         }
 
+        // Flag to prevent multiple simultaneous API calls
+        let isCheckingLoadMore = false;
+        let hasCheckedLoadMore = false;
+
         // Check if there are more products on page load and show button
         function checkAndShowLoadMoreButton() {
+            // Prevent multiple simultaneous calls
+            if (isCheckingLoadMore || hasCheckedLoadMore) {
+                return;
+            }
+
             const loadMoreContainer = document.getElementById('loadMoreContainer');
             const loadMoreBtn = document.getElementById('loadMoreBtn');
             const productCount = document.querySelectorAll('.product-card').length;
-            
             
             // If we have exactly 20 products, likely there are more (since Index shows 20 max)
             if (productCount === 20) {
@@ -1874,8 +2009,15 @@
                     loadMoreBtn.style.display = 'inline-block';
                 }
                 
-                // Still verify by checking the API
-                fetch(`/Customer/Home/LoadMoreProducts?page=1&pageSize=20`)
+                // Mark as checking to prevent duplicate calls
+                isCheckingLoadMore = true;
+                hasCheckedLoadMore = true;
+                
+                // Still verify by checking the API (only once)
+                const filterParams = getFilterParams();
+                const url = `/Customer/Home/LoadMoreProducts?page=1&pageSize=20${filterParams ? '&' + filterParams : ''}`;
+                
+                fetch(url)
                     .then(response => response.json())
                     .then(data => {
                         if (!data.hasMore && (!data.products || data.products.length === 0)) {
@@ -1885,13 +2027,23 @@
                                 loadMoreContainer.style.display = 'none';
                             }
                         }
+                        isCheckingLoadMore = false;
                     })
                     .catch(error => {
+                        console.error('Error checking for more products:', error);
+                        isCheckingLoadMore = false;
                     });
             } 
             // If we have products but less than 20, check if there are more
             else if (productCount > 0 && productCount < 20) {
-                fetch(`/Customer/Home/LoadMoreProducts?page=1&pageSize=20`)
+                // Mark as checking to prevent duplicate calls
+                isCheckingLoadMore = true;
+                hasCheckedLoadMore = true;
+                
+                const filterParams = getFilterParams();
+                const url = `/Customer/Home/LoadMoreProducts?page=1&pageSize=20${filterParams ? '&' + filterParams : ''}`;
+                
+                fetch(url)
                     .then(response => response.json())
                     .then(data => {
                         if (data.hasMore || (data.products && data.products.length > 0)) {
@@ -1908,16 +2060,20 @@
                                 loadMoreContainer.style.display = 'none';
                             }
                         }
+                        isCheckingLoadMore = false;
                     })
                     .catch(error => {
+                        console.error('Error checking for more products:', error);
+                        isCheckingLoadMore = false;
                     });
             } 
             // No products at all
             else {
                 hasMoreProducts = false;
+                hasCheckedLoadMore = true; // Mark as checked even if no products
                 if (loadMoreContainer) {
                     loadMoreContainer.style.display = 'none';
-            }
+                }
             }
         }
 
@@ -2039,33 +2195,67 @@
             loadAllProductRatings();
 
             // Check if we need to show the Load More button after products are rendered
+            // Use a single call with appropriate delay to ensure DOM is ready
             setTimeout(function() {
                 checkAndShowLoadMoreButton();
-            }, 1500);
+            }, 500);
         });
         
-        // Also check when window loads (in case DOMContentLoaded fires too early)
+        // Also check when window loads (as a fallback, but only if not already checked)
         window.addEventListener('load', function() {
-            setTimeout(function() {
-                checkAndShowLoadMoreButton();
-            }, 1000);
+            // Only check if not already checked (in case DOMContentLoaded was too early)
+            if (!hasCheckedLoadMore) {
+                setTimeout(function() {
+                    checkAndShowLoadMoreButton();
+                }, 300);
+            }
         });
-        
-        // Also check after a longer delay to ensure everything is loaded
-        setTimeout(function() {
-            checkAndShowLoadMoreButton();
-        }, 2000);
 
         function loadAllProductRatings() {
             const ratingElements = document.querySelectorAll('.product-card-rating');
-            ratingElements.forEach(element => {
-                const productId = element.getAttribute('data-product-id');
-                if (productId) {
-                    loadProductCardRating(productId, element);
-                }
-            });
+            if (ratingElements.length === 0) return;
+
+            // Collect all product IDs
+            const productIds = Array.from(ratingElements)
+                .map(element => {
+                    const productId = element.getAttribute('data-product-id');
+                    return productId ? parseInt(productId) : null;
+                })
+                .filter(id => id !== null);
+
+            if (productIds.length === 0) return;
+
+            // Make a single batch API call for all products
+            fetch('/Customer/Review/GetBatchProductRatings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(productIds)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ratings) {
+                        // Update each product card with its rating
+                        ratingElements.forEach(element => {
+                            const productId = parseInt(element.getAttribute('data-product-id'));
+                            if (productId && data.ratings[productId]) {
+                                const rating = data.ratings[productId];
+                                if (rating.reviewCount > 0) {
+                                    const starsHtml = getStarsHTML(rating.averageRating);
+                                    const starsElement = element.querySelector('.product-card-stars');
+                                    const textElement = element.querySelector('.product-card-rating-text');
+                                    if (starsElement) starsElement.innerHTML = starsHtml;
+                                    if (textElement) textElement.textContent = `(${rating.reviewCount})`;
+                                }
+                            }
+                        });
+                    }
+                })
+                .catch(error => console.error('Error loading ratings:', error));
         }
 
+        // Keep individual function for backward compatibility (if needed elsewhere)
         function loadProductCardRating(productId, element) {
             fetch(`/Customer/Review/GetProductRating?productId=${productId}`)
                 .then(response => response.json())

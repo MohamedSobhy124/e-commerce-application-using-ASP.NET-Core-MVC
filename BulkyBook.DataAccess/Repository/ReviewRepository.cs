@@ -46,6 +46,38 @@ namespace BulkyBook.DataAccess.Repository
                 .OrderByDescending(r => r.CreatedAt)
                 .ToList();
         }
+
+        public Dictionary<int, (double averageRating, int reviewCount)> GetBatchProductRatings(List<int> productIds)
+        {
+            if (productIds == null || !productIds.Any())
+                return new Dictionary<int, (double, int)>();
+
+            // Get all reviews for the products in one query
+            var reviews = _db.Reviews
+                .Where(r => productIds.Contains(r.ProductId) && r.IsApproved)
+                .GroupBy(r => r.ProductId)
+                .Select(g => new
+                {
+                    ProductId = g.Key,
+                    AverageRating = Math.Round(g.Average(r => r.Rating), 1),
+                    ReviewCount = g.Count()
+                })
+                .ToList();
+
+            // Create dictionary with all product IDs (including those with no reviews)
+            var result = productIds.ToDictionary(
+                id => id,
+                id =>
+                {
+                    var review = reviews.FirstOrDefault(r => r.ProductId == id);
+                    return review != null
+                        ? (review.AverageRating, review.ReviewCount)
+                        : (0.0, 0);
+                }
+            );
+
+            return result;
+        }
     }
 }
 

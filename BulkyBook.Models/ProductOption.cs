@@ -20,6 +20,11 @@ namespace BulkyBook.Models
         [StringLength(100)]
         public string Name { get; set; } // e.g., "Size", "Color", "Flavor"
         
+        [Required]
+        [Display(Name = "Option Name (Arabic)")]
+        [StringLength(100)]
+        public string NameAr { get; set; }
+        
         [Display(Name = "Display Order")]
         public int DisplayOrder { get; set; } = 0;
         

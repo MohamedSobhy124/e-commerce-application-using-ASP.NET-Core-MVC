@@ -17,6 +17,18 @@ namespace BulkyBook.Areas.Admin.Controllers
         public int imageId { get; set; }
     }
 
+    public class UpdateImageInfoRequest
+    {
+        public int ImageId { get; set; }
+        public string? ImageInfo { get; set; }
+    }
+
+    public class DeleteInfoImageRequest
+    {
+        public int ProductId { get; set; }
+        public int? ImageId { get; set; } // Optional, not needed since we find by marker
+    }
+
     [Area("Admin")]
     [Authorize(Roles = SD.Role_Admin)]
     public class ProductController : Controller
@@ -144,7 +156,7 @@ namespace BulkyBook.Areas.Admin.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        public IActionResult UpSert(ProductVM productVM, List<IFormFile>? files, string? saveOnly)
+        public IActionResult UpSert(ProductVM productVM, List<IFormFile>? files, string? saveOnly, string? imageUploadOption, IFormFile? infoImage)
         {
             // Check if this is an AJAX request (saveOnly flag)
             bool isAjaxRequest = !string.IsNullOrEmpty(saveOnly) && saveOnly == "true";
@@ -152,11 +164,24 @@ namespace BulkyBook.Areas.Admin.Controllers
             // For AJAX requests, skip image validation (images can be added later)
             if (!isAjaxRequest)
             {
-                // Validate at least one image is required
-                if (productVM.product.Id == 0 && (files == null || files.Count == 0))
+                bool isAtLeastOneRequired = imageUploadOption == "atLeastOne";
+                bool hasExistingImages = productVM.product.Id > 0 && 
+                    _dbContext.ProductImages.Any(pi => pi.ProductId == productVM.product.Id);
+                
+                // Validate based on selected option
+                if (isAtLeastOneRequired)
                 {
-                    ModelState.AddModelError("", "At least one image is required.");
+                    // At least one image required (either existing or new)
+                    if (productVM.product.Id == 0 && (files == null || files.Count == 0))
+                    {
+                        ModelState.AddModelError("", "At least one image is required.");
+                    }
+                    else if (productVM.product.Id > 0 && !hasExistingImages && (files == null || files.Count == 0))
+                    {
+                        ModelState.AddModelError("", "At least one image is required.");
+                    }
                 }
+                // For "multiple" option, no validation needed (images are optional)
             }
 
             if (ModelState.IsValid)
@@ -199,7 +224,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                                 productVM.product.ImageUrl = @"\Images\Products\" + FileName;
                             }
 
-                            // Add ProductImage
+                            // Add ProductImage (ImageInfo will be set separately via UpdateImageInfo action)
                             if (productVM.product.Id == 0)
                             {
                                 // New product - add to collection
@@ -228,18 +253,15 @@ namespace BulkyBook.Areas.Admin.Controllers
                     }
                 }
 
+                int savedProductId = 0;
+                
                 if (productVM.product.Id == 0)
                 {
                     // Set audit fields for new product
                     AuditHelper.SetCreatedAudit(productVM.product, User);
                     _unitOfWork.product.add(productVM.product);
                     _unitOfWork.save(); // This automatically saves ProductImages too!
-                    
-                    if (isAjaxRequest)
-                    {
-                        return Json(new { success = true, productId = productVM.product.Id, message = "Product Created Successfully" });
-                    }
-                    TempData["success"] = "Product Created Successfully";
+                    savedProductId = productVM.product.Id;
                 }
                 else
                 {
@@ -257,7 +279,15 @@ namespace BulkyBook.Areas.Admin.Controllers
                     
                     // Update properties
                     existingProduct.Title = productVM.product.Title;
+                    existingProduct.TitleAr = productVM.product.TitleAr;
                     existingProduct.Description = productVM.product.Description;
+                    existingProduct.DescriptionAr = productVM.product.DescriptionAr;
+                    existingProduct.SuggestedUse = productVM.product.SuggestedUse;
+                    existingProduct.SuggestedUseAr = productVM.product.SuggestedUseAr;
+                    existingProduct.HealthNotes = productVM.product.HealthNotes;
+                    existingProduct.HealthNotesAr = productVM.product.HealthNotesAr;
+                    existingProduct.Specification = productVM.product.Specification;
+                    existingProduct.SpecificationAr = productVM.product.SpecificationAr;
                     existingProduct.Price = productVM.product.Price;
                     existingProduct.ListPrice = productVM.product.ListPrice;
                     existingProduct.CategryId = productVM.product.CategryId;
@@ -277,10 +307,83 @@ namespace BulkyBook.Areas.Admin.Controllers
                     // Update and save
                     _dbContext.Products.Update(existingProduct);
                     _dbContext.SaveChanges();
+                    savedProductId = existingProduct.Id;
+                }
+                
+                // Handle info image if provided - must be after product is saved
+                // Info image is saved as a separate ProductImage entry marked with ImageInfo = "INFO_IMAGE"
+                if (infoImage != null && infoImage.Length > 0 && savedProductId > 0)
+                {
+                    // Save the info image file first
+                    string FileName = Guid.NewGuid().ToString() + Path.GetExtension(infoImage.FileName);
+                    string filePath = Path.Combine(ProductPath, FileName);
                     
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        infoImage.CopyTo(fileStream);
+                    }
+                    
+                    string infoImageUrl = @"\Images\Products\" + FileName;
+                    
+                    // Ensure all changes are saved before querying
+                    _dbContext.SaveChanges();
+                    
+                    // Find existing info image (marked with ImageInfo = "INFO_IMAGE")
+                    var existingInfoImage = _dbContext.ProductImages
+                        .FirstOrDefault(pi => pi.ProductId == savedProductId && pi.ImageInfo == "INFO_IMAGE");
+                    
+                    if (existingInfoImage != null)
+                    {
+                        // Delete old info image file
+                        if (!string.IsNullOrEmpty(existingInfoImage.ImageUrl))
+                        {
+                            try
+                            {
+                                string oldFilePath = Path.Combine(WWWRootPath, existingInfoImage.ImageUrl.TrimStart('\\', '/'));
+                                if (System.IO.File.Exists(oldFilePath))
+                                {
+                                    System.IO.File.Delete(oldFilePath);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Error deleting old info image file: {ex.Message}");
+                            }
+                        }
+                        
+                        // Update existing info image
+                        existingInfoImage.ImageUrl = infoImageUrl;
+                    }
+                    else
+                    {
+                        // Create new info image as separate ProductImage entry
+                        var newInfoImage = new ProductImage
+                        {
+                            ProductId = savedProductId,
+                            ImageUrl = infoImageUrl,
+                            DisplayOrder = -1, // Use -1 to mark as info image (separate from regular images)
+                            ImageInfo = "INFO_IMAGE" // Marker to identify this as info image
+                        };
+                        _dbContext.ProductImages.Add(newInfoImage);
+                    }
+                    
+                    _dbContext.SaveChanges();
+                }
+                
+                // Return success messages after processing info image
+                if (productVM.product.Id == 0)
+                {
                     if (isAjaxRequest)
                     {
-                        return Json(new { success = true, productId = existingProduct.Id, message = "Product Updated Successfully" });
+                        return Json(new { success = true, productId = savedProductId, message = "Product Created Successfully" });
+                    }
+                    TempData["success"] = "Product Created Successfully";
+                }
+                else
+                {
+                    if (isAjaxRequest)
+                    {
+                        return Json(new { success = true, productId = savedProductId, message = "Product Updated Successfully" });
                     }
                     TempData["success"] = "Product Updated Successfully";
                 }
@@ -399,6 +502,7 @@ namespace BulkyBook.Areas.Admin.Controllers
 
         // Delete Product Image
         [HttpPost]
+        [IgnoreAntiforgeryToken]
         public IActionResult DeleteImage([FromBody] DeleteImageRequest request)
         {
             var productImage = _dbContext.ProductImages.FirstOrDefault(pi => pi.Id == request.imageId);
@@ -441,6 +545,112 @@ namespace BulkyBook.Areas.Admin.Controllers
             _dbContext.SaveChanges();
 
             return Json(new { success = true, message = "Image deleted successfully" });
+        }
+
+        // Update Product Image Info
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public IActionResult UpdateImageInfo([FromBody] UpdateImageInfoRequest request)
+        {
+            if (request == null || request.ImageId <= 0)
+            {
+                return Json(new { success = false, message = "Invalid request" });
+            }
+
+            var productImage = _dbContext.ProductImages.FirstOrDefault(pi => pi.Id == request.ImageId);
+            if (productImage == null)
+            {
+                return Json(new { success = false, message = "Image not found" });
+            }
+
+            productImage.ImageInfo = string.IsNullOrWhiteSpace(request.ImageInfo) ? null : request.ImageInfo.Trim();
+            _dbContext.SaveChanges();
+
+            return Json(new { success = true, message = "Image info updated successfully" });
+        }
+
+        [HttpPost]
+        public IActionResult UploadInfoImage(IFormFile infoImage)
+        {
+            if (infoImage == null || infoImage.Length == 0)
+            {
+                return Json(new { success = false, message = "No file uploaded" });
+            }
+
+            string WWWRootPath = _webHostEnvironment.WebRootPath;
+            string ProductPath = Path.Combine(WWWRootPath, @"Images\Products");
+
+            if (!Directory.Exists(ProductPath))
+            {
+                Directory.CreateDirectory(ProductPath);
+            }
+
+            string FileName = Guid.NewGuid().ToString() + Path.GetExtension(infoImage.FileName);
+            string filePath = Path.Combine(ProductPath, FileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                infoImage.CopyTo(fileStream);
+            }
+
+            string imageUrl = @"\Images\Products\" + FileName;
+
+            return Json(new { success = true, imageUrl = imageUrl, message = "Info image uploaded successfully" });
+        }
+
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public IActionResult DeleteInfoImage([FromBody] DeleteInfoImageRequest request)
+        {
+            if (request == null || request.ProductId <= 0)
+            {
+                return Json(new { success = false, message = "Invalid request" });
+            }
+
+            try
+            {
+                // Find the info image by marker (ImageInfo = "INFO_IMAGE")
+                var infoImage = _dbContext.ProductImages
+                    .FirstOrDefault(pi => pi.ProductId == request.ProductId && pi.ImageInfo == "INFO_IMAGE");
+
+                if (infoImage == null)
+                {
+                    return Json(new { success = false, message = "Info image not found" });
+                }
+
+                // Get the info image URL before deleting
+                string infoImageUrl = infoImage.ImageUrl;
+
+                // Delete the physical file if it exists
+                if (!string.IsNullOrEmpty(infoImageUrl))
+                {
+                    try
+                    {
+                        string WWWRootPath = _webHostEnvironment.WebRootPath;
+                        string filePath = Path.Combine(WWWRootPath, infoImageUrl.TrimStart('\\', '/'));
+                        
+                        if (System.IO.File.Exists(filePath))
+                        {
+                            System.IO.File.Delete(filePath);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error but don't fail the request if file deletion fails
+                        Console.WriteLine($"Error deleting info image file: {ex.Message}");
+                    }
+                }
+
+                // Delete the ProductImage entry
+                _dbContext.ProductImages.Remove(infoImage);
+                _dbContext.SaveChanges();
+
+                return Json(new { success = true, message = "Info image deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error deleting info image: " + ex.Message });
+            }
         }
 
         // GET: Categries/Delete/5
@@ -523,13 +733,14 @@ namespace BulkyBook.Areas.Admin.Controllers
             {
                 var values = _unitOfWork.ProductOptionValue.GetAll(ov => ov.ProductOptionId == option.Id && !ov.IsDeleted)
                     .OrderBy(ov => ov.DisplayOrder)
-                    .Select(ov => new { ov.Id, ov.Value, ov.DisplayOrder })
+                    .Select(ov => new { ov.Id, ov.Value, ov.ValueAr, ov.DisplayOrder })
                     .ToList();
 
                 options.Add(new
                 {
                     id = option.Id,
                     name = option.Name,
+                    nameAr = option.NameAr,
                     displayOrder = option.DisplayOrder,
                     values = values
                 });
@@ -543,13 +754,19 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             if (request == null || request.ProductId <= 0 || string.IsNullOrWhiteSpace(request.OptionName))
             {
-                return Json(new { success = false, message = "Invalid request" });
+                return Json(new { success = false, message = "Invalid request: Option Name (English) is required" });
+            }
+            
+            if (string.IsNullOrWhiteSpace(request.OptionNameAr))
+            {
+                return Json(new { success = false, message = "Invalid request: Option Name (العربية) is required" });
             }
 
             var option = new ProductOption
             {
                 ProductId = request.ProductId,
                 Name = request.OptionName,
+                NameAr = request.OptionNameAr,
                 DisplayOrder = request.DisplayOrder
             };
 
@@ -677,13 +894,19 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             if (request == null || request.OptionId <= 0 || string.IsNullOrWhiteSpace(request.Value))
             {
-                return Json(new { success = false, message = "Invalid request" });
+                return Json(new { success = false, message = "Invalid request: Value (English) is required" });
+            }
+            
+            if (string.IsNullOrWhiteSpace(request.ValueAr))
+            {
+                return Json(new { success = false, message = "Invalid request: Value (العربية) is required" });
             }
 
             var optionValue = new ProductOptionValue
             {
                 ProductOptionId = request.OptionId,
                 Value = request.Value,
+                ValueAr = request.ValueAr,
                 DisplayOrder = request.DisplayOrder
             };
 
@@ -1207,6 +1430,7 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             public int ProductId { get; set; }
             public string OptionName { get; set; }
+            public string OptionNameAr { get; set; }
             public int DisplayOrder { get; set; }
         }
 
@@ -1214,6 +1438,7 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             public int OptionId { get; set; }
             public string Value { get; set; }
+            public string ValueAr { get; set; }
             public int DisplayOrder { get; set; }
         }
 
