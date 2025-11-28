@@ -294,6 +294,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                     existingProduct.StockQuantity = productVM.product.StockQuantity;
                     existingProduct.MinimumStockAlert = productVM.product.MinimumStockAlert;
                     existingProduct.ProductType = productVM.product.ProductType;
+                    existingProduct.ExpiryDate = productVM.product.ExpiryDate;
                     
                     // Update ImageUrl only if provided
                     if (!string.IsNullOrEmpty(productVM.product.ImageUrl))
@@ -1314,6 +1315,16 @@ namespace BulkyBook.Areas.Admin.Controllers
             variant.ListPrice = request.ListPrice;
             variant.StockQuantity = request.StockQuantity;
             variant.MinimumStockAlert = request.MinimumStockAlert;
+            
+            // Update ExpiryDate if provided
+            if (request.ExpiryDate.HasValue)
+            {
+                variant.ExpiryDate = request.ExpiryDate.Value;
+            }
+            else
+            {
+                variant.ExpiryDate = null;
+            }
 
             // Set audit fields
             AuditHelper.SetModifiedAudit(variant, User);
@@ -1449,6 +1460,7 @@ namespace BulkyBook.Areas.Admin.Controllers
             public decimal? ListPrice { get; set; }
             public int StockQuantity { get; set; }
             public int MinimumStockAlert { get; set; }
+            public DateTime? ExpiryDate { get; set; }
         }
 
         #endregion

@@ -37,6 +37,7 @@ namespace BulkyBook.DataAccess.Data
         public DbSet<ProductOptionValue> ProductOptionValues { get; set; }
         public DbSet<ProductVariant> ProductVariants { get; set; }
         public DbSet<ProductVariantOptionValue> ProductVariantOptionValues { get; set; }
+        public DbSet<StockNotification> StockNotifications { get; set; }
 
 
 

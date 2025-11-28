@@ -163,7 +163,7 @@
     <value>المؤلف</value>
   </data>
   <data name="Category" xml:space="preserve">
-    <value>الفئة</value>
+    <value>الفئات</value>
   </data>
   <data name="Description" xml:space="preserve">
     <value>الوصف</value>
@@ -271,7 +271,7 @@
     <value>حذف</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>وفر</value>
+    <value>حفظ</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>إلغاء</value>
@@ -448,7 +448,7 @@
     <value>الشركة</value>
   </data>
   <data name="Product" xml:space="preserve">
-    <value>المنتج</value>
+    <value>المنتجات</value>
   </data>
   <data name="CartUpdatedSuccessfully" xml:space="preserve">
     <value>تم تحديث السلة بنجاح</value>
@@ -1155,13 +1155,13 @@
     <value>عروض ساخنة الآن!</value>
   </data>
   <data name="FlashSale" xml:space="preserve">
-    <value>عرض خاطف</value>
+    <value>عرض لفترة محدودة</value>
   </data>
   <data name="LimitedTimeOffers" xml:space="preserve">
     <value>عروض لوقت محدود!</value>
   </data>
   <data name="ViewAllFlashSales" xml:space="preserve">
-    <value>عرض جميع العروض الخاطفة</value>
+    <value>عرض جميع العروض لفترة محدودة</value>
   </data>
   <data name="OFF" xml:space="preserve">
     <value>خصم</value>
@@ -1230,7 +1230,7 @@
     <value>في السلة</value>
   </data>
   <data name="FlashSales" xml:space="preserve">
-    <value>العروض الخاطفة</value>
+    <value>العروض لفترة محدودة</value>
   </data>
   <data name="Notifications" xml:space="preserve">
     <value>الإشعارات</value>
@@ -1248,13 +1248,13 @@
     <value>العروض الخاطفة - عروض محدودة الوقت</value>
   </data>
   <data name="AllFlashSales" xml:space="preserve">
-    <value>جميع العروض الخاطفة</value>
+    <value>جميع العروض لفترة محدودة</value>
   </data>
   <data name="DontMissIncredibleDeals" xml:space="preserve">
     <value>لا تفوت الصفقات الرائعة والخصومات الحصرية!</value>
   </data>
   <data name="NoActiveFlashSales" xml:space="preserve">
-    <value>لا توجد عروض خاطفة نشطة</value>
+    <value>لا توجد عروض لفترة محدودة نشطة</value>
   </data>
   <data name="CheckBackForAmazingDeals" xml:space="preserve">
     <value>تحقق مرة أخرى قريباً للحصول على صفقات رائعة وعروض حصرية!</value>
@@ -1284,19 +1284,19 @@
     <value>نفدت الكمية</value>
   </data>
   <data name="FlashSalesManagement" xml:space="preserve">
-    <value>إدارة العروض الخاطفة</value>
+    <value>إدارة العرض لفترة محدودة</value>
   </data>
   <data name="CreateNewFlashSale" xml:space="preserve">
-    <value>إنشاء عرض خاطف جديد</value>
+    <value>إنشاء عرض لفترة محدودة جديد</value>
   </data>
   <data name="NoFlashSalesYet" xml:space="preserve">
-    <value>لا توجد عروض خاطفة بعد</value>
+    <value>لا توجد عروض لفترة محدودة بعد</value>
   </data>
   <data name="CreateFlashSaleToBoostSales" xml:space="preserve">
-    <value>أنشئ عرضاً خاطفاً لتعزيز مبيعاتك وجذب المزيد من العملاء!</value>
+    <value>أنشئ عرض لفترة محدودة لتعزيز مبيعاتك وجذب المزيد من العملاء!</value>
   </data>
   <data name="CreateFirstFlashSale" xml:space="preserve">
-    <value>إنشاء أول عرض خاطف</value>
+    <value>إنشاء أول عرض لفترة محدودة</value>
   </data>
   <data name="Ended" xml:space="preserve">
     <value>انتهى</value>
@@ -1326,16 +1326,16 @@
     <value>تبديل حالة التفعيل</value>
   </data>
   <data name="ChangeActiveStatusConfirm" xml:space="preserve">
-    <value>هل أنت متأكد من تغيير حالة التفعيل لهذا العرض الخاطف؟</value>
+    <value>هل أنت متأكد من تغيير حالة التفعيل لهذا العرض لفترة محدودة؟</value>
   </data>
   <data name="YesToggleIt" xml:space="preserve">
     <value>نعم، قم بالتبديل</value>
   </data>
   <data name="DeleteFlashSaleConfirm" xml:space="preserve">
-    <value>حذف العرض الخاطف؟</value>
+    <value>حذف العرض لفترة محدودة؟</value>
   </data>
   <data name="DeleteFlashSaleWarning" xml:space="preserve">
-    <value>هل أنت متأكد من حذف هذا العرض الخاطف؟ لا يمكن التراجع عن هذا الإجراء وستتم إزالة جميع المنتجات المرتبطة.</value>
+    <value>هل أنت متأكد من حذف هذا العرض لفترة محدودة؟ لا يمكن التراجع عن هذا الإجراء وستتم إزالة جميع المنتجات المرتبطة.</value>
   </data>
   <data name="YesDeleteIt" xml:space="preserve">
     <value>نعم، احذفه</value>
@@ -1347,13 +1347,13 @@
     <value>حدث خطأ. يرجى المحاولة مرة أخرى.</value>
   </data>
   <data name="CreateFlashSale" xml:space="preserve">
-    <value>إنشاء عرض خاطف</value>
+    <value>إنشاء عرض لفترة محدودة</value>
   </data>
   <data name="FlashSaleInformation" xml:space="preserve">
-    <value>معلومات العرض الخاطف</value>
+    <value>معلومات العرض لفترة محدودة</value>
   </data>
   <data name="FlashSaleName" xml:space="preserve">
-    <value>اسم العرض الخاطف</value>
+    <value>اسم العرض لفترة محدودة</value>
   </data>
   <data name="ExampleFlashSaleName" xml:space="preserve">
     <value>مثال: عرض الصيف الكبير 2024</value>
@@ -1362,10 +1362,10 @@
     <value>أعطه اسماً جذاباً سيجذب العملاء</value>
   </data>
   <data name="DescribeFlashSale" xml:space="preserve">
-    <value>اوصف هذا العرض الخاطف...</value>
+    <value>اوصف هذا العرض لفترة محدودة...</value>
   </data>
   <data name="OptionalDescription" xml:space="preserve">
-    <value>اختياري: أضف وصفاً لشرح العرض الخاطف</value>
+    <value>اختياري: أضف وصفاً لشرح العرض لفترة محدودة</value>
   </data>
   <data name="Schedule" xml:space="preserve">
     <value>الجدولة</value>
@@ -1374,19 +1374,19 @@
     <value>نصيحة</value>
   </data>
   <data name="SetTimesCarefully" xml:space="preserve">
-    <value>حدد أوقات البداية والنهاية بعناية. سيتم تفعيل وتعطيل العرض الخاطف تلقائياً بناءً على هذه الأوقات.</value>
+    <value>حدد أوقات البداية والنهاية بعناية. سيتم تفعيل وتعطيل العرض لفترة محدودة تلقائياً بناءً على هذه الأوقات.</value>
   </data>
   <data name="StartDateTime" xml:space="preserve">
     <value>تاريخ ووقت البداية</value>
   </data>
   <data name="WhenFlashSaleStarts" xml:space="preserve">
-    <value>متى يجب أن يبدأ هذا العرض الخاطف؟</value>
+    <value>متى يجب أن يبدأ هذا العرض لفترة محدودة؟</value>
   </data>
   <data name="EndDateTime" xml:space="preserve">
     <value>تاريخ ووقت النهاية</value>
   </data>
   <data name="WhenFlashSaleEnds" xml:space="preserve">
-    <value>متى يجب أن ينتهي هذا العرض الخاطف؟</value>
+    <value>متى يجب أن ينتهي هذا العرض لفترة محدودة؟</value>
   </data>
   <data name="Duration" xml:space="preserve">
     <value>المدة</value>
@@ -1395,13 +1395,13 @@
     <value>نشط (بناءً على الجدولة)</value>
   </data>
   <data name="CanDeactivateLater" xml:space="preserve">
-    <value>يمكنك تعطيل هذا العرض الخاطف لاحقاً إذا لزم الأمر</value>
+    <value>يمكنك تعطيل هذا العرض لفترة محدودة لاحقاً إذا لزم الأمر</value>
   </data>
   <data name="NextStep" xml:space="preserve">
     <value>الخطوة التالية</value>
   </data>
   <data name="AfterCreatingAddProducts" xml:space="preserve">
-    <value>بعد إنشاء العرض الخاطف، ستتمكن من إضافة المنتجات إليه.</value>
+    <value>بعد إنشاء العرض لفترة محدودة، ستتمكن من إضافة المنتجات إليه.</value>
   </data>
   <data name="day" xml:space="preserve">
     <value>يوم</value>
@@ -1416,16 +1416,16 @@
     <value>ات</value>
   </data>
   <data name="EditFlashSale" xml:space="preserve">
-    <value>تعديل العرض الخاطف</value>
+    <value>تعديل العرض لفترة محدودة</value>
   </data>
   <data name="UpdateFlashSale" xml:space="preserve">
-    <value>تحديث العرض الخاطف</value>
+    <value>تحديث العرض لفترة محدودة</value>
   </data>
   <data name="ManageProducts" xml:space="preserve">
     <value>إدارة المنتجات</value>
   </data>
   <data name="FlashSaleDetails" xml:space="preserve">
-    <value>تفاصيل العرض الخاطف</value>
+    <value>تفاصيل العرض لفترة محدودة</value>
   </data>
   <data name="ActiveNow" xml:space="preserve">
     <value>نشط الآن</value>
@@ -1440,10 +1440,10 @@
     <value>القيمة الإجمالية</value>
   </data>
   <data name="ProductsInFlashSale" xml:space="preserve">
-    <value>المنتجات في العرض الخاطف</value>
+    <value>المنتجات في العرض لفترة محدودة</value>
   </data>
   <data name="NoProductsInFlashSale" xml:space="preserve">
-    <value>لا توجد منتجات في هذا العرض الخاطف بعد</value>
+    <value>لا توجد منتجات في هذا العرض لفترة محدودة بعد</value>
   </data>
   <data name="AddProductsNow" xml:space="preserve">
     <value>إضافة منتجات الآن</value>
@@ -1458,10 +1458,10 @@
     <value>المخزون</value>
   </data>
   <data name="TotalFlashSaleValue" xml:space="preserve">
-    <value>إجمالي قيمة العرض الخاطف</value>
+    <value>إجمالي قيمة العرض لفترة محدودة</value>
   </data>
   <data name="AddProductsToFlashSale" xml:space="preserve">
-    <value>إضافة منتجات للعرض الخاطف</value>
+    <value>إضافة منتجات لعرض لفترة محدودة</value>
   </data>
   <data name="AddNewProduct" xml:space="preserve">
     <value>إضافة منتج جديد</value>
@@ -1470,7 +1470,7 @@
     <value>اختر المنتج</value>
   </data>
   <data name="FlashSaleQuantity" xml:space="preserve">
-    <value>كمية العرض الخاطف</value>
+    <value>كمية العرض لفترة محدودة</value>
   </data>
   <data name="EnterQuantity" xml:space="preserve">
     <value>أدخل الكمية</value>
@@ -1479,7 +1479,7 @@
     <value>يجب أن تكون أقل من أو تساوي المخزون المتاح</value>
   </data>
   <data name="FlashSalePrice" xml:space="preserve">
-    <value>سعر العرض الخاطف</value>
+    <value>سعر العرض لفترة محدودة</value>
   </data>
   <data name="EnterPrice" xml:space="preserve">
     <value>أدخل السعر</value>
@@ -1488,10 +1488,10 @@
     <value>لم تتم إضافة منتجات بعد</value>
   </data>
   <data name="AddAtLeastOneProduct" xml:space="preserve">
-    <value>أضف منتجاً واحداً على الأقل لجعل هذا العرض الخاطف نشطاً</value>
+    <value>أضف منتجاً واحداً على الأقل لجعل هذا العرض لفترة محدودة نشطاً</value>
   </data>
   <data name="ViewFlashSale" xml:space="preserve">
-    <value>عرض العرض الخاطف</value>
+    <value>عرض العرض لفترة محدودة</value>
   </data>
   <data name="PleaseSelectProduct" xml:space="preserve">
     <value>يرجى اختيار منتج</value>
@@ -1512,7 +1512,7 @@
     <value>إزالة المنتج</value>
   </data>
   <data name="RemoveProductConfirm" xml:space="preserve">
-    <value>هل أنت متأكد من إزالة هذا المنتج من العرض الخاطف؟</value>
+    <value>هل أنت متأكد من إزالة هذا المنتج من العرض لفترة محدودة؟</value>
   </data>
   <data name="YesRemoveIt" xml:space="preserve">
     <value>نعم، أزلته</value>
@@ -1938,7 +1938,7 @@
     <value>إذا تم التفعيل، سيتم إرسال إشعار بريد إلكتروني لجميع المشتركين النشطين في النشرة الإخبارية حول هذا العرض الخاطف</value>
   </data>
   <data name="NewFlashSaleNotification" xml:space="preserve">
-    <value>⚡ عرض خاطف جديد متاح!</value>
+    <value>⚡ عرض  لفترة محدودة جديد متاح!</value>
   </data>
   <data name="FlashSaleEmailFooter" xml:space="preserve">
     <value>لا تفوت هذه العروض الرائعة! تسوق الآن قبل انتهاء العرض.</value>
@@ -2245,5 +2245,14 @@
   </data>
   <data name="ProductInformation" xml:space="preserve">
     <value>معلومات المنتج</value>
+  </data>
+  <data name="Offers" xml:space="preserve">
+    <value>العروض</value>
+  </data>
+  <data name="BestDeals" xml:space="preserve">
+    <value>أفضل العروض</value>
+  </data>
+  <data name="Filters" xml:space="preserve">
+    <value>الفلتر</value>
   </data>
 </root>

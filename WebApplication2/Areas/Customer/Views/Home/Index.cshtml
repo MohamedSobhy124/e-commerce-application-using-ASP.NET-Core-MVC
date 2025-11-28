@@ -33,6 +33,42 @@
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
 }
 
+<!-- Sticky Hero Search Box Header - At Top -->
+<header class="hero-search-box-sticky" id="heroSearchBoxSticky">
+    <div class="container">
+        <div class="hero-search-box">
+            <form id="heroSearchForm" onsubmit="return false;">
+                <div class="advanced-search-container">
+                    <div class="search-input-wrapper">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" 
+                               name="searchTerm" 
+                               id="heroSearchInput"
+                               value="@searchTerm" 
+                               class="hero-search-input" 
+                               placeholder="@Localizer["SearchSupplements"]"
+                               autocomplete="off" />
+                    </div>
+                    <button type="submit" class="hero-search-btn magnetic-btn ripple">
+                        @Localizer["Search"]
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Header Actions -->
+        <div class="hero-header-actions">
+            <!-- Filter Button -->
+            <button type="button" class="modern-filter-toggle-header-btn" id="modernFilterToggleBtn" aria-label="Toggle filters">
+                <i class="bi bi-funnel-fill"></i>
+                <span class="filter-btn-text">@Localizer["Filters"]</span>
+            </button>
+        </div>
+    </div>
+    
+     
+</header>
+
 <!-- Hero Section -->
 <section class="hero-section">
     <!-- Morphing Shapes Background -->
@@ -83,37 +119,8 @@
                 </div>
             </div>
 
-            <div class="hero-search-box">
-                <form asp-action="Index" method="get">
-                    <div class="advanced-search-container">
-                        <div class="search-input-wrapper">
-                            <i class="bi bi-search search-icon"></i>
-                            <input type="text" 
-                                   name="searchTerm" 
-                                   value="@searchTerm" 
-                                   class="hero-search-input" 
-                                   placeholder="@Localizer["SearchSupplements"]" />
-                        </div>
-                        <button type="submit" class="hero-search-btn magnetic-btn ripple">
-                            <i class="bi bi-search me-2"></i>
-                            @Localizer["Search"]
-                        </button>
-                    </div>
-                </form>
-            </div>
 
-            <div class="hero-categories">
-                <a href="@Url.Action("Index")" class="hero-category-badge @(!selectedCategory.HasValue ? "active" : "")">
-                    <i class="bi bi-grid-3x3-gap me-2"></i>@Localizer["AllBooks"]
-                </a>
-                @foreach (var category in categories.Take(5))
-                {
-                    <a href="@Url.Action("Index", new { categoryId = category.Id })" 
-                       class="hero-category-badge @(selectedCategory == category.Id ? "active" : "")">
-                        <i class="bi bi-tag me-2"></i>@category.Name
-                    </a>
-                }
-            </div>
+          
         </div>
     </div>
 </section>
@@ -128,45 +135,258 @@
 
 @if (hasActiveFlashSales)
 {
-       <div class="flash-sale-section-header">
-        <h3 class="flash-sale-section-title">
-            <i class="bi bi-star-fill"></i>
-            @Localizer["HotDealsRightNow"]
-            <i class="bi bi-star-fill"></i>
-        </h3>
-    </div>
-    <!-- FLASH SALE SECTION - COMPACT -->
-    <section class="flash-sale-hero">
+    <!-- FLASH SALE CAROUSEL SECTION -->
+    <section class="flash-sale-carousel-section">
         <div class="container">
-         
-            <div class="flash-sale-hero-content">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                    <i class="bi bi-lightning-charge-fill lightning-icon"></i>
-                    <h2 class="flash-sale-title" style="color:white;">@Localizer["FlashSale"]</h2>
-                </div>
-                <p class="flash-sale-subtitle">@Localizer["LimitedTimeOffers"]</p>
-
-                @{
-                    var nearestEndingSale = activeFlashSales.OrderBy(f => f.EndDate).FirstOrDefault();
-                }
-
-                @if (nearestEndingSale != null)
+            <div class="flash-sale-carousel-wrapper">
+                <button class="flash-sale-carousel-nav prev" data-action="prev-slide" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                
+                <div class="flash-sale-carousel" id="flashSaleCarousel">
+                    @foreach (var flashSale in activeFlashSales)
+                    {
+                        var flashSaleName = currentCulture == "ar" && !string.IsNullOrEmpty(flashSale.NameAr) 
+                            ? flashSale.NameAr 
+                            : flashSale.Name;
+                        var flashSaleDesc = currentCulture == "ar" && !string.IsNullOrEmpty(flashSale.DescriptionAr) 
+                            ? flashSale.DescriptionAr 
+                            : flashSale.Description;
+                        
+                        <div class="flash-sale-slide" 
+                             data-flash-sale-id="@flashSale.Id"
+                             data-flash-sale-end="@flashSale.EndDate.ToString("o")"
+                             data-flash-sale-name="@flashSaleName"
+                             data-action="open-flash-sale">
+                            @if (!string.IsNullOrEmpty(flashSale.ImageUrl))
+                            {
+                                <img src="@flashSale.ImageUrl" alt="@flashSaleName" class="flash-sale-slide-image" />
+                            }
+                            else
+                            {
+                                <div class="flash-sale-slide-placeholder">
+                                    <i class="bi bi-lightning-charge-fill"></i>
+                                    <h3>@flashSaleName</h3>
+                                    @if (!string.IsNullOrEmpty(flashSaleDesc))
+                                    {
+                                        <p>@flashSaleDesc</p>
+                                    }
+                                </div>
+                            }
+                            <div class="flash-sale-slide-overlay">
+                                <div class="flash-sale-slide-content">
+                                    <h3 class="flash-sale-slide-title">@flashSaleName</h3>
+                                    @if (!string.IsNullOrEmpty(flashSaleDesc))
                 {
-                    <div id="mainFlashTimer" class="flash-sale-timer" data-flash-sale-end="@nearestEndingSale.EndDate.ToString("o")">
+                                        <p class="flash-sale-slide-desc">@flashSaleDesc</p>
+                                    }
+                                    <div class="flash-sale-slide-timer" data-flash-sale-end="@flashSale.EndDate.ToString("o")">
                         <!-- Timer will be populated by JavaScript -->
+                                    </div>
+                                    <button class="flash-sale-slide-btn">
+                                        @Localizer["ShopNow"]
+                                        <i class="bi bi-arrow-left ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
                     </div>
                 }
-
-                <div class="text-center mt-2">
+                </div>
+                
+                <button class="flash-sale-carousel-nav next" data-action="next-slide" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+            
+            <!-- Carousel Indicators -->
+            <div class="flash-sale-carousel-indicators" id="flashSaleIndicators">
+                @for (int i = 0; i < activeFlashSales.Count(); i++)
+                {
+                    <button class="flash-sale-indicator @(i == 0 ? "active" : "")" 
+                            data-action="go-to-slide"
+                            data-slide-index="@i"
+                            aria-label="Go to slide @(i + 1)"></button>
+                }
+            </div>
+            
+            <!-- View All Button -->
+            <div class="text-center mt-3">
                     <a href="@Url.Action("Index", "FlashSale", new { area = "Customer" })" class="view-all-flash-sales-btn">
                         @Localizer["ViewAllFlashSales"]
-                        <i class="bi bi-arrow-right ms-1"></i>
+                    <i class="bi bi-arrow-right ms-2"></i>
                     </a>
-                </div>
             </div>
         </div>
     </section>
      
+    <!-- Flash Sale Products Modal -->
+    <div class="flash-sale-products-modal" id="flashSaleProductsModal">
+        <div class="flash-sale-modal-overlay" onclick="closeFlashSaleProducts()"></div>
+        <div class="flash-sale-modal-content">
+            <button class="flash-sale-modal-close" onclick="closeFlashSaleProducts()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <div class="flash-sale-modal-header">
+                <h2 id="modalFlashSaleTitle"></h2>
+                <div id="modalFlashSaleTimer" class="flash-sale-timer" data-flash-sale-end=""></div>
+            </div>
+            <div class="flash-sale-modal-body" id="flashSaleProductsContainer">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- DISCOUNTED PRODUCTS / OFFERS SECTION -->
+@{
+    var discountedProducts = ViewBag.DiscountedProducts as IEnumerable<BulkyBook.Models.Product> ?? Enumerable.Empty<BulkyBook.Models.Product>();
+    var hasDiscountedProducts = discountedProducts.Any();
+}
+
+@if (hasDiscountedProducts)
+{
+    <section class="offers-section">
+        <div class="container">
+            <!-- Section Header -->
+            <div class="offers-header">
+                <h2 class="offers-title">
+                    <span class="offers-icon">🔥</span>
+                    @Localizer["Offers"]
+                </h2>
+                <p class="offers-subtitle">@Localizer["BestDeals"]</p>
+            </div>
+            
+            <!-- Bootstrap Carousel -->
+            <div id="offersCarousel" class="carousel slide offers-carousel" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
+                <div class="carousel-inner">
+                    @{
+                        var productsList = discountedProducts.ToList();
+                        
+                        // Responsive items per slide: mobile=1, tablet=2, desktop=4
+                        var itemsPerSlideMobile = 1;
+                        var itemsPerSlideTablet = 2;
+                        var itemsPerSlideDesktop = 4;
+                        
+                        // Calculate total slides for desktop (most slides)
+                        var totalSlidesDesktop = (int)Math.Ceiling(productsList.Count / (double)itemsPerSlideDesktop);
+                        
+                        for (int slideIndex = 0; slideIndex < totalSlidesDesktop; slideIndex++)
+                        {
+                            var slideProducts = productsList.Skip(slideIndex * itemsPerSlideDesktop).Take(itemsPerSlideDesktop).ToList();
+                            if (!slideProducts.Any()) continue;
+                            
+                            <div class="carousel-item @(slideIndex == 0 ? "active" : "")">
+                                <div class="row g-3 g-md-4">
+                                    @foreach (var product in slideProducts)
+                                    {
+                                        var productName = currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) 
+                                            ? product.TitleAr 
+                                            : product.Title;
+                                        
+                                        // Calculate discount percentage
+                                        var discountPercent = product.ListPrice > 0 
+                                            ? (int)((product.ListPrice - product.Price) / product.ListPrice * 100) 
+                                            : 0;
+                                        
+                                        // Get product image
+                                        var productImages = product.ProductImages != null && product.ProductImages.Any() 
+                                            ? product.ProductImages.OrderBy(pi => pi.DisplayOrder).Select(pi => pi.ImageUrl).ToList()
+                                            : new List<string>();
+                                        
+                                        if (!productImages.Any() && !string.IsNullOrEmpty(product.ImageUrl))
+                                        {
+                                            productImages.Add(product.ImageUrl);
+                                        }
+                                        
+                                        var productImage = productImages.FirstOrDefault() ?? "/images/no-image.png";
+                                        
+                                        // Get best variant price if product has variants
+                                        decimal? variantPrice = null;
+                                        decimal? variantListPrice = null;
+                                        if (product.HasVariants && product.ProductVariants != null && product.ProductVariants.Any())
+                                        {
+                                            var bestVariant = product.ProductVariants
+                                                .Where(v => v.ListPrice > v.Price && v.StockQuantity > 0)
+                                                .OrderByDescending(v => ((v.ListPrice - v.Price) / v.ListPrice) * 100)
+                                                .FirstOrDefault();
+                                            
+                                            if (bestVariant != null)
+                                            {
+                                                variantPrice = (decimal)bestVariant.Price;
+                                                variantListPrice = (decimal)bestVariant.ListPrice;
+                                                discountPercent = variantListPrice > 0 
+                                                    ? (int)((variantListPrice.Value - variantPrice.Value) / variantListPrice.Value * 100) 
+                                                    : discountPercent;
+                                            }
+                                        }
+                                        
+                                        var displayPrice = variantPrice ?? (decimal)product.Price;
+                                        var displayListPrice = variantListPrice ?? (decimal)product.ListPrice;
+                                        
+                                        <div class="col-12 col-sm-6 col-lg-3">
+                                            <div class="offer-card h-100">
+                                                <a href="@Url.Action("Details", "Home", new { area = "Customer", productId = product.Id })" class="offer-card-link">
+                                                    @if (discountPercent > 0)
+                                                    {
+                                                        <div class="offer-badge">-@discountPercent%</div>
+                                                    }
+                                                    
+                                                    <div class="offer-card-image">
+                                                        <img src="@productImage" alt="@productName" class="img-fluid" loading="lazy" />
+                                                    </div>
+                                                    
+                                                    <div class="offer-card-content">
+                                                        <h3 class="offer-card-title">@productName</h3>
+                                                        
+                                                        <div class="offer-card-price">
+                                                            <span class="offer-price-old">@Html.Raw(currencySymbol)@displayListPrice.ToString("N2")</span>
+                                                            <span class="offer-price-new">@Html.Raw(currencySymbol)@displayPrice.ToString("N2")</span>
+                                                        </div>
+                                                        
+                                                        @if (discountPercent > 0)
+                                                        {
+                                                            <div class="offer-save">
+                                                                @Localizer["Save"] @Html.Raw(currencySymbol)@((displayListPrice - displayPrice).ToString("N2"))
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+                
+                <!-- Carousel Controls -->
+                <button class="carousel-control-prev offers-carousel-control" type="button" data-bs-target="#offersCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">@Localizer["Previous"]</span>
+                </button>
+                <button class="carousel-control-next offers-carousel-control" type="button" data-bs-target="#offersCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">@Localizer["Next"]</span>
+                </button>
+                
+                <!-- Carousel Indicators -->
+                @if (totalSlidesDesktop > 1)
+                {
+                    <div class="carousel-indicators offers-carousel-indicators">
+                        @for (int i = 0; i < totalSlidesDesktop; i++)
+                        {
+                            <button type="button" data-bs-target="#offersCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
 }
 
 <!-- Services Section -->
@@ -334,9 +554,95 @@
     </section>
 }
 
+<!-- Active Filters Display -->
+    @if (selectedCategory.HasValue || !string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(sortBy) || minPrice.HasValue || maxPrice.HasValue || !string.IsNullOrEmpty(availability))
+    {
+        <div class="modern-active-filters" id="modernActiveFilters">
+            @if (!string.IsNullOrEmpty(searchTerm))
+            {
+                <span class="modern-active-filter-tag">
+                    @Localizer["Search"]: @searchTerm
+                    <button type="button" class="remove-btn" data-filter="searchTerm">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </span>
+            }
+            @if (selectedCategory.HasValue)
+            {
+                var categoryName = categories.FirstOrDefault(c => c.Id == selectedCategory.Value)?.Name ?? "";
+                <span class="modern-active-filter-tag">
+                    @Localizer["Category"]: @categoryName
+                    <button type="button" class="remove-btn" data-filter="categoryId">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </span>
+            }
+            @if (minPrice.HasValue || maxPrice.HasValue)
+            {
+                <span class="modern-active-filter-tag">
+                    @Localizer["Price"]: @Html.Raw(currencySymbol) @(minPrice?.ToString("N2") ?? "0") - @Html.Raw(currencySymbol) @(maxPrice?.ToString("N2") ?? maxPriceRange.ToString("N2"))
+                    <button type="button" class="remove-btn" data-filter="price">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </span>
+            }
+            @if (!string.IsNullOrEmpty(sortBy))
+            {
+                <span class="modern-active-filter-tag">
+                    @Localizer["Sort"]: @sortBy
+                    <button type="button" class="remove-btn" data-filter="sortBy">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </span>
+            }
+            <a href="@Url.Action("Index")" class="modern-active-filter-tag" style="background: var(--home-gray-200); color: var(--home-gray-700);">
+                <i class="bi bi-x-circle"></i>
+                @Localizer["ClearAll"]
+            </a>
+        </div>
+    }
+</header>
+
+<!-- Filter Overlay -->
+<div class="modern-filter-overlay" id="modernFilterOverlay"></div>
+
+<!-- Mobile Filter Bottom Sheet -->
+<div class="modern-filter-bottom-sheet" id="modernFilterBottomSheet">
+    <div class="modern-filter-bottom-sheet-header">
+        <h3 class="modern-filter-bottom-sheet-title">@Localizer["FilterAndSort"]</h3>
+        <button type="button" class="modern-filter-bottom-sheet-close" id="modernFilterBottomSheetClose">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+    <div class="modern-filter-bottom-sheet-content">
+        <!-- Filter content will be moved here by JS -->
+    </div>
+    <div class="modern-filter-bottom-sheet-footer">
+        <button type="button" class="modern-filter-reset-btn" id="modernFilterResetBtn">@Localizer["Reset"]</button>
+        <button type="button" class="modern-filter-apply-btn" id="modernFilterApplyBtn">@Localizer["ApplyFilters"]</button>
+    </div>
+</div>
+
+<!-- Desktop Filter Side Panel -->
+<div class="modern-filter-side-panel" id="modernFilterSidePanel">
+    <div class="modern-filter-side-panel-header">
+        <h3 class="modern-filter-side-panel-title">@Localizer["FilterAndSort"]</h3>
+        <button type="button" class="modern-filter-bottom-sheet-close" id="modernFilterSidePanelClose">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+    <div class="modern-filter-side-panel-content">
+        <!-- Filter content will be moved here by JS -->
+    </div>
+    <div class="modern-filter-side-panel-footer">
+        <button type="button" class="modern-filter-reset-btn" id="modernFilterSidePanelResetBtn">@Localizer["Reset"]</button>
+        <button type="button" class="modern-filter-apply-btn" id="modernFilterSidePanelApplyBtn">@Localizer["ApplyFilters"]</button>
+    </div>
+</div>
+
 <div class="container-fluid px-3">
-    <!-- Enhanced Filter Section -->
-    <div class="filter-section enhanced-filters">
+    <!-- Enhanced Filter Section (Hidden - will be moved to side panel/bottom sheet) -->
+    <div class="filter-section enhanced-filters" id="originalFilterSection" style="display: none;">
         <div class="filter-header">
             <div class="filter-header-left">
                 <h2 class="filter-title">
@@ -358,7 +664,7 @@
             </div>
         </div>
 
-        <form asp-action="Index" method="get" id="filterForm" class="filter-form">
+        <form id="filterForm" class="filter-form" onsubmit="return false;">
             <input type="hidden" name="searchTerm" value="@searchTerm" />
             
             <div class="filter-groups" id="filterGroups">
@@ -442,9 +748,9 @@
                     </select>
                 </div>
 
-                <!-- Apply Filters Button -->
-                <div class="filter-group filter-actions-group">
-                    <button type="submit" class="apply-filters-btn">
+                <!-- Apply Filters Button - Hidden, using modern filter panels instead -->
+                <div class="filter-group filter-actions-group" style="display: none;">
+                    <button type="button" class="apply-filters-btn" style="display: none;">
                         <i class="bi bi-check-lg me-2"></i>
                         @Localizer["ApplyFilters"]
                     </button>
@@ -453,9 +759,73 @@
         </form>
     </div>
 
-    
+    <!-- Category Carousel -->
+    @{
+        var categoryProductsMap = ViewBag.CategoryProductsMap as Dictionary<int, List<Product>> ?? new Dictionary<int, List<Product>>();
+        var displayCategories = categories.ToList();
+    }
+    @if (displayCategories.Any())
+    {
+        <section class="category-section">
+            <div class="category-section-title">
+                <h2>@Localizer["ShopByCategory"]</h2>
+            </div>
+            <div class="category-carousel-container" id="categoryCarouselContainer">
+            <button class="carousel-nav prev" onclick="scrollCategoryCarousel(-1)" aria-label="Previous categories">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="category-carousel-wrapper">
+                <div class="category-carousel" id="categoryCarousel">
+                    @for (int i = 0; i < displayCategories.Count; i++)
+                    {
+                        var category = displayCategories[i];
+                        var categoryProducts = categoryProductsMap.ContainsKey(category.Id) 
+                            ? categoryProductsMap[category.Id] 
+                            : new List<Product>();
+                        var categoryName = currentCulture == "ar" && !string.IsNullOrEmpty(category.NameAr) 
+                            ? category.NameAr 
+                            : category.Name;
+                        
+                        <a href="@Url.Action("Index", new { categoryId = category.Id })" 
+                           class="category-card @(selectedCategory == category.Id ? "active" : "")"
+                           data-category-index="@i"
+                           data-category-id="@category.Id"
+                           onclick="if(typeof loadProductsWithFilters === 'function') { event.preventDefault(); loadProductsWithFilters({ categoryId: @category.Id }, true); setTimeout(function() { if(typeof scrollToProductsSection === 'function') scrollToProductsSection(); }, 300); }">
+                            <div class="category-circle">
+                                @if (!string.IsNullOrEmpty(category.ImageUrl))
+                                {
+                                    <div class="category-image-wrapper">
+                                        <img src="@category.ImageUrl" alt="@categoryName" class="category-image" />
+                                    </div>
+                                }
+                                else if (categoryProducts.Any())
+                                {
+                                    <div class="category-products-grid">
+                                        @foreach (var product in categoryProducts)
+                                        {
+                                            var productImage = product.ProductImages?.FirstOrDefault()?.ImageUrl ?? product.ImageUrl;
+                                            if (!string.IsNullOrEmpty(productImage))
+                                            {
+                                                <img src="@productImage" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)" class="category-product-mini" />
+                                            }
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div class="category-label">@categoryName</div>
+                        </a>
+                    }
+                </div>
+            </div>
+            <button class="carousel-nav next" onclick="scrollCategoryCarousel(1)" aria-label="Next categories">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+        </section>
+    }
     <!-- Product Grid - Modern Design -->
-    <div class="products-grid-container" id="productContainer">
+    <div class="modern-products-container" id="productsSection">
+        <div class="modern-products-grid" id="productContainer">
 @foreach (var Product in Model)
 {
     var discount = Product.ListPrice > 0 ? (int)((Product.ListPrice - Product.Price) / Product.ListPrice * 100) : 0;
@@ -465,7 +835,7 @@
     var isInWishlist = wishlistProductIds.Contains(Product.Id);
     var isAuthenticated = User.Identity.IsAuthenticated;
     
-    <div class="product-card stagger-item" 
+    <div class="product-card stagger-item visible" 
          data-stock-quantity="@Product.StockQuantity" 
          data-minimum-stock="@Product.MinimumStockAlert"
          data-product-id="@Product.Id"
@@ -530,22 +900,13 @@
             {
             <img src="@Product.ImageUrl" class="product-image" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Product.TitleAr) ? Product.TitleAr : Product.Title)" />
             }
-            
-            <!-- Badges -->
-            <div class="product-badges">
-                @if (discount > 0)
-                {
-                    <span class="product-badge badge-discount">@discount% @(currentCulture == "ar" ? "خصم" : "OFF")</span>
-                }
-            </div>
         </div>
         
         <!-- Product Info -->
         <div class="product-content">
-            <div class="product-category">@Product.categry.Name</div>
             <h3 class="product-title">@(currentCulture == "ar" && !string.IsNullOrEmpty(Product.TitleAr) ? Product.TitleAr : Product.Title)</h3>
             
-            <!-- Star Rating -->
+            <!-- Star Rating with Discount -->
             <div class="product-card-rating" data-product-id="@Product.Id">
                 <div class="product-card-stars">
                     <i class="bi bi-star"></i>
@@ -555,17 +916,17 @@
                     <i class="bi bi-star"></i>
                 </div>
                 <span class="product-card-rating-text">(0)</span>
+                @if (discount > 0)
+                {
+                    <span class="discount-badge-rating">@discount% @(currentCulture == "ar" ? "خصم" : "OFF")</span>
+                }
             </div>
             
             <!-- Price and Actions - Same Line -->
             <div class="price-actions-row" onclick="event.stopPropagation();">
                 <div class="price-wrapper">
                     <span class="current-price">@Html.Raw(currencySymbol) @Product.Price.ToString("N2")</span>
-                    @if (discount > 0)
-                    {
-                        <span class="list-price">@Html.Raw(currencySymbol) @Product.ListPrice.ToString("N2")</span>
-                        <span class="discount-percent">@discount% @Localizer["OFF"]</span>
-                    }
+                   
                 </div>
                 <div class="product-actions">
                     @if (Product.ProductType == BulkyBook.Models.ProductType.Variable)
@@ -1121,7 +1482,18 @@
     </div>
 </div>
 -->
+@section Styles {
+    <link rel="stylesheet" href="~/css/modern-home-screen.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/category-carousel.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/flash-sale-carousel.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/offers-carousel.css" asp-append-version="true" />
+}
+
     @section Scripts {
+    <script src="~/js/modern-home-screen.js" asp-append-version="true"></script>
+    <script src="~/js/category-carousel.js" asp-append-version="true"></script>
+    <script src="~/js/flash-sale-carousel.js" asp-append-version="true"></script>
+    <script src="~/js/offers-carousel-responsive.js" asp-append-version="true"></script>
     <script>
         // Localizations for JavaScript
         const currentCulture = '@currentCulture';
@@ -1667,15 +2039,13 @@
         }
 
         // Function to create product HTML - NEW DESIGN
-        function createProductCard(product, isAuthenticated) {
+        window.createProductCard = function(product, isAuthenticated) {
             const discount = product.listPrice > 0 ? Math.floor((product.listPrice - product.price) / product.listPrice * 100) : 0;
             const discountText = '@(currentCulture == "ar" ? "خصم" : "OFF")';
-            const discountBadge = discount > 0 ? `<span class="product-badge badge-discount">${discount}% ${discountText}</span>` : '';
             
             const priceHtml = discount > 0 
                 ? `<span class="current-price">${formatCurrency(product.price)}</span>
-                   <span class="list-price">${formatCurrency(product.listPrice)}</span>
-                   <span class="discount-percent">${discount}% OFF</span>`
+                   <span class="list-price">${formatCurrency(product.listPrice)}</span>`
                 : `<span class="current-price">${formatCurrency(product.price)}</span>`;
             
             const isInCart = cartProductIds.includes(product.id);
@@ -1793,19 +2163,15 @@
             }
             
             return `
-                <div class="product-card stagger-item" 
+                <div class="product-card stagger-item visible" 
                      data-stock-quantity="${product.stockQuantity || 0}" 
                      data-minimum-stock="${product.minimumStockAlert || 5}"
                      onclick="window.location.href='/Customer/Home/Details?productId=${product.id}'"
                      style="cursor: pointer;">
                     <div class="product-image-wrapper">
                         ${imageHtml}
-                        <div class="product-badges">
-                            ${discountBadge}
-                        </div>
                     </div>
                     <div class="product-content">
-                        <div class="product-category">${product.categry?.name || 'PRODUCT'}</div>
                         <h3 class="product-title">${(currentCulture === 'ar' && product.titleAr) ? product.titleAr : product.title}</h3>
                         <div class="product-card-rating" data-product-id="${product.id}">
                             <div class="product-card-stars">
@@ -1816,6 +2182,7 @@
                                 <i class="bi bi-star"></i>
                             </div>
                             <span class="product-card-rating-text">(0)</span>
+                            ${discount > 0 ? `<span class="discount-badge-rating">${discount}% ${discountText}</span>` : ''}
                         </div>
                         <div class="price-actions-row" onclick="event.stopPropagation();">
                             <div class="price-wrapper">
@@ -2155,13 +2522,14 @@
                 });
             });
             
-            // Select filters auto-submit
+            // Select filters - DO NOT auto-submit (use Apply button instead)
+            // Removed auto-submit to prevent page reloads - filters now use AJAX via Apply button
             const autoSubmitSelects = document.querySelectorAll('.modern-select:not([name="minPrice"]):not([name="maxPrice"])');
             autoSubmitSelects.forEach(select => {
-                select.addEventListener('change', function() {
-                    if (filterForm) {
-                        filterForm.submit();
-                    }
+                select.addEventListener('change', function(e) {
+                    e.preventDefault();
+                    // Don't auto-submit - user must click Apply Filters button
+                    // This prevents page reloads and uses AJAX instead
                 });
             });
             

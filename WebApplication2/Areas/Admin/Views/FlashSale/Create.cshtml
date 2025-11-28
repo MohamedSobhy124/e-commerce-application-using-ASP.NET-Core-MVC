@@ -16,9 +16,9 @@
             </div>
 
             <div class="admin-form-body">
-                <form asp-action="Create" method="post">
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
                     <input hidden asp-for="Id" />
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    <div asp-validation-summary="All" class="alert alert-danger"></div>
 
                     <!-- Flash Sale Information -->
                     <div class="card mb-4">
@@ -43,6 +43,20 @@
                                 </small>
                             </div>
 
+                            <!-- Name Arabic -->
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">
+                                    <i class="bi bi-tag me-2"></i>@Localizer["FlashSaleName"] (عربي)
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="NameAr" class="admin-form-control" dir="rtl" placeholder="اسم التخفيضات" />
+                                <span asp-validation-for="NameAr" class="text-danger"></span>
+                                <small class="form-text text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    @Localizer["GiveCatchyName"]
+                                </small>
+                            </div>
+
                             <!-- Description -->
                             <div class="admin-form-group">
                                 <label class="admin-form-label">
@@ -54,6 +68,36 @@
                                     <i class="bi bi-info-circle me-1"></i>
                                     @Localizer["OptionalDescription"]
                                 </small>
+                            </div>
+
+                            <!-- Description Arabic -->
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">
+                                    <i class="bi bi-text-paragraph me-2"></i>@Localizer["Description"] (عربي)
+                                </label>
+                                <textarea asp-for="DescriptionAr" class="admin-form-control" rows="3" dir="rtl" placeholder="وصف التخفيضات"></textarea>
+                                <span asp-validation-for="DescriptionAr" class="text-danger"></span>
+                                <small class="form-text text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    @Localizer["OptionalDescription"]
+                                </small>
+                            </div>
+
+                            <!-- Image Upload -->
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">
+                                    <i class="bi bi-image me-2"></i>Image
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="file" asp-for="ImageFile" class="admin-form-control" accept="image/*" />
+                                <span asp-validation-for="ImageFile" class="text-danger"></span>
+                                <small class="form-text text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Please upload an image for the flash sale.
+                                </small>
+                                <div id="imagePreview" class="mt-2" style="display: none;">
+                                    <img id="previewImg" src="#" alt="Preview" style="max-width: 300px; max-height: 300px; border: 1px solid #ddd; padding: 5px; border-radius: 5px;" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -180,6 +224,21 @@
     }
     
     <script>
+        // Image preview
+        document.getElementById('ImageFile')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('imagePreview').style.display = 'none';
+            }
+        });
+
         // Calculate and display duration
         function updateDuration() {
             const startInput = document.querySelector('input[name="StartDate"]');

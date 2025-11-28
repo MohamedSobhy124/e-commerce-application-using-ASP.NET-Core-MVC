@@ -1,4 +1,13 @@
 ﻿var dataTable;
+
+// Helper function to get localized string
+function getLocalizedString(key, defaultValue) {
+    if (typeof window.Localizer !== 'undefined' && window.Localizer[key]) {
+        return window.Localizer[key];
+    }
+    return defaultValue || key;
+}
+
 $(document).ready(function () {
     loadDataTable();
 });
@@ -29,7 +38,7 @@ function loadDataTable() {
                 "render": function(data, type, row) {
                     var html = data;
                     if (row.isDeleted) {
-                        html += ' <span class="badge bg-danger">Deleted</span>';
+                        html += ' <span class="badge bg-danger">' + getLocalizedString('Deleted', 'Deleted') + '</span>';
                     }
                     return html;
                 }
@@ -53,13 +62,13 @@ function loadDataTable() {
                 "render": function (data, type, row) {
                     // Remove actions for deleted products
                     if (row.isDeleted) {
-                        return '<span class="text-muted" style="color: #c62828 !important;"><i class="bi bi-lock-fill"></i> No Actions</span>';
+                        return '<span class="text-muted" style="color: #c62828 !important;"><i class="bi bi-lock-fill"></i> ' + getLocalizedString('NoActions', 'No Actions') + '</span>';
                     }
                     return `
                     <div class=" btn-group" role="group">
-                    <a href="/Admin/Product/UpSert?id=${data}" class="btn btn-dark"><i class="bi bi-pencil-square"></i>Edit</a>
+                    <a href="/Admin/Product/UpSert?id=${data}" class="btn btn-dark"><i class="bi bi-pencil-square"></i>${getLocalizedString('Edit', 'Edit')}</a>
 
-                    <a Onclick="Delete('/Admin/Product/Delete?id=${data}')" class="btn btn-danger "><i class="bi bi-trash-fill"></i>Delete</a>
+                    <a Onclick="Delete('/Admin/Product/Delete?id=${data}')" class="btn btn-danger "><i class="bi bi-trash-fill"></i>${getLocalizedString('Delete', 'Delete')}</a>
                     </div>`
                 },
                 "width": "25%"
@@ -70,13 +79,14 @@ function loadDataTable() {
 };
 function Delete(url) {
     Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
+        title: getLocalizedString('AreYouSure', 'Are you sure?'),
+        text: getLocalizedString('DeleteConfirmMessage', "You won't be able to revert this!"),
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
+        confirmButtonText: getLocalizedString('YesDeleteIt', 'Yes, delete it!'),
+        cancelButtonText: getLocalizedString('Cancel', 'Cancel')
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
@@ -84,15 +94,15 @@ function Delete(url) {
                 type: 'DELETE',
                 success: function (data) {
                     if (data.success) {
-                        toastr.success(data.massage || data.message || 'Product deleted successfully');
+                        toastr.success(data.massage || data.message || getLocalizedString('ProductDeletedSuccessfully', 'Product deleted successfully'));
                         // Reload the DataTable
                         dataTable.ajax.reload(null, false); // false = don't reset paging
                     } else {
-                        toastr.error(data.massage || data.message || 'Error deleting product');
+                        toastr.error(data.massage || data.message || getLocalizedString('ErrorDeletingProduct', 'Error deleting product'));
                     }
                 },
                 error: function (xhr, status, error) {
-                    toastr.error('Error deleting product: ' + error);
+                    toastr.error(getLocalizedString('ErrorDeletingProduct', 'Error deleting product') + ': ' + error);
                 }
             });
         }
