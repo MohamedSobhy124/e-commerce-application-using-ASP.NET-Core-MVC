@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace BulkyBook.Areas.Admin.Controllers
 {
@@ -21,19 +23,22 @@ namespace BulkyBook.Areas.Admin.Controllers
         private readonly IStringLocalizer<SharedResources> _localizer;
         private readonly ILogger<FlashSaleController> _logger;
         private readonly ApplicationDBContext _dbContext;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public FlashSaleController(
             IUnitOfWork unitOfWork, 
             IEmailSender emailSender,
             IStringLocalizer<SharedResources> localizer,
             ILogger<FlashSaleController> logger,
-            ApplicationDBContext dbContext)
+            ApplicationDBContext dbContext,
+            IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
             _emailSender = emailSender;
             _localizer = localizer;
             _logger = logger;
             _dbContext = dbContext;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Flash Sales List
@@ -59,6 +64,21 @@ namespace BulkyBook.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(FlashSale flashSale, bool notifySubscribers = false)
         {
+            // Initialize ImageUrl to empty string to avoid null validation errors
+            if (string.IsNullOrEmpty(flashSale.ImageUrl))
+            {
+                flashSale.ImageUrl = string.Empty;
+            }
+
+            // Validate image is required
+            if (flashSale.ImageFile == null || flashSale.ImageFile.Length == 0)
+            {
+                ModelState.AddModelError("ImageFile", "Image is required.");
+            }
+
+            // Remove ImageUrl from ModelState validation since we handle it manually
+            ModelState.Remove("ImageUrl");
+
             // Validate dates
             if (flashSale.EndDate <= flashSale.StartDate)
             {
@@ -67,10 +87,49 @@ namespace BulkyBook.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
+                try
+                {
+                    // Handle image upload
+                    string wwwRootPath = _webHostEnvironment.WebRootPath;
+                    string flashSalePath = Path.Combine(wwwRootPath, @"images\flashsales");
+
+                    if (!Directory.Exists(flashSalePath))
+                    {
+                        Directory.CreateDirectory(flashSalePath);
+                    }
+
+                    if (flashSale.ImageFile != null && flashSale.ImageFile.Length > 0)
+                    {
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(flashSale.ImageFile.FileName);
+                        using (var fileStream = new FileStream(Path.Combine(flashSalePath, fileName), FileMode.Create))
+                        {
+                            flashSale.ImageFile.CopyTo(fileStream);
+                        }
+                        flashSale.ImageUrl = @"\images\flashsales\" + fileName;
+                    }
+                    else
+                    {
+                        // This shouldn't happen if validation passed, but just in case
+                        ModelState.AddModelError("ImageFile", "Image is required.");
+                        return View(flashSale);
+                    }
+
                 // Set audit fields
                 AuditHelper.SetCreatedAudit(flashSale, User);
                 _unitOfWork.FlashSale.Add(flashSale);
                 _unitOfWork.save();
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception for debugging
+                    _logger.LogError(ex, "Error creating flash sale");
+                    ModelState.AddModelError("", $"An error occurred while creating the flash sale: {ex.Message}");
+                    if (ex.InnerException != null)
+                    {
+                        ModelState.AddModelError("", $"Inner exception: {ex.InnerException.Message}");
+                    }
+                    return View(flashSale);
+                }
                 
                 // Send notification to subscribers if requested
                 if (notifySubscribers)
@@ -360,8 +419,26 @@ namespace BulkyBook.Areas.Admin.Controllers
         // POST: Edit Flash Sale
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(FlashSale flashSale)
+        public IActionResult Edit(int id, FlashSale flashSale)
         {
+            if (id != flashSale.Id)
+            {
+                return NotFound();
+            }
+
+            // Get existing flash sale to preserve image if not changed
+            var existingFlashSale = _unitOfWork.FlashSale.Get(f => f.Id == id);
+            if (existingFlashSale == null)
+            {
+                return NotFound();
+            }
+
+            // Initialize ImageUrl from existing flash sale first
+            flashSale.ImageUrl = existingFlashSale.ImageUrl ?? string.Empty;
+
+            // Remove ImageUrl from ModelState validation since we handle it manually
+            ModelState.Remove("ImageUrl");
+
             // Validate dates
             if (flashSale.EndDate <= flashSale.StartDate)
             {
@@ -370,12 +447,57 @@ namespace BulkyBook.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
+                try
+                {
+                    // Handle image upload if a new image is provided
+                    if (flashSale.ImageFile != null && flashSale.ImageFile.Length > 0)
+                    {
+                        string wwwRootPath = _webHostEnvironment.WebRootPath;
+                        string flashSalePath = Path.Combine(wwwRootPath, @"images\flashsales");
+
+                        if (!Directory.Exists(flashSalePath))
+                        {
+                            Directory.CreateDirectory(flashSalePath);
+                        }
+
+                        // Delete old image if exists
+                        if (!string.IsNullOrEmpty(existingFlashSale.ImageUrl))
+                        {
+                            var oldImagePath = Path.Combine(wwwRootPath, existingFlashSale.ImageUrl.TrimStart('\\'));
+                            if (System.IO.File.Exists(oldImagePath))
+                            {
+                                System.IO.File.Delete(oldImagePath);
+                            }
+                        }
+
+                        // Upload new image
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(flashSale.ImageFile.FileName);
+                        using (var fileStream = new FileStream(Path.Combine(flashSalePath, fileName), FileMode.Create))
+                        {
+                            flashSale.ImageFile.CopyTo(fileStream);
+                        }
+                        flashSale.ImageUrl = @"\images\flashsales\" + fileName;
+                    }
+                    // If no new image, ImageUrl already set from existingFlashSale above
+
                 // Set audit fields
                 AuditHelper.SetModifiedAudit(flashSale, User);
                 _unitOfWork.FlashSale.Update(flashSale);
                 _unitOfWork.save();
                 TempData["success"] = "Flash sale updated successfully";
                 return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception for debugging
+                    _logger.LogError(ex, "Error updating flash sale");
+                    ModelState.AddModelError("", $"An error occurred while updating the flash sale: {ex.Message}");
+                    if (ex.InnerException != null)
+                    {
+                        ModelState.AddModelError("", $"Inner exception: {ex.InnerException.Message}");
+                    }
+                    return View(flashSale);
+                }
             }
 
             return View(flashSale);

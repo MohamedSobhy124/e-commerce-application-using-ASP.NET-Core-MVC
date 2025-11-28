@@ -36,6 +36,7 @@ namespace BulkyBook.DataAccess.Repository
         public IProductOptionRepository ProductOption { get; private set; }
         public IProductOptionValueRepository ProductOptionValue { get; private set; }
         public IProductVariantRepository ProductVariant { get; private set; }
+        public IStockNotificationRepository StockNotification { get; private set; }
 
         public UnitOfWork(ApplicationDBContext db) 
         {
@@ -61,6 +62,7 @@ namespace BulkyBook.DataAccess.Repository
             ProductOption = new ProductOptionRepository(_db);
             ProductOptionValue = new ProductOptionValueRepository(_db);
             ProductVariant = new ProductVariantRepository(_db);
+            StockNotification = new StockNotificationRepository(_db);
 
         }
 

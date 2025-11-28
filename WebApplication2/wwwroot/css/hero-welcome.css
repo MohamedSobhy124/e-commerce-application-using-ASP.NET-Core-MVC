@@ -393,10 +393,16 @@
         margin-bottom: 2rem;
     }
 
-    .advanced-search-container {
+    /* Override for hero section only, not sticky header */
+    .hero-section .advanced-search-container {
         flex-direction: column;
         border-radius: 20px;
         padding: 1rem;
+    }
+    
+    /* Keep sticky search container in row */
+    .hero-search-box-sticky .advanced-search-container {
+        flex-direction: row !important;
     }
 
     .hero-search-input {

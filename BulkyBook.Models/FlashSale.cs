@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Http;
 
 namespace BulkyBook.Models
 {
@@ -13,9 +14,25 @@ namespace BulkyBook.Models
         [Display(Name = "Flash Sale Name")]
         public string Name { get; set; }
 
+        [Required(ErrorMessage = "Flash sale name in Arabic is required")]
+        [StringLength(100)]
+        [Display(Name = "Flash Sale Name (Arabic)")]
+        public string NameAr { get; set; }
+
         [StringLength(500)]
         [Display(Name = "Description")]
         public string Description { get; set; }
+
+        [StringLength(500)]
+        [Display(Name = "Description (Arabic)")]
+        public string DescriptionAr { get; set; }
+
+        [StringLength(500)]
+        [Display(Name = "Image URL")]
+        public string ImageUrl { get; set; }
+
+        [NotMapped]
+        public IFormFile? ImageFile { get; set; }
 
         [Required]
         [Display(Name = "Start Date & Time")]

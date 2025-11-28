@@ -52,6 +52,11 @@ namespace BulkyBook.Models
         [ValidateNever]
         public string? ImageUrl { get; set; }
         
+        // Expiry Date (Optional)
+        [Display(Name = "Expiry Date")]
+        [DataType(DataType.Date)]
+        public DateTime? ExpiryDate { get; set; }
+        
         // Navigation property for variant option values (many-to-many relationship)
         [ValidateNever]
         public ICollection<ProductVariantOptionValue> VariantOptionValues { get; set; } = new List<ProductVariantOptionValue>();

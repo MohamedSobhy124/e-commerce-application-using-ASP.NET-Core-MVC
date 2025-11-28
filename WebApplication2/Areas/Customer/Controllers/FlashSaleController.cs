@@ -82,6 +82,38 @@ namespace BulkyBook.Areas.Customer.Controllers
                 imageUrl = item.Product?.ProductImages?.FirstOrDefault()?.ImageUrl
             });
         }
+
+        // GET: Get Flash Sale Products HTML (AJAX for modal)
+        [HttpGet]
+        public IActionResult GetFlashSaleProducts(int id)
+        {
+            var flashSale = _unitOfWork.FlashSale.GetFlashSaleWithItems(id);
+            
+            if (flashSale == null)
+            {
+                return BadRequest("Flash sale not found");
+            }
+
+            // Check if flash sale is active
+            var now = DateTime.Now;
+            if (!flashSale.IsActive || now < flashSale.StartDate || now > flashSale.EndDate)
+            {
+                return BadRequest("This flash sale is not currently active");
+            }
+
+            // Store flash sale name and end date in ViewBag for JavaScript
+            var requestCulture = HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+            var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+            var flashSaleName = currentCulture == "ar" && !string.IsNullOrEmpty(flashSale.NameAr) 
+                ? flashSale.NameAr 
+                : flashSale.Name;
+            
+            ViewBag.FlashSaleName = flashSaleName;
+            ViewBag.FlashSaleEndDate = flashSale.EndDate.ToString("o");
+            
+            // Return partial view with products
+            return PartialView("_FlashSaleProducts", flashSale);
+        }
     }
 }
 

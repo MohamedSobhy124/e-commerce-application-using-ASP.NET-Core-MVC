@@ -29,6 +29,7 @@
 [dir="rtl"] .nav-link {
     padding-right: 0;
     padding-left: 0.5rem;
+    margin-left: 0rem !important;
 }
 
 [dir="rtl"] .dropdown-menu {
@@ -95,12 +96,7 @@
     text-align: right;
 }
 
-/* Form Controls */
-[dir="rtl"] input,
-[dir="rtl"] textarea,
-[dir="rtl"] select {
-    text-align: right;
-}
+ 
 
 [dir="rtl"] .form-control {
     text-align: right;
@@ -144,7 +140,7 @@
 }
 
 [dir="rtl"] .bi-chevron-left::before {
-    content: "\f286"; /* chevron-right */
+    content: "\f284"; /* chevron-right */
 }
 
 [dir="rtl"] .bi-arrow-right::before {

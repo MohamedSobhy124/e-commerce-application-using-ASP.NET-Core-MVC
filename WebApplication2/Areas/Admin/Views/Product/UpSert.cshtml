@@ -196,6 +196,21 @@
                                         </div>
                                     </div>
                                 </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label asp-for="product.ExpiryDate" class="admin-form-label">
+                                                <i class="bi bi-calendar-x me-2"></i>@Localizer["ExpiryDate"] <span class="text-muted">(Optional)</span>
+                                            </label>
+                                            <input asp-for="product.ExpiryDate" class="admin-form-control" type="date" />
+                                            <span asp-validation-for="product.ExpiryDate" class="text-danger"></span>
+                                            <small class="form-text text-muted">
+                                                <i class="bi bi-info-circle me-1"></i>@Localizer["ProductExpiryDateInfo"]
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <div class="admin-form-group">
                                     <label asp-for="product.CategryId" class="admin-form-label">
@@ -473,6 +488,7 @@
                                                                     <th><i class="bi bi-tag me-1"></i>@Localizer["ListPrice"]</th>
                                                                     <th><i class="bi bi-box-seam me-1"></i>@Localizer["Stock"]</th>
                                                                     <th><i class="bi bi-exclamation-triangle me-1"></i>@Localizer["MinStockAlert"]</th>
+                                                                    <th><i class="bi bi-calendar-x me-1"></i>@Localizer["ExpiryDate"]</th>
                                                                     <th><i class="bi bi-image me-1"></i>@Localizer["Image"]</th>
                                                                 </tr>
                                                             </thead>
@@ -545,6 +561,7 @@
             ListPrice = v.ListPrice,
             StockQuantity = v.StockQuantity,
             MinimumStockAlert = v.MinimumStockAlert,
+            ExpiryDate = v.ExpiryDate.HasValue ? v.ExpiryDate.Value.ToString("yyyy-MM-dd") : (string?)null,
             ImageUrl = v.ImageUrl,
             VariantName = v.VariantName
         })  ));
@@ -777,6 +794,7 @@
             errorDeletingImageTryAgain: '@Html.Raw(Localizer["ErrorDeletingImageTryAgain"])',
             removeValue: '@Html.Raw(Localizer["RemoveValue"])',
             variant: '@Html.Raw(Localizer["Variant"])',
+            expiryDate: '@Html.Raw(Localizer["ExpiryDate"])',
             price: '@Html.Raw(Localizer["Price"])',
             listPrice: '@Html.Raw(Localizer["ListPrice"])',
             stock: '@Html.Raw(Localizer["Stock"])',
@@ -1824,6 +1842,11 @@
                                 <input type="number" class="form-control variant-input" value="${variant.minimumStockAlert || 5}" onchange="updateVariantField(${variant.id}, 'minimumStockAlert', this.value)">
                             </div>
                         </td>
+                        <td data-label="${localizations.expiryDate}">
+                            <div class="input-group-sm">
+                                <input type="date" class="form-control variant-input" value="${variant.expiryDate || ''}" onchange="updateVariantField(${variant.id}, 'expiryDate', this.value)">
+                            </div>
+                        </td>
                         <td class="variant-image-cell" data-label="${localizations.image}">
                             <div class="variant-image-upload">
                                 <label class="variant-image-upload-label">
@@ -1867,7 +1890,8 @@
                         price: parseFloat(variant.price) || 0,
                         listPrice: variant.listPrice ? parseFloat(variant.listPrice) : null,
                         stockQuantity: parseInt(variant.stockQuantity) || 0,
-                        minimumStockAlert: parseInt(variant.minimumStockAlert) || 5
+                        minimumStockAlert: parseInt(variant.minimumStockAlert) || 5,
+                        expiryDate: variant.expiryDate || null
                     })
                 })
                 .then(response => {

@@ -1278,6 +1278,7 @@
     flex: 1;
     padding: 0.75rem 1rem;
     border: 2px solid var(--gray-300);
+    max-width:40%;
     border-radius: 10px;
     font-size: 0.95rem;
     transition: all 0.3s ease;
@@ -1297,6 +1298,7 @@
 .price-range-slider {
     position: relative;
     height: 6px;
+    max-width:85%;
     background: var(--gray-200);
     border-radius: 3px;
     margin: 1rem 0;
@@ -1465,7 +1467,7 @@
     .filter-groups {
         display: none;
         grid-template-columns: 1fr !important;
-        gap: 1rem;
+        gap: .5rem;
         margin-top: 1rem;
         padding-top: 1rem;
         border-top: 2px solid rgba(124, 58, 237, 0.1);

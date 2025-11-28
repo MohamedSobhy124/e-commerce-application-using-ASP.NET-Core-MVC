@@ -623,7 +623,7 @@
         //initLiveViewers();
          //initStickyCart(); 
         initTrustBadges();
-        initRecentlyViewed();
+        //initRecentlyViewed();
         //initImageZoom();
         
         console.log('✨ All e-commerce features ready!');

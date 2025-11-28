@@ -73,6 +73,11 @@ namespace BulkyBook.Models
         [Range(0, int.MaxValue, ErrorMessage = "Minimum stock must be 0 or greater")]
         public int MinimumStockAlert { get; set; } = 5;
         
+        // Expiry Date
+        [Display(Name = "Expiry Date")]
+        [DataType(DataType.Date)]
+        public DateTime? ExpiryDate { get; set; }
+        
         // Navigation property for multiple images
         [ValidateNever]
         public ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();

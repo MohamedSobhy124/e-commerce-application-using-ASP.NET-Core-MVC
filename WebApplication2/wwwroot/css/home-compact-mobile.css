@@ -5,8 +5,8 @@
 
 /* Hero Section - Much Smaller */
 .hero-section {
-    padding: 2rem 0 1.5rem 0 !important;
-    margin-bottom: 1.5rem !important;
+    padding: 1rem 0 0rem 0 !important;
+    margin-bottom: 0rem !important;
 }
 
 .hero-content {
@@ -51,7 +51,7 @@
 /* Large Screens - Hero Better */
 @media (min-width: 1200px) {
     .hero-section {
-        padding: 3rem 0 2.5rem 0 !important;
+        padding: 0rem 0 1.5rem 0 !important;
     }
     
     .hero-title {
@@ -188,7 +188,7 @@
     }
     
     .product-image-wrapper {
-        height: 200px !important;
+        height: 300px !important;
         padding: 0.75rem !important;
     }
     
@@ -285,7 +285,7 @@
 
 /* Product Image - Responsive */
 .product-image-wrapper {
-    height: 140px !important;
+    height: 300px !important;
     padding: 0.5rem !important;
 }
 
@@ -490,8 +490,8 @@
 @media (max-width: 768px) {
     /* Hero - Even Smaller on Mobile */
     .hero-section {
-        padding: 1.5rem 0 1rem 0 !important;
-        margin-bottom: 1rem !important;
+        padding: 0rem 0 1rem 0 !important;
+        margin-bottom: 0rem !important;
     }
 
     .hero-title {

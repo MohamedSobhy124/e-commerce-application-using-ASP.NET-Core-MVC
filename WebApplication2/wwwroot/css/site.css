@@ -114,7 +114,7 @@ a:hover {
 
 /* Container */
 .container {
-    max-width: 1320px;
+    max-width: 95%;
     padding: 0 1rem;
     margin: 0 auto;
 }

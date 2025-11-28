@@ -36,6 +36,7 @@
     align-items: center;
     gap: 0.5rem;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    min-width: fit-content;
 }
 
 .navbar-brand:hover {

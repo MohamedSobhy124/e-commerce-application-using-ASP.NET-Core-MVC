@@ -485,7 +485,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 999;
+    z-index: 1000;
     transition: all 0.3s ease;
 }
 
@@ -539,20 +539,21 @@
     }
 
     .floating-cart-btn {
-        bottom: 24px;
-        right: 24px;
-        width: 64px;
-        height: 64px;
+        bottom: 20px;
+        right: 16px;
+        width: 56px;
+        height: 56px;
+        z-index: 999;
     }
-
+    
     .floating-cart-btn i {
-        font-size: 26px;
+        font-size: 24px;
     }
-
+    
     .floating-cart-badge {
-        width: 28px;
-        height: 28px;
-        font-size: 0.8rem;
+        width: 24px;
+        height: 24px;
+        font-size: 0.75rem;
     }
 
     .product-image-wrapper {

@@ -163,7 +163,7 @@
     <value>Author</value>
   </data>
   <data name="Category" xml:space="preserve">
-    <value>Category</value>
+    <value>Categories</value>
   </data>
   <data name="Description" xml:space="preserve">
     <value>Description</value>
@@ -448,7 +448,7 @@
     <value>Company</value>
   </data>
   <data name="Product" xml:space="preserve">
-    <value>Product</value>
+    <value>Products</value>
   </data>
   <data name="CartUpdatedSuccessfully" xml:space="preserve">
     <value>Cart updated successfully</value>
@@ -659,6 +659,9 @@
   </data>
   <data name="OriginalPrice" xml:space="preserve">
     <value>Original Price</value>
+  </data>
+  <data name="AdditionalTaxMayApply" xml:space="preserve">
+    <value>(Price including tax)</value>
   </data>
   <data name="ViewFullCart" xml:space="preserve">
     <value>View Full Cart</value>
@@ -2240,5 +2243,14 @@
   </data>
   <data name="ProductInformation" xml:space="preserve">
     <value>Product Information</value>
+  </data>
+  <data name="Offers" xml:space="preserve">
+    <value>Offers</value>
+  </data>
+  <data name="BestDeals" xml:space="preserve">
+    <value>Best Deals</value>
+  </data>
+  <data name="Filters" xml:space="preserve">
+    <value>Filters</value>
   </data>
 </root>

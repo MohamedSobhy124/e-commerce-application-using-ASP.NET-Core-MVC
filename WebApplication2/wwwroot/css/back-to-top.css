@@ -17,7 +17,7 @@
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
-    z-index: 997;
+    z-index: 1000;
     box-shadow: 0 4px 12px rgba(59, 157, 213, 0.4);
     display: flex;
     align-items: center;

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Microsoft.AspNetCore.Identity;
 using System.Diagnostics;
 using System.Security.Claims;
 
@@ -20,14 +21,16 @@ namespace BulkyBook.Areas.Customer.Controllers
         private readonly IStringLocalizer<BulkyBook.SharedResources> _localizer;
         private readonly ApplicationDBContext _dbContext;
         private readonly IConfiguration _configuration;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IStringLocalizer<BulkyBook.SharedResources> localizer, ApplicationDBContext dbContext, IConfiguration configuration)
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IStringLocalizer<BulkyBook.SharedResources> localizer, ApplicationDBContext dbContext, IConfiguration configuration, UserManager<IdentityUser> userManager)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _localizer = localizer;
             _dbContext = dbContext;
             _configuration = configuration;
+            _userManager = userManager;
         }
 
         [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" })]
@@ -38,6 +41,48 @@ namespace BulkyBook.Areas.Customer.Controllers
             // Get active flash sales for homepage
             var activeFlashSales = _unitOfWork.FlashSale.GetActiveFlashSales();
             ViewBag.ActiveFlashSales = activeFlashSales;
+            
+            // Get discounted products (where ListPrice > Price or variants have discounts)
+            // Include variants and images for proper discount display
+            var allProducts = _unitOfWork.product.GetAllAsNoTracking(
+                filter: p => p.StockQuantity > 0,
+                includeProperties: "ProductImages,ProductVariants")
+                .ToList();
+            
+            // Filter products that have discounts (either main product or variants)
+            var discountedProducts = allProducts
+                .Where(p => {
+                    // Check if main product has discount
+                    if (p.ListPrice > p.Price) return true;
+                    
+                    // Check if any variant has discount
+                    if (p.ProductVariants != null && p.ProductVariants.Any())
+                    {
+                        return p.ProductVariants.Any(v => v.ListPrice > v.Price && v.StockQuantity > 0);
+                    }
+                    
+                    return false;
+                })
+                .OrderByDescending(p => {
+                    // Calculate best discount (either main product or best variant)
+                    var mainDiscount = p.ListPrice > 0 ? ((p.ListPrice - p.Price) / p.ListPrice) * 100 : 0;
+                    
+                    if (p.ProductVariants != null && p.ProductVariants.Any())
+                    {
+                        var bestVariantDiscount = p.ProductVariants
+                            .Where(v => v.ListPrice > v.Price && v.StockQuantity > 0)
+                            .Select(v => v.ListPrice > 0 ? ((v.ListPrice - v.Price) / v.ListPrice) * 100 : 0)
+                            .DefaultIfEmpty(0)
+                            .Max()??0m;
+                        
+                        return Math.Max(mainDiscount, (double)bestVariantDiscount);
+                    }
+                    
+                    return mainDiscount;
+                })
+                .Take(20) // Get top 20 discounted products
+                .ToList();
+            ViewBag.DiscountedProducts = discountedProducts;
 
             // Get active service subscriptions for homepage
             var activeServices = _unitOfWork.ServiceSubscriptions.GetAll(s => s.IsActive, includeProperties: "ServiceImages")
@@ -51,6 +96,19 @@ namespace BulkyBook.Areas.Customer.Controllers
             // Get all categories for filter (cached - only load once per request)
             var allCategories = _unitOfWork.categry.GetAllAsNoTracking().ToList();
             ViewBag.Categories = allCategories;
+            
+            // Get sample products for each category to display in carousel
+            var categoryProductsMap = new Dictionary<int, List<Product>>();
+            foreach (var category in allCategories.Take(6))
+            {
+                var categoryProducts = _unitOfWork.product.GetAllAsNoTracking(
+                    filter: p => p.CategryId == category.Id && p.StockQuantity > 0,
+                    includeProperties: "ProductImages")
+                    .Take(4)
+                    .ToList();
+                categoryProductsMap[category.Id] = categoryProducts;
+            }
+            ViewBag.CategoryProductsMap = categoryProductsMap;
             
             // PERFORMANCE: Optimized query - filter at database level, not in memory
             // Get best sellers (products with most orders)
@@ -122,13 +180,15 @@ namespace BulkyBook.Areas.Customer.Controllers
                 query = query.Where(p => p.CategryId == categoryId.Value);
             }
             
-            // Filter by search term (case-insensitive)
+            // Filter by search term (case-insensitive) - includes Arabic fields
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 var searchLower = searchTerm.ToLower();
                 query = query.Where(p => 
                     p.Title.ToLower().Contains(searchLower) || 
-                    (p.Description != null && p.Description.ToLower().Contains(searchLower)));
+                    (p.TitleAr != null && p.TitleAr.ToLower().Contains(searchLower)) ||
+                    (p.Description != null && p.Description.ToLower().Contains(searchLower)) ||
+                    (p.DescriptionAr != null && p.DescriptionAr.ToLower().Contains(searchLower)));
             }
             
             // Filter by price range
@@ -196,9 +256,15 @@ namespace BulkyBook.Areas.Customer.Controllers
             
             // Pagination - take first 20 (materialize only what we need)
             IEnumerable<Product> ProductList = query.Take(20).ToList();
-            
+
+            foreach (var p in ProductList)
+            {
+                p.ProductImages = p.ProductImages
+                    .Where(img => img.ImageInfo == null)
+                    .ToList();
+            }
             // Cache headers are automatically set by [ResponseCache] attribute
-            
+
             // Get cart product IDs for authenticated users
             if (User.Identity.IsAuthenticated)
             {
@@ -238,14 +304,16 @@ namespace BulkyBook.Areas.Customer.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 60, VaryByQueryKeys = new[] { "page", "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" })]
-        public IActionResult LoadMoreProducts(int page = 1, int pageSize = 20, 
+        public IActionResult LoadMoreProducts(int page = 0, int pageSize = 20, 
             int? categoryId = null, string searchTerm = null, string sortBy = null,
             decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
             string availability = null)
         {
-            // Apply same filters as Index action (optimized query)
-            var query = _unitOfWork.product.GetAll(includeProperties: "categry,ProductImages").AsQueryable();
+            // PERFORMANCE: Use AsNoTracking for read-only queries (faster, less memory)
+            // Only include necessary properties to reduce data transfer
+            var query = _unitOfWork.product.GetAllAsNoTracking(includeProperties: "categry,ProductImages").AsQueryable();
             
+            // Apply filters at database level (not in memory)
             if (categoryId.HasValue && categoryId.Value > 0)
             {
                 query = query.Where(p => p.CategryId == categoryId.Value);
@@ -253,10 +321,12 @@ namespace BulkyBook.Areas.Customer.Controllers
             
             if (!string.IsNullOrEmpty(searchTerm))
             {
-                var searchLower = searchTerm.ToLower();
+                // PERFORMANCE: Use EF.Functions.Like for better index usage (if available)
+                // Otherwise, keep simple Contains but with trim
+                var searchLower = searchTerm.Trim().ToLower();
                 query = query.Where(p => 
                     p.Title.ToLower().Contains(searchLower) || 
-                    (p.Description != null && p.Description.ToLower().Contains(searchLower)));
+                    (p.TitleAr != null && p.TitleAr.ToLower().Contains(searchLower)));
             }
             
             if (minPrice.HasValue && minPrice.Value > 0)
@@ -296,7 +366,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 }
             }
             
-            // Apply sorting
+            // PERFORMANCE: Apply sorting before counting/materializing
             query = sortBy switch
             {
                 "price_low" => query.OrderBy(p => p.Price),
@@ -307,35 +377,82 @@ namespace BulkyBook.Areas.Customer.Controllers
                 _ => query.OrderBy(p => p.Title)
             };
             
-            var totalProducts = query.Count();
             var productsToSkip = page * pageSize;
             
-            // Optimized: Only materialize the products we need
-            var products = query.Skip(productsToSkip).Take(pageSize).ToList();
-            var hasMore = (productsToSkip + pageSize) < totalProducts;
+            // PERFORMANCE: Use projection to select only needed fields at database level
+            // This reduces data transfer and memory usage significantly
+            var productsQuery = query
+                .Skip(productsToSkip)
+                .Take(pageSize)
+                .Select(p => new
+                {
+                    // Select only needed fields at database level (faster, less memory)
+                    id = p.Id,
+                    title = p.Title,
+                    titleAr = p.TitleAr,
+                    price = p.Price,
+                    listPrice = p.ListPrice,
+                    stockQuantity = p.StockQuantity,
+                    minimumStockAlert = p.MinimumStockAlert,
+                    imageUrl = p.ImageUrl,
+                    productType = p.ProductType,
+                    categoryId = p.categry != null ? (int?)p.categry.Id : null,
+                    categoryName = p.categry != null ? p.categry.Name : null,
+                    productImages = p.ProductImages
+                        .Where(pi => pi.ImageInfo != "INFO_IMAGE")
+                        .OrderBy(pi => pi.DisplayOrder)
+                        .Select(pi => pi.ImageUrl)
+                        .ToList()
+                });
+            
+            // Execute query and get products
+            var products = productsQuery.ToList();
+            
+            // PERFORMANCE: Only count if we need to determine hasMore
+            // Use a lightweight approach - check if we got a full page
+            var hasMore = products.Count == pageSize;
+            int totalProducts = 0;
+            
+            // Only count total if needed for display or if this is the first page
+            // For subsequent pages, only count if we got a full page (might be more)
+            if (page == 0)
+            {
+                // First page - always get count for display
+                totalProducts = query.Count();
+                hasMore = (productsToSkip + products.Count) < totalProducts;
+            }
+            else if (hasMore)
+            {
+                // Got a full page, might be more - do a quick check
+                // Use a faster approach: try to get one more record instead of full count
+                var checkQuery = query.Skip(productsToSkip + pageSize).Take(1);
+                hasMore = checkQuery.Any();
+                if (!hasMore)
+                {
+                    // No more records, can calculate total from position
+                    totalProducts = productsToSkip + products.Count;
+                }
+            }
+            else
+            {
+                // Didn't get a full page - this is the last page
+                totalProducts = productsToSkip + products.Count;
+            }
 
-            // Cache headers are automatically set by [ResponseCache] attribute
-
-            // Return products with AR fields for client-side language switching
+            // Transform to final JSON format (already projected, minimal transformation needed)
             var productsJson = products.Select(p => new
             {
-                id = p.Id,
-                title = p.Title,
-                titleAr = p.TitleAr,
-                description = p.Description,
-                descriptionAr = p.DescriptionAr,
-                price = p.Price,
-                listPrice = p.ListPrice,
-                stockQuantity = p.StockQuantity,
-                minimumStockAlert = p.MinimumStockAlert,
-                imageUrl = p.ImageUrl,
-                productType = p.ProductType,
-                categry = p.categry != null ? new { id = p.categry.Id, name = p.categry.Name } : null,
-                productImages = p.ProductImages?
-                    .Where(pi => pi.ImageInfo != "INFO_IMAGE") // Exclude info images
-                    .OrderBy(pi => pi.DisplayOrder)
-                    .Select(pi => pi.ImageUrl)
-                    .ToList() ?? new List<string>()
+                id = p.id,
+                title = p.title,
+                titleAr = p.titleAr,
+                price = p.price,
+                listPrice = p.listPrice,
+                stockQuantity = p.stockQuantity,
+                minimumStockAlert = p.minimumStockAlert,
+                imageUrl = p.imageUrl,
+                productType = p.productType,
+                categry = p.categoryId.HasValue ? new { id = p.categoryId.Value, name = p.categoryName } : null,
+                productImages = p.productImages ?? new List<string>()
             }).ToList();
 
             return Json(new { products = productsJson, hasMore = hasMore, totalCount = totalProducts });
@@ -758,38 +875,96 @@ namespace BulkyBook.Areas.Customer.Controllers
             ViewData["Image"] = seo.ImageUrl;
             ViewData["ProductRating"] = averageRating;
             ViewData["ProductReviewCount"] = reviewCount;
+            
+            // Check if all variants are out of stock
+            bool allVariantsOutOfStock = false;
+            if (product.ProductType == BulkyBook.Models.ProductType.Variable && product.ProductVariants != null && product.ProductVariants.Any())
+            {
+                allVariantsOutOfStock = product.ProductVariants.All(v => v.StockQuantity == 0);
+            }
+            else if (product.ProductType == BulkyBook.Models.ProductType.Simple)
+            {
+                allVariantsOutOfStock = product.StockQuantity == 0;
+            }
+            ViewData["AllVariantsOutOfStock"] = allVariantsOutOfStock;
         
             return View(cart);
         }
         [HttpPost]
         public IActionResult Details(ShoppingCart shoppingCart, int? ProductVariantId)
         {
+            // Validate quantity
+            if (shoppingCart.Count < 1)
+            {
+                TempData["error"] = "Quantity must be at least 1.";
+                return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
+            }
+            
+            // Get product to check stock
+            var product = _unitOfWork.product.Get(p => p.Id == shoppingCart.ProductId && !p.IsDeleted);
+            if (product == null)
+            {
+                TempData["error"] = "Product not found.";
+                return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
+            }
+            
+            // Validate quantity based on product type
+            string? validationError = null;
+            
+            if (ProductVariantId.HasValue && ProductVariantId.Value > 0)
+            {
+                // Variable product with variant - check variant stock
+                shoppingCart.ProductVariantId = ProductVariantId.Value;
+                
+                var variant = _unitOfWork.ProductVariant.Get(v => v.Id == ProductVariantId.Value && !v.IsDeleted);
+                if (variant == null || variant.IsDeleted)
+                {
+                    TempData["error"] = "Selected variant not found.";
+                    return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
+                }
+                
+                // Check variant stock quantity
+                if (variant.StockQuantity < shoppingCart.Count)
+                {
+                    if (variant.StockQuantity == 0)
+                    {
+                        validationError = "This variant is out of stock.";
+                    }
+                    else
+                    {
+                        validationError = $"Only {variant.StockQuantity} units available for this variant.";
+                    }
+                }
+            }
+            else
+            {
+                // Simple product - check product stock
+                if (product.StockQuantity < shoppingCart.Count)
+                {
+                    if (product.StockQuantity == 0)
+                    {
+                        validationError = "This product is out of stock.";
+                    }
+                    else
+                    {
+                        validationError = $"Only {product.StockQuantity} units available in stock.";
+                    }
+                }
+            }
+            
+            // If validation failed, return error
+            if (!string.IsNullOrEmpty(validationError))
+            {
+                TempData["error"] = validationError;
+                return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
+            }
+            
             if (User.Identity.IsAuthenticated)
             {
                 // Authenticated user - use database
                 var claimsIdentity=(ClaimsIdentity)User.Identity;
                 var UserId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
                 shoppingCart.ApplicationUserId = UserId;
-                
-                // Handle variant if provided
-                if (ProductVariantId.HasValue && ProductVariantId.Value > 0)
-                {
-                    shoppingCart.ProductVariantId = ProductVariantId.Value;
-                    
-                    // Get variant to check stock (only non-deleted variants)
-                    var variant = _unitOfWork.ProductVariant.Get(v => v.Id == ProductVariantId.Value && !v.IsDeleted);
-                    if (variant == null || variant.IsDeleted)
-                    {
-                        TempData["error"] = "Selected variant not found.";
-                        return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
-                    }
-                    
-                    if (variant.StockQuantity < shoppingCart.Count)
-                    {
-                        TempData["error"] = $"Only {variant.StockQuantity} units available in stock.";
-                        return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
-                    }
-                }
 
                 // Check if item already in cart (considering variant)
                 ShoppingCart shoppingCartFromDB = _unitOfWork.shoppingCart.Get(
@@ -799,7 +974,33 @@ namespace BulkyBook.Areas.Customer.Controllers
 
                 if(shoppingCartFromDB != null)
                 {
-                    shoppingCartFromDB.Count += shoppingCart.Count;
+                    // Check total quantity after adding
+                    var newTotalQuantity = shoppingCartFromDB.Count + shoppingCart.Count;
+                    
+                    // Re-validate total quantity
+                    if (ProductVariantId.HasValue && ProductVariantId.Value > 0)
+                    {
+                        var variant = _unitOfWork.ProductVariant.Get(v => v.Id == ProductVariantId.Value && !v.IsDeleted);
+                        if (variant != null && variant.StockQuantity < newTotalQuantity)
+                        {
+                            TempData["error"] = variant.StockQuantity == 0 
+                                ? "This variant is out of stock." 
+                                : $"Only {variant.StockQuantity} units available for this variant. You already have {shoppingCartFromDB.Count} in your cart.";
+                            return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
+                        }
+                    }
+                    else
+                    {
+                        if (product.StockQuantity < newTotalQuantity)
+                        {
+                            TempData["error"] = product.StockQuantity == 0 
+                                ? "This product is out of stock." 
+                                : $"Only {product.StockQuantity} units available in stock. You already have {shoppingCartFromDB.Count} in your cart.";
+                            return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
+                        }
+                    }
+                    
+                    shoppingCartFromDB.Count = newTotalQuantity;
                     _unitOfWork.shoppingCart.update(shoppingCartFromDB);
                 }
                 else
@@ -812,6 +1013,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             else
             {
                 // Guest user - use session
+                // Note: Guest cart validation would need to be handled in GuestCartHelper
                 BulkyBook.Utility.GuestCartHelper.AddToCart(HttpContext.Session, shoppingCart.ProductId, shoppingCart.Count, shoppingCart.ProductVariantId);
             }
 
@@ -1023,6 +1225,157 @@ namespace BulkyBook.Areas.Customer.Controllers
             {
                 _logger.LogError(ex, "Error unsubscribing from newsletter");
                 return Json(new { success = false, message = _localizer["SubscriptionError"].ToString() });
+            }
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubscribeStockNotification(int productId, int? variantId, string? email, string? phoneNumber)
+        {
+            try
+            {
+                // Get product
+                var product = _unitOfWork.product.Get(p => p.Id == productId && !p.IsDeleted);
+                if (product == null)
+                {
+                    return Json(new { success = false, message = _localizer["ProductNotFound"].ToString() });
+                }
+                
+                string userEmail = email;
+                string userPhone = phoneNumber;
+                string? userId = null;
+                
+                // If user is logged in, get their info
+                if (User.Identity.IsAuthenticated)
+                {
+                    var claimsIdentity = (ClaimsIdentity)User.Identity;
+                    userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    var userEmailClaim = claimsIdentity.FindFirst(ClaimTypes.Email)?.Value;
+                    var user = await _userManager.FindByIdAsync(userId);
+                    
+                    if (user != null)
+                    {
+                        userEmail = userEmail ?? user.Email;
+                        userPhone = userPhone ?? user.PhoneNumber;
+                    }
+                }
+                
+                // Validate email
+                if (string.IsNullOrWhiteSpace(userEmail))
+                {
+                    return Json(new { success = false, message = _localizer["EmailIsRequired"].ToString() });
+                }
+                
+                // Check if already subscribed
+                var existing = _unitOfWork.StockNotification.GetByProductAndEmail(productId, userEmail, variantId);
+                if (existing != null)
+                {
+                    if (existing.IsActive)
+                    {
+                        return Json(new { success = false, message = _localizer["StockNotificationAlreadySubscribed"].ToString() });
+                    }
+                    else
+                    {
+                        // Reactivate
+                        existing.IsActive = true;
+                        existing.PhoneNumber = userPhone;
+                        existing.ModifiedDate = DateTime.Now;
+                        _unitOfWork.StockNotification.Update(existing);
+                        _unitOfWork.save();
+                        return Json(new { success = true, message = _localizer["StockNotificationSubscribed"].ToString() });
+                    }
+                }
+                
+                // Create new notification
+                var stockNotification = new BulkyBook.Models.StockNotification
+                {
+                    ProductId = productId,
+                    ProductVariantId = variantId,
+                    Email = userEmail.Trim().ToLower(),
+                    PhoneNumber = userPhone,
+                    ApplicationUserId = userId,
+                    IsActive = true,
+                    IsNotified = false,
+                    CreatedDate = DateTime.Now
+                };
+                
+                _unitOfWork.StockNotification.Add(stockNotification);
+                _unitOfWork.save();
+                
+                // Send notification to admins
+                await SendStockNotificationToAdmins(stockNotification, product);
+                
+                return Json(new { success = true, message = _localizer["StockNotificationSubscribed"].ToString() });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error subscribing to stock notification");
+                return Json(new { success = false, message = "An error occurred. Please try again later." });
+            }
+        }
+        
+        private async Task SendStockNotificationToAdmins(BulkyBook.Models.StockNotification notification, Product product)
+        {
+            try
+            {
+                var emailSender = HttpContext.RequestServices.GetRequiredService<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender>();
+                var adminEmail = _configuration["StockAlerts:AdminEmail"];
+                
+                // Get all admin users
+                var adminUsers = await _userManager.GetUsersInRoleAsync(SD.Role_Admin);
+                
+                // Prepare email content
+                var productName = product.Title;
+                var variantInfo = notification.ProductVariantId.HasValue 
+                    ? $" (Variant ID: {notification.ProductVariantId.Value})" 
+                    : "";
+                
+                var emailSubject = $"New Stock Notification Request - {productName}";
+                var emailBody = $@"
+                    <html>
+                    <body style='font-family: Arial, sans-serif;'>
+                        <h2>New Stock Notification Request</h2>
+                        <p>A customer has requested to be notified when a product is back in stock.</p>
+                        <table style='border-collapse: collapse; width: 100%; margin: 20px 0;'>
+                            <tr>
+                                <td style='padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;'><strong>Product:</strong></td>
+                                <td style='padding: 10px; border: 1px solid #ddd;'>{productName}{variantInfo}</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;'><strong>Customer Email:</strong></td>
+                                <td style='padding: 10px; border: 1px solid #ddd;'>{notification.Email}</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;'><strong>Phone Number:</strong></td>
+                                <td style='padding: 10px; border: 1px solid #ddd;'>{notification.PhoneNumber ?? "Not provided"}</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;'><strong>Request Date:</strong></td>
+                                <td style='padding: 10px; border: 1px solid #ddd;'>{notification.CreatedDate:yyyy-MM-dd HH:mm:ss}</td>
+                            </tr>
+                        </table>
+                        <p>Please update the stock when available and the customer will be automatically notified.</p>
+                    </body>
+                    </html>";
+                
+                // Send to admin email from config
+                if (!string.IsNullOrEmpty(adminEmail))
+                {
+                    await emailSender.SendEmailAsync(adminEmail, emailSubject, emailBody);
+                }
+                
+                // Send to all admin users
+                foreach (var admin in adminUsers)
+                {
+                    if (!string.IsNullOrEmpty(admin.Email) && admin.Email != adminEmail)
+                    {
+                        await emailSender.SendEmailAsync(admin.Email, emailSubject, emailBody);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending stock notification to admins");
             }
         }
     }
