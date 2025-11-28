@@ -38,15 +38,15 @@ namespace BulkyBook.Services
         {
             // Get all admin users
             var adminNotificationEmail = _configuration["StockAlerts:AdminEmail"];
-            var adminUser = await _userManager.FindByEmailAsync(adminNotificationEmail ?? string.Empty);
+            //var adminUser = await _userManager.FindByEmailAsync(adminNotificationEmail ?? string.Empty);
 
-            if (!string.IsNullOrEmpty(adminUser?.Id))
+            if (!string.IsNullOrEmpty(adminNotificationEmail))
             {
            
                 // Send email to admin
                 var emailBody = GenerateAdminEmailTemplate(orderHeader);
                 await _emailSender.SendEmailAsync(
-                    adminUser.Email??string.Empty,
+                    adminNotificationEmail ?? string.Empty,
                     $"New Order #{orderHeader.Id} - Ideal Weight",
                     emailBody
                 );
@@ -118,6 +118,26 @@ namespace BulkyBook.Services
                     timestamp = DateTime.Now
                 }
             );
+        }
+              
+        public async Task SendOrderConfirmationToCustomerGuest(OrderHeader orderHeader)
+        {
+     
+            // Get order details
+            var orderDetails = _unitOfWork.OrderDetail.GetAll(
+                o => o.OrderHeaderId == orderHeader.Id,
+                includeProperties: "Product"
+            ).ToList();
+
+            // Send email to customer
+            var emailBody = GenerateCustomerEmailTemplate(orderHeader, orderDetails, null);
+            await _emailSender.SendEmailAsync(
+                orderHeader.Email??string.Empty,
+                $"Order Confirmation #{orderHeader.Id} - Ideal Weight",
+                emailBody
+            );
+
+        
         }
 
         public async Task LogNotification(string userId, string title, string message, string type, int? orderId = null)
@@ -283,7 +303,7 @@ namespace BulkyBook.Services
 </html>";
         }
 
-        private string GenerateCustomerEmailTemplate(OrderHeader orderHeader, List<OrderDetail> orderDetails, ApplicationUser customer)
+        private string GenerateCustomerEmailTemplate(OrderHeader orderHeader, List<OrderDetail> orderDetails, ApplicationUser? customer)
         {
             var itemsHtml = new StringBuilder();
             foreach (var item in orderDetails)
@@ -320,7 +340,7 @@ namespace BulkyBook.Services
         <div style='background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); padding: 40px; text-align: center;'>
             <div style='font-size: 48px; margin-bottom: 15px;'>✅</div>
             <h1 style='color: #ffffff; margin: 0; font-size: 32px; font-weight: 800;'>Order Confirmed!</h1>
-            <p style='color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;'>Thank you for your purchase, {customer.Name}!</p>
+            <p style='color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;'>Thank you for your purchase,  {(customer != null ? customer.Name : orderHeader.Name)?? "Our valued Customer"}</p>
         </div>
 
         <!-- Content -->

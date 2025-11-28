@@ -38,7 +38,7 @@ namespace BulkyBook.Services
                 // Get order details (include FlashSaleItem to check if from flash sale)
                 var orderDetails = _unitOfWork.OrderDetail.GetAll(
                     o => o.OrderHeaderId == orderId,
-                    includeProperties: "Product,FlashSaleItem"
+                    includeProperties: "Product,FlashSaleItem,ProductVariant"
                 ).ToList();
 
                 foreach (var detail in orderDetails)
@@ -47,6 +47,10 @@ namespace BulkyBook.Services
                     if (detail.FlashSaleItemId.HasValue && detail.FlashSaleItem != null)
                     {
                         await DeductFlashSaleQuantity(detail.FlashSaleItemId.Value, detail.Count);
+                    } 
+                    if (detail.ProductVariantId.HasValue && detail.ProductVariant != null)
+                    {
+                        await DeductVariantQuantity(detail.ProductVariantId.Value, detail.Count);
                     }
 
                     // Decrease product stock (regular stock)
@@ -110,6 +114,57 @@ namespace BulkyBook.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error deducting flash sale quantity for item {flashSaleItemId}: {ex.Message}");
+                return false;
+            }
+        }
+         private async Task<bool> DeductVariantQuantity(int variantItemId, int quantity)
+        {
+            try
+            {
+                var variantItem = _unitOfWork.ProductVariant.Get( f => f.Id == variantItemId, includeProperties: "Product");
+
+                if (variantItem == null)
+                {
+                    Console.WriteLine($"variant item {variantItemId} not found");
+                    return false;
+                }
+
+                // Check if we have enough flash sale quantity
+                if (variantItem.StockQuantity < quantity)
+                {
+                    Console.WriteLine($"⚠️ Insufficient variant  quantity for item {variantItemId}. Available: {variantItem.StockQuantity}, Requested: {quantity}");
+                    // Still decrease to 0 to prevent negative
+                    variantItem.StockQuantity = 0;
+                }
+                else
+                {
+                    variantItem.StockQuantity -= quantity;
+                }
+
+                _unitOfWork.ProductVariant.Update(variantItem);
+                _unitOfWork.save();
+
+                bool isOutOfStock = variantItem.StockQuantity == 0;
+                bool isLowStock = variantItem.StockQuantity > 0 && variantItem.StockQuantity <= variantItem.MinimumStockAlert;
+                 
+                if (isOutOfStock || isLowStock)
+                {
+                    await SendStockVariantAlertToAdmins(variantItem, isOutOfStock);
+                }
+
+                Console.WriteLine($"🔥 variant quantity deducted for item {variantItemId}: {quantity} units. Remaining: {variantItem.StockQuantity}");
+
+                // Log if variant item is now sold out
+                if (variantItem.StockQuantity == 0)
+                {
+                    Console.WriteLine($"🔥💥 variant item {variantItemId} ({variantItem.Product?.Title}) is now SOLD OUT!");
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deducting variant quantity for item {variantItemId}: {ex.Message}");
                 return false;
             }
         }
@@ -204,6 +259,7 @@ namespace BulkyBook.Services
             }
         }
 
+     
         private async Task SendStockAlertToAdmins(Product product, bool isOutOfStock)
         {
             try
@@ -261,8 +317,66 @@ namespace BulkyBook.Services
                 Console.WriteLine($"Error sending stock alert: {ex.Message}");
             }
         }
+          
+        private async Task SendStockVariantAlertToAdmins(ProductVariant productVariant, bool isOutOfStock)
+        {
+            try
+            {
+                // Get admin email from configuration (fallback to all admins)
+                var adminNotificationEmail = _configuration["StockAlerts:AdminEmail"];
+                var adminUser = await _userManager.FindByEmailAsync(adminNotificationEmail??string.Empty);
+                // Prepare notification details
+                string title = isOutOfStock ? "⚠️ Product Variant Out of Stock" : "📉 Variant Low Stock Alert";
+                string message = isOutOfStock
+                    ? $"Product '{productVariant.Product.Title}' , Variant '{productVariant.VariantName}' is now OUT OF STOCK!"
+                    : $"Product '{productVariant.Product.Title}' , Variant '{productVariant.VariantName}' stock is low! Only {productVariant.StockQuantity} units remaining (Alert level: {productVariant.MinimumStockAlert})";
 
-        private async Task LogStockNotification(string adminUserId, Product product, bool isOutOfStock)
+                string urgency = isOutOfStock ? "URGENT" : "WARNING";
+                 
+                 
+                    if (!string.IsNullOrEmpty(adminUser?.Id))
+                    {
+                        // Save notification to database
+                        await LogVariantStockNotification(adminUser.Id, productVariant, isOutOfStock);
+
+                        // Send email
+                        var emailBody = GenerateVariantStockAlertEmailTemplate(productVariant, isOutOfStock);
+                        await _emailSender.SendEmailAsync(
+                            adminNotificationEmail?? string.Empty,
+                            $"[{urgency}] Stock Alert: {productVariant.Product.Title} , Variant : {productVariant.VariantName}",
+                            emailBody
+                        );
+
+                        Console.WriteLine($"Stock alert email sent to admin: {adminNotificationEmail}");
+                    }
+                
+
+                // Send real-time push notification to all admins
+                await _hubContext.Clients.Group("Admins").SendAsync(
+                    "ReceiveStockAlert",
+                    new
+                    {
+                        title = title,
+                        message = message,
+                        productId = productVariant.ProductId,
+                        productName = productVariant.Product.Title,
+                        stockQuantity = productVariant.StockQuantity,
+                        minimumAlert = productVariant.MinimumStockAlert,
+                        isOutOfStock = isOutOfStock,
+                        urgency = urgency,
+                        timestamp = DateTime.Now
+                    }
+                );
+
+                Console.WriteLine($"Stock alert push notification sent for product: {productVariant.Product.Title}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending stock alert: {ex.Message}");
+            }
+        }
+
+        private Task LogStockNotification(string adminUserId, Product product, bool isOutOfStock)
         {
             try
             {
@@ -288,6 +402,38 @@ namespace BulkyBook.Services
             {
                 Console.WriteLine($"Error logging stock notification: {ex.Message}");
             }
+
+            return Task.CompletedTask;
+        }       
+        
+        private Task LogVariantStockNotification(string adminUserId, ProductVariant productVariant, bool isOutOfStock)
+        {
+            try
+            {
+                var notification = new Notification
+                {
+                    UserId = adminUserId,
+                    Title = isOutOfStock ? "Product Variant Out of Stock" : "Variant Low Stock Alert",
+                    Message = isOutOfStock
+                        ? $"'{productVariant.Product.Title}', Variant : {productVariant.VariantName} is now OUT OF STOCK and cannot be ordered."
+                        : $"'{productVariant.Product.Title}', Variant : {productVariant.VariantName} has only {productVariant.StockQuantity} units left (Alert threshold: {productVariant.MinimumStockAlert})",
+                    Type = "StockAlert",
+                    RelatedId = productVariant.Id,
+                    IsRead = false,
+                    Link = string.Empty,
+                    Icon =string.Empty,
+                    CreatedAt = DateTime.Now
+                };
+
+                _unitOfWork.notification.Add(notification);
+                _unitOfWork.save();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error logging stock notification: {ex.Message}");
+            }
+
+            return Task.CompletedTask;
         }
 
         private string GenerateStockAlertEmailTemplate(Product product, bool isOutOfStock)
@@ -468,6 +614,186 @@ namespace BulkyBook.Services
 </body>
 </html>";
         }
+      private string GenerateVariantStockAlertEmailTemplate(ProductVariant productVariant, bool isOutOfStock)
+        {
+            string statusColor = isOutOfStock ? "#ef4444" : "#f59e0b";
+            string statusText = isOutOfStock ? "Variant OUT OF STOCK" : "Variant LOW STOCK";
+            string statusIcon = isOutOfStock ? "❌" : "⚠️";
+
+            return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }}
+        .header {{
+            background: linear-gradient(135deg, {statusColor}, {(isOutOfStock ? "#dc2626" : "#ea580c")});
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }}
+        .header h1 {{
+            margin: 0;
+            font-size: 28px;
+        }}
+        .header .icon {{
+            font-size: 48px;
+            margin-bottom: 10px;
+        }}
+        .content {{
+            background: #f9fafb;
+            padding: 30px;
+            border: 1px solid #e5e7eb;
+        }}
+        .alert-box {{
+            background: white;
+            border-left: 4px solid {statusColor};
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }}
+        .product-info {{
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }}
+        .product-info h2 {{
+            color: #1976D2;
+            margin-top: 0;
+        }}
+        .info-row {{
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }}
+        .info-row:last-child {{
+            border-bottom: none;
+        }}
+        .label {{
+            font-weight: 600;
+            color: #6b7280;
+        }}
+        .value {{
+            font-weight: 700;
+            color: #1f2937;
+        }}
+        .action-section {{
+            background: #eff6ff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #bfdbfe;
+        }}
+        .action-section h3 {{
+            color: #1976D2;
+            margin-top: 0;
+        }}
+        .btn {{
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #3B9DD5, #1976D2);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 10px;
+        }}
+        .footer {{
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+            font-size: 14px;
+        }}
+    </style>
+</head>
+<body>
+    <div class=""header"">
+        <div class=""icon"">{statusIcon}</div>
+        <h1>{statusText} ALERT</h1>
+        <p style=""margin: 10px 0 0; font-size: 16px;"">Immediate Action Required</p>
+    </div>
+    
+    <div class=""content"">
+        <div class=""alert-box"">
+            <h3 style=""color: {statusColor}; margin-top: 0;"">{statusIcon} Stock Alert Notification</h3>
+            <p style=""font-size: 16px; margin: 0;"">
+                {(isOutOfStock
+                    ? $"The product <strong>'{productVariant.Product.Title}' , Variant : {productVariant.VariantName} </strong> is now completely OUT OF STOCK and cannot be ordered by customers."
+                    : $"The product <strong>'{productVariant.Product.Title}', Variant : {productVariant.VariantName}</strong>  has reached the low stock threshold with only <strong>{productVariant.StockQuantity} units</strong> remaining.")}
+            </p>
+        </div>
+
+        <div class=""product-info"">
+            <h2>📦 Product Details</h2>
+            <div class=""info-row"">
+                <span class=""label"">Product Name:</span>
+                <span class=""value"">{productVariant.Product.Title}</span>
+            </div>
+            <div class=""info-row"">
+                <span class=""label"">Product ID:</span>
+                <span class=""value"">#{productVariant.Id}</span>
+            </div>
+            <div class=""info-row"">
+                <span class=""label"">Current Stock:</span>
+                <span class=""value"" style=""color: {statusColor};"">{productVariant.StockQuantity} units</span>
+            </div>
+            <div class=""info-row"">
+                <span class=""label"">Alert Threshold:</span>
+                <span class=""value"">{productVariant.MinimumStockAlert} units</span>
+            </div>
+            <div class=""info-row"">
+                <span class=""label"">Status:</span>
+                <span class=""value"" style=""color: {statusColor};"">{statusText}</span>
+            </div>
+        </div>
+
+        <div class=""action-section"">
+            <h3>📋 Recommended Actions</h3>
+            <ul style=""margin: 10px 0; padding-left: 20px;"">
+                {(isOutOfStock
+                    ? @"<li>Restock this product immediately</li>
+                       <li>Contact suppliers for urgent delivery</li>
+                       <li>Update product page with expected restock date</li>
+                       <li>Notify customers on waitlist (if applicable)</li>"
+                    : @"<li>Review sales velocity and order more stock</li>
+                       <li>Check with suppliers for availability</li>
+                       <li>Consider adjusting alert threshold if needed</li>
+                       <li>Monitor stock levels daily</li>")}
+            </ul>
+            <a href=""https://yourwebsite.com/Admin/Product/Upsert/{productVariant.ProductId}"" class=""btn"">
+                Update Stock Now →
+            </a>
+        </div>
+
+        <div style=""background: #fef3c7; padding: 15px; border-radius: 6px; border-left: 4px solid #f59e0b; margin: 20px 0;"">
+            <strong>💡 Pro Tip:</strong> You can adjust the minimum stock alert level for each product in the admin panel to receive notifications earlier.
+        </div>
+    </div>
+    
+    <div class=""footer"">
+        <p>This is an automated stock alert from Ideal Weight Inventory Management System</p>
+        <p style=""margin-top: 10px;"">Generated on {DateTime.Now:MMMM dd, yyyy 'at' hh:mm tt}</p>
+        <p style=""color: #9ca3af; font-size: 12px; margin-top: 15px;"">
+            To configure stock alert settings, update your appsettings.json file.
+        </p>
+    </div>
+</body>
+</html>";
+        }
+    
+    
     }
 }
 

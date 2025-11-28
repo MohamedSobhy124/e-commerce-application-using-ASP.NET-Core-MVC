@@ -16,40 +16,66 @@
         // Extract all offer cards from the original structure
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = originalHTML;
-        const allCards = tempDiv.querySelectorAll('.offer-card');
         
-        if (allCards.length === 0) return;
+        // Find all offer cards - they are inside column divs (col-12 col-sm-6 col-lg-3)
+        // We need to get the actual .offer-card elements, not the column wrappers
+        let allCards = Array.from(tempDiv.querySelectorAll('.offer-card'));
+        
+        // If no cards found in temp div, try current DOM
+        if (allCards.length === 0) {
+            allCards = Array.from(carouselInner.querySelectorAll('.offer-card'));
+        }
+        
+        if (allCards.length === 0) {
+            return;
+        }
         
         let currentItemsPerSlide = getItemsPerSlide();
         
         function getItemsPerSlide() {
             const width = window.innerWidth;
-            if (width < 576) return 1;      // Mobile: 1 item
-            if (width < 768) return 1;      // Small tablet: 1 item  
-            if (width < 992) return 2;      // Tablet: 2 items
-            if (width < 1200) return 3;     // Small desktop: 3 items
-            return 4;                       // Desktop: 4 items
+            // Mobile (< 576px): 1 product per slide
+            if (width < 576) return 1;
+            // Small tablet (576-768px): 1 product per slide
+            if (width < 768) return 1;
+            // Tablet (768-992px): 2 items
+            if (width < 992) return 2;
+            // Small desktop (992-1200px): 3 items
+            if (width < 1200) return 3;
+            // Desktop (>= 1200px): 4 items
+            return 4;
         }
         
         function reorganizeSlides() {
             const newItemsPerSlide = getItemsPerSlide();
             
-            // Only reorganize if items per slide changed
-            if (newItemsPerSlide === currentItemsPerSlide && carouselInner.querySelector('.carousel-item')) {
+            // Always reorganize on mobile/tablet to ensure proper structure
+            const shouldReorganize = newItemsPerSlide !== currentItemsPerSlide || 
+                                    !carouselInner.querySelector('.carousel-item') ||
+                                    window.innerWidth < 768;
+            
+            if (!shouldReorganize && carouselInner.querySelector('.carousel-item')) {
                 return;
             }
             
             currentItemsPerSlide = newItemsPerSlide;
             
+            // Use the original cards array (stored at initialization)
+            // Don't try to re-extract from DOM as it will be empty after clearing
+            const cardsToUse = Array.from(allCards);
+            
+            if (cardsToUse.length === 0) {
+                return;
+            }
+            
             // Clear existing carousel items
             carouselInner.innerHTML = '';
             
             // Group cards into slides
-            const cardsArray = Array.from(allCards);
-            const totalSlides = Math.ceil(cardsArray.length / currentItemsPerSlide);
+            const totalSlides = Math.ceil(cardsToUse.length / currentItemsPerSlide);
             
             for (let slideIndex = 0; slideIndex < totalSlides; slideIndex++) {
-                const slideCards = cardsArray.slice(
+                const slideCards = cardsToUse.slice(
                     slideIndex * currentItemsPerSlide,
                     (slideIndex + 1) * currentItemsPerSlide
                 );
@@ -65,24 +91,33 @@
                 row.className = 'row g-3 g-md-4';
                 
                 // Add cards to row with appropriate column classes
-                slideCards.forEach((card) => {
+                slideCards.forEach((card, cardIndex) => {
                     const cardClone = card.cloneNode(true);
                     
-                    // Remove existing column classes
-                    cardClone.className = cardClone.className.replace(/col-\w+-\d+/g, '').trim();
+                    // Create a column wrapper div
+                    const colWrapper = document.createElement('div');
                     
                     // Add responsive column classes based on items per slide
+                    // Force 1 item per slide for mobile (< 576px) and small tablet (576-768px)
                     if (currentItemsPerSlide === 1) {
-                        cardClone.className += ' col-12';
+                        // Mobile and small tablet: 1 item per slide - full width
+                        colWrapper.className = 'col-12';
                     } else if (currentItemsPerSlide === 2) {
-                        cardClone.className += ' col-12 col-md-6';
+                        // Tablet: 2 items per slide
+                        colWrapper.className = 'col-12 col-md-6';
                     } else if (currentItemsPerSlide === 3) {
-                        cardClone.className += ' col-12 col-md-6 col-lg-4';
+                        // Small desktop: 3 items per slide
+                        colWrapper.className = 'col-12 col-md-6 col-lg-4';
                     } else {
-                        cardClone.className += ' col-12 col-sm-6 col-lg-3';
+                        // Desktop: 4 items per slide
+                        colWrapper.className = 'col-12 col-md-6 col-lg-3';
                     }
                     
-                    row.appendChild(cardClone);
+                    // Append the cloned card to the column wrapper
+                    colWrapper.appendChild(cardClone);
+                    
+                    // Append the column wrapper to the row
+                    row.appendChild(colWrapper);
                 });
                 
                 carouselItem.appendChild(row);
@@ -97,6 +132,13 @@
             if (bsCarousel) {
                 // Reset to first slide
                 bsCarousel.to(0);
+            } else {
+                // Initialize carousel if it doesn't exist
+                new bootstrap.Carousel(carousel, {
+                    interval: 5000,
+                    ride: 'carousel',
+                    pause: 'hover'
+                });
             }
         }
         
@@ -130,7 +172,7 @@
             }
         }
         
-        // Initial organization
+        // Initial organization - reorganize immediately
         reorganizeSlides();
         
         // Reorganize on resize with debounce
@@ -149,11 +191,19 @@
     // Initialize when DOM is ready
     function initWhenReady() {
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initResponsiveOffersCarousel);
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(initResponsiveOffersCarousel, 300);
+            });
         } else {
-            setTimeout(initResponsiveOffersCarousel, 100);
+            // DOM already loaded, wait a bit more for Bootstrap to initialize
+            setTimeout(initResponsiveOffersCarousel, 300);
         }
     }
+    
+    // Also try on window load as fallback
+    window.addEventListener('load', () => {
+        setTimeout(initResponsiveOffersCarousel, 500);
+    });
     
     initWhenReady();
 })();

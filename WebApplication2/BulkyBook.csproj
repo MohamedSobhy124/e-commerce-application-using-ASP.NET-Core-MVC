@@ -7,6 +7,9 @@
     <ApplicationIcon />
     <Win32Resource />
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <!-- Performance: Precompile Razor Views for faster rendering -->
+    <RazorCompileOnBuild>true</RazorCompileOnBuild>
+    <RazorCompileOnPublish>true</RazorCompileOnPublish>
   </PropertyGroup>
 
   <ItemGroup>
