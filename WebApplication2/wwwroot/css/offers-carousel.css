@@ -75,6 +75,46 @@
     width: 100%;
 }
 
+/* Ensure proper column sizing for responsive behavior */
+.offers-carousel .carousel-item .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Force 1 product per slide on mobile and small tablets */
+@media (max-width: 768px) {
+    .offers-carousel .carousel-item {
+        width: 100%;
+    }
+    
+    .offers-carousel .carousel-item .row {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    
+    .offers-carousel .carousel-item .row > [class*="col-"] {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+    
+    /* Hide any extra columns that might appear (safety measure) */
+    .offers-carousel .carousel-item .row > [class*="col-"]:nth-child(n+2) {
+        display: none !important;
+    }
+    
+    /* Ensure only first card is visible */
+    .offers-carousel .carousel-item .row > [class*="col-"]:first-child {
+        display: block !important;
+    }
+}
+
 /* Offer Card */
 .offer-card {
     background: #ffffff;
@@ -367,6 +407,12 @@
         width: 18px;
         height: 18px;
     }
+    
+    /* Force 1 product per slide on small tablets (576-768px) */
+    .offers-carousel .carousel-item .row > [class*="col-"] {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
 }
 
 @media (max-width: 576px) {
@@ -440,6 +486,12 @@
     .offers-carousel-indicators button.active {
         width: 24px;
         height: 8px;
+    }
+    
+    /* Force 1 product per slide on mobile (< 576px) */
+    .offers-carousel .carousel-item .row > [class*="col-"] {
+        flex: 0 0 100%;
+        max-width: 100%;
     }
 }
 

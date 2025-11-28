@@ -5,7 +5,7 @@
     let isScrolling = false;
     let scrollTimeout;
     
-    // Enhanced scroll function - scroll 4 items at a time
+    // Enhanced scroll function - responsive items per scroll
     window.scrollCategoryCarousel = function(direction) {
         const carousel = document.getElementById('categoryCarousel');
         if (!carousel || isScrolling) return;
@@ -15,7 +15,9 @@
         const firstCard = carousel.querySelector('.category-card');
         const cardWidth = firstCard ? firstCard.offsetWidth : 220;
         const gap = window.innerWidth <= 768 ? 16 : 20; // Adjust gap for mobile
-        const itemsPerScroll = 4; // Scroll 4 items at a time
+        
+        // Responsive items per scroll: 1 on mobile/tablet, 4 on desktop
+        const itemsPerScroll = window.innerWidth < 768 ? 1 : 4;
         const scrollAmount = (cardWidth + gap) * itemsPerScroll;
         
         // Calculate current scroll position
@@ -97,7 +99,8 @@
         
         const cardWidth = carousel.querySelector('.category-card')?.offsetWidth || 220;
         const gap = window.innerWidth <= 768 ? 16 : 20; // Adjust gap for mobile
-        const itemsPerPage = 4; // Show 4 items per view
+        // Responsive items per page: 1 on mobile/tablet, 4 on desktop
+        const itemsPerPage = window.innerWidth < 768 ? 1 : 4;
         const scrollAmount = (cardWidth + gap) * itemsPerPage;
         
         // Calculate which page we're on
@@ -126,7 +129,8 @@
         
         const cardWidth = cards[0].offsetWidth || 220;
         const gap = window.innerWidth <= 768 ? 16 : 20; // Adjust gap for mobile
-        const itemsPerPage = 4;
+        // Responsive items per page: 1 on mobile/tablet, 4 on desktop
+        const itemsPerPage = window.innerWidth < 768 ? 1 : 4;
         const totalPages = Math.max(1, Math.ceil(cards.length / itemsPerPage));
         
         // Remove existing indicators

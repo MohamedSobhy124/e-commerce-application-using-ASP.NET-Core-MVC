@@ -760,7 +760,8 @@ namespace BulkyBook.Areas.Customer.Controllers
 						OrderHeaderId = ShoppingCartVM.OrderHeader.Id,
 						Price = cart.Price,
 						Count = cart.Count,
-						FlashSaleItemId = cart.FlashSaleItemId // Copy flash sale item ID if exists
+						FlashSaleItemId = cart.FlashSaleItemId, // Copy flash sale item ID if exists
+						ProductVariantId = cart.ProductVariantId
 					};
 					_unitOfWork.OrderDetail.add(orderDetail);
 					_unitOfWork.save();
@@ -774,17 +775,42 @@ namespace BulkyBook.Areas.Customer.Controllers
 					// Check payment method
 					if (ShoppingCartVM.OrderHeader.PaymentMethod == SD.PaymentMethodTappy)
 					{
-						// Tappy payment logic
-						if (_tappySettings.Enabled)
-						{
-							// Store payment method
-							var orderHeader = _unitOfWork.OrderHeader.Get(o => o.Id == ShoppingCartVM.OrderHeader.Id);
-							orderHeader.PaymentMethod = SD.PaymentMethodTappy;
-							_unitOfWork.OrderHeader.Update(orderHeader);
-							_unitOfWork.save();
+					// Tappy payment logic
+					if (_tappySettings.Enabled)
+					{
+						// Store payment method
+						ShoppingCartVM.OrderHeader.PaymentMethod = SD.PaymentMethodTappy;
+						_unitOfWork.OrderHeader.Update(ShoppingCartVM.OrderHeader);
+						_unitOfWork.save();
 							
-							// Create Tappy payment
+							// Create Tabby payment
 							var tappyHelper = new TappyHelper(_tappySettings);
+							
+							// Build order items for Tabby
+							var tabbyItems = ShoppingCartVM.ShoppingCartList.Select(cart => 
+							{
+								var productImageUrl = GetProductImageUrl(cart.product);
+								var fullImageUrl = productImageUrl.StartsWith("http") 
+									? productImageUrl 
+									: domain.TrimEnd('/') + productImageUrl;
+								var productUrl = domain + $"customer/home/details?id={cart.ProductId}";
+								
+								return new TabbyOrderItem
+								{
+									ReferenceId = cart.ProductId.ToString(),
+									Title = cart.product?.Title ?? "Product",
+									Description = cart.product?.Description?.Length > 500 
+										? cart.product.Description.Substring(0, 500) 
+										: cart.product?.Description,
+									Quantity = cart.Count,
+									UnitPrice = (decimal)cart.Price,
+									DiscountAmount = 0,
+									ImageUrl = fullImageUrl,
+									ProductUrl = productUrl,
+									Category = cart.product?.categry?.Name ?? "General"
+								};
+							}).ToList();
+							
 							var tappyRequest = new TappyPaymentRequest
 							{
 								MerchantId = _tappySettings.MerchantId,
@@ -796,16 +822,24 @@ namespace BulkyBook.Areas.Customer.Controllers
 								CustomerPhone = ShoppingCartVM.OrderHeader.PhoneNumber,
 								ReturnUrl = domain + $"customer/cart/TappyCallback?orderId={ShoppingCartVM.OrderHeader.Id}",
 								CancelUrl = domain + "customer/cart/index",
-								Description = $"Order #{ShoppingCartVM.OrderHeader.Id} - {ShoppingCartVM.ShoppingCartList.Count()} items"
+								Description = $"Order #{ShoppingCartVM.OrderHeader.Id} - {ShoppingCartVM.ShoppingCartList.Count()} items",
+								ShippingCity = ShoppingCartVM.OrderHeader.City,
+								ShippingAddress = ShoppingCartVM.OrderHeader.StreetAddress,
+								ShippingPostalCode = ShoppingCartVM.OrderHeader.PostalCode,
+								TaxAmount = 0,
+								ShippingAmount = 0,
+								DiscountAmount = (decimal?)ShoppingCartVM.OrderHeader.DiscountAmount,
+								Language = "en",
+								Items = tabbyItems
 							};
 
 							var tappyResponse = await tappyHelper.CreatePaymentAsync(tappyRequest);
 							
 							if (tappyResponse.Success && !string.IsNullOrEmpty(tappyResponse.PaymentUrl))
 							{
-								// Store Tappy transaction ID
-								orderHeader.SessionId = tappyResponse.TransactionId;
-								_unitOfWork.OrderHeader.Update(orderHeader);
+                                // Store Tappy transaction ID
+                                ShoppingCartVM.OrderHeader.SessionId = tappyResponse.TransactionId;
+								_unitOfWork.OrderHeader.Update(ShoppingCartVM.OrderHeader);
 								_unitOfWork.save();
 								
 								// Redirect to Tappy payment page
@@ -830,9 +864,8 @@ namespace BulkyBook.Areas.Customer.Controllers
 						if (_tamaraSettings.Enabled)
 						{
 							// Store payment method
-							var orderHeader = _unitOfWork.OrderHeader.Get(o => o.Id == ShoppingCartVM.OrderHeader.Id);
-							orderHeader.PaymentMethod = SD.PaymentMethodTamara;
-							_unitOfWork.OrderHeader.Update(orderHeader);
+							ShoppingCartVM.OrderHeader.PaymentMethod = SD.PaymentMethodTamara;
+							_unitOfWork.OrderHeader.Update(ShoppingCartVM.OrderHeader);
 							_unitOfWork.save();
 							
 							// Create Tamara checkout
@@ -886,9 +919,9 @@ namespace BulkyBook.Areas.Customer.Controllers
 							
 							if (tamaraResponse.Success && !string.IsNullOrEmpty(tamaraResponse.CheckoutUrl))
 							{
-								// Store Tamara checkout ID
-								orderHeader.SessionId = tamaraResponse.CheckoutId;
-								_unitOfWork.OrderHeader.Update(orderHeader);
+                                // Store Tamara checkout ID
+                                ShoppingCartVM.OrderHeader.SessionId = tamaraResponse.CheckoutId;
+								_unitOfWork.OrderHeader.Update(ShoppingCartVM.OrderHeader);
 								_unitOfWork.save();
 								
 								// Redirect to Tamara checkout page
@@ -959,10 +992,11 @@ namespace BulkyBook.Areas.Customer.Controllers
 						Session session = service.Create(options);
 						
 						// Store payment method and Stripe info
-						_unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
-						var orderHeader = _unitOfWork.OrderHeader.Get(o => o.Id == ShoppingCartVM.OrderHeader.Id);
-						orderHeader.PaymentMethod = SD.PaymentMethodStripe;
-						_unitOfWork.OrderHeader.Update(orderHeader);
+						//_unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
+						ShoppingCartVM.OrderHeader.PaymentMethod = SD.PaymentMethodStripe;
+						ShoppingCartVM.OrderHeader.SessionId = session.Id;
+						ShoppingCartVM.OrderHeader.PaymentIntentId = session.PaymentIntentId;
+						_unitOfWork.OrderHeader.Update(ShoppingCartVM.OrderHeader);
 						_unitOfWork.save();
 						
 						Response.Headers.Add("Location", session.Url);
@@ -1124,10 +1158,20 @@ namespace BulkyBook.Areas.Customer.Controllers
 			}
 
 			// ⚡ PROCESS STOCK DEDUCTION AFTER PAYMENT CONFIRMED
-			await _stockService.ProcessOrderStockDeduction(id);
+			
+            try
+            {
+                await _stockService.ProcessOrderStockDeduction(id);
+            }
+            catch (Exception ex) { }
 
-			// Send notifications to all admins
-			await _notificationService.SendOrderNotificationToAdmins(orderHeader);
+            try
+            {
+                // Send notifications to all admins
+                await _notificationService.SendOrderNotificationToAdmins(orderHeader);
+            }
+            catch (Exception ex) { }
+
 
 			// Send order confirmation to customer
 			if (!orderHeader.IsGuestOrder && !string.IsNullOrEmpty(orderHeader.ApplicationUserId))
@@ -1135,7 +1179,14 @@ namespace BulkyBook.Areas.Customer.Controllers
 				var customer = _unitOfWork.applicationUser.Get(u => u.Id == orderHeader.ApplicationUserId);
 				if (customer != null)
 				{
-					await _notificationService.SendOrderConfirmationToCustomer(orderHeader, customer);
+                    try
+                    {
+                        await _notificationService.SendOrderConfirmationToCustomer(orderHeader, customer);
+
+                    }
+                    catch (Exception ex) { }
+
+                   
 				}
 
 				// Clear cart from database for authenticated users
@@ -1149,10 +1200,15 @@ namespace BulkyBook.Areas.Customer.Controllers
 			{
 				// Clear cart from session for guest users
 				BulkyBook.Utility.GuestCartHelper.ClearCart(HttpContext.Session);
-				
-				// TODO: Send order confirmation email to guest user's email
-				// You can implement email sending here using orderHeader.Email
-			}
+                try
+                {
+                    await _notificationService.SendOrderConfirmationToCustomerGuest(orderHeader);
+
+                }
+                catch (Exception ex) { }
+                // TODO: Send order confirmation email to guest user's email
+                // You can implement email sending here using orderHeader.Email
+            }
 
 			return View(id);
 		}

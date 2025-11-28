@@ -2843,17 +2843,17 @@
                 }
             }
 
-            // Load wishlist on page load
-            window.addEventListener('load', function() {
-                fetch('/Customer/Home/GetWishlistProductIds')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.productIds) {
-                            updateFloatingWishlistBadge(data.productIds.length);
-                        }
-                    })
-                    .catch(error => console.error('Error loading wishlist count:', error));
-            });
+            // // Load wishlist on page load
+            // window.addEventListener('load', function() {
+            //     fetch('/Customer/Home/GetWishlistProductIds')
+            //         .then(response => response.json())
+            //         .then(data => {
+            //             if (data.productIds) {
+            //                 updateFloatingWishlistBadge(data.productIds.length);
+            //             }
+            //         })
+            //         .catch(error => console.error('Error loading wishlist count:', error));
+            // });
             </text>
         }
     </script>

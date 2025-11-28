@@ -2255,4 +2255,19 @@
   <data name="Filters" xml:space="preserve">
     <value>الفلتر</value>
   </data>
+  <data name="InstallmentTabby" xml:space="preserve">
+    <value>ابدأ من {0}/شهر أو 4 دفعات بدون فائدة</value>
+  </data>
+  <data name="InstallmentTamara" xml:space="preserve">
+    <value>أو قسّط على 4 دفعات بقيمة {0}</value>
+  </data>
+  <data name="InstallmentTamaraDetails" xml:space="preserve">
+    <value>- بدون رسوم تأخير، متوافق مع الشريعة! المزيد من الخيارات</value>
+  </data>
+  <data name="Tabby" xml:space="preserve">
+    <value>تابي</value>
+  </data>
+  <data name="Tamara" xml:space="preserve">
+    <value>تمارا</value>
+  </data>
 </root>

@@ -33,7 +33,8 @@ namespace BulkyBook.Areas.Customer.Controllers
             _userManager = userManager;
         }
 
-        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" })]
+        // Performance: Cache response for 5 minutes, vary by query parameters
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" }, Location = ResponseCacheLocation.Any)]
         public IActionResult Index(int? categoryId, string searchTerm, string sortBy, 
             decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
             int? minRating = null, string availability = null)
@@ -778,6 +779,8 @@ namespace BulkyBook.Areas.Customer.Controllers
             }
         }
         
+        // Performance: Cache product details for 5 minutes (product data changes infrequently)
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "productId" }, Location = ResponseCacheLocation.Any)]
         public IActionResult Details(int productId)
         {
             var hasPurchased = false;

@@ -15,12 +15,32 @@ using Microsoft.Extensions.Options;
 var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-        builder.Services.AddControllersWithViews()
+        builder.Services.AddControllersWithViews(options =>
+        {
+            // Performance: Cache output for GET requests (except authenticated/admin pages)
+            options.CacheProfiles.Add("DefaultCache", new Microsoft.AspNetCore.Mvc.CacheProfile
+            {
+                Duration = 300, // 5 minutes
+                VaryByQueryKeys = new[] { "*" }
+            });
+            options.CacheProfiles.Add("LongCache", new Microsoft.AspNetCore.Mvc.CacheProfile
+            {
+                Duration = 3600, // 1 hour for static content
+                VaryByQueryKeys = new[] { "*" }
+            });
+        })
             .AddViewLocalization()
             .AddDataAnnotationsLocalization();
         
-        // Add Response Caching for performance
-        builder.Services.AddResponseCaching();
+        // Performance: Add Response Caching for performance
+        builder.Services.AddResponseCaching(options =>
+        {
+            options.MaximumBodySize = 64 * 1024; // 64 KB
+            options.UseCaseSensitivePaths = false;
+        });
+        
+        // Performance: Add Memory Cache for application-level caching
+        builder.Services.AddMemoryCache();
         
         // Configure Localization
         builder.Services.AddLocalization();

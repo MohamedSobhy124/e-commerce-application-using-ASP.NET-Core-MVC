@@ -8,6 +8,7 @@ namespace BulkyBook.Services
     {
         Task SendOrderNotificationToAdmins(OrderHeader orderHeader);
         Task SendOrderConfirmationToCustomer(OrderHeader orderHeader, ApplicationUser customer);
+        Task SendOrderConfirmationToCustomerGuest(OrderHeader orderHeader);
         Task LogNotification(string userId, string title, string message, string type, int? orderId = null);
         Task<IEnumerable<Notification>> GetUserNotifications(string userId);
         Task MarkAsRead(int notificationId);
