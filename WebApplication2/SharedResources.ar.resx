@@ -2271,6 +2271,192 @@
   <data name="InstallmentTamaraDetails" xml:space="preserve">
     <value>قسّط دفعتك على 4 أقساط بدون فوائد</value>
   </data>
+  <data name="ComboOffers" xml:space="preserve">
+    <value>عروض كومبو</value>
+  </data>
+  <data name="ComboOffer" xml:space="preserve">
+    <value>عرض كومبو</value>
+  </data>
+  <data name="CreateComboOffer" xml:space="preserve">
+    <value>إنشاء عرض كومبو</value>
+  </data>
+  <data name="EditComboOffer" xml:space="preserve">
+    <value>تعديل عرض كومبو</value>
+  </data>
+  <data name="DeleteComboOffer" xml:space="preserve">
+    <value>حذف عرض كومبو</value>
+  </data>
+  <data name="ComboOfferDetails" xml:space="preserve">
+    <value>تفاصيل عرض كومبو</value>
+  </data>
+  <data name="ComboPrice" xml:space="preserve">
+    <value>سعر الكومبو</value>
+  </data>
+  <data name="OriginalTotalPrice" xml:space="preserve">
+    <value>السعر الأصلي الإجمالي</value>
+  </data>
+  <data name="YouSave" xml:space="preserve">
+    <value>توفر</value>
+  </data>
+  <data name="AddComboToCart" xml:space="preserve">
+    <value>إضافة الكومبو إلى السلة</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>عرض التفاصيل</value>
+  </data>
+  <data name="ProductsIncluded" xml:space="preserve">
+    <value>المنتجات المشمولة</value>
+  </data>
+  <data name="SaveMoreWithComboDeals" xml:space="preserve">
+    <value>وفر أكثر مع عروض الكومبو المذهلة</value>
+  </data>
+  <data name="SaveMoreWithOurComboOffers" xml:space="preserve">
+    <value>وفر أكثر مع عروض الكومبو</value>
+  </data>
+  <data name="NoComboOffersAvailable" xml:space="preserve">
+    <value>لا توجد عروض كومبو متاحة حالياً</value>
+  </data>
+  <data name="CheckBackLaterForNewOffers" xml:space="preserve">
+    <value>تحقق لاحقاً للحصول على عروض كومبو جديدة</value>
+  </data>
+  <data name="ComboOfferCreatedSuccessfully" xml:space="preserve">
+    <value>تم إنشاء عرض الكومبو بنجاح</value>
+  </data>
+  <data name="ComboOfferUpdatedSuccessfully" xml:space="preserve">
+    <value>تم تحديث عرض الكومبو بنجاح</value>
+  </data>
+  <data name="ComboOfferDeletedSuccessfully" xml:space="preserve">
+    <value>تم حذف عرض الكومبو بنجاح</value>
+  </data>
+  <data name="ErrorCreatingComboOffer" xml:space="preserve">
+    <value>خطأ في إنشاء عرض الكومبو</value>
+  </data>
+  <data name="ErrorUpdatingComboOffer" xml:space="preserve">
+    <value>خطأ في تحديث عرض الكومبو</value>
+  </data>
+  <data name="ErrorDeletingComboOffer" xml:space="preserve">
+    <value>خطأ في حذف عرض الكومبو</value>
+  </data>
+  <data name="ManageProducts" xml:space="preserve">
+    <value>إدارة المنتجات</value>
+  </data>
+  <data name="ManageComboProducts" xml:space="preserve">
+    <value>إدارة منتجات الكومبو</value>
+  </data>
+  <data name="AddProduct" xml:space="preserve">
+    <value>إضافة منتج</value>
+  </data>
+  <data name="SelectProduct" xml:space="preserve">
+    <value>اختر منتج</value>
+  </data>
+  <data name="ProductAddedToCombo" xml:space="preserve">
+    <value>تم إضافة المنتج إلى الكومبو بنجاح</value>
+  </data>
+  <data name="ProductRemovedFromCombo" xml:space="preserve">
+    <value>تم إزالة المنتج من الكومبو بنجاح</value>
+  </data>
+  <data name="ErrorAddingProductToCombo" xml:space="preserve">
+    <value>خطأ في إضافة المنتج إلى الكومبو</value>
+  </data>
+  <data name="ErrorRemovingProductFromCombo" xml:space="preserve">
+    <value>خطأ في إزالة المنتج من الكومبو</value>
+  </data>
+  <data name="ProductAlreadyInCombo" xml:space="preserve">
+    <value>هذا المنتج موجود بالفعل في الكومبو</value>
+  </data>
+  <data name="AreYouSureRemoveProduct" xml:space="preserve">
+    <value>هل أنت متأكد من إزالة هذا المنتج من الكومبو؟</value>
+  </data>
+  <data name="ComboOfferItemUpdated" xml:space="preserve">
+    <value>تم تحديث عنصر الكومبو بنجاح</value>
+  </data>
+  <data name="ErrorUpdatingComboOfferItem" xml:space="preserve">
+    <value>خطأ في تحديث عنصر الكومبو</value>
+  </data>
+  <data name="ProductsInCombo" xml:space="preserve">
+    <value>المنتجات في الكومبو</value>
+  </data>
+  <data name="NoProductsInCombo" xml:space="preserve">
+    <value>لا توجد منتجات في هذا الكومبو بعد</value>
+  </data>
+  <data name="AddProducts" xml:space="preserve">
+    <value>إضافة منتجات</value>
+  </data>
+  <data name="Required" xml:space="preserve">
+    <value>مطلوب</value>
+  </data>
+  <data name="Optional" xml:space="preserve">
+    <value>اختياري</value>
+  </data>
+  <data name="ComboOfferNotFoundOrInactive" xml:space="preserve">
+    <value>عرض الكومبو غير موجود أو غير نشط حالياً</value>
+  </data>
+  <data name="ComboAddedToCart" xml:space="preserve">
+    <value>تم إضافة عرض الكومبو إلى السلة بنجاح</value>
+  </data>
+  <data name="ErrorAddingComboToCart" xml:space="preserve">
+    <value>خطأ في إضافة الكومبو إلى السلة</value>
+  </data>
+  <data name="InsufficientStockForCombo" xml:space="preserve">
+    <value>المخزون غير كافٍ لواحد أو أكثر من المنتجات في هذا الكومبو</value>
+  </data>
+  <data name="ComboOfferHasEnded" xml:space="preserve">
+    <value>انتهى عرض الكومبو هذا</value>
+  </data>
+  <data name="ComboOfferNotStartedYet" xml:space="preserve">
+    <value>لم يبدأ عرض الكومبو هذا بعد</value>
+  </data>
+  <data name="ComboOfferNotAvailable" xml:space="preserve">
+    <value>عرض الكومبو هذا غير متاح حالياً</value>
+  </data>
+  <data name="AreYouSureDeleteComboOffer" xml:space="preserve">
+    <value>هل أنت متأكد من حذف عرض الكومبو هذا؟ لا يمكن التراجع عن هذا الإجراء.</value>
+  </data>
+  <data name="NoComboOffersFound" xml:space="preserve">
+    <value>لم يتم العثور على عروض كومبو</value>
+  </data>
+  <data name="CreateFirstComboOffer" xml:space="preserve">
+    <value>إنشاء أول عرض كومبو</value>
+  </data>
+  <data name="UpdateComboOffer" xml:space="preserve">
+    <value>تحديث عرض الكومبو</value>
+  </data>
+  <data name="ChangeImage" xml:space="preserve">
+    <value>تغيير الصورة</value>
+  </data>
+  <data name="CurrentImage" xml:space="preserve">
+    <value>الصورة الحالية</value>
+  </data>
+  <data name="LeaveEmptyToKeepCurrent" xml:space="preserve">
+    <value>اتركه فارغاً للاحتفاظ بالصورة الحالية</value>
+  </data>
+  <data name="AfterAddingProducts" xml:space="preserve">
+    <value>بعد إضافة المنتجات</value>
+  </data>
+  <data name="TotalPriceForCombo" xml:space="preserve">
+    <value>السعر الإجمالي للكومبو بالكامل</value>
+  </data>
+  <data name="MinimumComboQuantity" xml:space="preserve">
+    <value>الحد الأدنى لكمية الكومبو التي يمكن للعميل شراؤها</value>
+  </data>
+  <data name="LeaveEmptyForUnlimited" xml:space="preserve">
+    <value>اتركه فارغاً لغير محدود</value>
+  </data>
+  <data name="LowerNumbersDisplayFirst" xml:space="preserve">
+    <value>الأرقام الأقل تظهر أولاً</value>
+  </data>
+  <data name="QuickInfo" xml:space="preserve">
+    <value>معلومات سريعة</value>
+  </data>
+  <data name="RequiredProducts" xml:space="preserve">
+    <value>المنتجات المطلوبة</value>
+  </data>
+  <data name="NoDescription" xml:space="preserve">
+    <value>لا يوجد وصف متاح</value>
+  </data>
+  <data name="LoadingComboOffers" xml:space="preserve">
+    <value>جاري تحميل عروض الكومبو...</value>
+  </data>
   <data name="DiscountSave" xml:space="preserve">
     <value>وفر</value>
   </data>

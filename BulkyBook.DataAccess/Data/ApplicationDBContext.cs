@@ -38,6 +38,9 @@ namespace BulkyBook.DataAccess.Data
         public DbSet<ProductVariant> ProductVariants { get; set; }
         public DbSet<ProductVariantOptionValue> ProductVariantOptionValues { get; set; }
         public DbSet<StockNotification> StockNotifications { get; set; }
+        public DbSet<ComboOffer> ComboOffers { get; set; }
+        public DbSet<ComboOfferItem> ComboOfferItems { get; set; }
+        public DbSet<ComboOfferImage> ComboOfferImages { get; set; }
 
 
 
@@ -61,6 +64,8 @@ namespace BulkyBook.DataAccess.Data
 			modelBuilder.Entity<ProductVariant>().HasIndex(v => new { v.IsDeleted, v.ProductId });
 			modelBuilder.Entity<FlashSale>().HasIndex(f => new { f.IsDeleted, f.IsActive, f.StartDate, f.EndDate });
 			modelBuilder.Entity<FlashSaleItem>().HasIndex(i => new { i.IsDeleted, i.FlashSaleId, i.ProductId });
+			modelBuilder.Entity<ComboOffer>().HasIndex(co => new { co.IsDeleted, co.IsActive, co.StartDate, co.EndDate });
+			modelBuilder.Entity<ComboOfferItem>().HasIndex(ci => new { ci.IsDeleted, ci.ComboOfferId, ci.ProductId });
 			
 			// Index on foreign keys for faster joins
 			modelBuilder.Entity<Product>().HasIndex(p => p.CategryId);
@@ -143,6 +148,9 @@ namespace BulkyBook.DataAccess.Data
 			
 			// ServiceImage indexes
 			modelBuilder.Entity<ServiceImage>().HasIndex(si => si.ServiceSubscriptionId); // For service images
+			
+			// ComboOfferImage indexes
+			modelBuilder.Entity<ComboOfferImage>().HasIndex(ci => new { ci.ComboOfferId, ci.DisplayOrder }); // For ordered image queries
 			
 			// Additional performance indexes for common query patterns
 			// Note: Full-text search indexes require special SQL Server setup, but these help with exact/prefix matches

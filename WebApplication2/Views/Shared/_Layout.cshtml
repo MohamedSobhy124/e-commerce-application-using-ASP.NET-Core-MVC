@@ -118,6 +118,7 @@
     <link rel="stylesheet" href="~/css/home-compact-mobile.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/home-professional-enhancements.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/lazy-loaded-sections.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/combo-offers.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/unified-responsive-carousels.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/mobile-carousel-enhancements.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BulkyBook.styles.css" asp-append-version="true" />
@@ -204,6 +205,11 @@
                                     <li>
                                         <a class="dropdown-item" asp-area="Admin" asp-controller="PromoCode" asp-action="Index">
                                             <i class="bi bi-tag-fill me-2"></i>@Localizer["PromoCodes"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="ComboOffer" asp-action="Index">
+                                            <i class="bi bi-box-seam me-2"></i>@Localizer["ComboOffers"]
                                         </a>
                                     </li>
                                     <li>

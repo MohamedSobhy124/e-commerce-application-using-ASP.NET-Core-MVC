@@ -15,11 +15,15 @@ namespace BulkyBook.Models
         public int? FlashSaleItemId { get; set; }
         public double? FlashSalePrice { get; set; }
         
+        // Combo Offer Support
+        public int? ComboOfferId { get; set; }
+        
         // Helper properties for display (not persisted)
         public string ProductTitle { get; set; }
         public double ProductPrice { get; set; }
         
         public bool IsFlashSale => FlashSaleItemId.HasValue;
+        public bool IsComboOffer => ComboOfferId.HasValue;
     }
 }
 

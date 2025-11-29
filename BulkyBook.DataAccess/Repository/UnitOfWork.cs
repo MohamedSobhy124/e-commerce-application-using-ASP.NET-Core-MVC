@@ -37,6 +37,8 @@ namespace BulkyBook.DataAccess.Repository
         public IProductOptionValueRepository ProductOptionValue { get; private set; }
         public IProductVariantRepository ProductVariant { get; private set; }
         public IStockNotificationRepository StockNotification { get; private set; }
+        public IComboOfferRepository ComboOffer { get; private set; }
+        public IComboOfferItemRepository ComboOfferItem { get; private set; }
 
         public UnitOfWork(ApplicationDBContext db) 
         {
@@ -63,6 +65,8 @@ namespace BulkyBook.DataAccess.Repository
             ProductOptionValue = new ProductOptionValueRepository(_db);
             ProductVariant = new ProductVariantRepository(_db);
             StockNotification = new StockNotificationRepository(_db);
+            ComboOffer = new ComboOfferRepository(_db);
+            ComboOfferItem = new ComboOfferItemRepository(_db);
 
         }
 

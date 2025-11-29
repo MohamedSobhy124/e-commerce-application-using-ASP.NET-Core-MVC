@@ -30,6 +30,8 @@ namespace BulkyBook.DataAccess.Repository.IRepository
         IProductOptionValueRepository ProductOptionValue { get; }
         IProductVariantRepository ProductVariant { get; }
         IStockNotificationRepository StockNotification { get; }
+        IComboOfferRepository ComboOffer { get; }
+        IComboOfferItemRepository ComboOfferItem { get; }
         void save();
     }
 }

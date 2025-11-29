@@ -26,24 +26,47 @@ namespace BulkyBook.Utility
             session.SetString(CartSessionKey, cartJson);
         }
 
-        public static void AddToCart(ISession session, int productId, int count = 1, int? productVariantId = null)
+        public static void AddToCart(ISession session, int productId, int count = 1, int? productVariantId = null, int? comboOfferId = null)
         {
             var cart = GetGuestCart(session);
-            // Check for existing item with same product and variant
-            var existingItem = cart.FirstOrDefault(c => c.ProductId == productId && c.ProductVariantId == productVariantId);
-
-            if (existingItem != null)
+            
+            // For combo offers, check if combo already exists (only check ComboOfferId)
+            if (comboOfferId.HasValue)
             {
-                existingItem.Count += count;
+                var existingComboItem = cart.FirstOrDefault(c => c.ComboOfferId == comboOfferId);
+                if (existingComboItem != null)
+                {
+                    existingComboItem.Count += count;
+                }
+                else
+                {
+                    cart.Add(new GuestCartItem
+                    {
+                        ProductId = productId,
+                        Count = count,
+                        ProductVariantId = productVariantId,
+                        ComboOfferId = comboOfferId
+                    });
+                }
             }
             else
             {
-                cart.Add(new GuestCartItem
+                // Check for existing item with same product and variant (for regular products)
+                var existingItem = cart.FirstOrDefault(c => c.ProductId == productId && c.ProductVariantId == productVariantId && !c.ComboOfferId.HasValue);
+
+                if (existingItem != null)
                 {
-                    ProductId = productId,
-                    Count = count,
-                    ProductVariantId = productVariantId
-                });
+                    existingItem.Count += count;
+                }
+                else
+                {
+                    cart.Add(new GuestCartItem
+                    {
+                        ProductId = productId,
+                        Count = count,
+                        ProductVariantId = productVariantId
+                    });
+                }
             }
 
             SaveGuestCart(session, cart);

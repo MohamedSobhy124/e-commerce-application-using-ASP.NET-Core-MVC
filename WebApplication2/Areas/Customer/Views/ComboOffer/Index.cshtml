@@ -1,0 +1,90 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
+@inject IStringLocalizer<BulkyBook.SharedResources> Localizer
+@model IEnumerable<BulkyBook.Models.ComboOffer>
+
+@{
+    ViewData["Title"] = Localizer["ComboOffers"];
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold mb-3">
+                <i class="bi bi-box-seam me-3"></i>@Localizer["ComboOffers"]
+            </h1>
+            <p class="lead text-muted">@Localizer["SaveMoreWithOurComboOffers"]</p>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var comboOffer in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="combo-offer-card h-100">
+                        <div class="combo-offer-image-wrapper">
+                            @if (!string.IsNullOrEmpty(comboOffer.ImageUrl))
+                            {
+                                <img src="@comboOffer.ImageUrl" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(comboOffer.NameAr) ? comboOffer.NameAr : comboOffer.Name)" class="combo-offer-image" />
+                            }
+                            <div class="combo-offer-badge">
+                                <span class="badge bg-danger">@comboOffer.DiscountPercentage.ToString("F0")% @Localizer["Off"]</span>
+                            </div>
+                            @if (comboOffer.IsCurrentlyActive)
+                            {
+                                <div class="combo-offer-status">
+                                    <span class="badge bg-success">@Localizer["Active"]</span>
+                                </div>
+                            }
+                        </div>
+                        <div class="combo-offer-content">
+                            <h3 class="combo-offer-title">
+                                @(currentCulture == "ar" && !string.IsNullOrEmpty(comboOffer.NameAr) ? comboOffer.NameAr : comboOffer.Name)
+                            </h3>
+                            @if (!string.IsNullOrEmpty(comboOffer.Description))
+                            {
+                                <p class="combo-offer-description">@comboOffer.Description</p>
+                            }
+                            <div class="combo-offer-pricing">
+                                <div class="combo-offer-original-price">
+                                    <span class="text-decoration-line-through text-muted">@Html.Raw(currencySymbol)@comboOffer.OriginalTotalPrice.ToString("N2")</span>
+                                </div>
+                                <div class="combo-offer-price">
+                                    <span class="combo-price-amount">@Html.Raw(currencySymbol)@comboOffer.ComboPrice.ToString("N2")</span>
+                                </div>
+                                <div class="combo-offer-savings">
+                                    <i class="bi bi-tag-fill me-1"></i>@Localizer["YouSave"] @Html.Raw(currencySymbol)@comboOffer.TotalSavings.ToString("N2")
+                                </div>
+                            </div>
+                            <div class="combo-offer-info">
+                                <span class="combo-products-count">
+                                    <i class="bi bi-box-seam me-1"></i>@comboOffer.TotalProducts @Localizer["Products"]
+                                </span>
+                            </div>
+                            <div class="combo-offer-actions mt-3">
+                                <a asp-action="Details" asp-route-id="@comboOffer.Id" class="btn btn-primary w-100">
+                                    <i class="bi bi-eye me-2"></i>@Localizer["ViewDetails"]
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-box-seam display-1 text-muted"></i>
+            <h3 class="mt-3">@Localizer["NoComboOffersAvailable"]</h3>
+            <p class="text-muted">@Localizer["CheckBackLaterForNewOffers"]</p>
+        </div>
+    }
+</div>
+

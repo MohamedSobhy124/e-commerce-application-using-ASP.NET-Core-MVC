@@ -508,6 +508,20 @@ namespace BulkyBook.Areas.Customer.Controllers
             return PartialView("_CategoryProductsSection", categoryProductsMap);
         }
 
+        [HttpGet]
+        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        public IActionResult LoadComboOffersSection()
+        {
+            var activeComboOffers = _unitOfWork.ComboOffer.GetActiveComboOffers().Take(6).ToList();
+            
+            if (!activeComboOffers.Any())
+            {
+                return Content(""); // Return empty if no combo offers
+            }
+
+            return PartialView("_ComboOffersSection", activeComboOffers);
+        }
+
         // PERFORMANCE: Helper method to get discounted products asynchronously
         private async Task<List<Product>> GetDiscountedProductsAsync()
         {
