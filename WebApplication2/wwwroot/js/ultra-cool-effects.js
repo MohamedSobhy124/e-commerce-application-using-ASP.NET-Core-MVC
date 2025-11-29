@@ -27,19 +27,32 @@
     }
 
     // ========================================
-    // 2. PARALLAX EFFECT ON SCROLL
+    // 2. PARALLAX EFFECT ON SCROLL (Optimized for mobile)
     // ========================================
     function initParallax() {
+        // Disable parallax on mobile for better performance
+        if (window.innerWidth <= 768) {
+            return;
+        }
+        
+        let ticking = false;
         window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const parallaxElements = document.querySelectorAll('[data-parallax]');
-            
-            parallaxElements.forEach(el => {
-                const speed = el.dataset.parallax || 0.5;
-                const yPos = -(scrolled * speed);
-                el.style.transform = `translateY(${yPos}px)`;
-            });
-        });
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const scrolled = window.pageYOffset;
+                    const parallaxElements = document.querySelectorAll('[data-parallax]');
+                    
+                    parallaxElements.forEach(el => {
+                        const speed = el.dataset.parallax || 0.5;
+                        const yPos = -(scrolled * speed);
+                        el.style.transform = `translate3d(0, ${yPos}px, 0)`;
+                    });
+                    
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
     }
 
     // ========================================

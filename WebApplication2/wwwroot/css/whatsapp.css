@@ -148,6 +148,114 @@
     }
 }
 
+/* Floating Call Button */
+.floating-call-btn {
+    position: fixed;
+    bottom: 190px;
+    right: 18px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #3B9DD5 0%, #1976D2 100%);
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(59, 157, 213, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    border: none;
+    text-decoration: none;
+}
+
+.floating-call-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(59, 157, 213, 0.6);
+    background: linear-gradient(135deg, #1976D2 0%, #3B9DD5 100%);
+}
+
+.floating-call-btn i {
+    animation: callPulse 2s infinite;
+}
+
+@keyframes callPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Call Tooltip */
+.call-tooltip {
+    position: absolute;
+    right: 70px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    padding: 10px 16px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 120px;
+    font-size: 14px;
+    color: #1976D2;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    text-align: center;
+}
+
+.call-tooltip-text {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1976D2;
+}
+
+.call-tooltip-phone {
+    font-weight: 700;
+    font-size: 13px;
+    color: #3B9DD5;
+    letter-spacing: 0.5px;
+}
+
+.floating-call-btn:hover .call-tooltip {
+    opacity: 1;
+}
+
+/* RTL Support for Call Button - Keep on RIGHT side */
+[dir="rtl"] .floating-call-btn {
+    right: 20px;
+    left: auto;
+}
+
+[dir="rtl"] .call-tooltip {
+    left: auto;
+    right: 70px;
+}
+
+/* Pulse Animation for Call Button */
+.call-pulse {
+    animation: callButtonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes callButtonPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 157, 213, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(59, 157, 213, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(59, 157, 213, 0);
+    }
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .floating-whatsapp-btn {
@@ -159,7 +267,17 @@
         z-index: 999;
     }
     
-    .whatsapp-tooltip {
+    .floating-call-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+        bottom: 160px;
+        right: 16px;
+        z-index: 999;
+    }
+    
+    .whatsapp-tooltip,
+    .call-tooltip {
         display: none; /* Hide tooltip on mobile */
     }
 }

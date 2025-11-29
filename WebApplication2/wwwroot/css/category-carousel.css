@@ -98,6 +98,8 @@
     /* border-radius: 16px; */
     padding: 0.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 2px solid transparent;
+    position: relative;
     border: 1px solid rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
@@ -124,9 +126,50 @@
     border-color: rgba(59, 157, 213, 0.2);
 }
 
-.category-card.active {
+/* Active state - only when carousel item is active (not transitioning) */
+.category-carousel .carousel-item.active .category-card.active {
     border-color: #3B9DD5;
     box-shadow: 0 8px 24px rgba(59, 157, 213, 0.2);
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    transform: translateY(-4px);
+}
+
+.category-carousel .carousel-item.active .category-card.active .category-label {
+    color: #3B9DD5;
+    font-weight: 700;
+}
+
+/* Prevent active styling during Bootstrap carousel transitions */
+.category-carousel .carousel-item:not(.active) .category-card.active {
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+    background: #ebf5fb;
+    transform: translateY(0);
+}
+
+.category-carousel .carousel-item:not(.active) .category-card.active .category-label {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+/* Handle transition states - prevent flickering */
+.category-carousel .carousel-item.carousel-item-next,
+.category-carousel .carousel-item.carousel-item-prev {
+    display: block;
+}
+
+.category-carousel .carousel-item.carousel-item-next:not(.active) .category-card,
+.category-carousel .carousel-item.carousel-item-prev:not(.active) .category-card {
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+    background: #ebf5fb;
+    transform: translateY(0);
+}
+
+.category-carousel .carousel-item.carousel-item-next:not(.active) .category-card .category-label,
+.category-carousel .carousel-item.carousel-item-prev:not(.active) .category-card .category-label {
+    color: #1f2937;
+    font-weight: 600;
 }
 
 /* Circular Image Container - Neutral Background - Bigger */
@@ -369,6 +412,53 @@
 .category-card:nth-child(5) { animation-delay: 0.5s; }
 .category-card:nth-child(6) { animation-delay: 0.6s; }
 
+/* Bootstrap Carousel Transition Fixes - Prevent Flickering */
+.category-carousel {
+    position: relative;
+    overflow: hidden;
+}
+
+.category-carousel .carousel-inner {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.category-carousel .carousel-item {
+    transition: transform 0.6s ease-in-out;
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Ensure only active item shows active styling */
+.category-carousel .carousel-item.active .category-card {
+    opacity: 1;
+}
+
+.category-carousel .carousel-item:not(.active) .category-card {
+    opacity: 1;
+}
+
+/* Mobile: Additional fixes for smooth transitions */
+@media (max-width: 768px) {
+    .category-carousel .carousel-item {
+        transition: transform 0.5s ease-in-out;
+    }
+    
+    /* Ensure proper stacking during transitions */
+    .category-carousel .carousel-item.carousel-item-next,
+    .category-carousel .carousel-item.carousel-item-prev {
+        position: absolute;
+        top: 0;
+        width: 100%;
+    }
+    
+    .category-carousel .carousel-item.active.carousel-item-next,
+    .category-carousel .carousel-item.active.carousel-item-prev {
+        position: relative;
+    }
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .category-section {
@@ -508,6 +598,7 @@
     .category-carousel {
         scroll-snap-type: x mandatory;
         scroll-padding: 0 1.5rem;
+        max-height: 18rem;
     }
     
     .category-circle {
@@ -578,8 +669,8 @@
     opacity: 1;
 }
 
-/* Active State Indicator */
-.category-card.active::after {
+/* Active State Indicator - only show when carousel item is active */
+.category-carousel .carousel-item.active .category-card.active::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -590,6 +681,11 @@
     background: linear-gradient(90deg, #3B9DD5 0%, #7BC043 100%);
     border-radius: 2px;
     animation: expandWidth 0.3s ease;
+}
+
+/* Hide indicator during transitions */
+.category-carousel .carousel-item:not(.active) .category-card.active::after {
+    display: none;
 }
 
 @keyframes expandWidth {

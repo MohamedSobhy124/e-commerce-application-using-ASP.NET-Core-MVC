@@ -1,0 +1,75 @@
+@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
+@model Dictionary<int, List<BulkyBook.Models.Product>>
+@inject IConfiguration Configuration
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var categories = ViewBag.Categories as IEnumerable<BulkyBook.Models.Categry> ?? Enumerable.Empty<BulkyBook.Models.Categry>();
+    var categoryProductsMap = Model ?? new Dictionary<int, List<BulkyBook.Models.Product>>();
+    var displayCategories = categories.ToList();
+    var hasCategories = displayCategories.Any();
+}
+
+@if (hasCategories)
+{
+    <section class="category-section">
+        <div class="category-section-title">
+            <h2>@Localizer["ShopByCategory"]</h2>
+        </div>
+        <div class="category-carousel-container" id="categoryCarouselContainer">
+            <button class="carousel-nav prev" onclick="scrollCategoryCarousel(-1)" aria-label="Previous categories">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="category-carousel-wrapper">
+                <div class="category-carousel" id="categoryCarousel">
+                    @for (int i = 0; i < displayCategories.Count; i++)
+                    {
+                        var category = displayCategories[i];
+                        var categoryProducts = categoryProductsMap.ContainsKey(category.Id) 
+                            ? categoryProductsMap[category.Id] 
+                            : new List<BulkyBook.Models.Product>();
+                        var categoryName = currentCulture == "ar" && !string.IsNullOrEmpty(category.NameAr) 
+                            ? category.NameAr 
+                            : category.Name;
+                        
+                        <div class="category-card"
+                             data-category-index="@i"
+                             data-category-id="@category.Id"
+                             role="button"
+                             tabindex="0"
+                             style="cursor: pointer;">
+                            <div class="category-circle">
+                                @if (!string.IsNullOrEmpty(category.ImageUrl))
+                                {
+                                    <div class="category-image-wrapper">
+                                        <img src="@category.ImageUrl" alt="@categoryName" class="category-image" />
+                                    </div>
+                                }
+                                else if (categoryProducts.Any())
+                                {
+                                    <div class="category-products-grid">
+                                        @foreach (var product in categoryProducts)
+                                        {
+                                            var productImage = product.ProductImages?.FirstOrDefault()?.ImageUrl ?? product.ImageUrl;
+                                            if (!string.IsNullOrEmpty(productImage))
+                                            {
+                                                <img src="@productImage" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)" class="category-product-mini" />
+                                            }
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div class="category-label">@categoryName</div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <button class="carousel-nav next" onclick="scrollCategoryCarousel(1)" aria-label="Next categories">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+}
+

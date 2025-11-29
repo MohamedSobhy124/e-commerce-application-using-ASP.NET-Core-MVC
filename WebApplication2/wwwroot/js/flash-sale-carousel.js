@@ -5,7 +5,7 @@
     let currentSlide = 0;
     let autoSwapInterval = null;
     let isAutoSwapping = true;
-    const swapInterval = 5000; // 5 seconds
+    const swapInterval = 8000; // 8 seconds - slower for better UX
     
     // Helper functions
     function updateIndicators() {
@@ -417,6 +417,18 @@
             scrollTimeout = setTimeout(() => {
                 updateIndicators();
             }, 100);
+        }, { passive: true });
+        
+        // Simple touch handling - let CSS handle scrolling, just pause auto-swap on interaction
+        carousel.addEventListener('touchstart', () => {
+            pauseAutoSwap(); // Pause auto-swap when user starts touching
+        }, { passive: true });
+        
+        carousel.addEventListener('touchend', () => {
+            // Resume auto-swap after a delay when user finishes touching
+            setTimeout(() => {
+                resumeAutoSwap();
+            }, 2000);
         }, { passive: true });
         
         // Initial indicator update

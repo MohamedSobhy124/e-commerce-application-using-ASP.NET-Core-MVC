@@ -879,10 +879,40 @@
 
 .about-us-section .carousel-item img {
     transition: transform 0.5s ease;
+    backface-visibility: hidden;
+    perspective: 1000px;
 }
 
-.about-us-section .carousel-item:hover img {
+/* Only apply hover effect when carousel item is active (not transitioning) */
+.about-us-section .carousel-item.active:hover img {
     transform: scale(1.05);
+}
+
+/* Prevent hover effects during Bootstrap carousel transitions */
+.about-us-section .carousel-item:not(.active):hover img,
+.about-us-section .carousel-item.carousel-item-next:hover img,
+.about-us-section .carousel-item.carousel-item-prev:hover img {
+    transform: scale(1);
+}
+
+/* Smooth transitions - prevent flickering */
+#aboutUsCarousel .carousel-item {
+    transition: transform 0.6s ease-in-out;
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Ensure proper stacking during transitions */
+#aboutUsCarousel .carousel-item.carousel-item-next,
+#aboutUsCarousel .carousel-item.carousel-item-prev {
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+#aboutUsCarousel .carousel-item.active.carousel-item-next,
+#aboutUsCarousel .carousel-item.active.carousel-item-prev {
+    position: relative;
 }
 
 .about-us-section .carousel-control-prev,
@@ -925,6 +955,17 @@
     background-color: #3B9DD5;
     width: 30px;
     border-radius: 6px;
+}
+
+/* Prevent indicator flickering during transitions */
+#aboutUsCarousel .carousel-indicators button {
+    transition: all 0.3s ease;
+}
+
+/* Ensure only one indicator is visually active at a time */
+#aboutUsCarousel .carousel-indicators button:not(.active) {
+    width: 12px;
+    border-radius: 50%;
 }
 
 @keyframes pulse {
@@ -980,6 +1021,16 @@
     
     .about-us-section .carousel-control-next {
         right: 10px;
+    }
+    
+    /* Mobile: Additional fixes for smooth transitions */
+    #aboutUsCarousel .carousel-item {
+        transition: transform 0.5s ease-in-out;
+    }
+    
+    /* Prevent hover effects on mobile during transitions */
+    .about-us-section .carousel-item:hover img {
+        transform: scale(1);
     }
 }
 

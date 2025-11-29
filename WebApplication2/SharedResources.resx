@@ -2257,4 +2257,7 @@
   <data name="InstallmentTabby" xml:space="preserve">
     <value />
   </data>
+  <data name="DiscountSave" xml:space="preserve">
+    <value />
+  </data>
 </root>

@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://idealweightnutrition.ae/sitemap.xml
+
+# Disallow admin and API endpoints
+Disallow: /Admin/
+Disallow: /Identity/
+Disallow: /api/
+
+# Allow important pages
+Allow: /Customer/Home
+Allow: /Customer/Home/Details
+Allow: /Customer/FlashSale
+Allow: /Customer/ServiceSubscription
+

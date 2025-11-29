@@ -358,7 +358,9 @@ namespace BulkyBook.Utility
     ""@context"": ""https://schema.org"",
     ""@type"": ""WebSite"",
     ""name"": ""{EscapeJson(siteName)}"",
+    ""alternateName"": ""وزن مثالي للتغذية"",
     ""url"": ""{baseUrl}"",
+    ""logo"": ""{baseUrl}/Images/Products/logo_white_bg.png"",
     ""potentialAction"": {{
         ""@type"": ""SearchAction"",
         ""target"": {{
@@ -366,6 +368,45 @@ namespace BulkyBook.Utility
             ""urlTemplate"": ""{baseUrl}/Customer/Home?searchTerm={{search_term_string}}""
         }},
         ""query-input"": ""required name=search_term_string""
+    }}
+}}";
+        }
+
+        public static string GenerateHomePageStructuredData(string baseUrl, string siteName, string description, string culture = "en")
+        {
+            var keywords = culture == "ar"
+                ? "مكملات غذائية, بروتين, فيتامينات, مكملات رياضية, منتجات تخسيس, حمية غذائية, مكملات صحية, وزن مثالي, تغذية, مكملات الإمارات"
+                : "nutrition supplements, protein supplements, vitamins UAE, diet supplements, weight loss products, fitness nutrition, health supplements, ideal weight, nutrition store UAE";
+
+            return $@"{{
+    ""@context"": ""https://schema.org"",
+    ""@type"": ""WebPage"",
+    ""@id"": ""{baseUrl}#webpage"",
+    ""name"": ""{EscapeJson(siteName)}"",
+    ""description"": ""{EscapeJson(description)}"",
+    ""url"": ""{baseUrl}"",
+    ""inLanguage"": ""{culture}"",
+    ""isPartOf"": {{
+        ""@type"": ""WebSite"",
+        ""name"": ""{EscapeJson(siteName)}"",
+        ""url"": ""{baseUrl}""
+    }},
+    ""about"": {{
+        ""@type"": ""Thing"",
+        ""name"": ""Nutrition Supplements"",
+        ""description"": ""Premium nutrition supplements, protein, vitamins, diet products, and fitness nutrition in UAE""
+    }},
+    ""keywords"": ""{EscapeJson(keywords)}"",
+    ""breadcrumb"": {{
+        ""@type"": ""BreadcrumbList"",
+        ""itemListElement"": [
+            {{
+                ""@type"": ""ListItem"",
+                ""position"": 1,
+                ""name"": ""Home"",
+                ""item"": ""{baseUrl}""
+            }}
+        ]
     }}
 }}";
         }

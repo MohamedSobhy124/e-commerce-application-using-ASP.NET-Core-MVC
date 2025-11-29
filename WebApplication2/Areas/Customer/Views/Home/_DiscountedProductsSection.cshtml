@@ -1,0 +1,141 @@
+@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
+@model IEnumerable<BulkyBook.Models.Product>
+@inject IConfiguration Configuration
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var discountedProducts = Model ?? Enumerable.Empty<BulkyBook.Models.Product>();
+    var hasDiscountedProducts = discountedProducts.Any();
+}
+
+@if (hasDiscountedProducts)
+{
+    <section class="offers-section">
+        <div class="container">
+            <!-- Section Header -->
+            <div class="offers-header">
+                <h2 class="offers-title">
+                    <span class="offers-icon">🔥</span>
+                    @Localizer["Offers"]
+                </h2>
+                <p class="offers-subtitle">@Localizer["BestDeals"]</p>
+            </div>
+            
+            <!-- Bootstrap Carousel -->
+            <div id="offersCarousel" class="carousel slide offers-carousel" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
+                <div class="carousel-inner">
+                    @{
+                        var productsList = discountedProducts.ToList();
+                        var itemsPerSlide = 4; // Fixed 4 items per slide like best sellers
+                        var totalSlides = 0; // Initialize total slides
+                        
+                        // Ensure we have products before creating slides
+                        if (productsList.Count > 0)
+                        {
+                            // Calculate total slides - always create at least one slide
+                            totalSlides = productsList.Count < itemsPerSlide 
+                                ? 1 
+                                : (int)Math.Ceiling(productsList.Count / (double)itemsPerSlide);
+                            
+                            for (int slideIndex = 0; slideIndex < totalSlides; slideIndex++)
+                            {
+                                var slideProducts = new List<Product>();
+                                
+                                // Use circular wrapping to always get exactly 4 items per slide
+                                for (int i = 0; i < itemsPerSlide; i++)
+                                {
+                                    var productIndex = (slideIndex * itemsPerSlide + i) % productsList.Count;
+                                    slideProducts.Add(productsList[productIndex]);
+                                }
+                                
+                                if (!slideProducts.Any()) continue;
+                            
+                            <div class="carousel-item @(slideIndex == 0 ? "active" : "")">
+                                <div class="row g-3 g-md-4">
+                                    @foreach (var product in slideProducts)
+                                    {
+                                        var productName = currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) 
+                                            ? product.TitleAr 
+                                            : product.Title;
+                                        
+                                        var discountPercent = product.ListPrice > 0 
+                                            ? (int)((product.ListPrice - product.Price) / product.ListPrice * 100) 
+                                            : 0;
+                                        
+                                        var productImages = product.ProductImages != null && product.ProductImages.Any() 
+                                            ? product.ProductImages.OrderBy(pi => pi.DisplayOrder).Select(pi => pi.ImageUrl).ToList()
+                                            : new List<string>();
+                                        
+                                        if (!productImages.Any() && !string.IsNullOrEmpty(product.ImageUrl))
+                                        {
+                                            productImages.Add(product.ImageUrl);
+                                        }
+                                        
+                                        var productImage = productImages.FirstOrDefault() ?? "/images/no-image.png";
+                                        var displayPrice = (decimal)product.Price;
+                                        var displayListPrice = (decimal)product.ListPrice;
+                                        
+                                        <div class="col-12 col-sm-6 col-lg-3">
+                                            <div class="offer-card h-100">
+                                                <a href="@Url.Action("Details", "Home", new { area = "Customer", productId = product.Id })" class="offer-card-link">
+                                                    @if (discountPercent > 0)
+                                                    {
+                                                        <div class="offer-badge">-@discountPercent%</div>
+                                                    }
+                                                    
+                                                    <div class="offer-card-image">
+                                                        <img src="@productImage" alt="@productName" class="img-fluid" loading="lazy" />
+                                                    </div>
+                                                    
+                                                    <div class="offer-card-content">
+                                                        <h3 class="offer-card-title">@productName</h3>
+                                                        
+                                                        <div class="offer-card-price">
+                                                            <span class="offer-price-old">@Html.Raw(currencySymbol)@displayListPrice.ToString("N2")</span>
+                                                            <span class="offer-price-new">@Html.Raw(currencySymbol)@displayPrice.ToString("N2")</span>
+                                                        </div>
+                                                        
+                                                        @if (discountPercent > 0)
+                                                        {
+                                                            <div class="offer-save">
+                                                                @Localizer["DiscountSave"] @Html.Raw(currencySymbol)@((displayListPrice - displayPrice).ToString("N2"))
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            }
+                        }
+                    }
+                </div>
+                
+                @if (totalSlides > 1)
+                {
+                    <button class="carousel-control-prev offers-carousel-control" type="button" data-bs-target="#offersCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">@Localizer["Previous"]</span>
+                    </button>
+                    <button class="carousel-control-next offers-carousel-control" type="button" data-bs-target="#offersCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">@Localizer["Next"]</span>
+                    </button>
+                    
+                    <div class="carousel-indicators offers-carousel-indicators">
+                        @for (int i = 0; i < totalSlides; i++)
+                        {
+                            <button type="button" data-bs-target="#offersCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-label="Slide @(i + 1)"></button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+

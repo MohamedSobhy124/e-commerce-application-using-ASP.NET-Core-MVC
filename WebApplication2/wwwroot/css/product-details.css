@@ -1048,6 +1048,13 @@
     padding: 0.25rem 0;
 }
 
+/* Preserve line breaks in textarea content */
+.preserve-line-breaks {
+    white-space: pre-line; /* Preserves line breaks and wraps text */
+    word-wrap: break-word; /* Breaks long words if needed */
+    overflow-wrap: break-word; /* Modern property for word breaking */
+}
+
 .tab-content-body p {
     margin-bottom: 1.25rem;
 }

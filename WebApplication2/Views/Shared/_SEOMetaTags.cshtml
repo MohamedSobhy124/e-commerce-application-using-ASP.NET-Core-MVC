@@ -43,8 +43,19 @@
 <meta property="og:title" content="@(pageTitle) - @siteName" />
 <meta property="og:description" content="@pageDescription" />
 <meta property="og:image" content="@pageImage" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="@siteName Logo" />
 <meta property="og:site_name" content="@siteName" />
 <meta property="og:locale" content="@(currentCulture == "ar" ? "ar_AE" : "en_US")" />
+@if (currentCulture == "ar")
+{
+    <meta property="og:locale:alternate" content="en_US" />
+}
+else
+{
+    <meta property="og:locale:alternate" content="ar_AE" />
+}
 @if (seo?.PageType == "product" && seo.Price.HasValue)
 {
     <meta property="product:price:amount" content="@seo.Price.Value.ToString("F2")" />
@@ -62,10 +73,17 @@
 <!-- Canonical URL -->
 <link rel="canonical" href="@canonicalUrl" />
 
-<!-- Alternate Languages -->
-<link rel="alternate" hreflang="ar" href="@(baseUrl + Context.Request.Path)" />
-<link rel="alternate" hreflang="en" href="@(baseUrl + Context.Request.Path)" />
-<link rel="alternate" hreflang="x-default" href="@(baseUrl + Context.Request.Path)" />
+<!-- Alternate Languages - Proper multilingual support -->
+@{
+    var currentPath = Context.Request.Path.Value ?? "/";
+    var queryString = Context.Request.QueryString.Value ?? "";
+    var arUrl = baseUrl + currentPath + (currentPath.Contains("?") ? "&" : "?") + "culture=ar" + queryString.Replace("?culture=en", "").Replace("&culture=en", "");
+    var enUrl = baseUrl + currentPath + (currentPath.Contains("?") ? "&" : "?") + "culture=en" + queryString.Replace("?culture=ar", "").Replace("&culture=ar", "");
+    var defaultUrl = baseUrl + currentPath + queryString;
+}
+<link rel="alternate" hreflang="ar" href="@arUrl" />
+<link rel="alternate" hreflang="en" href="@enUrl" />
+<link rel="alternate" hreflang="x-default" href="@defaultUrl" />
 
 <!-- Geo Tags - UAE Specific -->
 <meta name="geo.region" content="AE" />
@@ -82,6 +100,6 @@
 <meta name="DC.coverage" content="United Arab Emirates" />
 <meta name="DC.language" content="@currentCulture" />
 
-<!-- UAE-Specific Keywords -->
-<meta name="keywords" content="@pageKeywords, Dubai, Abu Dhabi, Sharjah, UAE delivery, free delivery UAE, nutrition store UAE, supplements online UAE" />
+<!-- Enhanced Keywords for Better SEO -->
+<meta name="keywords" content="@pageKeywords, nutrition, supplements, diet, protein, vitamins, weight loss, fitness, health, Dubai, Abu Dhabi, Sharjah, UAE delivery, free delivery UAE, nutrition store UAE, supplements online UAE, buy supplements, nutrition products, health supplements UAE, diet supplements Dubai, protein supplements UAE, vitamins Dubai, weight management, sports nutrition, ideal weight nutrition" />
 
