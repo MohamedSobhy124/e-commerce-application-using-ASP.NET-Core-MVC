@@ -2254,8 +2254,20 @@
     <value>Filters</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="InstallmentTabby" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="InstallmentTabby" xml:space="preserve">
+    <value>Pay in 4 installments of {0}</value>
+  </data>
+  <data name="InstallmentTamara" xml:space="preserve">
+    <value>Pay in 4 installments of {0}</value>
+  </data>
+  <data name="Tabby" xml:space="preserve">
+    <value>Tabby</value>
+  </data>
+  <data name="Tamara" xml:space="preserve">
+    <value>Tamara</value>
+  </data>
+  <data name="InstallmentTamaraDetails" xml:space="preserve">
+    <value>Split your payment into 4 interest-free installments</value>
   </data>
   <data name="DiscountSave" xml:space="preserve">
     <value>Save</value>

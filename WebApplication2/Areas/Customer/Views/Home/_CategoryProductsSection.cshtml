@@ -47,18 +47,35 @@
                                         <img src="@category.ImageUrl" alt="@categoryName" class="category-image" />
                                     </div>
                                 }
-                                else if (categoryProducts.Any())
+                                else
                                 {
-                                    <div class="category-products-grid">
-                                        @foreach (var product in categoryProducts)
-                                        {
-                                            var productImage = product.ProductImages?.FirstOrDefault()?.ImageUrl ?? product.ImageUrl;
-                                            if (!string.IsNullOrEmpty(productImage))
+                                        // Get products from the map, limit to 4 for display
+                                        var productsToShow = categoryProducts.Take(4).ToList();
+                                    
+                                    @if (productsToShow.Any())
+                                    {
+                                        <div class="category-products-grid">
+                                            @foreach (var product in productsToShow)
                                             {
-                                                <img src="@productImage" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)" class="category-product-mini" />
+                                                // Get product image - check ProductImages first (excluding info images), then ImageUrl
+                                                var productImage = product.ProductImages?.FirstOrDefault(pi => pi.ImageInfo == null)?.ImageUrl 
+                                                    ?? product.ProductImages?.FirstOrDefault()?.ImageUrl 
+                                                    ?? product.ImageUrl;
+                                                
+                                                if (!string.IsNullOrEmpty(productImage))
+                                                {
+                                                    <img src="@productImage" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)" class="category-product-mini" />
+                                                }
                                             }
-                                        }
-                                    </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        // Fallback icon if no products available
+                                        <div class="category-image-wrapper">
+                                            <i class="bi bi-box-seam" style="font-size: 2.5rem; color: #667eea;"></i>
+                                        </div>
+                                    }
                                 }
                             </div>
                             <div class="category-label">@categoryName</div>
