@@ -2255,9 +2255,21 @@
     <value />
   </data>
   <data name="InstallmentTabby" xml:space="preserve">
-    <value />
+    <value>Pay in 4 installments of {0}</value>
+  </data>
+  <data name="InstallmentTamara" xml:space="preserve">
+    <value>Pay in 4 installments of {0}</value>
+  </data>
+  <data name="Tabby" xml:space="preserve">
+    <value>Tabby</value>
+  </data>
+  <data name="Tamara" xml:space="preserve">
+    <value>Tamara</value>
+  </data>
+  <data name="InstallmentTamaraDetails" xml:space="preserve">
+    <value>Split your payment into 4 interest-free installments</value>
   </data>
   <data name="DiscountSave" xml:space="preserve">
-    <value />
+    <value>Save</value>
   </data>
 </root>
