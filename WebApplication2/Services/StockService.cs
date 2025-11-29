@@ -35,16 +35,23 @@ namespace BulkyBook.Services
         {
             try
             {
-                // Get order details (include FlashSaleItem to check if from flash sale)
+                // Get order details (include FlashSaleItem and ComboOffer to check if from flash sale or combo)
                 var orderDetails = _unitOfWork.OrderDetail.GetAll(
                     o => o.OrderHeaderId == orderId,
-                    includeProperties: "Product,FlashSaleItem,ProductVariant"
+                    includeProperties: "Product,FlashSaleItem,ComboOffer,ProductVariant"
                 ).ToList();
 
                 foreach (var detail in orderDetails)
                 {
+                    // 🔥 COMBO OFFER DEDUCTION: Handle combo offers separately
+                    if (detail.IsFromComboOffer)
+                    {
+                        await DeductComboOfferStock(detail.ComboOfferId.Value, detail.Count);
+                        continue; // Skip regular deduction for combo items
+                    }
+
                     // 🔥 FLASH SALE DEDUCTION: Deduct from flash sale quantity first
-                    if (detail.FlashSaleItemId.HasValue && detail.FlashSaleItem != null)
+                    if (detail.IsFromFlashSale)
                     {
                         await DeductFlashSaleQuantity(detail.FlashSaleItemId.Value, detail.Count);
                     } 
@@ -67,6 +74,99 @@ namespace BulkyBook.Services
             {
                 Console.WriteLine($"Error processing stock deduction for order {orderId}: {ex.Message}");
                 // Don't throw - we don't want stock errors to break order confirmation
+            }
+        }
+
+        // 🔥 NEW METHOD: Deduct Combo Offer Stock
+        private async Task<bool> DeductComboOfferStock(int comboOfferId, int comboQuantity)
+        {
+            try
+            {
+                // Get combo offer with all items
+                var comboOffer = _unitOfWork.ComboOffer.GetComboOfferWithItems(comboOfferId);
+                
+                if (comboOffer == null)
+                {
+                    Console.WriteLine($"Combo offer {comboOfferId} not found");
+                    return false;
+                }
+
+                if (comboOffer.ComboOfferItems == null || !comboOffer.ComboOfferItems.Any())
+                {
+                    Console.WriteLine($"Combo offer {comboOfferId} has no items");
+                    return false;
+                }
+
+                Console.WriteLine($"📦 Processing stock deduction for combo offer {comboOfferId} ({comboOffer.Name}). Quantity: {comboQuantity} combos");
+
+                // Process each item in the combo
+                foreach (var comboItem in comboOffer.ComboOfferItems.Where(i => !i.IsDeleted))
+                {
+                    // Calculate total quantity needed: combo item quantity * number of combos purchased
+                    int totalQuantityNeeded = comboItem.Quantity * comboQuantity;
+
+                    // Handle variant products
+                    if (comboItem.ProductVariantId.HasValue && comboItem.ProductVariant != null)
+                    {
+                        var variant = comboItem.ProductVariant;
+                        
+                        // Reload variant to get latest stock (in case it was modified)
+                        variant = _unitOfWork.ProductVariant.Get(v => v.Id == variant.Id && !v.IsDeleted);
+                        if (variant != null)
+                        {
+                            // Deduct from variant stock
+                            if (variant.StockQuantity < totalQuantityNeeded)
+                            {
+                                Console.WriteLine($"⚠️ Insufficient variant stock for combo item. Product: {comboItem.Product?.Title}, Variant ID: {variant.Id}. Available: {variant.StockQuantity}, Needed: {totalQuantityNeeded}");
+                                variant.StockQuantity = 0; // Prevent negative
+                            }
+                            else
+                            {
+                                variant.StockQuantity -= totalQuantityNeeded;
+                            }
+
+                            _unitOfWork.ProductVariant.Update(variant);
+                            _unitOfWork.save();
+
+                            Console.WriteLine($"✅ Variant stock deducted: Product '{comboItem.Product?.Title}', Variant ID {variant.Id}, Quantity: {totalQuantityNeeded}. Remaining: {variant.StockQuantity}");
+
+                            // Check for stock alerts
+                            bool isOutOfStock = variant.StockQuantity == 0;
+                            bool isLowStock = variant.StockQuantity > 0 && variant.StockQuantity <= variant.MinimumStockAlert;
+                            
+                            if (isOutOfStock || isLowStock)
+                            {
+                                await SendStockVariantAlertToAdmins(variant, isOutOfStock);
+                            }
+                        }
+                    }
+                    else if (comboItem.Product != null)
+                    {
+                        // Handle regular products - reload to get latest stock
+                        var product = _unitOfWork.product.Get(p => p.Id == comboItem.ProductId && !p.IsDeleted);
+                        if (product != null)
+                        {
+                            // Deduct from product stock
+                            bool stockDecreased = await DecreaseStock(product.Id, totalQuantityNeeded);
+
+                            if (stockDecreased)
+                            {
+                                Console.WriteLine($"✅ Product stock deducted: '{product.Title}', Quantity: {totalQuantityNeeded}. Remaining: {product.StockQuantity}");
+                                
+                                // Check for stock alerts
+                                await CheckAndNotifyStockLevels(product.Id);
+                            }
+                        }
+                    }
+                }
+
+                Console.WriteLine($"✅ Combo offer stock deduction completed for combo {comboOfferId}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deducting combo offer stock for combo {comboOfferId}: {ex.Message}");
+                return false;
             }
         }
 

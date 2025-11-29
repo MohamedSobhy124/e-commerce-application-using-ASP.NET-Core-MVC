@@ -286,7 +286,10 @@ function createCartItemHTML(item) {
                     <span class="cart-item-quantity">Qty: ${item.count}</span>
                     <span class="cart-item-price">${price}</span>
                 </div>
-                ${item.isFlashSale ? '<span class="badge bg-danger" style="font-size: 0.7rem; margin-top: 0.25rem;">Flash Sale</span>' : ''}
+                <div style="margin-top: 0.25rem;">
+                    ${item.isFlashSale ? '<span class="badge bg-danger" style="font-size: 0.7rem; margin-right: 0.25rem;">Flash Sale</span>' : ''}
+                    ${item.isComboOffer ? '<span class="badge bg-warning text-dark" style="font-size: 0.7rem;">Combo Offer</span>' : ''}
+                </div>
             </div>
             <button class="cart-item-remove" onclick="removeCartItem(${item.productId}, ${item.cartId || 'null'})" title="Remove">
                 <i class="bi bi-x-lg"></i>

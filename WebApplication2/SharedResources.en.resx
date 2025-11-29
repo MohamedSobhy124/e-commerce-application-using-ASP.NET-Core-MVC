@@ -2269,6 +2269,192 @@
   <data name="InstallmentTamaraDetails" xml:space="preserve">
     <value>Split your payment into 4 interest-free installments</value>
   </data>
+  <data name="ComboOffers" xml:space="preserve">
+    <value>Combo Offers</value>
+  </data>
+  <data name="ComboOffer" xml:space="preserve">
+    <value>Combo Offer</value>
+  </data>
+  <data name="CreateComboOffer" xml:space="preserve">
+    <value>Create Combo Offer</value>
+  </data>
+  <data name="EditComboOffer" xml:space="preserve">
+    <value>Edit Combo Offer</value>
+  </data>
+  <data name="DeleteComboOffer" xml:space="preserve">
+    <value>Delete Combo Offer</value>
+  </data>
+  <data name="ComboOfferDetails" xml:space="preserve">
+    <value>Combo Offer Details</value>
+  </data>
+  <data name="ComboPrice" xml:space="preserve">
+    <value>Combo Price</value>
+  </data>
+  <data name="OriginalTotalPrice" xml:space="preserve">
+    <value>Original Total Price</value>
+  </data>
+  <data name="YouSave" xml:space="preserve">
+    <value>You Save</value>
+  </data>
+  <data name="AddComboToCart" xml:space="preserve">
+    <value>Add Combo to Cart</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>View Details</value>
+  </data>
+  <data name="ProductsIncluded" xml:space="preserve">
+    <value>Products Included</value>
+  </data>
+  <data name="SaveMoreWithComboDeals" xml:space="preserve">
+    <value>Save more with our amazing combo deals</value>
+  </data>
+  <data name="SaveMoreWithOurComboOffers" xml:space="preserve">
+    <value>Save more with our combo offers</value>
+  </data>
+  <data name="NoComboOffersAvailable" xml:space="preserve">
+    <value>No combo offers available at the moment</value>
+  </data>
+  <data name="CheckBackLaterForNewOffers" xml:space="preserve">
+    <value>Check back later for new combo offers</value>
+  </data>
+  <data name="ComboOfferCreatedSuccessfully" xml:space="preserve">
+    <value>Combo offer created successfully</value>
+  </data>
+  <data name="ComboOfferUpdatedSuccessfully" xml:space="preserve">
+    <value>Combo offer updated successfully</value>
+  </data>
+  <data name="ComboOfferDeletedSuccessfully" xml:space="preserve">
+    <value>Combo offer deleted successfully</value>
+  </data>
+  <data name="ErrorCreatingComboOffer" xml:space="preserve">
+    <value>Error creating combo offer</value>
+  </data>
+  <data name="ErrorUpdatingComboOffer" xml:space="preserve">
+    <value>Error updating combo offer</value>
+  </data>
+  <data name="ErrorDeletingComboOffer" xml:space="preserve">
+    <value>Error deleting combo offer</value>
+  </data>
+  <data name="ManageProducts" xml:space="preserve">
+    <value>Manage Products</value>
+  </data>
+  <data name="ManageComboProducts" xml:space="preserve">
+    <value>Manage Combo Products</value>
+  </data>
+  <data name="AddProduct" xml:space="preserve">
+    <value>Add Product</value>
+  </data>
+  <data name="SelectProduct" xml:space="preserve">
+    <value>Select Product</value>
+  </data>
+  <data name="ProductAddedToCombo" xml:space="preserve">
+    <value>Product added to combo successfully</value>
+  </data>
+  <data name="ProductRemovedFromCombo" xml:space="preserve">
+    <value>Product removed from combo successfully</value>
+  </data>
+  <data name="ErrorAddingProductToCombo" xml:space="preserve">
+    <value>Error adding product to combo</value>
+  </data>
+  <data name="ErrorRemovingProductFromCombo" xml:space="preserve">
+    <value>Error removing product from combo</value>
+  </data>
+  <data name="ProductAlreadyInCombo" xml:space="preserve">
+    <value>This product is already in the combo</value>
+  </data>
+  <data name="AreYouSureRemoveProduct" xml:space="preserve">
+    <value>Are you sure you want to remove this product from the combo?</value>
+  </data>
+  <data name="ComboOfferItemUpdated" xml:space="preserve">
+    <value>Combo offer item updated successfully</value>
+  </data>
+  <data name="ErrorUpdatingComboOfferItem" xml:space="preserve">
+    <value>Error updating combo offer item</value>
+  </data>
+  <data name="ProductsInCombo" xml:space="preserve">
+    <value>Products in Combo</value>
+  </data>
+  <data name="NoProductsInCombo" xml:space="preserve">
+    <value>No products in this combo yet</value>
+  </data>
+  <data name="AddProducts" xml:space="preserve">
+    <value>Add Products</value>
+  </data>
+  <data name="Required" xml:space="preserve">
+    <value>Required</value>
+  </data>
+  <data name="Optional" xml:space="preserve">
+    <value>Optional</value>
+  </data>
+  <data name="ComboOfferNotFoundOrInactive" xml:space="preserve">
+    <value>Combo offer not found or is not currently active</value>
+  </data>
+  <data name="ComboAddedToCart" xml:space="preserve">
+    <value>Combo offer added to cart successfully</value>
+  </data>
+  <data name="ErrorAddingComboToCart" xml:space="preserve">
+    <value>Error adding combo to cart</value>
+  </data>
+  <data name="InsufficientStockForCombo" xml:space="preserve">
+    <value>Insufficient stock for one or more products in this combo</value>
+  </data>
+  <data name="ComboOfferHasEnded" xml:space="preserve">
+    <value>This combo offer has ended</value>
+  </data>
+  <data name="ComboOfferNotStartedYet" xml:space="preserve">
+    <value>This combo offer has not started yet</value>
+  </data>
+  <data name="ComboOfferNotAvailable" xml:space="preserve">
+    <value>This combo offer is not currently available</value>
+  </data>
+  <data name="AreYouSureDeleteComboOffer" xml:space="preserve">
+    <value>Are you sure you want to delete this combo offer? This action cannot be undone.</value>
+  </data>
+  <data name="NoComboOffersFound" xml:space="preserve">
+    <value>No combo offers found</value>
+  </data>
+  <data name="CreateFirstComboOffer" xml:space="preserve">
+    <value>Create Your First Combo Offer</value>
+  </data>
+  <data name="UpdateComboOffer" xml:space="preserve">
+    <value>Update Combo Offer</value>
+  </data>
+  <data name="ChangeImage" xml:space="preserve">
+    <value>Change Image</value>
+  </data>
+  <data name="CurrentImage" xml:space="preserve">
+    <value>Current Image</value>
+  </data>
+  <data name="LeaveEmptyToKeepCurrent" xml:space="preserve">
+    <value>Leave empty to keep current image</value>
+  </data>
+  <data name="AfterAddingProducts" xml:space="preserve">
+    <value>after adding products</value>
+  </data>
+  <data name="TotalPriceForCombo" xml:space="preserve">
+    <value>Total price for the entire combo</value>
+  </data>
+  <data name="MinimumComboQuantity" xml:space="preserve">
+    <value>Minimum quantity of combos customer can purchase</value>
+  </data>
+  <data name="LeaveEmptyForUnlimited" xml:space="preserve">
+    <value>Leave empty for unlimited</value>
+  </data>
+  <data name="LowerNumbersDisplayFirst" xml:space="preserve">
+    <value>Lower numbers display first</value>
+  </data>
+  <data name="QuickInfo" xml:space="preserve">
+    <value>Quick Info</value>
+  </data>
+  <data name="RequiredProducts" xml:space="preserve">
+    <value>Required Products</value>
+  </data>
+  <data name="NoDescription" xml:space="preserve">
+    <value>No description available</value>
+  </data>
+  <data name="LoadingComboOffers" xml:space="preserve">
+    <value>Loading Combo Offers...</value>
+  </data>
   <data name="DiscountSave" xml:space="preserve">
     <value>Save</value>
   </data>

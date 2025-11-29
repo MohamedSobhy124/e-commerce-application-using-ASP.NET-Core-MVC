@@ -43,9 +43,9 @@ namespace BulkyBook.Areas.Customer.Controllers
                 // Authenticated user - load from database
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var UserId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-                // 🔥 Include FlashSaleItem, ProductVariant, and ProductImages to check for flash sale prices, variant prices, and display images
+                // 🔥 Include FlashSaleItem, ProductVariant, ComboOffer, and ProductImages to check for flash sale prices, variant prices, combo offers, and display images
                 cartList = _unitOfWork.shoppingCart.GetAll(a=>a.ApplicationUserId==UserId,
-                    includeProperties: "product,FlashSaleItem,ProductVariant,product.ProductImages");
+                    includeProperties: "product,FlashSaleItem,ProductVariant,ComboOffer,product.ProductImages");
             }
             else
             {
@@ -58,6 +58,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                     ProductVariantId = gc.ProductVariantId, // 🔥 Include variant info
                     FlashSaleItemId = gc.FlashSaleItemId, // 🔥 Include flash sale info
                     FlashSalePrice = (decimal?)gc.FlashSalePrice, // 🔥 Include flash sale price
+                    ComboOfferId = gc.ComboOfferId, // 🔥 Include combo offer info
+                    ComboOffer = gc.ComboOfferId.HasValue ? _unitOfWork.ComboOffer.GetComboOfferWithItems(gc.ComboOfferId.Value) : null, // 🔥 Load combo offer
                     product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry,ProductImages"),
                     ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value) : null
                 }).ToList();
@@ -86,7 +88,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
                 // 🔥 Include FlashSaleItem, ProductVariant to check for flash sale prices and variant prices
-                cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "product,FlashSaleItem,ProductVariant,product.ProductImages");
+                cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "product,FlashSaleItem,ComboOffer,ProductVariant,product.ProductImages");
             }
             else
             {
@@ -99,20 +101,43 @@ namespace BulkyBook.Areas.Customer.Controllers
                     ProductVariantId = gc.ProductVariantId, // 🔥 Include variant info
                     FlashSaleItemId = gc.FlashSaleItemId, // 🔥 Include flash sale info
                     FlashSalePrice = (decimal?)gc.FlashSalePrice, // 🔥 Include flash sale price
+                    ComboOfferId = gc.ComboOfferId, // 🔥 Include combo offer info
+                    ComboOffer = gc.ComboOfferId.HasValue ? _unitOfWork.ComboOffer.GetComboOfferWithItems(gc.ComboOfferId.Value) : null, // 🔥 Load combo offer
                     product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry,ProductImages"),
                     ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value) : null
                 }).ToList();
             }
             
-            var items = cartItems.Select(cart => new
-            {
-                productId = cart.ProductId,
-                title = cart.product.Title,
-                imageUrl = GetProductImageUrl(cart.product), // 🔥 Use helper method to get correct image
-                price = GetCartItemPrice(cart), // 🔥 Use new method that checks flash sale price
-                count = cart.Count,
-                cartId = cart.Id,
-                isFlashSale = cart.FlashSaleItemId.HasValue // 🔥 Indicate if it's a flash sale item
+            var requestCulture = HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+            var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+            
+            var items = cartItems.Select(cart => {
+                // Check if this is a combo offer
+                bool isComboOffer = cart.ComboOfferId.HasValue && cart.ComboOffer != null;
+                
+                // Get display name - use combo name if it's a combo, otherwise use product name
+                string displayTitle = isComboOffer 
+                    ? (currentCulture == "ar" && !string.IsNullOrEmpty(cart.ComboOffer.NameAr) 
+                        ? cart.ComboOffer.NameAr 
+                        : cart.ComboOffer.Name)
+                    : cart.product.Title;
+                
+                // Get image - use combo image if it's a combo, otherwise use product image
+                string imageUrl = isComboOffer && !string.IsNullOrEmpty(cart.ComboOffer.ImageUrl)
+                    ? cart.ComboOffer.ImageUrl
+                    : GetProductImageUrl(cart.product);
+                
+                return new
+                {
+                    productId = cart.ProductId,
+                    title = displayTitle,
+                    imageUrl = imageUrl,
+                    price = GetCartItemPrice(cart), // 🔥 Use new method that checks flash sale price
+                    count = cart.Count,
+                    cartId = cart.Id,
+                    isFlashSale = cart.FlashSaleItemId.HasValue, // 🔥 Indicate if it's a flash sale item
+                    isComboOffer = isComboOffer // 🔥 Indicate if it's a combo offer
+                };
             }).ToList();
 
             var subtotal = cartItems.Sum(cart => GetCartItemPrice(cart) * cart.Count);
@@ -475,6 +500,8 @@ namespace BulkyBook.Areas.Customer.Controllers
 				ProductVariantId = gc.ProductVariantId,
 				FlashSaleItemId = gc.FlashSaleItemId,
 				FlashSalePrice = (decimal?)gc.FlashSalePrice,
+				ComboOfferId = gc.ComboOfferId, // 🔥 Include combo offer info
+				ComboOffer = gc.ComboOfferId.HasValue ? _unitOfWork.ComboOffer.GetComboOfferWithItems(gc.ComboOfferId.Value) : null, // 🔥 Load combo offer
 				product = _unitOfWork.product.Get(p => p.Id == gc.ProductId),
 				ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value) : null
 			}).ToList();
@@ -582,6 +609,8 @@ namespace BulkyBook.Areas.Customer.Controllers
 				ProductVariantId = gc.ProductVariantId,
 				FlashSaleItemId = gc.FlashSaleItemId, // 🔥 Include flash sale info
 				FlashSalePrice = (decimal?)gc.FlashSalePrice, // 🔥 Include flash sale price
+				ComboOfferId = gc.ComboOfferId, // 🔥 Include combo offer info
+				ComboOffer = gc.ComboOfferId.HasValue ? _unitOfWork.ComboOffer.GetComboOfferWithItems(gc.ComboOfferId.Value) : null, // 🔥 Load combo offer
 				product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry"),
 				ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value) : null
 			}).ToList();
@@ -615,9 +644,9 @@ namespace BulkyBook.Areas.Customer.Controllers
 				// Authenticated user
 				var claimsIdentity = (ClaimsIdentity)User.Identity;
 				userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-				// 🔥 Include FlashSaleItem to check for flash sale prices
+				// 🔥 Include FlashSaleItem and ComboOffer to check for flash sale and combo prices
 				cartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId,
-					includeProperties: "product,FlashSaleItem");
+					includeProperties: "product,FlashSaleItem,ComboOffer");
 				applicationUser = _unitOfWork.applicationUser.Get(u => u.Id == userId);
 			}
 			else
@@ -637,6 +666,8 @@ namespace BulkyBook.Areas.Customer.Controllers
 					ProductVariantId = gc.ProductVariantId,
 					FlashSaleItemId = gc.FlashSaleItemId,
 					FlashSalePrice= (decimal?)gc.FlashSalePrice,
+					ComboOfferId = gc.ComboOfferId, // 🔥 Include combo offer info
+					ComboOffer = gc.ComboOfferId.HasValue ? _unitOfWork.ComboOffer.GetComboOfferWithItems(gc.ComboOfferId.Value) : null, // 🔥 Load combo offer
 					product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry"),
 					ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value) : null
 				}).ToList();
@@ -761,6 +792,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 						Price = cart.Price,
 						Count = cart.Count,
 						FlashSaleItemId = cart.FlashSaleItemId, // Copy flash sale item ID if exists
+						ComboOfferId = cart.ComboOfferId, // Copy combo offer ID if exists
 						ProductVariantId = cart.ProductVariantId
 					};
 					_unitOfWork.OrderDetail.add(orderDetail);
@@ -1227,6 +1259,18 @@ namespace BulkyBook.Areas.Customer.Controllers
             if (shoppingCart.FlashSaleItemId.HasValue && shoppingCart.FlashSalePrice.HasValue)
             {
                 return (double)shoppingCart.FlashSalePrice.Value;
+            }
+
+            // If this item is from a combo offer, use the combo price directly
+            if (shoppingCart.ComboOfferId.HasValue)
+            {
+                var comboOffer = _unitOfWork.ComboOffer.GetComboOfferWithItems(shoppingCart.ComboOfferId.Value);
+                if (comboOffer != null)
+                {
+                    // Return combo price per unit (combo price / count)
+                    // Count represents number of combos, so price per combo is comboPrice / count
+                    return (double)comboOffer.ComboPrice;
+                }
             }
 
             // If this item has a variant, use the variant price

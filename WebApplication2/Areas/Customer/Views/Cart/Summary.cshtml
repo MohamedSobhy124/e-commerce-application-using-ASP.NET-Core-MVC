@@ -92,10 +92,30 @@
 								<ul class="order-items-list">
 									@foreach(var details in Model.ShoppingCartList)
 									{
+										// Check if this is a combo offer
+										bool isComboOffer = details.ComboOfferId.HasValue && details.ComboOffer != null;
+										
+										// Get display name
+										string displayName = isComboOffer 
+											? (currentCulture == "ar" && !string.IsNullOrEmpty(details.ComboOffer.NameAr) 
+												? details.ComboOffer.NameAr 
+												: details.ComboOffer.Name)
+											: details.product.Title;
+										
 										<li class="order-item">
 											<div>
-												<h6 class="order-item-title">@details.product.Title</h6>
+												<h6 class="order-item-title">
+													@displayName
+													@if (isComboOffer)
+													{
+														<span class="badge bg-warning text-dark ms-2" style="font-size: 0.7rem;">@Localizer["ComboOffer"]</span>
+													}
+												</h6>
 												<small class="order-item-quantity">@Localizer["Quantity"]: @details.Count</small>
+												@if (isComboOffer)
+												{
+													<small class="text-muted d-block">@details.ComboOffer.TotalProducts @Localizer["Products"]</small>
+												}
 											</div>
 											<span class="order-item-price">@Html.Raw(currencySymbol) @((details.Price*details.Count).ToString("N2"))</span>
 										</li>

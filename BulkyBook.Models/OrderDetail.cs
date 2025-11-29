@@ -42,5 +42,14 @@ namespace BulkyBook.Models
         [ForeignKey("ProductVariantId")]
         [ValidateNever]
         public ProductVariant? ProductVariant { get; set; }
+
+        // Combo Offer Support
+        public int? ComboOfferId { get; set; }
+        [ForeignKey(nameof(ComboOfferId))]
+        [ValidateNever]
+        public ComboOffer? ComboOffer { get; set; }
+
+        [NotMapped]
+        public bool IsFromComboOffer => ComboOfferId.HasValue;
     }
 }

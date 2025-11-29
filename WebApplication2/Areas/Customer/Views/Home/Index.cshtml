@@ -212,6 +212,21 @@
     </div>
 </div>
 
+<!-- Combo Offers Section -->
+<div id="comboOffersSectionPlaceholder" class="lazy-section-placeholder">
+    <div class="cool-loading-container">
+        <div class="cool-loading-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+        </div>
+        <div class="cool-loading-content">
+            <i class="bi bi-box-seam-fill cool-loading-icon"></i>
+            <p class="cool-loading-text">@Localizer["LoadingComboOffers"]</p>
+        </div>
+    </div>
+</div>
+
 <!-- OLD CODE - Commented out, will be replaced by lazy-loaded sections
 @{
     var activeFlashSales = ViewBag.ActiveFlashSales as IEnumerable<FlashSale> ?? Enumerable.Empty<FlashSale>();
@@ -3392,35 +3407,40 @@
                     .then(html => {
                         if (html && html.trim().length > 0) {
                             placeholder.outerHTML = html;
-                            // Reinitialize any scripts/event handlers after content loads
-                            if (typeof initializeFlashSaleCarousel === 'function') {
-                                initializeFlashSaleCarousel();
-                            }
-                            if (typeof initializeProductCarousels === 'function') {
-                                initializeProductCarousels();
-                            }
-                            // Enhance carousels for mobile if needed
-                            if (window.innerWidth <= 767 && typeof enhanceCarouselsForMobile === 'function') {
-                                setTimeout(function() {
-                                    enhanceCarouselsForMobile();
-                                }, 100);
-                            }
                             
-                            // Initialize Bootstrap carousels if they exist with touch support
-                            if (typeof bootstrap !== 'undefined') {
-                                document.querySelectorAll('.carousel').forEach(carousel => {
-                                    // Check if carousel is already initialized
-                                    const existingCarousel = bootstrap.Carousel.getInstance(carousel);
-                                    if (!existingCarousel) {
-                                        // Get interval from data attribute or default to 8000
-                                        const interval = carousel.dataset.bsInterval || carousel.getAttribute('data-bs-interval') || '8000';
-                                        new bootstrap.Carousel(carousel, {
-                                            interval: parseInt(interval),
-                                            wrap: true,
-                                            touch: true // Enable touch support for mobile
-                                        });
-                                    }
-                                });
+                            // Wait a bit for DOM to update before initializing
+                            setTimeout(() => {
+                                // Reinitialize any scripts/event handlers after content loads
+                                if (typeof initializeFlashSaleCarousel === 'function') {
+                                    initializeFlashSaleCarousel();
+                                }
+                                if (typeof initializeProductCarousels === 'function') {
+                                    initializeProductCarousels();
+                                }
+                                
+                                // Initialize Bootstrap carousels if they exist with touch support
+                                if (typeof bootstrap !== 'undefined') {
+                                    document.querySelectorAll('.carousel').forEach(carousel => {
+                                        // Check if carousel is already initialized
+                                        const existingCarousel = bootstrap.Carousel.getInstance(carousel);
+                                        if (!existingCarousel) {
+                                            // Get interval from data attribute or default to 8000
+                                            const interval = carousel.dataset.bsInterval || carousel.getAttribute('data-bs-interval') || '8000';
+                                            new bootstrap.Carousel(carousel, {
+                                                interval: parseInt(interval),
+                                                wrap: true,
+                                                touch: true // Enable touch support for mobile
+                                            });
+                                        }
+                                    });
+                                }
+                                
+                                // Enhance carousels for mobile if needed
+                                if (window.innerWidth <= 767 && typeof enhanceCarouselsForMobile === 'function') {
+                                    setTimeout(function() {
+                                        enhanceCarouselsForMobile();
+                                    }, 100);
+                                }
                                 
                                 // Also enhance carousels for mobile if needed
                                 if (typeof window.enhanceCarouselsForMobile === 'function' && window.innerWidth <= 767) {
@@ -3428,7 +3448,7 @@
                                         window.enhanceCarouselsForMobile();
                                     }, 100);
                                 }
-                            }
+                            }, 50);
                         } else {
                             // Hide placeholder if no content
                             placeholder.style.display = 'none';
@@ -3450,6 +3470,7 @@
             setTimeout(() => loadSection('/Customer/Home/LoadCategoryProductsSection', 'categoryProductsSectionPlaceholder'), 700);
             setTimeout(() => loadSection('/Customer/Home/LoadBestSellersSection', 'bestSellersSectionPlaceholder'), 900);
             setTimeout(() => loadSection('/Customer/Home/LoadNewArrivalsSection', 'newArrivalsSectionPlaceholder'), 1100);
+            setTimeout(() => loadSection('/Customer/Home/LoadComboOffersSection', 'comboOffersSectionPlaceholder'), 1300);
         });
     </script>
 }

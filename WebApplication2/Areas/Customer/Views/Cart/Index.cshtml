@@ -1,5 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
 @using BulkyBook.Utility
+@inject IStringLocalizer<BulkyBook.SharedResources> Localizer
 @model ShoppingCartVM
 @{
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
@@ -30,31 +32,50 @@
 
                 @foreach(var item in Model.ShoppingCartList)
                 {
-                     
-                        // Get product image - check ProductImages first, then fallback to ImageUrl
-                        string productImageUrl = null;
-                        if (item.product.ProductImages != null && item.product.ProductImages.Any())
-                        {
-                            var firstImage = item.product.ProductImages.OrderBy(pi => pi.DisplayOrder).FirstOrDefault();
-                            productImageUrl = firstImage?.ImageUrl;
-                        }
-                        if (string.IsNullOrEmpty(productImageUrl))
-                        {
-                            productImageUrl = item.product.ImageUrl;
-                        }
-                        if (string.IsNullOrEmpty(productImageUrl))
-                        {
-                            productImageUrl = "/images/no-image.png";
-                        }
+                    // Check if this is a combo offer
+                    bool isComboOffer = item.ComboOfferId.HasValue && item.ComboOffer != null;
+                    
+                    // Get display name
+                    string displayName = isComboOffer 
+                        ? (currentCulture == "ar" && !string.IsNullOrEmpty(item.ComboOffer.NameAr) 
+                            ? item.ComboOffer.NameAr 
+                            : item.ComboOffer.Name)
+                        : item.product.Title;
+                    
+                    // Get image - use combo image if it's a combo, otherwise use product image
+                    string productImageUrl = null;
+                    if (isComboOffer && !string.IsNullOrEmpty(item.ComboOffer.ImageUrl))
+                    {
+                        productImageUrl = item.ComboOffer.ImageUrl;
+                    }
+                    else if (item.product.ProductImages != null && item.product.ProductImages.Any())
+                    {
+                        var firstImage = item.product.ProductImages.OrderBy(pi => pi.DisplayOrder).FirstOrDefault();
+                        productImageUrl = firstImage?.ImageUrl;
+                    }
+                    else if (!string.IsNullOrEmpty(item.product.ImageUrl))
+                    {
+                        productImageUrl = item.product.ImageUrl;
+                    }
+                    
+                    if (string.IsNullOrEmpty(productImageUrl))
+                    {
+                        productImageUrl = "/images/no-image.png";
+                    }
                     
                     <div class="cart-item-card">
                         <div class="row d-flex justify-content-between align-items-center">
                             <div class="col-md-2 col-lg-2 col-xl-2">
-                                <img src="@productImageUrl" class="cart-item-image" alt="@item.product.Title">
+                                <img src="@productImageUrl" class="cart-item-image" alt="@displayName">
                             </div>
                             <div class="col-md-3 col-lg-3 col-xl-3">
-                                <p class="cart-item-title">@item.product.Title</p>
-                               
+                                <p class="cart-item-title">@displayName</p>
+                                @if (isComboOffer)
+                                {
+                                    <small class="text-muted">
+                                        <i class="bi bi-box-seam me-1"></i>@Localizer["ComboOffer"]
+                                    </small>
+                                }
                             </div>
                             <div class="col-md-3 col-lg-3 col-xl-2">
                                 <div class="cart-quantity-controls">

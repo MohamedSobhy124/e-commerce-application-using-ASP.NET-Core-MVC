@@ -123,10 +123,10 @@ namespace BulkyBook.Services
         public async Task SendOrderConfirmationToCustomerGuest(OrderHeader orderHeader)
         {
      
-            // Get order details
+            // Get order details (include ComboOffer to show combo names in email)
             var orderDetails = _unitOfWork.OrderDetail.GetAll(
                 o => o.OrderHeaderId == orderHeader.Id,
-                includeProperties: "Product"
+                includeProperties: "Product,ComboOffer"
             ).ToList();
 
             // Send email to customer
@@ -183,18 +183,25 @@ namespace BulkyBook.Services
             {
                 var orderDetails = _unitOfWork.OrderDetail.GetAll(
                     o => o.OrderHeaderId == orderHeader.Id,
-                    includeProperties: "Product"
+                    includeProperties: "Product,ComboOffer"
                 ).ToList();
 
                 foreach (var item in orderDetails)
                 {
-                    // Handle null Product gracefully
-                    var productTitle = item.Product?.Title ?? "Unknown Product";
+                    // Check if this is a combo offer
+                    bool isComboOffer = item.ComboOfferId.HasValue && item.ComboOffer != null;
+                    
+                    // Get display name - use combo name if it's a combo, otherwise use product name
+                    var displayTitle = isComboOffer 
+                        ? item.ComboOffer.Name 
+                        : (item.Product?.Title ?? "Unknown Product");
+                    
                     var productAuthor = item.Product?.Author ?? "";
+                    var comboBadge = isComboOffer ? "<span style='background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 8px;'>COMBO</span>" : "";
                     
                     itemsHtml.AppendLine($@"
                         <tr>
-                            <td style='padding: 12px; border-bottom: 1px solid #e5e7eb;'>{productTitle}</td>
+                            <td style='padding: 12px; border-bottom: 1px solid #e5e7eb;'>{displayTitle}{comboBadge}</td>
                             <td style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;'>{item.Count}</td>
                             <td style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;'>{item.Price:C}</td>
                             <td style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 700;'>{(item.Price * item.Count):C}</td>
@@ -308,15 +315,23 @@ namespace BulkyBook.Services
             var itemsHtml = new StringBuilder();
             foreach (var item in orderDetails)
             {
-                // Handle null Product gracefully
-                var productTitle = item.Product?.Title ?? "Unknown Product";
+                // Check if this is a combo offer
+                bool isComboOffer = item.ComboOfferId.HasValue && item.ComboOffer != null;
+                
+                // Get display name - use combo name if it's a combo, otherwise use product name
+                var displayTitle = isComboOffer 
+                    ? item.ComboOffer.Name 
+                    : (item.Product?.Title ?? "Unknown Product");
+                
                 var productAuthor = item.Product?.Author ?? "";
+                var comboBadge = isComboOffer ? "<span style='background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 8px;'>COMBO OFFER</span>" : "";
                 
                 itemsHtml.AppendLine($@"
                     <tr>
                         <td style='padding: 12px; border-bottom: 1px solid #e5e7eb;'>
-                            <strong style='color: #1f2937; display: block; margin-bottom: 5px;'>{productTitle}</strong>
-                            {(!string.IsNullOrEmpty(productAuthor) ? $"<small style='color: #6b7280;'>by {productAuthor}</small>" : "")}
+                            <strong style='color: #1f2937; display: block; margin-bottom: 5px;'>{displayTitle}{comboBadge}</strong>
+                            {(!string.IsNullOrEmpty(productAuthor) && !isComboOffer ? $"<small style='color: #6b7280;'>by {productAuthor}</small>" : "")}
+                            {(isComboOffer ? $"<small style='color: #6b7280;'>{item.ComboOffer.TotalProducts} products included</small>" : "")}
                         </td>
                         <td style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;'>{item.Count}</td>
                         <td style='padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;'>{item.Price:C}</td>

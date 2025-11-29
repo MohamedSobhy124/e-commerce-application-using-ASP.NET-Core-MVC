@@ -74,6 +74,169 @@ namespace BulkyBook.DataAccess.Migrations
                     b.ToTable("Categries");
                 });
 
+            modelBuilder.Entity("BulkyBook.Models.ComboOffer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("ComboPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DescriptionAr")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("MaximumQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinimumQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted", "IsActive", "StartDate", "EndDate");
+
+                    b.ToTable("ComboOffers");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ComboOfferImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ComboOfferId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImageInfo")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComboOfferId", "DisplayOrder");
+
+                    b.ToTable("ComboOfferImages");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ComboOfferItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ComboOfferId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProductVariantId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComboOfferId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("IsDeleted", "ComboOfferId", "ProductId");
+
+                    b.ToTable("ComboOfferItems");
+                });
+
             modelBuilder.Entity("BulkyBook.Models.Company", b =>
                 {
                     b.Property<int>("Id")
@@ -337,6 +500,9 @@ namespace BulkyBook.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ComboOfferId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Count")
                         .HasColumnType("int");
 
@@ -356,6 +522,8 @@ namespace BulkyBook.DataAccess.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ComboOfferId");
 
                     b.HasIndex("FlashSaleItemId");
 
@@ -1188,6 +1356,9 @@ namespace BulkyBook.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("ComboOfferId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Count")
                         .HasColumnType("int");
 
@@ -1206,6 +1377,8 @@ namespace BulkyBook.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("ComboOfferId");
 
                     b.HasIndex("FlashSaleItemId");
 
@@ -1542,6 +1715,42 @@ namespace BulkyBook.DataAccess.Migrations
                     b.HasDiscriminator().HasValue("ApplicationUser");
                 });
 
+            modelBuilder.Entity("BulkyBook.Models.ComboOfferImage", b =>
+                {
+                    b.HasOne("BulkyBook.Models.ComboOffer", "ComboOffer")
+                        .WithMany("ComboOfferImages")
+                        .HasForeignKey("ComboOfferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ComboOffer");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ComboOfferItem", b =>
+                {
+                    b.HasOne("BulkyBook.Models.ComboOffer", "ComboOffer")
+                        .WithMany("ComboOfferItems")
+                        .HasForeignKey("ComboOfferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BulkyBook.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BulkyBook.Models.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId");
+
+                    b.Navigation("ComboOffer");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ProductVariant");
+                });
+
             modelBuilder.Entity("BulkyBook.Models.FlashSaleItem", b =>
                 {
                     b.HasOne("BulkyBook.Models.FlashSale", "FlashSale")
@@ -1584,6 +1793,10 @@ namespace BulkyBook.DataAccess.Migrations
 
             modelBuilder.Entity("BulkyBook.Models.OrderDetail", b =>
                 {
+                    b.HasOne("BulkyBook.Models.ComboOffer", "ComboOffer")
+                        .WithMany()
+                        .HasForeignKey("ComboOfferId");
+
                     b.HasOne("BulkyBook.Models.FlashSaleItem", "FlashSaleItem")
                         .WithMany()
                         .HasForeignKey("FlashSaleItemId");
@@ -1603,6 +1816,8 @@ namespace BulkyBook.DataAccess.Migrations
                     b.HasOne("BulkyBook.Models.ProductVariant", "ProductVariant")
                         .WithMany()
                         .HasForeignKey("ProductVariantId");
+
+                    b.Navigation("ComboOffer");
 
                     b.Navigation("FlashSaleItem");
 
@@ -1807,6 +2022,10 @@ namespace BulkyBook.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BulkyBook.Models.ComboOffer", "ComboOffer")
+                        .WithMany()
+                        .HasForeignKey("ComboOfferId");
+
                     b.HasOne("BulkyBook.Models.FlashSaleItem", "FlashSaleItem")
                         .WithMany()
                         .HasForeignKey("FlashSaleItemId");
@@ -1820,6 +2039,8 @@ namespace BulkyBook.DataAccess.Migrations
                     b.HasOne("BulkyBook.Models.ProductVariant", "ProductVariant")
                         .WithMany()
                         .HasForeignKey("ProductVariantId");
+
+                    b.Navigation("ComboOffer");
 
                     b.Navigation("FlashSaleItem");
 
@@ -1932,6 +2153,13 @@ namespace BulkyBook.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("company");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.ComboOffer", b =>
+                {
+                    b.Navigation("ComboOfferImages");
+
+                    b.Navigation("ComboOfferItems");
                 });
 
             modelBuilder.Entity("BulkyBook.Models.FlashSale", b =>
