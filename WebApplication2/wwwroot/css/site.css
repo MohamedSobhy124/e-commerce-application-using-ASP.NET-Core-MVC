@@ -69,6 +69,15 @@ html {
     scroll-behavior: smooth;
     position: relative;
     min-height: 100%;
+    /* Optimize scrolling performance on mobile */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Disable smooth scroll on mobile for better performance */
+@media (max-width: 768px) {
+    html {
+        scroll-behavior: auto;
+    }
 }
 
 body {
@@ -77,8 +86,11 @@ body {
     line-height: 1.6;
     color: var(--gray-800);
     background-color: var(--gray-50);
-  
     overflow-x: hidden;
+    /* Optimize rendering performance */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 /* Typography */

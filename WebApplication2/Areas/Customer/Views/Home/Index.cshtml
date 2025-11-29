@@ -9,14 +9,15 @@
     var baseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    // SEO-Optimized Descriptions with Key Keywords
     var siteDescription = currentCulture == "ar" 
-        ? (Configuration["SiteSettings:SiteDescriptionAr"] ?? "مكملات صحية ولياقة بدنية متميزة في الإمارات")
-        : (Configuration["SiteSettings:SiteDescription"] ?? "Premium health and fitness supplements in UAE");
+        ? (Configuration["SiteSettings:SiteDescriptionAr"] ?? "ايديال وايت للتغذية - متجر المكملات الغذائية والبروتين في الإمارات. مكملات غذائية أصلية 100%، بروتين، فيتامينات، منتجات تخسيس، حمية غذائية، مكملات رياضية. توصيل سريع مجاني في دبي وأبوظبي. اكتشف طريقك للوزن المثالي مع أفضل المكملات الغذائية في الإمارات.")
+        : (Configuration["SiteSettings:SiteDescription"] ?? "Ideal Weight Nutrition - UAE's #1 Nutrition & Supplements Store. Buy authentic 100% original protein supplements, vitamins, diet products, weight loss supplements, fitness nutrition online. Fast free delivery in Dubai, Abu Dhabi. Discover your path to ideal weight with premium nutrition supplements in UAE.");
     
     ViewData["Description"] = siteDescription;
     ViewData["Keywords"] = currentCulture == "ar" 
-        ? "مكملات غذائية, صحة, لياقة, وزن مثالي, الإمارات, منتجات صحية"
-        : "nutrition supplements, health, fitness, ideal weight, UAE, health products";
+        ? "مكملات غذائية, بروتين, فيتامينات, مكملات رياضية, منتجات تخسيس, حمية غذائية, مكملات صحية, وزن مثالي, تغذية, مكملات الإمارات, مكملات دبي, مكملات أبوظبي, بروتين الإمارات, فيتامينات الإمارات, منتجات صحية الإمارات, متجر تغذية, توصيل مجاني الإمارات"
+        : "nutrition supplements, protein supplements, vitamins UAE, diet supplements, weight loss products, fitness nutrition, health supplements, ideal weight, nutrition store UAE, supplements Dubai, supplements Abu Dhabi, protein UAE, vitamins Dubai, health products UAE, nutrition store, free delivery UAE, buy supplements online, diet products, sports nutrition, weight management";
     ViewData["Image"] = baseUrl + "/Images/Products/logo_white_bg.png";
     
     var categories = ViewBag.Categories as IEnumerable<BulkyBook.Models.Categry> ?? Enumerable.Empty<BulkyBook.Models.Categry>();
@@ -28,7 +29,7 @@
     var inStock = ViewBag.InStock as bool?;
     var availability = ViewBag.Availability as string ?? "";
     var minPriceRange = ViewBag.MinPriceRange as decimal? ?? 0;
-    var maxPriceRange = ViewBag.MaxPriceRange as decimal? ?? 1000;
+    var maxPriceRange = ViewBag.MaxPriceRange as decimal? ?? 10000;
     var totalProducts = ViewBag.TotalProducts as int? ?? 0;
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
 }
@@ -48,6 +49,13 @@
                                class="hero-search-input" 
                                placeholder="@Localizer["SearchSupplements"]"
                                autocomplete="off" />
+                        <button type="button" 
+                                class="search-clear-btn" 
+                                id="searchClearBtn" 
+                                aria-label="Clear search"
+                                style="display: @(string.IsNullOrEmpty(searchTerm) ? "none" : "block");">
+                            <i class="bi bi-x"></i>
+                        </button>
                     </div>
                     <button type="submit" class="hero-search-btn magnetic-btn ripple">
                         @Localizer["Search"]
@@ -128,6 +136,83 @@
 <partial name="_Notifications" />
 @Html.AntiForgeryToken()
 
+<!-- LAZY-LOADED SECTIONS - Will be loaded via AJAX after page load -->
+<!-- Flash Sales Section -->
+<div id="flashSalesSectionPlaceholder" class="lazy-section-placeholder">
+    <div class="cool-loading-container">
+        <div class="cool-loading-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+        </div>
+        <div class="cool-loading-content">
+            <i class="bi bi-lightning-charge-fill cool-loading-icon flash-icon"></i>
+            <p class="cool-loading-text">@Localizer["LoadingFlashSales"]</p>
+        </div>
+    </div>
+</div>
+
+<!-- Discounted Products Section -->
+<div id="discountedProductsSectionPlaceholder" class="lazy-section-placeholder">
+    <div class="cool-loading-container">
+        <div class="cool-loading-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+        </div>
+        <div class="cool-loading-content">
+            <i class="bi bi-tag-fill cool-loading-icon offer-icon"></i>
+            <p class="cool-loading-text">@Localizer["LoadingSpecialOffers"]</p>
+        </div>
+    </div>
+</div>
+
+<!-- Services Section -->
+<div id="servicesSectionPlaceholder" class="lazy-section-placeholder">
+    <div class="cool-loading-container">
+        <div class="cool-loading-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+        </div>
+        <div class="cool-loading-content">
+            <i class="bi bi-gear-fill cool-loading-icon service-icon"></i>
+            <p class="cool-loading-text">@Localizer["LoadingServices"]</p>
+        </div>
+    </div>
+</div>
+
+<!-- Best Sellers Section -->
+<div id="bestSellersSectionPlaceholder" class="lazy-section-placeholder">
+    <div class="cool-loading-container">
+        <div class="cool-loading-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+        </div>
+        <div class="cool-loading-content">
+            <i class="bi bi-trophy-fill cool-loading-icon bestseller-icon"></i>
+            <p class="cool-loading-text">@Localizer["LoadingBestSellers"]</p>
+        </div>
+    </div>
+</div>
+
+<!-- New Arrivals Section -->
+<div id="newArrivalsSectionPlaceholder" class="lazy-section-placeholder">
+    <div class="cool-loading-container">
+        <div class="cool-loading-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+        </div>
+        <div class="cool-loading-content">
+            <i class="bi bi-star-fill cool-loading-icon newarrival-icon"></i>
+            <p class="cool-loading-text">@Localizer["LoadingNewArrivals"]</p>
+        </div>
+    </div>
+</div>
+
+<!-- OLD CODE - Commented out, will be replaced by lazy-loaded sections
 @{
     var activeFlashSales = ViewBag.ActiveFlashSales as IEnumerable<FlashSale> ?? Enumerable.Empty<FlashSale>();
     var hasActiveFlashSales = activeFlashSales.Any();
@@ -261,23 +346,33 @@
             </div>
             
             <!-- Bootstrap Carousel -->
-            <div id="offersCarousel" class="carousel slide offers-carousel" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
+            <div id="offersCarousel" class="carousel slide offers-carousel" data-bs-ride="carousel" data-bs-interval="8000" data-bs-pause="hover" data-bs-touch="true">
                 <div class="carousel-inner">
                     @{
                         var productsList = discountedProducts.ToList();
+                        var itemsPerSlide = 4; // Fixed 4 items per slide like best sellers
+                        var totalSlides = 0; // Initialize total slides
                         
-                        // Responsive items per slide: mobile=1, tablet=2, desktop=4
-                        var itemsPerSlideMobile = 1;
-                        var itemsPerSlideTablet = 2;
-                        var itemsPerSlideDesktop = 4;
-                        
-                        // Calculate total slides for desktop (most slides)
-                        var totalSlidesDesktop = (int)Math.Ceiling(productsList.Count / (double)itemsPerSlideDesktop);
-                        
-                        for (int slideIndex = 0; slideIndex < totalSlidesDesktop; slideIndex++)
+                        // Ensure we have products before creating slides
+                        if (productsList.Count > 0)
                         {
-                            var slideProducts = productsList.Skip(slideIndex * itemsPerSlideDesktop).Take(itemsPerSlideDesktop).ToList();
-                            if (!slideProducts.Any()) continue;
+                            // Calculate total slides - always create at least one slide
+                            totalSlides = productsList.Count < itemsPerSlide 
+                                ? 1 
+                                : (int)Math.Ceiling(productsList.Count / (double)itemsPerSlide);
+                            
+                            for (int slideIndex = 0; slideIndex < totalSlides; slideIndex++)
+                            {
+                                var slideProducts = new List<Product>();
+                                
+                                // Use circular wrapping to always get exactly 4 items per slide
+                                for (int i = 0; i < itemsPerSlide; i++)
+                                {
+                                    var productIndex = (slideIndex * itemsPerSlide + i) % productsList.Count;
+                                    slideProducts.Add(productsList[productIndex]);
+                                }
+                                
+                                if (!slideProducts.Any()) continue;
                             
                             <div class="carousel-item @(slideIndex == 0 ? "active" : "")">
                                 <div class="row g-3 g-md-4">
@@ -360,6 +455,7 @@
                                     }
                                 </div>
                             </div>
+                            }
                         }
                     }
                 </div>
@@ -375,10 +471,10 @@
                 </button>
                 
                 <!-- Carousel Indicators -->
-                @if (totalSlidesDesktop > 1)
+                @if (totalSlides > 1)
                 {
                     <div class="carousel-indicators offers-carousel-indicators">
-                        @for (int i = 0; i < totalSlidesDesktop; i++)
+                        @for (int i = 0; i < totalSlides; i++)
                         {
                             <button type="button" data-bs-target="#offersCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
                         }
@@ -706,10 +802,10 @@
                         <div class="price-range-slider">
                             <input type="range" id="priceRangeMin" class="range-input" 
                                    min="@minPriceRange" max="@maxPriceRange" 
-                                   value="@(minPrice ?? minPriceRange)" step="1" />
+                                   value="@(minPrice?.ToString("F0") ?? minPriceRange.ToString("F0"))" step="1" />
                             <input type="range" id="priceRangeMax" class="range-input" 
                                    min="@minPriceRange" max="@maxPriceRange" 
-                                   value="@(maxPrice ?? maxPriceRange)" step="1" />
+                                   value="@(maxPrice?.ToString("F0") ?? maxPriceRange.ToString("F0"))" step="1" />
                         </div>
                         <div class="price-display">
                             <span id="priceMinDisplay">@Html.Raw(currencySymbol) @(minPrice?.ToString("N2") ?? minPriceRange.ToString("N2"))</span>
@@ -771,56 +867,135 @@
                 <h2>@Localizer["ShopByCategory"]</h2>
             </div>
             <div class="category-carousel-container" id="categoryCarouselContainer">
-            <button class="carousel-nav prev" onclick="scrollCategoryCarousel(-1)" aria-label="Previous categories">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-            <div class="category-carousel-wrapper">
-                <div class="category-carousel" id="categoryCarousel">
-                    @for (int i = 0; i < displayCategories.Count; i++)
-                    {
-                        var category = displayCategories[i];
-                        var categoryProducts = categoryProductsMap.ContainsKey(category.Id) 
-                            ? categoryProductsMap[category.Id] 
-                            : new List<Product>();
-                        var categoryName = currentCulture == "ar" && !string.IsNullOrEmpty(category.NameAr) 
-                            ? category.NameAr 
-                            : category.Name;
-                        
-                        <a href="@Url.Action("Index", new { categoryId = category.Id })" 
-                           class="category-card @(selectedCategory == category.Id ? "active" : "")"
-                           data-category-index="@i"
-                           data-category-id="@category.Id"
-                           onclick="if(typeof loadProductsWithFilters === 'function') { event.preventDefault(); loadProductsWithFilters({ categoryId: @category.Id }, true); setTimeout(function() { if(typeof scrollToProductsSection === 'function') scrollToProductsSection(); }, 300); }">
-                            <div class="category-circle">
-                                @if (!string.IsNullOrEmpty(category.ImageUrl))
+                <div id="categoryCarousel" class="carousel slide category-carousel" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
+                    <div class="carousel-inner">
+                        @{
+                            var categoriesList = displayCategories.ToList();
+                            
+                            // Responsive items per slide: mobile=1, tablet=2, desktop=4
+                            var itemsPerSlideMobile = 1;
+                            var itemsPerSlideTablet = 2;
+                            var itemsPerSlideDesktop = 4;
+                            
+                            // Calculate total slides for desktop (most slides) - add 1 for "All Categories"
+                            var totalSlidesDesktop = (int)Math.Ceiling((categoriesList.Count + 1) / (double)itemsPerSlideDesktop);
+                            
+                            // First, render "All Categories" in the first slide
+                            var firstSlideHasAllCategories = true;
+                            var categoriesToShow = categoriesList.ToList();
+                            
+                            for (int slideIndex = 0; slideIndex < totalSlidesDesktop; slideIndex++)
+                            {
+                                var slideCategories = new List<BulkyBook.Models.Categry>();
+                                
+                                // First slide: add "All Categories" first, then regular categories
+                                if (slideIndex == 0)
                                 {
-                                    <div class="category-image-wrapper">
-                                        <img src="@category.ImageUrl" alt="@categoryName" class="category-image" />
-                                    </div>
+                                    // Add remaining categories for first slide (skip 1 slot for "All Categories")
+                                    var remainingSlots = itemsPerSlideDesktop - 1;
+                                    slideCategories = categoriesToShow.Take(remainingSlots).ToList();
                                 }
-                                else if (categoryProducts.Any())
+                                else
                                 {
-                                    <div class="category-products-grid">
-                                        @foreach (var product in categoryProducts)
+                                    // For other slides, skip the "All Categories" slot
+                                    var skipCount = (slideIndex * itemsPerSlideDesktop) - 1;
+                                    slideCategories = categoriesToShow.Skip(skipCount).Take(itemsPerSlideDesktop).ToList();
+                                }
+                                
+                                <div class="carousel-item @(slideIndex == 0 ? "active" : "")">
+                                    <div class="row g-3 g-md-4">
+                                        @if (slideIndex == 0)
                                         {
-                                            var productImage = product.ProductImages?.FirstOrDefault()?.ImageUrl ?? product.ImageUrl;
-                                            if (!string.IsNullOrEmpty(productImage))
-                                            {
-                                                <img src="@productImage" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)" class="category-product-mini" />
-                                            }
+                                            // Render "All Categories" as first item in first slide
+                                            <div class="col-12 col-sm-6 col-lg-3">
+                                                <div class="category-card @(selectedCategory == null ? "active" : "")"
+                                                     data-category-id="0"
+                                                     data-all-categories="true"
+                                                     role="button"
+                                                     tabindex="0"
+                                                     style="cursor: pointer;">
+                                                    <div class="category-circle">
+                                                        <div class="category-image-wrapper">
+                                                            <i class="bi bi-grid-3x3-gap-fill" style="font-size: 2.5rem; color: #667eea;"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="category-label">@Localizer["AllCategories"]</div>
+                                                </div>
+                                            </div>
+                                        }
+                                        
+                                        @foreach (var category in slideCategories)
+                                        {
+                                            if (category == null) continue;
+                                            
+                                            var categoryIndex = categoriesList.IndexOf(category);
+                                            var categoryProducts = categoryProductsMap.ContainsKey(category.Id) 
+                                                ? categoryProductsMap[category.Id] 
+                                                : new List<Product>();
+                                            var categoryName = currentCulture == "ar" && !string.IsNullOrEmpty(category.NameAr) 
+                                                ? category.NameAr 
+                                                : category.Name;
+                                            
+                                            <div class="col-12 col-sm-6 col-lg-3">
+                                                <div class="category-card @(selectedCategory == category.Id ? "active" : "")"
+                                                     data-category-index="@categoryIndex"
+                                                     data-category-id="@category.Id"
+                                                     role="button"
+                                                     tabindex="0"
+                                                     style="cursor: pointer;">
+                                                    <div class="category-circle">
+                                                        @if (!string.IsNullOrEmpty(category.ImageUrl))
+                                                        {
+                                                            <div class="category-image-wrapper">
+                                                                <img src="@category.ImageUrl" alt="@categoryName" class="category-image" />
+                                                            </div>
+                                                        }
+                                                        else if (categoryProducts.Any())
+                                                        {
+                                                            <div class="category-products-grid">
+                                                                @foreach (var product in categoryProducts)
+                                                                {
+                                                                    var productImage = product.ProductImages?.FirstOrDefault()?.ImageUrl ?? product.ImageUrl;
+                                                                    if (!string.IsNullOrEmpty(productImage))
+                                                                    {
+                                                                        <img src="@productImage" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)" class="category-product-mini" />
+                                                                    }
+                                                                }
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                    <div class="category-label">@categoryName</div>
+                                                </div>
+                                            </div>
                                         }
                                     </div>
-                                }
-                            </div>
-                            <div class="category-label">@categoryName</div>
-                        </a>
+                                </div>
+                            }
+                        }
+                    </div>
+                    
+                    <!-- Carousel Controls -->
+                    <button class="carousel-control-prev category-carousel-control carousel-nav prev" type="button" data-bs-target="#categoryCarousel" data-bs-slide="prev">
+                        <i class="bi bi-chevron-left"></i>
+                        <span class="visually-hidden">@Localizer["Previous"]</span>
+                    </button>
+                    <button class="carousel-control-next category-carousel-control carousel-nav next" type="button" data-bs-target="#categoryCarousel" data-bs-slide="next">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="visually-hidden">@Localizer["Next"]</span>
+                    </button>
+                    
+                    <!-- Carousel Indicators -->
+                    @if (totalSlidesDesktop > 1)
+                    {
+                        <div class="carousel-indicators category-carousel-indicators">
+                            @for (int i = 0; i < totalSlidesDesktop; i++)
+                            {
+                                <button type="button" data-bs-target="#categoryCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
+                            }
+                        </div>
                     }
                 </div>
             </div>
-            <button class="carousel-nav next" onclick="scrollCategoryCarousel(1)" aria-label="Next categories">
-                <i class="bi bi-chevron-right"></i>
-            </button>
-        </div>
         </section>
     }
     <!-- Product Grid - Modern Design -->
@@ -924,10 +1099,36 @@
             
             <!-- Price and Actions - Same Line -->
             <div class="price-actions-row" onclick="event.stopPropagation();">
-                <div class="price-wrapper">
-                    <span class="current-price">@Html.Raw(currencySymbol) @Product.Price.ToString("N2")</span>
-                   
-                </div>
+                @{
+                    var minPrices = ViewBag.MinPrices as Dictionary<int, double> ?? new Dictionary<int, double>();
+                    var showPriceFlags = ViewBag.ShowPriceFlags as Dictionary<int, bool> ?? new Dictionary<int, bool>();
+                    var allVariantsOutOfStockFlags = ViewBag.AllVariantsOutOfStockFlags as Dictionary<int, bool> ?? new Dictionary<int, bool>();
+                    var shouldShowPrice = showPriceFlags.ContainsKey(Product.Id) ? showPriceFlags[Product.Id] : (Product.StockQuantity > 0);
+                    var allVariantsOutOfStock = allVariantsOutOfStockFlags.ContainsKey(Product.Id) && allVariantsOutOfStockFlags[Product.Id];
+                    var hasVariants = Product.ProductType == BulkyBook.Models.ProductType.Variable && minPrices.ContainsKey(Product.Id);
+                    var displayPrice = hasVariants ? minPrices[Product.Id] : Product.Price;
+                    var pricePrefix = hasVariants ? (currentCulture == "ar" ? "من " : "From ") : "";
+                }
+                @if (shouldShowPrice)
+                {
+                    <div class="price-wrapper">
+                        <span class="current-price">
+                            @if (hasVariants)
+                            {
+                                <span class="price-from-text">@pricePrefix</span>
+                            }
+                            @Html.Raw(currencySymbol) @displayPrice.ToString("N2")
+                        </span>
+                    </div>
+                }
+                else if (allVariantsOutOfStock)
+                {
+                    <div class="price-wrapper">
+                        <span class="text-muted" style="font-size: 0.9rem;">
+                            @Localizer["OutOfStock"]
+                        </span>
+                    </div>
+                }
                 <div class="product-actions">
                     @if (Product.ProductType == BulkyBook.Models.ProductType.Variable)
                     {
@@ -2042,11 +2243,21 @@
         window.createProductCard = function(product, isAuthenticated) {
             const discount = product.listPrice > 0 ? Math.floor((product.listPrice - product.price) / product.listPrice * 100) : 0;
             const discountText = '@(currentCulture == "ar" ? "خصم" : "OFF")';
+            const hasVariants = product.hasVariants === true || product.productType === 1;
+            const shouldShowPrice = product.shouldShowPrice !== undefined ? product.shouldShowPrice : (product.stockQuantity > 0);
+            const allVariantsOutOfStock = product.allVariantsOutOfStock === true;
+            const pricePrefix = hasVariants ? (currentCulture === 'ar' ? 'من ' : 'From ') : '';
             
-            const priceHtml = discount > 0 
-                ? `<span class="current-price">${formatCurrency(product.price)}</span>
-                   <span class="list-price">${formatCurrency(product.listPrice)}</span>`
-                : `<span class="current-price">${formatCurrency(product.price)}</span>`;
+            const priceHtml = shouldShowPrice 
+                ? (discount > 0 
+                    ? `<span class="current-price">${hasVariants ? `<span class="price-from-text">${pricePrefix}</span>` : ''}${formatCurrency(product.price)}</span>
+                       <span class="list-price">${formatCurrency(product.listPrice)}</span>`
+                    : `<span class="current-price">${hasVariants ? `<span class="price-from-text">${pricePrefix}</span>` : ''}${formatCurrency(product.price)}</span>`)
+                : '';
+            
+            const outOfStockHtml = !shouldShowPrice && allVariantsOutOfStock
+                ? `<div class="price-wrapper"><span class="text-muted" style="font-size: 0.9rem;">@Localizer["OutOfStock"]</span></div>`
+                : '';
             
             const isInCart = cartProductIds.includes(product.id);
             const cartIcon = isInCart ? 'bi-check-lg' : 'bi-cart-plus';
@@ -2185,9 +2396,7 @@
                             ${discount > 0 ? `<span class="discount-badge-rating">${discount}% ${discountText}</span>` : ''}
                         </div>
                         <div class="price-actions-row" onclick="event.stopPropagation();">
-                            <div class="price-wrapper">
-                                ${priceHtml}
-                            </div>
+                            ${shouldShowPrice ? `<div class="price-wrapper">${priceHtml}</div>` : outOfStockHtml}
                             <div class="product-actions">
                                 ${(product.productType === 1 || product.productType === 'Variable')
                                     ? `<a href="/Customer/Home/Details?productId=${product.id}" class="btn-select-options">
@@ -2222,6 +2431,249 @@
             if (urlParams.get('availability')) params.append('availability', urlParams.get('availability'));
             
             return params.toString();
+        }
+
+        // Function to load products with filters via AJAX (no page refresh)
+        function loadProductsWithFilters(filters = {}, scrollToProducts = true, updateUrl = false) {
+            // Prevent multiple simultaneous calls
+            if (window.isLoadingProducts) {
+                return;
+            }
+            window.isLoadingProducts = true;
+
+            const productContainer = document.getElementById('productContainer');
+            const loadMoreContainer = document.getElementById('loadMoreContainer');
+            
+            if (!productContainer) {
+                console.error('Product container not found');
+                window.isLoadingProducts = false;
+                return;
+            }
+
+            // Show loading state
+            const originalContent = productContainer.innerHTML;
+            productContainer.innerHTML = `
+                <div class="text-center py-5" style="grid-column: 1 / -1;">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">@Localizer["LoadingProducts"]...</p>
+                </div>
+            `;
+            
+            // Hide load more button during loading
+            if (loadMoreContainer) {
+                loadMoreContainer.style.display = 'none';
+            }
+
+            // Build filter parameters
+            const params = new URLSearchParams();
+            if (filters.categoryId) params.append('categoryId', filters.categoryId);
+            if (filters.searchTerm) params.append('searchTerm', filters.searchTerm);
+            if (filters.sortBy) params.append('sortBy', filters.sortBy);
+            if (filters.minPrice) params.append('minPrice', filters.minPrice);
+            if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
+            if (filters.inStock !== undefined) params.append('inStock', filters.inStock);
+            if (filters.availability) params.append('availability', filters.availability);
+
+            // Update active category in category carousel
+            if (filters.categoryId) {
+                // Remove active class from all category cards
+                document.querySelectorAll('.category-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                // Add active class to selected category
+                const activeCard = document.querySelector(`.category-card[data-category-id="${filters.categoryId}"]`);
+                if (activeCard) {
+                    activeCard.classList.add('active');
+                }
+            } else {
+                // Remove active class from all if no category selected
+                document.querySelectorAll('.category-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                // Set "All Categories" as active when no category is selected
+                const allCategoriesCard = document.querySelector('.category-card[data-category-id="0"]');
+                if (allCategoriesCard) {
+                    allCategoriesCard.classList.add('active');
+                }
+            }
+
+            // Build URL
+            const url = `/Customer/Home/FilterProducts?${params.toString()}`;
+
+            // Update URL without page reload (only if updateUrl is true)
+            if (updateUrl) {
+                const newUrl = new URL(window.location.href);
+                newUrl.search = params.toString();
+                window.history.pushState({ path: newUrl.href }, '', newUrl.href);
+            }
+
+            // Fetch filtered products
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    window.isLoadingProducts = false;
+                    
+                    // Clear container
+                    productContainer.innerHTML = '';
+
+                    if (!data.products || data.products.length === 0) {
+                        productContainer.innerHTML = `
+                            <div class="text-center py-5" style="grid-column: 1 / -1;">
+                                <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                                <p class="mt-3 text-muted">@Localizer["NoProductsFound"]</p>
+                            </div>
+                        `;
+                        if (loadMoreContainer) loadMoreContainer.style.display = 'none';
+                        currentPage = 0;
+                        hasMoreProducts = false;
+                        return;
+                    }
+
+                    // Render products
+                    data.products.forEach((product, index) => {
+                        const productHtml = createProductCard(product, isAuthenticated);
+                        productContainer.insertAdjacentHTML('beforeend', productHtml);
+                    });
+
+                    // Animate products with stagger effect
+                    const productCards = productContainer.querySelectorAll('.product-card.stagger-item');
+                    productCards.forEach((card, index) => {
+                        card.classList.remove('visible');
+                        setTimeout(() => {
+                            card.classList.add('visible');
+                        }, index * 50);
+                    });
+
+                    // Load ratings for products
+                    loadAllProductRatings();
+
+                    // Update pagination state
+                    currentPage = 0;
+                    hasMoreProducts = data.hasMore || false;
+
+                    // Show/hide load more button
+                    if (loadMoreContainer) {
+                        if (hasMoreProducts) {
+                            loadMoreContainer.style.display = 'block';
+                            const loadMoreBtn = document.getElementById('loadMoreBtn');
+                            if (loadMoreBtn) loadMoreBtn.style.display = 'inline-block';
+                        } else {
+                            loadMoreContainer.style.display = 'none';
+                        }
+                    }
+
+                    // Scroll to products section if requested
+                    if (scrollToProducts) {
+                        scrollToProductsSection();
+                    }
+
+                    // Update filter form inputs to match current filters
+                    if (filters.categoryId) {
+                        const categoryInput = document.querySelector('input[name="categoryId"]');
+                        if (categoryInput) categoryInput.value = filters.categoryId;
+                    }
+                })
+                .catch(error => {
+                    window.isLoadingProducts = false;
+                    console.error('Error loading products:', error);
+                    productContainer.innerHTML = `
+                        <div class="text-center py-5" style="grid-column: 1 / -1;">
+                            <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #dc3545;"></i>
+                            <p class="mt-3 text-danger">@Localizer["ErrorLoadingProducts"]</p>
+                            <button class="btn btn-primary mt-3" onclick="loadProductsWithFilters({})">@Localizer["Retry"]</button>
+                        </div>
+                    `;
+                });
+        }
+
+        // Event delegation for category card clicks (handles dynamically reorganized carousel items)
+        window.handleCategoryCardClick = function(categoryCard, event) {
+            if (!categoryCard || !categoryCard.hasAttribute('data-category-id')) {
+                return false;
+            }
+            
+            // Always prevent default and stop propagation
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+            }
+            
+            const categoryId = categoryCard.getAttribute('data-category-id');
+            const categoryIdNum = parseInt(categoryId);
+            
+            if (isNaN(categoryIdNum)) {
+                return false;
+            }
+            
+            // Remove active class from all category cards
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Add active class to clicked card
+            categoryCard.classList.add('active');
+            
+            // Load products with category filter via AJAX (without URL update)
+            if (typeof loadProductsWithFilters === 'function') {
+                // If categoryId is 0, it means "All Categories" - clear the category filter
+                if (categoryIdNum === 0) {
+                    loadProductsWithFilters({}, true, false);
+                } else {
+                    loadProductsWithFilters({ categoryId: categoryIdNum }, true, false);
+                }
+            } else {
+                // Fallback to page navigation if function doesn't exist
+                if (categoryIdNum === 0) {
+                    window.location.href = '@Url.Action("Index", "Home", new { area = "Customer" })';
+                } else {
+                    window.location.href = `@Url.Action("Index", "Home", new { area = "Customer" })?categoryId=${categoryIdNum}`;
+                }
+            }
+            
+            return false;
+        }
+        
+        // Handle clicks - use capture phase to catch early
+        document.addEventListener('click', function(e) {
+            const categoryCard = e.target.closest('.category-card');
+            if (categoryCard && categoryCard.hasAttribute('data-category-id')) {
+                handleCategoryCardClick(categoryCard, e);
+                return false;
+            }
+        }, true); // Use capture phase
+        
+        // Handle keyboard (Enter/Space) for accessibility
+        document.addEventListener('keydown', function(e) {
+            const categoryCard = e.target.closest('.category-card');
+            if (categoryCard && categoryCard.hasAttribute('data-category-id')) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    handleCategoryCardClick(categoryCard, e);
+                    return false;
+                }
+            }
+        }, true); // Use capture phase
+
+        // Function to scroll to products section smoothly
+        function scrollToProductsSection() {
+            const productsSection = document.getElementById('productsSection');
+            if (productsSection) {
+                const headerOffset = 100; // Account for fixed header
+                const elementPosition = productsSection.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
         }
 
         // Function to load more products with filters
@@ -2355,10 +2807,10 @@
         let isCheckingLoadMore = false;
         let hasCheckedLoadMore = false;
 
-        // Check if there are more products on page load and show button
+        // Check if there are more products on page load and show button (without API call)
         function checkAndShowLoadMoreButton() {
             // Prevent multiple simultaneous calls
-            if (isCheckingLoadMore || hasCheckedLoadMore) {
+            if (hasCheckedLoadMore) {
                 return;
             }
 
@@ -2367,81 +2819,32 @@
             const productCount = document.querySelectorAll('.product-card').length;
             
             // If we have exactly 20 products, likely there are more (since Index shows 20 max)
+            // Just show the button, don't make an API call - let the user click to load more
             if (productCount === 20) {
-                hasMoreProducts = true;
+                hasMoreProducts = true; // Assume there are more
                 if (loadMoreContainer) {
                     loadMoreContainer.style.display = 'block';
                 }
                 if (loadMoreBtn) {
                     loadMoreBtn.style.display = 'inline-block';
                 }
-                
-                // Mark as checking to prevent duplicate calls
-                isCheckingLoadMore = true;
-                hasCheckedLoadMore = true;
-                
-                // Still verify by checking the API (only once)
-                const filterParams = getFilterParams();
-                const url = `/Customer/Home/LoadMoreProducts?page=1&pageSize=20${filterParams ? '&' + filterParams : ''}`;
-                
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.hasMore && (!data.products || data.products.length === 0)) {
-                            // No more products, hide the button
-                            hasMoreProducts = false;
-                            if (loadMoreContainer) {
-                                loadMoreContainer.style.display = 'none';
-                            }
-                        }
-                        isCheckingLoadMore = false;
-                    })
-                    .catch(error => {
-                        console.error('Error checking for more products:', error);
-                        isCheckingLoadMore = false;
-                    });
             } 
-            // If we have products but less than 20, check if there are more
+            // If we have products but less than 20, likely no more products
             else if (productCount > 0 && productCount < 20) {
-                // Mark as checking to prevent duplicate calls
-                isCheckingLoadMore = true;
-                hasCheckedLoadMore = true;
-                
-                const filterParams = getFilterParams();
-                const url = `/Customer/Home/LoadMoreProducts?page=1&pageSize=20${filterParams ? '&' + filterParams : ''}`;
-                
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.hasMore || (data.products && data.products.length > 0)) {
-                            hasMoreProducts = true;
-                            if (loadMoreContainer) {
-                                loadMoreContainer.style.display = 'block';
-                            }
-                            if (loadMoreBtn) {
-                                loadMoreBtn.style.display = 'inline-block';
-                            }
-                        } else {
-                            hasMoreProducts = false;
-                            if (loadMoreContainer) {
-                                loadMoreContainer.style.display = 'none';
-                            }
-                        }
-                        isCheckingLoadMore = false;
-                    })
-                    .catch(error => {
-                        console.error('Error checking for more products:', error);
-                        isCheckingLoadMore = false;
-                    });
+                hasMoreProducts = false;
+                if (loadMoreContainer) {
+                    loadMoreContainer.style.display = 'none';
+                }
             } 
             // No products at all
             else {
                 hasMoreProducts = false;
-                hasCheckedLoadMore = true; // Mark as checked even if no products
                 if (loadMoreContainer) {
                     loadMoreContainer.style.display = 'none';
                 }
             }
+            
+            hasCheckedLoadMore = true; // Mark as checked
         }
 
         // Save scroll position when clicking on any link (like Details button)
@@ -2475,9 +2878,21 @@
             
             if (priceRangeMin && priceRangeMax && priceMinInput && priceMaxInput) {
                 const minPrice = parseFloat(priceRangeMin.getAttribute('min')) || 0;
-                const maxPrice = parseFloat(priceRangeMax.getAttribute('max')) || 1000;
+                const maxPrice = parseFloat(priceRangeMax.getAttribute('max')) || 10000;
                 
-                // Update display when sliders change
+                // Check if inputs have values from server/URL - don't sync from sliders if empty
+                const hasMinPrice = priceMinInput.value && priceMinInput.value.trim() !== '';
+                const hasMaxPrice = priceMaxInput.value && priceMaxInput.value.trim() !== '';
+                
+                // Ensure inputs stay empty if no price filter is set
+                if (!hasMinPrice) {
+                    priceMinInput.value = '';
+                }
+                if (!hasMaxPrice) {
+                    priceMaxInput.value = '';
+                }
+                
+                // Update display when sliders change (only syncs when user moves slider)
                 priceRangeMin.addEventListener('input', function() {
                     const value = parseFloat(this.value);
                     if (priceMinInput) priceMinInput.value = value.toFixed(2);
@@ -2489,6 +2904,14 @@
                     if (priceMaxInput) priceMaxInput.value = value.toFixed(2);
                     if (priceMaxDisplay) priceMaxDisplay.textContent = currencySymbol + ' ' + value.toFixed(2);
                 });
+                
+                // Initialize display text from current slider range values (for display only, not input)
+                if (!hasMinPrice && priceMinDisplay) {
+                    priceMinDisplay.textContent = currencySymbol + ' ' + minPrice.toFixed(2);
+                }
+                if (!hasMaxPrice && priceMaxDisplay) {
+                    priceMaxDisplay.textContent = currencySymbol + ' ' + maxPrice.toFixed(2);
+                }
                 
                 // Update sliders when inputs change
                 if (priceMinInput) {
@@ -2535,6 +2958,41 @@
             
             // Initialize filter state from URL
             initializeFiltersFromURL();
+            
+            // Search clear button functionality
+            const heroSearchInput = document.getElementById('heroSearchInput');
+            const searchClearBtn = document.getElementById('searchClearBtn');
+            
+            if (heroSearchInput && searchClearBtn) {
+                // Show/hide clear button based on input value
+                function toggleClearButton() {
+                    if (heroSearchInput.value.trim() !== '') {
+                        searchClearBtn.style.display = 'block';
+                    } else {
+                        searchClearBtn.style.display = 'none';
+                    }
+                }
+                
+                // Toggle on input
+                heroSearchInput.addEventListener('input', toggleClearButton);
+                
+                // Toggle on page load
+                toggleClearButton();
+                
+                // Clear search when button is clicked
+                searchClearBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    heroSearchInput.value = '';
+                    searchClearBtn.style.display = 'none';
+                    heroSearchInput.focus();
+                    
+                    // Clear search filter and reload products
+                    if (typeof loadProductsWithFilters === 'function') {
+                        loadProductsWithFilters({ searchTerm: '' }, false, false);
+                    }
+                });
+            }
         });
         
         // Initialize filters from URL parameters
@@ -2543,18 +3001,26 @@
             const minPrice = urlParams.get('minPrice');
             const maxPrice = urlParams.get('maxPrice');
             
-            if (minPrice) {
-                const priceMinInput = document.querySelector('input[name="minPrice"]');
-                const priceRangeMin = document.getElementById('priceRangeMin');
-                if (priceMinInput) priceMinInput.value = minPrice;
+            const priceMinInput = document.querySelector('input[name="minPrice"]');
+            const priceMaxInput = document.querySelector('input[name="maxPrice"]');
+            const priceRangeMin = document.getElementById('priceRangeMin');
+            const priceRangeMax = document.getElementById('priceRangeMax');
+            
+            // Only set values if they exist in URL - otherwise keep inputs empty
+            if (minPrice && minPrice.trim() !== '') {
+                if (priceMinInput) priceMinInput.value = parseFloat(minPrice).toFixed(2);
                 if (priceRangeMin) priceRangeMin.value = minPrice;
+            } else {
+                // Ensure input is empty if no minPrice
+                if (priceMinInput) priceMinInput.value = '';
             }
             
-            if (maxPrice) {
-                const priceMaxInput = document.querySelector('input[name="maxPrice"]');
-                const priceRangeMax = document.getElementById('priceRangeMax');
-                if (priceMaxInput) priceMaxInput.value = maxPrice;
+            if (maxPrice && maxPrice.trim() !== '') {
+                if (priceMaxInput) priceMaxInput.value = parseFloat(maxPrice).toFixed(2);
                 if (priceRangeMax) priceRangeMax.value = maxPrice;
+            } else {
+                // Ensure input is empty if no maxPrice
+                if (priceMaxInput) priceMaxInput.value = '';
             }
         }
 
@@ -2567,6 +3033,21 @@
             setTimeout(function() {
                 checkAndShowLoadMoreButton();
             }, 500);
+
+            // Initialize active category from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryId = urlParams.get('categoryId');
+            if (categoryId) {
+                // Remove active class from all category cards
+                document.querySelectorAll('.category-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                // Add active class to selected category
+                const activeCard = document.querySelector(`.category-card[data-category-id="${categoryId}"]`);
+                if (activeCard) {
+                    activeCard.classList.add('active');
+                }
+            }
         });
         
         // Also check when window loads (as a fallback, but only if not already checked)
@@ -2856,5 +3337,99 @@
             // });
             </text>
         }
+    </script>
+
+    <!-- PERFORMANCE: Lazy loading for sections - Load independently via AJAX -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to load a section via AJAX
+            function loadSection(url, placeholderId) {
+                const placeholder = document.getElementById(placeholderId);
+                if (!placeholder) return;
+
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            // If 500 error or other error, hide the placeholder
+                            if (response.status >= 500) {
+                                console.warn(`Server error loading ${placeholderId}, hiding section`);
+                                placeholder.style.display = 'none';
+                                return '';
+                            }
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        if (html && html.trim().length > 0) {
+                            placeholder.outerHTML = html;
+                            // Reinitialize any scripts/event handlers after content loads
+                            if (typeof initializeFlashSaleCarousel === 'function') {
+                                initializeFlashSaleCarousel();
+                            }
+                            if (typeof initializeProductCarousels === 'function') {
+                                initializeProductCarousels();
+                            }
+                            // Enhance carousels for mobile if needed
+                            if (window.innerWidth <= 767 && typeof enhanceCarouselsForMobile === 'function') {
+                                setTimeout(function() {
+                                    enhanceCarouselsForMobile();
+                                }, 100);
+                            }
+                            
+                            // Initialize Bootstrap carousels if they exist with touch support
+                            if (typeof bootstrap !== 'undefined') {
+                                document.querySelectorAll('.carousel').forEach(carousel => {
+                                    // Check if carousel is already initialized
+                                    const existingCarousel = bootstrap.Carousel.getInstance(carousel);
+                                    if (!existingCarousel) {
+                                        // Get interval from data attribute or default to 8000
+                                        const interval = carousel.dataset.bsInterval || carousel.getAttribute('data-bs-interval') || '8000';
+                                        new bootstrap.Carousel(carousel, {
+                                            interval: parseInt(interval),
+                                            wrap: true,
+                                            touch: true // Enable touch support for mobile
+                                        });
+                                    }
+                                });
+                                
+                                // Also enhance carousels for mobile if needed
+                                if (typeof window.enhanceCarouselsForMobile === 'function' && window.innerWidth <= 767) {
+                                    setTimeout(() => {
+                                        window.enhanceCarouselsForMobile();
+                                    }, 100);
+                                }
+                            }
+                        } else {
+                            // Hide placeholder if no content
+                            placeholder.style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error(`Error loading section ${placeholderId}:`, error);
+                        // Hide on error instead of showing error message for better UX
+                        placeholder.style.display = 'none';
+                    });
+            }
+
+            // Load sections in sequence with small delays to avoid overwhelming the server
+            // Priority order: Flash Sales -> Discounted Products -> Services -> Category Products -> Best Sellers -> New Arrivals
+            
+            setTimeout(() => loadSection('/Customer/Home/LoadFlashSalesSection', 'flashSalesSectionPlaceholder'), 100);
+            setTimeout(() => loadSection('/Customer/Home/LoadDiscountedProductsSection', 'discountedProductsSectionPlaceholder'), 300);
+            setTimeout(() => loadSection('/Customer/Home/LoadServicesSection', 'servicesSectionPlaceholder'), 500);
+            setTimeout(() => loadSection('/Customer/Home/LoadCategoryProductsSection', 'categoryProductsSectionPlaceholder'), 700);
+            setTimeout(() => loadSection('/Customer/Home/LoadBestSellersSection', 'bestSellersSectionPlaceholder'), 900);
+            setTimeout(() => loadSection('/Customer/Home/LoadNewArrivalsSection', 'newArrivalsSectionPlaceholder'), 1100);
+        });
+    </script>
+}
+
+@section StructuredData {
+    @{
+        var homepageSchema = SEOHelper.GenerateHomePageStructuredData(baseUrl, "Ideal Weight Nutrition", siteDescription, currentCulture);
+    }
+    <script type="application/ld+json">
+    @Html.Raw(homepageSchema)
     </script>
 }

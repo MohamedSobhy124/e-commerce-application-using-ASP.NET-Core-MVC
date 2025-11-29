@@ -35,112 +35,31 @@ namespace BulkyBook.Areas.Customer.Controllers
 
         // Performance: Cache response for 5 minutes, vary by query parameters
         [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" }, Location = ResponseCacheLocation.Any)]
-        public IActionResult Index(int? categoryId, string searchTerm, string sortBy, 
+        public async Task<IActionResult> Index(int? categoryId, string searchTerm, string sortBy, 
             decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
             int? minRating = null, string availability = null)
         {
-            // Get active flash sales for homepage
-            var activeFlashSales = _unitOfWork.FlashSale.GetActiveFlashSales();
-            ViewBag.ActiveFlashSales = activeFlashSales;
+            // PERFORMANCE: Load only essential data for initial page render
+            // Sections (flash sales, discounted products, etc.) will be loaded lazily via AJAX
             
-            // Get discounted products (where ListPrice > Price or variants have discounts)
-            // Include variants and images for proper discount display
-            var allProducts = _unitOfWork.product.GetAllAsNoTracking(
-                filter: p => p.StockQuantity > 0,
-                includeProperties: "ProductImages,ProductVariants")
-                .ToList();
-            
-            // Filter products that have discounts (either main product or variants)
-            var discountedProducts = allProducts
-                .Where(p => {
-                    // Check if main product has discount
-                    if (p.ListPrice > p.Price) return true;
-                    
-                    // Check if any variant has discount
-                    if (p.ProductVariants != null && p.ProductVariants.Any())
-                    {
-                        return p.ProductVariants.Any(v => v.ListPrice > v.Price && v.StockQuantity > 0);
-                    }
-                    
-                    return false;
-                })
-                .OrderByDescending(p => {
-                    // Calculate best discount (either main product or best variant)
-                    var mainDiscount = p.ListPrice > 0 ? ((p.ListPrice - p.Price) / p.ListPrice) * 100 : 0;
-                    
-                    if (p.ProductVariants != null && p.ProductVariants.Any())
-                    {
-                        var bestVariantDiscount = p.ProductVariants
-                            .Where(v => v.ListPrice > v.Price && v.StockQuantity > 0)
-                            .Select(v => v.ListPrice > 0 ? ((v.ListPrice - v.Price) / v.ListPrice) * 100 : 0)
-                            .DefaultIfEmpty(0)
-                            .Max()??0m;
-                        
-                        return Math.Max(mainDiscount, (double)bestVariantDiscount);
-                    }
-                    
-                    return mainDiscount;
-                })
-                .Take(20) // Get top 20 discounted products
-                .ToList();
-            ViewBag.DiscountedProducts = discountedProducts;
-
-            // Get active service subscriptions for homepage
-            var activeServices = _unitOfWork.ServiceSubscriptions.GetAll(s => s.IsActive, includeProperties: "ServiceImages")
-                .OrderBy(s => s.DisplayOrder)
-                .ThenByDescending(s => s.CreatedDate)
-                .Take(6)
-                .ToList();
-            ViewBag.ActiveServices = activeServices;
-
-            // PERFORMANCE: Use AsNoTracking for read-only queries
-            // Get all categories for filter (cached - only load once per request)
-            var allCategories = _unitOfWork.categry.GetAllAsNoTracking().ToList();
+            // Load categories (needed for filters)
+            var allCategories = await _dbContext.Categries
+                .AsNoTracking()
+                .Where(c => !c.IsDeleted)
+                .ToListAsync();
             ViewBag.Categories = allCategories;
             
-            // Get sample products for each category to display in carousel
-            var categoryProductsMap = new Dictionary<int, List<Product>>();
-            foreach (var category in allCategories.Take(6))
-            {
-                var categoryProducts = _unitOfWork.product.GetAllAsNoTracking(
-                    filter: p => p.CategryId == category.Id && p.StockQuantity > 0,
-                    includeProperties: "ProductImages")
-                    .Take(4)
-                    .ToList();
-                categoryProductsMap[category.Id] = categoryProducts;
-            }
-            ViewBag.CategoryProductsMap = categoryProductsMap;
-            
-            // PERFORMANCE: Optimized query - filter at database level, not in memory
-            // Get best sellers (products with most orders)
-            var bestSellers = _unitOfWork.product.GetAllAsNoTracking(
-                filter: p => p.StockQuantity > 0,
-                includeProperties: "categry,ProductImages")
-                .OrderByDescending(p => p.Id) // For now, use ID as proxy for popularity
-                .Take(8)
-                .ToList();
-            ViewBag.BestSellers = bestSellers;
-            
-            // PERFORMANCE: Optimized query
-            // Get new arrivals (recently added products)
-            var newArrivals = _unitOfWork.product.GetAllAsNoTracking(
-                filter: p => p.StockQuantity > 0,
-                includeProperties: "categry,ProductImages")
-                .OrderByDescending(p => p.Id)
-                .Take(8)
-                .ToList();
-            ViewBag.NewArrivals = newArrivals;
-            
-            // PERFORMANCE: Optimized - batch count queries instead of N+1
-            // Get top categories (categories with most products)
-            var categoryProductCounts = _unitOfWork.product.GetAllAsNoTracking()
+            // Load category product counts for top categories (lightweight)
+            var categoryProductCounts = (await _dbContext.Products
+                .AsNoTracking()
+                .Where(p => !p.IsDeleted)
                 .GroupBy(p => p.CategryId)
                 .Select(g => new { CategryId = g.Key, Count = g.Count() })
+                .ToListAsync())
                 .ToDictionary(x => x.CategryId, x => x.Count);
             
             var topCategories = allCategories
                 .OrderByDescending(c => categoryProductCounts.GetValueOrDefault(c.Id, 0))
-                .Take(6)
                 .ToList();
             ViewBag.TopCategories = topCategories;
             ViewBag.SelectedCategory = categoryId;
@@ -152,28 +71,36 @@ namespace BulkyBook.Areas.Customer.Controllers
             ViewBag.MinRating = minRating;
             ViewBag.Availability = availability;
             
-            // Check if logged-in user is subscribed to newsletter
-            if (User.Identity.IsAuthenticated)
+            // PERFORMANCE: Newsletter subscription check (lightweight query)
+            ViewBag.IsNewsletterSubscribed = false;
+            if (User.Identity?.IsAuthenticated == true)
             {
                 var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
                 if (!string.IsNullOrEmpty(userEmail))
+                {
+                    try
                 {
                     var userSubscription = _unitOfWork.NewsletterSubscription.GetByEmail(userEmail);
                     ViewBag.IsNewsletterSubscribed = userSubscription != null && userSubscription.IsActive;
                     ViewBag.UserEmail = userEmail;
                 }
-                else
+                    catch
                 {
                     ViewBag.IsNewsletterSubscribed = false;
                 }
             }
-            else
-            {
-                ViewBag.IsNewsletterSubscribed = false;
             }
             
+            // PERFORMANCE: Use AsNoTracking for read-only queries
             // Get products with optional filtering (optimized query - only load what's needed)
-            var query = _unitOfWork.product.GetAll(includeProperties: "categry,ProductImages").AsQueryable();
+            // Use direct context query to filter variants at database level
+            var query = _dbContext.Products
+                .AsNoTracking()
+                .Where(p => !p.IsDeleted)
+                .Include(p => p.categry)
+                .Include(p => p.ProductImages.Where(img => img.ImageInfo == null))
+                .Include(p => p.ProductVariants.Where(v => !v.IsDeleted))
+                .AsQueryable();
             
             // Filter by category
             if (categoryId.HasValue && categoryId.Value > 0)
@@ -232,13 +159,30 @@ namespace BulkyBook.Areas.Customer.Controllers
                 }
             }
             
-            // PERFORMANCE: Use AsNoTracking for read-only queries
-            // Get price range for filter display (optimized - only get min/max, not all products)
-            var priceStats = _unitOfWork.product.GetAllAsNoTracking()
-                .Select(p => p.Price)
-                .ToList();
-            ViewBag.MinPriceRange = priceStats.Any() ? (decimal?)priceStats.Min() : 0;
-            ViewBag.MaxPriceRange = priceStats.Any() ? (decimal?)priceStats.Max() : 1000;
+            // PERFORMANCE: Only calculate price range if not already filtered by price
+            decimal minPriceRange = 0;
+            decimal maxPriceRange = 10000;
+            
+            if (!minPrice.HasValue && !maxPrice.HasValue)
+            {
+                // Execute sequentially (DbContext doesn't support concurrent operations)
+                minPriceRange = await _dbContext.Products
+                    .AsNoTracking()
+                    .Where(p => !p.IsDeleted)
+                    .Select(p => (decimal?)p.Price)
+                    .DefaultIfEmpty()
+                    .MinAsync() ?? 0;
+                
+                maxPriceRange = await _dbContext.Products
+                    .AsNoTracking()
+                    .Where(p => !p.IsDeleted)
+                    .Select(p => (decimal?)p.Price)
+                    .DefaultIfEmpty()
+                    .MaxAsync() ?? 10000;
+            }
+            
+            ViewBag.MinPriceRange = minPriceRange;
+            ViewBag.MaxPriceRange = maxPriceRange;
             
             // Sort products
             query = sortBy switch
@@ -252,55 +196,376 @@ namespace BulkyBook.Areas.Customer.Controllers
             };
             
             // Get total count before pagination (optimized - count before materializing)
-            var totalCount = query.Count();
+            var totalCount = await query.CountAsync();
             ViewBag.TotalProducts = totalCount;
             
+            // Initialize dictionaries for storing minimum prices and show price flags
+            var minPrices = new Dictionary<int, double>();
+            var showPriceFlags = new Dictionary<int, bool>();
+            var allVariantsOutOfStockFlags = new Dictionary<int, bool>();
+            ViewBag.MinPrices = minPrices;
+            ViewBag.ShowPriceFlags = showPriceFlags;
+            ViewBag.AllVariantsOutOfStockFlags = allVariantsOutOfStockFlags;
+            
             // Pagination - take first 20 (materialize only what we need)
-            IEnumerable<Product> ProductList = query.Take(20).ToList();
+            IEnumerable<Product> ProductList = await query.Take(20).ToListAsync();
 
             foreach (var p in ProductList)
             {
-                p.ProductImages = p.ProductImages
-                    .Where(img => img.ImageInfo == null)
-                    .ToList();
-            }
-            // Cache headers are automatically set by [ResponseCache] attribute
-
-            // Get cart product IDs for authenticated users
-            if (User.Identity.IsAuthenticated)
-            {
-                var claimsIdentity = (ClaimsIdentity)User.Identity;
-                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-                var cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId);
-                ViewBag.CartProductIds = cartItems.Select(c => c.ProductId).ToList();
+                // ProductImages already filtered at database level via Include, no need to filter again
                 
-                // Get wishlist product IDs for authenticated users
-                try
+                bool shouldShowPrice = false;
+                bool allVariantsOutOfStock = false;
+                double? displayPrice = null;
+                
+                if (p.ProductType == BulkyBook.Models.ProductType.Variable && 
+                    p.ProductVariants != null && 
+                    p.ProductVariants.Any(v => !v.IsDeleted))
                 {
-                    // Check if wishlist repository exists by trying to access it
-                    if (_unitOfWork.wishlist != null)
+                    // Product has variants - check if any variant is in stock
+                    var inStockVariants = p.ProductVariants
+                        .Where(v => !v.IsDeleted && v.StockQuantity > 0)
+                        .ToList();
+                    
+                    if (inStockVariants.Any())
                     {
-                        var wishlistItems = _unitOfWork.wishlist.GetAll(u => u.ApplicationUserId == userId);
-                        ViewBag.WishlistProductIds = wishlistItems.Select(w => w.ProductId).ToList();
+                        // Show minimum price of in-stock variants
+                        var minVariantPrice = inStockVariants.Min(v => (double)v.Price);
+                        minPrices[p.Id] = minVariantPrice;
+                        displayPrice = minVariantPrice;
+                        shouldShowPrice = true;
+                        allVariantsOutOfStock = false;
                     }
                     else
                     {
-                        ViewBag.WishlistProductIds = new List<int>();
+                        // All variants are out of stock - show "Out of Stock" message
+                        allVariantsOutOfStock = true;
+                        shouldShowPrice = false;
                     }
                 }
-                catch
+                else
                 {
-                    // Wishlist repository not set up yet
-                    ViewBag.WishlistProductIds = new List<int>();
+                    // Simple product - only show price if in stock
+                    if (p.StockQuantity > 0)
+                    {
+                        shouldShowPrice = true;
+                        displayPrice = p.Price;
+                    }
+                    // If out of stock, price will be hidden (no special flag needed for simple products)
+                }
+                
+                showPriceFlags[p.Id] = shouldShowPrice;
+                if (allVariantsOutOfStock)
+                {
+                    allVariantsOutOfStockFlags[p.Id] = true;
+                }
+                if (displayPrice.HasValue && shouldShowPrice)
+                {
+                    minPrices[p.Id] = displayPrice.Value;
                 }
             }
-            else
+            // Cache headers are automatically set by [ResponseCache] attribute
+
+            // PERFORMANCE: Defer cart/wishlist queries - only run if authenticated
+            // Initialize empty lists to avoid null checks in view
+            ViewBag.CartProductIds = new List<int>();
+            ViewBag.WishlistProductIds = new List<int>();
+            
+            // Get cart and wishlist product IDs for authenticated users (optimized with AsNoTracking)
+            if (User.Identity?.IsAuthenticated == true)
             {
-                ViewBag.CartProductIds = new List<int>();
-                ViewBag.WishlistProductIds = new List<int>();
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    // Execute sequentially (DbContext doesn't support concurrent operations)
+                    var cartProductIds = await _dbContext.ShoppingCarts
+                        .AsNoTracking()
+                        .Where(u => u.ApplicationUserId == userId)
+                        .Select(c => c.ProductId)
+                        .ToListAsync();
+                    ViewBag.CartProductIds = cartProductIds;
+                    
+                    // Get wishlist product IDs
+                    try
+                    {
+                    if (_unitOfWork.wishlist != null)
+                    {
+                            var wishlistProductIds = await _dbContext.Wishlists
+                                .AsNoTracking()
+                                .Where(u => u.ApplicationUserId == userId)
+                                .Select(w => w.ProductId)
+                                .ToListAsync();
+                            ViewBag.WishlistProductIds = wishlistProductIds;
+                        }
+                    }
+                    catch
+                    {
+                        // Wishlist repository not set up yet - already initialized as empty list
+                    }
+                }
             }
             
             return View(ProductList);
+        }
+
+        // PERFORMANCE: Lazy-loaded sections - Load independently via AJAX to not block main page
+        
+        [HttpGet]
+        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> LoadFlashSalesSection()
+        {
+            var now = DateTime.Now;
+            var activeFlashSales = await _dbContext.FlashSales
+                .AsNoTracking()
+                .Include(f => f.FlashSaleItems.Where(i => !i.IsDeleted && i.FlashSaleQuantity > 0))
+                    .ThenInclude(i => i.Product)
+                        .ThenInclude(p => p.ProductImages.Where(img => img.ImageInfo == null))
+                .Where(f => !f.IsDeleted 
+                    && f.IsActive 
+                    && f.StartDate <= now 
+                    && f.EndDate >= now)
+                .OrderBy(f => f.EndDate)
+                .ToListAsync();
+            
+            if (!activeFlashSales.Any())
+            {
+                return Content(""); // Return empty if no flash sales
+            }
+            
+            // Load ProductVariant data for flash sales if needed
+            var flashSaleItemIds = activeFlashSales
+                .SelectMany(f => f.FlashSaleItems)
+                .Where(i => i.ProductVariantId.HasValue)
+                .Select(i => i.ProductVariantId.Value)
+                .Distinct()
+                .ToList();
+            
+            if (flashSaleItemIds.Any())
+            {
+                var variants = await _dbContext.ProductVariants
+                    .AsNoTracking()
+                    .Include(v => v.VariantOptionValues.Where(vov => vov.OptionValue != null && !vov.OptionValue.IsDeleted))
+                        .ThenInclude(vov => vov.OptionValue)
+                            .ThenInclude(ov => ov.ProductOption)
+                    .Where(v => flashSaleItemIds.Contains(v.Id) && !v.IsDeleted)
+                    .ToListAsync();
+                
+                var variantDict = variants.ToDictionary(v => v.Id);
+                foreach (var flashSale in activeFlashSales)
+                {
+                    foreach (var item in flashSale.FlashSaleItems.Where(i => i.ProductVariantId.HasValue))
+                    {
+                        if (variantDict.TryGetValue(item.ProductVariantId.Value, out var variant))
+                        {
+                            item.ProductVariant = variant;
+                        }
+                    }
+                }
+            }
+            
+            return PartialView("_FlashSalesSection", activeFlashSales);
+        }
+
+        [HttpGet]
+        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> LoadDiscountedProductsSection()
+        {
+            var discountedProducts = await GetDiscountedProductsAsync();
+            if (!discountedProducts.Any())
+            {
+                return Content(""); // Return empty if no discounted products
+            }
+            return PartialView("_DiscountedProductsSection", discountedProducts);
+        }
+
+        [HttpGet]
+        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> LoadBestSellersSection()
+        {
+            var bestSellers = await _dbContext.Products
+                .AsNoTracking()
+                .Where(p => !p.IsDeleted && p.StockQuantity > 0)
+                .Include(p => p.categry)
+                .Include(p => p.ProductImages.Where(img => img.ImageInfo == null))
+                .OrderByDescending(p => p.Id)
+                .Take(20)
+                .ToListAsync();
+            
+            if (!bestSellers.Any())
+            {
+                return Content(""); // Return empty if no best sellers
+            }
+            
+            return PartialView("_BestSellersSection", bestSellers);
+        }
+
+        [HttpGet]
+        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> LoadNewArrivalsSection()
+        {
+            var newArrivals = await _dbContext.Products
+                .AsNoTracking()
+                .Where(p => !p.IsDeleted && p.StockQuantity > 0)
+                .Include(p => p.categry)
+                .Include(p => p.ProductImages.Where(img => img.ImageInfo == null))
+                .OrderByDescending(p => p.CreatedDate)
+                .Take(10)
+                .ToListAsync();
+            
+            if (!newArrivals.Any())
+            {
+                return Content(""); // Return empty if no new arrivals
+            }
+            
+            return PartialView("_NewArrivalsSection", newArrivals);
+        }
+
+        [HttpGet]
+        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> LoadServicesSection()
+        {
+            var activeServices = await _dbContext.ServiceSubscriptions
+                .AsNoTracking()
+                .Where(s => s.IsActive)
+                .Include(s => s.ServiceImages)
+                .OrderBy(s => s.DisplayOrder)
+                .ThenByDescending(s => s.CreatedDate)
+                .Take(3)
+                .ToListAsync();
+            
+            if (!activeServices.Any())
+            {
+                return Content(""); // Return empty if no services
+            }
+            
+            // Load active offers for each service
+            var serviceIds = activeServices.Select(s => s.Id).ToList();
+            var now = DateTime.Now;
+            var activeOffers = await _dbContext.ServiceOffers
+                .AsNoTracking()
+                .Where(o => serviceIds.Contains(o.ServiceSubscriptionId) 
+                    && o.IsActive 
+                    && o.StartDate <= now 
+                    && o.EndDate >= now)
+                .ToListAsync();
+            
+            // Group offers by service ID
+            var offersByService = activeOffers
+                .GroupBy(o => o.ServiceSubscriptionId)
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(o => o.DiscountValue).ToList());
+            
+            ViewBag.ActiveOffersByService = offersByService;
+            
+            return PartialView("_ServicesSection", activeServices);
+        }
+
+        [HttpGet]
+        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> LoadCategoryProductsSection()
+        {
+            var allCategories = await _dbContext.Categries
+                .AsNoTracking()
+                .Where(c => !c.IsDeleted)
+                .ToListAsync();
+            
+            var categoryIds = allCategories.Take(6).Select(c => c.Id).ToList();
+            
+            if (!categoryIds.Any())
+            {
+                return Content(""); // Return empty if no categories
+            }
+            
+            var allCategoryProducts = (await _dbContext.Products
+                .AsNoTracking()
+                .Where(p => !p.IsDeleted && categoryIds.Contains(p.CategryId) && p.StockQuantity > 0)
+                .Include(p => p.ProductImages.Where(img => img.ImageInfo == null))
+                .ToListAsync())
+                .GroupBy(p => p.CategryId)
+                .ToDictionary(g => g.Key, g => g.Take(4).ToList());
+            
+            var categoryProductsMap = new Dictionary<int, List<Product>>();
+            var hasAnyProducts = false;
+            foreach (var category in allCategories.Take(6))
+            {
+                var products = allCategoryProducts.ContainsKey(category.Id) 
+                    ? allCategoryProducts[category.Id] 
+                    : new List<Product>();
+                categoryProductsMap[category.Id] = products;
+                if (products.Any())
+                {
+                    hasAnyProducts = true;
+                }
+            }
+            
+            if (!hasAnyProducts)
+            {
+                return Content(""); // Return empty if no products in any category
+            }
+            
+            ViewBag.Categories = allCategories.Take(6).ToList();
+            return PartialView("_CategoryProductsSection", categoryProductsMap);
+        }
+
+        // PERFORMANCE: Helper method to get discounted products asynchronously
+        private async Task<List<Product>> GetDiscountedProductsAsync()
+        {
+            // First get products with main product discounts (limit early)
+            var mainProductDiscounts = await _dbContext.Products
+                .AsNoTracking()
+                .Where(p => !p.IsDeleted && p.StockQuantity > 0 && p.ListPrice > p.Price && p.ListPrice > 0)
+                .Include(p => p.ProductImages.Where(img => img.ImageInfo == null))
+                .OrderByDescending(p => ((p.ListPrice - p.Price) / p.ListPrice) * 100)
+                .Take(20)
+                .Select(p => new { 
+                    Product = p, 
+                    Discount = (double)((p.ListPrice - p.Price) / p.ListPrice) * 100 
+                })
+                .ToListAsync();
+            
+            var discountedProductsList = mainProductDiscounts
+                .Select(item => (item.Product, item.Discount))
+                .ToList();
+            
+            // Get products with variant discounts (optimized query with better filtering)
+            if (discountedProductsList.Count < 20)
+            {
+                var variantDiscountProducts = await _dbContext.Products
+                    .AsNoTracking()
+                    .Where(p => !p.IsDeleted && p.StockQuantity > 0 && p.ProductType == BulkyBook.Models.ProductType.Variable)
+                    .Include(p => p.ProductImages.Where(img => img.ImageInfo == null))
+                    .Include(p => p.ProductVariants.Where(v => !v.IsDeleted && v.StockQuantity > 0 && v.ListPrice.HasValue && v.ListPrice > v.Price))
+                    .Take(50) // Limit early to reduce memory usage
+                    .ToListAsync();
+                
+                var variantProductsWithDiscounts = variantDiscountProducts
+                    .Where(p => p.ProductVariants != null && p.ProductVariants.Any())
+                    .Select(p => new { 
+                        Product = p, 
+                        Discount = (double)(p.ProductVariants
+                            .Where(v => v.ListPrice.HasValue && v.ListPrice > v.Price && v.StockQuantity > 0)
+                            .Select(v => v.ListPrice > 0 ? ((v.ListPrice.Value - v.Price) / v.ListPrice.Value) * 100 : 0)
+                            .DefaultIfEmpty(0)
+                            .Max())
+                    })
+                    .Where(x => x.Discount > 0)
+                    .OrderByDescending(x => x.Discount)
+                    .Take(20 - discountedProductsList.Count)
+                    .ToList();
+                
+                foreach (var item in variantProductsWithDiscounts)
+                {
+                    discountedProductsList.Add((item.Product, item.Discount));
+                }
+            }
+            
+            // Get top 20 by discount (already sorted)
+            return discountedProductsList
+                .OrderByDescending(x => x.Discount)
+                .Take(20)
+                .Select(x => x.Product)
+                .ToList();
         }
 
         [HttpGet]
@@ -312,7 +577,8 @@ namespace BulkyBook.Areas.Customer.Controllers
         {
             // PERFORMANCE: Use AsNoTracking for read-only queries (faster, less memory)
             // Only include necessary properties to reduce data transfer
-            var query = _unitOfWork.product.GetAllAsNoTracking(includeProperties: "categry,ProductImages").AsQueryable();
+            // Include ProductVariants to calculate minimum price for products with variants
+            var query = _unitOfWork.product.GetAllAsNoTracking(includeProperties: "categry,ProductImages,ProductVariants").AsQueryable();
             
             // Apply filters at database level (not in memory)
             if (categoryId.HasValue && categoryId.Value > 0)
@@ -380,34 +646,93 @@ namespace BulkyBook.Areas.Customer.Controllers
             
             var productsToSkip = page * pageSize;
             
-            // PERFORMANCE: Use projection to select only needed fields at database level
-            // This reduces data transfer and memory usage significantly
-            var productsQuery = query
+            // Load products with variants to calculate minimum prices
+            var productsList = query
                 .Skip(productsToSkip)
                 .Take(pageSize)
-                .Select(p => new
+                .ToList();
+            
+            // Calculate minimum prices and show price flags for products
+            var minPricesDict = new Dictionary<int, double>();
+            var showPriceFlagsDict = new Dictionary<int, bool>();
+            var allVariantsOutOfStockDict = new Dictionary<int, bool>();
+            
+            foreach (var product in productsList)
+            {
+                bool shouldShowPrice = false;
+                bool allVariantsOutOfStock = false;
+                double? displayPrice = null;
+                
+                if (product.ProductType == BulkyBook.Models.ProductType.Variable && 
+                    product.ProductVariants != null && 
+                    product.ProductVariants.Any(v => !v.IsDeleted))
                 {
-                    // Select only needed fields at database level (faster, less memory)
+                    // Product has variants - check if any variant is in stock
+                    var inStockVariants = product.ProductVariants
+                        .Where(v => !v.IsDeleted && v.StockQuantity > 0)
+                        .ToList();
+                    
+                    if (inStockVariants.Any())
+                    {
+                        // Show minimum price of in-stock variants
+                        var minVariantPrice = inStockVariants.Min(v => (double)v.Price);
+                        minPricesDict[product.Id] = minVariantPrice;
+                        displayPrice = minVariantPrice;
+                        shouldShowPrice = true;
+                        allVariantsOutOfStock = false;
+                    }
+                    else
+                    {
+                        // All variants are out of stock - show "Out of Stock" message
+                        allVariantsOutOfStock = true;
+                        shouldShowPrice = false;
+                    }
+                }
+                else
+                {
+                    // Simple product - only show price if in stock
+                    if (product.StockQuantity > 0)
+                    {
+                        shouldShowPrice = true;
+                        displayPrice = product.Price;
+                    }
+                    // If out of stock, price will be hidden (no special flag needed for simple products)
+                }
+                
+                showPriceFlagsDict[product.Id] = shouldShowPrice;
+                if (allVariantsOutOfStock)
+                {
+                    allVariantsOutOfStockDict[product.Id] = true;
+                }
+                if (displayPrice.HasValue && shouldShowPrice)
+                {
+                    minPricesDict[product.Id] = displayPrice.Value;
+                }
+            }
+            
+            // Transform to JSON format
+            var products = productsList.Select(p => new
+            {
                     id = p.Id,
                     title = p.Title,
                     titleAr = p.TitleAr,
-                    price = p.Price,
+                price = minPricesDict.ContainsKey(p.Id) ? minPricesDict[p.Id] : p.Price,
                     listPrice = p.ListPrice,
                     stockQuantity = p.StockQuantity,
                     minimumStockAlert = p.MinimumStockAlert,
                     imageUrl = p.ImageUrl,
-                    productType = p.ProductType,
+                productType = (int)p.ProductType,
+                hasVariants = p.ProductType == BulkyBook.Models.ProductType.Variable && minPricesDict.ContainsKey(p.Id),
+                shouldShowPrice = showPriceFlagsDict.ContainsKey(p.Id) ? showPriceFlagsDict[p.Id] : (p.StockQuantity > 0),
+                allVariantsOutOfStock = allVariantsOutOfStockDict.ContainsKey(p.Id) && allVariantsOutOfStockDict[p.Id],
                     categoryId = p.categry != null ? (int?)p.categry.Id : null,
                     categoryName = p.categry != null ? p.categry.Name : null,
                     productImages = p.ProductImages
-                        .Where(pi => pi.ImageInfo != "INFO_IMAGE")
+                        .Where(img => img.ImageInfo == null)
                         .OrderBy(pi => pi.DisplayOrder)
                         .Select(pi => pi.ImageUrl)
                         .ToList()
-                });
-            
-            // Execute query and get products
-            var products = productsQuery.ToList();
+            }).ToList();
             
             // PERFORMANCE: Only count if we need to determine hasMore
             // Use a lightweight approach - check if we got a full page
@@ -440,7 +765,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 totalProducts = productsToSkip + products.Count;
             }
 
-            // Transform to final JSON format (already projected, minimal transformation needed)
+            // Transform to final JSON format
             var productsJson = products.Select(p => new
             {
                 id = p.id,
@@ -452,11 +777,25 @@ namespace BulkyBook.Areas.Customer.Controllers
                 minimumStockAlert = p.minimumStockAlert,
                 imageUrl = p.imageUrl,
                 productType = p.productType,
+                hasVariants = p.hasVariants,
+                shouldShowPrice = p.shouldShowPrice,
+                allVariantsOutOfStock = p.allVariantsOutOfStock,
                 categry = p.categoryId.HasValue ? new { id = p.categoryId.Value, name = p.categoryName } : null,
                 productImages = p.productImages ?? new List<string>()
             }).ToList();
 
             return Json(new { products = productsJson, hasMore = hasMore, totalCount = totalProducts });
+        }
+
+        [HttpGet]
+        public IActionResult FilterProducts(
+            int? categoryId = null, string searchTerm = null, string sortBy = null,
+            decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
+            string availability = null)
+        {
+            // Use the same logic as LoadMoreProducts but for page 0 (first page) - just call it directly
+            return LoadMoreProducts(page: 0, pageSize: 20, categoryId: categoryId, searchTerm: searchTerm, 
+                sortBy: sortBy, minPrice: minPrice, maxPrice: maxPrice, inStock: inStock, availability: availability);
         }
 
         [HttpPost]
@@ -781,19 +1120,27 @@ namespace BulkyBook.Areas.Customer.Controllers
         
         // Performance: Cache product details for 5 minutes (product data changes infrequently)
         [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "productId" }, Location = ResponseCacheLocation.Any)]
-        public IActionResult Details(int productId)
+        public async Task<IActionResult> Details(int productId)
         {
+            // PERFORMANCE: Check purchase status efficiently with direct query
             var hasPurchased = false;
             try
             {
-                var claimsIdentity = (ClaimsIdentity)User?.Identity!;
-                var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                hasPurchased = _unitOfWork.OrderDetail.GetAll(
-                    od => od.ProductId == productId,
-                    includeProperties: "OrderHeader"
-                ).Any(od => od.OrderHeader != null &&
-                            od.OrderHeader.ApplicationUserId == userId &&
-                            od.OrderHeader.OrderStatus == SD.StatusDelivered);
+                if (User?.Identity?.IsAuthenticated == true)
+                {
+                    var claimsIdentity = (ClaimsIdentity)User.Identity;
+                    var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    if (!string.IsNullOrEmpty(userId))
+                    {
+                        // PERFORMANCE: Direct query instead of loading all OrderDetails
+                        hasPurchased = await _dbContext.orderDetails
+                            .AsNoTracking()
+                            .AnyAsync(od => od.ProductId == productId 
+                                && od.OrderHeader != null 
+                                && od.OrderHeader.ApplicationUserId == userId 
+                                && od.OrderHeader.OrderStatus == SD.StatusDelivered);
+                    }
+                }
             }
             catch
             {
@@ -801,18 +1148,19 @@ namespace BulkyBook.Areas.Customer.Controllers
                 hasPurchased = false;
             }
 
-            // PERFORMANCE: Use direct context query with AsNoTracking for read-only
-            var product = _dbContext.Products
+            // PERFORMANCE: Optimized query - load product with only necessary includes
+            var product = await _dbContext.Products
                 .AsNoTracking()
+                .Where(p => p.Id == productId && !p.IsDeleted)
                 .Include(p => p.categry)
-                .Include(p => p.ProductImages)
-                .Include(p => p.ProductOptions.Where(o => !o.IsDeleted))
-                    .ThenInclude(o => o.OptionValues.Where(ov => !ov.IsDeleted))
+                .Include(p => p.ProductImages.OrderBy(pi => pi.DisplayOrder))
+                .Include(p => p.ProductOptions.Where(o => !o.IsDeleted).OrderBy(o => o.DisplayOrder))
+                    .ThenInclude(o => o.OptionValues.Where(ov => !ov.IsDeleted).OrderBy(ov => ov.DisplayOrder))
                 .Include(p => p.ProductVariants.Where(v => !v.IsDeleted))
-                    .ThenInclude(v => v.VariantOptionValues)
+                    .ThenInclude(v => v.VariantOptionValues.Where(vov => vov.OptionValue != null && !vov.OptionValue.IsDeleted && vov.OptionValue.ProductOption != null && !vov.OptionValue.ProductOption.IsDeleted))
                         .ThenInclude(vov => vov.OptionValue)
                             .ThenInclude(ov => ov.ProductOption)
-                .FirstOrDefault(p => p.Id == productId && !p.IsDeleted);
+                .FirstOrDefaultAsync();
             
             // Check if product is deleted
             if (product == null)
@@ -820,49 +1168,19 @@ namespace BulkyBook.Areas.Customer.Controllers
                 return NotFound();
             }
             
-            // PERFORMANCE: Filter already done in Include, but ensure in-memory filtering for safety
-            if (product.ProductOptions != null)
-            {
-                product.ProductOptions = product.ProductOptions.Where(o => !o.IsDeleted).ToList();
-                foreach (var option in product.ProductOptions)
-                {
-                    if (option.OptionValues != null)
-                    {
-                        option.OptionValues = option.OptionValues.Where(ov => !ov.IsDeleted).OrderBy(ov => ov.DisplayOrder).ToList();
-                    }
-                }
-            }
-            
-            if (product.ProductVariants != null)
-            {
-                product.ProductVariants = product.ProductVariants.Where(v => !v.IsDeleted).ToList();
-                foreach (var variant in product.ProductVariants)
-                {
-                    if (variant.VariantOptionValues != null)
-                    {
-                        variant.VariantOptionValues = variant.VariantOptionValues
-                            .Where(vov => vov.OptionValue != null 
-                                && !vov.OptionValue.IsDeleted
-                                && vov.OptionValue.ProductOption != null
-                                && !vov.OptionValue.ProductOption.IsDeleted)
-                            .ToList();
-                    }
-                }
-            }
-            
             ShoppingCart cart = new()
             {
                 product = product,
-                Count=1,
-                ProductId=productId,
-                CanReview= hasPurchased
+                Count = 1,
+                ProductId = productId,
+                CanReview = hasPurchased
             };
 
-            // Get SEO data
+            // PERFORMANCE: Get SEO data and ratings in parallel
             var baseUrl = _configuration["SiteSettings:BaseUrl"] ?? Request.Scheme + "://" + Request.Host;
             var seo = SEOHelper.GetProductSEO(product, baseUrl, _localizer["Culture"]?.ToString() ?? "en");
             
-            // Get product rating for structured data
+            // PERFORMANCE: Get product rating and review count efficiently (single query if possible)
             var averageRating = _unitOfWork.review.GetAverageRating(productId);
             var reviewCount = _unitOfWork.review.GetReviewCount(productId);
             if (averageRating > 0 && reviewCount > 0)

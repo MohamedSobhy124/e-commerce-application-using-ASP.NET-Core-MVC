@@ -1,0 +1,135 @@
+@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
+@model IEnumerable<BulkyBook.Models.Product>
+@inject IConfiguration Configuration
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var newArrivals = Model ?? Enumerable.Empty<BulkyBook.Models.Product>();
+    var hasNewArrivals = newArrivals.Any();
+}
+
+@if (hasNewArrivals)
+{
+    <section class="new-arrivals-section">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">
+                        <i class="bi bi-star-fill"></i>
+                        @Localizer["NewArrivals"]
+                    </h2>
+                    <p class="section-subtitle">@Localizer["LatestProducts"]</p>
+                </div>
+            </div>
+            
+            <div id="newArrivalsCarousel" class="carousel slide product-carousel" data-bs-ride="carousel" data-bs-interval="8000" data-bs-touch="true">
+                <div class="carousel-inner">
+                    @{
+                        var productsList = newArrivals.ToList();
+                        var itemsPerSlide = 4; // Fixed 4 items per slide like best sellers
+                        var totalSlides = 0; // Initialize total slides
+                        
+                        // Ensure we have products before creating slides
+                        if (productsList.Count > 0)
+                        {
+                            // Calculate total slides - always create at least one slide
+                            totalSlides = productsList.Count < itemsPerSlide 
+                                ? 1 
+                                : (int)Math.Ceiling(productsList.Count / (double)itemsPerSlide);
+                            
+                            for (int slideIndex = 0; slideIndex < totalSlides; slideIndex++)
+                            {
+                                var slideProducts = new List<Product>();
+                                
+                                // Use circular wrapping to always get exactly 4 items per slide
+                                for (int i = 0; i < itemsPerSlide; i++)
+                                {
+                                    var productIndex = (slideIndex * itemsPerSlide + i) % productsList.Count;
+                                    slideProducts.Add(productsList[productIndex]);
+                                }
+                                
+                                if (!slideProducts.Any()) continue;
+                            
+                            <div class="carousel-item @(slideIndex == 0 ? "active" : "")">
+                                <div class="row g-3 g-md-4">
+                                    @foreach (var product in slideProducts)
+                                    {
+                                        var productName = currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) 
+                                            ? product.TitleAr 
+                                            : product.Title;
+                                        
+                                        var discount = product.ListPrice > 0 && product.ListPrice > product.Price
+                                            ? (int)((product.ListPrice - product.Price) / product.ListPrice * 100)
+                                            : 0;
+                                        
+                                        var productImages = product.ProductImages != null && product.ProductImages.Any() 
+                                            ? product.ProductImages.OrderBy(pi => pi.DisplayOrder).Select(pi => pi.ImageUrl).ToList()
+                                            : new List<string>();
+                                        
+                                        if (!productImages.Any() && !string.IsNullOrEmpty(product.ImageUrl))
+                                        {
+                                            productImages.Add(product.ImageUrl);
+                                        }
+                                        
+                                        var productImage = productImages.FirstOrDefault() ?? "/images/no-image.png";
+                                        
+                                        <div class="col-12 col-sm-6 col-lg-3">
+                                            <div class="product-card-simple h-100">
+                                                <div class="product-badge-new">
+                                                    <i class="bi bi-sparkles"></i> @Localizer["New"]
+                                                </div>
+                                                @if (discount > 0)
+                                                {
+                                                    <div class="product-badge-discount">-@discount%</div>
+                                                }
+                                                <a href="@Url.Action("Details", "Home", new { area = "Customer", productId = product.Id })" class="product-card-link">
+                                                    <div class="product-card-image">
+                                                        <img src="@productImage" alt="@productName" class="img-fluid" loading="lazy" />
+                                                    </div>
+                                                    <div class="product-card-content">
+                                                        <h3 class="product-card-title">@productName</h3>
+                                                        <div class="product-card-price">
+                                                            @if (discount > 0 && product.ListPrice > 0)
+                                                            {
+                                                                <span class="product-price-old">@Html.Raw(currencySymbol)@product.ListPrice.ToString("N2")</span>
+                                                            }
+                                                            <span class="product-price-current">@Html.Raw(currencySymbol)@product.Price.ToString("N2")</span>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            }
+                        }
+                    }
+                </div>
+                
+                @if (totalSlides > 1)
+                {
+                    <button class="carousel-control-prev" type="button" data-bs-target="#newArrivalsCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">@Localizer["Previous"]</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#newArrivalsCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">@Localizer["Next"]</span>
+                    </button>
+                    
+                    <div class="carousel-indicators">
+                        @for (int i = 0; i < totalSlides; i++)
+                        {
+                            <button type="button" data-bs-target="#newArrivalsCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-label="Slide @(i + 1)"></button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+

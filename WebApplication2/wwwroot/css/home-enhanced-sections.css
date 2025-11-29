@@ -146,6 +146,25 @@
     padding: 4rem 0;
     background: white;
     margin: 2rem 0;
+    /* Allow vertical scrolling to pass through */
+    touch-action: pan-y !important; /* Force allow vertical scrolling */
+    overscroll-behavior-y: none !important; /* Force allow vertical scroll to pass through */
+    overflow: visible !important; /* Ensure nothing is clipped */
+    position: relative; /* Ensure proper stacking */
+}
+
+@media (max-width: 767px) {
+    .best-sellers-section,
+    .new-arrivals-section {
+        touch-action: pan-y !important;
+        overscroll-behavior-y: none !important;
+        overflow: visible !important;
+    }
+    
+    .best-sellers-section *,
+    .new-arrivals-section * {
+        touch-action: pan-y pan-x !important; /* Allow both directions on all children */
+    }
 }
 
 .best-sellers-section {

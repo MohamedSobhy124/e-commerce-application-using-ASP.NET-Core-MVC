@@ -16,17 +16,24 @@
     
     if (modernHeader || heroSearchBoxSticky) {
         const headerElement = modernHeader || heroSearchBoxSticky;
+        let ticking = false;
         window.addEventListener('scroll', function() {
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
-            if (scrollTop > 50) {
-                headerElement.classList.add('scrolled');
-            } else {
-                headerElement.classList.remove('scrolled');
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    
+                    if (scrollTop > 50) {
+                        headerElement.classList.add('scrolled');
+                    } else {
+                        headerElement.classList.remove('scrolled');
+                    }
+                    
+                    lastScrollTop = scrollTop;
+                    ticking = false;
+                });
+                ticking = true;
             }
-            
-            lastScrollTop = scrollTop;
-        });
+        }, { passive: true });
     }
 
     // ===================================
@@ -115,7 +122,10 @@
         hideSearchSuggestions();
         // Clear current filters and set only search term
         currentFilters = { searchTerm: searchTerm };
-        loadProductsWithFilters({ searchTerm: searchTerm }, true);
+        // Use AJAX without updating URL
+        if (typeof loadProductsWithFilters === 'function') {
+            loadProductsWithFilters({ searchTerm: searchTerm }, true, false);
+        }
     }
     
     // Function to smoothly scroll to products section
@@ -589,8 +599,8 @@
             card.style.animationDelay = `${index * 0.05}s`;
         });
         
-        // Update URL without page reload
-        updateURL(currentFilters);
+        // Don't update URL - use pure AJAX without URL changes
+        // updateURL(currentFilters); // Disabled to prevent URL updates
         
         // Re-initialize any carousels or other interactive elements
         setTimeout(() => {
@@ -711,17 +721,18 @@
         loadProductsWithFilters(currentFilters, false);
     };
     
-    function updateURL(filters) {
-        const params = new URLSearchParams();
-        Object.keys(filters).forEach(key => {
-            if (filters[key]) {
-                params.append(key, filters[key]);
-            }
-        });
-        
-        const newURL = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-        window.history.pushState({ path: newURL }, '', newURL);
-    }
+    // Disabled - don't update URL, use pure AJAX
+    // function updateURL(filters) {
+    //     const params = new URLSearchParams();
+    //     Object.keys(filters).forEach(key => {
+    //         if (filters[key]) {
+    //             params.append(key, filters[key]);
+    //         }
+    //     });
+    //     
+    //     const newURL = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    //     window.history.pushState({ path: newURL }, '', newURL);
+    // }
     
     function removeFilter(filterName) {
         delete currentFilters[filterName];
@@ -738,17 +749,22 @@
         if (infiniteScrollEnabled) return;
         infiniteScrollEnabled = true;
         
+        let scrollTicking = false;
         window.addEventListener('scroll', function() {
-            if (isLoading || !hasMoreProducts) return;
+            if (isLoading || !hasMoreProducts || scrollTicking) return;
             
-            const scrollPosition = window.innerHeight + window.scrollY;
-            const pageHeight = document.documentElement.scrollHeight;
-            const threshold = 200; // Load when 200px from bottom
-            
-            if (scrollPosition >= pageHeight - threshold) {
-                loadMoreProducts();
-            }
-        });
+            scrollTicking = true;
+            window.requestAnimationFrame(() => {
+                const scrollPosition = window.innerHeight + window.scrollY;
+                const pageHeight = document.documentElement.scrollHeight;
+                const threshold = 200; // Load when 200px from bottom
+                
+                if (scrollPosition >= pageHeight - threshold) {
+                    loadMoreProducts();
+                }
+                scrollTicking = false;
+            });
+        }, { passive: true });
     }
     
     // Enable infinite scroll on mobile by default

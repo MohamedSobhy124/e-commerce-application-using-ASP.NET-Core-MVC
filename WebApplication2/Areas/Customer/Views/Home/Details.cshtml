@@ -437,32 +437,52 @@
                                             @if (hasDescription)
                                             {
                                                 <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
-                                                    <div class="tab-content-body">
-                                                        @Html.Raw(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.DescriptionAr) ? Model.product.DescriptionAr : Model.product.Description)
+                                                    <div class="tab-content-body preserve-line-breaks">
+                                                        @{
+                                                            var descriptionText = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.DescriptionAr) 
+                                                                ? Model.product.DescriptionAr 
+                                                                : Model.product.Description;
+                                                        }
+                                                        @Html.Raw(descriptionText)
                                                     </div>
                                                 </div>
                                             }
                                             @if (hasSuggestedUse)
                                             {
                                                 <div class="tab-pane fade @(!hasDescription ? "show active" : "")" id="suggesteduse" role="tabpanel" aria-labelledby="suggesteduse-tab">
-                                                    <div class="tab-content-body">
-                                                        @Html.Raw(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.SuggestedUseAr) ? Model.product.SuggestedUseAr : Model.product.SuggestedUse)
+                                                    <div class="tab-content-body preserve-line-breaks">
+                                                        @{
+                                                            var suggestedUseText = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.SuggestedUseAr) 
+                                                                ? Model.product.SuggestedUseAr 
+                                                                : Model.product.SuggestedUse;
+                                                        }
+                                                        @Html.Raw(suggestedUseText)
                                                     </div>
                                                 </div>
                                             }
                                             @if (hasHealthNotes)
                                             {
                                                 <div class="tab-pane fade @(!hasDescription && !hasSuggestedUse ? "show active" : "")" id="healthnotes" role="tabpanel" aria-labelledby="healthnotes-tab">
-                                                    <div class="tab-content-body">
-                                                        @Html.Raw(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.HealthNotesAr) ? Model.product.HealthNotesAr : Model.product.HealthNotes)
+                                                    <div class="tab-content-body preserve-line-breaks">
+                                                        @{
+                                                            var healthNotesText = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.HealthNotesAr) 
+                                                                ? Model.product.HealthNotesAr 
+                                                                : Model.product.HealthNotes;
+                                                        }
+                                                        @Html.Raw(healthNotesText)
                                                     </div>
                                                 </div>
                                             }
                                             @if (hasSpecification)
                                             {
                                                 <div class="tab-pane fade @(!hasDescription && !hasSuggestedUse && !hasHealthNotes ? "show active" : "")" id="specification" role="tabpanel" aria-labelledby="specification-tab">
-                                                    <div class="tab-content-body">
-                                                        @Html.Raw(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.SpecificationAr) ? Model.product.SpecificationAr : Model.product.Specification)
+                                                    <div class="tab-content-body preserve-line-breaks">
+                                                        @{
+                                                            var specificationText = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.SpecificationAr) 
+                                                                ? Model.product.SpecificationAr 
+                                                                : Model.product.Specification;
+                                                        }
+                                                        @Html.Raw(specificationText)
                                                     </div>
                                                 </div>
                                             }

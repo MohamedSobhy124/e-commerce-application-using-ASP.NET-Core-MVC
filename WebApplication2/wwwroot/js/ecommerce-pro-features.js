@@ -461,17 +461,23 @@
         `;
         document.body.appendChild(stickyBar);
         
-        // Show/hide on scroll
+        // Show/hide on scroll (optimized for mobile)
         let lastScroll = 0;
+        let scrollTicking = false;
         window.addEventListener('scroll', () => {
-            const currentScroll = window.pageYOffset;
-            if (currentScroll > 500 && currentScroll > lastScroll) {
-                stickyBar.classList.add('active');
-            } else if (currentScroll < lastScroll - 50) {
-                stickyBar.classList.remove('active');
-            }
-            lastScroll = currentScroll;
-        });
+            if (scrollTicking) return;
+            scrollTicking = true;
+            window.requestAnimationFrame(() => {
+                const currentScroll = window.pageYOffset;
+                if (currentScroll > 500 && currentScroll > lastScroll) {
+                    stickyBar.classList.add('active');
+                } else if (currentScroll < lastScroll - 50) {
+                    stickyBar.classList.remove('active');
+                }
+                lastScroll = currentScroll;
+                scrollTicking = false;
+            });
+        }, { passive: true });
     }
 
     // Quantity change function (global)

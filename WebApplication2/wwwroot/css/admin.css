@@ -278,6 +278,18 @@
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
+/* Textarea specific styling - preserve line breaks */
+textarea.admin-form-control {
+    min-height: 120px;
+    resize: vertical;
+    white-space: pre-wrap; /* Preserves line breaks and spaces */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-family: inherit; /* Use same font as other inputs */
+    line-height: 1.6;
+    padding: 0.75rem 1rem;
+}
+
 .admin-form-select {
     width: 100%;
     padding: 0.75rem 1rem;

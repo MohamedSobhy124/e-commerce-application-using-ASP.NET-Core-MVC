@@ -78,7 +78,10 @@
     @RenderSection("StructuredData", required: false)
     <!-- Performance: Use CDN for Bootstrap (faster, globally cached) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-	<link rel="icon" type="image/png" href="~/Images/Products/logo_white_bg.png" />
+	<!-- Favicon and Logo -->
+	<link rel="icon" type="image/png" href="@(baseUrl)/Images/Products/logo_white_bg.png" />
+	<link rel="apple-touch-icon" href="@(baseUrl)/Images/Products/logo_white_bg.png" />
+	<link rel="shortcut icon" href="@(baseUrl)/Images/Products/logo_white_bg.png" />
     <!-- Removed duplicate local Bootstrap CSS - using CDN only -->
     <link rel="stylesheet" href="~/css/order-details.css" asp-append-version="true" />
 
@@ -114,6 +117,9 @@
     <link rel="stylesheet" href="~/css/home-enhanced-sections.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/home-compact-mobile.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/home-professional-enhancements.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/lazy-loaded-sections.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/unified-responsive-carousels.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/mobile-carousel-enhancements.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BulkyBook.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/modern-product-grid.css" asp-append-version="true" />
 
@@ -420,6 +426,8 @@
     <!-- Performance: Use CDN for common libraries (faster, globally cached) -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script src="~/js/enhanced-carousels.js" asp-append-version="true"></script>
+    <script src="~/js/product-carousel-touch-fix.js" asp-append-version="true"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
     <script src="~/js/toastr-config.js" asp-append-version="true"></script>
@@ -671,6 +679,35 @@
             };
         })();
     </script>
+
+    <!-- Floating Call Button -->
+    @{
+        var callPhone = Configuration["Call:PhoneNumber"] ?? Configuration["SiteSettings:Business:Phone"] ?? "971527383841";
+        // Keep original phone for display
+        var callPhoneDisplay = callPhone;
+        // Remove spaces, dashes, and parentheses for tel: link, but keep + if present
+        var callPhoneFormatted = callPhone.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "");
+        // Ensure it starts with + if it doesn't already
+        if (!callPhoneFormatted.StartsWith("+") && !callPhoneFormatted.StartsWith("tel:"))
+        {
+            callPhoneFormatted = "+" + callPhoneFormatted;
+        }
+        var callUrl = $"tel:{callPhoneFormatted}";
+        var callEnabled = Configuration.GetValue<bool>("Call:Enabled", true);
+        var callTooltipText = currentCulture == "ar" ? "اتصل بنا" : "Call Us";
+    }
+    @if (callEnabled)
+    {
+        <a href="@callUrl" 
+           class="floating-call-btn call-pulse"
+           title="@callTooltipText - @callPhoneDisplay">
+            <i class="bi bi-telephone-fill"></i>
+            <span class="call-tooltip">
+                <span class="call-tooltip-text">@callTooltipText</span>
+                <span class="call-tooltip-phone">@callPhoneDisplay</span>
+            </span>
+        </a>
+    }
 
     <!-- Floating WhatsApp Button -->
     @{

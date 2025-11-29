@@ -2255,19 +2255,11 @@
   <data name="Filters" xml:space="preserve">
     <value>الفلتر</value>
   </data>
-  <data name="InstallmentTabby" xml:space="preserve">
-    <value>ابدأ من {0}/شهر أو 4 دفعات بدون فائدة</value>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="InstallmentTabby" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
   </data>
-  <data name="InstallmentTamara" xml:space="preserve">
-    <value>أو قسّط على 4 دفعات بقيمة {0}</value>
-  </data>
-  <data name="InstallmentTamaraDetails" xml:space="preserve">
-    <value>- بدون رسوم تأخير، متوافق مع الشريعة! المزيد من الخيارات</value>
-  </data>
-  <data name="Tabby" xml:space="preserve">
-    <value>تابي</value>
-  </data>
-  <data name="Tamara" xml:space="preserve">
-    <value>تمارا</value>
+  <data name="DiscountSave" xml:space="preserve">
+    <value>وفر</value>
   </data>
 </root>

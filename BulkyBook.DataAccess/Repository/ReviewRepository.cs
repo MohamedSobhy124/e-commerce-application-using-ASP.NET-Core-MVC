@@ -23,14 +23,13 @@ namespace BulkyBook.DataAccess.Repository
 
         public double GetAverageRating(int productId)
         {
-            var reviews = _db.Reviews
+            // PERFORMANCE: Calculate average directly in database instead of loading all reviews
+            var average = _db.Reviews
                 .Where(r => r.ProductId == productId && r.IsApproved)
-                .ToList();
+                .Select(r => (double?)r.Rating)
+                .Average();
 
-            if (reviews.Count == 0)
-                return 0;
-
-            return Math.Round(reviews.Average(r => r.Rating), 1);
+            return average.HasValue ? Math.Round(average.Value, 1) : 0;
         }
 
         public int GetReviewCount(int productId)
@@ -52,9 +51,12 @@ namespace BulkyBook.DataAccess.Repository
             if (productIds == null || !productIds.Any())
                 return new Dictionary<int, (double, int)>();
 
+            // Remove duplicates to prevent dictionary key conflicts
+            var uniqueProductIds = productIds.Distinct().ToList();
+
             // Get all reviews for the products in one query
             var reviews = _db.Reviews
-                .Where(r => productIds.Contains(r.ProductId) && r.IsApproved)
+                .Where(r => uniqueProductIds.Contains(r.ProductId) && r.IsApproved)
                 .GroupBy(r => r.ProductId)
                 .Select(g => new
                 {
@@ -65,7 +67,7 @@ namespace BulkyBook.DataAccess.Repository
                 .ToList();
 
             // Create dictionary with all product IDs (including those with no reviews)
-            var result = productIds.ToDictionary(
+            var result = uniqueProductIds.ToDictionary(
                 id => id,
                 id =>
                 {

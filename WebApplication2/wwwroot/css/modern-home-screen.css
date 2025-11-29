@@ -214,7 +214,7 @@
 
 .hero-search-box-sticky .hero-search-input {
     width: 100%;
-    padding: 1rem 1.5rem 1rem 3.5rem;
+    padding: 1rem 3.5rem 1rem 3.5rem;
     border: none;
     border-radius: 50px;
     font-size: 1.05rem;
@@ -226,6 +226,34 @@
 
 .hero-search-box-sticky .hero-search-input::placeholder {
     color: var(--gray-400);
+}
+
+.hero-search-box-sticky .search-clear-btn {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--gray-400);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.hero-search-box-sticky .search-clear-btn:hover {
+    color: var(--gray-600);
+    background: var(--gray-100);
+}
+
+.hero-search-box-sticky .search-clear-btn:active {
+    transform: translateY(-50%) scale(0.9);
 }
 
 .hero-search-box-sticky .hero-header-actions {

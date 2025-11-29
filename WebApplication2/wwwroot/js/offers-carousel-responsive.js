@@ -1,29 +1,125 @@
-// Responsive Offers Carousel - Adjusts items per slide based on screen size
+// Responsive Carousel - Adjusts items per slide based on screen size
+// Supports both offers and category carousels
 (function() {
     'use strict';
     
-    function initResponsiveOffersCarousel() {
-        const carousel = document.getElementById('offersCarousel');
+    // Carousel configurations
+    // Note: offersCarousel is now handled server-side like bestSellersCarousel, so it's excluded from JavaScript reorganization
+    const carouselConfigs = [
+        {
+            carouselId: 'categoryCarousel',
+            cardSelector: '.category-card',
+            indicatorsClass: 'category-carousel-indicators',
+            containerId: 'categoryCarouselContainer' // Category carousel needs container for button conversion
+        }
+    ];
+    
+    function initResponsiveCarousel(config) {
+        // Skip offersCarousel - it's handled server-side like bestSellersCarousel
+        if (config.carouselId === 'offersCarousel') {
+            return;
+        }
+        
+        const carouselContainer = config.containerId ? document.getElementById(config.containerId) : null;
+        const carousel = document.getElementById(config.carouselId);
         if (!carousel) return;
         
-        const carouselInner = carousel.querySelector('.carousel-inner');
-        if (!carouselInner) return;
+        // Check if already converted to Bootstrap carousel
+        let carouselInner = carousel.querySelector('.carousel-inner');
+        let allCards = [];
         
-        // Store original HTML structure
-        const originalHTML = carouselInner.innerHTML;
-        if (!originalHTML) return;
-        
-        // Extract all offer cards from the original structure
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = originalHTML;
-        
-        // Find all offer cards - they are inside column divs (col-12 col-sm-6 col-lg-3)
-        // We need to get the actual .offer-card elements, not the column wrappers
-        let allCards = Array.from(tempDiv.querySelectorAll('.offer-card'));
-        
-        // If no cards found in temp div, try current DOM
-        if (allCards.length === 0) {
-            allCards = Array.from(carouselInner.querySelectorAll('.offer-card'));
+        // If no carousel-inner, we need to convert the existing structure
+        if (!carouselInner) {
+            // Extract all cards from the existing structure
+            allCards = Array.from(carousel.querySelectorAll(config.cardSelector));
+            
+            if (allCards.length === 0) {
+                return;
+            }
+            
+            // Store original card HTML
+            allCards = allCards.map(card => card.cloneNode(true));
+            
+            // Create Bootstrap carousel structure
+            carousel.className = 'carousel slide';
+            carousel.setAttribute('data-bs-ride', 'carousel');
+            carousel.setAttribute('data-bs-interval', '8000');
+            carousel.setAttribute('data-bs-pause', 'hover');
+            
+            // Clear existing content
+            carousel.innerHTML = '';
+            
+            // Create carousel-inner
+            carouselInner = document.createElement('div');
+            carouselInner.className = 'carousel-inner';
+            carousel.appendChild(carouselInner);
+            
+            // Update navigation buttons to use Bootstrap carousel (only for category carousel)
+            if (carouselContainer) {
+                const prevBtn = carouselContainer.querySelector('.carousel-nav.prev');
+                const nextBtn = carouselContainer.querySelector('.carousel-nav.next');
+                
+                if (prevBtn) {
+                    prevBtn.setAttribute('type', 'button');
+                    prevBtn.setAttribute('data-bs-target', `#${config.carouselId}`);
+                    prevBtn.setAttribute('data-bs-slide', 'prev');
+                    prevBtn.removeAttribute('onclick');
+                    // Preserve existing icon if it exists
+                    if (!prevBtn.querySelector('i')) {
+                        prevBtn.innerHTML = '<i class="bi bi-chevron-left"></i>';
+                    }
+                }
+                
+                if (nextBtn) {
+                    nextBtn.setAttribute('type', 'button');
+                    nextBtn.setAttribute('data-bs-target', `#${config.carouselId}`);
+                    nextBtn.setAttribute('data-bs-slide', 'next');
+                    nextBtn.removeAttribute('onclick');
+                    // Preserve existing icon if it exists
+                    if (!nextBtn.querySelector('i')) {
+                        nextBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+                    }
+                }
+            }
+        } else {
+            // Already Bootstrap carousel, extract cards from carousel-inner
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = carouselInner.innerHTML;
+            let extractedCards = Array.from(tempDiv.querySelectorAll(config.cardSelector));
+            
+            // If no cards found in temp div, try current DOM
+            if (extractedCards.length === 0) {
+                extractedCards = Array.from(carouselInner.querySelectorAll(config.cardSelector));
+            }
+            
+            // Deduplicate cards by extracting product ID from href (for offer cards)
+            const uniqueCards = [];
+            const seenIds = new Set();
+            
+            extractedCards.forEach(card => {
+                // Try to get product ID from the card's link
+                const link = card.querySelector('a[href*="productId"]');
+                if (link) {
+                    const href = link.getAttribute('href');
+                    const productIdMatch = href.match(/productId[=:](\d+)/);
+                    if (productIdMatch) {
+                        const productId = productIdMatch[1];
+                        if (!seenIds.has(productId)) {
+                            seenIds.add(productId);
+                            uniqueCards.push(card);
+                        }
+                    } else {
+                        // If no product ID found, use the card itself as identifier
+                        uniqueCards.push(card);
+                    }
+                } else {
+                    // If no link found, use the card itself
+                    uniqueCards.push(card);
+                }
+            });
+            
+            // Store original card HTML (deduplicated)
+            allCards = uniqueCards.map(card => card.cloneNode(true));
         }
         
         if (allCards.length === 0) {
@@ -49,10 +145,12 @@
         function reorganizeSlides() {
             const newItemsPerSlide = getItemsPerSlide();
             
-            // Always reorganize on mobile/tablet to ensure proper structure
+            // Always reorganize if items per slide changed, no carousel items exist, or on mobile/tablet
+            // Also reorganize on desktop to ensure wrapping works
             const shouldReorganize = newItemsPerSlide !== currentItemsPerSlide || 
                                     !carouselInner.querySelector('.carousel-item') ||
-                                    window.innerWidth < 768;
+                                    window.innerWidth < 768 ||
+                                    (newItemsPerSlide === 4 && window.innerWidth >= 1200); // Force reorganize on desktop
             
             if (!shouldReorganize && carouselInner.querySelector('.carousel-item')) {
                 return;
@@ -61,7 +159,6 @@
             currentItemsPerSlide = newItemsPerSlide;
             
             // Use the original cards array (stored at initialization)
-            // Don't try to re-extract from DOM as it will be empty after clearing
             const cardsToUse = Array.from(allCards);
             
             if (cardsToUse.length === 0) {
@@ -71,14 +168,33 @@
             // Clear existing carousel items
             carouselInner.innerHTML = '';
             
-            // Group cards into slides
-            const totalSlides = Math.ceil(cardsToUse.length / currentItemsPerSlide);
+            // Group cards into slides with circular wrapping
+            // If we have fewer cards than items per slide, we'll create multiple slides by looping
+            let totalSlides;
+            if (cardsToUse.length < currentItemsPerSlide) {
+                // If fewer cards than items per slide, create at least one slide and loop cards to fill it
+                totalSlides = 1;
+            } else {
+                totalSlides = Math.ceil(cardsToUse.length / currentItemsPerSlide);
+            }
             
             for (let slideIndex = 0; slideIndex < totalSlides; slideIndex++) {
-                const slideCards = cardsToUse.slice(
-                    slideIndex * currentItemsPerSlide,
-                    (slideIndex + 1) * currentItemsPerSlide
-                );
+                let slideCards = [];
+                
+                // Get cards for this slide using circular wrapping
+                for (let i = 0; i < currentItemsPerSlide; i++) {
+                    const cardIndex = (slideIndex * currentItemsPerSlide + i) % cardsToUse.length;
+                    slideCards.push(cardsToUse[cardIndex]);
+                }
+                
+                // Always ensure we have exactly the right number of items (especially important when cards < itemsPerSlide)
+                while (slideCards.length < currentItemsPerSlide && cardsToUse.length > 0) {
+                    // Loop through available cards to fill remaining slots
+                    const currentLength = slideCards.length;
+                    for (let i = 0; i < currentItemsPerSlide - currentLength && i < cardsToUse.length; i++) {
+                        slideCards.push(cardsToUse[i % cardsToUse.length]);
+                    }
+                }
                 
                 if (slideCards.length === 0) continue;
                 
@@ -130,25 +246,27 @@
             // Reinitialize Bootstrap carousel if needed
             const bsCarousel = bootstrap.Carousel.getInstance(carousel);
             if (bsCarousel) {
-                // Reset to first slide
-                bsCarousel.to(0);
-            } else {
-                // Initialize carousel if it doesn't exist
-                new bootstrap.Carousel(carousel, {
-                    interval: 5000,
-                    ride: 'carousel',
-                    pause: 'hover'
-                });
+                // Dispose old instance
+                bsCarousel.dispose();
             }
+            
+            // Initialize carousel with auto-rotation
+            new bootstrap.Carousel(carousel, {
+                interval: 8000,
+                ride: 'carousel',
+                pause: 'hover',
+                wrap: true,
+                touch: true
+            });
         }
         
         function updateIndicators(totalSlides) {
-            let indicatorsContainer = carousel.querySelector('.offers-carousel-indicators');
+            let indicatorsContainer = carousel.querySelector(`.${config.indicatorsClass}`);
             
             if (!indicatorsContainer && totalSlides > 1) {
                 // Create indicators container if it doesn't exist
                 indicatorsContainer = document.createElement('div');
-                indicatorsContainer.className = 'carousel-indicators offers-carousel-indicators';
+                indicatorsContainer.className = `carousel-indicators ${config.indicatorsClass}`;
                 carousel.appendChild(indicatorsContainer);
             }
             
@@ -161,7 +279,7 @@
             for (let i = 0; i < totalSlides; i++) {
                 const button = document.createElement('button');
                 button.type = 'button';
-                button.setAttribute('data-bs-target', '#offersCarousel');
+                button.setAttribute('data-bs-target', `#${config.carouselId}`);
                 button.setAttribute('data-bs-slide-to', i.toString());
                 button.setAttribute('aria-label', `Slide ${i + 1}`);
                 if (i === 0) {
@@ -177,7 +295,7 @@
         
         // Reorganize on resize with debounce
         let resizeTimeout;
-        window.addEventListener('resize', () => {
+        const resizeHandler = () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 const newItemsPerSlide = getItemsPerSlide();
@@ -185,6 +303,16 @@
                     reorganizeSlides();
                 }
             }, 250);
+        };
+        
+        // Store resize handler for cleanup if needed
+        window.addEventListener('resize', resizeHandler);
+    }
+    
+    // Initialize all carousels
+    function initAllCarousels() {
+        carouselConfigs.forEach(config => {
+            initResponsiveCarousel(config);
         });
     }
     
@@ -192,19 +320,18 @@
     function initWhenReady() {
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
-                setTimeout(initResponsiveOffersCarousel, 300);
+                setTimeout(initAllCarousels, 300);
             });
         } else {
             // DOM already loaded, wait a bit more for Bootstrap to initialize
-            setTimeout(initResponsiveOffersCarousel, 300);
+            setTimeout(initAllCarousels, 300);
         }
     }
     
     // Also try on window load as fallback
     window.addEventListener('load', () => {
-        setTimeout(initResponsiveOffersCarousel, 500);
+        setTimeout(initAllCarousels, 500);
     });
     
     initWhenReady();
 })();
-

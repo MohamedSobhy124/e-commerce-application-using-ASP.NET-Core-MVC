@@ -2253,19 +2253,11 @@
   <data name="Filters" xml:space="preserve">
     <value>Filters</value>
   </data>
-  <data name="InstallmentTabby" xml:space="preserve">
-    <value>Start from {0}/month or 4 installments interest-free</value>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="InstallmentTabby" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
   </data>
-  <data name="InstallmentTamara" xml:space="preserve">
-    <value>Or pay in 4 installments of {0}</value>
-  </data>
-  <data name="InstallmentTamaraDetails" xml:space="preserve">
-    <value>- No late fees, Sharia-compliant! More options</value>
-  </data>
-  <data name="Tabby" xml:space="preserve">
-    <value>Tabby</value>
-  </data>
-  <data name="Tamara" xml:space="preserve">
-    <value>Tamara</value>
+  <data name="DiscountSave" xml:space="preserve">
+    <value>Save</value>
   </data>
 </root>

@@ -73,8 +73,87 @@ namespace BulkyBook.DataAccess.Data
 			
 			// Index on frequently queried fields
 			modelBuilder.Entity<Product>().HasIndex(p => p.StockQuantity);
+			modelBuilder.Entity<Product>().HasIndex(p => p.Price); // For price sorting and filtering
+			modelBuilder.Entity<Product>().HasIndex(p => new { p.IsDeleted, p.Price }); // Composite for price filtering
+			modelBuilder.Entity<Product>().HasIndex(p => new { p.IsDeleted, p.StockQuantity, p.MinimumStockAlert }); // For low stock queries
+			modelBuilder.Entity<Product>().HasIndex(p => new { p.IsDeleted, p.CategryId, p.StockQuantity }); // For category + stock queries
+			
 			modelBuilder.Entity<ProductVariant>().HasIndex(v => v.StockQuantity);
+			modelBuilder.Entity<ProductVariant>().HasIndex(v => new { v.IsDeleted, v.ProductId, v.StockQuantity }); // Composite for variant queries
+			
 			modelBuilder.Entity<FlashSale>().HasIndex(f => new { f.IsActive, f.StartDate, f.EndDate });
+			modelBuilder.Entity<FlashSaleItem>().HasIndex(i => new { i.IsDeleted, i.FlashSaleQuantity }); // For flash sale item filtering
+			
+			// Reviews indexes - CRITICAL for performance
+			modelBuilder.Entity<Review>().HasIndex(r => new { r.ProductId, r.IsApproved }); // Most common query pattern
+			modelBuilder.Entity<Review>().HasIndex(r => r.IsApproved); // For filtering approved reviews
+			modelBuilder.Entity<Review>().HasIndex(r => new { r.ProductId, r.IsApproved, r.CreatedAt }); // For ordered review queries
+			modelBuilder.Entity<Review>().HasIndex(r => r.UserId); // For user review queries
+			
+			// OrderHeader indexes - CRITICAL for order queries
+			modelBuilder.Entity<OrderHeader>().HasIndex(o => o.ApplicationUserId); // For user orders
+			modelBuilder.Entity<OrderHeader>().HasIndex(o => new { o.ApplicationUserId, o.OrderStatus }); // Composite for user + status
+			modelBuilder.Entity<OrderHeader>().HasIndex(o => o.OrderStatus); // For status filtering
+			modelBuilder.Entity<OrderHeader>().HasIndex(o => o.Email); // For guest order lookup
+			modelBuilder.Entity<OrderHeader>().HasIndex(o => new { o.Email, o.OrderStatus }); // For guest + status
+			modelBuilder.Entity<OrderHeader>().HasIndex(o => o.OrderDate); // For date sorting
+			modelBuilder.Entity<OrderHeader>().HasIndex(o => new { o.ApplicationUserId, o.OrderDate }); // For user orders by date
+			
+			// OrderDetail indexes - CRITICAL for order detail queries
+			modelBuilder.Entity<OrderDetail>().HasIndex(od => od.ProductId); // For product order history
+			modelBuilder.Entity<OrderDetail>().HasIndex(od => new { od.ProductId, od.OrderHeaderId }); // Composite (already exists but ensure)
+			modelBuilder.Entity<OrderDetail>().HasIndex(od => od.ProductVariantId); // For variant orders
+			
+			// ProductImage indexes
+			modelBuilder.Entity<ProductImage>().HasIndex(pi => new { pi.ProductId, pi.DisplayOrder }); // For ordered image queries
+			modelBuilder.Entity<ProductImage>().HasIndex(pi => new { pi.ProductId, pi.ImageInfo }); // For filtering by ImageInfo
+			
+			// Notification indexes
+			modelBuilder.Entity<Notification>().HasIndex(n => new { n.UserId, n.IsRead }); // Most common query
+			modelBuilder.Entity<Notification>().HasIndex(n => new { n.UserId, n.IsRead, n.CreatedAt }); // For ordered notifications
+			
+			// ShoppingCart indexes (enhance existing)
+			modelBuilder.Entity<ShoppingCart>().HasIndex(c => c.ApplicationUserId); // Single column for user cart
+			
+			// Wishlist indexes (enhance existing)
+			modelBuilder.Entity<Wishlist>().HasIndex(w => w.ApplicationUserId); // Single column for user wishlist
+			
+			// PromoCode indexes
+			modelBuilder.Entity<PromoCode>().HasIndex(pc => new { pc.Code, pc.IsActive }); // For code lookup
+			modelBuilder.Entity<PromoCodeUsage>().HasIndex(pcu => pcu.OrderId); // For order promo lookup
+			modelBuilder.Entity<PromoCodeUsage>().HasIndex(pcu => new { pcu.PromoCodeId, pcu.UserId }); // For usage tracking
+			
+			// StockNotification indexes
+			modelBuilder.Entity<StockNotification>().HasIndex(sn => new { sn.ProductId, sn.IsNotified }); // For product notifications
+			modelBuilder.Entity<StockNotification>().HasIndex(sn => sn.ApplicationUserId); // For user notifications
+			
+			// ServiceSubscription indexes
+			modelBuilder.Entity<ServiceSubscription>().HasIndex(ss => ss.IsActive); // For active filtering
+			
+			// NewsletterSubscription indexes
+			modelBuilder.Entity<NewsletterSubscription>().HasIndex(ns => ns.Email); // For email lookup
+			modelBuilder.Entity<NewsletterSubscription>().HasIndex(ns => new { ns.Email, ns.IsActive }); // For active subscriptions
+			
+			// ProductOptionValue indexes (enhance existing)
+			modelBuilder.Entity<ProductOptionValue>().HasIndex(ov => new { ov.IsDeleted, ov.DisplayOrder }); // For ordered option values
+			
+			// ServicePurchase indexes
+			modelBuilder.Entity<ServicePurchase>().HasIndex(sp => sp.ApplicationUserId); // For user purchases
+			modelBuilder.Entity<ServicePurchase>().HasIndex(sp => new { sp.ApplicationUserId, sp.ServiceSubscriptionId }); // Composite
+			
+			// ServiceImage indexes
+			modelBuilder.Entity<ServiceImage>().HasIndex(si => si.ServiceSubscriptionId); // For service images
+			
+			// Additional performance indexes for common query patterns
+			// Note: Full-text search indexes require special SQL Server setup, but these help with exact/prefix matches
+			modelBuilder.Entity<Product>().HasIndex(p => new { p.IsDeleted, p.Id }); // For newest/oldest sorting
+			modelBuilder.Entity<Product>().HasIndex(p => new { p.IsDeleted, p.StockQuantity, p.Price }); // For stock + price queries
+			
+			// FlashSaleItem additional indexes
+			modelBuilder.Entity<FlashSaleItem>().HasIndex(i => i.ProductId); // Single column for product lookup
+			
+			// ProductVariantOptionValue indexes (enhance existing)
+			modelBuilder.Entity<ProductVariantOptionValue>().HasIndex(vov => vov.ProductOptionValueId); // Reverse lookup
 
 			//modelBuilder.Entity<Company>().HasData(
 			//	new Company
