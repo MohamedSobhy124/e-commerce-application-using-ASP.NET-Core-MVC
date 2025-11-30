@@ -442,7 +442,7 @@
     }
     
     .hero-search-box-sticky .hero-search-btn {
-        padding: 0.4375rem !important;
+        padding: 1.5rem !important;
         font-size: 0.75rem;
         border-radius: 25px;
         flex-shrink: 0 !important;

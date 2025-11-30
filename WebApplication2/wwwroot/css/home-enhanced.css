@@ -1395,7 +1395,7 @@
 
 .price-display {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
     font-size: 0.875rem;
     color: var(--gray-600);
     font-weight: 600;

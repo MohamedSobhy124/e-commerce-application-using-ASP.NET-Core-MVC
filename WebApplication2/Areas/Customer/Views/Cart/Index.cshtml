@@ -7,6 +7,7 @@
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var hasItems = Model.ShoppingCartList != null && Model.ShoppingCartList.Any();
 }
 
 <section class="cart-page-wrapper">
@@ -17,101 +18,225 @@
         </a>
         
         <div class="row">
-            <div class="col-12">
+            <div class="col-lg-8 col-md-12">
                 <div class="cart-header-section">
                     <h3 class="cart-title">
-                        <i class="bi bi-cart3 me-3"></i>@Localizer["ShoppingCart"]e
+                        <i class="bi bi-cart3"></i>
+                        @Localizer["ShoppingCart"]
+                        @if (hasItems)
+                        {
+                            <span class="cart-item-count-badge">@Model.ShoppingCartList.Count()</span>
+                        }
                     </h3>
-                    <div class="cart-sort">
-                        <p class="cart-sort-label">@Localizer["SortBy"]:</p>
-                        <a href="#!" class="cart-sort-link">
-                            @Localizer["Price"] <i class="bi bi-chevron-down"></i>
-                        </a>
-                    </div>                  
                 </div>
 
-                @foreach(var item in Model.ShoppingCartList)
+                @if (!hasItems)
                 {
-                    // Check if this is a combo offer
-                    bool isComboOffer = item.ComboOfferId.HasValue && item.ComboOffer != null;
-                    
-                    // Get display name
-                    string displayName = isComboOffer 
-                        ? (currentCulture == "ar" && !string.IsNullOrEmpty(item.ComboOffer.NameAr) 
-                            ? item.ComboOffer.NameAr 
-                            : item.ComboOffer.Name)
-                        : item.product.Title;
-                    
-                    // Get image - use combo image if it's a combo, otherwise use product image
-                    string productImageUrl = null;
-                    if (isComboOffer && !string.IsNullOrEmpty(item.ComboOffer.ImageUrl))
-                    {
-                        productImageUrl = item.ComboOffer.ImageUrl;
-                    }
-                    else if (item.product.ProductImages != null && item.product.ProductImages.Any())
-                    {
-                        var firstImage = item.product.ProductImages.OrderBy(pi => pi.DisplayOrder).FirstOrDefault();
-                        productImageUrl = firstImage?.ImageUrl;
-                    }
-                    else if (!string.IsNullOrEmpty(item.product.ImageUrl))
-                    {
-                        productImageUrl = item.product.ImageUrl;
-                    }
-                    
-                    if (string.IsNullOrEmpty(productImageUrl))
-                    {
-                        productImageUrl = "/images/no-image.png";
-                    }
-                    
-                    <div class="cart-item-card">
-                        <div class="row d-flex justify-content-between align-items-center">
-                            <div class="col-md-2 col-lg-2 col-xl-2">
-                                <img src="@productImageUrl" class="cart-item-image" alt="@displayName">
-                            </div>
-                            <div class="col-md-3 col-lg-3 col-xl-3">
-                                <p class="cart-item-title">@displayName</p>
-                                @if (isComboOffer)
-                                {
-                                    <small class="text-muted">
-                                        <i class="bi bi-box-seam me-1"></i>@Localizer["ComboOffer"]
-                                    </small>
-                                }
-                            </div>
-                            <div class="col-md-3 col-lg-3 col-xl-2">
-                                <div class="cart-quantity-controls">
-                                    <a class="cart-quantity-btn" asp-action="Minus" asp-route-CartId="@item.Id" asp-route-ProductId="@item.ProductId">
-                                        <i class="bi bi-dash"></i>
-                                    </a>
-
-                                    <input readonly value="@item.Count" type="number" class="cart-quantity-input" />
-
-                                    <a class="cart-quantity-btn" asp-action="Pluse" asp-route-CartId="@item.Id" asp-route-ProductId="@item.ProductId">
-                                        <i class="bi bi-plus"></i>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="col-md-3 col-lg-2 col-xl-2">
-                                <h5 class="cart-item-price">@Html.Raw(currencySymbol) @item.Price.ToString("N2")</h5>
-                            </div>                          
-                            <div class="col-md-1 col-lg-1 col-xl-1 text-end">
-                                <a asp-action="Remove" asp-route-CartId="@item.Id" asp-route-ProductId="@item.ProductId" class="cart-delete-btn">
-                                    <i class="bi bi-trash-fill"></i>
-                                </a>
-                            </div>
-                        </div>  
+                    <div class="empty-cart-container">
+                        <i class="bi bi-cart-x empty-cart-icon"></i>
+                        <h2 class="empty-cart-title">@Localizer["YourCartIsEmpty"]</h2>
+                        <p class="empty-cart-message">@Localizer["AddItemsToStartShopping"]</p>
+                        <a asp-action="Index" asp-controller="Home" class="continue-shopping-btn">
+                            <i class="bi bi-arrow-left"></i>
+                            @Localizer["ContinueShopping"]
+                        </a>
                     </div>
                 }
+                else
+                {
+                    @foreach(var item in Model.ShoppingCartList)
+                    {
+                        // Check if this is a combo offer
+                        bool isComboOffer = item.ComboOfferId.HasValue && item.ComboOffer != null;
+                        bool hasFlashSale = item.FlashSaleItemId.HasValue && item.FlashSalePrice.HasValue;
+                        bool hasVariant = item.ProductVariantId.HasValue && item.ProductVariant != null;
+                        
+                        // Get display name
+                        string displayName = isComboOffer 
+                            ? (currentCulture == "ar" && !string.IsNullOrEmpty(item.ComboOffer.NameAr) 
+                                ? item.ComboOffer.NameAr 
+                                : item.ComboOffer.Name)
+                            : item.product.Title;
+                        
+                        // Get image - use combo image if it's a combo, otherwise use product image
+                        string productImageUrl = null;
+                        if (isComboOffer && !string.IsNullOrEmpty(item.ComboOffer.ImageUrl))
+                        {
+                            productImageUrl = item.ComboOffer.ImageUrl;
+                        }
+                        else if (item.product.ProductImages != null && item.product.ProductImages.Any())
+                        {
+                            var firstImage = item.product.ProductImages.OrderBy(pi => pi.DisplayOrder).FirstOrDefault();
+                            productImageUrl = firstImage?.ImageUrl;
+                        }
+                        else if (!string.IsNullOrEmpty(item.product.ImageUrl))
+                        {
+                            productImageUrl = item.product.ImageUrl;
+                        }
+                        
+                        if (string.IsNullOrEmpty(productImageUrl))
+                        {
+                            productImageUrl = "/images/no-image.png";
+                        }
+                        
+                        // Calculate prices
+                        decimal unitPrice = (decimal)item.Price;
+                        decimal totalPrice = unitPrice * item.Count;
+                        decimal? originalPrice = hasFlashSale && (decimal)item.product.Price > unitPrice ? (decimal)item.product.Price : null;
+                        
+                        // Get variant display string
+                        string variantDisplayText = null;
+                        if (hasVariant && item.ProductVariant != null)
+                        {
+                            // Try to get variant option values directly
+                            if (item.ProductVariant.VariantOptionValues != null && item.ProductVariant.VariantOptionValues.Any())
+                            {
+                                var variantParts = item.ProductVariant.VariantOptionValues
+                                    .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                                    .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+                                    .Select(vov => 
+                                    {
+                                        if (vov.OptionValue == null) return "";
+                                        
+                                        var optionName = currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue.ProductOption?.NameAr) 
+                                            ? vov.OptionValue.ProductOption.NameAr 
+                                            : vov.OptionValue.ProductOption?.Name ?? "";
+                                        var optionValue = currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue.ValueAr) 
+                                            ? vov.OptionValue.ValueAr 
+                                            : vov.OptionValue.Value ?? "";
+                                        
+                                        if (string.IsNullOrEmpty(optionName) || string.IsNullOrEmpty(optionValue))
+                                            return optionValue ?? optionName ?? "";
+                                        
+                                        return $"{optionName}: {optionValue}";
+                                    })
+                                    .Where(v => !string.IsNullOrEmpty(v));
+                                
+                                variantDisplayText = variantParts.Any() ? string.Join(" / ", variantParts) : Localizer["Default"].Value;
+                            }
+                            else
+                            {
+                                // If no option values, check if VariantName property is available
+                                variantDisplayText = !string.IsNullOrEmpty(item.ProductVariant.VariantName) 
+                                    ? item.ProductVariant.VariantName 
+                                    : Localizer["Default"].Value;
+                            }
+                        }
+                        else if (item.ProductVariantId.HasValue && item.ProductVariant == null)
+                        {
+                            // Variant ID exists but variant not loaded - show default
+                            variantDisplayText = Localizer["Default"].Value;
+                        }
 
-                <div class="cart-total-card">
-                    <p class="cart-total-label">@Localizer["TotalAmount"]</p>
-                    <h2 class="cart-total-amount">@Html.Raw(currencySymbol) @Model.OrderTotal.ToString("N2")</h2>
-                    <hr style="border-color: rgba(255,255,255,0.3); margin: 1.5rem 0;" />
-                    <a asp-action="Summary" class="cart-summary-btn">
-                        <i class="bi bi-arrow-right-circle"></i>
-                        @Localizer["ProceedToSummary"]
-                    </a>
-                </div>
+                        <div class="cart-item-card">
+                            <div class="cart-item-row">
+                                <!-- Product Image -->
+                                <div class="cart-item-col cart-item-image-col">
+                                    <div class="cart-item-image-wrapper">
+                                        <img src="@productImageUrl" class="cart-item-image" alt="@displayName">
+                                    </div>
+                                </div>
+
+                                <!-- Product Details -->
+                                <div class="cart-item-col cart-item-details-col">
+                                    <h4 class="cart-item-title">@displayName</h4>
+                                    
+                                    @if (item.ProductVariantId.HasValue || hasVariant)
+                                    {
+                                        <div class="cart-item-variant-display">
+                                            <i class="bi bi-tag-fill"></i>
+                                            <span>@(variantDisplayText ?? Localizer["Default"].Value)</span>
+                                        </div>
+                                    }
+                                    
+                                    <div class="cart-item-badges">
+                                        @if (hasFlashSale)
+                                        {
+                                            <span class="cart-badge flash-sale">
+                                                <i class="bi bi-lightning-fill"></i>
+                                                @Localizer["FlashSale"]
+                                            </span>
+                                        }
+                                        @if (isComboOffer)
+                                        {
+                                            <span class="cart-badge combo">
+                                                <i class="bi bi-box-seam"></i>
+                                                @Localizer["ComboOffer"]
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Quantity Controls -->
+                                <div class="cart-item-col cart-item-quantity-col">
+                                    <div class="cart-quantity-controls">
+                                        <a href="#" class="cart-quantity-btn minus-btn" data-cart-id="@item.Id" data-product-id="@item.ProductId">
+                                            <i class="bi bi-dash"></i>
+                                        </a>
+                                        <input readonly value="@item.Count" type="number" class="cart-quantity-input" />
+                                        <a href="#" class="cart-quantity-btn plus-btn" data-cart-id="@item.Id" data-product-id="@item.ProductId">
+                                            <i class="bi bi-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Price and Delete -->
+                                <div class="cart-item-col cart-item-price-col">
+                                    <div class="cart-item-price-wrapper">
+                                        @if (originalPrice.HasValue && originalPrice.Value > 0)
+                                        {
+                                            <div class="cart-item-price original-price">@Html.Raw(currencySymbol) @originalPrice.Value.ToString("N2")</div>
+                                        }
+                                        <div class="cart-item-price @(hasFlashSale ? "sale-price" : "")">
+                                            @Html.Raw(currencySymbol) @unitPrice.ToString("N2")
+                                        </div>
+                                        <div class="cart-item-total">
+                                            @Html.Raw(currencySymbol) @totalPrice.ToString("N2")
+                                        </div>
+                                    </div>
+                                    <a href="#" class="cart-delete-btn" data-cart-id="@item.Id" data-product-id="@item.ProductId" title="@Localizer["Remove"]">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </div>
+                            </div>  
+                        </div>
+                    }
+                }
             </div>
+            
+            @if (hasItems)
+            {
+                <div class="col-lg-4 col-md-12">
+                    <div class="cart-total-card">
+                        <p class="cart-total-label">@Localizer["TotalAmount"]</p>
+                        <h2 class="cart-total-amount">@Html.Raw(currencySymbol) @Model.OrderTotal.ToString("N2")</h2>
+                        <hr style="border-color: rgba(255,255,255,0.3); margin: 1.5rem 0;" />
+                        <a asp-action="Summary" class="cart-summary-btn">
+                            @Localizer["ProceedToSummary"]
+                            <i class="bi bi-arrow-right-circle"></i>
+                        </a>
+                    </div>
+                </div>
+            }
         </div>
+
     </div>
 </section>
+
+@Html.AntiForgeryToken()
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cart-enhanced.css" />
+}
+
+@section Scripts {
+    <script>
+        // Define cart action URLs
+        window.cartUrls = {
+            plus: '@Url.Action("Pluse", "Cart", new { area = "Customer" })',
+            minus: '@Url.Action("Minus", "Cart", new { area = "Customer" })',
+            remove: '@Url.Action("Remove", "Cart", new { area = "Customer" })'
+        };
+    </script>
+    <script src="~/js/cart-ajax.js"></script>
+}

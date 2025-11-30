@@ -45,8 +45,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                 var activeOffers = _unitOfWork.ServiceOffers.GetAll(
                     o => o.ServiceSubscriptionId == service.Id && 
                          o.IsActive && 
-                         o.StartDate <= DateTime.Now && 
-                         o.EndDate >= DateTime.Now
+                         o.StartDate <= BulkyBook.Utility.DateTimeHelper.Now && 
+                         o.EndDate >= BulkyBook.Utility.DateTimeHelper.Now
                 ).ToList();
                 ViewBag.Offers = activeOffers;
             }
@@ -76,8 +76,8 @@ namespace BulkyBook.Areas.Customer.Controllers
             var activeOffers = _unitOfWork.ServiceOffers.GetAll(
                 o => o.ServiceSubscriptionId == service.Id && 
                      o.IsActive && 
-                     o.StartDate <= DateTime.Now && 
-                     o.EndDate >= DateTime.Now
+                     o.StartDate <= BulkyBook.Utility.DateTimeHelper.Now && 
+                     o.EndDate >= BulkyBook.Utility.DateTimeHelper.Now
             ).ToList();
 
             ViewBag.ActiveOffers = activeOffers;
@@ -129,8 +129,8 @@ namespace BulkyBook.Areas.Customer.Controllers
             {
                 appliedOffer = _unitOfWork.ServiceOffers.Get(o => o.Id == offerId.Value);
                 if (appliedOffer != null && appliedOffer.IsActive && 
-                    appliedOffer.StartDate <= DateTime.Now && 
-                    appliedOffer.EndDate >= DateTime.Now)
+                    appliedOffer.StartDate <= BulkyBook.Utility.DateTimeHelper.Now && 
+                    appliedOffer.EndDate >= BulkyBook.Utility.DateTimeHelper.Now)
                 {
                     if (appliedOffer.DiscountType == DiscountType.Percentage)
                     {
@@ -150,8 +150,8 @@ namespace BulkyBook.Areas.Customer.Controllers
             {
                 promo = _unitOfWork.PromoCode.GetByCode(promoCode.Trim());
                 if (promo != null && promo.IsActive && 
-                    promo.StartDate <= DateTime.Now && 
-                    promo.EndDate >= DateTime.Now)
+                    promo.StartDate <= BulkyBook.Utility.DateTimeHelper.Now && 
+                    promo.EndDate >= BulkyBook.Utility.DateTimeHelper.Now)
                 {
                     decimal promoDiscount = 0;
                     if (promo.DiscountType == DiscountType.Percentage)
@@ -220,7 +220,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 PaymentStatus = "Pending",
                 ServiceOfferId = appliedOffer?.Id,
                 DiscountAmount = discountAmount,
-                PurchaseDate = DateTime.Now,
+                PurchaseDate = BulkyBook.Utility.DateTimeHelper.Now,
                 Status = "Active"
             };
 
@@ -369,7 +369,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                         message = $"Service subscription #{purchase.Id} - {purchase.ServiceSubscription?.Title}",
                         purchaseId = purchase.Id,
                         amount = purchase.AmountPaid,
-                        timestamp = DateTime.Now
+                        timestamp = BulkyBook.Utility.DateTimeHelper.Now
                     }
                 );
             }

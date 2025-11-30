@@ -26,7 +26,7 @@ namespace BulkyBook.Utility
             session.SetString(CartSessionKey, cartJson);
         }
 
-        public static void AddToCart(ISession session, int productId, int count = 1, int? productVariantId = null, int? comboOfferId = null)
+        public static void AddToCart(ISession session, int productId, int count = 1, int? productVariantId = null, int? comboOfferId = null, int? flashSaleItemId = null, double? flashSalePrice = null)
         {
             var cart = GetGuestCart(session);
             
@@ -51,8 +51,11 @@ namespace BulkyBook.Utility
             }
             else
             {
-                // Check for existing item with same product and variant (for regular products)
-                var existingItem = cart.FirstOrDefault(c => c.ProductId == productId && c.ProductVariantId == productVariantId && !c.ComboOfferId.HasValue);
+                // Check for existing item with same product, variant, and flash sale status
+                var existingItem = cart.FirstOrDefault(c => c.ProductId == productId 
+                    && c.ProductVariantId == productVariantId 
+                    && c.FlashSaleItemId == flashSaleItemId
+                    && !c.ComboOfferId.HasValue);
 
                 if (existingItem != null)
                 {
@@ -64,7 +67,9 @@ namespace BulkyBook.Utility
                     {
                         ProductId = productId,
                         Count = count,
-                        ProductVariantId = productVariantId
+                        ProductVariantId = productVariantId,
+                        FlashSaleItemId = flashSaleItemId,
+                        FlashSalePrice = flashSalePrice
                     });
                 }
             }

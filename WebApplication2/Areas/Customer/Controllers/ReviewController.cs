@@ -80,7 +80,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     Comment = comment,
                     IsVerifiedPurchase = hasPurchased,
                     IsApproved = true, // Auto-approve for now (change to false for moderation)
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = BulkyBook.Utility.DateTimeHelper.Now,
                     HelpfulCount = 0
                 };
 

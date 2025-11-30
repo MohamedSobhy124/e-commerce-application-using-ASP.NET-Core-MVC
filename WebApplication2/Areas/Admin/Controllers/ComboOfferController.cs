@@ -53,8 +53,8 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             var comboOffer = new ComboOffer
             {
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(30),
+                StartDate = BulkyBook.Utility.DateTimeHelper.Now,
+                EndDate = BulkyBook.Utility.DateTimeHelper.Now.AddDays(30),
                 MinimumQuantity = 1
             };
             return View(comboOffer);

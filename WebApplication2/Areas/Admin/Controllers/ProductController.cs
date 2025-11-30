@@ -1092,7 +1092,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                         if (variant != null)
                         {
                             variant.IsDeleted = true;
-                            variant.ModifiedDate = DateTime.Now;
+                            variant.ModifiedDate = BulkyBook.Utility.DateTimeHelper.Now;
                             AuditHelper.SetDeletedAudit(variant, User);
                         }
                     }

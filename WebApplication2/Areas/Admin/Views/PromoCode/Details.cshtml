@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = Localizer["PromoCodeDetails"];
     var usages = ViewBag.Usages as IEnumerable<BulkyBook.Models.PromoCodeUsage>;
-    var now = DateTime.Now;
+    var now = BulkyBook.Utility.DateTimeHelper.Now;
     var isActive = Model.IsActive && Model.StartDate <= now && Model.EndDate >= now;
 }
 

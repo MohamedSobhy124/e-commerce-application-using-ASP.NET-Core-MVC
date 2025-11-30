@@ -19,7 +19,7 @@ namespace BulkyBook.DataAccess.Repository
             // Set audit fields
             if (flashSale is BaseEntity baseEntity)
             {
-                baseEntity.ModifiedDate = DateTime.Now;
+                baseEntity.ModifiedDate = BulkyBook.Utility.DateTimeHelper.Now;
             }
             _db.FlashSales.Update(flashSale);
         }
@@ -35,7 +35,7 @@ namespace BulkyBook.DataAccess.Repository
             if (flashSale is BaseEntity baseEntity)
             {
                 baseEntity.IsDeleted = true;
-                baseEntity.ModifiedDate = DateTime.Now;
+                baseEntity.ModifiedDate = BulkyBook.Utility.DateTimeHelper.Now;
                 _db.FlashSales.Update(flashSale);
             }
             else
@@ -47,7 +47,7 @@ namespace BulkyBook.DataAccess.Repository
         // PERFORMANCE: Optimized with AsNoTracking and filtered includes
         public IEnumerable<FlashSale> GetActiveFlashSales()
         {
-            var now = DateTime.Now;
+            var now = BulkyBook.Utility.DateTimeHelper.Now;
             var flashSales = _db.FlashSales
                 .AsNoTracking() // Read-only query
                 .Include(f => f.FlashSaleItems.Where(i => !i.IsDeleted && i.FlashSaleQuantity > 0))

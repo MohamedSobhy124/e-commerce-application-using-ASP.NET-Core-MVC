@@ -1,7 +1,7 @@
 @model IEnumerable<OrderHeader>
 
 @{
-    ViewData["Title"] = "Orders";
+    ViewData["Title"] = Localizer["OrdersManagement"];
 }
 
 <partial name="_Notifications" />
@@ -12,55 +12,130 @@
             <div class="admin-card-header">
                 <h2 class="admin-card-title">
                     <i class="bi bi-receipt me-3"></i>
-                    Orders Management
+                    @Localizer["OrdersManagement"]
                 </h2>
             </div>
 
             <div class="admin-card-body">
+                <!-- Order Statistics Cards -->
+                <div class="order-stats-container" id="orderStatsContainer">
+                    <div class="order-stat-card all">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-list-ul"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["TotalOrders"]</div>
+                        <div class="order-stat-value" id="statAll">0</div>
+                    </div>
+                    <div class="order-stat-card pending">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["Pending"]</div>
+                        <div class="order-stat-value" id="statPending">0</div>
+                    </div>
+                    <div class="order-stat-card approved">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["Approved"]</div>
+                        <div class="order-stat-value" id="statApproved">0</div>
+                    </div>
+                    <div class="order-stat-card inprocess">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-gear"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["Processing"]</div>
+                        <div class="order-stat-value" id="statProcessing">0</div>
+                    </div>
+                    <div class="order-stat-card shipped">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-truck"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["Shipped"]</div>
+                        <div class="order-stat-value" id="statShipped">0</div>
+                    </div>
+                    <div class="order-stat-card delivered">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["Delivered"]</div>
+                        <div class="order-stat-value" id="statDelivered">0</div>
+                    </div>
+                </div>
+
                 <!-- Filter Tabs -->
-                <div class="order-filter-tabs mb-4">
+                <div class="order-filter-tabs">
                     <button class="filter-tab active" onclick="filterOrders('all')">
-                        <i class="bi bi-list-ul me-2"></i>All Orders
+                        <i class="bi bi-list-ul"></i>@Localizer["AllOrders"]
                     </button>
-                    <button class="filter-tab" onclick="filterOrders('pending')">
-                        <i class="bi bi-clock me-2"></i>Pending
+                    <button class="filter-tab" onclick="filterOrders('Pending')">
+                        <i class="bi bi-clock"></i>@Localizer["Pending"]
                     </button>
-                    <button class="filter-tab" onclick="filterOrders('approved')">
-                        <i class="bi bi-check-circle me-2"></i>Approved
+                    <button class="filter-tab" onclick="filterOrders('Approved')">
+                        <i class="bi bi-check-circle"></i>@Localizer["Approved"]
                     </button>
-                    <button class="filter-tab" onclick="filterOrders('inprocess')">
-                        <i class="bi bi-gear me-2"></i>Processing
+                    <button class="filter-tab" onclick="filterOrders('Processing')">
+                        <i class="bi bi-gear"></i>@Localizer["Processing"]
                     </button>
-                    <button class="filter-tab" onclick="filterOrders('shipped')">
-                        <i class="bi bi-truck me-2"></i>Shipped
+                    <button class="filter-tab" onclick="filterOrders('Shipped')">
+                        <i class="bi bi-truck"></i>@Localizer["Shipped"]
                     </button>
-                    <button class="filter-tab" onclick="filterOrders('delivered')">
-                        <i class="bi bi-check-circle-fill me-2"></i>Delivered
+                    <button class="filter-tab" onclick="filterOrders('Delivered')">
+                        <i class="bi bi-check-circle-fill"></i>@Localizer["Delivered"]
+                    </button>
+                    <button class="filter-tab" onclick="filterOrders('Cancelled')">
+                        <i class="bi bi-x-circle"></i>@Localizer["Cancelled"]
                     </button>
                 </div>
 
-                <div class="admin-table-wrapper">
-                    <table id="tblData" class="table table-bordered table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Order Date</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                    </table>
+                <!-- Order Table -->
+                <div class="order-table-wrapper">
+                    <div class="admin-table-wrapper">
+                        <table id="tblData" class="table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>@Localizer["OrderID"]</th>
+                                    <th>@Localizer["Customer"]</th>
+                                    <th>@Localizer["Email"]</th>
+                                    <th>@Localizer["Phone"]</th>
+                                    <th>@Localizer["OrderDate"]</th>
+                                    <th>@Localizer["Total"]</th>
+                                    <th>@Localizer["OrderStatus"]</th>
+                                    <th>@Localizer["PaymentStatus"]</th>
+                                    <th>@Localizer["Actions"]</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/order-index.css" />
+}
+
 @section Scripts {
+    <script>
+        // Pass translations to JavaScript
+        window.orderTranslations = {
+            pending: '@Html.Raw(Localizer["Pending"].Value)',
+            approved: '@Html.Raw(Localizer["Approved"].Value)',
+            processing: '@Html.Raw(Localizer["Processing"].Value)',
+            shipped: '@Html.Raw(Localizer["Shipped"].Value)',
+            delivered: '@Html.Raw(Localizer["Delivered"].Value)',
+            cancelled: '@Html.Raw(Localizer["Cancelled"].Value)',
+            paid: '@Html.Raw(Localizer["Paid"]?.Value ?? "Paid")',
+            refunded: '@Html.Raw(Localizer["Refunded"].Value)',
+            rejected: '@Html.Raw(Localizer["Rejected"].Value)',
+            guestOrder: '@Html.Raw(Localizer["GuestOrder"].Value)',
+            noOrdersFound: '@Html.Raw(Localizer["NoOrdersFound"].Value)',
+            details: '@Html.Raw(Localizer["Details"].Value)',
+            na: '@Html.Raw(Localizer["NA"]?.Value ?? "N/A")'
+        };
+    </script>
     <script src="~/js/order.js"></script>
 }
 

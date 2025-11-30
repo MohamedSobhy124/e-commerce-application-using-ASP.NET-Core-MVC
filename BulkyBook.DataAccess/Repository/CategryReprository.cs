@@ -20,7 +20,7 @@ namespace BulkyBook.DataAccess.Repository
             // Set audit fields
             if (obj is BaseEntity baseEntity)
             {
-                baseEntity.ModifiedDate = DateTime.Now;
+                baseEntity.ModifiedDate = BulkyBook.Utility.DateTimeHelper.Now;
             }
             _db.Categries.Update(obj);
         }

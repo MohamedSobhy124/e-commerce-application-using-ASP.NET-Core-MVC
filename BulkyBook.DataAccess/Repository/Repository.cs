@@ -27,7 +27,7 @@ namespace BulkyBook.DataAccess.Repository
             {
                 if (baseEntity.CreatedDate == default(DateTime))
                 {
-                    baseEntity.CreatedDate = DateTime.Now;
+                    baseEntity.CreatedDate = BulkyBook.Utility.DateTimeHelper.Now;
                 }
                 baseEntity.IsDeleted = false;
             }
@@ -131,7 +131,7 @@ namespace BulkyBook.DataAccess.Repository
             if (entity is BaseEntity baseEntity)
             {
                 baseEntity.IsDeleted = true;
-                baseEntity.ModifiedDate = DateTime.Now;
+                baseEntity.ModifiedDate = BulkyBook.Utility.DateTimeHelper.Now;
                 _db.Update(entity);
             }
             else
@@ -150,7 +150,7 @@ namespace BulkyBook.DataAccess.Repository
                 foreach (var baseEntity in baseEntities)
                 {
                     baseEntity.IsDeleted = true;
-                    baseEntity.ModifiedDate = DateTime.Now;
+                    baseEntity.ModifiedDate = BulkyBook.Utility.DateTimeHelper.Now;
                 }
                 _db.UpdateRange(baseEntities.Cast<T>());
             }

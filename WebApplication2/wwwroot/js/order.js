@@ -3,6 +3,21 @@ let dataTable;
 let currentFilter = 'all';
 
 $(document).ready(function () {
+    // Load initial statistics
+    $.ajax({
+        url: '/Admin/Order/GetAll',
+        type: 'GET',
+        success: function(response) {
+            if (response && response.data) {
+                updateOrderStatistics(response.data);
+            }
+        },
+        error: function() {
+            console.error('Failed to load order statistics');
+        }
+    });
+    
+    // Load DataTable
     loadDataTable(currentFilter);
 });
 
@@ -24,7 +39,7 @@ function loadDataTable(status) {
         "columns": [
             { 
                 data: null,
-                "width": "8%",
+                "width": "6%",
                 "render": function (data, type, row) {
                     const id = row.id || row.Id;
                     return `<strong>#${id}</strong>`;
@@ -32,36 +47,39 @@ function loadDataTable(status) {
             },
             { 
                 data: null,
-                "width": "15%",
+                "width": "12%",
                 "render": function (data, type, row) {
                     return row.name || row.Name || 'N/A';
                 }
             },
             { 
                 data: null,
-                "width": "15%",
+                "width": "14%",
                 "render": function (data, type, row) {
                     // For guest orders, show the email from OrderHeader
                     // For authenticated users, show ApplicationUser email
                     const isGuest = row.isGuestOrder || row.IsGuestOrder;
                     const appUser = row.applicationUser || row.ApplicationUser;
                     
+                    const guestText = (window.orderTranslations && window.orderTranslations.guestOrder) || 'Guest Order';
+                    const naText = (window.orderTranslations && window.orderTranslations.na) || 'N/A';
+                    
                     if (isGuest || !appUser) {
-                        return (row.email || row.Email) || '<span class="text-muted">Guest Order</span>';
+                        return (row.email || row.Email) || `<span class="text-muted">${guestText}</span>`;
                     }
-                    return (appUser.email || appUser.Email) || '<span class="text-muted">N/A</span>';
+                    return (appUser.email || appUser.Email) || `<span class="text-muted">${naText}</span>`;
                 }
             },
             { 
                 data: null,
-                "width": "12%",
+                "width": "10%",
                 "render": function (data, type, row) {
                     return row.phoneNumber || row.PhoneNumber || 'N/A';
                 }
             },
             { 
                 data: null,
-                "width": "12%",
+                "width": "10%",
                 "render": function (data, type, row) {
                     const orderDate = row.orderDate || row.OrderDate;
                     const date = new Date(orderDate);
@@ -77,8 +95,8 @@ function loadDataTable(status) {
                 "width": "10%",
                 "render": function (data, type, row) {
                     const total = row.orderTotal || row.OrderTotal || 0;
-                    const currencySymbol = (typeof getCurrencySymbol === 'function' ? getCurrencySymbol() : (typeof getCurrentLanguage === 'function' && getCurrentLanguage() === 'ar' ? 'د.إ' : 'AED'));
-                    return `<strong style="color: #059669;">${currencySymbol} ${total.toFixed(2)}</strong>`;
+                    const currencySymbol = (typeof getCurrencySymbol === 'function' ? getCurrencySymbol() : 'AED');
+                    return `<strong style="color: #059669;">${currencySymbol} ${parseFloat(total).toFixed(2)}</strong>`;
                 }
             },
             { 
@@ -86,61 +104,148 @@ function loadDataTable(status) {
                 "width": "12%",
                 "render": function (data, type, row) {
                     const status = (row.orderStatus || row.OrderStatus || '').toLowerCase();
+                    const translations = window.orderTranslations || {};
                     let badgeClass = 'badge-secondary';
                     let icon = 'bi-hourglass';
+                    let statusText = row.orderStatus || row.OrderStatus || '';
                     
+                    // Map status to translated text
                     if (status.includes('delivered')) {
                         badgeClass = 'badge-success';
                         icon = 'bi-check-circle-fill';
+                        statusText = translations.delivered || statusText;
                     } else if (status.includes('approved')) {
                         badgeClass = 'badge-success';
                         icon = 'bi-check-circle';
+                        statusText = translations.approved || statusText;
                     } else if (status.includes('shipped')) {
                         badgeClass = 'badge-primary';
                         icon = 'bi-truck';
+                        statusText = translations.shipped || statusText;
                     } else if (status.includes('cancel')) {
                         badgeClass = 'badge-danger';
                         icon = 'bi-x-circle';
+                        statusText = translations.cancelled || statusText;
                     } else if (status.includes('process')) {
                         badgeClass = 'badge-info';
                         icon = 'bi-gear';
+                        statusText = translations.processing || statusText;
                     } else if (status.includes('pending')) {
                         badgeClass = 'badge-warning';
                         icon = 'bi-clock';
+                        statusText = translations.pending || statusText;
                     }
                     
-                    return `<span class="badge ${badgeClass}"><i class="bi ${icon} me-1"></i>${row.orderStatus || row.OrderStatus}</span>`;
+                    return `<span class="order-badge ${badgeClass}"><i class="bi ${icon}"></i>${statusText}</span>`;
                 }
             },
             {
                 data: null,
+                "width": "12%",
+                "render": function (data, type, row) {
+                    const paymentStatus = (row.paymentStatus || row.PaymentStatus || '').toLowerCase();
+                    const translations = window.orderTranslations || {};
+                    let badgeClass = 'payment-badge pending';
+                    let icon = 'bi-hourglass';
+                    let label = row.paymentStatus || row.PaymentStatus || (translations.pending || 'Pending');
+                    
+                    if (paymentStatus.includes('paid')) {
+                        badgeClass = 'payment-badge paid';
+                        icon = 'bi-check-circle-fill';
+                        label = translations.paid || label;
+                    } else if (paymentStatus.includes('pending')) {
+                        badgeClass = 'payment-badge pending';
+                        icon = 'bi-clock';
+                        label = translations.pending || label;
+                    } else if (paymentStatus.includes('approved')) {
+                        badgeClass = 'payment-badge approved';
+                        icon = 'bi-check-circle';
+                        label = translations.approved || label;
+                    } else if (paymentStatus.includes('refund')) {
+                        badgeClass = 'payment-badge refunded';
+                        icon = 'bi-arrow-counterclockwise';
+                        label = translations.refunded || label;
+                    } else if (paymentStatus.includes('reject')) {
+                        badgeClass = 'payment-badge rejected';
+                        icon = 'bi-x-circle';
+                        label = translations.rejected || label;
+                    }
+                    
+                    return `<span class="${badgeClass}"><i class="bi ${icon}"></i>${label}</span>`;
+                }
+            },
+            {
+                data: null,
+                "width": "14%",
                 "render": function (data, type, row) {
                     const orderId = row.id || row.Id;
                     
-                    // Debug logging
                     if (!orderId || orderId === 0) {
                         console.error('Invalid Order ID:', row);
+                        return '';
                     }
+                    
+                    const translations = window.orderTranslations || {};
+                    const detailsText = translations.details || 'Details';
                     
                     return `
                         <div class="btn-group" role="group">
                             <a href="/Admin/Order/Details/${orderId}" 
                                class="btn btn-sm btn-primary"
-                               title="Order ID: ${orderId}">
-                                <i class="bi bi-eye me-1"></i>Details
+                               title="${detailsText}">
+                                <i class="bi bi-eye me-1"></i>${detailsText}
                             </a>
                         </div>
                     `;
-                },
-                "width": "16%"
+                }
             }
         ],
         "order": [[0, "desc"]],
         "language": {
-            "emptyTable": "No orders found"
+            "emptyTable": (window.orderTranslations && window.orderTranslations.noOrdersFound) || "No orders found"
         },
-        "responsive": true
+        "responsive": true,
+        "pageLength": 25
     });
+}
+
+// Update order statistics
+function updateOrderStatistics(orders) {
+    const stats = {
+        all: orders.length,
+        pending: 0,
+        approved: 0,
+        processing: 0,
+        shipped: 0,
+        delivered: 0,
+        cancelled: 0
+    };
+
+    orders.forEach(function(order) {
+        const status = (order.orderStatus || order.OrderStatus || '').toLowerCase();
+        
+        if (status.includes('pending')) {
+            stats.pending++;
+        } else if (status.includes('approved')) {
+            stats.approved++;
+        } else if (status.includes('process')) {
+            stats.processing++;
+        } else if (status.includes('shipped')) {
+            stats.shipped++;
+        } else if (status.includes('delivered')) {
+            stats.delivered++;
+        } else if (status.includes('cancel')) {
+            stats.cancelled++;
+        }
+    });
+
+    // Update DOM
+    $('#statAll').text(stats.all);
+    $('#statPending').text(stats.pending);
+    $('#statApproved').text(stats.approved);
+    $('#statProcessing').text(stats.processing);
+    $('#statShipped').text(stats.shipped);
+    $('#statDelivered').text(stats.delivered);
 }
 
 function filterOrders(status) {
@@ -150,85 +255,18 @@ function filterOrders(status) {
     document.querySelectorAll('.filter-tab').forEach(tab => {
         tab.classList.remove('active');
     });
-    event.target.closest('.filter-tab').classList.add('active');
+    
+    // Find and activate the clicked tab
+    const tabs = document.querySelectorAll('.filter-tab');
+    tabs.forEach(tab => {
+        const onclickAttr = tab.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes(`'${status}'`)) {
+            tab.classList.add('active');
+        }
+    });
     
     // Reload table with filter
     loadDataTable(status);
 }
 
-// Add styles for badges
-const style = document.createElement('style');
-style.textContent = `
-    .badge {
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        display: inline-flex;
-        align-items: center;
-        white-space: nowrap;
-    }
-    .badge-success {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-    }
-    .badge-primary {
-        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-        color: white;
-    }
-    .badge-danger {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        color: white;
-    }
-    .badge-warning {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        color: white;
-    }
-    .badge-info {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
-    }
-    .badge-secondary {
-        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-        color: white;
-    }
-    
-    .order-filter-tabs {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        padding: 1.5rem;
-        background: var(--gray-50);
-        border-radius: var(--border-radius);
-        margin-bottom: 1.5rem;
-    }
-    
-    .filter-tab {
-        padding: 0.75rem 1.5rem;
-        background: var(--white);
-        border: 2px solid var(--gray-300);
-        border-radius: var(--border-radius);
-        color: var(--gray-700);
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-    }
-    
-    .filter-tab:hover {
-        border-color: var(--primary-color);
-        color: var(--primary-color);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
-    }
-    
-    .filter-tab.active {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        border-color: var(--primary-color);
-        color: var(--white);
-        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-    }
-`;
-document.head.appendChild(style);
 

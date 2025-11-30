@@ -33,7 +33,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             }
 
             // Check if flash sale is active
-            var now = DateTime.Now;
+            var now = BulkyBook.Utility.DateTimeHelper.Now;
             if (!flashSale.IsActive || now < flashSale.StartDate || now > flashSale.EndDate)
             {
                 TempData["error"] = "This flash sale is not currently active";
@@ -57,7 +57,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             }
 
             // Check if flash sale is active
-            var now = DateTime.Now;
+            var now = BulkyBook.Utility.DateTimeHelper.Now;
             if (!item.FlashSale.IsActive || now < item.FlashSale.StartDate || now > item.FlashSale.EndDate)
             {
                 return Json(new { success = false, message = "This flash sale is no longer active" });
@@ -95,7 +95,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             }
 
             // Check if flash sale is active
-            var now = DateTime.Now;
+            var now = BulkyBook.Utility.DateTimeHelper.Now;
             if (!flashSale.IsActive || now < flashSale.StartDate || now > flashSale.EndDate)
             {
                 return BadRequest("This flash sale is not currently active");

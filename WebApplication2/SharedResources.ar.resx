@@ -1467,7 +1467,7 @@
     <value>إضافة منتج جديد</value>
   </data>
   <data name="SelectProduct" xml:space="preserve">
-    <value>اختر المنتج</value>
+    <value>اختر منتج</value>
   </data>
   <data name="FlashSaleQuantity" xml:space="preserve">
     <value>كمية العرض لفترة محدودة</value>
@@ -2255,7 +2255,6 @@
   <data name="Filters" xml:space="preserve">
     <value>الفلتر</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="InstallmentTabby" xml:space="preserve">
     <value>قسّط على 4 دفعات بقيمة {0}</value>
   </data>
@@ -2301,9 +2300,6 @@
   <data name="AddComboToCart" xml:space="preserve">
     <value>إضافة الكومبو إلى السلة</value>
   </data>
-  <data name="ViewDetails" xml:space="preserve">
-    <value>عرض التفاصيل</value>
-  </data>
   <data name="ProductsIncluded" xml:space="preserve">
     <value>المنتجات المشمولة</value>
   </data>
@@ -2337,17 +2333,11 @@
   <data name="ErrorDeletingComboOffer" xml:space="preserve">
     <value>خطأ في حذف عرض الكومبو</value>
   </data>
-  <data name="ManageProducts" xml:space="preserve">
-    <value>إدارة المنتجات</value>
-  </data>
   <data name="ManageComboProducts" xml:space="preserve">
     <value>إدارة منتجات الكومبو</value>
   </data>
   <data name="AddProduct" xml:space="preserve">
     <value>إضافة منتج</value>
-  </data>
-  <data name="SelectProduct" xml:space="preserve">
-    <value>اختر منتج</value>
   </data>
   <data name="ProductAddedToCombo" xml:space="preserve">
     <value>تم إضافة المنتج إلى الكومبو بنجاح</value>
@@ -2378,9 +2368,6 @@
   </data>
   <data name="NoProductsInCombo" xml:space="preserve">
     <value>لا توجد منتجات في هذا الكومبو بعد</value>
-  </data>
-  <data name="AddProducts" xml:space="preserve">
-    <value>إضافة منتجات</value>
   </data>
   <data name="Required" xml:space="preserve">
     <value>مطلوب</value>
@@ -2459,5 +2446,77 @@
   </data>
   <data name="DiscountSave" xml:space="preserve">
     <value>وفر</value>
+  </data>
+  <data name="ViewAll" xml:space="preserve">
+    <value>عرض الكل</value>
+  </data>
+  <data name="ProductsList" xml:space="preserve">
+    <value>قائمة المنتجات</value>
+  </data>
+  <data name="CreateNewProduct" xml:space="preserve">
+    <value>اضافة منتج جديد</value>
+  </data>
+  <data name="CategoriesList" xml:space="preserve">
+    <value>قائمة المنتجات</value>
+  </data>
+  <data name="CreateNewCategory" xml:space="preserve">
+    <value>اضافة فئة جديدة</value>
+  </data>
+  <data name="NameEnglish" xml:space="preserve">
+    <value>الاسم</value>
+  </data>
+  <data name="CreateCategory" xml:space="preserve">
+    <value>اضافة فئة</value>
+  </data>
+  <data name="SelectProductAndSetFlashSaleDetails" xml:space="preserve">
+    <value>اختار المنتج وضعه فى العرض</value>
+  </data>
+  <data name="Blog" xml:space="preserve">
+    <value>المدونة</value>
+  </data>
+  <data name="HealthWellnessBlog" xml:space="preserve">
+    <value>مدونة الصحة والعافية</value>
+  </data>
+  <data name="ExpertTipsGuidesForBetterHealth" xml:space="preserve">
+    <value>نصائح وإرشادات الخبراء لصحة أفضل</value>
+  </data>
+  <data name="Featured" xml:space="preserve">
+    <value>مميز</value>
+  </data>
+  <data name="MinRead" xml:space="preserve">
+    <value>دقيقة قراءة</value>
+  </data>
+  <data name="ReadMore" xml:space="preserve">
+    <value>اقرأ المزيد</value>
+  </data>
+  <data name="AllPosts" xml:space="preserve">
+    <value>جميع المقالات</value>
+  </data>
+  <data name="NoBlogsFound" xml:space="preserve">
+    <value>لم يتم العثور على مقالات</value>
+  </data>
+  <data name="TryDifferentFilter" xml:space="preserve">
+    <value>جرب فلترًا مختلفًا</value>
+  </data>
+  <data name="ShareThisArticle" xml:space="preserve">
+    <value>شارك هذه المقالة</value>
+  </data>
+  <data name="CopyLink" xml:space="preserve">
+    <value>نسخ الرابط</value>
+  </data>
+  <data name="RelatedArticles" xml:space="preserve">
+    <value>مقالات ذات صلة</value>
+  </data>
+  <data name="BackToBlog" xml:space="preserve">
+    <value>العودة إلى المدونة</value>
+  </data>
+  <data name="LinkCopied" xml:space="preserve">
+    <value>تم نسخ الرابط!</value>
+  </data>
+  <data name="FailedToCopy" xml:space="preserve">
+    <value>فشل نسخ الرابط</value>
+  </data>
+  <data name="Min" xml:space="preserve">
+    <value>دقيقة</value>
   </data>
 </root>

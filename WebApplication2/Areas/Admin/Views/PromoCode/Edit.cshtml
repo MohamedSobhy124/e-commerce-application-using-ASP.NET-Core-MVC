@@ -155,11 +155,14 @@
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold d-block">
-                                    <i class="bi bi-toggle-on text-success me-2"></i>@Localizer["Status"]
+                                     @Localizer["Status"]
                                 </label>
-                                <div class="form-check form-switch mt-3">
-                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" style="width: 3rem; height: 1.5rem;" />
-                                    <label class="form-check-label ms-2 fw-bold">@Localizer["Active"]</label>
+                                <div class="d-flex align-items-center mt-3 ">
+                                    <div class="form-check form-switch me-3 w-100">
+                                        <input asp-for="IsActive" class="form-check-input" type="checkbox" id="isActiveCheckbox" style="width: 3rem; height: 1.5rem;" />
+                                        <label class="form-check-label ms-2 fw-bold" for="isActiveCheckbox">@Localizer["Active"]</label>
+                                    </div>
+                                   
                                 </div>
                             </div>
                         </div>
@@ -228,6 +231,8 @@
     }
 </style>
 
+@Html.AntiForgeryToken()
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
@@ -241,5 +246,72 @@
         $('input[name="Code"]').on('input', function() {
             $(this).val($(this).val().toUpperCase());
         });
+
+        // Toggle active status from edit page
+        $('.toggle-active-edit').click(function (e) {
+            e.preventDefault();
+            var promoId = $(this).data('id');
+            var btn = $(this);
+            var checkbox = $('#isActiveCheckbox');
+            var statusBadge = $('.badge.fs-6');
+            
+            // Disable button during request
+            btn.prop('disabled', true);
+            
+            $.ajax({
+                url: '@Url.Action("ToggleActive", "PromoCode", new { area = "Admin" })',
+                type: 'POST',
+                data: {
+                    id: promoId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Update checkbox
+                        checkbox.prop('checked', response.isActive);
+                        
+                        // Update status badge in header
+                        if (response.isActive) {
+                            statusBadge.removeClass('bg-secondary').addClass('bg-success');
+                            statusBadge.html('<i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>@Html.Raw(Localizer["Active"].Value)');
+                            btn.removeClass('btn-secondary').addClass('btn-success');
+                            btn.find('i').removeClass('bi-toggle-off').addClass('bi-toggle-on');
+                        } else {
+                            statusBadge.removeClass('bg-success').addClass('bg-secondary');
+                            statusBadge.html('<i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>@Html.Raw(Localizer["Inactive"].Value)');
+                            btn.removeClass('btn-success').addClass('btn-secondary');
+                            btn.find('i').removeClass('bi-toggle-on').addClass('bi-toggle-off');
+                        }
+                        
+                        // Show success message
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    } else {
+                        if (typeof toastr !== 'undefined') {
+                            toastr.error(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Toggle active error:', error);
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error('@Html.Raw(Localizer["An error occurred. Please try again."].Value)');
+                    } else {
+                        alert('An error occurred. Please try again.');
+                    }
+                },
+                complete: function () {
+                    btn.prop('disabled', false);
+                }
+            });
+        });
+
+        // Prevent checkbox from triggering AJAX - let form submission handle it
+        // The toggle button will update the checkbox via AJAX
     </script>
 }

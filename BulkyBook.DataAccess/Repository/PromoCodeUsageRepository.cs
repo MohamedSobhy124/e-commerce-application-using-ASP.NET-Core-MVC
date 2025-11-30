@@ -22,7 +22,7 @@ namespace BulkyBook.DataAccess.Repository
                 PromoCodeId = promoCodeId,
                 UserId = userId,
                 OrderId = orderId,
-                UsedDate = DateTime.Now
+                UsedDate = BulkyBook.Utility.DateTimeHelper.Now
             };
             
             _db.PromoCodeUsages.Add(usage);

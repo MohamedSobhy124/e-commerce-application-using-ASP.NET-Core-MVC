@@ -29,22 +29,22 @@ namespace BulkyBook.Controllers
                 var urlElements = new List<XElement>
                 {
                     // Home Page
-                    CreateUrlElement(baseUrl + "/Customer/Home", DateTime.Now, "daily", 1.0),
+                    CreateUrlElement(baseUrl + "/Customer/Home", BulkyBook.Utility.DateTimeHelper.Now, "daily", 1.0),
                     
                     // Static Pages
-                    CreateUrlElement(baseUrl + "/Customer/Home/AboutUs", DateTime.Now.AddDays(-7), "monthly", 0.8),
-                    CreateUrlElement(baseUrl + "/Customer/Home/Privacy", DateTime.Now.AddDays(-7), "monthly", 0.5),
-                    CreateUrlElement(baseUrl + "/Customer/Home/PrivacyPolicy", DateTime.Now.AddDays(-7), "monthly", 0.5),
-                    CreateUrlElement(baseUrl + "/Customer/Home/Terms", DateTime.Now.AddDays(-7), "monthly", 0.5),
-                    CreateUrlElement(baseUrl + "/Customer/Home/Shipping", DateTime.Now.AddDays(-7), "monthly", 0.7),
-                    CreateUrlElement(baseUrl + "/Customer/Home/Returns", DateTime.Now.AddDays(-7), "monthly", 0.7),
-                    CreateUrlElement(baseUrl + "/Customer/Home/HelpCenter", DateTime.Now.AddDays(-7), "monthly", 0.8),
+                    CreateUrlElement(baseUrl + "/Customer/Home/AboutUs", BulkyBook.Utility.DateTimeHelper.Now.AddDays(-7), "monthly", 0.8),
+                    CreateUrlElement(baseUrl + "/Customer/Home/Privacy", BulkyBook.Utility.DateTimeHelper.Now.AddDays(-7), "monthly", 0.5),
+                    CreateUrlElement(baseUrl + "/Customer/Home/PrivacyPolicy", BulkyBook.Utility.DateTimeHelper.Now.AddDays(-7), "monthly", 0.5),
+                    CreateUrlElement(baseUrl + "/Customer/Home/Terms", BulkyBook.Utility.DateTimeHelper.Now.AddDays(-7), "monthly", 0.5),
+                    CreateUrlElement(baseUrl + "/Customer/Home/Shipping", BulkyBook.Utility.DateTimeHelper.Now.AddDays(-7), "monthly", 0.7),
+                    CreateUrlElement(baseUrl + "/Customer/Home/Returns", BulkyBook.Utility.DateTimeHelper.Now.AddDays(-7), "monthly", 0.7),
+                    CreateUrlElement(baseUrl + "/Customer/Home/HelpCenter", BulkyBook.Utility.DateTimeHelper.Now.AddDays(-7), "monthly", 0.8),
                     
                     // Services
-                    CreateUrlElement(baseUrl + "/Customer/ServiceSubscription", DateTime.Now.AddDays(-1), "weekly", 0.9),
+                    CreateUrlElement(baseUrl + "/Customer/ServiceSubscription", BulkyBook.Utility.DateTimeHelper.Now.AddDays(-1), "weekly", 0.9),
                     
                     // Flash Sales
-                    CreateUrlElement(baseUrl + "/Customer/FlashSale", DateTime.Now, "daily", 0.9)
+                    CreateUrlElement(baseUrl + "/Customer/FlashSale", BulkyBook.Utility.DateTimeHelper.Now, "daily", 0.9)
                 };
 
                 // Try to add dynamic content, but don't fail if database is unavailable
@@ -89,7 +89,7 @@ namespace BulkyBook.Controllers
                     new XDeclaration("1.0", "UTF-8", "yes"),
                     new XElement("urlset",
                         new XAttribute("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9"),
-                        CreateUrlElement(baseUrl + "/Customer/Home", DateTime.Now, "daily", 1.0)
+                        CreateUrlElement(baseUrl + "/Customer/Home", BulkyBook.Utility.DateTimeHelper.Now, "daily", 1.0)
                     )
                 );
                 return Content(basicSitemap.ToString(), "application/xml", Encoding.UTF8);
@@ -117,7 +117,7 @@ namespace BulkyBook.Controllers
                 {
                     urls.Add(CreateUrlElement(
                         baseUrl + $"/Customer/Home/Details?productId={product.Id}",
-                        DateTime.Now.AddDays(-1),
+                        BulkyBook.Utility.DateTimeHelper.Now.AddDays(-1),
                         "weekly",
                         0.8
                     ));
@@ -192,7 +192,7 @@ namespace BulkyBook.Controllers
                 {
                     urls.Add(CreateUrlElement(
                         baseUrl + $"/Customer/Home?categoryId={category.Id}",
-                        DateTime.Now.AddDays(-7),
+                        BulkyBook.Utility.DateTimeHelper.Now.AddDays(-7),
                         "weekly",
                         0.7
                     ));

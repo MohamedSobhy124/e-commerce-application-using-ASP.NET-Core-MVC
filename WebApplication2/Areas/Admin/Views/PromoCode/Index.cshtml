@@ -47,7 +47,7 @@
                         <tbody>
                             @foreach (var promo in Model)
                             {
-                                var now = DateTime.Now;
+                                var now = BulkyBook.Utility.DateTimeHelper.Now;
                                 var isExpired = promo.EndDate < now;
                                 var isNotStarted = promo.StartDate > now;
                                 var isUsageLimitReached = promo.UsageLimit.HasValue && promo.TimesUsed >= promo.UsageLimit.Value;
@@ -139,6 +139,8 @@
     </div>
 </div>
 
+@Html.AntiForgeryToken()
+
 @section Scripts {
     <script>
         $(document).ready(function () {
@@ -148,13 +150,17 @@
                 "pageLength": 25
             });
 
-            // Toggle active status
-            $('.toggle-active').click(function () {
+            // Toggle active status - Use event delegation for DataTable compatibility
+            $(document).on('click', '.toggle-active', function (e) {
+                e.preventDefault();
                 var promoId = $(this).data('id');
                 var btn = $(this);
                 
+                // Disable button during request
+                btn.prop('disabled', true);
+                
                 $.ajax({
-                    url: '@Url.Action("ToggleActive", "PromoCode")',
+                    url: '@Url.Action("ToggleActive", "PromoCode", new { area = "Admin" })',
                     type: 'POST',
                     data: {
                         id: promoId,
@@ -164,22 +170,57 @@
                         if (response.success) {
                             // Update status badge
                             var statusBadge = $('#status-' + promoId);
-                            if (response.isActive) {
-                                statusBadge.removeClass('bg-secondary').addClass('bg-success').text('@Localizer["Active"]');
-                                btn.find('i').removeClass('bi-toggle-off').addClass('bi-toggle-on');
+                            var row = btn.closest('tr');
+                            
+                            // Check if promo is expired or not started
+                            var isExpired = row.find('.badge.bg-danger').length > 0;
+                            var isNotStarted = row.find('.badge.bg-warning:contains("@Localizer["Upcoming"]")').length > 0;
+                            var isUsageLimitReached = row.find('.badge.bg-danger:contains("@Localizer["LimitReached"]")').length > 0;
+                            
+                            // Update badge based on active status and other conditions
+                            statusBadge.removeClass('bg-success bg-secondary bg-warning');
+                            
+                            if (response.isActive && !isExpired && !isUsageLimitReached && !isNotStarted) {
+                                statusBadge.addClass('bg-success').text('@Html.Raw(Localizer["Active"].Value)');
+                            } else if (!response.isActive) {
+                                statusBadge.addClass('bg-secondary').text('@Html.Raw(Localizer["Inactive"].Value)');
                             } else {
-                                statusBadge.removeClass('bg-success').addClass('bg-secondary').text('@Localizer["Inactive"]');
+                                statusBadge.addClass('bg-warning').text('@Html.Raw(Localizer["Paused"].Value)');
+                            }
+                            
+                            // Update toggle button
+                            if (response.isActive) {
+                                btn.find('i').removeClass('bi-toggle-off').addClass('bi-toggle-on');
+                                btn.removeClass('btn-secondary').addClass('btn-success');
+                            } else {
                                 btn.find('i').removeClass('bi-toggle-on').addClass('bi-toggle-off');
+                                btn.removeClass('btn-success').addClass('btn-secondary');
                             }
                             
                             // Show success message
-                            toastr.success(response.message);
+                            if (typeof toastr !== 'undefined') {
+                                toastr.success(response.message);
+                            } else {
+                                alert(response.message);
+                            }
                         } else {
-                            toastr.error(response.message);
+                            if (typeof toastr !== 'undefined') {
+                                toastr.error(response.message);
+                            } else {
+                                alert(response.message);
+                            }
                         }
                     },
-                    error: function () {
-                        toastr.error('@Localizer["An error occurred. Please try again."]');
+                    error: function (xhr, status, error) {
+                        console.error('Toggle active error:', error);
+                        if (typeof toastr !== 'undefined') {
+                            toastr.error('@Html.Raw(Localizer["An error occurred. Please try again."].Value)');
+                        } else {
+                            alert('An error occurred. Please try again.');
+                        }
+                    },
+                    complete: function () {
+                        btn.prop('disabled', false);
                     }
                 });
             });
