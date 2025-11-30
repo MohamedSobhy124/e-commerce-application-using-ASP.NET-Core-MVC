@@ -423,9 +423,28 @@
                             <h5 class="fw-bold mb-2" style="cursor: pointer;" onclick="window.location.href='@Url.Action("Details", "Home", new { area = "Customer", productId = item.ProductId })'">@productName</h5>
                             @if (item.ProductVariant != null)
                             {
-                                <p class="text-muted small mb-2">
-                                    <i class="bi bi-palette me-1"></i>@item.ProductVariant.VariantName
-                                </p>
+                                string variantName = "";
+                                if (item.ProductVariant.VariantOptionValues != null && item.ProductVariant.VariantOptionValues.Any())
+                                {
+                                    var optionValues = item.ProductVariant.VariantOptionValues
+                                        .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                                        .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+                                        .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                                        .Where(s => !string.IsNullOrEmpty(s))
+                                        .ToList();
+                                    variantName = string.Join(" / ", optionValues);
+                                }
+                                else if (!string.IsNullOrEmpty(item.ProductVariant.VariantName))
+                                {
+                                    variantName = item.ProductVariant.VariantName;
+                                }
+                                
+                                if (!string.IsNullOrEmpty(variantName))
+                                {
+                                    <p class="text-muted small mb-2">
+                                        <i class="bi bi-palette me-1"></i>@variantName
+                                    </p>
+                                }
                             }
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="text-primary fw-bold">

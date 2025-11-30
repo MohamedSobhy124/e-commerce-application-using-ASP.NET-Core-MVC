@@ -1,9 +1,11 @@
 using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.DataAccess.Data;
 using BulkyBook.Models;
 using BulkyBook.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.EntityFrameworkCore;
 
 namespace BulkyBook.Areas.Customer.Controllers
 {
@@ -12,11 +14,13 @@ namespace BulkyBook.Areas.Customer.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStringLocalizer<SharedResources> _localizer;
+        private readonly ApplicationDBContext _dbContext;
 
-        public ComboOfferController(IUnitOfWork unitOfWork, IStringLocalizer<SharedResources> localizer)
+        public ComboOfferController(IUnitOfWork unitOfWork, IStringLocalizer<SharedResources> localizer, ApplicationDBContext dbContext)
         {
             _unitOfWork = unitOfWork;
             _localizer = localizer;
+            _dbContext = dbContext;
         }
 
         // GET: Combo Offers List
@@ -38,6 +42,23 @@ namespace BulkyBook.Areas.Customer.Controllers
             if (comboOffer == null)
             {
                 return NotFound();
+            }
+
+            // Load variant option values for combo offer items
+            if (comboOffer.ComboOfferItems != null)
+            {
+                foreach (var item in comboOffer.ComboOfferItems.Where(i => !i.IsDeleted && i.ProductVariantId.HasValue))
+                {
+                    if (item.ProductVariant != null)
+                    {
+                        // Load variant option values using DbContext
+                        item.ProductVariant.VariantOptionValues = _dbContext.ProductVariantOptionValues
+                            .Include(vov => vov.OptionValue)
+                                .ThenInclude(ov => ov.ProductOption)
+                            .Where(vov => vov.ProductVariantId == item.ProductVariant.Id)
+                            .ToList();
+                    }
+                }
             }
 
             // Allow viewing even if not currently active (for debugging and showing status)

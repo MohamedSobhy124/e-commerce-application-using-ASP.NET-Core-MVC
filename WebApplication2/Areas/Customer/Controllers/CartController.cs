@@ -104,6 +104,21 @@ namespace BulkyBook.Areas.Customer.Controllers
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
                 // 🔥 Include FlashSaleItem, ProductVariant to check for flash sale prices and variant prices
                 cartItems = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "product,FlashSaleItem,ComboOffer,ProductVariant,product.ProductImages");
+                
+                // Load variant option values for each cart item
+                foreach (var cart in cartItems)
+                {
+                    if (cart.ProductVariantId.HasValue && cart.ProductVariant != null)
+                    {
+                        // Ensure variant option values are loaded
+                        var variant = _unitOfWork.ProductVariant.Get(v => v.Id == cart.ProductVariantId.Value, 
+                            includeProperties: "VariantOptionValues,VariantOptionValues.OptionValue,VariantOptionValues.OptionValue.ProductOption");
+                        if (variant != null)
+                        {
+                            cart.ProductVariant = variant;
+                        }
+                    }
+                }
             }
             else
             {
@@ -119,7 +134,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     ComboOfferId = gc.ComboOfferId, // 🔥 Include combo offer info
                     ComboOffer = gc.ComboOfferId.HasValue ? _unitOfWork.ComboOffer.GetComboOfferWithItems(gc.ComboOfferId.Value) : null, // 🔥 Load combo offer
                     product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry,ProductImages"),
-                    ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value) : null
+                    ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value, includeProperties: "VariantOptionValues,VariantOptionValues.OptionValue,VariantOptionValues.OptionValue.ProductOption") : null
                 }).ToList();
             }
             
@@ -135,12 +150,40 @@ namespace BulkyBook.Areas.Customer.Controllers
                     ? (currentCulture == "ar" && !string.IsNullOrEmpty(cart.ComboOffer.NameAr) 
                         ? cart.ComboOffer.NameAr 
                         : cart.ComboOffer.Name)
-                    : cart.product.Title;
+                    : (cart.product != null 
+                        ? (currentCulture == "ar" && !string.IsNullOrEmpty(cart.product.TitleAr) 
+                            ? cart.product.TitleAr 
+                            : cart.product.Title ?? "Product")
+                        : "Product");
                 
                 // Get image - use combo image if it's a combo, otherwise use product image
                 string imageUrl = isComboOffer && !string.IsNullOrEmpty(cart.ComboOffer.ImageUrl)
                     ? cart.ComboOffer.ImageUrl
                     : GetProductImageUrl(cart.product);
+                
+                // Build variant name if variant exists
+                string variantName = "";
+                if (cart.ProductVariantId.HasValue && cart.ProductVariant != null)
+                {
+                    if (cart.ProductVariant.VariantOptionValues != null && cart.ProductVariant.VariantOptionValues.Any())
+                    {
+                        var optionValues = cart.ProductVariant.VariantOptionValues
+                            .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                            .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+                            .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                            .Where(s => !string.IsNullOrEmpty(s))
+                            .ToList();
+                        
+                        if (optionValues.Any())
+                        {
+                            variantName = string.Join(" / ", optionValues);
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(cart.ProductVariant.VariantName))
+                    {
+                        variantName = cart.ProductVariant.VariantName;
+                    }
+                }
                 
                 return new
                 {
@@ -151,7 +194,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                     count = cart.Count,
                     cartId = cart.Id,
                     isFlashSale = cart.FlashSaleItemId.HasValue, // 🔥 Indicate if it's a flash sale item
-                    isComboOffer = isComboOffer // 🔥 Indicate if it's a combo offer
+                    isComboOffer = isComboOffer, // 🔥 Indicate if it's a combo offer
+                    variantName = variantName // 🔥 Include variant name if exists
                 };
             }).ToList();
 
@@ -186,7 +230,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     _unitOfWork.shoppingCart.update(cartItem);
                     _unitOfWork.save();
                     
-                    return Json(new { success = true, message = "Quantity updated successfully!" });
+                    return Json(new { success = true, message = _localizer["QuantityUpdatedSuccessfully"].Value });
                 }
             }
             else
@@ -206,11 +250,11 @@ namespace BulkyBook.Areas.Customer.Controllers
                     }
 
                     BulkyBook.Utility.GuestCartHelper.UpdateQuantity(HttpContext.Session, productId, count);
-                    return Json(new { success = true, message = "Quantity updated successfully!" });
+                    return Json(new { success = true, message = _localizer["QuantityUpdatedSuccessfully"].Value });
                 }
             }
 
-            return Json(new { success = false, message = "Item not found in cart" });
+            return Json(new { success = false, message = _localizer["CartItemNotFound"].Value });
         }
 
         // Add Flash Sale Item to Cart
@@ -360,7 +404,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     var cartFromDD = _unitOfWork.shoppingCart.Get(a => a.Id == CartId, includeProperties: "product,FlashSaleItem,ProductVariant,ComboOffer");
                     if (cartFromDD == null)
                     {
-                        return Json(new { success = false, message = "Cart item not found" });
+                        return Json(new { success = false, message = _localizer["CartItemNotFound"].Value });
                     }
 
                     var newQuantity = cartFromDD.Count + 1;
@@ -396,7 +440,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                         totalPrice = totalPrice,
                         originalPrice = originalPrice,
                         orderTotal = orderTotal,
-                        message = "Quantity updated"
+                        message = _localizer["QuantityUpdated"].Value
                     });
                 }
                 else if (ProductId.HasValue)
@@ -406,7 +450,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     
                     if (item == null)
                     {
-                        return Json(new { success = false, message = "Cart item not found" });
+                        return Json(new { success = false, message = _localizer["CartItemNotFound"].Value });
                     }
 
                     var newQuantity = item.Count + 1;
@@ -432,11 +476,11 @@ namespace BulkyBook.Areas.Customer.Controllers
                         unitPrice = updatedItem.FlashSalePrice ?? updatedItem.ProductPrice,
                         totalPrice = (updatedItem.FlashSalePrice ?? updatedItem.ProductPrice) * updatedItem.Count,
                         orderTotal = orderTotal,
-                        message = "Quantity updated"
+                        message = _localizer["QuantityUpdated"].Value
                     });
                 }
                 
-                return Json(new { success = false, message = "Invalid request" });
+                return Json(new { success = false, message = _localizer["InvalidRequest"].Value });
             }
             catch (Exception ex)
             {
@@ -454,7 +498,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     var cartFromDD = _unitOfWork.shoppingCart.Get(a => a.Id == CartId, includeProperties: "product,FlashSaleItem,ProductVariant,ComboOffer");
                     if (cartFromDD == null)
                     {
-                        return Json(new { success = false, message = "Cart item not found" });
+                        return Json(new { success = false, message = _localizer["CartItemNotFound"].Value });
                     }
 
                     bool removed = false;
@@ -481,7 +525,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                             success = true, 
                             removed = true,
                             orderTotal = orderTotal,
-                            message = "Item removed from cart"
+                            message = _localizer["ItemRemovedFromCart"].Value
                         });
                     }
                     else
@@ -505,7 +549,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                             totalPrice = totalPrice,
                             originalPrice = originalPrice,
                             orderTotal = orderTotal,
-                            message = "Quantity updated"
+                            message = _localizer["QuantityUpdated"].Value
                         });
                     }
                 }
@@ -515,7 +559,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     var item = guestCart.FirstOrDefault(c => c.ProductId == ProductId.Value);
                     if (item == null)
                     {
-                        return Json(new { success = false, message = "Cart item not found" });
+                        return Json(new { success = false, message = _localizer["CartItemNotFound"].Value });
                     }
 
                     bool removed = false;
@@ -538,7 +582,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                             success = true, 
                             removed = true,
                             orderTotal = orderTotal,
-                            message = "Item removed from cart"
+                            message = _localizer["ItemRemovedFromCart"].Value
                         });
                     }
                     else
@@ -554,12 +598,12 @@ namespace BulkyBook.Areas.Customer.Controllers
                             unitPrice = updatedItem.FlashSalePrice ?? updatedItem.ProductPrice,
                             totalPrice = (updatedItem.FlashSalePrice ?? updatedItem.ProductPrice) * updatedItem.Count,
                             orderTotal = orderTotal,
-                            message = "Quantity updated"
+                            message = _localizer["QuantityUpdated"].Value
                         });
                     }
                 }
 
-                return Json(new { success = false, message = "Invalid request" });
+                return Json(new { success = false, message = _localizer["InvalidRequest"].Value });
             }
             catch (Exception ex)
             {
@@ -577,7 +621,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     var cartFromDD = _unitOfWork.shoppingCart.Get(a => a.Id == CartId);
                     if (cartFromDD == null)
                     {
-                        return Json(new { success = false, message = "Cart item not found" });
+                        return Json(new { success = false, message = _localizer["CartItemNotFound"].Value });
                     }
 
                     _unitOfWork.shoppingCart.remove(cartFromDD);
@@ -608,7 +652,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     });
                 }
 
-                return Json(new { success = false, message = "Invalid request" });
+                return Json(new { success = false, message = _localizer["InvalidRequest"].Value });
             }
             catch (Exception ex)
             {
@@ -1565,6 +1609,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                 return "/images/no-image.png"; // Default placeholder image
             }
 
+            string imageUrl = null;
+
             // Check if product has ProductImages
             if (product.ProductImages != null && product.ProductImages.Any())
             {
@@ -1572,14 +1618,38 @@ namespace BulkyBook.Areas.Customer.Controllers
                 var firstImage = product.ProductImages.OrderBy(pi => pi.DisplayOrder).FirstOrDefault();
                 if (firstImage != null && !string.IsNullOrEmpty(firstImage.ImageUrl))
                 {
-                    return firstImage.ImageUrl;
+                    imageUrl = firstImage.ImageUrl;
                 }
             }
 
             // Fallback to ImageUrl if no ProductImages
-            if (!string.IsNullOrEmpty(product.ImageUrl))
+            if (string.IsNullOrEmpty(imageUrl) && !string.IsNullOrEmpty(product.ImageUrl))
             {
-                return product.ImageUrl;
+                imageUrl = product.ImageUrl;
+            }
+
+            // Normalize image URL
+            if (!string.IsNullOrEmpty(imageUrl))
+            {
+                // Replace backslashes with forward slashes
+                imageUrl = imageUrl.Replace('\\', '/');
+                
+                // Remove double slashes (except after http:// or https://)
+                imageUrl = System.Text.RegularExpressions.Regex.Replace(imageUrl, @"([^:]/)/+", "$1");
+                
+                // Fix case sensitivity: Images -> images, but keep Products as Products
+                // The actual folder structure is: wwwroot/images/Products/
+                imageUrl = System.Text.RegularExpressions.Regex.Replace(imageUrl, @"/Images/", "/images/", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                
+                // Ensure it starts with / if it's a relative path
+                if (!imageUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase) 
+                    && !imageUrl.StartsWith("/") 
+                    && !imageUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+                {
+                    imageUrl = "/" + imageUrl;
+                }
+                
+                return imageUrl;
             }
 
             // Return placeholder if no image found

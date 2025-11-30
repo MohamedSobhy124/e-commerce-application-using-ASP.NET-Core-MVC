@@ -56,32 +56,37 @@ namespace BulkyBook.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Categry categry)
         {
-            // Initialize ImageUrl to empty string to avoid null validation errors
-            if (string.IsNullOrEmpty(categry.ImageUrl))
-            {
-                categry.ImageUrl = string.Empty;
-            }
-
+            // Remove Id from validation for Create action (it will be set by database)
+            ModelState.Remove("Id");
+            
+            // Remove BaseEntity audit fields from validation since they're set programmatically
+            ModelState.Remove("CreatedDate");
+            ModelState.Remove("ModifiedDate");
+            ModelState.Remove("CreatedBy");
+            ModelState.Remove("ModifiedBy");
+            ModelState.Remove("IsDeleted");
+            
             // Validate image is required
             if (categry.ImageFile == null || categry.ImageFile.Length == 0)
             {
                 ModelState.AddModelError("ImageFile", "Image is required.");
             }
 
-            // Remove ImageUrl from ModelState validation since we handle it manually
-            ModelState.Remove("ImageUrl");
-
-            // Debug: Log ModelState errors
+            // Debug: Log ModelState errors with more detail
             if (!ModelState.IsValid)
             {
+                var errorDetails = new List<string>();
                 foreach (var error in ModelState)
                 {
                     foreach (var errorMessage in error.Value.Errors)
                     {
-                        // Log or add to TempData for debugging
-                        System.Diagnostics.Debug.WriteLine($"Field: {error.Key}, Error: {errorMessage.ErrorMessage}");
+                        var errorDetail = $"Field: '{error.Key}', Error: '{errorMessage.ErrorMessage}', AttemptedValue: '{error.Value.AttemptedValue}'";
+                        System.Diagnostics.Debug.WriteLine(errorDetail);
+                        errorDetails.Add(errorDetail);
                     }
                 }
+                // Add all errors to TempData for display
+                TempData["ValidationErrors"] = string.Join(" | ", errorDetails);
             }
 
             if (ModelState.IsValid)
@@ -168,11 +173,11 @@ namespace BulkyBook.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            // Initialize ImageUrl from existing category first
-            categry.ImageUrl = existingCategory.ImageUrl ?? string.Empty;
-
-            // Remove ImageUrl from ModelState validation since we handle it manually
-            ModelState.Remove("ImageUrl");
+            // Preserve existing ImageUrl if no new image is uploaded
+            if (categry.ImageFile == null || categry.ImageFile.Length == 0)
+            {
+                categry.ImageUrl = existingCategory.ImageUrl;
+            }
 
             // Debug: Log ModelState errors
             if (!ModelState.IsValid)
