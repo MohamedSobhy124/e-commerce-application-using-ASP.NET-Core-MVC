@@ -2519,4 +2519,148 @@
   <data name="Min" xml:space="preserve">
     <value>دقيقة</value>
   </data>
+  <data name="VideoBanner" xml:space="preserve">
+    <value>فيديو البانر</value>
+  </data>
+  <data name="VideoBannerManagement" xml:space="preserve">
+    <value>إدارة فيديو البانر</value>
+  </data>
+  <data name="VideoBannerDescription" xml:space="preserve">
+    <value>قم بتحميل أو تغيير فيديو البانر الرئيسي الذي يظهر في الصفحة الرئيسية</value>
+  </data>
+  <data name="VideoFile" xml:space="preserve">
+    <value>ملف الفيديو</value>
+  </data>
+  <data name="PosterImage" xml:space="preserve">
+    <value>صورة البوستر</value>
+  </data>
+  <data name="VideoExists" xml:space="preserve">
+    <value>تم تحميل الفيديو بنجاح</value>
+  </data>
+  <data name="PosterExists" xml:space="preserve">
+    <value>تم تحميل البوستر بنجاح</value>
+  </data>
+  <data name="NoVideoUploaded" xml:space="preserve">
+    <value>لم يتم تحميل أي فيديو بعد</value>
+  </data>
+  <data name="NoPosterUploaded" xml:space="preserve">
+    <value>لم يتم تحميل أي بوستر بعد</value>
+  </data>
+  <data name="UploadNewVideo" xml:space="preserve">
+    <value>تحميل فيديو جديد</value>
+  </data>
+  <data name="UploadNewPoster" xml:space="preserve">
+    <value>تحميل بوستر جديد</value>
+  </data>
+  <data name="SelectVideoFile" xml:space="preserve">
+    <value>اختر ملف الفيديو</value>
+  </data>
+  <data name="SelectPosterImage" xml:space="preserve">
+    <value>اختر صورة البوستر</value>
+  </data>
+  <data name="UploadVideo" xml:space="preserve">
+    <value>تحميل الفيديو</value>
+  </data>
+  <data name="UploadPoster" xml:space="preserve">
+    <value>تحميل البوستر</value>
+  </data>
+  <data name="DeleteVideo" xml:space="preserve">
+    <value>حذف الفيديو</value>
+  </data>
+  <data name="DeletePoster" xml:space="preserve">
+    <value>حذف البوستر</value>
+  </data>
+  <data name="ConfirmDeleteVideo" xml:space="preserve">
+    <value>هل أنت متأكد من حذف الفيديو؟</value>
+  </data>
+  <data name="ConfirmDeletePoster" xml:space="preserve">
+    <value>هل أنت متأكد من حذف البوستر؟</value>
+  </data>
+  <data name="VideoRequirements" xml:space="preserve">
+    <value>متطلبات الفيديو</value>
+  </data>
+  <data name="PosterRequirements" xml:space="preserve">
+    <value>متطلبات البوستر</value>
+  </data>
+  <data name="Instructions" xml:space="preserve">
+    <value>التعليمات</value>
+  </data>
+  <data name="Instruction1" xml:space="preserve">
+    <value>يجب أن يكون الفيديو بتنسيق MP4 أو WebM أو MOV</value>
+  </data>
+  <data name="Instruction2" xml:space="preserve">
+    <value>الحجم الأقصى للفيديو: 50 ميجابايت</value>
+  </data>
+  <data name="Instruction3" xml:space="preserve">
+    <value>يُنصح بأن يكون الفيديو 10 ثوانٍ كحد أقصى</value>
+  </data>
+  <data name="Instruction4" xml:space="preserve">
+    <value>الدقة الموصى بها: 1920x1080 أو 1280x720 (نسبة 16:9)</value>
+  </data>
+  <data name="Instruction5" xml:space="preserve">
+    <value>صورة البوستر ستظهر أثناء تحميل الفيديو</value>
+  </data>
+  <data name="PleaseSelectVideoFile" xml:space="preserve">
+    <value>يرجى اختيار ملف فيديو</value>
+  </data>
+  <data name="PleaseSelectPosterImage" xml:space="preserve">
+    <value>يرجى اختيار صورة البوستر</value>
+  </data>
+  <data name="InvalidVideoFormat" xml:space="preserve">
+    <value>تنسيق الفيديو غير صحيح. يرجى استخدام MP4 أو WebM أو MOV</value>
+  </data>
+  <data name="InvalidImageFormat" xml:space="preserve">
+    <value>تنسيق الصورة غير صحيح. يرجى استخدام JPG أو PNG أو WebP</value>
+  </data>
+  <data name="VideoFileTooLarge" xml:space="preserve">
+    <value>ملف الفيديو كبير جداً. الحد الأقصى: 50 ميجابايت</value>
+  </data>
+  <data name="ImageFileTooLarge" xml:space="preserve">
+    <value>ملف الصورة كبير جداً. الحد الأقصى: 5 ميجابايت</value>
+  </data>
+  <data name="VideoUploadedSuccessfully" xml:space="preserve">
+    <value>تم تحميل الفيديو بنجاح</value>
+  </data>
+  <data name="PosterUploadedSuccessfully" xml:space="preserve">
+    <value>تم تحميل البوستر بنجاح</value>
+  </data>
+  <data name="VideoDeletedSuccessfully" xml:space="preserve">
+    <value>تم حذف الفيديو بنجاح</value>
+  </data>
+  <data name="PosterDeletedSuccessfully" xml:space="preserve">
+    <value>تم حذف البوستر بنجاح</value>
+  </data>
+  <data name="ErrorUploadingVideo" xml:space="preserve">
+    <value>حدث خطأ أثناء تحميل الفيديو</value>
+  </data>
+  <data name="ErrorUploadingPoster" xml:space="preserve">
+    <value>حدث خطأ أثناء تحميل البوستر</value>
+  </data>
+  <data name="ErrorDeletingVideo" xml:space="preserve">
+    <value>حدث خطأ أثناء حذف الفيديو</value>
+  </data>
+  <data name="ErrorDeletingPoster" xml:space="preserve">
+    <value>حدث خطأ أثناء حذف البوستر</value>
+  </data>
+  <data name="VideoNotFound" xml:space="preserve">
+    <value>لم يتم العثور على الفيديو</value>
+  </data>
+  <data name="PosterNotFound" xml:space="preserve">
+    <value>لم يتم العثور على البوستر</value>
+  </data>
+  <data name="YourBrowserDoesNotSupportVideo" xml:space="preserve">
+    <value>المتصفح الخاص بك لا يدعم تشغيل الفيديو</value>
+  </data>
+  <data name="Size" xml:space="preserve">
+    <value>الحجم</value>
+  </data>
+  <data name="LastModified" xml:space="preserve">
+    <value>آخر تعديل</value>
+  </data>
+  <data name="Uploading" xml:space="preserve">
+    <value>جاري التحميل</value>
+  </data>
+  <data name="YourFile" xml:space="preserve">
+    <value>حجم ملفك</value>
+  </data>
 </root>

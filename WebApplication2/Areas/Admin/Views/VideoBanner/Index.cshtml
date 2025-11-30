@@ -1,0 +1,384 @@
+@{
+    ViewData["Title"] = "Video Banner Management";
+}
+
+<partial name="_Notifications" />
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">
+                    <i class="bi bi-play-circle-fill me-3"></i>
+                    @Localizer["VideoBannerManagement"]
+                </h2>
+                <p class="text-muted mb-0">
+                    @Localizer["VideoBannerDescription"]
+                </p>
+            </div>
+
+            <div class="admin-card-body">
+                <!-- Video Upload Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-film me-2"></i>
+                            @Localizer["VideoFile"]
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (ViewBag.HasVideo == true)
+                        {
+                            <div class="alert alert-success mb-3">
+                                <i class="bi bi-check-circle me-2"></i>
+                                <strong>@Localizer["VideoExists"]</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>@Localizer["Size"]: @ViewBag.VideoSizeMB MB</li>
+                                    <li>@Localizer["LastModified"]: @ViewBag.VideoLastModified.ToString("yyyy-MM-dd HH:mm")</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <video controls class="w-100" style="max-height: 300px; border-radius: 8px;">
+                                    <source src="~/videos/home-banner.mp4" type="video/mp4">
+                                    @Localizer["YourBrowserDoesNotSupportVideo"]
+                                </video>
+                            </div>
+                            
+                            <form asp-action="DeleteVideo" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('@Localizer["ConfirmDeleteVideo"]')">
+                                    <i class="bi bi-trash me-2"></i>@Localizer["DeleteVideo"]
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning mb-3">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                @Localizer["NoVideoUploaded"]
+                            </div>
+                        }
+                        
+                        <hr />
+                        
+                        <h6 class="mb-3">@Localizer["UploadNewVideo"]</h6>
+                        <form asp-action="UploadVideo" method="post" enctype="multipart/form-data" id="videoUploadForm">
+                            @Html.AntiForgeryToken()
+                            <div class="mb-3">
+                                <label for="videoFile" class="form-label">@Localizer["SelectVideoFile"]</label>
+                                <input type="file" class="form-control" id="videoFile" name="videoFile" accept="video/mp4,video/webm,video/mov" required>
+                                <div id="videoFileError" class="text-danger mt-2" style="display: none;"></div>
+                                <div id="videoFileInfo" class="text-muted mt-2" style="display: none;"></div>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    @Localizer["VideoRequirements"]: MP4, WebM, or MOV format. Max size: 50MB. Recommended: 10 seconds, 1280x720 or 1920x1080.
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="videoUploadBtn">
+                                <i class="bi bi-upload me-2"></i>@Localizer["UploadVideo"]
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Poster Image Upload Section -->
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-image me-2"></i>
+                            @Localizer["PosterImage"]
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (ViewBag.HasPoster == true)
+                        {
+                            <div class="alert alert-success mb-3">
+                                <i class="bi bi-check-circle me-2"></i>
+                                <strong>@Localizer["PosterExists"]</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>@Localizer["Size"]: @ViewBag.PosterSizeKB KB</li>
+                                    <li>@Localizer["LastModified"]: @ViewBag.PosterLastModified.ToString("yyyy-MM-dd HH:mm")</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <img src="~/images/video-banner-poster.jpg" alt="Video Banner Poster" class="img-fluid" style="max-height: 300px; border-radius: 8px;">
+                            </div>
+                            
+                            <form asp-action="DeletePoster" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('@Localizer["ConfirmDeletePoster"]')">
+                                    <i class="bi bi-trash me-2"></i>@Localizer["DeletePoster"]
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning mb-3">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                @Localizer["NoPosterUploaded"]
+                            </div>
+                        }
+                        
+                        <hr />
+                        
+                        <h6 class="mb-3">@Localizer["UploadNewPoster"]</h6>
+                        <form asp-action="UploadPoster" method="post" enctype="multipart/form-data" id="posterUploadForm">
+                            @Html.AntiForgeryToken()
+                            <div class="mb-3">
+                                <label for="posterFile" class="form-label">@Localizer["SelectPosterImage"]</label>
+                                <input type="file" class="form-control" id="posterFile" name="posterFile" accept="image/jpeg,image/jpg,image/png,image/webp" required>
+                                <div id="posterFileError" class="text-danger mt-2" style="display: none;"></div>
+                                <div id="posterFileInfo" class="text-muted mt-2" style="display: none;"></div>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    @Localizer["PosterRequirements"]: JPG, PNG, or WebP format. Max size: 5MB. Recommended: 1920x1080 or 1280x720.
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-info text-white" id="posterUploadBtn">
+                                <i class="bi bi-upload me-2"></i>@Localizer["UploadPoster"]
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Instructions Section -->
+                <div class="card mt-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-question-circle me-2"></i>
+                            @Localizer["Instructions"]
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            <li>@Localizer["Instruction1"]</li>
+                            <li>@Localizer["Instruction2"]</li>
+                            <li>@Localizer["Instruction3"]</li>
+                            <li>@Localizer["Instruction4"]</li>
+                            <li>@Localizer["Instruction5"]</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .admin-card {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            font-weight: 600;
+        }
+        
+        video, img {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+        
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+        
+        .form-control.is-valid {
+            border-color: #198754;
+        }
+        
+        #videoFileInfo, #posterFileInfo {
+            font-size: 0.875rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // File size limits
+        const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+        const MAX_POSTER_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+
+        // Format file size for display
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Validate video file
+        const videoFileInput = document.getElementById('videoFile');
+        const videoFileError = document.getElementById('videoFileError');
+        const videoFileInfo = document.getElementById('videoFileInfo');
+        const videoUploadForm = document.getElementById('videoUploadForm');
+        const videoUploadBtn = document.getElementById('videoUploadBtn');
+
+        if (videoFileInput) {
+            videoFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                videoFileError.style.display = 'none';
+                videoFileInfo.style.display = 'none';
+                videoFileInput.classList.remove('is-invalid', 'is-valid');
+                videoUploadBtn.disabled = false;
+
+                if (!file) {
+                    return;
+                }
+
+                // Validate file type
+                const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
+                const allowedExtensions = ['.mp4', '.webm', '.mov'];
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                
+                if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+                    videoFileInput.classList.add('is-invalid');
+                    videoFileError.textContent = '@Localizer["InvalidVideoFormat"]';
+                    videoFileError.style.display = 'block';
+                    videoUploadBtn.disabled = true;
+                    return;
+                }
+
+                // Validate file size
+                if (file.size > MAX_VIDEO_SIZE) {
+                    videoFileInput.classList.add('is-invalid');
+                    const fileSize = formatFileSize(file.size);
+                    videoFileError.textContent = '@Localizer["VideoFileTooLarge"] (@Localizer["YourFile"]: ' + fileSize + ')';
+                    videoFileError.style.display = 'block';
+                    videoUploadBtn.disabled = true;
+                    return;
+                }
+
+                // File is valid
+                videoFileInput.classList.add('is-valid');
+                videoFileInfo.textContent = '✓ ' + formatFileSize(file.size) + ' - ' + file.name;
+                videoFileInfo.style.display = 'block';
+            });
+
+            // Prevent form submission if file is invalid
+            videoUploadForm.addEventListener('submit', function(e) {
+                const file = videoFileInput.files[0];
+                if (!file) {
+                    e.preventDefault();
+                    videoFileError.textContent = '@Localizer["PleaseSelectVideoFile"]';
+                    videoFileError.style.display = 'block';
+                    return false;
+                }
+
+                if (file.size > MAX_VIDEO_SIZE) {
+                    e.preventDefault();
+                    videoFileInput.classList.add('is-invalid');
+                    videoFileError.textContent = '@Localizer["VideoFileTooLarge"]';
+                    videoFileError.style.display = 'block';
+                    return false;
+                }
+
+                // Show loading state
+                videoUploadBtn.disabled = true;
+                videoUploadBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>@Localizer["Uploading"]...';
+            });
+        }
+
+        // Validate poster file
+        const posterFileInput = document.getElementById('posterFile');
+        const posterFileError = document.getElementById('posterFileError');
+        const posterFileInfo = document.getElementById('posterFileInfo');
+        const posterUploadForm = document.getElementById('posterUploadForm');
+        const posterUploadBtn = document.getElementById('posterUploadBtn');
+
+        if (posterFileInput) {
+            posterFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                posterFileError.style.display = 'none';
+                posterFileInfo.style.display = 'none';
+                posterFileInput.classList.remove('is-invalid', 'is-valid');
+                posterUploadBtn.disabled = false;
+
+                if (!file) {
+                    return;
+                }
+
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                
+                if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+                    posterFileInput.classList.add('is-invalid');
+                    posterFileError.textContent = '@Localizer["InvalidImageFormat"]';
+                    posterFileError.style.display = 'block';
+                    posterUploadBtn.disabled = true;
+                    return;
+                }
+
+                // Validate file size
+                if (file.size > MAX_POSTER_SIZE) {
+                    posterFileInput.classList.add('is-invalid');
+                    const fileSize = formatFileSize(file.size);
+                    posterFileError.textContent = '@Localizer["ImageFileTooLarge"] (@Localizer["YourFile"]: ' + fileSize + ')';
+                    posterFileError.style.display = 'block';
+                    posterUploadBtn.disabled = true;
+                    return;
+                }
+
+                // File is valid - show preview
+                posterFileInput.classList.add('is-valid');
+                posterFileInfo.textContent = '✓ ' + formatFileSize(file.size) + ' - ' + file.name;
+                posterFileInfo.style.display = 'block';
+
+                // Show image preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let preview = document.getElementById('posterPreview');
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.id = 'posterPreview';
+                        preview.className = 'img-fluid mt-3';
+                        preview.style.cssText = 'max-height: 200px; border-radius: 8px; border: 2px solid #198754;';
+                        posterFileInfo.parentElement.appendChild(preview);
+                    }
+                    preview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Prevent form submission if file is invalid
+            posterUploadForm.addEventListener('submit', function(e) {
+                const file = posterFileInput.files[0];
+                if (!file) {
+                    e.preventDefault();
+                    posterFileError.textContent = '@Localizer["PleaseSelectPosterImage"]';
+                    posterFileError.style.display = 'block';
+                    return false;
+                }
+
+                if (file.size > MAX_POSTER_SIZE) {
+                    e.preventDefault();
+                    posterFileInput.classList.add('is-invalid');
+                    posterFileError.textContent = '@Localizer["ImageFileTooLarge"]';
+                    posterFileError.style.display = 'block';
+                    return false;
+                }
+
+                // Show loading state
+                posterUploadBtn.disabled = true;
+                posterUploadBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>@Localizer["Uploading"]...';
+            });
+        }
+    </script>
+}
+

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Identity;
 using System.Diagnostics;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Hosting;
 
 namespace BulkyBook.Areas.Customer.Controllers
 {
@@ -22,8 +23,9 @@ namespace BulkyBook.Areas.Customer.Controllers
         private readonly ApplicationDBContext _dbContext;
         private readonly IConfiguration _configuration;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IStringLocalizer<BulkyBook.SharedResources> localizer, ApplicationDBContext dbContext, IConfiguration configuration, UserManager<IdentityUser> userManager)
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IStringLocalizer<BulkyBook.SharedResources> localizer, ApplicationDBContext dbContext, IConfiguration configuration, UserManager<IdentityUser> userManager, IWebHostEnvironment webHostEnvironment)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
@@ -31,6 +33,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             _dbContext = dbContext;
             _configuration = configuration;
             _userManager = userManager;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // Performance: Cache response for 5 minutes, vary by query parameters
@@ -70,6 +73,20 @@ namespace BulkyBook.Areas.Customer.Controllers
             ViewBag.InStock = inStock;
             ViewBag.MinRating = minRating;
             ViewBag.Availability = availability;
+            
+            // Check if video banner file exists
+            var videoPath = Path.Combine(_webHostEnvironment.WebRootPath, "videos", "home-banner.mp4");
+            var posterPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "video-banner-poster.jpg");
+            ViewBag.HasVideoBanner = System.IO.File.Exists(videoPath);
+            ViewBag.HasPoster = System.IO.File.Exists(posterPath);
+            
+            // Add cache-busting version for poster image (use last modified time + random to force refresh)
+            if (ViewBag.HasPoster == true)
+            {
+                var posterFileInfo = new FileInfo(posterPath);
+                // Use ticks + a random component to ensure cache is cleared
+                ViewBag.PosterVersion = posterFileInfo.LastWriteTime.Ticks + "_" + Guid.NewGuid().ToString("N").Substring(0, 8);
+            }
             
             // PERFORMANCE: Newsletter subscription check (lightweight query)
             ViewBag.IsNewsletterSubscribed = false;
