@@ -71,7 +71,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("IsDeleted");
 
-                    b.ToTable("Categries");
+                    b.ToTable("Categries", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.ComboOffer", b =>
@@ -149,7 +149,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("IsDeleted", "IsActive", "StartDate", "EndDate");
 
-                    b.ToTable("ComboOffers");
+                    b.ToTable("ComboOffers", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.ComboOfferImage", b =>
@@ -178,7 +178,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("ComboOfferId", "DisplayOrder");
 
-                    b.ToTable("ComboOfferImages");
+                    b.ToTable("ComboOfferImages", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.ComboOfferItem", b =>
@@ -234,7 +234,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("IsDeleted", "ComboOfferId", "ProductId");
 
-                    b.ToTable("ComboOfferItems");
+                    b.ToTable("ComboOfferItems", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.Company", b =>
@@ -271,7 +271,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Companys");
+                    b.ToTable("Companys", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.FlashSale", b =>
@@ -339,7 +339,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("IsDeleted", "IsActive", "StartDate", "EndDate");
 
-                    b.ToTable("FlashSales");
+                    b.ToTable("FlashSales", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.FlashSaleItem", b =>
@@ -400,7 +400,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("IsDeleted", "FlashSaleId", "ProductId");
 
-                    b.ToTable("FlashSaleItems");
+                    b.ToTable("FlashSaleItems", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.NewsletterSubscription", b =>
@@ -435,7 +435,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("Email", "IsActive");
 
-                    b.ToTable("NewsletterSubscriptions");
+                    b.ToTable("NewsletterSubscriptions", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.Notification", b =>
@@ -489,7 +489,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("UserId", "IsRead", "CreatedAt");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.OrderDetail", b =>
@@ -535,7 +535,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("ProductId", "OrderHeaderId");
 
-                    b.ToTable("orderDetails");
+                    b.ToTable("orderDetails", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.OrderHeader", b =>
@@ -645,7 +645,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("Email", "OrderStatus");
 
-                    b.ToTable("orderHeaders");
+                    b.ToTable("orderHeaders", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.Product", b =>
@@ -769,7 +769,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("IsDeleted", "StockQuantity", "Price");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.ProductImage", b =>
@@ -802,7 +802,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("ProductId", "ImageInfo");
 
-                    b.ToTable("ProductImages");
+                    b.ToTable("ProductImages", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.ProductOption", b =>
@@ -852,7 +852,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("IsDeleted", "ProductId");
 
-                    b.ToTable("ProductOptions");
+                    b.ToTable("ProductOptions", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.ProductOptionValue", b =>
@@ -904,7 +904,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("IsDeleted", "ProductOptionId");
 
-                    b.ToTable("ProductOptionValues");
+                    b.ToTable("ProductOptionValues", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.ProductVariant", b =>
@@ -973,7 +973,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("IsDeleted", "ProductId", "StockQuantity");
 
-                    b.ToTable("ProductVariants");
+                    b.ToTable("ProductVariants", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.ProductVariantOptionValue", b =>
@@ -996,7 +996,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("ProductVariantId", "ProductOptionValueId");
 
-                    b.ToTable("ProductVariantOptionValues");
+                    b.ToTable("ProductVariantOptionValues", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.PromoCode", b =>
@@ -1057,7 +1057,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("Code", "IsActive");
 
-                    b.ToTable("PromoCodes");
+                    b.ToTable("PromoCodes", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.PromoCodeUsage", b =>
@@ -1089,7 +1089,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("PromoCodeId", "UserId");
 
-                    b.ToTable("PromoCodeUsages");
+                    b.ToTable("PromoCodeUsages", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.Review", b =>
@@ -1139,7 +1139,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("ProductId", "IsApproved", "CreatedAt");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.ServiceImage", b =>
@@ -1164,7 +1164,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("ServiceSubscriptionId");
 
-                    b.ToTable("ServiceImages");
+                    b.ToTable("ServiceImages", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.ServiceOffer", b =>
@@ -1209,7 +1209,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("ServiceSubscriptionId");
 
-                    b.ToTable("ServiceOffers");
+                    b.ToTable("ServiceOffers", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.ServicePurchase", b =>
@@ -1282,7 +1282,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("ApplicationUserId", "ServiceSubscriptionId");
 
-                    b.ToTable("ServicePurchases");
+                    b.ToTable("ServicePurchases", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.ServiceSubscription", b =>
@@ -1341,7 +1341,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("IsActive");
 
-                    b.ToTable("ServiceSubscriptions");
+                    b.ToTable("ServiceSubscriptions", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.ShoppingCart", b =>
@@ -1388,7 +1388,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("ApplicationUserId", "ProductId", "ProductVariantId");
 
-                    b.ToTable("ShoppingCarts");
+                    b.ToTable("ShoppingCarts", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.StockNotification", b =>
@@ -1451,7 +1451,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("ProductId", "IsNotified");
 
-                    b.ToTable("StockNotifications");
+                    b.ToTable("StockNotifications", (string)null);
                 });
 
             modelBuilder.Entity("BulkyBook.Models.Wishlist", b =>
@@ -1477,7 +1477,7 @@ namespace BulkyBook.DataAccess.Migrations
 
                     b.HasIndex("ApplicationUserId", "ProductId");
 
-                    b.ToTable("Wishlists");
+                    b.ToTable("Wishlists", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

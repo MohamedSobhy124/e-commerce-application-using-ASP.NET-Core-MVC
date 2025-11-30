@@ -298,7 +298,7 @@
     <value>تحذير</value>
   </data>
   <data name="ItemAddedToCart" xml:space="preserve">
-    <value>تم إضافة المنتج للسلة بنجاح</value>
+    <value>تم إضافة المنتج للسلة بنجاح!</value>
   </data>
   <data name="ItemRemovedFromCart" xml:space="preserve">
     <value>تم إزالة المنتج من السلة</value>
@@ -2471,196 +2471,112 @@
   <data name="SelectProductAndSetFlashSaleDetails" xml:space="preserve">
     <value>اختار المنتج وضعه فى العرض</value>
   </data>
-  <data name="Blog" xml:space="preserve">
-    <value>المدونة</value>
+  <data name="NameAr" xml:space="preserve">
+    <value>الاسم بالعربية</value>
   </data>
-  <data name="HealthWellnessBlog" xml:space="preserve">
-    <value>مدونة الصحة والعافية</value>
+  <data name="DescriptionAr" xml:space="preserve">
+    <value>الوصف بالعربية</value>
   </data>
-  <data name="ExpertTipsGuidesForBetterHealth" xml:space="preserve">
-    <value>نصائح وإرشادات الخبراء لصحة أفضل</value>
+  <data name="Images" xml:space="preserve">
+    <value>الصور</value>
   </data>
-  <data name="Featured" xml:space="preserve">
-    <value>مميز</value>
+  <data name="MinimumQuantity" xml:space="preserve">
+    <value>اقل كمية</value>
   </data>
-  <data name="MinRead" xml:space="preserve">
-    <value>دقيقة قراءة</value>
+  <data name="MaximumQuantityPerCustomer" xml:space="preserve">
+    <value>اعلى كمية للعميل</value>
   </data>
-  <data name="ReadMore" xml:space="preserve">
-    <value>اقرأ المزيد</value>
+  <data name="DisplayOrder" xml:space="preserve">
+    <value>الرقم فى العرض</value>
   </data>
-  <data name="AllPosts" xml:space="preserve">
-    <value>جميع المقالات</value>
+  <data name="OriginalPriceWillBeCalculated " xml:space="preserve">
+    <value>السعر الاصلى سوف يتم حسابة</value>
   </data>
-  <data name="NoBlogsFound" xml:space="preserve">
-    <value>لم يتم العثور على مقالات</value>
+  <data name="ErrorMissingCartInformation" xml:space="preserve">
+    <value>خطأ: معلومات السلة مفقودة</value>
   </data>
-  <data name="TryDifferentFilter" xml:space="preserve">
-    <value>جرب فلترًا مختلفًا</value>
+  <data name="ErrorUpdatingQuantity" xml:space="preserve">
+    <value>خطأ في تحديث الكمية. يرجى المحاولة مرة أخرى.</value>
   </data>
-  <data name="ShareThisArticle" xml:space="preserve">
-    <value>شارك هذه المقالة</value>
+  <data name="ProductRemovedFromCart" xml:space="preserve">
+    <value>تمت إزالة المنتج من السلة</value>
   </data>
-  <data name="CopyLink" xml:space="preserve">
-    <value>نسخ الرابط</value>
+  <data name="AddedToCart" xml:space="preserve">
+    <value>تمت الإضافة إلى السلة!</value>
   </data>
-  <data name="RelatedArticles" xml:space="preserve">
-    <value>مقالات ذات صلة</value>
+  <data name="FailedToAddToCart" xml:space="preserve">
+    <value>فشلت إضافة المنتج إلى السلة</value>
   </data>
-  <data name="BackToBlog" xml:space="preserve">
-    <value>العودة إلى المدونة</value>
+  <data name="FailedToRemoveFromWishlist" xml:space="preserve">
+    <value>فشلت إزالة المنتج من قائمة الأمنيات</value>
   </data>
-  <data name="LinkCopied" xml:space="preserve">
-    <value>تم نسخ الرابط!</value>
+  <data name="FailedToUpdateCart" xml:space="preserve">
+    <value>فشل تحديث السلة. يرجى المحاولة مرة أخرى.</value>
   </data>
-  <data name="FailedToCopy" xml:space="preserve">
-    <value>فشل نسخ الرابط</value>
+  <data name="SecurityTokenMissing" xml:space="preserve">
+    <value>رمز الأمان مفقود. يرجى تحديث الصفحة.</value>
   </data>
-  <data name="Min" xml:space="preserve">
-    <value>دقيقة</value>
+  <data name="CouldNotAddItemToCart" xml:space="preserve">
+    <value>تعذرت إضافة العنصر إلى السلة</value>
   </data>
-  <data name="VideoBanner" xml:space="preserve">
-    <value>فيديو البانر</value>
+  <data name="AnErrorOccurredPleaseTryAgain" xml:space="preserve">
+    <value>حدث خطأ. يرجى المحاولة مرة أخرى.</value>
   </data>
-  <data name="VideoBannerManagement" xml:space="preserve">
-    <value>إدارة فيديو البانر</value>
+  <data name="ItemRemovedFromCart" xml:space="preserve">
+    <value>تمت إزالة العنصر من السلة</value>
   </data>
-  <data name="VideoBannerDescription" xml:space="preserve">
-    <value>قم بتحميل أو تغيير فيديو البانر الرئيسي الذي يظهر في الصفحة الرئيسية</value>
+  <data name="FailedToRemoveItem" xml:space="preserve">
+    <value>فشلت إزالة العنصر. يرجى المحاولة مرة أخرى.</value>
   </data>
-  <data name="VideoFile" xml:space="preserve">
-    <value>ملف الفيديو</value>
+  <data name="PleaseLoginToUseWishlist" xml:space="preserve">
+    <value>يرجى تسجيل الدخول لاستخدام قائمة الأمنيات</value>
   </data>
-  <data name="PosterImage" xml:space="preserve">
-    <value>صورة البوستر</value>
+  <data name="FailedToUpdateWishlist" xml:space="preserve">
+    <value>فشل تحديث قائمة الأمنيات</value>
   </data>
-  <data name="VideoExists" xml:space="preserve">
-    <value>تم تحميل الفيديو بنجاح</value>
+  <data name="FailedToUpdateWishlistPleaseTryAgain" xml:space="preserve">
+    <value>فشل تحديث قائمة الأمنيات. يرجى المحاولة مرة أخرى.</value>
   </data>
-  <data name="PosterExists" xml:space="preserve">
-    <value>تم تحميل البوستر بنجاح</value>
+  <data name="InfoImageDeletedSuccessfully" xml:space="preserve">
+    <value>تم حذف صورة المعلومات بنجاح</value>
   </data>
-  <data name="NoVideoUploaded" xml:space="preserve">
-    <value>لم يتم تحميل أي فيديو بعد</value>
+  <data name="FailedToDeleteInfoImage" xml:space="preserve">
+    <value>فشل حذف صورة المعلومات</value>
   </data>
-  <data name="NoPosterUploaded" xml:space="preserve">
-    <value>لم يتم تحميل أي بوستر بعد</value>
+  <data name="ErrorDeletingInfoImage" xml:space="preserve">
+    <value>خطأ في حذف صورة المعلومات</value>
   </data>
-  <data name="UploadNewVideo" xml:space="preserve">
-    <value>تحميل فيديو جديد</value>
+  <data name="FailedToUpdateImageInfo" xml:space="preserve">
+    <value>فشل تحديث معلومات الصورة</value>
   </data>
-  <data name="UploadNewPoster" xml:space="preserve">
-    <value>تحميل بوستر جديد</value>
+  <data name="ErrorUpdatingImageInfo" xml:space="preserve">
+    <value>خطأ في تحديث معلومات الصورة</value>
   </data>
-  <data name="SelectVideoFile" xml:space="preserve">
-    <value>اختر ملف الفيديو</value>
+  <data name="AllNotificationsMarkedAsRead" xml:space="preserve">
+    <value>تم تمييز جميع الإشعارات كمقروءة</value>
   </data>
-  <data name="SelectPosterImage" xml:space="preserve">
-    <value>اختر صورة البوستر</value>
+  <data name="ErrorTogglingApprovalStatus" xml:space="preserve">
+    <value>خطأ في تبديل حالة الموافقة</value>
   </data>
-  <data name="UploadVideo" xml:space="preserve">
-    <value>تحميل الفيديو</value>
+  <data name="ErrorDeletingReview" xml:space="preserve">
+    <value>خطأ في حذف التقييم</value>
   </data>
-  <data name="UploadPoster" xml:space="preserve">
-    <value>تحميل البوستر</value>
+  <data name="InvalidProductId" xml:space="preserve">
+    <value>معرف المنتج غير صالح</value>
   </data>
-  <data name="DeleteVideo" xml:space="preserve">
-    <value>حذف الفيديو</value>
+  <data name="QuantityUpdated" xml:space="preserve">
+    <value>تم تحديث الكمية</value>
   </data>
-  <data name="DeletePoster" xml:space="preserve">
-    <value>حذف البوستر</value>
+  <data name="QuantityUpdatedSuccessfully" xml:space="preserve">
+    <value>تم تحديث الكمية بنجاح!</value>
   </data>
-  <data name="ConfirmDeleteVideo" xml:space="preserve">
-    <value>هل أنت متأكد من حذف الفيديو؟</value>
+  <data name="ItemRemovedFromCart" xml:space="preserve">
+    <value>تمت إزالة العنصر من السلة</value>
   </data>
-  <data name="ConfirmDeletePoster" xml:space="preserve">
-    <value>هل أنت متأكد من حذف البوستر؟</value>
+  <data name="CartItemNotFound" xml:space="preserve">
+    <value>عنصر السلة غير موجود</value>
   </data>
-  <data name="VideoRequirements" xml:space="preserve">
-    <value>متطلبات الفيديو</value>
-  </data>
-  <data name="PosterRequirements" xml:space="preserve">
-    <value>متطلبات البوستر</value>
-  </data>
-  <data name="Instructions" xml:space="preserve">
-    <value>التعليمات</value>
-  </data>
-  <data name="Instruction1" xml:space="preserve">
-    <value>يجب أن يكون الفيديو بتنسيق MP4 أو WebM أو MOV</value>
-  </data>
-  <data name="Instruction2" xml:space="preserve">
-    <value>الحجم الأقصى للفيديو: 50 ميجابايت</value>
-  </data>
-  <data name="Instruction3" xml:space="preserve">
-    <value>يُنصح بأن يكون الفيديو 10 ثوانٍ كحد أقصى</value>
-  </data>
-  <data name="Instruction4" xml:space="preserve">
-    <value>الدقة الموصى بها: 1920x1080 أو 1280x720 (نسبة 16:9)</value>
-  </data>
-  <data name="Instruction5" xml:space="preserve">
-    <value>صورة البوستر ستظهر أثناء تحميل الفيديو</value>
-  </data>
-  <data name="PleaseSelectVideoFile" xml:space="preserve">
-    <value>يرجى اختيار ملف فيديو</value>
-  </data>
-  <data name="PleaseSelectPosterImage" xml:space="preserve">
-    <value>يرجى اختيار صورة البوستر</value>
-  </data>
-  <data name="InvalidVideoFormat" xml:space="preserve">
-    <value>تنسيق الفيديو غير صحيح. يرجى استخدام MP4 أو WebM أو MOV</value>
-  </data>
-  <data name="InvalidImageFormat" xml:space="preserve">
-    <value>تنسيق الصورة غير صحيح. يرجى استخدام JPG أو PNG أو WebP</value>
-  </data>
-  <data name="VideoFileTooLarge" xml:space="preserve">
-    <value>ملف الفيديو كبير جداً. الحد الأقصى: 50 ميجابايت</value>
-  </data>
-  <data name="ImageFileTooLarge" xml:space="preserve">
-    <value>ملف الصورة كبير جداً. الحد الأقصى: 5 ميجابايت</value>
-  </data>
-  <data name="VideoUploadedSuccessfully" xml:space="preserve">
-    <value>تم تحميل الفيديو بنجاح</value>
-  </data>
-  <data name="PosterUploadedSuccessfully" xml:space="preserve">
-    <value>تم تحميل البوستر بنجاح</value>
-  </data>
-  <data name="VideoDeletedSuccessfully" xml:space="preserve">
-    <value>تم حذف الفيديو بنجاح</value>
-  </data>
-  <data name="PosterDeletedSuccessfully" xml:space="preserve">
-    <value>تم حذف البوستر بنجاح</value>
-  </data>
-  <data name="ErrorUploadingVideo" xml:space="preserve">
-    <value>حدث خطأ أثناء تحميل الفيديو</value>
-  </data>
-  <data name="ErrorUploadingPoster" xml:space="preserve">
-    <value>حدث خطأ أثناء تحميل البوستر</value>
-  </data>
-  <data name="ErrorDeletingVideo" xml:space="preserve">
-    <value>حدث خطأ أثناء حذف الفيديو</value>
-  </data>
-  <data name="ErrorDeletingPoster" xml:space="preserve">
-    <value>حدث خطأ أثناء حذف البوستر</value>
-  </data>
-  <data name="VideoNotFound" xml:space="preserve">
-    <value>لم يتم العثور على الفيديو</value>
-  </data>
-  <data name="PosterNotFound" xml:space="preserve">
-    <value>لم يتم العثور على البوستر</value>
-  </data>
-  <data name="YourBrowserDoesNotSupportVideo" xml:space="preserve">
-    <value>المتصفح الخاص بك لا يدعم تشغيل الفيديو</value>
-  </data>
-  <data name="Size" xml:space="preserve">
-    <value>الحجم</value>
-  </data>
-  <data name="LastModified" xml:space="preserve">
-    <value>آخر تعديل</value>
-  </data>
-  <data name="Uploading" xml:space="preserve">
-    <value>جاري التحميل</value>
-  </data>
-  <data name="YourFile" xml:space="preserve">
-    <value>حجم ملفك</value>
+  <data name="InvalidRequest" xml:space="preserve">
+    <value>طلب غير صالح</value>
   </data>
 </root>

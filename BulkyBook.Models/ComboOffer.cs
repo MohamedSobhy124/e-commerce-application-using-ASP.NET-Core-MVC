@@ -126,7 +126,9 @@ namespace BulkyBook.Models
         {
             get
             {
-                var now = DateTime.Now;
+                DateTime now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                        TimeZoneInfo.FindSystemTimeZoneById("Asia/Dubai"));
+
                 return IsActive && 
                        !IsDeleted && 
                        now >= StartDate && 
@@ -138,10 +140,12 @@ namespace BulkyBook.Models
         }
 
         [NotMapped]
-        public bool HasStarted => DateTime.Now >= StartDate;
+        public bool HasStarted => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                        TimeZoneInfo.FindSystemTimeZoneById("Asia/Dubai")) >= StartDate;
 
         [NotMapped]
-        public bool HasEnded => DateTime.Now > EndDate;
+        public bool HasEnded => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                        TimeZoneInfo.FindSystemTimeZoneById("Asia/Dubai")) > EndDate;
 
         [NotMapped]
         public bool HasAvailableStock
@@ -174,8 +178,10 @@ namespace BulkyBook.Models
             get
             {
                 if (HasEnded) return TimeSpan.Zero;
-                if (!HasStarted) return StartDate - DateTime.Now;
-                return EndDate - DateTime.Now;
+                if (!HasStarted) return StartDate - TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                        TimeZoneInfo.FindSystemTimeZoneById("Asia/Dubai"));
+                return EndDate - TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                        TimeZoneInfo.FindSystemTimeZoneById("Asia/Dubai"));
             }
         }
 

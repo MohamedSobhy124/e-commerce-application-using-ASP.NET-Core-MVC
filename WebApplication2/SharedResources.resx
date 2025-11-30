@@ -876,8 +876,7 @@
   <data name="PriceRange" xml:space="preserve">
     <value />
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Max" type="System.Resources.ResXNullRef, System.Windows.Forms">
+  <data name="Max" xml:space="preserve">
     <value />
   </data>
   <data name="Min" xml:space="preserve">
@@ -2468,6 +2467,27 @@
     <value />
   </data>
   <data name="SelectProductAndSetFlashSaleDetails" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NameAr" xml:space="preserve">
+    <value />
+  </data>
+  <data name="DescriptionAr" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Images" xml:space="preserve">
+    <value />
+  </data>
+  <data name="MinimumQuantity" xml:space="preserve">
+    <value />
+  </data>
+  <data name="MaximumQuantityPerCustomer" xml:space="preserve">
+    <value />
+  </data>
+  <data name="DisplayOrder" xml:space="preserve">
+    <value />
+  </data>
+  <data name="OriginalPriceWillBeCalculated " xml:space="preserve">
     <value />
   </data>
 </root>

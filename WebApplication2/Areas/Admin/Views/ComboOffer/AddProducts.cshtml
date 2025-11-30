@@ -49,18 +49,39 @@
                         
                         <div class="mb-3">
                             <label class="form-label">@Localizer["Product"] <span class="text-danger">*</span></label>
-                            <select name="productId" class="form-select" required>
+                            <select name="productId" id="productSelect" class="form-select" required>
                                 <option value="">@Localizer["SelectProduct"]</option>
                                 @foreach (var product in ViewBag.AvailableProducts as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)
                                 {
                                     <option value="@product.Value">@product.Text</option>
                                 }
                             </select>
+                            <div id="productInfoBox" class="mt-2 p-2 bg-light rounded" style="display: none;">
+                                <small>
+                                    <strong>@Localizer["Product"]:</strong> <span id="productName"></span><br />
+                                    <strong>@Localizer["Stock"]:</strong> <span id="productStock" class="badge bg-success"></span><br />
+                                    <strong>@Localizer["Price"]:</strong> <span id="productPrice" class="badge bg-secondary"></span>
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Variant Selection (for Variable Products) -->
+                        <div class="mb-3" id="variantSelectContainer" style="display: none;">
+                            <label class="form-label">@Localizer["SelectVariant"] <span class="text-danger">*</span></label>
+                            <select name="productVariantId" id="variantSelect" class="form-select">
+                                <option value="">-- @Localizer["SelectVariant"] --</option>
+                            </select>
+                            <div id="variantInfoBox" class="mt-2 p-2 bg-info bg-opacity-10 rounded" style="display: none;">
+                                <small>
+                                    <strong>@Localizer["Price"]:</strong> <span id="variantPrice" class="badge bg-info"></span><br />
+                                    <strong>@Localizer["Stock"]:</strong> <span id="variantStock" class="badge bg-success"></span>
+                                </small>
+                            </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">@Localizer["Quantity"] <span class="text-danger">*</span></label>
-                            <input type="number" name="quantity" class="form-control" min="1" value="1" required />
+                            <input type="number" name="quantity" id="quantityInput" class="form-control" min="1" value="1" required />
                         </div>
 
                         <div class="mb-3">
@@ -112,7 +133,26 @@
                                                 <strong>@item.Product?.Title</strong>
                                                 @if (item.ProductVariant != null)
                                                 {
-                                                    <br /><small class="text-muted">Variant: @item.ProductVariant.VariantName</small>
+                                                    string variantName = "";
+                                                    if (item.ProductVariant.VariantOptionValues != null && item.ProductVariant.VariantOptionValues.Any())
+                                                    {
+                                                        var optionValues = item.ProductVariant.VariantOptionValues
+                                                            .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                                                            .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+                                                            .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                                                            .Where(s => !string.IsNullOrEmpty(s))
+                                                            .ToList();
+                                                        variantName = string.Join(" / ", optionValues);
+                                                    }
+                                                    else if (!string.IsNullOrEmpty(item.ProductVariant.VariantName))
+                                                    {
+                                                        variantName = item.ProductVariant.VariantName;
+                                                    }
+                                                    
+                                                    if (!string.IsNullOrEmpty(variantName))
+                                                    {
+                                                        <br /><small class="text-muted"><i class="bi bi-tag"></i> Variant: @variantName</small>
+                                                    }
                                                 }
                                             </td>
                                             <td>@item.Quantity</td>
@@ -183,4 +223,206 @@
         </div>
     </div>
 </div>
+
+@section Styles {
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    
+    <style>
+        /* Custom styling for Select2 dropdown */
+        .select2-container--bootstrap-5 .select2-selection {
+            min-height: 38px;
+            border: 1px solid #ced4da;
+        }
+        
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            line-height: 36px;
+            padding-left: 12px;
+        }
+        
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+        
+        .select2-dropdown {
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+        }
+        
+        .select2-search--dropdown .select2-search__field {
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            padding: 0.375rem 0.75rem;
+        }
+        
+        .select2-results__option {
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .select2-results__option--highlighted {
+            background-color: #0d6efd;
+        }
+    </style>
+}
+
+@section Scripts {
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <script>
+        // Localizations for JavaScript
+        const localizations = {
+            selectVariant: '@Html.Raw(Localizer["SelectVariant"])',
+            variantPrice: '@Html.Raw(Localizer["VariantPrice"] ?? "Price")',
+            variantStock: '@Html.Raw(Localizer["VariantStock"] ?? "Stock")',
+            stock: '@Html.Raw(Localizer["Stock"] ?? "Stock")',
+            units: '@Html.Raw(Localizer["units"] ?? "units")'
+        };
+
+        let currentStockQty = 0;
+        let currentPrice = 0;
+        let currentProductType = 0;
+        let selectedVariant = null;
+
+        $(document).ready(function() {
+            // Initialize Select2 for product dropdown with search functionality
+            $('#productSelect').select2({
+                theme: 'bootstrap-5',
+                placeholder: '@Html.Raw(Localizer["SelectProduct"])',
+                allowClear: true,
+                width: '100%',
+                // Enable search - no minimum input length required
+                minimumInputLength: 0,
+                // Close dropdown when clicking outside
+                closeOnSelect: true
+            });
+
+            // Get product info when selected
+            $('#productSelect').on('change', function() {
+                const productId = $(this).val();
+                if (!productId) {
+                    // Hide product info
+                    document.getElementById('productInfoBox').style.display = 'none';
+                    
+                    // Hide and reset variant dropdown
+                    document.getElementById('variantSelectContainer').style.display = 'none';
+                    const variantSelect = $('#variantSelect');
+                    
+                    // Destroy Select2 if it exists
+                    if (variantSelect.hasClass('select2-hidden-accessible')) {
+                        variantSelect.select2('destroy');
+                    }
+                    
+                    // Clear variant options
+                    variantSelect.empty();
+                    variantSelect.append('<option value="">-- ' + localizations.selectVariant + ' --</option>');
+                    selectedVariant = null;
+                    return;
+                }
+
+                fetch(`/Admin/ComboOffer/GetProductInfo?productId=${productId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            currentProductType = data.productType || 0;
+                            currentStockQty = data.stockQuantity;
+                            currentPrice = data.price;
+
+                            document.getElementById('productName').textContent = data.title;
+                            document.getElementById('productStock').textContent = data.stockQuantity;
+                            document.getElementById('productPrice').textContent = data.price.toFixed(2);
+                            document.getElementById('productInfoBox').style.display = 'block';
+
+                            // If variable product, show variant dropdown
+                            if (currentProductType === 1 && data.variants && data.variants.length > 0) {
+                                // Clear and populate variant dropdown
+                                const variantSelect = $('#variantSelect');
+                                
+                                // Destroy existing Select2 instance if it exists
+                                if (variantSelect.hasClass('select2-hidden-accessible')) {
+                                    variantSelect.select2('destroy');
+                                }
+                                
+                                // Clear existing options
+                                variantSelect.empty();
+                                variantSelect.append('<option value="">-- ' + localizations.selectVariant + ' --</option>');
+                                
+                                // Add all variants
+                                data.variants.forEach(variant => {
+                                    // Format: "Size: L / Color: Red - Price: 20.00 (Stock: 4)"
+                                    const displayText = variant.name + ' - ' + localizations.variantPrice + ': ' + variant.price.toFixed(2) + ' (' + localizations.stock + ': ' + variant.stockQuantity + ')';
+                                    const option = $('<option></option>')
+                                        .attr('value', variant.id)
+                                        .text(displayText)
+                                        .attr('data-price', variant.price)
+                                        .attr('data-stock', variant.stockQuantity);
+                                    variantSelect.append(option);
+                                });
+                                
+                                // Show variant container
+                                document.getElementById('variantSelectContainer').style.display = 'block';
+                                document.getElementById('variantInfoBox').style.display = 'none';
+                                
+                                // Initialize Select2 for variant dropdown
+                                variantSelect.select2({
+                                    theme: 'bootstrap-5',
+                                    placeholder: localizations.selectVariant,
+                                    allowClear: true,
+                                    width: '100%',
+                                    minimumInputLength: 0,
+                                    closeOnSelect: true
+                                });
+                            } else {
+                                // Hide variant container for non-variable products
+                                document.getElementById('variantSelectContainer').style.display = 'none';
+                                
+                                // Destroy Select2 if it exists
+                                const variantSelect = $('#variantSelect');
+                                if (variantSelect.hasClass('select2-hidden-accessible')) {
+                                    variantSelect.select2('destroy');
+                                }
+                                
+                                variantSelect.val('').trigger('change');
+                                selectedVariant = null;
+                            }
+
+                            // Set max quantity
+                            document.getElementById('quantityInput').max = data.stockQuantity;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching product info:', error);
+                    });
+            });
+
+            // Handle variant selection (works with Select2)
+            $('#variantSelect').on('change', function() {
+                const variantId = $(this).val();
+                if (!variantId) {
+                    selectedVariant = null;
+                    document.getElementById('variantInfoBox').style.display = 'none';
+                    // Reset quantity max to product stock
+                    document.getElementById('quantityInput').max = currentStockQty;
+                    return;
+                }
+
+                // Get selected option data
+                const selectedOption = $(this).find('option:selected');
+                selectedVariant = {
+                    id: parseInt(variantId),
+                    price: parseFloat(selectedOption.data('price')),
+                    stockQuantity: parseInt(selectedOption.data('stock'))
+                };
+
+                document.getElementById('variantPrice').textContent = selectedVariant.price.toFixed(2);
+                document.getElementById('variantStock').textContent = selectedVariant.stockQuantity + ' ' + localizations.units;
+                document.getElementById('variantInfoBox').style.display = 'block';
+                
+                // Update quantity max to variant stock
+                document.getElementById('quantityInput').max = selectedVariant.stockQuantity;
+            });
+        });
+    </script>
+}
 

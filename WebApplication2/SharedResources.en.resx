@@ -298,7 +298,7 @@
     <value>Warning</value>
   </data>
   <data name="ItemAddedToCart" xml:space="preserve">
-    <value>Product added to cart successfully</value>
+    <value>Product added to cart successfully!</value>
   </data>
   <data name="ItemRemovedFromCart" xml:space="preserve">
     <value>Product removed from cart</value>
@@ -2469,196 +2469,112 @@
   <data name="SelectProductAndSetFlashSaleDetails" xml:space="preserve">
     <value>Select Product And Set Flash Sale Details</value>
   </data>
-  <data name="Blog" xml:space="preserve">
-    <value>Blog</value>
+  <data name="NameAr" xml:space="preserve">
+    <value>Name Arabic</value>
   </data>
-  <data name="HealthWellnessBlog" xml:space="preserve">
-    <value>Health &amp; Wellness Blog</value>
+  <data name="DescriptionAr" xml:space="preserve">
+    <value>Description Ararbic</value>
   </data>
-  <data name="ExpertTipsGuidesForBetterHealth" xml:space="preserve">
-    <value>Expert Tips &amp; Guides for Better Health</value>
+  <data name="Images" xml:space="preserve">
+    <value>Images</value>
   </data>
-  <data name="Featured" xml:space="preserve">
-    <value>Featured</value>
+  <data name="MinimumQuantity" xml:space="preserve">
+    <value>Minimum Quantity</value>
   </data>
-  <data name="MinRead" xml:space="preserve">
-    <value>Min Read</value>
+  <data name="MaximumQuantityPerCustomer" xml:space="preserve">
+    <value>Maximum Quantity Per Customer</value>
   </data>
-  <data name="ReadMore" xml:space="preserve">
-    <value>Read More</value>
+  <data name="DisplayOrder" xml:space="preserve">
+    <value>Display Order</value>
   </data>
-  <data name="AllPosts" xml:space="preserve">
-    <value>All Posts</value>
+  <data name="OriginalPriceWillBeCalculated " xml:space="preserve">
+    <value>Original Price Will Be Calculated </value>
   </data>
-  <data name="NoBlogsFound" xml:space="preserve">
-    <value>No Blogs Found</value>
+  <data name="ErrorMissingCartInformation" xml:space="preserve">
+    <value>Error: Missing cart information</value>
   </data>
-  <data name="TryDifferentFilter" xml:space="preserve">
-    <value>Try a different filter</value>
+  <data name="ErrorUpdatingQuantity" xml:space="preserve">
+    <value>Error updating quantity. Please try again.</value>
   </data>
-  <data name="ShareThisArticle" xml:space="preserve">
-    <value>Share This Article</value>
+  <data name="ProductRemovedFromCart" xml:space="preserve">
+    <value>Product removed from cart</value>
   </data>
-  <data name="CopyLink" xml:space="preserve">
-    <value>Copy Link</value>
+  <data name="AddedToCart" xml:space="preserve">
+    <value>Added to cart!</value>
   </data>
-  <data name="RelatedArticles" xml:space="preserve">
-    <value>Related Articles</value>
+  <data name="FailedToAddToCart" xml:space="preserve">
+    <value>Failed to add to cart</value>
   </data>
-  <data name="BackToBlog" xml:space="preserve">
-    <value>Back to Blog</value>
+  <data name="FailedToRemoveFromWishlist" xml:space="preserve">
+    <value>Failed to remove from wishlist</value>
   </data>
-  <data name="LinkCopied" xml:space="preserve">
-    <value>Link copied to clipboard!</value>
+  <data name="FailedToUpdateCart" xml:space="preserve">
+    <value>Failed to update cart. Please try again.</value>
   </data>
-  <data name="FailedToCopy" xml:space="preserve">
-    <value>Failed to copy link</value>
+  <data name="SecurityTokenMissing" xml:space="preserve">
+    <value>Security token missing. Please refresh the page.</value>
   </data>
-  <data name="Min" xml:space="preserve">
-    <value>Min</value>
+  <data name="CouldNotAddItemToCart" xml:space="preserve">
+    <value>Could not add item to cart</value>
   </data>
-  <data name="VideoBanner" xml:space="preserve">
-    <value>Video Banner</value>
+  <data name="AnErrorOccurredPleaseTryAgain" xml:space="preserve">
+    <value>An error occurred. Please try again.</value>
   </data>
-  <data name="VideoBannerManagement" xml:space="preserve">
-    <value>Video Banner Management</value>
+  <data name="ItemRemovedFromCart" xml:space="preserve">
+    <value>Item removed from cart</value>
   </data>
-  <data name="VideoBannerDescription" xml:space="preserve">
-    <value>Upload or change the main banner video that appears on the home page</value>
+  <data name="FailedToRemoveItem" xml:space="preserve">
+    <value>Failed to remove item. Please try again.</value>
   </data>
-  <data name="VideoFile" xml:space="preserve">
-    <value>Video File</value>
+  <data name="PleaseLoginToUseWishlist" xml:space="preserve">
+    <value>Please login to use wishlist</value>
   </data>
-  <data name="PosterImage" xml:space="preserve">
-    <value>Poster Image</value>
+  <data name="FailedToUpdateWishlist" xml:space="preserve">
+    <value>Failed to update wishlist</value>
   </data>
-  <data name="VideoExists" xml:space="preserve">
-    <value>Video uploaded successfully</value>
+  <data name="FailedToUpdateWishlistPleaseTryAgain" xml:space="preserve">
+    <value>Failed to update wishlist. Please try again.</value>
   </data>
-  <data name="PosterExists" xml:space="preserve">
-    <value>Poster uploaded successfully</value>
+  <data name="InfoImageDeletedSuccessfully" xml:space="preserve">
+    <value>Info image deleted successfully</value>
   </data>
-  <data name="NoVideoUploaded" xml:space="preserve">
-    <value>No video uploaded yet</value>
+  <data name="FailedToDeleteInfoImage" xml:space="preserve">
+    <value>Failed to delete info image</value>
   </data>
-  <data name="NoPosterUploaded" xml:space="preserve">
-    <value>No poster uploaded yet</value>
+  <data name="ErrorDeletingInfoImage" xml:space="preserve">
+    <value>Error deleting info image</value>
   </data>
-  <data name="UploadNewVideo" xml:space="preserve">
-    <value>Upload New Video</value>
+  <data name="FailedToUpdateImageInfo" xml:space="preserve">
+    <value>Failed to update image info</value>
   </data>
-  <data name="UploadNewPoster" xml:space="preserve">
-    <value>Upload New Poster</value>
+  <data name="ErrorUpdatingImageInfo" xml:space="preserve">
+    <value>Error updating image info</value>
   </data>
-  <data name="SelectVideoFile" xml:space="preserve">
-    <value>Select Video File</value>
+  <data name="AllNotificationsMarkedAsRead" xml:space="preserve">
+    <value>All notifications marked as read</value>
   </data>
-  <data name="SelectPosterImage" xml:space="preserve">
-    <value>Select Poster Image</value>
+  <data name="ErrorTogglingApprovalStatus" xml:space="preserve">
+    <value>Error toggling approval status</value>
   </data>
-  <data name="UploadVideo" xml:space="preserve">
-    <value>Upload Video</value>
+  <data name="ErrorDeletingReview" xml:space="preserve">
+    <value>Error deleting review</value>
   </data>
-  <data name="UploadPoster" xml:space="preserve">
-    <value>Upload Poster</value>
+  <data name="InvalidProductId" xml:space="preserve">
+    <value>Invalid product ID</value>
   </data>
-  <data name="DeleteVideo" xml:space="preserve">
-    <value>Delete Video</value>
+  <data name="QuantityUpdated" xml:space="preserve">
+    <value>Quantity updated</value>
   </data>
-  <data name="DeletePoster" xml:space="preserve">
-    <value>Delete Poster</value>
+  <data name="QuantityUpdatedSuccessfully" xml:space="preserve">
+    <value>Quantity updated successfully!</value>
   </data>
-  <data name="ConfirmDeleteVideo" xml:space="preserve">
-    <value>Are you sure you want to delete the video?</value>
+  <data name="ItemRemovedFromCart" xml:space="preserve">
+    <value>Item removed from cart</value>
   </data>
-  <data name="ConfirmDeletePoster" xml:space="preserve">
-    <value>Are you sure you want to delete the poster?</value>
+  <data name="CartItemNotFound" xml:space="preserve">
+    <value>Cart item not found</value>
   </data>
-  <data name="VideoRequirements" xml:space="preserve">
-    <value>Video Requirements</value>
-  </data>
-  <data name="PosterRequirements" xml:space="preserve">
-    <value>Poster Requirements</value>
-  </data>
-  <data name="Instructions" xml:space="preserve">
-    <value>Instructions</value>
-  </data>
-  <data name="Instruction1" xml:space="preserve">
-    <value>Video must be in MP4, WebM, or MOV format</value>
-  </data>
-  <data name="Instruction2" xml:space="preserve">
-    <value>Maximum video file size: 50MB</value>
-  </data>
-  <data name="Instruction3" xml:space="preserve">
-    <value>Recommended video duration: 10 seconds maximum</value>
-  </data>
-  <data name="Instruction4" xml:space="preserve">
-    <value>Recommended resolution: 1920x1080 or 1280x720 (16:9 aspect ratio)</value>
-  </data>
-  <data name="Instruction5" xml:space="preserve">
-    <value>Poster image will be shown while video is loading</value>
-  </data>
-  <data name="PleaseSelectVideoFile" xml:space="preserve">
-    <value>Please select a video file</value>
-  </data>
-  <data name="PleaseSelectPosterImage" xml:space="preserve">
-    <value>Please select a poster image</value>
-  </data>
-  <data name="InvalidVideoFormat" xml:space="preserve">
-    <value>Invalid video format. Please use MP4, WebM, or MOV</value>
-  </data>
-  <data name="InvalidImageFormat" xml:space="preserve">
-    <value>Invalid image format. Please use JPG, PNG, or WebP</value>
-  </data>
-  <data name="VideoFileTooLarge" xml:space="preserve">
-    <value>Video file is too large. Maximum size: 50MB</value>
-  </data>
-  <data name="ImageFileTooLarge" xml:space="preserve">
-    <value>Image file is too large. Maximum size: 5MB</value>
-  </data>
-  <data name="VideoUploadedSuccessfully" xml:space="preserve">
-    <value>Video uploaded successfully</value>
-  </data>
-  <data name="PosterUploadedSuccessfully" xml:space="preserve">
-    <value>Poster uploaded successfully</value>
-  </data>
-  <data name="VideoDeletedSuccessfully" xml:space="preserve">
-    <value>Video deleted successfully</value>
-  </data>
-  <data name="PosterDeletedSuccessfully" xml:space="preserve">
-    <value>Poster deleted successfully</value>
-  </data>
-  <data name="ErrorUploadingVideo" xml:space="preserve">
-    <value>An error occurred while uploading the video</value>
-  </data>
-  <data name="ErrorUploadingPoster" xml:space="preserve">
-    <value>An error occurred while uploading the poster</value>
-  </data>
-  <data name="ErrorDeletingVideo" xml:space="preserve">
-    <value>An error occurred while deleting the video</value>
-  </data>
-  <data name="ErrorDeletingPoster" xml:space="preserve">
-    <value>An error occurred while deleting the poster</value>
-  </data>
-  <data name="VideoNotFound" xml:space="preserve">
-    <value>Video not found</value>
-  </data>
-  <data name="PosterNotFound" xml:space="preserve">
-    <value>Poster not found</value>
-  </data>
-  <data name="YourBrowserDoesNotSupportVideo" xml:space="preserve">
-    <value>Your browser does not support video playback</value>
-  </data>
-  <data name="Size" xml:space="preserve">
-    <value>Size</value>
-  </data>
-  <data name="LastModified" xml:space="preserve">
-    <value>Last Modified</value>
-  </data>
-  <data name="Uploading" xml:space="preserve">
-    <value>Uploading</value>
-  </data>
-  <data name="YourFile" xml:space="preserve">
-    <value>Your file size</value>
+  <data name="InvalidRequest" xml:space="preserve">
+    <value>Invalid request</value>
   </data>
 </root>

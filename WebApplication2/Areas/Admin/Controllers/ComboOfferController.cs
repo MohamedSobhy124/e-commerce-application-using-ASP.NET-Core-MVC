@@ -626,6 +626,23 @@ namespace BulkyBook.Areas.Admin.Controllers
                 return NotFound();
             }
 
+            // Load variant option values for combo offer items
+            if (comboOffer.ComboOfferItems != null)
+            {
+                foreach (var item in comboOffer.ComboOfferItems.Where(i => !i.IsDeleted && i.ProductVariantId.HasValue))
+                {
+                    if (item.ProductVariant != null)
+                    {
+                        // Load variant option values using DbContext
+                        item.ProductVariant.VariantOptionValues = _dbContext.ProductVariantOptionValues
+                            .Include(vov => vov.OptionValue)
+                                .ThenInclude(ov => ov.ProductOption)
+                            .Where(vov => vov.ProductVariantId == item.ProductVariant.Id)
+                            .ToList();
+                    }
+                }
+            }
+
             // Get all products that are not deleted and have stock
             var allProducts = _unitOfWork.product.GetAll(
                 filter: p => !p.IsDeleted && p.StockQuantity > 0,
@@ -813,6 +830,87 @@ namespace BulkyBook.Areas.Admin.Controllers
             }
 
             return RedirectToAction(nameof(AddProducts), new { id = comboOfferItem.ComboOfferId });
+        }
+
+        // GET: Get Product Info (for variant selection)
+        public IActionResult GetProductInfo(int productId)
+        {
+            var product = _unitOfWork.product.Get(p => p.Id == productId, includeProperties: "ProductVariants,ProductOptions");
+            
+            // Load variant option values for variable products
+            if (product?.ProductType == ProductType.Variable && product.ProductVariants != null)
+            {
+                foreach (var variant in product.ProductVariants)
+                {
+                    // Load variant option values using DbContext
+                    variant.VariantOptionValues = _dbContext.ProductVariantOptionValues
+                        .Include(vov => vov.OptionValue)
+                            .ThenInclude(ov => ov.ProductOption)
+                        .Where(vov => vov.ProductVariantId == variant.Id)
+                        .ToList();
+                }
+            }
+            
+            if (product == null)
+            {
+                return Json(new { success = false, message = "Product not found" });
+            }
+
+            var result = new { 
+                success = true, 
+                stockQuantity = product.StockQuantity,
+                price = product.Price,
+                title = product.Title,
+                productType = (int)product.ProductType
+            };
+
+            // If variable product, include variants
+            if (product.ProductType == ProductType.Variable && product.ProductVariants != null)
+            {
+                var variants = product.ProductVariants.Select(v => 
+                {
+                    // Build variant name from option values
+                    string variantDisplayName = "Default";
+                    if (v.VariantOptionValues != null && v.VariantOptionValues.Any())
+                    {
+                        var optionValues = v.VariantOptionValues
+                            .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                            .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+                            .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                            .Where(s => !string.IsNullOrEmpty(s))
+                            .ToList();
+                        
+                        if (optionValues.Any())
+                        {
+                            variantDisplayName = string.Join(" / ", optionValues);
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(v.VariantName))
+                    {
+                        variantDisplayName = v.VariantName;
+                    }
+
+                    return new
+                    {
+                        id = v.Id,
+                        name = variantDisplayName,
+                        price = v.Price,
+                        stockQuantity = v.StockQuantity,
+                        imageUrl = v.ImageUrl
+                    };
+                }).ToList();
+
+                return Json(new { 
+                    success = true, 
+                    stockQuantity = product.StockQuantity,
+                    price = product.Price,
+                    title = product.Title,
+                    productType = (int)product.ProductType,
+                    variants = variants
+                });
+            }
+
+            return Json(result);
         }
     }
 }
