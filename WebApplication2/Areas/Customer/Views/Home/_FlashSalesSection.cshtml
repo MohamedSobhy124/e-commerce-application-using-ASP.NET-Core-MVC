@@ -14,6 +14,13 @@
     <!-- FLASH SALE CAROUSEL SECTION -->
     <section class="flash-sale-carousel-section">
         <div class="container">
+            <!-- View All Button -->
+            <div class="text-center mt-3">
+                <a href="@Url.Action("Index", "FlashSale", new { area = "Customer" })" class="view-all-flash-sales-btn">
+                    @Localizer["ViewAllFlashSales"]
+                    <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
             <div class="flash-sale-carousel-wrapper">
                 <button class="flash-sale-carousel-nav prev" data-action="prev-slide" aria-label="Previous">
                     <i class="bi bi-chevron-left"></i>
@@ -85,13 +92,7 @@
                 }
             </div>
             
-            <!-- View All Button -->
-            <div class="text-center mt-3">
-                <a href="@Url.Action("Index", "FlashSale", new { area = "Customer" })" class="view-all-flash-sales-btn">
-                    @Localizer["ViewAllFlashSales"]
-                    <i class="bi bi-arrow-right ms-2"></i>
-                </a>
-            </div>
+           
         </div>
     </section>
      

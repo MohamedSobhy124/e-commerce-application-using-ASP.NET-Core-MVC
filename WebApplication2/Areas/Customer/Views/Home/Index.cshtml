@@ -8,6 +8,9 @@
     ViewData["Title"] = Localizer["Home"];
     var baseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    
+    // Add no-cache meta tag for video banner poster to prevent caching
+    ViewData["CacheControl"] = "no-cache, no-store, must-revalidate";
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
     // SEO-Optimized Descriptions with Key Keywords
     var siteDescription = currentCulture == "ar" 
@@ -77,6 +80,108 @@
      
 </header>
 
+@* Enhanced Video Banner Section - Two Part Design *@
+@if (ViewBag.HasVideoBanner == true || ViewBag.HasPoster == true)
+{
+    <!-- Enhanced Video Banner Section -->
+    <section class="enhanced-video-banner-section">
+        <div class="container-fluid">
+            <div class="row g-0">
+                <!-- Part 1: Video/Image Section -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="video-banner-media-wrapper">
+                        @if (ViewBag.HasVideoBanner == true)
+                        {
+                            var posterUrl = ViewBag.HasPoster == true 
+                                ? Url.Content($"~/images/video-banner-poster.jpg?v={ViewBag.PosterVersion}") 
+                                : "";
+                            <video class="enhanced-video-banner" 
+                                   autoplay 
+                                   muted 
+                                   loop 
+                                   playsinline
+                                   preload="metadata"
+                                   poster="@posterUrl">
+                                <source src="~/videos/home-banner.mp4" type="video/mp4">
+                                @if (ViewBag.HasPoster == true)
+                                {
+                                    <img src="@Url.Content($"~/images/video-banner-poster.jpg?v={ViewBag.PosterVersion}")" alt="Video Banner" class="video-banner-poster-fallback" style="display: none;">
+                                }
+                            </video>
+                        }
+                        else if (ViewBag.HasPoster == true)
+                        {
+                            <img src="@Url.Content($"~/images/video-banner-poster.jpg?v={ViewBag.PosterVersion}")" alt="Video Banner Poster" class="enhanced-video-banner-poster">
+                        }
+                        
+                        <!-- Decorative overlay -->
+                        <div class="media-overlay"></div>
+                    </div>
+                </div>
+                
+                <!-- Part 2: Content Section with Paragraphs -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="video-banner-content-wrapper">
+                        <div class="content-inner">
+                            <div class="content-badge">
+                                <i class="bi bi-star-fill me-2"></i>
+                                <span>@Localizer["WelcomeToHealthFitness"]</span>
+                            </div>
+                            
+                            <h2 class="content-title">
+                                <i class="bi bi-heart-pulse me-3"></i>
+                                @Localizer["DiscoverIdealWeight"]
+                            </h2>
+                            
+                            <div class="content-paragraphs">
+                                <p class="paragraph-main">
+                                    @Localizer["InnovativeSupplements"]
+                                </p>
+                                
+                                <p class="paragraph-secondary">
+                                    @(currentCulture == "ar" 
+                                        ? "نقدم لك مجموعة واسعة من المكملات الغذائية عالية الجودة المصممة خصيصاً لدعم رحلتك نحو الصحة واللياقة البدنية. منتجاتنا مختبرة ومعتمدة من أفضل المختبرات العالمية."
+                                        : "We offer a wide range of high-quality nutritional supplements specifically designed to support your journey towards health and fitness. Our products are tested and certified by the world's leading laboratories.")
+                                </p>
+                                
+                                <p class="paragraph-features">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    @(currentCulture == "ar" 
+                                        ? "مكملات غذائية أصلية 100% مع ضمان الجودة"
+                                        : "100% Authentic supplements with quality guarantee")
+                                </p>
+                                
+                                <p class="paragraph-features">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    @(currentCulture == "ar" 
+                                        ? "توصيل سريع ومجاني في جميع أنحاء الإمارات"
+                                        : "Fast and free delivery across UAE")
+                                </p>
+                                
+                                <p class="paragraph-features">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    @(currentCulture == "ar" 
+                                        ? "دعم متخصص من خبراء التغذية"
+                                        : "Expert support from nutrition specialists")
+                                </p>
+                            </div>
+                            
+                            <div class="content-cta">
+                            
+                                <a href="@Url.Action("AboutUs", "Home", new { area = "Customer" })" class="btn-cta-secondary">
+                                    <span>@Localizer["LearnMoreAboutUs"]</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}else{
+
+
+
 <!-- Hero Section -->
 <section class="hero-section">
     <!-- Morphing Shapes Background -->
@@ -132,7 +237,7 @@
         </div>
     </div>
 </section>
-
+}
 <partial name="_Notifications" />
 @Html.AntiForgeryToken()
 
@@ -1728,6 +1833,7 @@
 </div>
 -->
 @section Styles {
+    <link rel="stylesheet" href="~/css/video-banner.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/modern-home-screen.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/category-carousel.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/flash-sale-carousel.css" asp-append-version="true" />
@@ -3471,6 +3577,114 @@
             setTimeout(() => loadSection('/Customer/Home/LoadBestSellersSection', 'bestSellersSectionPlaceholder'), 900);
             setTimeout(() => loadSection('/Customer/Home/LoadNewArrivalsSection', 'newArrivalsSectionPlaceholder'), 1100);
             setTimeout(() => loadSection('/Customer/Home/LoadComboOffersSection', 'comboOffersSectionPlaceholder'), 1300);
+        });
+
+        // Video Banner Optimization
+        document.addEventListener('DOMContentLoaded', function() {
+            const videoBanner = document.querySelector('.video-banner, .enhanced-video-banner');
+            const posterImage = document.querySelector('.video-banner-poster, .enhanced-video-banner-poster');
+            
+            // Function to force reload image with aggressive cache-busting
+            function forceReloadImage(imgElement) {
+                if (!imgElement || !imgElement.src) return;
+                
+                const url = new URL(imgElement.src);
+                // Remove all existing cache-busting parameters
+                url.searchParams.delete('v');
+                url.searchParams.delete('_t');
+                url.searchParams.delete('nocache');
+                url.searchParams.delete('refresh');
+                // Add multiple cache-busting parameters
+                url.searchParams.set('v', Date.now());
+                url.searchParams.set('_t', Math.random().toString(36).substring(7));
+                url.searchParams.set('nocache', Date.now());
+                url.searchParams.set('refresh', Math.random().toString(36).substring(2, 15));
+                
+                // Force reload by clearing src first
+                const newSrc = url.toString();
+                imgElement.src = '';
+                
+                // Use requestAnimationFrame to ensure browser processes the change
+                requestAnimationFrame(() => {
+                    imgElement.src = newSrc;
+                    // Force browser to reload by adding a load event
+                    imgElement.onload = function() {
+                        this.onload = null; // Remove handler after first load
+                    };
+                });
+            }
+            
+            // Force reload poster image to avoid cache issues
+            if (posterImage) {
+                forceReloadImage(posterImage);
+            }
+            
+            // Clear browser cache for video banner images
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        if (name.includes('video-banner') || name.includes('images')) {
+                            caches.delete(name);
+                        }
+                    });
+                });
+            }
+            
+            if (videoBanner) {
+                // Check if video can play (browser support)
+                videoBanner.addEventListener('loadedmetadata', function() {
+                    videoBanner.classList.add('loaded');
+                });
+                
+                // Handle video loading errors - show poster if available
+                videoBanner.addEventListener('error', function() {
+                    console.warn('Video banner failed to load, showing poster fallback');
+                    this.style.display = 'none';
+                    const container = this.closest('.video-banner-container');
+                    if (container) {
+                        // Try to show poster image if available
+                        const posterFallback = container.querySelector('.video-banner-poster-fallback');
+                        if (posterFallback) {
+                            // Force reload the poster image with aggressive cache-busting
+                            forceReloadImage(posterFallback);
+                            posterFallback.style.display = 'block';
+                            posterFallback.classList.add('video-banner-poster');
+                        } else {
+                            // Show fallback content if no poster
+                            const fallback = container.querySelector('.video-fallback');
+                            if (fallback) {
+                                fallback.style.display = 'flex';
+                            }
+                        }
+                    }
+                });
+                
+                // Pause video when page is not visible (performance)
+                document.addEventListener('visibilitychange', function() {
+                    if (document.hidden) {
+                        videoBanner.pause();
+                    } else {
+                        videoBanner.play().catch(e => console.log('Video autoplay prevented:', e));
+                    }
+                });
+                
+                // Lazy load video only when in viewport
+                if ('IntersectionObserver' in window) {
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const video = entry.target;
+                                if (video.readyState === 0) {
+                                    video.load();
+                                }
+                                observer.unobserve(video);
+                            }
+                        });
+                    }, { rootMargin: '50px' });
+                    
+                    observer.observe(videoBanner);
+                }
+            }
         });
     </script>
 }

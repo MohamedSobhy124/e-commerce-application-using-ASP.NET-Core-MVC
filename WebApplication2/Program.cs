@@ -11,8 +11,23 @@ using BulkyBook.DataAccess.DbInitializer;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
+
+        // Configure file upload limits for video banner
+        builder.Services.Configure<FormOptions>(options =>
+        {
+            options.MultipartBodyLengthLimit = 52428800; // 50MB for video uploads
+            options.ValueLengthLimit = 52428800; // 50MB
+            options.MultipartHeadersLengthLimit = 52428800; // 50MB
+        });
+
+        // Configure IIS server limits (for IIS hosting)
+        builder.Services.Configure<IISServerOptions>(options =>
+        {
+            options.MaxRequestBodySize = 52428800; // 50MB
+        });
 
         // Add services to the container.
         builder.Services.AddControllersWithViews(options =>
@@ -165,8 +180,19 @@ var staticFileOptions = new StaticFileOptions
         }
         else if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif" || extension == ".webp" || extension == ".svg")
         {
-            // Images: 1 year
-            ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000,immutable");
+            // Special handling for video banner poster - no cache
+            if (path.Contains("video-banner-poster"))
+            {
+                // No cache for video banner poster to ensure fresh image
+                ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store, must-revalidate");
+                ctx.Context.Response.Headers.Append("Pragma", "no-cache");
+                ctx.Context.Response.Headers.Append("Expires", "0");
+            }
+            else
+            {
+                // Other images: 1 year
+                ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000,immutable");
+            }
         }
         else if (extension == ".woff" || extension == ".woff2" || extension == ".ttf" || extension == ".eot")
         {
