@@ -75,7 +75,7 @@ namespace BulkyBook.Services
                     message = $"Order #{orderHeader.Id} - {orderHeader.Name}",
                     orderId = orderHeader.Id,
                     total = orderHeader.OrderTotal,
-                    timestamp = DateTime.Now
+                    timestamp = BulkyBook.Utility.DateTimeHelper.Now
                 }
             );
 
@@ -115,7 +115,7 @@ namespace BulkyBook.Services
                     message = $"Your order #{orderHeader.Id} has been confirmed",
                     orderId = orderHeader.Id,
                     total = orderHeader.OrderTotal,
-                    timestamp = DateTime.Now
+                    timestamp = BulkyBook.Utility.DateTimeHelper.Now
                 }
             );
         }
@@ -150,7 +150,7 @@ namespace BulkyBook.Services
                 Type = type,
                 OrderId = orderId,
                 IsRead = false,
-                CreatedAt = DateTime.Now,
+                CreatedAt = BulkyBook.Utility.DateTimeHelper.Now,
                 Icon = type == "Order" ? "bi-cart-check" : "bi-bell",
                 Link = orderId.HasValue ? $"/Admin/Order/Details/{orderId}" : null
             };
@@ -340,7 +340,7 @@ namespace BulkyBook.Services
                 ");
             }
 
-            var estimatedDelivery = DateTime.Now.AddDays(7).ToString("MMM dd, yyyy") + " - " + DateTime.Now.AddDays(14).ToString("MMM dd, yyyy");
+            var estimatedDelivery = BulkyBook.Utility.DateTimeHelper.Now.AddDays(7).ToString("MMM dd, yyyy") + " - " + BulkyBook.Utility.DateTimeHelper.Now.AddDays(14).ToString("MMM dd, yyyy");
 
             return $@"
 <!DOCTYPE html>

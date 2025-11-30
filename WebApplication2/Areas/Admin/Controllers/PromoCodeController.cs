@@ -1,8 +1,10 @@
 using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.DataAccess.Data;
 using BulkyBook.Models;
 using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System.Security.Claims;
 
@@ -14,11 +16,13 @@ namespace BulkyBook.Areas.Admin.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStringLocalizer<SharedResources> _localizer;
+        private readonly ApplicationDBContext _dbContext;
 
-        public PromoCodeController(IUnitOfWork unitOfWork, IStringLocalizer<SharedResources> localizer)
+        public PromoCodeController(IUnitOfWork unitOfWork, IStringLocalizer<SharedResources> localizer, ApplicationDBContext dbContext)
         {
             _unitOfWork = unitOfWork;
             _localizer = localizer;
+            _dbContext = dbContext;
         }
 
         // GET: PromoCode/Index
@@ -33,8 +37,8 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             var promoCode = new PromoCode
             {
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(30),
+                StartDate = BulkyBook.Utility.DateTimeHelper.Now,
+                EndDate = BulkyBook.Utility.DateTimeHelper.Now.AddDays(30),
                 IsActive = true
             };
             return View(promoCode);
@@ -70,7 +74,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 
                 promoCode.CreatedBy = userId;
-                promoCode.CreatedDate = DateTime.Now;
+                promoCode.CreatedDate = BulkyBook.Utility.DateTimeHelper.Now;
                 promoCode.TimesUsed = 0;
 
                 _unitOfWork.PromoCode.add(promoCode);
@@ -206,25 +210,45 @@ namespace BulkyBook.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult ToggleActive(int id)
         {
-            var promoCode = _unitOfWork.PromoCode.Get(p => p.Id == id);
-            
-            if (promoCode == null)
+            try
             {
-                return Json(new { success = false, message = _localizer["PromoCodeNotFound"].Value });
+                // Get current value first
+                var promoCode = _dbContext.PromoCodes.AsNoTracking().FirstOrDefault(p => p.Id == id);
+                
+                if (promoCode == null)
+                {
+                    return Json(new { success = false, message = _localizer["PromoCodeNotFound"].Value });
+                }
+
+                // Calculate new value
+                var newIsActive = !promoCode.IsActive;
+                
+                // Get the actual table name from EF Core metadata
+                var entityType = _dbContext.Model.FindEntityType(typeof(PromoCode));
+                var tableName = entityType?.GetTableName() ?? "PromoCodes";
+                
+                // Use raw SQL to update directly - bypasses EF Core tracking issues
+                var sql = $"UPDATE [{tableName}] SET [IsActive] = {{0}} WHERE [Id] = {{1}}";
+                var rowsAffected = _dbContext.Database.ExecuteSqlRaw(sql, newIsActive, id);
+
+                if (rowsAffected == 0)
+                {
+                    return Json(new { success = false, message = "Failed to update promo code" });
+                }
+
+                var message = newIsActive ? _localizer["PromoCodeActivated"].Value : _localizer["PromoCodeDeactivated"].Value;
+                
+                return Json(new 
+                { 
+                    success = true, 
+                    message = message,
+                    isActive = newIsActive
+                });
             }
-
-            promoCode.IsActive = !promoCode.IsActive;
-            _unitOfWork.PromoCode.Update(promoCode);
-            _unitOfWork.save();
-
-            var message = promoCode.IsActive ? _localizer["PromoCodeActivated"].Value : _localizer["PromoCodeDeactivated"].Value;
-            
-            return Json(new 
-            { 
-                success = true, 
-                message = message,
-                isActive = promoCode.IsActive
-            });
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "An error occurred: " + ex.Message });
+            }
         }
 
         // GET: PromoCode/GetActivePromoCodes (API endpoint)

@@ -306,6 +306,7 @@
     font-size: 0.75rem;
     font-weight: 700;
     box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    max-width: fit-content;
 }
 
 .new-badge {

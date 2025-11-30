@@ -93,7 +93,7 @@ namespace BulkyBook.Areas.Admin.Controllers
             {
                 IsActive = true,
                 ServiceType = ServiceType.Online,
-                CreatedDate = DateTime.Now,
+                CreatedDate = BulkyBook.Utility.DateTimeHelper.Now,
                 ServiceImages = new List<ServiceImage>()
             };
             return View(service);
@@ -172,7 +172,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 service.CreatedBy = userId;
-                service.CreatedDate = DateTime.Now;
+                service.CreatedDate = BulkyBook.Utility.DateTimeHelper.Now;
 
                 _unitOfWork.ServiceSubscriptions.Add(service);
                 _unitOfWork.save();
@@ -308,7 +308,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                     existingService.OfflinePaymentPercent = null;
                 }
 
-                existingService.UpdatedDate = DateTime.Now;
+                existingService.UpdatedDate = BulkyBook.Utility.DateTimeHelper.Now;
 
                 _unitOfWork.ServiceSubscriptions.Update(existingService);
                 _unitOfWork.save();
@@ -456,7 +456,7 @@ namespace BulkyBook.Areas.Admin.Controllers
             }
 
             service.IsActive = !service.IsActive;
-            service.UpdatedDate = DateTime.Now;
+            service.UpdatedDate = BulkyBook.Utility.DateTimeHelper.Now;
             _unitOfWork.ServiceSubscriptions.Update(service);
             _unitOfWork.save();
 

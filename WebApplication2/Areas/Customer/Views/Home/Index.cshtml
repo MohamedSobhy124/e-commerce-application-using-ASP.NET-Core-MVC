@@ -530,8 +530,8 @@
                     var activeOffers = _unitOfWork.ServiceOffers.GetAll(
                         o => o.ServiceSubscriptionId == service.Id && 
                              o.IsActive && 
-                             o.StartDate <= DateTime.Now && 
-                             o.EndDate >= DateTime.Now
+                             o.StartDate <= BulkyBook.Utility.DateTimeHelper.Now && 
+                             o.EndDate >= BulkyBook.Utility.DateTimeHelper.Now
                     ).ToList();
                     var hasOffer = activeOffers.Any();
                     var bestOffer = activeOffers.OrderByDescending(o => o.DiscountValue).FirstOrDefault();
@@ -751,7 +751,7 @@
     </div>
 </div>
 
-<div class="container-fluid px-3">
+<div class="container">
     <!-- Enhanced Filter Section (Hidden - will be moved to side panel/bottom sheet) -->
     <div class="filter-section enhanced-filters" id="originalFilterSection" style="display: none;">
         <div class="filter-header">

@@ -9,7 +9,7 @@
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
     
-    var now = DateTime.Now;
+    var now = BulkyBook.Utility.DateTimeHelper.Now;
     var isActive = Model.IsActive && now >= Model.StartDate && now <= Model.EndDate;
     var hasStarted = now >= Model.StartDate;
     var hasEnded = now > Model.EndDate;

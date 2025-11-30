@@ -35,8 +35,8 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             var offer = new ServiceOffer
             {
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(30),
+                StartDate = BulkyBook.Utility.DateTimeHelper.Now,
+                EndDate = BulkyBook.Utility.DateTimeHelper.Now.AddDays(30),
                 IsActive = true,
                 DiscountType = DiscountType.Percentage
             };
@@ -83,7 +83,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 offer.CreatedBy = userId;
-                offer.CreatedDate = DateTime.Now;
+                offer.CreatedDate = BulkyBook.Utility.DateTimeHelper.Now;
 
                 _unitOfWork.ServiceOffers.Add(offer);
                 _unitOfWork.save();

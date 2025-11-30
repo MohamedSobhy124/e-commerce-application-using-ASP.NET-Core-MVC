@@ -53,8 +53,8 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             var flashSale = new FlashSale
             {
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(1)
+                StartDate = BulkyBook.Utility.DateTimeHelper.Now,
+                EndDate = BulkyBook.Utility.DateTimeHelper.Now.AddDays(1)
             };
             return View(flashSale);
         }
@@ -373,7 +373,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                 FlashSaleQuantity = quantity,
                 FlashSaleQuantityCreated = quantity,
                 FlashSalePrice = price,
-                AddedDate = DateTime.Now
+                AddedDate = BulkyBook.Utility.DateTimeHelper.Now
             };
 
             // Set audit fields

@@ -22,7 +22,7 @@ namespace BulkyBook.DataAccess.Repository
             // Set audit fields
             if (obj is BaseEntity baseEntity)
             {
-                baseEntity.ModifiedDate = DateTime.Now;
+                baseEntity.ModifiedDate = BulkyBook.Utility.DateTimeHelper.Now;
             }
             _db.FlashSaleItems.Update(obj);
         }   
@@ -36,7 +36,7 @@ namespace BulkyBook.DataAccess.Repository
             if (obj is BaseEntity baseEntity)
             {
                 baseEntity.IsDeleted = true;
-                baseEntity.ModifiedDate = DateTime.Now;
+                baseEntity.ModifiedDate = BulkyBook.Utility.DateTimeHelper.Now;
                 _db.FlashSaleItems.Update(obj);
             }
             else

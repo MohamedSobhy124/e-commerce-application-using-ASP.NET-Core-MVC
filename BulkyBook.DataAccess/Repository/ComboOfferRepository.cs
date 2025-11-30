@@ -19,7 +19,7 @@ namespace BulkyBook.DataAccess.Repository
             // Set audit fields
             if (comboOffer is BaseEntity baseEntity)
             {
-                baseEntity.ModifiedDate = DateTime.Now;
+                baseEntity.ModifiedDate = BulkyBook.Utility.DateTimeHelper.Now;
             }
             _db.ComboOffers.Update(comboOffer);
         }   
@@ -35,7 +35,7 @@ namespace BulkyBook.DataAccess.Repository
             if (comboOffer is BaseEntity baseEntity)
             {
                 baseEntity.IsDeleted = true;
-                baseEntity.ModifiedDate = DateTime.Now;
+                baseEntity.ModifiedDate = BulkyBook.Utility.DateTimeHelper.Now;
                 _db.ComboOffers.Update(comboOffer);
             }
             else
@@ -47,7 +47,7 @@ namespace BulkyBook.DataAccess.Repository
         // PERFORMANCE: Optimized with AsNoTracking and filtered includes
         public IEnumerable<ComboOffer> GetActiveComboOffers()
         {
-            var now = DateTime.Now;
+            var now = BulkyBook.Utility.DateTimeHelper.Now;
             var comboOffers = _db.ComboOffers
                 .AsNoTracking() // Read-only query
                 .Include(co => co.ComboOfferItems.Where(i => !i.IsDeleted))

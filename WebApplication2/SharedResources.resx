@@ -175,7 +175,7 @@
     <value />
   </data>
   <data name="ViewDetails" xml:space="preserve">
-    <value />
+    <value>View Details</value>
   </data>
   <data name="InStock" xml:space="preserve">
     <value />
@@ -1313,7 +1313,7 @@
     <value />
   </data>
   <data name="AddProducts" xml:space="preserve">
-    <value />
+    <value>Add Products</value>
   </data>
   <data name="Deactivate" xml:space="preserve">
     <value />
@@ -1421,7 +1421,7 @@
     <value />
   </data>
   <data name="ManageProducts" xml:space="preserve">
-    <value />
+    <value>Manage Products</value>
   </data>
   <data name="FlashSaleDetails" xml:space="preserve">
     <value />
@@ -1466,7 +1466,7 @@
     <value />
   </data>
   <data name="SelectProduct" xml:space="preserve">
-    <value />
+    <value>Select Product</value>
   </data>
   <data name="FlashSaleQuantity" xml:space="preserve">
     <value />
@@ -2299,9 +2299,6 @@
   <data name="AddComboToCart" xml:space="preserve">
     <value>Add Combo to Cart</value>
   </data>
-  <data name="ViewDetails" xml:space="preserve">
-    <value>View Details</value>
-  </data>
   <data name="ProductsIncluded" xml:space="preserve">
     <value>Products Included</value>
   </data>
@@ -2335,17 +2332,11 @@
   <data name="ErrorDeletingComboOffer" xml:space="preserve">
     <value>Error deleting combo offer</value>
   </data>
-  <data name="ManageProducts" xml:space="preserve">
-    <value>Manage Products</value>
-  </data>
   <data name="ManageComboProducts" xml:space="preserve">
     <value>Manage Combo Products</value>
   </data>
   <data name="AddProduct" xml:space="preserve">
     <value>Add Product</value>
-  </data>
-  <data name="SelectProduct" xml:space="preserve">
-    <value>Select Product</value>
   </data>
   <data name="ProductAddedToCombo" xml:space="preserve">
     <value>Product added to combo successfully</value>
@@ -2376,9 +2367,6 @@
   </data>
   <data name="NoProductsInCombo" xml:space="preserve">
     <value>No products in this combo yet</value>
-  </data>
-  <data name="AddProducts" xml:space="preserve">
-    <value>Add Products</value>
   </data>
   <data name="Required" xml:space="preserve">
     <value>Required</value>
@@ -2457,5 +2445,29 @@
   </data>
   <data name="DiscountSave" xml:space="preserve">
     <value>Save</value>
+  </data>
+  <data name="ViewAll" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ProductsList" xml:space="preserve">
+    <value>Products List</value>
+  </data>
+  <data name="CreateNewProduct" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CategoriesList" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CreateNewCategory" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NameEnglish" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CreateCategory" xml:space="preserve">
+    <value />
+  </data>
+  <data name="SelectProductAndSetFlashSaleDetails" xml:space="preserve">
+    <value />
   </data>
 </root>

@@ -406,7 +406,7 @@ namespace BulkyBook.Services
                         minimumAlert = product.MinimumStockAlert,
                         isOutOfStock = isOutOfStock,
                         urgency = urgency,
-                        timestamp = DateTime.Now
+                        timestamp = BulkyBook.Utility.DateTimeHelper.Now
                     }
                 );
 
@@ -464,7 +464,7 @@ namespace BulkyBook.Services
                         minimumAlert = productVariant.MinimumStockAlert,
                         isOutOfStock = isOutOfStock,
                         urgency = urgency,
-                        timestamp = DateTime.Now
+                        timestamp = BulkyBook.Utility.DateTimeHelper.Now
                     }
                 );
 
@@ -492,7 +492,7 @@ namespace BulkyBook.Services
                     IsRead = false,
                     Link = string.Empty,
                     Icon =string.Empty,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = BulkyBook.Utility.DateTimeHelper.Now
                 };
 
                 _unitOfWork.notification.Add(notification);
@@ -522,7 +522,7 @@ namespace BulkyBook.Services
                     IsRead = false,
                     Link = string.Empty,
                     Icon =string.Empty,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = BulkyBook.Utility.DateTimeHelper.Now
                 };
 
                 _unitOfWork.notification.Add(notification);
@@ -706,7 +706,7 @@ namespace BulkyBook.Services
     
     <div class=""footer"">
         <p>This is an automated stock alert from Ideal Weight Inventory Management System</p>
-        <p style=""margin-top: 10px;"">Generated on {DateTime.Now:MMMM dd, yyyy 'at' hh:mm tt}</p>
+        <p style=""margin-top: 10px;"">Generated on {BulkyBook.Utility.DateTimeHelper.Now:MMMM dd, yyyy 'at' hh:mm tt}</p>
         <p style=""color: #9ca3af; font-size: 12px; margin-top: 15px;"">
             To configure stock alert settings, update your appsettings.json file.
         </p>
@@ -884,7 +884,7 @@ namespace BulkyBook.Services
     
     <div class=""footer"">
         <p>This is an automated stock alert from Ideal Weight Inventory Management System</p>
-        <p style=""margin-top: 10px;"">Generated on {DateTime.Now:MMMM dd, yyyy 'at' hh:mm tt}</p>
+        <p style=""margin-top: 10px;"">Generated on {BulkyBook.Utility.DateTimeHelper.Now:MMMM dd, yyyy 'at' hh:mm tt}</p>
         <p style=""color: #9ca3af; font-size: 12px; margin-top: 15px;"">
             To configure stock alert settings, update your appsettings.json file.
         </p>

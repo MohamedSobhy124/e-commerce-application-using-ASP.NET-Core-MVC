@@ -216,7 +216,7 @@
 						<div class="col-12 col-md-8">
 							<p class="estimate-delivery">
 								<i class="bi bi-calendar-check me-2"></i>
-								@Localizer["EstimatedDelivery"]: @DateTime.Now.AddDays(7).ToShortDateString() - @DateTime.Now.AddDays(14).ToShortDateString()
+								@Localizer["EstimatedDelivery"]: @BulkyBook.Utility.DateTimeHelper.Now.AddDays(7).ToShortDateString() - @BulkyBook.Utility.DateTimeHelper.Now.AddDays(14).ToShortDateString()
 							</p>
 						</div>
 						<div class="col-12 col-md-8">

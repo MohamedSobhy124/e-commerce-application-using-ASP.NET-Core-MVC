@@ -110,11 +110,11 @@ namespace BulkyBook.Areas.Admin.Controllers
             orderHeader.TrackingNumber = trackingNumber;
             orderHeader.Carrier = carrier;
             orderHeader.OrderStatus = SD.StatusShipped;
-            orderHeader.ShippingDate = DateTime.Now;
+            orderHeader.ShippingDate = BulkyBook.Utility.DateTimeHelper.Now;
 
             if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
             {
-                orderHeader.PaymentDueDate = DateTime.Now.AddDays(30);
+                orderHeader.PaymentDueDate = BulkyBook.Utility.DateTimeHelper.Now.AddDays(30);
             }
 
             _unitOfWork.OrderHeader.Update(orderHeader);

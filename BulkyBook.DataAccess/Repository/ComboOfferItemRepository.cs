@@ -19,7 +19,7 @@ namespace BulkyBook.DataAccess.Repository
             // Set audit fields
             if (comboOfferItem is BaseEntity baseEntity)
             {
-                baseEntity.ModifiedDate = DateTime.Now;
+                baseEntity.ModifiedDate = BulkyBook.Utility.DateTimeHelper.Now;
             }
             _db.ComboOfferItems.Update(comboOfferItem);
         }
@@ -37,7 +37,7 @@ namespace BulkyBook.DataAccess.Repository
             if (comboOfferItem is BaseEntity baseEntity)
             {
                 baseEntity.IsDeleted = true;
-                baseEntity.ModifiedDate = DateTime.Now;
+                baseEntity.ModifiedDate = BulkyBook.Utility.DateTimeHelper.Now;
                 _db.ComboOfferItems.Update(comboOfferItem);
             }
             else

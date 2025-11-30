@@ -176,23 +176,43 @@
                             <div class="product-price-area">
                                 @if (Model.product.ProductType == BulkyBook.Models.ProductType.Simple)
                                 {
-                                        var productPrice = Model.product.Price;
+                                        var flashSaleItem = ViewData["FlashSaleItem"] as BulkyBook.Models.FlashSaleItem;
+                                        var isInFlashSale = flashSaleItem != null && flashSaleItem.FlashSaleQuantity > 0;
+                                        var productPrice = isInFlashSale ? (double)flashSaleItem.FlashSalePrice : Model.product.Price;
+                                        var originalPrice = Model.product.Price;
                                         var tabbyMonthly = productPrice / 4;
                                         var tamaraPayment = productPrice / 4;
                                         var tabbyAmount = currencySymbol + " " + tabbyMonthly.ToString("N2");
                                         var tamaraAmount = currencySymbol + " " + tamaraPayment.ToString("N2");
                                         var tabbyText = string.Format(Localizer["InstallmentTabby"].ToString(), tabbyAmount);
                                         var tamaraText = string.Format(Localizer["InstallmentTamara"].ToString(), tamaraAmount);
-                                    
                                     <div class="product-price-with-installments">
                                         <div class="product-price-section-main">
-                                            @if (Model.product.ListPrice > Model.product.Price)
+                                            @if (isInFlashSale)
+                                            {
+                                                <div class="flash-sale-badge-inline" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #f59e0b 100%); color: white; padding: 0.3rem 0.8rem; border-radius: 5px; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                                    <i class="bi bi-lightning-fill"></i> @Localizer["FLASHSALE"]
+                                                </div>
+                                                <p class="product-old-price" style="text-decoration: line-through; color: #999; font-size: 1.1rem; margin-bottom: 0.3rem;">
+                                                    @Localizer["OriginalPrice"]: @Html.Raw(currencySymbol) @originalPrice.ToString("N2")
+                                                </p>
+                                                <p class="product-new-price" id="productPrice" style="color: #ef4444; font-size: 1.8rem; font-weight: 700;">
+                                                    @Html.Raw(currencySymbol) @productPrice.ToString("N2")
+                                                </p>
+                                                <div style="color: #10b981; font-size: 0.9rem; margin-top: 0.3rem;">
+                                                    <i class="bi bi-tag-fill"></i> @Localizer["YouSave"]: @Html.Raw(currencySymbol) @((originalPrice - productPrice).ToString("N2"))
+                                                </div>
+                                            }
+                                            else if (Model.product.ListPrice > Model.product.Price)
                                             {
                                                 <p class="product-old-price">
                                                     @Localizer["OriginalPrice"]: @Html.Raw(currencySymbol) @Model.product.ListPrice.ToString("N2")
                                                 </p>
                                             }
-                                            <p class="product-new-price" id="productPrice">@Html.Raw(currencySymbol) @Model.product.Price.ToString("N2")</p>
+                                            @if (!isInFlashSale)
+                                            {
+                                                <p class="product-new-price" id="productPrice">@Html.Raw(currencySymbol) @Model.product.Price.ToString("N2")</p>
+                                            }
                                             @if (Model.product.ExpiryDate.HasValue)
                                             {
                                                 <div class="expiry-date-info mt-2">
@@ -237,8 +257,14 @@
                                 {
                                     <div class="product-price-with-installments">
                                         <div class="product-price-section-main">
+                                            <div id="variantFlashSaleBadge" style="display: none; background: linear-gradient(135deg, #FF6B35 0%, #f59e0b 100%); color: white; padding: 0.3rem 0.8rem; border-radius: 5px; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                                <i class="bi bi-lightning-fill"></i> @Localizer["FLASHSALE"]
+                                            </div>
                                             <p class="product-old-price" id="variantListPrice" style="display: none;"></p>
                                             <p class="product-new-price" id="variantPrice">@Localizer["SelectOptions"]</p>
+                                            <div id="variantSavings" style="display: none; color: #10b981; font-size: 0.9rem; margin-top: 0.3rem;">
+                                                <i class="bi bi-tag-fill"></i> <span id="variantSavingsText"></span>
+                                            </div>
                                             <p class="product-tax-notice">@Localizer["AdditionalTaxMayApply"]</p>
                                             <div id="stockInfo" class="stock-info mt-2" style="display: none;">
                                                 <span id="stockStatus" class="badge"></span>
@@ -618,6 +644,30 @@
         }) ));
         const productStockQuantity = @Model.product.StockQuantity;
         
+        // Flash sale data for variants
+        @{
+            var variantFlashSaleDict = ViewData["VariantFlashSaleItems"] as Dictionary<int, BulkyBook.Models.FlashSaleItem>;
+            var variantFlashSaleData = variantFlashSaleDict?.Select(kvp => new {
+                variantId = kvp.Key,
+                flashSalePrice = (double)kvp.Value.FlashSalePrice,
+                flashSaleItemId = kvp.Value.Id,
+                flashSaleQuantity = kvp.Value.FlashSaleQuantity,
+                originalPrice =  kvp.Value.ProductVariant?.ListPrice 
+            }).ToList()  ;
+        }
+        const variantFlashSales = @Html.Raw(Json.Serialize(variantFlashSaleData));
+        const variantFlashSaleMap = {};
+        if (variantFlashSales) {
+            variantFlashSales.forEach(item => {
+                variantFlashSaleMap[item.variantId] = {
+                    flashSalePrice: item.flashSalePrice,
+                    flashSaleItemId: item.flashSaleItemId,
+                    flashSaleQuantity: item.flashSaleQuantity,
+                    originalPrice: item.originalPrice
+                };
+            });
+        }
+        
         // Store all product images for carousel (exclude info images)
         let allProductImages = @Html.Raw(Json.Serialize(
             Model.product.ProductType == BulkyBook.Models.ProductType.Variable && 
@@ -677,6 +727,8 @@
             outOfStockMsg: '@Html.Raw(Localizer["OutOfStock"] ?? "This product is out of stock")',
             installmentTabby: '@Html.Raw(Localizer["InstallmentTabby"])',
             installmentTamara: '@Html.Raw(Localizer["InstallmentTamara"])',
+            flashSale: '@Html.Raw(Localizer["FLASHSALE"] ?? "FLASH SALE")',
+            youSave: '@Html.Raw(Localizer["YouSave"] ?? "You Save")',
             expiryDate: '@Html.Raw(Localizer["ExpiryDate"])'
         };
 
@@ -804,8 +856,14 @@
             } else {
                 // Reset variant info
                 $('#selectedVariantId').val('');
-                $('#variantPrice').text(localizations.selectOptions);
+                $('#variantPrice').text(localizations.selectOptions).css({
+                    'color': '',
+                    'font-size': '',
+                    'font-weight': ''
+                });
                 $('#variantListPrice').hide();
+                $('#variantFlashSaleBadge').hide();
+                $('#variantSavings').hide();
                 $('#variantInstallments').hide();
                 $('#stockInfo').hide();
                 $('#expiryDateInfo').hide();
@@ -828,16 +886,60 @@
             
             if (variant) {
                 $('#selectedVariantId').val(variant.id);
-                $('#variantPrice').text(formatCurrency(variant.price));
                 
-                if (variant.listPrice && variant.listPrice > variant.price) {
-                    $('#variantListPrice').text(localizations.originalPrice + ': ' + formatCurrency(variant.listPrice)).show();
+                // Check if variant is in flash sale
+                const flashSaleData = variantFlashSaleMap[variant.id];
+                let displayPrice = variant.price;
+                let originalPrice = variant.price;
+                let isInFlashSale = false;
+                
+                if (flashSaleData && flashSaleData.flashSaleQuantity > 0) {
+                    isInFlashSale = true;
+                    displayPrice = flashSaleData.flashSalePrice;
+                    originalPrice = flashSaleData.originalPrice;
+                    
+                    // Show flash sale badge
+                    $('#variantFlashSaleBadge').show();
+                    
+                    // Show original price crossed out
+                    $('#variantListPrice')
+                        .html('<span style="text-decoration: line-through; color: #999;">' + localizations.originalPrice + ': ' + formatCurrency(originalPrice) + '</span>')
+                        .show();
+                    
+                    // Show flash sale price prominently
+                    $('#variantPrice')
+                        .text(formatCurrency(displayPrice))
+                        .css({
+                            'color': '#ef4444',
+                            'font-size': '1.8rem',
+                            'font-weight': '700'
+                        });
+                    
+                    // Show savings
+                    const savings = originalPrice - displayPrice;
+                    $('#variantSavingsText').text(localizations.youSave + ': ' + formatCurrency(savings));
+                    $('#variantSavings').show();
                 } else {
-                    $('#variantListPrice').hide();
+                    // Not in flash sale - normal display
+                    $('#variantFlashSaleBadge').hide();
+                    $('#variantSavings').hide();
+                    $('#variantPrice')
+                        .text(formatCurrency(variant.price))
+                        .css({
+                            'color': '',
+                            'font-size': '',
+                            'font-weight': ''
+                        });
+                    
+                    if (variant.listPrice && variant.listPrice > variant.price) {
+                        $('#variantListPrice').text(localizations.originalPrice + ': ' + formatCurrency(variant.listPrice)).show();
+                    } else {
+                        $('#variantListPrice').hide();
+                    }
                 }
                 
-                // Update installment amounts
-                const variantPrice = variant.price;
+                // Update installment amounts based on display price
+                const variantPrice = displayPrice;
                 const tabbyMonthly = variantPrice / 4;
                 const tamaraPayment = variantPrice / 4;
                 
@@ -879,8 +981,14 @@
                 updateQuantityInputMax(variant.stockQuantity);
             } else {
                 $('#selectedVariantId').val('');
-                $('#variantPrice').text(localizations.variantNotFound);
+                $('#variantPrice').text(localizations.variantNotFound).css({
+                    'color': '',
+                    'font-size': '',
+                    'font-weight': ''
+                });
                 $('#variantListPrice').hide();
+                $('#variantFlashSaleBadge').hide();
+                $('#variantSavings').hide();
                 $('#variantInstallments').hide();
                 $('#stockInfo').hide();
                 $('#expiryDateInfo').hide();

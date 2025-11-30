@@ -75,12 +75,12 @@ namespace BulkyBook.Areas.Admin.Controllers
                 
                 if (!subscription.IsActive)
                 {
-                    subscription.UnsubscribedDate = DateTime.Now;
+                    subscription.UnsubscribedDate = BulkyBook.Utility.DateTimeHelper.Now;
                 }
                 else
                 {
                     subscription.UnsubscribedDate = null;
-                    subscription.SubscribedDate = DateTime.Now;
+                    subscription.SubscribedDate = BulkyBook.Utility.DateTimeHelper.Now;
                 }
 
                 _unitOfWork.NewsletterSubscription.Update(subscription);
@@ -160,7 +160,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                 }
 
                 var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
-                return File(bytes, "text/csv", $"newsletter-subscribers-{DateTime.Now:yyyyMMdd-HHmmss}.csv");
+                return File(bytes, "text/csv", $"newsletter-subscribers-{BulkyBook.Utility.DateTimeHelper.Now:yyyyMMdd-HHmmss}.csv");
             }
             catch (Exception ex)
             {

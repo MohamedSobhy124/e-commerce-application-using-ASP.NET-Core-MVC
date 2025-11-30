@@ -20,22 +20,10 @@ namespace BulkyBook.DataAccess.Repository
 
         public void Update(PromoCode obj)
         {
-            var objFromDB = _db.PromoCodes.FirstOrDefault(a => a.Id == obj.Id);
-            if (objFromDB != null)
-            {
-                objFromDB.Code = obj.Code;
-                objFromDB.Description = obj.Description;
-                objFromDB.DiscountType = obj.DiscountType;
-                objFromDB.DiscountValue = obj.DiscountValue;
-                objFromDB.MinimumOrderAmount = obj.MinimumOrderAmount;
-                objFromDB.MaximumDiscountAmount = obj.MaximumDiscountAmount;
-                objFromDB.StartDate = obj.StartDate;
-                objFromDB.EndDate = obj.EndDate;
-                objFromDB.UsageLimit = obj.UsageLimit;
-                objFromDB.TimesUsed = obj.TimesUsed;
-                objFromDB.UsageLimitPerUser = obj.UsageLimitPerUser;
-                objFromDB.IsActive = obj.IsActive;
-            }
+           
+            
+            // Use Entity Framework's Update method directly
+            _db.PromoCodes.Update(obj);
         }
 
         public PromoCode GetByCode(string code)
@@ -57,7 +45,7 @@ namespace BulkyBook.DataAccess.Repository
 
         public IEnumerable<PromoCode> GetActivePromoCodes()
         {
-            var now = DateTime.Now;
+            var now = BulkyBook.Utility.DateTimeHelper.Now;
             return _db.PromoCodes
                 .Where(p => p.IsActive && 
                            p.StartDate <= now && 
@@ -73,7 +61,7 @@ namespace BulkyBook.DataAccess.Repository
             if (promoCode == null || !promoCode.IsActive)
                 return false;
 
-            var now = DateTime.Now;
+            var now = BulkyBook.Utility.DateTimeHelper.Now;
             if (now < promoCode.StartDate || now > promoCode.EndDate)
                 return false;
 
@@ -108,6 +96,7 @@ namespace BulkyBook.DataAccess.Repository
                 promoCode.TimesUsed++;
             }
         }
+
     }
 }
 
