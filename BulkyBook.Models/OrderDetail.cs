@@ -51,5 +51,9 @@ namespace BulkyBook.Models
 
         [NotMapped]
         public bool IsFromComboOffer => ComboOfferId.HasValue;
+
+        // Promo Code Discount Support
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? PromoCodeDiscountAmount { get; set; }
     }
 }

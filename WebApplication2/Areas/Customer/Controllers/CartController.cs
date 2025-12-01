@@ -722,19 +722,27 @@ namespace BulkyBook.Areas.Customer.Controllers
 				}
 			}
 
+			// Load excluded products for the promo code
+			var promoWithExclusions = _unitOfWork.PromoCode.Get(p => p.Id == promo.Id, includeProperties: "ExcludedProducts");
+			if (promoWithExclusions != null)
+			{
+				promo.ExcludedProducts = promoWithExclusions.ExcludedProducts;
+			}
+
 			// Calculate cart subtotal to check minimum order amount
 			IEnumerable<ShoppingCart> cartList;
 			if (User.Identity.IsAuthenticated)
 			{
 				var claimsIdentity = (ClaimsIdentity)User.Identity;
 				var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-				cartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "product,FlashSaleItem,ProductVariant");
+				cartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "product,FlashSaleItem,ProductVariant,ComboOffer");
 			}
 			else
 			{
 				var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
 			cartList = guestCart.Select(gc => new ShoppingCart
 			{
+				Id = 0, // Guest cart items don't have IDs, use 0 as placeholder
 				ProductId = gc.ProductId,
 				Count = gc.Count,
 				ProductVariantId = gc.ProductVariantId,
@@ -747,6 +755,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 			}).ToList();
 			}
 
+			// Calculate total subtotal for display
 			double subtotal = 0;
 			foreach (var cart in cartList)
 			{
@@ -754,41 +763,86 @@ namespace BulkyBook.Areas.Customer.Controllers
 				subtotal += (cart.Price * cart.Count);
 			}
 
-			// Check minimum order amount
-			if (promo.MinimumOrderAmount.HasValue && (decimal)subtotal < promo.MinimumOrderAmount.Value)
+			// Calculate item-level discounts using the new helper method
+			var (totalDiscount, itemDiscounts) = CalculatePromoCodeDiscounts(cartList, promo);
+
+			// Calculate eligible subtotal and count eligible items
+			double eligibleSubtotal = 0;
+			int eligibleItemCount = 0;
+			var eligibleItemsInfo = new List<object>();
+
+			foreach (var cart in cartList)
 			{
-				var minAmountMessage = string.Format(_localizer["MinimumOrderAmountRequired"].Value, promo.MinimumOrderAmount.Value.ToString("C"));
+				cart.Price = GetCartItemPrice(cart);
+				bool isEligible = IsItemEligibleForPromoCode(cart, promo);
+				
+				if (isEligible)
+				{
+					eligibleSubtotal += (cart.Price * cart.Count);
+					eligibleItemCount++;
+					
+					// Create item key to check if it has discount
+					string itemKey = $"{cart.ProductId}_{cart.ProductVariantId?.ToString() ?? "0"}_{cart.FlashSaleItemId?.ToString() ?? "0"}_{cart.ComboOfferId?.ToString() ?? "0"}";
+					double itemDiscount = itemDiscounts.ContainsKey(itemKey) ? itemDiscounts[itemKey] : 0;
+					
+					eligibleItemsInfo.Add(new
+					{
+						productId = cart.ProductId,
+						productVariantId = cart.ProductVariantId,
+						productTitle = cart.product?.Title ?? "Unknown",
+						itemKey = itemKey,
+						discountAmount = itemDiscount,
+						originalPrice = cart.Price * cart.Count,
+						discountedPrice = (cart.Price * cart.Count) - itemDiscount
+					});
+				}
+			}
+
+			// Check if there are any eligible items
+			if (eligibleItemCount == 0)
+			{
 				return Json(new 
 				{ 
 					success = false, 
-					message = minAmountMessage
+					message = _localizer["NoEligibleProductsForPromoCode"].Value
 				});
 			}
 
-			// Calculate discount
-			double discountAmount = 0;
-			if (promo.DiscountType == BulkyBook.Models.DiscountType.Percentage)
+			// Check minimum order amount on eligible items
+			if (promo.MinimumOrderAmount.HasValue)
 			{
-				discountAmount = subtotal * ((double)promo.DiscountValue / 100);
-				
-				// Apply maximum discount limit if set
-				if (promo.MaximumDiscountAmount.HasValue && (decimal)discountAmount > promo.MaximumDiscountAmount.Value)
+				if ((decimal)eligibleSubtotal < promo.MinimumOrderAmount.Value)
 				{
-					discountAmount = (double)promo.MaximumDiscountAmount.Value;
+					var minAmountMessage = string.Format(
+						_localizer["MinimumOrderAmountRequiredForEligibleItems"].Value,
+						promo.MinimumOrderAmount.Value.ToString("C"),
+						eligibleSubtotal.ToString("C")
+					);
+					return Json(new 
+					{ 
+						success = false, 
+						message = minAmountMessage
+					});
 				}
 			}
-			else
+
+			// If discount is 0 but we have eligible items, there might be an issue
+			if (totalDiscount == 0 && eligibleItemCount > 0)
 			{
-				discountAmount = (double)promo.DiscountValue;
+				return Json(new 
+				{ 
+					success = false, 
+					message = _localizer["PromoCodeCouldNotBeAppliedToEligibleItems"].Value
+				});
 			}
 
 			// Ensure discount doesn't exceed subtotal
-			if (discountAmount > subtotal)
+			if (totalDiscount > subtotal)
 			{
-				discountAmount = subtotal;
+				totalDiscount = subtotal;
 			}
 
-			double finalTotal = subtotal - discountAmount;
+			double finalTotal = subtotal - totalDiscount;
 
 			return Json(new 
 			{ 
@@ -796,12 +850,15 @@ namespace BulkyBook.Areas.Customer.Controllers
 				message = _localizer["PromoCodeAppliedSuccessfully"].Value,
 				promoCodeId = promo.Id,
 				promoCode = promo.Code,
-				discountAmount = discountAmount,
+				discountAmount = totalDiscount,
 				subtotal = subtotal,
 				finalTotal = finalTotal,
 				discountText = promo.DiscountType == BulkyBook.Models.DiscountType.Percentage 
 					? $"{promo.DiscountValue}% off" 
-					: $"{promo.DiscountValue:C} off"
+					: $"{promo.DiscountValue:C} off",
+				itemDiscounts = itemDiscounts, // Include item-level discounts for reference
+				eligibleItems = eligibleItemsInfo, // Include eligible items with discount info
+				eligibleItemCount = eligibleItemCount
 			});
 		}
 
@@ -820,9 +877,24 @@ namespace BulkyBook.Areas.Customer.Controllers
 			var claimsIdentity = (ClaimsIdentity)User.Identity;
 			var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-			// 🔥 Include FlashSaleItem to check for flash sale prices
+			// 🔥 Include FlashSaleItem, ProductVariant, ComboOffer to check for flash sale prices, variant prices, combo offers
 			cartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId,
-				includeProperties: "product,FlashSaleItem");
+				includeProperties: "product,FlashSaleItem,ProductVariant,ComboOffer");
+
+			// Load variant option values for each cart item
+			foreach (var cart in cartList)
+			{
+				if (cart.ProductVariantId.HasValue && cart.ProductVariant != null)
+				{
+					// Ensure variant option values are loaded
+					var variant = _unitOfWork.ProductVariant.Get(v => v.Id == cart.ProductVariantId.Value, 
+						includeProperties: "VariantOptionValues,VariantOptionValues.OptionValue,VariantOptionValues.OptionValue.ProductOption");
+					if (variant != null)
+					{
+						cart.ProductVariant = variant;
+					}
+				}
+			}
 
 			ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.applicationUser.Get(u => u.Id == userId);
 			ShoppingCartVM.OrderHeader.Name = ShoppingCartVM.OrderHeader.ApplicationUser.Name;
@@ -852,7 +924,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 				ComboOfferId = gc.ComboOfferId, // 🔥 Include combo offer info
 				ComboOffer = gc.ComboOfferId.HasValue ? _unitOfWork.ComboOffer.GetComboOfferWithItems(gc.ComboOfferId.Value) : null, // 🔥 Load combo offer
 				product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry"),
-				ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value) : null
+				ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value, includeProperties: "VariantOptionValues,VariantOptionValues.OptionValue,VariantOptionValues.OptionValue.ProductOption") : null
 			}).ToList();
 
 			// Initialize empty fields for guest
@@ -874,9 +946,128 @@ namespace BulkyBook.Areas.Customer.Controllers
 		[ActionName("Summary")]
 		public async Task<IActionResult> SummaryPOST(ShoppingCartVM ShoppingCartVM)
 		{
+            var userId = string.Empty;
+            
+			// Validate required fields manually (primary check)
+			bool hasValidationErrors = false;
+			var validationErrors = new List<string>();
+
+			if (string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.Name))
+			{
+				hasValidationErrors = true;
+				validationErrors.Add(_localizer["Name"].Value + " " + (_localizer["IsRequired"].Value ?? "is required"));
+			}
+
+			if (string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.PhoneNumber))
+			{
+				hasValidationErrors = true;
+				validationErrors.Add(_localizer["Phone"].Value + " " + (_localizer["IsRequired"].Value ?? "is required"));
+			}
+
+			if (string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.StreetAddress))
+			{
+				hasValidationErrors = true;
+				validationErrors.Add(_localizer["StreetAddress"].Value + " " + (_localizer["IsRequired"].Value ?? "is required"));
+			}
+
+			if (string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.City))
+			{
+				hasValidationErrors = true;
+				validationErrors.Add(_localizer["City"].Value + " " + (_localizer["IsRequired"].Value ?? "is required"));
+			}
+
+			if (string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.State))
+			{
+				hasValidationErrors = true;
+				validationErrors.Add(_localizer["State"].Value + " " + (_localizer["IsRequired"].Value ?? "is required"));
+			}
+
+			if (string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.PostalCode))
+			{
+				hasValidationErrors = true;
+				validationErrors.Add(_localizer["PostalCode"].Value + " " + (_localizer["IsRequired"].Value ?? "is required"));
+			}
+
+			// Validate email for guest orders
+			if (ShoppingCartVM.OrderHeader.IsGuestOrder || !User.Identity.IsAuthenticated)
+			{
+				if (string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.Email))
+				{
+					hasValidationErrors = true;
+					validationErrors.Add(_localizer["EmailAddress"].Value + " " + (_localizer["IsRequired"].Value ?? "is required"));
+				}
+				else if (!System.Text.RegularExpressions.Regex.IsMatch(ShoppingCartVM.OrderHeader.Email, @"^[^\s@]+@[^\s@]+\.[^\s@]+$"))
+				{
+					hasValidationErrors = true;
+					validationErrors.Add(_localizer["InvalidEmailFormat"].Value ?? _localizer["PleaseEnterValidEmailAddress"].Value ?? "Please enter a valid email address");
+				}
+			}
+
+			// Validate payment method
+			if (string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.PaymentMethod))
+			{
+				hasValidationErrors = true;
+				validationErrors.Add(_localizer["PleaseSelectPaymentMethod"].Value ?? "Please select a payment method");
+			}
+
+			if (hasValidationErrors)
+			{
+				// Reload cart data for display
+				IEnumerable<ShoppingCart> cartListForDisplay;
+
+				if (User.Identity.IsAuthenticated)
+				{
+					var claimsIdentity = (ClaimsIdentity)User.Identity;
+					  userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+					cartListForDisplay = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId,
+						includeProperties: "product,FlashSaleItem,ProductVariant,ComboOffer");
+					
+					foreach (var cart in cartListForDisplay)
+					{
+						if (cart.ProductVariantId.HasValue && cart.ProductVariant != null)
+						{
+							var variant = _unitOfWork.ProductVariant.Get(v => v.Id == cart.ProductVariantId.Value, 
+								includeProperties: "VariantOptionValues,VariantOptionValues.OptionValue,VariantOptionValues.OptionValue.ProductOption");
+							if (variant != null)
+							{
+								cart.ProductVariant = variant;
+							}
+						}
+					}
+					
+					ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.applicationUser.Get(u => u.Id == userId);
+				}
+				else
+				{
+					var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
+					cartListForDisplay = guestCart.Select(gc => new ShoppingCart
+					{
+						ProductId = gc.ProductId,
+						Count = gc.Count,
+						ProductVariantId = gc.ProductVariantId,
+						FlashSaleItemId = gc.FlashSaleItemId,
+						FlashSalePrice = (decimal?)gc.FlashSalePrice,
+						ComboOfferId = gc.ComboOfferId,
+						ComboOffer = gc.ComboOfferId.HasValue ? _unitOfWork.ComboOffer.GetComboOfferWithItems(gc.ComboOfferId.Value) : null,
+						product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry"),
+						ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value, includeProperties: "VariantOptionValues,VariantOptionValues.OptionValue,VariantOptionValues.OptionValue.ProductOption") : null
+					}).ToList();
+					ShoppingCartVM.OrderHeader.IsGuestOrder = true;
+				}
+
+				ShoppingCartVM.ShoppingCartList = cartListForDisplay;
+				foreach (var cart in ShoppingCartVM.ShoppingCartList)
+				{
+					cart.Price = GetCartItemPrice(cart);
+					ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
+				}
+
+				TempData["error"] = string.Join(", ", validationErrors);
+				return View(ShoppingCartVM);
+			}
+
 			IEnumerable<ShoppingCart> cartList;
 			bool isGuest = !User.Identity.IsAuthenticated;
-			string userId = null;
 			ApplicationUser applicationUser = null;
 
 			if (!isGuest)
@@ -943,7 +1134,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 				// Apply promo code if provided
 				if (ShoppingCartVM.OrderHeader.PromoCodeId.HasValue && ShoppingCartVM.OrderHeader.PromoCodeId.Value > 0)
 				{
-					var promoCode = _unitOfWork.PromoCode.Get(p => p.Id == ShoppingCartVM.OrderHeader.PromoCodeId.Value);
+					var promoCode = _unitOfWork.PromoCode.Get(p => p.Id == ShoppingCartVM.OrderHeader.PromoCodeId.Value, includeProperties: "ExcludedProducts");
 					
 					if (promoCode != null && promoCode.IsActive)
 					{
@@ -967,31 +1158,20 @@ namespace BulkyBook.Areas.Customer.Controllers
 							
 							if (canUse)
 							{
-								// Calculate discount
-								double discountAmount = 0;
+								// Calculate item-level discounts using the new helper method
+								var (totalDiscount, itemDiscounts) = CalculatePromoCodeDiscounts(ShoppingCartVM.ShoppingCartList, promoCode);
 								
-								if (promoCode.DiscountType == BulkyBook.Models.DiscountType.Percentage)
+								// Store item discounts in TempData so we can access when creating OrderDetail
+								TempData["PromoCodeItemDiscounts"] = System.Text.Json.JsonSerializer.Serialize(itemDiscounts);
+								
+								if (totalDiscount > subtotal)
 								{
-									discountAmount = subtotal * ((double)promoCode.DiscountValue / 100);
-									
-									if (promoCode.MaximumDiscountAmount.HasValue && (decimal)discountAmount > promoCode.MaximumDiscountAmount.Value)
-									{
-										discountAmount = (double)promoCode.MaximumDiscountAmount.Value;
-									}
-								}
-								else
-								{
-									discountAmount = (double)promoCode.DiscountValue;
+									totalDiscount = subtotal;
 								}
 								
-								if (discountAmount > subtotal)
-								{
-									discountAmount = subtotal;
-								}
-								
-								ShoppingCartVM.OrderHeader.DiscountAmount = discountAmount;
+								ShoppingCartVM.OrderHeader.DiscountAmount = totalDiscount;
 								ShoppingCartVM.OrderHeader.PromoCodeText = promoCode.Code;
-								ShoppingCartVM.OrderHeader.OrderTotal = subtotal - discountAmount;
+								ShoppingCartVM.OrderHeader.OrderTotal = subtotal - totalDiscount;
 							}
 						}
 					}
@@ -1023,8 +1203,37 @@ namespace BulkyBook.Areas.Customer.Controllers
 					_unitOfWork.save();
 				}
 				
+				// Get item-level promo code discounts if available
+				Dictionary<string, double> promoItemDiscounts = new Dictionary<string, double>();
+				if (TempData["PromoCodeItemDiscounts"] != null)
+				{
+					try
+					{
+						var discountsJson = TempData["PromoCodeItemDiscounts"].ToString();
+						if (!string.IsNullOrEmpty(discountsJson))
+						{
+							promoItemDiscounts = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, double>>(discountsJson) ?? new Dictionary<string, double>();
+						}
+					}
+					catch
+					{
+						// If deserialization fails, continue without item discounts
+						promoItemDiscounts = new Dictionary<string, double>();
+					}
+				}
+				
 				foreach (var cart in ShoppingCartVM.ShoppingCartList)
 				{
+					// Create composite key for this item
+					string itemKey = $"{cart.ProductId}_{cart.ProductVariantId?.ToString() ?? "0"}_{cart.FlashSaleItemId?.ToString() ?? "0"}_{cart.ComboOfferId?.ToString() ?? "0"}";
+					
+					// Get promo code discount for this item (if any)
+					decimal? promoDiscount = null;
+					if (promoItemDiscounts.ContainsKey(itemKey))
+					{
+						promoDiscount = (decimal)promoItemDiscounts[itemKey];
+					}
+					
 					OrderDetail orderDetail = new()
 					{
 						ProductId = cart.ProductId,
@@ -1033,7 +1242,8 @@ namespace BulkyBook.Areas.Customer.Controllers
 						Count = cart.Count,
 						FlashSaleItemId = cart.FlashSaleItemId, // Copy flash sale item ID if exists
 						ComboOfferId = cart.ComboOfferId, // Copy combo offer ID if exists
-						ProductVariantId = cart.ProductVariantId
+						ProductVariantId = cart.ProductVariantId,
+						PromoCodeDiscountAmount = promoDiscount // Store item-level promo discount
 					};
 					_unitOfWork.OrderDetail.add(orderDetail);
 					_unitOfWork.save();
@@ -1493,6 +1703,158 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         // 🔥 NEW: Get cart item price - uses flash sale price if available, then variant price, otherwise quantity-based pricing
+        // Helper method to check if a cart item is eligible for promo code discount
+        private bool IsItemEligibleForPromoCode(ShoppingCart cartItem, PromoCode promoCode)
+        {
+            // Check if product is excluded
+            if (promoCode.ExcludedProducts != null && promoCode.ExcludedProducts.Any(ep => ep.ProductId == cartItem.ProductId))
+            {
+                return false;
+            }
+
+            // Check if item already has a discount and promo code excludes discounted items
+            if (promoCode.ExcludeDiscountedItems)
+            {
+                // Item has flash sale discount
+                if (cartItem.FlashSaleItemId.HasValue)
+                {
+                    return false;
+                }
+
+                // Item has combo offer discount
+                if (cartItem.ComboOfferId.HasValue)
+                {
+                    return false;
+                }
+
+                // Check if variant has a discount (ListPrice > Price)
+                if (cartItem.ProductVariantId.HasValue && cartItem.ProductVariant != null)
+                {
+                    if (cartItem.ProductVariant.ListPrice.HasValue && 
+                        cartItem.ProductVariant.ListPrice.Value > cartItem.ProductVariant.Price)
+                    {
+                        return false;
+                    }
+                }
+                else if (cartItem.product != null)
+                {
+                    // Check if product has a discount (ListPrice > Price)
+                    if (cartItem.product.ListPrice > cartItem.product.Price)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        // Helper method to calculate promo code discount for a single item
+        private double CalculateItemPromoDiscount(ShoppingCart cartItem, PromoCode promoCode, double itemSubtotal)
+        {
+            if (!IsItemEligibleForPromoCode(cartItem, promoCode))
+            {
+                return 0;
+            }
+
+            double discount = 0;
+
+            if (promoCode.DiscountType == BulkyBook.Models.DiscountType.Percentage)
+            {
+                discount = itemSubtotal * ((double)promoCode.DiscountValue / 100);
+            }
+            else
+            {
+                // For fixed amount, we need to distribute it proportionally across eligible items
+                // This will be handled at the cart level
+                discount = 0; // Will be calculated at cart level for fixed amounts
+            }
+
+            return discount;
+        }
+
+        // Helper method to calculate promo code discounts for all eligible items
+        // Returns a dictionary keyed by a composite key: "ProductId_ProductVariantId_FlashSaleItemId_ComboOfferId"
+        private (double totalDiscount, Dictionary<string, double> itemDiscounts) CalculatePromoCodeDiscounts(
+            IEnumerable<ShoppingCart> cartList, PromoCode promoCode)
+        {
+            var itemDiscounts = new Dictionary<string, double>();
+            double eligibleSubtotal = 0;
+            var eligibleItems = new List<(ShoppingCart item, double subtotal, string key)>();
+
+            // First pass: identify eligible items and calculate their subtotals
+            foreach (var cart in cartList)
+            {
+                cart.Price = GetCartItemPrice(cart);
+                double itemSubtotal = cart.Price * cart.Count;
+
+                if (IsItemEligibleForPromoCode(cart, promoCode))
+                {
+                    // Create a composite key for this item
+                    string itemKey = $"{cart.ProductId}_{cart.ProductVariantId?.ToString() ?? "0"}_{cart.FlashSaleItemId?.ToString() ?? "0"}_{cart.ComboOfferId?.ToString() ?? "0"}";
+                    eligibleSubtotal += itemSubtotal;
+                    eligibleItems.Add((cart, itemSubtotal, itemKey));
+                }
+            }
+
+            // Check minimum order amount on eligible items only
+            if (promoCode.MinimumOrderAmount.HasValue && (decimal)eligibleSubtotal < promoCode.MinimumOrderAmount.Value)
+            {
+                return (0, itemDiscounts);
+            }
+
+            double totalDiscount = 0;
+
+            if (promoCode.DiscountType == BulkyBook.Models.DiscountType.Percentage)
+            {
+                // Percentage discount: apply to each eligible item proportionally
+                double discountPercentage = (double)promoCode.DiscountValue / 100;
+                
+                foreach (var (item, subtotal, key) in eligibleItems)
+                {
+                    double itemDiscount = subtotal * discountPercentage;
+                    itemDiscounts[key] = itemDiscount;
+                    totalDiscount += itemDiscount;
+                }
+
+                // Apply maximum discount limit if set
+                if (promoCode.MaximumDiscountAmount.HasValue && (decimal)totalDiscount > promoCode.MaximumDiscountAmount.Value)
+                {
+                    // Proportionally reduce all discounts to fit within the maximum
+                    double reductionRatio = (double)promoCode.MaximumDiscountAmount.Value / totalDiscount;
+                    totalDiscount = (double)promoCode.MaximumDiscountAmount.Value;
+                    
+                    var adjustedItemDiscounts = new Dictionary<string, double>();
+                    foreach (var kvp in itemDiscounts)
+                    {
+                        adjustedItemDiscounts[kvp.Key] = kvp.Value * reductionRatio;
+                    }
+                    itemDiscounts = adjustedItemDiscounts;
+                }
+            }
+            else
+            {
+                // Fixed amount discount: distribute proportionally across eligible items
+                double fixedDiscount = (double)promoCode.DiscountValue;
+                
+                // Ensure discount doesn't exceed eligible subtotal
+                if (fixedDiscount > eligibleSubtotal)
+                {
+                    fixedDiscount = eligibleSubtotal;
+                }
+
+                // Distribute proportionally
+                foreach (var (item, subtotal, key) in eligibleItems)
+                {
+                    double itemDiscount = (subtotal / eligibleSubtotal) * fixedDiscount;
+                    itemDiscounts[key] = itemDiscount;
+                    totalDiscount += itemDiscount;
+                }
+            }
+
+            return (totalDiscount, itemDiscounts);
+        }
+
         private double GetCartItemPrice(ShoppingCart shoppingCart)
         {
             // If this item is from a flash sale, use the flash sale price

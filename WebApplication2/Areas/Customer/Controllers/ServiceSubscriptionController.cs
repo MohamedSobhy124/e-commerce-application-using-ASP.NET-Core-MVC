@@ -433,7 +433,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
         private string GetBaseUrl()
         {
-            return "https://msobhyapp.runasp.net";
+            return _configuration["SiteSettings:BaseUrl"]??string.Empty;
         }
     }
 }

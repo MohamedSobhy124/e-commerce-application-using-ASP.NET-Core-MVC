@@ -167,6 +167,70 @@
                             </div>
                         </div>
 
+                        <!-- Exclude Discounted Items -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input asp-for="ExcludeDiscountedItems" class="form-check-input" type="checkbox" id="excludeDiscountedItems" style="width: 3rem; height: 1.5rem;" />
+                                    <label class="form-check-label ms-2 fw-bold" for="excludeDiscountedItems">
+                                        <i class="bi bi-x-circle text-danger me-2"></i>@Localizer["ExcludeItemsWithExistingDiscounts"]
+                                    </label>
+                                </div>
+                                <small class="form-text text-muted ms-5">
+                                    @Localizer["WhenEnabledPromoCodeWillNotApplyToItemsWithFlashSalesComboOffersOrListPriceDiscounts"]
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Excluded Products Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-primary">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0">
+                                            <i class="bi bi-ban me-2"></i>@Localizer["ExcludedProducts"]
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted mb-3">
+                                            @Localizer["ProductsInThisListWillNotReceiveThePromoCodeDiscount"]
+                                        </p>
+                                        
+                                        <!-- Add Product Form -->
+                                        <div class="mb-3">
+                                            <div class="input-group">
+                                                <input type="text" id="productSearchInput" class="form-control" placeholder="@Localizer["SearchProductsByName"]" />
+                                                <button type="button" class="btn btn-primary" id="searchProductBtn">
+                                                    <i class="bi bi-search me-1"></i>@Localizer["Search"]
+                                                </button>
+                                            </div>
+                                            <div id="productSearchResults" class="mt-2" style="display: none;">
+                                                <div class="list-group" id="productResultsList"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Excluded Products List -->
+                                        <div id="excludedProductsList">
+                                            @if (Model.ExcludedProducts != null && Model.ExcludedProducts.Any())
+                                            {
+                                                @foreach (var excludedProduct in Model.ExcludedProducts)
+                                                {
+                                                    <div class="badge bg-danger me-2 mb-2 p-2 excluded-product-item" data-excluded-id="@excludedProduct.Id" data-product-id="@excludedProduct.ProductId">
+                                                        <span>@(excludedProduct.Product?.Title ?? "Unknown")</span>
+                                                        <button type="button" class="btn-close btn-close-white ms-2 remove-excluded-product" aria-label="Remove"></button>
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <p class="text-muted">@Localizer["NoProductsExcluded"]</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <hr class="my-4" />
 
                         <!-- Action Buttons -->
@@ -313,5 +377,142 @@
 
         // Prevent checkbox from triggering AJAX - let form submission handle it
         // The toggle button will update the checkbox via AJAX
+
+        // Excluded Products Management
+        var promoCodeId = @Model.Id;
+        var currentCulture = '@System.Globalization.CultureInfo.CurrentCulture.Name';
+
+        // Search products
+        $('#searchProductBtn').click(function() {
+            var searchTerm = $('#productSearchInput').val().trim();
+            if (searchTerm.length < 2) {
+                alert('@Html.Raw(Localizer["PleaseEnterAtLeast2Characters"].Value)');
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("SearchProducts", "PromoCode", new { area = "Admin" })',
+                type: 'GET',
+                data: { searchTerm: searchTerm },
+                success: function(products) {
+                    var resultsHtml = '';
+                    if (products.length === 0) {
+                        resultsHtml = '<div class="alert alert-info">@Html.Raw(Localizer["NoProductsFound"].Value)</div>';
+                    } else {
+                        products.forEach(function(product) {
+                            var productTitle = (currentCulture === 'ar' && product.titleAr) ? product.titleAr : product.title;
+                            resultsHtml += '<a href="#" class="list-group-item list-group-item-action add-product-item" data-product-id="' + product.id + '" data-product-title="' + productTitle + '">';
+                            resultsHtml += '<div class="d-flex justify-content-between">';
+                            resultsHtml += '<div><strong>' + productTitle + '</strong><br><small class="text-muted">' + product.category + ' - ' + product.price + ' AED</small></div>';
+                            resultsHtml += '<i class="bi bi-plus-circle text-primary"></i>';
+                            resultsHtml += '</div></a>';
+                        });
+                    }
+                    $('#productResultsList').html(resultsHtml);
+                    $('#productSearchResults').show();
+                },
+                error: function() {
+                    alert('@Html.Raw(Localizer["AnErrorOccurredPleaseTryAgain"].Value)');
+                }
+            });
+        });
+
+        // Add product to excluded list
+        $(document).on('click', '.add-product-item', function(e) {
+            e.preventDefault();
+            var productId = $(this).data('product-id');
+            var productTitle = $(this).data('product-title');
+
+            // Check if already excluded
+            if ($('.excluded-product-item[data-product-id="' + productId + '"]').length > 0) {
+                alert('@Html.Raw(Localizer["ProductIsAlreadyExcluded"].Value)');
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("AddExcludedProduct", "PromoCode", new { area = "Admin" })',
+                type: 'POST',
+                data: {
+                    promoCodeId: promoCodeId,
+                    productId: productId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Add to UI
+                        var badgeHtml = '<div class="badge bg-danger me-2 mb-2 p-2 excluded-product-item" data-excluded-id="' + response.excludedProductId + '" data-product-id="' + productId + '">';
+                        badgeHtml += '<span>' + productTitle + '</span>';
+                        badgeHtml += '<button type="button" class="btn-close btn-close-white ms-2 remove-excluded-product" aria-label="Remove"></button>';
+                        badgeHtml += '</div>';
+
+                        if ($('#excludedProductsList p.text-muted').length > 0) {
+                            $('#excludedProductsList').html(badgeHtml);
+                        } else {
+                            $('#excludedProductsList').append(badgeHtml);
+                        }
+
+                        // Clear search
+                        $('#productSearchInput').val('');
+                        $('#productSearchResults').hide();
+
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success(response.message);
+                        }
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('@Html.Raw(Localizer["AnErrorOccurredPleaseTryAgain"].Value)');
+                }
+            });
+        });
+
+        // Remove product from excluded list
+        $(document).on('click', '.remove-excluded-product', function(e) {
+            e.preventDefault();
+            var excludedItem = $(this).closest('.excluded-product-item');
+            var excludedId = excludedItem.data('excluded-id');
+
+            if (!confirm('@Html.Raw(Localizer["AreYouSureYouWantToRemoveThisProductFromExcludedList"].Value)')) {
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("RemoveExcludedProduct", "PromoCode", new { area = "Admin" })',
+                type: 'POST',
+                data: {
+                    excludedProductId: excludedId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        excludedItem.remove();
+                        
+                        // Show message if no products left
+                        if ($('.excluded-product-item').length === 0) {
+                            $('#excludedProductsList').html('<p class="text-muted">@Html.Raw(Localizer["NoProductsExcluded"].Value)</p>');
+                        }
+
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success(response.message);
+                        }
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('@Html.Raw(Localizer["AnErrorOccurredPleaseTryAgain"].Value)');
+                }
+            });
+        });
+
+        // Allow Enter key to search
+        $('#productSearchInput').keypress(function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $('#searchProductBtn').click();
+            }
+        });
     </script>
 }

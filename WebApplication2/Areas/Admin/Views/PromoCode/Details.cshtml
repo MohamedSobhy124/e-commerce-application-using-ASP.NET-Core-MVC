@@ -138,6 +138,53 @@
                         </div>
                     </div>
 
+                    <!-- Discount Exclusions -->
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-shield-exclamation text-warning me-2"></i>@Localizer["DiscountExclusions"]
+                                    </h5>
+                                    <hr/>
+                                    <p>
+                                        <strong>@Localizer["ExcludeItemsWithExistingDiscounts"]:</strong>
+                                        @if (Model.ExcludeDiscountedItems)
+                                        {
+                                            <span class="badge bg-success">@Localizer["Yes"]</span>
+                                            <small class="text-muted d-block mt-1">
+                                                @Localizer["PromoCodeWillNotApplyToItemsWithFlashSalesComboOffersOrListPriceDiscounts"]
+                                            </small>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@Localizer["No"]</span>
+                                        }
+                                    </p>
+                                    @if (Model.ExcludedProducts != null && Model.ExcludedProducts.Any())
+                                    {
+                                        <p><strong>@Localizer["ExcludedProducts"]:</strong></p>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            @foreach (var excludedProduct in Model.ExcludedProducts)
+                                            {
+                                                <span class="badge bg-danger p-2">
+                                                    @(excludedProduct.Product?.Title ?? "Unknown")
+                                                </span>
+                                            }
+                                        </div>
+                                        <small class="text-muted d-block mt-2">
+                                            @Model.ExcludedProducts.Count @Localizer["Product"]@(Model.ExcludedProducts.Count != 1 ? "s" : "") @Localizer["ExcludedFromPromoCode"]
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">@Localizer["NoProductsExcluded"]</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     @if (usages != null && usages.Any())
                     {
                         <div class="row mt-4">

@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace BulkyBook.Models
@@ -63,8 +65,14 @@ namespace BulkyBook.Models
         [Display(Name = "Created By")]
         public string? CreatedBy { get; set; }
 
+        [Display(Name = "Exclude Items with Existing Discounts")]
+        public bool ExcludeDiscountedItems { get; set; } = false;
+
         // Navigation properties
         public ICollection<OrderHeader>? Orders { get; set; }
+        
+        [ValidateNever]
+        public ICollection<PromoCodeExcludedProduct>? ExcludedProducts { get; set; }
     }
 
     public enum DiscountType

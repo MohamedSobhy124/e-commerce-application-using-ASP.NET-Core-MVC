@@ -447,7 +447,7 @@ namespace BulkyBook.Services
         private string GetBaseUrl()
         {
             // You can configure this in appsettings.json or get it from HttpContext
-            return "https://msobhyapp.runasp.net";
+            return _configuration["SiteSettings:BaseUrl"] ?? string.Empty;
         }
     }
 }
