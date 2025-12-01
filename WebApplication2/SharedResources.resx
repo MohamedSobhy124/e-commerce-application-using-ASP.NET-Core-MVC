@@ -2490,4 +2490,13 @@
   <data name="OriginalPriceWillBeCalculated " xml:space="preserve">
     <value />
   </data>
+  <data name="LatestProducts" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NewsletterSubscription" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Wishlist " xml:space="preserve">
+    <value />
+  </data>
 </root>

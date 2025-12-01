@@ -224,6 +224,45 @@ namespace BulkyBook.Areas.Customer.Controllers
             ViewBag.ShowPriceFlags = showPriceFlags;
             ViewBag.AllVariantsOutOfStockFlags = allVariantsOutOfStockFlags;
             
+            // Get active flash sale prices for products (optimized query)
+            var now = BulkyBook.Utility.DateTimeHelper.Now;
+            var flashSaleItems = await _dbContext.FlashSaleItems
+                .AsNoTracking()
+                .Include(fsi => fsi.FlashSale)
+                .Where(fsi => !fsi.IsDeleted 
+                    && fsi.FlashSaleQuantity > 0
+                    && fsi.FlashSale != null
+                    && !fsi.FlashSale.IsDeleted
+                    && fsi.FlashSale.IsActive
+                    && fsi.FlashSale.StartDate <= now
+                    && fsi.FlashSale.EndDate >= now)
+                .ToListAsync();
+            
+            // Create dictionary for flash sale prices: key = productId, value = minimum flash sale price
+            var flashSalePrices = new Dictionary<int, decimal>();
+            var variantFlashSalePrices = new Dictionary<int, decimal>(); // key = variantId, value = flash sale price
+            
+            foreach (var item in flashSaleItems)
+            {
+                if (item.ProductVariantId.HasValue)
+                {
+                    // Variant flash sale
+                    var variantId = item.ProductVariantId.Value;
+                    if (!variantFlashSalePrices.ContainsKey(variantId) || variantFlashSalePrices[variantId] > item.FlashSalePrice)
+                    {
+                        variantFlashSalePrices[variantId] = item.FlashSalePrice;
+                    }
+                }
+                else
+                {
+                    // Product flash sale
+                    if (!flashSalePrices.ContainsKey(item.ProductId) || flashSalePrices[item.ProductId] > item.FlashSalePrice)
+                    {
+                        flashSalePrices[item.ProductId] = item.FlashSalePrice;
+                    }
+                }
+            }
+            
             // Pagination - take first 20 (materialize only what we need)
             IEnumerable<Product> ProductList = await query.Take(20).ToListAsync();
 
@@ -246,8 +285,25 @@ namespace BulkyBook.Areas.Customer.Controllers
                     
                     if (inStockVariants.Any())
                     {
-                        // Show minimum price of in-stock variants
-                        var minVariantPrice = inStockVariants.Min(v => (double)v.Price);
+                        // Get prices (regular or flash sale) for each in-stock variant
+                        var variantPrices = inStockVariants.Select(v => 
+                        {
+                            // Check if variant is in flash sale
+                            if (variantFlashSalePrices.ContainsKey(v.Id))
+                            {
+                                return (double)variantFlashSalePrices[v.Id];
+                            }
+                            // Check if product is in flash sale (applies to all variants)
+                            if (flashSalePrices.ContainsKey(p.Id))
+                            {
+                                return (double)flashSalePrices[p.Id];
+                            }
+                            // Use regular variant price
+                            return (double)v.Price;
+                        }).ToList();
+                        
+                        // Show minimum price of in-stock variants (considering flash sale prices)
+                        var minVariantPrice = variantPrices.Min();
                         minPrices[p.Id] = minVariantPrice;
                         displayPrice = minVariantPrice;
                         shouldShowPrice = true;
@@ -265,8 +321,16 @@ namespace BulkyBook.Areas.Customer.Controllers
                     // Simple product - only show price if in stock
                     if (p.StockQuantity > 0)
                     {
+                        // Check if product is in flash sale
+                        if (flashSalePrices.ContainsKey(p.Id))
+                        {
+                            displayPrice = (double)flashSalePrices[p.Id];
+                        }
+                        else
+                        {
+                            displayPrice = p.Price;
+                        }
                         shouldShowPrice = true;
-                        displayPrice = p.Price;
                     }
                     // If out of stock, price will be hidden (no special flag needed for simple products)
                 }
@@ -406,6 +470,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 .Where(p => !p.IsDeleted && p.StockQuantity > 0)
                 .Include(p => p.categry)
                 .Include(p => p.ProductImages.Where(img => img.ImageInfo == null))
+                .Include(p => p.ProductVariants.Where(v => !v.IsDeleted))
                 .OrderByDescending(p => p.Id)
                 .Take(20)
                 .ToListAsync();
@@ -427,6 +492,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 .Where(p => !p.IsDeleted && p.StockQuantity > 0)
                 .Include(p => p.categry)
                 .Include(p => p.ProductImages.Where(img => img.ImageInfo == null))
+                .Include(p => p.ProductVariants.Where(v => !v.IsDeleted))
                 .OrderByDescending(p => p.CreatedDate)
                 .Take(10)
                 .ToListAsync();
@@ -547,6 +613,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 .AsNoTracking()
                 .Where(p => !p.IsDeleted && p.StockQuantity > 0 && p.ListPrice > p.Price && p.ListPrice > 0)
                 .Include(p => p.ProductImages.Where(img => img.ImageInfo == null))
+                .Include(p => p.ProductVariants.Where(v => !v.IsDeleted))
                 .OrderByDescending(p => ((p.ListPrice - p.Price) / p.ListPrice) * 100)
                 .Take(20)
                 .Select(p => new { 
@@ -677,6 +744,45 @@ namespace BulkyBook.Areas.Customer.Controllers
             
             var productsToSkip = page * pageSize;
             
+            // Get active flash sale prices for products (optimized query)
+            var now = BulkyBook.Utility.DateTimeHelper.Now;
+            var flashSaleItems =   _dbContext.FlashSaleItems
+                .AsNoTracking()
+                .Include(fsi => fsi.FlashSale)
+                .Where(fsi => !fsi.IsDeleted 
+                    && fsi.FlashSaleQuantity > 0
+                    && fsi.FlashSale != null
+                    && !fsi.FlashSale.IsDeleted
+                    && fsi.FlashSale.IsActive
+                    && fsi.FlashSale.StartDate <= now
+                    && fsi.FlashSale.EndDate >= now)
+                .ToList();
+            
+            // Create dictionary for flash sale prices: key = productId, value = minimum flash sale price
+            var flashSalePrices = new Dictionary<int, decimal>();
+            var variantFlashSalePrices = new Dictionary<int, decimal>(); // key = variantId, value = flash sale price
+            
+            foreach (var item in flashSaleItems)
+            {
+                if (item.ProductVariantId.HasValue)
+                {
+                    // Variant flash sale
+                    var variantId = item.ProductVariantId.Value;
+                    if (!variantFlashSalePrices.ContainsKey(variantId) || variantFlashSalePrices[variantId] > item.FlashSalePrice)
+                    {
+                        variantFlashSalePrices[variantId] = item.FlashSalePrice;
+                    }
+                }
+                else
+                {
+                    // Product flash sale
+                    if (!flashSalePrices.ContainsKey(item.ProductId) || flashSalePrices[item.ProductId] > item.FlashSalePrice)
+                    {
+                        flashSalePrices[item.ProductId] = item.FlashSalePrice;
+                    }
+                }
+            }
+            
             // Load products with variants to calculate minimum prices
             var productsList = query
                 .Skip(productsToSkip)
@@ -705,8 +811,25 @@ namespace BulkyBook.Areas.Customer.Controllers
                     
                     if (inStockVariants.Any())
                     {
-                        // Show minimum price of in-stock variants
-                        var minVariantPrice = inStockVariants.Min(v => (double)v.Price);
+                        // Get prices (regular or flash sale) for each in-stock variant
+                        var variantPrices = inStockVariants.Select(v => 
+                        {
+                            // Check if variant is in flash sale
+                            if (variantFlashSalePrices.ContainsKey(v.Id))
+                            {
+                                return (double)variantFlashSalePrices[v.Id];
+                            }
+                            // Check if product is in flash sale (applies to all variants)
+                            if (flashSalePrices.ContainsKey(product.Id))
+                            {
+                                return (double)flashSalePrices[product.Id];
+                            }
+                            // Use regular variant price
+                            return (double)v.Price;
+                        }).ToList();
+                        
+                        // Show minimum price of in-stock variants (considering flash sale prices)
+                        var minVariantPrice = variantPrices.Min();
                         minPricesDict[product.Id] = minVariantPrice;
                         displayPrice = minVariantPrice;
                         shouldShowPrice = true;
@@ -724,8 +847,16 @@ namespace BulkyBook.Areas.Customer.Controllers
                     // Simple product - only show price if in stock
                     if (product.StockQuantity > 0)
                     {
+                        // Check if product is in flash sale
+                        if (flashSalePrices.ContainsKey(product.Id))
+                        {
+                            displayPrice = (double)flashSalePrices[product.Id];
+                        }
+                        else
+                        {
+                            displayPrice = product.Price;
+                        }
                         shouldShowPrice = true;
-                        displayPrice = product.Price;
                     }
                     // If out of stock, price will be hidden (no special flag needed for simple products)
                 }
@@ -1055,7 +1186,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
         [HttpGet]
         [Authorize]
-        public IActionResult GetWishlistItems()
+        public async Task<IActionResult> GetWishlistItems()
         {
             if (!User.Identity.IsAuthenticated)
             {
@@ -1068,17 +1199,102 @@ namespace BulkyBook.Areas.Customer.Controllers
             try
             {
                 var wishlistItems = _unitOfWork.wishlist.GetAll(w => w.ApplicationUserId == userId, 
-                    includeProperties: "product,product.ProductImages").ToList();
+                    includeProperties: "product,product.ProductImages,product.ProductVariants").ToList();
 
-                var items = wishlistItems.Select(item => new
+                // Get active flash sale prices for products (optimized query)
+                var now = BulkyBook.Utility.DateTimeHelper.Now;
+                var flashSaleItems = await _dbContext.FlashSaleItems
+                    .AsNoTracking()
+                    .Include(fsi => fsi.FlashSale)
+                    .Where(fsi => !fsi.IsDeleted 
+                        && fsi.FlashSaleQuantity > 0
+                        && fsi.FlashSale != null
+                        && !fsi.FlashSale.IsDeleted
+                        && fsi.FlashSale.IsActive
+                        && fsi.FlashSale.StartDate <= now
+                        && fsi.FlashSale.EndDate >= now)
+                    .ToListAsync();
+                
+                // Create dictionary for flash sale prices: key = productId, value = minimum flash sale price
+                var flashSalePrices = new Dictionary<int, decimal>();
+                var variantFlashSalePrices = new Dictionary<int, decimal>(); // key = variantId, value = flash sale price
+                
+                foreach (var item in flashSaleItems)
                 {
-                    id = item.Id,
-                    productId = item.ProductId,
-                    title = item.product.Title,
-                    imageUrl = item.product.ProductImages?.FirstOrDefault()?.ImageUrl ?? item.product.ImageUrl ?? "/images/no-image.png",
-                    price = (double)item.product.Price,
-                    listPrice = item.product.ListPrice > 0 ? (double?)item.product.ListPrice : null,
-                    productType = (int)item.product.ProductType
+                    if (item.ProductVariantId.HasValue)
+                    {
+                        // Variant flash sale
+                        var variantId = item.ProductVariantId.Value;
+                        if (!variantFlashSalePrices.ContainsKey(variantId) || variantFlashSalePrices[variantId] > item.FlashSalePrice)
+                        {
+                            variantFlashSalePrices[variantId] = item.FlashSalePrice;
+                        }
+                    }
+                    else
+                    {
+                        // Product flash sale
+                        if (!flashSalePrices.ContainsKey(item.ProductId) || flashSalePrices[item.ProductId] > item.FlashSalePrice)
+                        {
+                            flashSalePrices[item.ProductId] = item.FlashSalePrice;
+                        }
+                    }
+                }
+
+                var items = wishlistItems.Select(item => 
+                {
+                    var product = item.product;
+                    double displayPrice = (double)product.Price;
+                    
+                    // Check if product has variants and calculate minimum price
+                    if (product.ProductType == BulkyBook.Models.ProductType.Variable && 
+                        product.ProductVariants != null && 
+                        product.ProductVariants.Any(v => !v.IsDeleted))
+                    {
+                        // Product has variants - get minimum price considering flash sale prices
+                        var inStockVariants = product.ProductVariants
+                            .Where(v => !v.IsDeleted && v.StockQuantity > 0)
+                            .ToList();
+                        
+                        if (inStockVariants.Any())
+                        {
+                            var variantPrices = inStockVariants.Select(v => 
+                            {
+                                // Check if variant is in flash sale
+                                if (variantFlashSalePrices.ContainsKey(v.Id))
+                                {
+                                    return (double)variantFlashSalePrices[v.Id];
+                                }
+                                // Check if product is in flash sale (applies to all variants)
+                                if (flashSalePrices.ContainsKey(product.Id))
+                                {
+                                    return (double)flashSalePrices[product.Id];
+                                }
+                                // Use regular variant price
+                                return (double)v.Price;
+                            }).ToList();
+                            
+                            displayPrice = variantPrices.Min();
+                        }
+                    }
+                    else
+                    {
+                        // Simple product - check if in flash sale
+                        if (flashSalePrices.ContainsKey(product.Id))
+                        {
+                            displayPrice = (double)flashSalePrices[product.Id];
+                        }
+                    }
+                    
+                    return new
+                    {
+                        id = item.Id,
+                        productId = item.ProductId,
+                        title = product.Title,
+                        imageUrl = product.ProductImages?.FirstOrDefault()?.ImageUrl ?? product.ImageUrl ?? "/images/no-image.png",
+                        price = displayPrice,
+                        listPrice = product.ListPrice > 0 ? (double?)product.ListPrice : null,
+                        productType = (int)product.ProductType
+                    };
                 }).ToList();
 
                 return Json(new { success = true, items = items, count = items.Count });

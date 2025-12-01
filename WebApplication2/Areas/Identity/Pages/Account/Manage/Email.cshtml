@@ -1,43 +1,174 @@
 ﻿@page
 @model EmailModel
 @{
-    ViewData["Title"] = "Manage Email";
+    ViewData["Title"] = Localizer["ManageEmail"];
     ViewData["ActivePage"] = ManageNavPages.Email;
 }
 
-<h3>@ViewData["Title"]</h3>
-<partial name="_StatusMessage" for="StatusMessage" />
-<div class="row">
-    <div class="col-md-6">
-        <form id="email-form" method="post">
-            <div asp-validation-summary="All" class="text-danger" role="alert"></div>
-            @if (Model.IsEmailConfirmed)
-            {
-                <div class="form-floating mb-3 input-group">
-                    <input asp-for="Email" class="form-control" placeholder="Please enter your email." disabled />
-                        <div class="input-group-append">
-                            <span class="h-100 input-group-text text-success font-weight-bold">✓</span>
-                        </div>
-                    <label asp-for="Email" class="form-label"></label>
-                </div>
-            }
-            else
-            {
-                <div class="form-floating mb-3">
-                    <input asp-for="Email" class="form-control" placeholder="Please enter your email." disabled />
-                    <label asp-for="Email" class="form-label"></label>
-                    <button id="email-verification" type="submit" asp-page-handler="SendVerificationEmail" class="btn btn-link">Send verification email</button>
-                </div>
-            }
-            <div class="form-floating mb-3">
-                <input asp-for="Input.NewEmail" class="form-control" autocomplete="email" aria-required="true" placeholder="Please enter new email." />
-                <label asp-for="Input.NewEmail" class="form-label"></label>
-                <span asp-validation-for="Input.NewEmail" class="text-danger"></span>
-            </div>
-            <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" class="w-100 btn btn-lg btn-primary">Change email</button>
-        </form>
-    </div>
+<div class="page-header mb-4">
+    <h3 class="page-title">
+        <i class="bi bi-envelope me-2"></i>@ViewData["Title"]
+    </h3>
+    <p class="page-subtitle">@Localizer["EmailSubtitle"]</p>
 </div>
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<div class="email-form-wrapper">
+    <form id="email-form" method="post" class="modern-form">
+        <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+        
+        <div class="form-card">
+            <div class="form-card-header">
+                <i class="bi bi-envelope-check me-2"></i>
+                <span>@Localizer["CurrentEmail"]</span>
+            </div>
+            <div class="form-card-body">
+                @if (Model.IsEmailConfirmed)
+                {
+                    <div class="form-floating mb-3">
+                        <div class="input-group">
+                            <input asp-for="Email" class="form-control" placeholder="@Localizer["Email"]" disabled />
+                            <span class="input-group-text bg-success text-white">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </span>
+                        </div>
+                        <label asp-for="Email" class="form-label">
+                            <i class="bi bi-envelope me-2"></i>@Localizer["Email"]
+                        </label>
+                        <small class="form-text text-success">
+                            <i class="bi bi-check-circle me-1"></i>@Localizer["EmailVerified"]
+                        </small>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-floating mb-3">
+                        <input asp-for="Email" class="form-control" placeholder="@Localizer["Email"]" disabled />
+                        <label asp-for="Email" class="form-label">
+                            <i class="bi bi-envelope me-2"></i>@Localizer["Email"]
+                        </label>
+                        <small class="form-text text-warning">
+                            <i class="bi bi-exclamation-triangle me-1"></i>@Localizer["EmailNotVerified"]
+                        </small>
+                    </div>
+                    <button id="email-verification" type="submit" asp-page-handler="SendVerificationEmail" class="btn btn-outline-primary mb-3">
+                        <i class="bi bi-send me-2"></i>@Localizer["SendVerificationEmail"]
+                    </button>
+                }
+            </div>
+        </div>
+        
+        <div class="form-card">
+            <div class="form-card-header">
+                <i class="bi bi-envelope-plus me-2"></i>
+                <span>@Localizer["ChangeEmail"]</span>
+            </div>
+            <div class="form-card-body">
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.NewEmail" class="form-control" autocomplete="email" aria-required="true" placeholder="@Localizer["NewEmail"]" />
+                    <label asp-for="Input.NewEmail" class="form-label">
+                        <i class="bi bi-envelope-plus me-2"></i>@Localizer["NewEmail"]
+                    </label>
+                    <span asp-validation-for="Input.NewEmail" class="text-danger"></span>
+                    <small class="form-text text-muted">
+                        <i class="bi bi-info-circle me-1"></i>@Localizer["NewEmailHint"]
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" class="btn btn-primary btn-lg">
+                <i class="bi bi-check-circle me-2"></i>@Localizer["ChangeEmail"]
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Styles {
+    <style>
+        .page-header {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .email-form-wrapper {
+            margin-top: 2rem;
+        }
+
+        .form-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .form-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-card-body {
+            padding: 1.5rem;
+        }
+
+        .input-group-text {
+            border-left: none;
+        }
+
+        .form-control:disabled {
+            background-color: #e9ecef;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-outline-primary {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline-primary:hover {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+}
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

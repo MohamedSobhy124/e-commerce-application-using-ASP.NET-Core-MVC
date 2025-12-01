@@ -1255,7 +1255,8 @@
                     var shouldShowPrice = showPriceFlags.ContainsKey(Product.Id) ? showPriceFlags[Product.Id] : (Product.StockQuantity > 0);
                     var allVariantsOutOfStock = allVariantsOutOfStockFlags.ContainsKey(Product.Id) && allVariantsOutOfStockFlags[Product.Id];
                     var hasVariants = Product.ProductType == BulkyBook.Models.ProductType.Variable && minPrices.ContainsKey(Product.Id);
-                    var displayPrice = hasVariants ? minPrices[Product.Id] : Product.Price;
+                    // Use flash sale price from minPrices if available, otherwise use regular price
+                    var displayPrice = minPrices.ContainsKey(Product.Id) ? minPrices[Product.Id] : Product.Price;
                     var pricePrefix = hasVariants ? (currentCulture == "ar" ? "من " : "From ") : "";
                 }
                 @if (shouldShowPrice)
@@ -2198,6 +2199,7 @@
                     <img src="${item.imageUrl}" alt="${item.title}" class="cart-item-image">
                     <div class="cart-item-details">
                         <h6 class="cart-item-title">${item.title}</h6>
+                        ${item.variantName ? `<p class="cart-item-variant" style="font-size: 0.85rem; color: #666; margin-top: 0.25rem; margin-bottom: 0.25rem;">${item.variantName}</p>` : ''}
                         <p class="cart-item-price">${formatCurrency(item.price * item.count)}</p>
                         <div class="cart-item-quantity">
                             <button class="btn btn-sm btn-outline-secondary" onclick="updateCartQuantity(${item.productId}, ${item.count - 1})">

@@ -161,7 +161,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     ? cart.ComboOffer.ImageUrl
                     : GetProductImageUrl(cart.product);
                 
-                // Build variant name if variant exists
+                // Build variant name if variant exists (localized based on current culture)
                 string variantName = "";
                 if (cart.ProductVariantId.HasValue && cart.ProductVariant != null)
                 {
@@ -170,7 +170,17 @@ namespace BulkyBook.Areas.Customer.Controllers
                         var optionValues = cart.ProductVariant.VariantOptionValues
                             .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
                             .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
-                            .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                            .Select(vov => {
+                                var optionName = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ProductOption?.NameAr)) 
+                                    ? vov.OptionValue.ProductOption.NameAr 
+                                    : vov.OptionValue?.ProductOption?.Name;
+                                
+                                var optionValue = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ValueAr)) 
+                                    ? vov.OptionValue.ValueAr 
+                                    : vov.OptionValue?.Value;
+                                
+                                return $"{optionName}: {optionValue}";
+                            })
                             .Where(s => !string.IsNullOrEmpty(s))
                             .ToList();
                         

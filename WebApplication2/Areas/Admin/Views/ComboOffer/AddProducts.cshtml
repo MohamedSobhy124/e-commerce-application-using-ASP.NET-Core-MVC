@@ -1,10 +1,13 @@
 @using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Localization
 @inject IStringLocalizer<BulkyBook.SharedResources> Localizer
 @model BulkyBook.Models.ComboOffer
 
 @{
     ViewData["Title"] = Localizer["ManageComboProducts"];
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
 }
 
 <div class="container-fluid py-4">
@@ -130,7 +133,12 @@
                                     {
                                         <tr>
                                             <td>
-                                                <strong>@item.Product?.Title</strong>
+                                                @{
+                                                    var productTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(item.Product?.TitleAr)) 
+                                                        ? item.Product.TitleAr 
+                                                        : item.Product?.Title;
+                                                }
+                                                <strong>@productTitle</strong>
                                                 @if (item.ProductVariant != null)
                                                 {
                                                     string variantName = "";
@@ -139,7 +147,17 @@
                                                         var optionValues = item.ProductVariant.VariantOptionValues
                                                             .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
                                                             .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
-                                                            .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                                                            .Select(vov => {
+                                                                var optionName = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ProductOption?.NameAr)) 
+                                                                    ? vov.OptionValue.ProductOption.NameAr 
+                                                                    : vov.OptionValue?.ProductOption?.Name;
+                                                                
+                                                                var optionValue = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ValueAr)) 
+                                                                    ? vov.OptionValue.ValueAr 
+                                                                    : vov.OptionValue?.Value;
+                                                                
+                                                                return $"{optionName}: {optionValue}";
+                                                            })
                                                             .Where(s => !string.IsNullOrEmpty(s))
                                                             .ToList();
                                                         variantName = string.Join(" / ", optionValues);
@@ -151,7 +169,7 @@
                                                     
                                                     if (!string.IsNullOrEmpty(variantName))
                                                     {
-                                                        <br /><small class="text-muted"><i class="bi bi-tag"></i> Variant: @variantName</small>
+                                                        <br /><small class="text-muted"><i class="bi bi-tag"></i> @Localizer["Variant"]: @variantName</small>
                                                     }
                                                 }
                                             </td>

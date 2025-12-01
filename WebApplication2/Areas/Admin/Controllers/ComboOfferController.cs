@@ -10,6 +10,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Localization;
 using System.IO;
 
 namespace BulkyBook.Areas.Admin.Controllers
@@ -655,12 +656,30 @@ namespace BulkyBook.Areas.Admin.Controllers
                 .Select(item => item.ProductId)
                 .ToList();
 
+            // Get current culture for localization
+            var requestCulture = HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+            var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+            var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+            
             ViewBag.AvailableProducts = allProducts
                 .Where(p => !existingProductIds.Contains(p.Id))
-                .Select(p => new SelectListItem
-                {
-                    Value = p.Id.ToString(),
-                    Text = $"{p.Title} - {p.Price:C} (Stock: {p.StockQuantity})"
+                .Select(p => {
+                    // Get localized product title
+                    var productTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(p.TitleAr)) 
+                        ? p.TitleAr 
+                        : p.Title;
+                    
+                    // Format price with currency symbol
+                    var priceText = $"{currencySymbol}{p.Price:N2}";
+                    
+                    // Get localized "Stock" text
+                    var stockText = _localizer["Stock"]?.Value ?? "Stock";
+                    
+                    return new SelectListItem
+                    {
+                        Value = p.Id.ToString(),
+                        Text = $"{productTitle} - {priceText} ({stockText}: {p.StockQuantity})"
+                    };
                 })
                 .ToList();
 
@@ -835,76 +854,118 @@ namespace BulkyBook.Areas.Admin.Controllers
         // GET: Get Product Info (for variant selection)
         public IActionResult GetProductInfo(int productId)
         {
-            var product = _unitOfWork.product.Get(p => p.Id == productId, includeProperties: "ProductVariants,ProductOptions");
-            
-            // Load variant option values for variable products
-            if (product?.ProductType == ProductType.Variable && product.ProductVariants != null)
-            {
-                foreach (var variant in product.ProductVariants)
-                {
-                    // Load variant option values using DbContext
-                    variant.VariantOptionValues = _dbContext.ProductVariantOptionValues
-                        .Include(vov => vov.OptionValue)
-                            .ThenInclude(ov => ov.ProductOption)
-                        .Where(vov => vov.ProductVariantId == variant.Id)
-                        .ToList();
-                }
-            }
+            // Get product with non-deleted variants only
+            var product = _unitOfWork.product.Get(
+                p => p.Id == productId && !p.IsDeleted, 
+                includeProperties: "ProductVariants,ProductOptions"
+            );
             
             if (product == null)
             {
                 return Json(new { success = false, message = "Product not found" });
             }
 
+            // Filter out deleted variants
+            if (product.ProductVariants != null)
+            {
+                product.ProductVariants = product.ProductVariants
+                    .Where(v => !v.IsDeleted)
+                    .ToList();
+            }
+
+            // Load variant option values for variable products (excluding deleted items)
+            if (product.ProductType == ProductType.Variable && product.ProductVariants != null)
+            {
+                foreach (var variant in product.ProductVariants.Where(v => !v.IsDeleted))
+                {
+                    // Load variant option values using DbContext, filtering out deleted items
+                    variant.VariantOptionValues = _dbContext.ProductVariantOptionValues
+                        .Include(vov => vov.OptionValue)
+                            .ThenInclude(ov => ov.ProductOption)
+                        .Where(vov => vov.ProductVariantId == variant.Id 
+                            && vov.OptionValue != null
+                            && !vov.OptionValue.IsDeleted 
+                            && vov.OptionValue.ProductOption != null
+                            && !vov.OptionValue.ProductOption.IsDeleted)
+                        .ToList();
+                }
+            }
+
+            // Get current culture for localization
+            var requestCulture = HttpContext.Features.Get<IRequestCultureFeature>();
+            var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+            
+            // Get localized product title
+            var productTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr)) 
+                ? product.TitleAr 
+                : product.Title;
+
             var result = new { 
                 success = true, 
                 stockQuantity = product.StockQuantity,
                 price = product.Price,
-                title = product.Title,
+                title = productTitle,
                 productType = (int)product.ProductType
             };
 
-            // If variable product, include variants
+            // If variable product, include variants (only non-deleted)
             if (product.ProductType == ProductType.Variable && product.ProductVariants != null)
             {
-                var variants = product.ProductVariants.Select(v => 
-                {
-                    // Build variant name from option values
-                    string variantDisplayName = "Default";
-                    if (v.VariantOptionValues != null && v.VariantOptionValues.Any())
+                var variants = product.ProductVariants
+                    .Where(v => !v.IsDeleted) // Filter deleted variants
+                    .Select(v => 
                     {
-                        var optionValues = v.VariantOptionValues
-                            .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
-                            .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
-                            .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
-                            .Where(s => !string.IsNullOrEmpty(s))
-                            .ToList();
-                        
-                        if (optionValues.Any())
+                        // Build variant name from option values (localized), filtering deleted items
+                        string variantDisplayName = "Default";
+                        if (v.VariantOptionValues != null && v.VariantOptionValues.Any())
                         {
-                            variantDisplayName = string.Join(" / ", optionValues);
+                            var optionValues = v.VariantOptionValues
+                                .Where(vov => vov.OptionValue != null 
+                                    && !vov.OptionValue.IsDeleted 
+                                    && vov.OptionValue.ProductOption != null 
+                                    && !vov.OptionValue.ProductOption.IsDeleted) // Filter deleted option values and options
+                                .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                                .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+                                .Select(vov => {
+                                    var optionName = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ProductOption?.NameAr)) 
+                                        ? vov.OptionValue.ProductOption.NameAr 
+                                        : vov.OptionValue?.ProductOption?.Name;
+                                    
+                                    var optionValue = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ValueAr)) 
+                                        ? vov.OptionValue.ValueAr 
+                                        : vov.OptionValue?.Value;
+                                    
+                                    return $"{optionName}: {optionValue}";
+                                })
+                                .Where(s => !string.IsNullOrEmpty(s))
+                                .ToList();
+                            
+                            if (optionValues.Any())
+                            {
+                                variantDisplayName = string.Join(" / ", optionValues);
+                            }
                         }
-                    }
-                    else if (!string.IsNullOrEmpty(v.VariantName))
-                    {
-                        variantDisplayName = v.VariantName;
-                    }
+                        else if (!string.IsNullOrEmpty(v.VariantName))
+                        {
+                            variantDisplayName = v.VariantName;
+                        }
 
-                    return new
-                    {
-                        id = v.Id,
-                        name = variantDisplayName,
-                        price = v.Price,
-                        stockQuantity = v.StockQuantity,
-                        imageUrl = v.ImageUrl
-                    };
-                }).ToList();
+                        return new
+                        {
+                            id = v.Id,
+                            name = variantDisplayName,
+                            price = v.Price,
+                            stockQuantity = v.StockQuantity,
+                            imageUrl = v.ImageUrl
+                        };
+                    })
+                    .ToList();
 
                 return Json(new { 
                     success = true, 
                     stockQuantity = product.StockQuantity,
                     price = product.Price,
-                    title = product.Title,
+                    title = productTitle,
                     productType = (int)product.ProductType,
                     variants = variants
                 });

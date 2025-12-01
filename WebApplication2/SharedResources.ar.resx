@@ -298,7 +298,7 @@
     <value>تحذير</value>
   </data>
   <data name="ItemAddedToCart" xml:space="preserve">
-    <value>تم إضافة المنتج للسلة بنجاح!</value>
+    <value>تم إضافة المنتج للسلة بنجاح</value>
   </data>
   <data name="ItemRemovedFromCart" xml:space="preserve">
     <value>تم إزالة المنتج من السلة</value>
@@ -2492,91 +2492,97 @@
   <data name="OriginalPriceWillBeCalculated " xml:space="preserve">
     <value>السعر الاصلى سوف يتم حسابة</value>
   </data>
-  <data name="ErrorMissingCartInformation" xml:space="preserve">
-    <value>خطأ: معلومات السلة مفقودة</value>
+  <data name="LatestProducts" xml:space="preserve">
+    <value>احدث المنتجات</value>
   </data>
-  <data name="ErrorUpdatingQuantity" xml:space="preserve">
-    <value>خطأ في تحديث الكمية. يرجى المحاولة مرة أخرى.</value>
+  <data name="NewsletterSubscription" xml:space="preserve">
+    <value>اشتراك نشرة الاخبار</value>
   </data>
-  <data name="ProductRemovedFromCart" xml:space="preserve">
-    <value>تمت إزالة المنتج من السلة</value>
+  <data name="Wishlist " xml:space="preserve">
+    <value>قائمة المفضلات</value>
   </data>
-  <data name="AddedToCart" xml:space="preserve">
-    <value>تمت الإضافة إلى السلة!</value>
+  <data name="ManageAccount" xml:space="preserve">
+    <value>إدارة الحساب</value>
   </data>
-  <data name="FailedToAddToCart" xml:space="preserve">
-    <value>فشلت إضافة المنتج إلى السلة</value>
+  <data name="ManageAccountSubtitle" xml:space="preserve">
+    <value>قم بتحديث إعدادات حسابك وتفضيلاتك</value>
   </data>
-  <data name="FailedToRemoveFromWishlist" xml:space="preserve">
-    <value>فشلت إزالة المنتج من قائمة الأمنيات</value>
+  <data name="Profile" xml:space="preserve">
+    <value>الملف الشخصي</value>
   </data>
-  <data name="FailedToUpdateCart" xml:space="preserve">
-    <value>فشل تحديث السلة. يرجى المحاولة مرة أخرى.</value>
+  <data name="ProfileSubtitle" xml:space="preserve">
+    <value>قم بتحديث معلوماتك الشخصية</value>
   </data>
-  <data name="SecurityTokenMissing" xml:space="preserve">
-    <value>رمز الأمان مفقود. يرجى تحديث الصفحة.</value>
+  <data name="AccountSettings" xml:space="preserve">
+    <value>إعدادات الحساب</value>
   </data>
-  <data name="CouldNotAddItemToCart" xml:space="preserve">
-    <value>تعذرت إضافة العنصر إلى السلة</value>
+  <data name="Username" xml:space="preserve">
+    <value>اسم المستخدم</value>
   </data>
-  <data name="AnErrorOccurredPleaseTryAgain" xml:space="preserve">
-    <value>حدث خطأ. يرجى المحاولة مرة أخرى.</value>
+  <data name="PhoneNumber" xml:space="preserve">
+    <value>رقم الهاتف</value>
   </data>
-  <data name="ItemRemovedFromCart" xml:space="preserve">
-    <value>تمت إزالة العنصر من السلة</value>
+  <data name="PhoneNumberHint" xml:space="preserve">
+    <value>الرجاء إدخال رقم هاتفك بالتنسيق الدولي</value>
   </data>
-  <data name="FailedToRemoveItem" xml:space="preserve">
-    <value>فشلت إزالة العنصر. يرجى المحاولة مرة أخرى.</value>
+  <data name="BasicInformation" xml:space="preserve">
+    <value>المعلومات الأساسية</value>
   </data>
-  <data name="PleaseLoginToUseWishlist" xml:space="preserve">
-    <value>يرجى تسجيل الدخول لاستخدام قائمة الأمنيات</value>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>حفظ التغييرات</value>
   </data>
-  <data name="FailedToUpdateWishlist" xml:space="preserve">
-    <value>فشل تحديث قائمة الأمنيات</value>
+  <data name="ManageEmail" xml:space="preserve">
+    <value>إدارة البريد الإلكتروني</value>
   </data>
-  <data name="FailedToUpdateWishlistPleaseTryAgain" xml:space="preserve">
-    <value>فشل تحديث قائمة الأمنيات. يرجى المحاولة مرة أخرى.</value>
+  <data name="EmailSubtitle" xml:space="preserve">
+    <value>قم بتغيير عنوان بريدك الإلكتروني</value>
   </data>
-  <data name="InfoImageDeletedSuccessfully" xml:space="preserve">
-    <value>تم حذف صورة المعلومات بنجاح</value>
+  <data name="CurrentEmail" xml:space="preserve">
+    <value>البريد الإلكتروني الحالي</value>
   </data>
-  <data name="FailedToDeleteInfoImage" xml:space="preserve">
-    <value>فشل حذف صورة المعلومات</value>
+  <data name="EmailVerified" xml:space="preserve">
+    <value>تم التحقق من بريدك الإلكتروني</value>
   </data>
-  <data name="ErrorDeletingInfoImage" xml:space="preserve">
-    <value>خطأ في حذف صورة المعلومات</value>
+  <data name="EmailNotVerified" xml:space="preserve">
+    <value>لم يتم التحقق من بريدك الإلكتروني. يرجى التحقق من عنوان بريدك الإلكتروني.</value>
   </data>
-  <data name="FailedToUpdateImageInfo" xml:space="preserve">
-    <value>فشل تحديث معلومات الصورة</value>
+  <data name="SendVerificationEmail" xml:space="preserve">
+    <value>إرسال بريد التحقق</value>
   </data>
-  <data name="ErrorUpdatingImageInfo" xml:space="preserve">
-    <value>خطأ في تحديث معلومات الصورة</value>
+  <data name="ChangeEmail" xml:space="preserve">
+    <value>تغيير البريد الإلكتروني</value>
   </data>
-  <data name="AllNotificationsMarkedAsRead" xml:space="preserve">
-    <value>تم تمييز جميع الإشعارات كمقروءة</value>
+  <data name="NewEmail" xml:space="preserve">
+    <value>البريد الإلكتروني الجديد</value>
   </data>
-  <data name="ErrorTogglingApprovalStatus" xml:space="preserve">
-    <value>خطأ في تبديل حالة الموافقة</value>
+  <data name="NewEmailHint" xml:space="preserve">
+    <value>أدخل عنوان بريدك الإلكتروني الجديد. سيتم إرسال بريد التحقق.</value>
   </data>
-  <data name="ErrorDeletingReview" xml:space="preserve">
-    <value>خطأ في حذف التقييم</value>
+  <data name="ChangePasswordSubtitle" xml:space="preserve">
+    <value>قم بتحديث كلمة المرور للحفاظ على أمان حسابك</value>
   </data>
-  <data name="InvalidProductId" xml:space="preserve">
-    <value>معرف المنتج غير صالح</value>
+  <data name="PasswordSecurity" xml:space="preserve">
+    <value>أمان كلمة المرور</value>
   </data>
-  <data name="QuantityUpdated" xml:space="preserve">
-    <value>تم تحديث الكمية</value>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>كلمة المرور الحالية</value>
   </data>
-  <data name="QuantityUpdatedSuccessfully" xml:space="preserve">
-    <value>تم تحديث الكمية بنجاح!</value>
+  <data name="NewPassword" xml:space="preserve">
+    <value>كلمة المرور الجديدة</value>
   </data>
-  <data name="ItemRemovedFromCart" xml:space="preserve">
-    <value>تمت إزالة العنصر من السلة</value>
+  <data name="PasswordRequirements" xml:space="preserve">
+    <value>يجب أن تكون كلمة المرور 6 أحرف على الأقل</value>
   </data>
-  <data name="CartItemNotFound" xml:space="preserve">
-    <value>عنصر السلة غير موجود</value>
+  <data name="UpdatePassword" xml:space="preserve">
+    <value>تحديث كلمة المرور</value>
   </data>
-  <data name="InvalidRequest" xml:space="preserve">
-    <value>طلب غير صالح</value>
+  <data name="ExternalLogins" xml:space="preserve">
+    <value>تسجيلات الدخول الخارجية</value>
+  </data>
+  <data name="TwoFactorAuthentication" xml:space="preserve">
+    <value>المصادقة الثنائية</value>
+  </data>
+  <data name="PersonalData" xml:space="preserve">
+    <value>البيانات الشخصية</value>
   </data>
 </root>

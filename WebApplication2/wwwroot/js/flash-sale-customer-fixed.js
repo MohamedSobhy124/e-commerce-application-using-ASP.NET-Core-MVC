@@ -282,6 +282,7 @@ function createCartItemHTML(item) {
             </div>
             <div class="cart-item-details">
                 <h6 class="cart-item-title">${item.title}</h6>
+                ${item.variantName ? `<p class="cart-item-variant" style="font-size: 0.85rem; color: #666; margin-top: 0.25rem; margin-bottom: 0.25rem;">${item.variantName}</p>` : ''}
                 <div class="cart-item-meta">
                     <span class="cart-item-quantity">Qty: ${item.count}</span>
                     <span class="cart-item-price">${price}</span>

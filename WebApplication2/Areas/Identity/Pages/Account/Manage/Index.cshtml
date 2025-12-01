@@ -1,29 +1,132 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Profile";
+    ViewData["Title"] = Localizer["Profile"];
     ViewData["ActivePage"] = ManageNavPages.Index;
 }
 
-<h3>@ViewData["Title"]</h3>
-<partial name="_StatusMessage" for="StatusMessage" />
-<div class="row">
-    <div class="col-md-6">
-        <form id="profile-form" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
-                <label asp-for="Username" class="form-label"></label>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
-                <label asp-for="Input.PhoneNumber" class="form-label"></label>
-                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
-            </div>
-            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
-        </form>
-    </div>
+<div class="page-header mb-4">
+    <h3 class="page-title">
+        <i class="bi bi-person-circle me-2"></i>@ViewData["Title"]
+    </h3>
+    <p class="page-subtitle">@Localizer["ProfileSubtitle"]</p>
 </div>
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<div class="profile-form-wrapper">
+    <form id="profile-form" method="post" class="modern-form">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+        
+        <div class="form-card">
+            <div class="form-card-header">
+                <i class="bi bi-info-circle me-2"></i>
+                <span>@Localizer["BasicInformation"]</span>
+            </div>
+            <div class="form-card-body">
+                <div class="form-floating mb-3">
+                    <input asp-for="Username" class="form-control" placeholder="@Localizer["Username"]" disabled />
+                    <label asp-for="Username" class="form-label">
+                        <i class="bi bi-person me-2"></i>@Localizer["Username"]
+                    </label>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.PhoneNumber" class="form-control" placeholder="@Localizer["PhoneNumber"]" />
+                    <label asp-for="Input.PhoneNumber" class="form-label">
+                        <i class="bi bi-telephone me-2"></i>@Localizer["PhoneNumber"]
+                    </label>
+                    <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                    <small class="form-text text-muted">
+                        <i class="bi bi-info-circle me-1"></i>@Localizer["PhoneNumberHint"]
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button id="update-profile-button" type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-check-circle me-2"></i>@Localizer["SaveChanges"]
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Styles {
+    <style>
+        .page-header {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .profile-form-wrapper {
+            margin-top: 2rem;
+        }
+
+        .form-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .form-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-card-body {
+            padding: 1.5rem;
+        }
+
+        .form-floating label {
+            display: flex;
+            align-items: center;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+}
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
