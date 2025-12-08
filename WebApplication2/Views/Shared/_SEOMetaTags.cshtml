@@ -26,10 +26,13 @@
     }
 }
 
-<!-- Primary Meta Tags -->
+<!-- Primary Meta Tags - Optimized for "ideal weight nutrition", "ideal weight", "nutrition" -->
 <meta name="title" content="@(pageTitle) - @siteName" />
 <meta name="description" content="@pageDescription" />
 <meta name="keywords" content="@pageKeywords" />
+<meta name="subject" content="@(currentCulture == "ar" ? "وزن مثالي للتغذية، وزن مثالي، التغذية" : "Ideal Weight Nutrition, Ideal Weight, Nutrition")" />
+<meta name="topic" content="@(currentCulture == "ar" ? "التغذية والوزن المثالي" : "Nutrition and Ideal Weight")" />
+<meta name="classification" content="@(currentCulture == "ar" ? "متجر التغذية والوزن المثالي" : "Nutrition and Ideal Weight Store")" />
 <meta name="author" content="@siteName" />
 <meta name="robots" content="index, follow" />
 <meta name="language" content="@currentCulture" />
@@ -73,7 +76,7 @@ else
 <!-- Canonical URL -->
 <link rel="canonical" href="@canonicalUrl" />
 
-<!-- Alternate Languages - Proper multilingual support -->
+<!-- Alternate Languages - Proper multilingual support for "ideal weight nutrition", "ideal weight", "nutrition" -->
 @{
     var currentPath = Context.Request.Path.Value ?? "/";
     var queryString = Context.Request.QueryString.Value ?? "";
@@ -84,6 +87,18 @@ else
 <link rel="alternate" hreflang="ar" href="@arUrl" />
 <link rel="alternate" hreflang="en" href="@enUrl" />
 <link rel="alternate" hreflang="x-default" href="@defaultUrl" />
+
+<!-- Additional SEO for Arabic searches -->
+@if (currentCulture == "ar")
+{
+    <meta name="keywords" content="وزن مثالي للتغذية, وزن مثالي, التغذية, وزن مثالي للتغذية الإمارات, حلول الوزن المثالي, مكملات التغذية, @pageKeywords" />
+    <meta property="og:title" content="@(pageTitle) - وزن مثالي للتغذية" />
+}
+else
+{
+    <meta name="keywords" content="ideal weight nutrition, ideal weight, nutrition, ideal weight nutrition UAE, ideal weight solutions, nutrition supplements, @pageKeywords" />
+    <meta property="og:title" content="@(pageTitle) - Ideal Weight Nutrition" />
+}
 
 <!-- Geo Tags - UAE Specific -->
 <meta name="geo.region" content="AE" />
@@ -100,6 +115,55 @@ else
 <meta name="DC.coverage" content="United Arab Emirates" />
 <meta name="DC.language" content="@currentCulture" />
 
-<!-- Enhanced Keywords for Better SEO -->
-<meta name="keywords" content="@pageKeywords, nutrition, supplements, diet, protein, vitamins, weight loss, fitness, health, Dubai, Abu Dhabi, Sharjah, UAE delivery, free delivery UAE, nutrition store UAE, supplements online UAE, buy supplements, nutrition products, health supplements UAE, diet supplements Dubai, protein supplements UAE, vitamins Dubai, weight management, sports nutrition, ideal weight nutrition" />
+<!-- Enhanced Keywords for Better SEO - Targeting "ideal weight nutrition", "ideal weight", "nutrition" -->
+<meta name="keywords" content="ideal weight nutrition, ideal weight, nutrition, @pageKeywords, ideal weight nutrition UAE, ideal weight solutions, nutrition supplements, diet, protein, vitamins, weight loss, fitness, health, Dubai, Abu Dhabi, Sharjah, UAE delivery, free delivery UAE, nutrition store UAE, supplements online UAE, buy supplements, nutrition products, health supplements UAE, diet supplements Dubai, protein supplements UAE, vitamins Dubai, weight management, sports nutrition, ideal weight program, nutrition advice, nutrition products, وزن مثالي للتغذية, وزن مثالي, التغذية" />
+
+<!-- Additional SEO Meta Tags -->
+<meta name="theme-color" content="#007bff" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="format-detection" content="telephone=yes" />
+
+<!-- Mobile Optimization -->
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="HandheldFriendly" content="true" />
+<meta name="MobileOptimized" content="320" />
+
+<!-- Content Language -->
+<meta http-equiv="content-language" content="@currentCulture" />
+
+<!-- Cache Control -->
+<meta http-equiv="Cache-Control" content="public, max-age=3600" />
+
+<!-- Additional Open Graph Tags -->
+<meta property="og:type" content="@(seo?.PageType ?? "website")" />
+@if (seo?.PageType == "product")
+{
+    <meta property="product:brand" content="@(seo.Brand ?? "Ideal Weight Nutrition")" />
+    <meta property="product:category" content="@(seo.Category ?? "")" />
+    <meta property="product:availability" content="@(seo.InStock ? "in stock" : "out of stock")" />
+    <meta property="product:condition" content="new" />
+    <meta property="product:retailer" content="Ideal Weight Nutrition" />
+    <meta property="product:retailer_item_id" content="@(ViewData["ProductId"]?.ToString() ?? "")" />
+    @if (seo.Rating.HasValue && seo.ReviewCount.HasValue && seo.ReviewCount > 0)
+    {
+        <meta property="product:rating:value" content="@seo.Rating.Value.ToString("F1")" />
+        <meta property="product:rating:scale" content="5" />
+    }
+}
+
+<!-- Twitter Card Enhanced -->
+<meta name="twitter:site" content="@("@idealweightnutrition")" />
+<meta name="twitter:creator" content="@("@idealweightnutrition")" />
+<meta name="twitter:domain" content="idealweightnutrition.ae" />
+
+<!-- Business Information -->
+<meta name="contact" content="info@idealweightnutrition.ae" />
+<meta name="copyright" content="Ideal Weight Nutrition" />
+<meta name="reply-to" content="info@idealweightnutrition.ae" />
+
+<!-- Rich Snippets Support -->
+<meta name="application-name" content="Ideal Weight Nutrition" />
+<meta name="msapplication-TileColor" content="#007bff" />
+<meta name="msapplication-config" content="/browserconfig.xml" />
 

@@ -79,6 +79,11 @@ namespace BulkyBook.Areas.Admin.Controllers
                     Text = a.Name,
                     Value = a.Id.ToString()
                 }),
+                BrandList = _unitOfWork.brand.GetAll().Select(a => new SelectListItem
+                {
+                    Text = a.Name,
+                    Value = a.Id.ToString()
+                }),
                 product = new Product()
                  
             };
@@ -291,6 +296,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                     existingProduct.Price = productVM.product.Price;
                     existingProduct.ListPrice = productVM.product.ListPrice;
                     existingProduct.CategryId = productVM.product.CategryId;
+                    existingProduct.BrandId = productVM.product.BrandId;
                     existingProduct.StockQuantity = productVM.product.StockQuantity;
                     existingProduct.MinimumStockAlert = productVM.product.MinimumStockAlert;
                     existingProduct.ProductType = productVM.product.ProductType;
@@ -405,6 +411,11 @@ namespace BulkyBook.Areas.Admin.Controllers
                 }
                 
                 productVM.CategryList = _unitOfWork.categry.GetAll().Select(a => new SelectListItem
+                {
+                    Text = a.Name,
+                    Value = a.Id.ToString()
+                });
+                productVM.BrandList = _unitOfWork.brand.GetAll().Select(a => new SelectListItem
                 {
                     Text = a.Name,
                     Value = a.Id.ToString()

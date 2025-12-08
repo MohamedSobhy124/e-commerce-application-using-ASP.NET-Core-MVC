@@ -9,6 +9,7 @@ namespace BulkyBook.DataAccess.Repository.IRepository
      public interface IUnitOfWork
     {
         ICategryReprository categry{ get; }
+        IBrandRepository brand { get; }
         IProductReprository product { get; }
         ICompanyRepository company { get; }
         IShoppingCartReprository shoppingCart { get; }
@@ -32,6 +33,7 @@ namespace BulkyBook.DataAccess.Repository.IRepository
         IStockNotificationRepository StockNotification { get; }
         IComboOfferRepository ComboOffer { get; }
         IComboOfferItemRepository ComboOfferItem { get; }
+        IBrandRepository Brand { get; }
         void save();
     }
 }

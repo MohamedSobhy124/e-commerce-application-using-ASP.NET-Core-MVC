@@ -13,5 +13,7 @@ namespace BulkyBook.Models.ViewModels
         public Product product { get; set; }
         [ValidateNever]
        public IEnumerable<SelectListItem> CategryList { get; set; }
+        [ValidateNever]
+       public IEnumerable<SelectListItem> BrandList { get; set; }
     }
 }

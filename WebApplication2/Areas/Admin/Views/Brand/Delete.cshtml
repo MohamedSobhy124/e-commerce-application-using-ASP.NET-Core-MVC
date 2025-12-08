@@ -1,0 +1,99 @@
+@model BulkyBook.Models.Brand
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header bg-danger text-white">
+                <h2 class="admin-card-title">
+                    <i class="bi bi-exclamation-triangle-fill me-3"></i>
+                    @Localizer["DeleteBrand"]
+                </h2>
+            </div>
+
+            <div class="admin-card-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>@Localizer["Warning"]:</strong> @Localizer["AreYouSureDeleteBrand"]
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-3">
+                                <i class="bi bi-image me-2"></i>@Localizer["Image"]
+                            </dt>
+                            <dd class="col-sm-9">
+                                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                {
+                                    <img src="@Model.ImageUrl" alt="@Model.Name" style="max-width: 150px; max-height: 150px; border-radius: 8px;" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted">@Localizer["NoImage"]</span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-3">
+                                @Html.DisplayNameFor(model => model.Name)
+                            </dt>
+                            <dd class="col-sm-9">
+                                <strong>@Html.DisplayFor(model => model.Name)</strong>
+                            </dd>
+
+                            <dt class="col-sm-3">
+                                @Html.DisplayNameFor(model => model.NameAr)
+                            </dt>
+                            <dd class="col-sm-9" dir="rtl">
+                                <strong>@Html.DisplayFor(model => model.NameAr)</strong>
+                            </dd>
+
+                            <dt class="col-sm-3">
+                                @Html.DisplayNameFor(model => model.Description)
+                            </dt>
+                            <dd class="col-sm-9">
+                                @Html.DisplayFor(model => model.Description)
+                            </dd>
+
+                            <dt class="col-sm-3">
+                                @Html.DisplayNameFor(model => model.DescriptionAr)
+                            </dt>
+                            <dd class="col-sm-9" dir="rtl">
+                                @Html.DisplayFor(model => model.DescriptionAr)
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-danger btn-lg">
+                            <i class="bi bi-trash me-2"></i>
+                            @Localizer["Delete"]
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary btn-lg">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            @Localizer["BackToList"]
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        padding: 1.5rem 0;
+        border-top: 2px solid #e9ecef;
+        margin-top: 2rem;
+    }
+</style>
+

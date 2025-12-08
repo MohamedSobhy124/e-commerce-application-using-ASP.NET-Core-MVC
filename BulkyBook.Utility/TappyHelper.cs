@@ -1,10 +1,12 @@
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace BulkyBook.Utility
 {
@@ -18,7 +20,132 @@ namespace BulkyBook.Utility
             _settings = settings;
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri(_settings.BaseUrl);
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_settings.ApiKey}");
+            // Don't set headers in constructor - set them per request to ensure ASCII-only
+        }
+        
+        /// <summary>
+        /// Ensures a string contains only ASCII characters for use in HTTP headers
+        /// </summary>
+        private static string EnsureAsciiOnly(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return string.Empty;
+            
+            // Remove any non-ASCII characters (keep only characters 0-127)
+            return new string(value.Where(c => c <= 0x7F).ToArray());
+        }
+        
+        /// <summary>
+        /// Checks if a URL is likely a checkout/payment URL (not an image or product URL)
+        /// </summary>
+        private static bool IsCheckoutUrl(string? url)
+        {
+            if (string.IsNullOrEmpty(url))
+                return false;
+            
+            var urlLower = url.ToLowerInvariant();
+            
+            // Exclude image URLs and localhost URLs (which are likely from our own domain)
+            if (urlLower.Contains("/images/") || 
+                urlLower.Contains(".jpg") || 
+                urlLower.Contains(".jpeg") || 
+                urlLower.Contains(".png") || 
+                urlLower.Contains(".gif") || 
+                urlLower.Contains(".webp") ||
+                urlLower.Contains("/images/products/") ||
+                urlLower.Contains("image_url") ||
+                urlLower.Contains("product_url") ||
+                urlLower.Contains("localhost") ||
+                urlLower.Contains("127.0.0.1") ||
+                urlLower.Contains("/products/") ||
+                urlLower.StartsWith("http://localhost") ||
+                urlLower.StartsWith("https://localhost"))
+            {
+                return false;
+            }
+            
+            // Prefer URLs that look like checkout/payment URLs
+            if (urlLower.Contains("tabby") ||
+                urlLower.Contains("checkout") ||
+                urlLower.Contains("payment") ||
+                urlLower.Contains("pay.") ||
+                urlLower.Contains("web_url"))
+            {
+                return true;
+            }
+            
+            // If URL is from Tabby domain, it's likely a checkout URL
+            if (urlLower.Contains("tabby.ai") || urlLower.Contains("tabby.tech"))
+            {
+                return true;
+            }
+            
+            return false;
+        }
+        
+        /// <summary>
+        /// Recursively searches for a checkout URL in a JSON element
+        /// Only returns URLs that are clearly checkout/payment URLs (excludes image URLs)
+        /// </summary>
+        private static string? FindUrlInJsonElement(System.Text.Json.JsonElement element, int depth = 0, int maxDepth = 5)
+        {
+            if (depth > maxDepth)
+                return null;
+            
+            // Check all properties
+            if (element.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                foreach (var prop in element.EnumerateObject())
+                {
+                    // Only check properties that might contain checkout URLs
+                    var propNameLower = prop.Name.ToLowerInvariant();
+                    if (prop.Value.ValueKind == System.Text.Json.JsonValueKind.String)
+                    {
+                        var urlValue = prop.Value.GetString();
+                        if (!string.IsNullOrEmpty(urlValue) && 
+                            (urlValue.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+                             urlValue.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            // Only return if it's clearly a checkout URL (not an image)
+                            if (IsCheckoutUrl(urlValue))
+                            {
+                                return urlValue;
+                            }
+                        }
+                    }
+                    
+                    // Skip known non-checkout properties
+                    if (propNameLower.Contains("image") || 
+                        propNameLower.Contains("product") ||
+                        propNameLower == "description" ||
+                        propNameLower == "title")
+                    {
+                        continue; // Skip these properties to avoid finding image URLs
+                    }
+                    
+                    // Recursively search nested objects
+                    var foundUrl = FindUrlInJsonElement(prop.Value, depth + 1, maxDepth);
+                    if (!string.IsNullOrEmpty(foundUrl) && IsCheckoutUrl(foundUrl))
+                    {
+                        return foundUrl;
+                    }
+                }
+            }
+            
+            // Check arrays (but skip items that are likely product data)
+            if (element.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                foreach (var item in element.EnumerateArray())
+                {
+                    var foundUrl = FindUrlInJsonElement(item, depth + 1, maxDepth);
+                    if (!string.IsNullOrEmpty(foundUrl) && IsCheckoutUrl(foundUrl))
+                    {
+                        return foundUrl;
+                    }
+                }
+            }
+            
+            return null;
         }
 
         /// <summary>
@@ -41,7 +168,7 @@ namespace BulkyBook.Utility
                 {
                     ["payment"] = new Dictionary<string, object>
                     {
-                        ["amount"] = request.Amount.ToString("F2"),
+                        ["amount"] = request.Amount.ToString("F2", CultureInfo.InvariantCulture),
                         ["currency"] = request.Currency,
                         ["description"] = request.Description ?? $"Order {request.OrderId}",
                         ["buyer"] = new Dictionary<string, object>
@@ -60,18 +187,18 @@ namespace BulkyBook.Utility
                         ["order"] = new Dictionary<string, object>
                         {
                             ["reference_id"] = request.OrderId,
-                            ["updated_at"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                            ["tax_amount"] = (request.TaxAmount ?? 0).ToString("F2"),
-                            ["shipping_amount"] = (request.ShippingAmount ?? 0).ToString("F2"),
-                            ["discount_amount"] = (request.DiscountAmount ?? 0).ToString("F2"),
+                            ["updated_at"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture),
+                            ["tax_amount"] = (request.TaxAmount ?? 0).ToString("F2", CultureInfo.InvariantCulture),
+                            ["shipping_amount"] = (request.ShippingAmount ?? 0).ToString("F2", CultureInfo.InvariantCulture),
+                            ["discount_amount"] = (request.DiscountAmount ?? 0).ToString("F2", CultureInfo.InvariantCulture),
                             ["items"] = request.Items?.Select(item => new Dictionary<string, object>
                             {
                                 ["reference_id"] = item.ReferenceId,
                                 ["title"] = item.Title ?? "Product", // Required
                                 ["description"] = item.Description ?? item.Title ?? "Product",
                                 ["quantity"] = item.Quantity, // Required
-                                ["unit_price"] = item.UnitPrice.ToString("F2"), // Required
-                                ["discount_amount"] = (item.DiscountAmount ?? 0).ToString("F2"),
+                                ["unit_price"] = item.UnitPrice.ToString("F2", CultureInfo.InvariantCulture), // Required
+                                ["discount_amount"] = (item.DiscountAmount ?? 0).ToString("F2", CultureInfo.InvariantCulture),
                                 ["image_url"] = item.ImageUrl ?? "https://example.com/",
                                 ["product_url"] = item.ProductUrl ?? "https://example.com/",
                                 ["category"] = item.Category ?? "General" // Required
@@ -152,8 +279,21 @@ namespace BulkyBook.Utility
 
                 var json = JsonSerializer.Serialize(tabbyRequest, options);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
+                
+                // Create a new request message with clean headers to ensure ASCII-only
+                var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v2/checkout")
+                {
+                    Content = content
+                };
+                
+                // Set Authorization header with ASCII-only values
+                var apiKey = EnsureAsciiOnly(_settings.ApiKey ?? string.Empty);
+                if (!string.IsNullOrEmpty(apiKey))
+                {
+                    requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+                }
 
-                var response = await _httpClient.PostAsync("/api/v2/checkout", content);
+                var response = await _httpClient.SendAsync(requestMessage);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 // Log error details for debugging
@@ -190,9 +330,81 @@ namespace BulkyBook.Utility
                 if (response.IsSuccessStatusCode)
                 {
                     // Parse Tabby response according to API documentation
-                    // Response structure: { id, configuration: { available_products: { installments: [{ web_url }] } }, payment: { id }, status }
+                    // Response structure may vary: { id, configuration: { available_products: { installments: [{ web_url }] } }, payment: { id }, status }
                     using var doc = JsonDocument.Parse(responseContent);
                     var root = doc.RootElement;
+                    
+                    // Get status first - check if payment was rejected
+                    var status = root.TryGetProperty("status", out var statusProp) 
+                        ? statusProp.GetString() 
+                        : "created";
+                    
+                    // Check for rejection status
+                    if (status?.ToLowerInvariant() == "rejected")
+                    {
+                        // Get rejection reason
+                        var rejectionReasonCode = root.TryGetProperty("rejection_reason_code", out var rejectionCodeProp) 
+                            ? rejectionCodeProp.GetString() 
+                            : null;
+                        
+                        var rejectionReason = root.TryGetProperty("rejection_reason", out var rejectionReasonProp) 
+                            ? rejectionReasonProp.GetString() 
+                            : null;
+                        
+                        // Check configuration for detailed rejection reason
+                        string? detailedReason = null;
+                        if (root.TryGetProperty("configuration", out var rejectionConfigProp))
+                        {
+                            if (rejectionConfigProp.TryGetProperty("products", out var productsProp))
+                            {
+                                if (productsProp.TryGetProperty("installments", out var installmentsProp))
+                                {
+                                    if (installmentsProp.TryGetProperty("rejection_reason", out var installRejectionProp))
+                                    {
+                                        detailedReason = installRejectionProp.GetString();
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Build user-friendly error message
+                        var errorMessage = "Tabby payment was rejected";
+                        if (!string.IsNullOrEmpty(detailedReason))
+                        {
+                            errorMessage = detailedReason switch
+                            {
+                                "order_amount_too_low" => "Order amount is too low for Tabby payment. Minimum order amount is required.",
+                                _ => $"Tabby payment rejected: {detailedReason}"
+                            };
+                        }
+                        else if (!string.IsNullOrEmpty(rejectionReasonCode))
+                        {
+                            errorMessage = rejectionReasonCode switch
+                            {
+                                "under_limit" => "Order amount is below Tabby's minimum limit. Please add more items to your cart.",
+                                _ => $"Tabby payment rejected: {rejectionReasonCode}"
+                            };
+                        }
+                        else if (!string.IsNullOrEmpty(rejectionReason))
+                        {
+                            errorMessage = $"Tabby payment rejected: {rejectionReason}";
+                        }
+                        
+                        // Get session ID and payment ID for reference
+                        var rejectedSessionId = root.TryGetProperty("id", out var rejectedIdProp) ? rejectedIdProp.GetString() : null;
+                        var rejectedPaymentId = root.TryGetProperty("payment", out var rejectedPaymentProp) 
+                            && rejectedPaymentProp.TryGetProperty("id", out var rejectedPaymentIdProp)
+                            ? rejectedPaymentIdProp.GetString() 
+                            : null;
+                        
+                        return new TappyPaymentResponse
+                        {
+                            Success = false,
+                            Message = errorMessage,
+                            TransactionId = rejectedPaymentId ?? rejectedSessionId,
+                            Status = status ?? "rejected"
+                        };
+                    }
                     
                     // Get session ID
                     var sessionId = root.TryGetProperty("id", out var idProp) ? idProp.GetString() : null;
@@ -203,12 +415,41 @@ namespace BulkyBook.Utility
                         ? paymentIdProp.GetString() 
                         : null;
                     
-                    // Get checkout URL from configuration.available_products.installments[0].web_url
+                    // Try multiple paths to find checkout URL
                     string? checkoutUrl = null;
-                    if (root.TryGetProperty("configuration", out var configProp))
+                    
+                    // Path 1: Check top-level web_url or url property
+                    if (root.TryGetProperty("web_url", out var topWebUrl))
+                    {
+                        var url = topWebUrl.GetString();
+                        if (IsCheckoutUrl(url))
+                        {
+                            checkoutUrl = url;
+                        }
+                    }
+                    else if (root.TryGetProperty("url", out var topUrl))
+                    {
+                        var url = topUrl.GetString();
+                        if (IsCheckoutUrl(url))
+                        {
+                            checkoutUrl = url;
+                        }
+                    }
+                    else if (root.TryGetProperty("checkout_url", out var topCheckoutUrl))
+                    {
+                        var url = topCheckoutUrl.GetString();
+                        if (IsCheckoutUrl(url))
+                        {
+                            checkoutUrl = url;
+                        }
+                    }
+                    
+                    // Path 2: configuration.available_products.installments[0].web_url
+                    if (string.IsNullOrEmpty(checkoutUrl) && root.TryGetProperty("configuration", out var configProp))
                     {
                         if (configProp.TryGetProperty("available_products", out var availableProductsProp))
                         {
+                            // Check if available_products is an object with installments array
                             if (availableProductsProp.TryGetProperty("installments", out var installmentsProp))
                             {
                                 if (installmentsProp.ValueKind == JsonValueKind.Array && installmentsProp.GetArrayLength() > 0)
@@ -216,24 +457,93 @@ namespace BulkyBook.Utility
                                     var firstInstallment = installmentsProp[0];
                                     if (firstInstallment.TryGetProperty("web_url", out var webUrlProp))
                                     {
-                                        checkoutUrl = webUrlProp.GetString();
+                                        var url = webUrlProp.GetString();
+                                        if (IsCheckoutUrl(url))
+                                        {
+                                            checkoutUrl = url;
+                                        }
                                     }
                                 }
+                            }
+                            // Also check if available_products itself has web_url
+                            if (string.IsNullOrEmpty(checkoutUrl) && availableProductsProp.TryGetProperty("web_url", out var apWebUrl))
+                            {
+                                var url = apWebUrl.GetString();
+                                if (IsCheckoutUrl(url))
+                                {
+                                    checkoutUrl = url;
+                                }
+                            }
+                        }
+                        // Check configuration level for URL
+                        if (string.IsNullOrEmpty(checkoutUrl) && configProp.TryGetProperty("web_url", out var configWebUrl))
+                        {
+                            var url = configWebUrl.GetString();
+                            if (IsCheckoutUrl(url))
+                            {
+                                checkoutUrl = url;
                             }
                         }
                     }
                     
-                    // Get status
-                    var status = root.TryGetProperty("status", out var statusProp) 
-                        ? statusProp.GetString() 
-                        : "created";
+                    // Path 3: Check payment object for URL
+                    if (string.IsNullOrEmpty(checkoutUrl) && root.TryGetProperty("payment", out var paymentObj))
+                    {
+                        if (paymentObj.TryGetProperty("web_url", out var paymentWebUrl))
+                        {
+                            var url = paymentWebUrl.GetString();
+                            if (IsCheckoutUrl(url))
+                            {
+                                checkoutUrl = url;
+                            }
+                        }
+                        else if (paymentObj.TryGetProperty("url", out var paymentUrl))
+                        {
+                            var url = paymentUrl.GetString();
+                            if (IsCheckoutUrl(url))
+                            {
+                                checkoutUrl = url;
+                            }
+                        }
+                    }
+                    
+                    // Path 4: Try to find URL recursively, but ONLY checkout/payment URLs (excludes image URLs)
+                    // This is a last resort - we prefer specific paths above
+                    if (string.IsNullOrEmpty(checkoutUrl))
+                    {
+                        checkoutUrl = FindUrlInJsonElement(root);
+                    }
+                    
+                    // Note: status was already retrieved above to check for rejection
+                    // Reuse that status value here if needed, or get it again
+                    var finalStatus = root.TryGetProperty("status", out var statusProp2) 
+                        ? statusProp2.GetString() 
+                        : status ?? "created";
+                    
+                    // Log response structure for debugging if URL is null
+                    if (string.IsNullOrEmpty(checkoutUrl))
+                    {
+                        // Return detailed error with full response for debugging
+                        // This will help us see what Tabby is actually returning
+                        var errorDetails = responseContent.Length > 4000 
+                            ? responseContent.Substring(0, 4000) + "..." 
+                            : responseContent;
+                        
+                        return new TappyPaymentResponse
+                        {
+                            Success = false,
+                            Message = $"Payment created successfully (Status: {finalStatus}, SessionId: {sessionId ?? "null"}, PaymentId: {paymentId ?? "null"}) but checkout URL not found in response. Please check Tabby API response structure. Full response: {errorDetails}",
+                            TransactionId = paymentId ?? sessionId,
+                            Status = finalStatus ?? "created"
+                        };
+                    }
                     
                     var paymentResponse = new TappyPaymentResponse
                     {
                         Success = true,
                         PaymentUrl = checkoutUrl,
                         TransactionId = paymentId ?? sessionId, // Prefer payment ID, fallback to session ID
-                        Status = status ?? "created"
+                        Status = finalStatus ?? "created"
                     };
 
                     return paymentResponse;
@@ -259,12 +569,41 @@ namespace BulkyBook.Utility
 
         /// <summary>
         /// Verify Tabby payment status
+        /// Note: This endpoint requires the payment ID (from payment.id), not the session ID.
+        /// This may return 401 if API key doesn't have verification permissions.
+        /// Payment status should be verified via callback URL parameters instead.
         /// </summary>
-        public async Task<TappyPaymentStatusResponse> VerifyPaymentAsync(string transactionId)
+        public async Task<TappyPaymentStatusResponse> VerifyPaymentAsync(string paymentId)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"/api/v2/payments/{transactionId}");
+                if (string.IsNullOrEmpty(paymentId))
+                {
+                    return new TappyPaymentStatusResponse 
+                    { 
+                        Success = false, 
+                        Message = "Payment ID is required for verification" 
+                    };
+                }
+
+                // Tabby API endpoint: GET /api/v2/payments/{payment_id}
+                // Note: This requires the payment ID (from payment.id), not the session ID (from id)
+                var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v2/payments/{paymentId}");
+                
+                // Set Authorization header with ASCII-only values
+                var apiKey = EnsureAsciiOnly(_settings.ApiKey ?? string.Empty);
+                if (string.IsNullOrEmpty(apiKey))
+                {
+                    return new TappyPaymentStatusResponse 
+                    { 
+                        Success = false, 
+                        Message = "API key is not configured" 
+                    };
+                }
+                
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+                
+                var response = await _httpClient.SendAsync(requestMessage);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -272,25 +611,69 @@ namespace BulkyBook.Utility
                     using var doc = JsonDocument.Parse(responseContent);
                     var root = doc.RootElement;
                     
+                    // Extract status from response
+                    // Tabby returns: { "status": "CLOSED", "authorized", "created", etc. }
+                    var status = root.TryGetProperty("status", out var statusProp) ? statusProp.GetString() : null;
+                    var statusLower = status?.ToLowerInvariant() ?? "";
+                    
+                    // Check if payment is authorized/paid
+                    // Tabby statuses: CLOSED, AUTHORIZED, CREATED, APPROVED indicate successful payment
+                    var isPaid = statusLower == "authorized" || 
+                                 statusLower == "created" || 
+                                 statusLower == "approved" ||
+                                 statusLower == "closed";
+                    
                     var statusResponse = new TappyPaymentStatusResponse
                     {
                         Success = true,
-                        Status = root.TryGetProperty("status", out var status) ? status.GetString() : null,
-                        TransactionId = transactionId,
-                        IsPaid = root.TryGetProperty("status", out var statusProp) 
-                            && statusProp.GetString()?.ToLower() == "authorized"
+                        Status = status,
+                        TransactionId = paymentId,
+                        IsPaid = isPaid,
+                        Message = isPaid ? "Payment verified successfully" : $"Payment status: {status}"
                     };
 
                     return statusResponse;
                 }
+                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    // 401 Unauthorized - API key may not have verification permissions
+                    // This is acceptable - payment status should be verified via callback URL parameters
+                    return new TappyPaymentStatusResponse 
+                    { 
+                        Success = false, 
+                        Message = $"API verification failed (401 Unauthorized). The API key may not have permission to access /api/v2/payments endpoint. Payment ID used: {paymentId}. Use callback URL parameters for payment status instead."
+                    };
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    // 404 Not Found - Payment ID doesn't exist
+                    return new TappyPaymentStatusResponse 
+                    { 
+                        Success = false,
+                        Message = $"Payment not found (404). Payment ID: {paymentId}"
+                    };
+                }
                 else
                 {
-                    return new TappyPaymentStatusResponse { Success = false };
+                    // Other error
+                    var errorDetails = responseContent.Length > 500 
+                        ? responseContent.Substring(0, 500) + "..." 
+                        : responseContent;
+                    
+                    return new TappyPaymentStatusResponse 
+                    { 
+                        Success = false,
+                        Message = $"Verification failed: {response.StatusCode}. Response: {errorDetails}"
+                    };
                 }
             }
             catch (Exception ex)
             {
-                return new TappyPaymentStatusResponse { Success = false, Message = ex.Message };
+                return new TappyPaymentStatusResponse 
+                { 
+                    Success = false, 
+                    Message = $"Error verifying payment: {ex.Message}" 
+                };
             }
         }
     }

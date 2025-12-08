@@ -73,6 +73,9 @@ namespace BulkyBook.Models
         
         [ValidateNever]
         public ICollection<PromoCodeExcludedProduct>? ExcludedProducts { get; set; }
+        
+        [ValidateNever]
+        public ICollection<PromoCodeExcludedComboOffer>? ExcludedComboOffers { get; set; }
     }
 
     public enum DiscountType

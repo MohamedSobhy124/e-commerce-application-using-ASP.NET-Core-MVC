@@ -61,6 +61,12 @@ namespace BulkyBook.Models
         [ForeignKey("CategryId")]
         [ValidateNever]
         public Categry categry { get; set; }
+        
+        [Display(Name = "Brand")]
+        public int? BrandId { get; set; }
+        [ForeignKey("BrandId")]
+        [ValidateNever]
+        public Brand? Brand { get; set; }
         [ValidateNever]
         public string ImageUrl { get; set; }
         

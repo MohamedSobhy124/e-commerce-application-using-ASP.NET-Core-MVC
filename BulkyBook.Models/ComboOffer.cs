@@ -59,11 +59,11 @@ namespace BulkyBook.Models
 
                         if (variant != null && !variant.IsDeleted)
                         {
-                            price = (decimal)variant.Price;
+                            price = variant.ListPrice??0m;
                         }
                         else if (product != null)
                         {
-                            price = (decimal)product.Price;
+                            price = (decimal)product.ListPrice;
                         }
 
                         return price * item.Quantity;

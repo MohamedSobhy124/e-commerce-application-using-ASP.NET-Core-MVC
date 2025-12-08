@@ -37,8 +37,8 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         // Performance: Cache response for 5 minutes, vary by query parameters
-        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" }, Location = ResponseCacheLocation.Any)]
-        public async Task<IActionResult> Index(int? categoryId, string searchTerm, string sortBy, 
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "brandId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" }, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> Index(int? categoryId, int? brandId, string searchTerm, string sortBy, 
             decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
             int? minRating = null, string availability = null)
         {
@@ -51,6 +51,13 @@ namespace BulkyBook.Areas.Customer.Controllers
                 .Where(c => !c.IsDeleted)
                 .ToListAsync();
             ViewBag.Categories = allCategories;
+            
+            // Load brands (needed for filters)
+            var allBrands = await _dbContext.Brands
+                .AsNoTracking()
+                .Where(b => !b.IsDeleted)
+                .ToListAsync();
+            ViewBag.Brands = allBrands;
             
             // Load category product counts for top categories (lightweight)
             var categoryProductCounts = (await _dbContext.Products
@@ -66,6 +73,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 .ToList();
             ViewBag.TopCategories = topCategories;
             ViewBag.SelectedCategory = categoryId;
+            ViewBag.SelectedBrand = brandId;
             ViewBag.SearchTerm = searchTerm;
             ViewBag.SortBy = sortBy;
             ViewBag.MinPrice = minPrice;
@@ -115,6 +123,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 .AsNoTracking()
                 .Where(p => !p.IsDeleted)
                 .Include(p => p.categry)
+                .Include(p => p.Brand)
                 .Include(p => p.ProductImages.Where(img => img.ImageInfo == null))
                 .Include(p => p.ProductVariants.Where(v => !v.IsDeleted))
                 .AsQueryable();
@@ -123,6 +132,12 @@ namespace BulkyBook.Areas.Customer.Controllers
             if (categoryId.HasValue && categoryId.Value > 0)
             {
                 query = query.Where(p => p.CategryId == categoryId.Value);
+            }
+            
+            // Filter by brand
+            if (brandId.HasValue && brandId.Value > 0)
+            {
+                query = query.Where(p => p.BrandId.HasValue && p.BrandId.Value == brandId.Value);
             }
             
             // Filter by search term (case-insensitive) - includes Arabic fields
@@ -669,19 +684,25 @@ namespace BulkyBook.Areas.Customer.Controllers
         [HttpGet]
         [ResponseCache(Duration = 60, VaryByQueryKeys = new[] { "page", "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" })]
         public IActionResult LoadMoreProducts(int page = 0, int pageSize = 20, 
-            int? categoryId = null, string searchTerm = null, string sortBy = null,
+            int? categoryId = null, int? brandId = null, string searchTerm = null, string sortBy = null,
             decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
             string availability = null)
         {
             // PERFORMANCE: Use AsNoTracking for read-only queries (faster, less memory)
             // Only include necessary properties to reduce data transfer
             // Include ProductVariants to calculate minimum price for products with variants
-            var query = _unitOfWork.product.GetAllAsNoTracking(includeProperties: "categry,ProductImages,ProductVariants").AsQueryable();
+            var query = _unitOfWork.product.GetAllAsNoTracking(includeProperties: "categry,Brand,ProductImages,ProductVariants").AsQueryable();
             
             // Apply filters at database level (not in memory)
             if (categoryId.HasValue && categoryId.Value > 0)
             {
                 query = query.Where(p => p.CategryId == categoryId.Value);
+            }
+            
+            // Filter by brand
+            if (brandId.HasValue && brandId.Value > 0)
+            {
+                query = query.Where(p => p.BrandId.HasValue && p.BrandId.Value == brandId.Value);
             }
             
             if (!string.IsNullOrEmpty(searchTerm))
@@ -951,12 +972,12 @@ namespace BulkyBook.Areas.Customer.Controllers
 
         [HttpGet]
         public IActionResult FilterProducts(
-            int? categoryId = null, string searchTerm = null, string sortBy = null,
+            int? categoryId = null, int? brandId = null, string searchTerm = null, string sortBy = null,
             decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
             string availability = null)
         {
             // Use the same logic as LoadMoreProducts but for page 0 (first page) - just call it directly
-            return LoadMoreProducts(page: 0, pageSize: 20, categoryId: categoryId, searchTerm: searchTerm, 
+            return LoadMoreProducts(page: 0, pageSize: 20, categoryId: categoryId, brandId: brandId, searchTerm: searchTerm, 
                 sortBy: sortBy, minPrice: minPrice, maxPrice: maxPrice, inStock: inStock, availability: availability);
         }
 
@@ -1400,6 +1421,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 .AsNoTracking()
                 .Where(p => p.Id == productId && !p.IsDeleted)
                 .Include(p => p.categry)
+                .Include(p => p.Brand)
                 .Include(p => p.ProductImages.OrderBy(pi => pi.DisplayOrder))
                 .Include(p => p.ProductOptions.Where(o => !o.IsDeleted).OrderBy(o => o.DisplayOrder))
                     .ThenInclude(o => o.OptionValues.Where(ov => !ov.IsDeleted).OrderBy(ov => ov.DisplayOrder))

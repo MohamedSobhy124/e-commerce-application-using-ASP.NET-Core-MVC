@@ -42,7 +42,7 @@ function loadDataTable(status) {
                 "width": "6%",
                 "render": function (data, type, row) {
                     const id = row.id || row.Id;
-                    return `<strong>#${id}</strong>`;
+                    return `<strong>${id}</strong>`;
                 }
             },
             { 

@@ -177,11 +177,11 @@
                                             <td>
                                                 @if (item.ProductVariant != null)
                                                 {
-                                                    @item.ProductVariant.Price.ToString("C")
+                                                    @item.ProductVariant.ListPrice?.ToString("C")
                                                 }
                                                 else
                                                 {
-                                                    @item.Product?.Price.ToString("C")
+                                                    @item.Product?.ListPrice.ToString("C")
                                                 }
                                             </td>
                                             <td>@item.ItemPrice.ToString("C")</td>

@@ -353,6 +353,15 @@
             }
         }
         
+        // Get brand select
+        const brandSelect = filterGroups.querySelector('select[name="brandId"]');
+        if (brandSelect) {
+            const brandValue = brandSelect.value;
+            if (brandValue && brandValue !== '') {
+                filters.brandId = parseInt(brandValue);
+            }
+        }
+        
         // Get availability select
         const availabilitySelect = filterGroups.querySelector('select[name="availability"]');
         if (availabilitySelect && availabilitySelect.value) {
@@ -479,12 +488,18 @@
             }
         }
         
-        // Convert categoryId to integer if it exists, or remove if null/empty
+        // Convert categoryId and brandId to integer if they exist, or remove if null/empty
         const cleanedFilters = { ...currentFilters };
         if (cleanedFilters.categoryId === null || cleanedFilters.categoryId === '' || cleanedFilters.categoryId === undefined) {
             delete cleanedFilters.categoryId;
         } else if (cleanedFilters.categoryId) {
             cleanedFilters.categoryId = parseInt(cleanedFilters.categoryId);
+        }
+        
+        if (cleanedFilters.brandId === null || cleanedFilters.brandId === '' || cleanedFilters.brandId === undefined) {
+            delete cleanedFilters.brandId;
+        } else if (cleanedFilters.brandId) {
+            cleanedFilters.brandId = parseInt(cleanedFilters.brandId);
         }
         
         const filterParams = getFilterParams(cleanedFilters);
@@ -780,6 +795,12 @@
         // Initialize filter chips
         updateFilterChips();
         
+        // Initialize filters from URL parameters
+        initializeFiltersFromURL();
+        
+        // Initialize price range sliders
+        initializePriceSliders();
+        
         // Convert category badge links to AJAX
         const categoryBadges = document.querySelectorAll('.hero-category-badge');
         categoryBadges.forEach(badge => {
@@ -815,6 +836,91 @@
             }, 250);
         });
     });
+    
+    function initializeFiltersFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryId = urlParams.get('categoryId');
+        const brandId = urlParams.get('brandId');
+        const searchTerm = urlParams.get('searchTerm');
+        const sortBy = urlParams.get('sortBy');
+        const minPrice = urlParams.get('minPrice');
+        const maxPrice = urlParams.get('maxPrice');
+        const availability = urlParams.get('availability');
+        
+        // Update all filter selects (original and cloned)
+        const allSelects = document.querySelectorAll('select[name="categoryId"], select[name="brandId"], select[name="sortBy"], select[name="availability"]');
+        allSelects.forEach(select => {
+            const name = select.name;
+            let value = null;
+            if (name === 'categoryId') value = categoryId;
+            else if (name === 'brandId') value = brandId;
+            else if (name === 'sortBy') value = sortBy;
+            else if (name === 'availability') value = availability;
+            
+            if (value && value.trim() !== '') {
+                select.value = value;
+            } else {
+                select.value = '';
+            }
+        });
+        
+        // Update price inputs
+        const allMinPriceInputs = document.querySelectorAll('input[name="minPrice"]');
+        const allMaxPriceInputs = document.querySelectorAll('input[name="maxPrice"]');
+        allMinPriceInputs.forEach(input => {
+            if (minPrice && minPrice.trim() !== '') {
+                input.value = minPrice;
+            }
+        });
+        allMaxPriceInputs.forEach(input => {
+            if (maxPrice && maxPrice.trim() !== '') {
+                input.value = maxPrice;
+            }
+        });
+        
+        // Update price sliders
+        const priceRangeMin = document.getElementById('priceRangeMin');
+        const priceRangeMax = document.getElementById('priceRangeMax');
+        if (priceRangeMin && minPrice) {
+            priceRangeMin.value = minPrice;
+        }
+        if (priceRangeMax && maxPrice) {
+            priceRangeMax.value = maxPrice;
+        }
+    }
+    
+    function initializePriceSliders() {
+        const priceRangeMin = document.getElementById('priceRangeMin');
+        const priceRangeMax = document.getElementById('priceRangeMax');
+        const priceMinDisplay = document.getElementById('priceMinDisplay');
+        const priceMaxDisplay = document.getElementById('priceMaxDisplay');
+        
+        if (priceRangeMin && priceRangeMax) {
+            // Update displays when sliders change
+            function updatePriceDisplays() {
+                if (priceMinDisplay) {
+                    const minValue = parseFloat(priceRangeMin.value) || 0;
+                    priceMinDisplay.textContent = formatPrice(minValue);
+                }
+                if (priceMaxDisplay) {
+                    const maxValue = parseFloat(priceRangeMax.value) || 0;
+                    priceMaxDisplay.textContent = formatPrice(maxValue);
+                }
+            }
+            
+            priceRangeMin.addEventListener('input', updatePriceDisplays);
+            priceRangeMax.addEventListener('input', updatePriceDisplays);
+            
+            // Initial update
+            updatePriceDisplays();
+        }
+    }
+    
+    function formatPrice(price) {
+        // Get currency symbol from page if available
+        const currencySymbol = document.querySelector('[data-currency-symbol]')?.getAttribute('data-currency-symbol') || 'AED';
+        return `${currencySymbol} ${parseFloat(price).toFixed(2)}`;
+    }
     
     function updateFilterChips() {
         // Update filter chip active states based on current filters

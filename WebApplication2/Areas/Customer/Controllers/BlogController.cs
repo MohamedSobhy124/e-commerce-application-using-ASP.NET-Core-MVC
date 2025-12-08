@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Localization;
+using BulkyBook.Utility;
+using Microsoft.Extensions.Configuration;
 
 namespace BulkyBook.Areas.Customer.Controllers
 {
@@ -8,10 +10,12 @@ namespace BulkyBook.Areas.Customer.Controllers
     public class BlogController : Controller
     {
         private readonly IStringLocalizer<SharedResources> _localizer;
+        private readonly IConfiguration _configuration;
 
-        public BlogController(IStringLocalizer<SharedResources> localizer)
+        public BlogController(IStringLocalizer<SharedResources> localizer, IConfiguration configuration)
         {
             _localizer = localizer;
+            _configuration = configuration;
         }
 
         private string GetCurrentCulture()
@@ -24,6 +28,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         {
             var currentCulture = GetCurrentCulture();
             var isArabic = currentCulture == "ar";
+            var baseUrl = _configuration["SiteSettings:BaseUrl"] ?? Request.Scheme + "://" + Request.Host;
 
             ViewData["Title"] = isArabic 
                 ? "مدونة الصحة والعافية - نصائح وإرشادات الخبراء"
@@ -36,6 +41,18 @@ namespace BulkyBook.Areas.Customer.Controllers
                 : "health blog, wellness tips, weight management, nutrition advice, healthy lifestyle, fitness tips";
 
             var blogs = GetBlogPosts();
+            
+            // Add Blog structured data
+            var blogDescription = isArabic
+                ? "مدونة الصحة والعافية - نصائح وإرشادات الخبراء"
+                : "Health & Wellness Blog - Expert Tips & Guides";
+            ViewData["BlogStructuredData"] = SEOHelper.GenerateBlogStructuredData(
+                baseUrl, 
+                "Ideal Weight Nutrition", 
+                blogDescription, 
+                currentCulture
+            );
+
             return View(blogs);
         }
 
@@ -51,11 +68,32 @@ namespace BulkyBook.Areas.Customer.Controllers
 
             var currentCulture = GetCurrentCulture();
             var isArabic = currentCulture == "ar";
+            var baseUrl = _configuration["SiteSettings:BaseUrl"] ?? Request.Scheme + "://" + Request.Host;
+            var blogUrl = Url.Action("Details", "Blog", new { area = "Customer", slug = blog.Slug }, Request.Scheme) ?? 
+                         $"{baseUrl}/Customer/Blog/Details/{blog.Slug}";
             
             ViewData["Title"] = $"{blog.Title} - {(isArabic ? "مدونة الصحة والعافية" : "Health & Wellness Blog")}";
             ViewData["Description"] = blog.MetaDescription;
             ViewData["Keywords"] = blog.MetaKeywords;
-            ViewData["Canonical"] = Url.Action("Details", "Blog", new { area = "Customer", slug = blog.Slug }, Request.Scheme);
+            ViewData["Canonical"] = blogUrl;
+            ViewData["Image"] = blog.ImageUrl;
+
+            // Add Article structured data for SEO
+            var articleData = new ArticleData
+            {
+                Headline = blog.Title,
+                Description = blog.MetaDescription,
+                Url = blogUrl,
+                DatePublished = blog.PublishedDate,
+                DateModified = blog.PublishedDate, // Can be updated when blog is modified
+                Author = blog.Author,
+                Category = blog.Category,
+                ImageUrl = blog.ImageUrl,
+                Keywords = blog.MetaKeywords,
+                WordCount = blog.Content?.Length / 5 // Rough estimate: 5 chars per word
+            };
+            
+            ViewData["ArticleStructuredData"] = SEOHelper.GenerateArticleStructuredData(articleData, baseUrl, currentCulture);
 
             // Related blogs
             ViewBag.RelatedBlogs = blogs.Where(b => b.Id != blog.Id && b.Category == blog.Category).Take(3).ToList();

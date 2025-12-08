@@ -5,26 +5,29 @@
 @inject IConfiguration Configuration
 
 @{
-    ViewData["Title"] = Localizer["Home"];
-    var baseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    ViewData["Title"] = currentCulture == "ar" 
+        ? " ايديال ويت للتغذية - حلول الوزن المثالي والتغذية المتميزة في الإمارات"
+        : "Ideal Weight Nutrition - Ideal Weight Solutions & Premium Nutrition UAE";
+    var baseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
     
     // Add no-cache meta tag for video banner poster to prevent caching
     ViewData["CacheControl"] = "no-cache, no-store, must-revalidate";
-    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
-    // SEO-Optimized Descriptions with Key Keywords
+    // SEO-Optimized Descriptions with Key Keywords - Targeting "ideal weight nutrition", "ideal weight", "nutrition"
     var siteDescription = currentCulture == "ar" 
-        ? (Configuration["SiteSettings:SiteDescriptionAr"] ?? "ايديال وايت للتغذية - متجر المكملات الغذائية والبروتين في الإمارات. مكملات غذائية أصلية 100%، بروتين، فيتامينات، منتجات تخسيس، حمية غذائية، مكملات رياضية. توصيل سريع مجاني في دبي وأبوظبي. اكتشف طريقك للوزن المثالي مع أفضل المكملات الغذائية في الإمارات.")
-        : (Configuration["SiteSettings:SiteDescription"] ?? "Ideal Weight Nutrition - UAE's #1 Nutrition & Supplements Store. Buy authentic 100% original protein supplements, vitamins, diet products, weight loss supplements, fitness nutrition online. Fast free delivery in Dubai, Abu Dhabi. Discover your path to ideal weight with premium nutrition supplements in UAE.");
+        ? (Configuration["SiteSettings:SiteDescriptionAr"] ?? "ايديال ويت للتغذية - وجهتك الأولى في الإمارات لحلول الوزن المثالي والتغذية المتميزة. نصائح التغذية من الخبراء، برامج ايديال ويت، ومنتجات التغذية عالية الجودة. حقق وزنك المثالي مع حلول التغذية الشاملة من ايديال ويت للتغذية. مكملات غذائية أصلية 100%، بروتين، فيتامينات، منتجات تخسيس، حمية غذائية. توصيل سريع مجاني في دبي وأبوظبي.")
+        : (Configuration["SiteSettings:SiteDescription"] ?? "Ideal Weight Nutrition - UAE's #1 destination for ideal weight solutions and premium nutrition supplements. Expert nutrition advice, ideal weight programs, and quality nutrition products. Achieve your ideal weight with Ideal Weight Nutrition's comprehensive nutrition solutions. Buy authentic 100% original protein supplements, vitamins, diet products, weight loss supplements, fitness nutrition online. Fast free delivery in Dubai, Abu Dhabi.");
     
     ViewData["Description"] = siteDescription;
     ViewData["Keywords"] = currentCulture == "ar" 
-        ? "مكملات غذائية, بروتين, فيتامينات, مكملات رياضية, منتجات تخسيس, حمية غذائية, مكملات صحية, وزن مثالي, تغذية, مكملات الإمارات, مكملات دبي, مكملات أبوظبي, بروتين الإمارات, فيتامينات الإمارات, منتجات صحية الإمارات, متجر تغذية, توصيل مجاني الإمارات"
-        : "nutrition supplements, protein supplements, vitamins UAE, diet supplements, weight loss products, fitness nutrition, health supplements, ideal weight, nutrition store UAE, supplements Dubai, supplements Abu Dhabi, protein UAE, vitamins Dubai, health products UAE, nutrition store, free delivery UAE, buy supplements online, diet products, sports nutrition, weight management";
+        ? "ايديال ويت للتغذية, وزن مثالي, التغذية, مكملات غذائية, بروتين, فيتامينات, مكملات رياضية, منتجات تخسيس, حمية غذائية, مكملات صحية, تغذية, مكملات الإمارات, مكملات دبي, مكملات أبوظبي, بروتين الإمارات, فيتامينات الإمارات, منتجات صحية الإمارات, متجر تغذية, توصيل مجاني الإمارات, برامج ايديال ويت, حلول التغذية, نصائح التغذية"
+        : "ideal weight nutrition, ideal weight, nutrition, ideal weight nutrition UAE, ideal weight solutions, nutrition supplements, protein supplements, vitamins UAE, diet supplements, weight loss products, fitness nutrition, health supplements, nutrition store UAE, supplements Dubai, supplements Abu Dhabi, protein UAE, vitamins Dubai, health products UAE, nutrition store, free delivery UAE, buy supplements online, diet products, sports nutrition, weight management, ideal weight program, nutrition advice, nutrition products";
     ViewData["Image"] = baseUrl + "/Images/Products/logo_white_bg.png";
     
     var categories = ViewBag.Categories as IEnumerable<BulkyBook.Models.Categry> ?? Enumerable.Empty<BulkyBook.Models.Categry>();
     var selectedCategory = ViewBag.SelectedCategory as int?;
+    var selectedBrand = ViewBag.SelectedBrand as int?;
     var searchTerm = ViewBag.SearchTerm as string ?? "";
     var sortBy = ViewBag.SortBy as string ?? "";
     var minPrice = ViewBag.MinPrice as decimal?;
@@ -35,6 +38,7 @@
     var maxPriceRange = ViewBag.MaxPriceRange as decimal? ?? 10000;
     var totalProducts = ViewBag.TotalProducts as int? ?? 0;
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var brands = ViewBag.Brands as IEnumerable<BulkyBook.Models.Brand> ?? Enumerable.Empty<BulkyBook.Models.Brand>();
 }
 
 <!-- Sticky Hero Search Box Header - At Top -->
@@ -87,40 +91,8 @@
     <section class="enhanced-video-banner-section">
         <div class="container-fluid">
             <div class="row g-0">
-                <!-- Part 1: Video/Image Section -->
-                <div class="col-lg-6 col-md-12">
-                    <div class="video-banner-media-wrapper">
-                        @if (ViewBag.HasVideoBanner == true)
-                        {
-                            var posterUrl = ViewBag.HasPoster == true 
-                                ? Url.Content($"~/images/video-banner-poster.jpg?v={ViewBag.PosterVersion}") 
-                                : "";
-                            <video class="enhanced-video-banner" 
-                                   autoplay 
-                                   muted 
-                                   loop 
-                                   playsinline
-                                   preload="metadata"
-                                   poster="@posterUrl">
-                                <source src="~/videos/home-banner.mp4" type="video/mp4">
-                                @if (ViewBag.HasPoster == true)
-                                {
-                                    <img src="@Url.Content($"~/images/video-banner-poster.jpg?v={ViewBag.PosterVersion}")" alt="Video Banner" class="video-banner-poster-fallback" style="display: none;">
-                                }
-                            </video>
-                        }
-                        else if (ViewBag.HasPoster == true)
-                        {
-                            <img src="@Url.Content($"~/images/video-banner-poster.jpg?v={ViewBag.PosterVersion}")" alt="Video Banner Poster" class="enhanced-video-banner-poster">
-                        }
-                        
-                        <!-- Decorative overlay -->
-                        <div class="media-overlay"></div>
-                    </div>
-                </div>
-                
-                <!-- Part 2: Content Section with Paragraphs -->
-                <div class="col-lg-6 col-md-12">
+                <!-- Part 1: Content Section with Paragraphs (60% width) -->
+                <div class="col-lg-7 col-md-12 order-lg-1 order-2">
                     <div class="video-banner-content-wrapper">
                         <div class="content-inner">
                             <div class="content-badge">
@@ -130,18 +102,22 @@
                             
                             <h2 class="content-title">
                                 <i class="bi bi-heart-pulse me-3"></i>
-                                @Localizer["DiscoverIdealWeight"]
+                                @(currentCulture == "ar"
+                                    ? "اكتشف وزنك المثالي مع ايديال ويت للتغذية"
+                                    : "Discover Your Ideal Weight with Ideal Weight Nutrition")
                             </h2>
                             
                             <div class="content-paragraphs">
                                 <p class="paragraph-main">
-                                    @Localizer["InnovativeSupplements"]
+                                    @(currentCulture == "ar"
+                                        ? "ايديال ويت للتغذية - وجهتك الأولى لحلول الوزن المثالي والتغذية المتميزة. نحن متخصصون في تقديم برامج التغذية الشاملة ونصائح التغذية من الخبراء لمساعدتك في تحقيق وزنك المثالي."
+                                        : "Ideal Weight Nutrition - Your #1 destination for ideal weight solutions and premium nutrition. We specialize in comprehensive nutrition programs and expert nutrition advice to help you achieve your ideal weight.")
                                 </p>
                                 
                                 <p class="paragraph-secondary">
                                     @(currentCulture == "ar" 
-                                        ? "نقدم لك مجموعة واسعة من المكملات الغذائية عالية الجودة المصممة خصيصاً لدعم رحلتك نحو الصحة واللياقة البدنية. منتجاتنا مختبرة ومعتمدة من أفضل المختبرات العالمية."
-                                        : "We offer a wide range of high-quality nutritional supplements specifically designed to support your journey towards health and fitness. Our products are tested and certified by the world's leading laboratories.")
+                                        ? "نقدم لك مجموعة واسعة من منتجات التغذية عالية الجودة والمكملات الغذائية المصممة خصيصاً لدعم رحلتك نحو الوزن المثالي والصحة واللياقة البدنية. منتجاتنا مختبرة ومعتمدة من أفضل المختبرات العالمية. اكتشف كيف يمكن للتغذية السليمة أن تساعدك في الوصول إلى وزنك المثالي."
+                                        : "We offer a wide range of high-quality nutrition products and nutritional supplements specifically designed to support your journey towards ideal weight, health and fitness. Our products are tested and certified by the world's leading laboratories. Discover how proper nutrition can help you reach your ideal weight.")
                                 </p>
                                 
                                 <p class="paragraph-features">
@@ -173,6 +149,38 @@
                                 </a>
                             </div>
                         </div>
+                    </div>
+                </div>
+                
+                <!-- Part 2: Video/Image Section (40% width) -->
+                <div class="col-lg-5 col-md-12 order-lg-2 order-1">
+                    <div class="video-banner-media-wrapper">
+                        @if (ViewBag.HasVideoBanner == true)
+                        {
+                            var posterUrl = ViewBag.HasPoster == true 
+                                ? Url.Content($"~/images/video-banner-poster.jpg?v={ViewBag.PosterVersion}") 
+                                : "";
+                            <video class="enhanced-video-banner" 
+                                   autoplay 
+                                   muted 
+                                   loop 
+                                   playsinline
+                                   preload="metadata"
+                                   poster="@posterUrl">
+                                <source src="~/videos/home-banner.mp4" type="video/mp4">
+                                @if (ViewBag.HasPoster == true)
+                                {
+                                    <img src="@Url.Content($"~/images/video-banner-poster.jpg?v={ViewBag.PosterVersion}")" alt="Video Banner" class="video-banner-poster-fallback" style="display: none;">
+                                }
+                            </video>
+                        }
+                        else if (ViewBag.HasPoster == true)
+                        {
+                            <img src="@Url.Content($"~/images/video-banner-poster.jpg?v={ViewBag.PosterVersion}")" alt="Video Banner Poster" class="enhanced-video-banner-poster">
+                        }
+                        
+                        <!-- Decorative overlay -->
+                        <div class="media-overlay"></div>
                     </div>
                 </div>
             </div>
@@ -771,7 +779,7 @@
 }
 
 <!-- Active Filters Display -->
-    @if (selectedCategory.HasValue || !string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(sortBy) || minPrice.HasValue || maxPrice.HasValue || !string.IsNullOrEmpty(availability))
+    @if (selectedCategory.HasValue || selectedBrand.HasValue || !string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(sortBy) || minPrice.HasValue || maxPrice.HasValue || !string.IsNullOrEmpty(availability))
     {
         <div class="modern-active-filters" id="modernActiveFilters">
             @if (!string.IsNullOrEmpty(searchTerm))
@@ -789,6 +797,17 @@
                 <span class="modern-active-filter-tag">
                     @Localizer["Category"]: @categoryName
                     <button type="button" class="remove-btn" data-filter="categoryId">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </span>
+            }
+            @if (selectedBrand.HasValue)
+            {
+                var brand = brands.FirstOrDefault(b => b.Id == selectedBrand.Value);
+                var brandName = brand != null ? (currentCulture == "ar" && !string.IsNullOrEmpty(brand.NameAr) ? brand.NameAr : brand.Name) : "";
+                <span class="modern-active-filter-tag">
+                    @Localizer["Brand"]: @brandName
+                    <button type="button" class="remove-btn" data-filter="brandId">
                         <i class="bi bi-x"></i>
                     </button>
                 </span>
@@ -896,6 +915,23 @@
                         {
                             <option value="@category.Id" selected="@(selectedCategory == category.Id)">
                                 @category.Name
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Brand Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="bi bi-award-fill"></i>
+                        @Localizer["Brand"]
+                    </label>
+                    <select name="brandId" class="filter-select modern-select">
+                        <option value="">@Localizer["AllBrands"]</option>
+                        @foreach (var brand in brands)
+                        {
+                            <option value="@brand.Id" selected="@(selectedBrand == brand.Id)">
+                                @(currentCulture == "ar" && !string.IsNullOrEmpty(brand.NameAr) ? brand.NameAr : brand.Name)
                             </option>
                         }
                     </select>
@@ -2621,6 +2657,7 @@
             // Build filter parameters
             const params = new URLSearchParams();
             if (filters.categoryId) params.append('categoryId', filters.categoryId);
+            if (filters.brandId) params.append('brandId', filters.brandId);
             if (filters.searchTerm) params.append('searchTerm', filters.searchTerm);
             if (filters.sortBy) params.append('sortBy', filters.sortBy);
             if (filters.minPrice) params.append('minPrice', filters.minPrice);
@@ -2728,8 +2765,13 @@
 
                     // Update filter form inputs to match current filters
                     if (filters.categoryId) {
-                        const categoryInput = document.querySelector('input[name="categoryId"]');
+                        const categoryInput = document.querySelector('select[name="categoryId"]');
                         if (categoryInput) categoryInput.value = filters.categoryId;
+                    }
+                    
+                    if (filters.brandId) {
+                        const brandInput = document.querySelector('select[name="brandId"]');
+                        if (brandInput) brandInput.value = filters.brandId;
                     }
                 })
                 .catch(error => {

@@ -177,7 +177,7 @@
 											</div>
 											<div class="text-end">
 												<div class="order-item-price">
-													<span class="original-price">@Html.Raw(currencySymbol) @((details.Price*details.Count).ToString("N2"))</span>
+													<span class="original-price">@Html.Raw(currencySymbol) @((details.Price*details.Count).ToString("N2", System.Globalization.CultureInfo.InvariantCulture))</span>
 													<span class="discounted-price text-success" style="display: none;"></span>
 												</div>
 											</div>
@@ -186,7 +186,7 @@
 
 									<li class="order-item order-total-item">
 										<small class="order-total-label">@Localizer["Subtotal"]</small>
-										<strong class="order-subtotal-value">@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2")</strong>
+										<strong class="order-subtotal-value">@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2", System.Globalization.CultureInfo.InvariantCulture)</strong>
 									</li>
 								</ul>
 							</div>
@@ -233,7 +233,7 @@
 										<i class="bi bi-wallet2 me-2"></i>
 										@Localizer["Total"]
 									</h4>
-									<strong class="order-final-total" id="finalTotal">@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2")</strong>
+									<strong class="order-final-total" id="finalTotal">@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2", System.Globalization.CultureInfo.InvariantCulture)</strong>
 								</div>
 							</div>
 
@@ -256,7 +256,7 @@
 										<input type="radio" id="paymentTappy" name="OrderHeader.PaymentMethod" value="@BulkyBook.Utility.SD.PaymentMethodTappy" />
 										<label for="paymentTappy" class="payment-method-label">
 											<i class="bi bi-wallet2 me-2"></i>
-											<span>Tappy</span>
+											<span>Tabby</span>
 											<small>@Localizer["DigitalWallet"]</small>
 										</label>
 									</div>
@@ -562,7 +562,7 @@
 
 @section Scripts {
 	<script>
-		var subtotal = @Model.OrderHeader.OrderTotal;
+		var subtotal = @Model.OrderHeader.OrderTotal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
 		var currentDiscount = 0;
 		var currentPromoCodeId = null;
 

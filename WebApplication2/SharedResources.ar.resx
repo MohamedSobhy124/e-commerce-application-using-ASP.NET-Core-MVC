@@ -670,7 +670,7 @@
     <value>إنشاء حساب</value>
   </data>
   <data name="JoinIdealWeightToday" xml:space="preserve">
-    <value> انضم اليوم إلى ايديال وايت</value>
+    <value> انضم اليوم إلى ايديال ويت</value>
   </data>
   <data name="QuickSignUpWith" xml:space="preserve">
     <value>تسجيل سريع باستخدام</value>
@@ -691,7 +691,7 @@
     <value>تأكيد كلمة المرور</value>
   </data>
   <data name="IdealWeight" xml:space="preserve">
-    <value> ايديال وايت</value>
+    <value> ايديال ويت</value>
   </data>
   <data name="DiscoverIdealWeight" xml:space="preserve">
     <value>اكتشف طريقك للوزن المثالي</value>
@@ -703,7 +703,7 @@
     <value>ابحث عن المكملات، الفيتامينات، الوجبات الخفيفة...</value>
   </data>
   <data name="WhyChooseIdealWeight" xml:space="preserve">
-    <value>لماذا تختار ايديال وايت؟</value>
+    <value>لماذا تختار ايديال ويت؟</value>
   </data>
   <data name="PremiumQualityTitle" xml:space="preserve">
     <value>جودة فائقة</value>
@@ -743,7 +743,7 @@
   </data>
   <data name="YourTrustedHealthPartner" xml:space="preserve">
     <value>شريكك الموثوق للصحة والعافية، نوفر لك مكملات غذائية فاخرة ووجبات خفيفة صحية.
-حقق وزنك المثالي وصحتك الأفضل مع ايديال وايت</value>
+حقق وزنك المثالي وصحتك الأفضل مع ايديال ويت</value>
   </data>
   <data name="AchieveOptimalHealth" xml:space="preserve">
     <value>احصل على الوزن المثالي والصحة المثلى مع الحيال وايت</value>
@@ -873,7 +873,7 @@
   </data>
   <data name="YourTrustedHealth" xml:space="preserve">
     <value>شريكك الموثوق للصحة والعافية، نوفر لك مكملات غذائية فاخرة ووجبات خفيفة صحية.
-حقق وزنك المثالي وصحتك الأفضل مع ايديال وايت</value>
+حقق وزنك المثالي وصحتك الأفضل مع ايديال ويت</value>
   </data>
   <data name="PriceRange" xml:space="preserve">
     <value>سعر ما بين </value>
@@ -2463,7 +2463,7 @@
     <value>اضافة فئة جديدة</value>
   </data>
   <data name="NameEnglish" xml:space="preserve">
-    <value>الاسم</value>
+    <value> الاسم بالانجليزية</value>
   </data>
   <data name="CreateCategory" xml:space="preserve">
     <value>اضافة فئة</value>
@@ -2503,5 +2503,744 @@
   </data>
   <data name="Blog" xml:space="preserve">
     <value>المدونة</value>
+  </data>
+  <data name="ReadMore" xml:space="preserve">
+    <value>قراءة المزيد</value>
+  </data>
+  <data name="ExpertTipsGuidesForBetterHealth" xml:space="preserve">
+    <value>خطط ونصائح لصحة افضل</value>
+  </data>
+  <data name="HealthWellnessBlog" xml:space="preserve">
+    <value>مقال لصحة افضل</value>
+  </data>
+  <data name="SpecialPrice" xml:space="preserve">
+    <value>سعر خاص</value>
+  </data>
+  <data name="Qty" xml:space="preserve">
+    <value>الكمية</value>
+  </data>
+  <data name="Items" xml:space="preserve">
+    <value>عناصر</value>
+  </data>
+  <data name="DiscountApplied" xml:space="preserve">
+    <value>تم تطبيق الخصم</value>
+  </data>
+  <data name="NoEligibleProductsForPromoCode" xml:space="preserve">
+    <value>عذراً، لا يوجد أي منتج في السلة مؤهّل لاستخدام كود الخصم الحالي.</value>
+  </data>
+  <data name="Brands" xml:space="preserve">
+    <value>ادارة العلامات التجارية</value>
+  </data>
+  <data name="NameArabic" xml:space="preserve">
+    <value>اللاسم بالعربية</value>
+  </data>
+  <data name="BrandsList" xml:space="preserve">
+    <value>قائمة العلامات التجارية</value>
+  </data>
+  <data name="CreateNewBrand" xml:space="preserve">
+    <value>اضافة علامة تجارية جديدة</value>
+  </data>
+  <data name="NoBrandsYet" xml:space="preserve">
+    <value>لا يوجد علامات تجارية حتى الان</value>
+  </data>
+  <data name="CreateBrandToOrganizeProducts" xml:space="preserve">
+    <value>اضف علامة تجارية لتنظيم منتجاتك</value>
+  </data>
+  <data name="CreateFirstBrand" xml:space="preserve">
+    <value>اضافة اول علامة تجارية</value>
+  </data>
+  <data name="Brand" xml:space="preserve">
+    <value>علامة تجارية</value>
+  </data>
+
+  <data name="AccountSettings" xml:space="preserve">
+    <value>إعدادات الحساب</value>
+  </data>
+  <data name="ChangeEmail" xml:space="preserve">
+    <value>تغيير البريد الإلكتروني</value>
+  </data>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>تغيير كلمة المرور</value>
+  </data>
+  <data name="ChangePasswordSubtitle" xml:space="preserve">
+    <value>قم بتحديث كلمة المرور لحسابك</value>
+  </data>
+  <data name="CurrentEmail" xml:space="preserve">
+    <value>البريد الإلكتروني الحالي</value>
+  </data>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>كلمة المرور الحالية</value>
+  </data>
+  <data name="EmailIsRequired" xml:space="preserve">
+    <value>البريد الإلكتروني مطلوب</value>
+  </data>
+  <data name="EmailNotVerified" xml:space="preserve">
+    <value>البريد الإلكتروني غير مفعّل</value>
+  </data>
+  <data name="EmailSubtitle" xml:space="preserve">
+    <value>إدارة عنوان بريدك الإلكتروني</value>
+  </data>
+  <data name="EmailVerified" xml:space="preserve">
+    <value>البريد الإلكتروني مفعّل</value>
+  </data>
+  <data name="ExternalLogins" xml:space="preserve">
+    <value>تسجيلات الدخول الخارجية</value>
+  </data>
+  <data name="ManageAccount" xml:space="preserve">
+    <value>إدارة الحساب</value>
+  </data>
+  <data name="ManageAccountSubtitle" xml:space="preserve">
+    <value>إدارة معلومات حسابك وإعداداته</value>
+  </data>
+  <data name="ManageEmail" xml:space="preserve">
+    <value>إدارة البريد الإلكتروني</value>
+  </data>
+  <data name="NewEmail" xml:space="preserve">
+    <value>البريد الإلكتروني الجديد</value>
+  </data>
+  <data name="NewEmailHint" xml:space="preserve">
+    <value>أدخل عنوان بريد إلكتروني جديد</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>كلمة المرور الجديدة</value>
+  </data>
+  <data name="PasswordRequirements" xml:space="preserve">
+    <value>متطلبات كلمة المرور</value>
+  </data>
+  <data name="PasswordSecurity" xml:space="preserve">
+    <value>أمان كلمة المرور</value>
+  </data>
+  <data name="PhoneNumber" xml:space="preserve">
+    <value>رقم الهاتف</value>
+  </data>
+  <data name="PhoneNumberHint" xml:space="preserve">
+    <value>أدخل رقم هاتفك</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>الملف الشخصي</value>
+  </data>
+  <data name="ProfileSubtitle" xml:space="preserve">
+    <value>إدارة معلومات ملفك الشخصي</value>
+  </data>
+  <data name="SendVerificationEmail" xml:space="preserve">
+    <value>إرسال بريد التحقق</value>
+  </data>
+  <data name="UpdatePassword" xml:space="preserve">
+    <value>تحديث كلمة المرور</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>اسم المستخدم</value>
+  </data>
+  <data name="AreYouSureDeleteBrand" xml:space="preserve">
+    <value>هل أنت متأكد من حذف هذه العلامة التجارية؟</value>
+  </data>
+  <data name="BrandDetails" xml:space="preserve">
+    <value>تفاصيل العلامة التجارية</value>
+  </data>
+  <data name="BrandImage" xml:space="preserve">
+    <value>صورة العلامة التجارية</value>
+  </data>
+  <data name="BrandInformation" xml:space="preserve">
+    <value>معلومات العلامة التجارية</value>
+  </data>
+  <data name="DeleteBrand" xml:space="preserve">
+    <value>حذف العلامة التجارية</value>
+  </data>
+  <data name="EditBrand" xml:space="preserve">
+    <value>تعديل العلامة التجارية</value>
+  </data>
+  <data name="EnterBrandDescription" xml:space="preserve">
+    <value>أدخل وصف العلامة التجارية</value>
+  </data>
+  <data name="EnterBrandName" xml:space="preserve">
+    <value>أدخل اسم العلامة التجارية</value>
+  </data>
+  <data name="SelectBrand" xml:space="preserve">
+    <value>اختر العلامة التجارية</value>
+  </data>
+  <data name="UploadBrandImage" xml:space="preserve">
+    <value>رفع صورة العلامة التجارية</value>
+  </data>
+  <data name="CategoryImage" xml:space="preserve">
+    <value>صورة الفئة</value>
+  </data>
+  <data name="CategoryInformation" xml:space="preserve">
+    <value>معلومات الفئة</value>
+  </data>
+  <data name="CreateCategoryToOrganizeProducts" xml:space="preserve">
+    <value>أنشئ فئة لتنظيم منتجاتك</value>
+  </data>
+  <data name="CreateFirstCategory" xml:space="preserve">
+    <value>إنشاء أول فئة</value>
+  </data>
+  <data name="EditCategory" xml:space="preserve">
+    <value>تعديل الفئة</value>
+  </data>
+  <data name="EnterCategoryDescription" xml:space="preserve">
+    <value>أدخل وصف الفئة</value>
+  </data>
+  <data name="EnterCategoryName" xml:space="preserve">
+    <value>أدخل اسم الفئة</value>
+  </data>
+  <data name="NoCategoriesYet" xml:space="preserve">
+    <value>لا توجد فئات بعد</value>
+  </data>
+  <data name="UploadCategoryImage" xml:space="preserve">
+    <value>رفع صورة الفئة</value>
+  </data>
+  <data name="AllVariantsOutOfStock" xml:space="preserve">
+    <value>جميع المتغيرات غير متوفرة</value>
+  </data>
+  <data name="ErrorLoadingProducts" xml:space="preserve">
+    <value>خطأ في تحميل المنتجات</value>
+  </data>
+  <data name="InsufficientStock" xml:space="preserve">
+    <value>المخزون غير كافٍ</value>
+  </data>
+  <data name="LoadingProducts" xml:space="preserve">
+    <value>جاري تحميل المنتجات...</value>
+  </data>
+  <data name="NoProductsAvailable" xml:space="preserve">
+    <value>لا توجد منتجات متاحة</value>
+  </data>
+  <data name="NoProductsExcluded" xml:space="preserve">
+    <value>لا توجد منتجات مستثناة</value>
+  </data>
+  <data name="NoProductsFound" xml:space="preserve">
+    <value>لم يتم العثور على منتجات</value>
+  </data>
+  <data name="PleaseSelectVariant" xml:space="preserve">
+    <value>يرجى اختيار المتغير</value>
+  </data>
+  <data name="ProductExpiryDateInfo" xml:space="preserve">
+    <value>معلومات تاريخ انتهاء المنتج</value>
+  </data>
+  <data name="ProductIsAlreadyExcluded" xml:space="preserve">
+    <value>المنتج مستثنى بالفعل</value>
+  </data>
+  <data name="ProductNotFound" xml:space="preserve">
+    <value>المنتج غير موجود</value>
+  </data>
+  <data name="ProductRemovedFromExcludedList" xml:space="preserve">
+    <value>تم إزالة المنتج من قائمة الاستثناء</value>
+  </data>
+  <data name="ProductVariantNotFound" xml:space="preserve">
+    <value>متغير المنتج غير موجود</value>
+  </data>
+  <data name="SelectMultipleImages" xml:space="preserve">
+    <value>اختر صور متعددة</value>
+  </data>
+  <data name="ComboOfferExcludedSuccessfully" xml:space="preserve">
+    <value>تم استثناء عرض الكومبو بنجاح</value>
+  </data>
+  <data name="ComboOfferIsAlreadyExcluded" xml:space="preserve">
+    <value>عرض الكومبو مستثنى بالفعل</value>
+  </data>
+  <data name="ComboOfferNotFound" xml:space="preserve">
+    <value>عرض الكومبو غير موجود</value>
+  </data>
+  <data name="ComboOfferRemovedFromExcludedList" xml:space="preserve">
+    <value>تم إزالة عرض الكومبو من قائمة الاستثناء</value>
+  </data>
+  <data name="ExcludedComboOfferNotFound" xml:space="preserve">
+    <value>عرض الكومبو المستثنى غير موجود</value>
+  </data>
+  <data name="ExcludedComboOffers" xml:space="preserve">
+    <value>عروض الكومبو المستثناة</value>
+  </data>
+  <data name="NoComboOffersExcluded" xml:space="preserve">
+    <value>لا توجد عروض كومبو مستثناة</value>
+  </data>
+  <data name="SelectComboOffer" xml:space="preserve">
+    <value>اختر عرض كومبو</value>
+  </data>
+  <data name="AnErrorOccurredWithDetails" xml:space="preserve">
+    <value>حدث خطأ: {0}</value>
+  </data>
+  <data name="ComboOffersInThisListWillNotReceiveThePromoCodeDiscount" xml:space="preserve">
+    <value>عروض الكومبو في هذه القائمة لن تحصل على خصم كود الخصم</value>
+  </data>
+  <data name="DiscountExclusions" xml:space="preserve">
+    <value>استثناءات الخصم</value>
+  </data>
+  <data name="ExcludeItemsWithExistingDiscounts" xml:space="preserve">
+    <value>استثناء العناصر ذات الخصومات الموجودة</value>
+  </data>
+  <data name="ExcludedFromPromoCode" xml:space="preserve">
+    <value>مستثنى من كود الخصم</value>
+  </data>
+  <data name="ExcludedProductNotFound" xml:space="preserve">
+    <value>المنتج المستثنى غير موجود</value>
+  </data>
+  <data name="ExcludedProducts" xml:space="preserve">
+    <value>المنتجات المستثناة</value>
+  </data>
+  <data name="FailedToUpdatePromoCode" xml:space="preserve">
+    <value>فشل في تحديث كود الخصم</value>
+  </data>
+  <data name="MinimumOrderAmountRequiredForEligibleItems" xml:space="preserve">
+    <value>الحد الأدنى لمبلغ الطلب المطلوب للعناصر المؤهلة</value>
+  </data>
+  <data name="ProductExcludedSuccessfully" xml:space="preserve">
+    <value>تم استثناء المنتج بنجاح</value>
+  </data>
+  <data name="ProductsInThisListWillNotReceiveThePromoCodeDiscount" xml:space="preserve">
+    <value>المنتجات في هذه القائمة لن تحصل على خصم كود الخصم</value>
+  </data>
+  <data name="PromoCodeCouldNotBeAppliedToEligibleItems" xml:space="preserve">
+    <value>لم يتمكن كود الخصم من التطبيق على العناصر المؤهلة</value>
+  </data>
+  <data name="PromoCodeWillNotApplyToItemsWithFlashSalesComboOffersOrListPriceDiscounts" xml:space="preserve">
+    <value>كود الخصم لن يطبق على العناصر ذات عروض الفلاش سيل أو عروض الكومبو أو خصومات سعر القائمة</value>
+  </data>
+  <data name="WhenEnabledPromoCodeWillNotApplyToItemsWithFlashSalesComboOffersOrListPriceDiscounts" xml:space="preserve">
+    <value>عند التفعيل، لن يطبق كود الخصم على العناصر ذات عروض الفلاش سيل أو عروض الكومبو أو خصومات سعر القائمة</value>
+  </data>
+  <data name="YouCanAddExcludedProductsAfterCreatingThePromoCode" xml:space="preserve">
+    <value>يمكنك إضافة المنتجات المستثناة بعد إنشاء كود الخصم</value>
+  </data>
+  <data name="AreYouSureYouWantToRemoveThisComboOfferFromExcludedList" xml:space="preserve">
+    <value>هل أنت متأكد من إزالة عرض الكومبو هذا من قائمة الاستثناء؟</value>
+  </data>
+  <data name="AreYouSureYouWantToRemoveThisProductFromExcludedList" xml:space="preserve">
+    <value>هل أنت متأكد من إزالة هذا المنتج من قائمة الاستثناء؟</value>
+  </data>
+  <data name="AddItemsToStartShopping" xml:space="preserve">
+    <value>أضف عناصر للبدء بالتسوق</value>
+  </data>
+  <data name="CartItemNotFound" xml:space="preserve">
+    <value>عنصر السلة غير موجود</value>
+  </data>
+  <data name="InvalidRequest" xml:space="preserve">
+    <value>طلب غير صالح</value>
+  </data>
+  <data name="QuantityUpdated" xml:space="preserve">
+    <value>تم تحديث الكمية</value>
+  </data>
+  <data name="QuantityUpdatedSuccessfully" xml:space="preserve">
+    <value>تم تحديث الكمية بنجاح</value>
+  </data>
+  <data name="FLASHSALE" xml:space="preserve">
+    <value>عرض فلاش</value>
+  </data>
+  <data name="LoadingFlashSales" xml:space="preserve">
+    <value>جاري تحميل عروض الفلاش...</value>
+  </data>
+  <data name="ManageFlashSaleProducts" xml:space="preserve">
+    <value>إدارة منتجات عرض الفلاش</value>
+  </data>
+  <data name="LoadingServices" xml:space="preserve">
+    <value>جاري تحميل الخدمات...</value>
+  </data>
+  <data name="ServiceType" xml:space="preserve">
+    <value>نوع الخدمة</value>
+  </data>
+  <data name="AllPosts" xml:space="preserve">
+    <value>جميع المقالات</value>
+  </data>
+  <data name="BackToBlog" xml:space="preserve">
+    <value>العودة للمدونة</value>
+  </data>
+  <data name="Comment" xml:space="preserve">
+    <value>تعليق</value>
+  </data>
+  <data name="Featured" xml:space="preserve">
+    <value>مميز</value>
+  </data>
+  <data name="MinRead" xml:space="preserve">
+    <value>دقائق قراءة</value>
+  </data>
+  <data name="NoBlogsFound" xml:space="preserve">
+    <value>لم يتم العثور على مدونات</value>
+  </data>
+  <data name="RelatedArticles" xml:space="preserve">
+    <value>مقالات ذات صلة</value>
+  </data>
+  <data name="ShareThisArticle" xml:space="preserve">
+    <value>شارك هذه المقالة</value>
+  </data>
+  <data name="ConfirmDeletePoster" xml:space="preserve">
+    <value>هل أنت متأكد من حذف الملصق؟</value>
+  </data>
+  <data name="ConfirmDeleteVideo" xml:space="preserve">
+    <value>هل أنت متأكد من حذف الفيديو؟</value>
+  </data>
+  <data name="DeletePoster" xml:space="preserve">
+    <value>حذف الملصق</value>
+  </data>
+  <data name="DeleteVideo" xml:space="preserve">
+    <value>حذف الفيديو</value>
+  </data>
+  <data name="ErrorDeletingPoster" xml:space="preserve">
+    <value>خطأ في حذف الملصق</value>
+  </data>
+  <data name="ErrorDeletingVideo" xml:space="preserve">
+    <value>خطأ في حذف الفيديو</value>
+  </data>
+  <data name="ErrorUploadingPoster" xml:space="preserve">
+    <value>خطأ في رفع الملصق</value>
+  </data>
+  <data name="ErrorUploadingVideo" xml:space="preserve">
+    <value>خطأ في رفع الفيديو</value>
+  </data>
+  <data name="InvalidVideoFormat" xml:space="preserve">
+    <value>تنسيق فيديو غير صالح</value>
+  </data>
+  <data name="NoPosterUploaded" xml:space="preserve">
+    <value>لم يتم رفع ملصق</value>
+  </data>
+  <data name="NoVideoUploaded" xml:space="preserve">
+    <value>لم يتم رفع فيديو</value>
+  </data>
+  <data name="PosterDeletedSuccessfully" xml:space="preserve">
+    <value>تم حذف الملصق بنجاح</value>
+  </data>
+  <data name="PosterExists" xml:space="preserve">
+    <value>الملصق موجود بالفعل</value>
+  </data>
+  <data name="PosterImage" xml:space="preserve">
+    <value>صورة الملصق</value>
+  </data>
+  <data name="PosterNotFound" xml:space="preserve">
+    <value>الملصق غير موجود</value>
+  </data>
+  <data name="PosterRequirements" xml:space="preserve">
+    <value>متطلبات الملصق</value>
+  </data>
+  <data name="PosterUploadedSuccessfully" xml:space="preserve">
+    <value>تم رفع الملصق بنجاح</value>
+  </data>
+  <data name="PleaseSelectPosterImage" xml:space="preserve">
+    <value>يرجى اختيار صورة الملصق</value>
+  </data>
+  <data name="PleaseSelectVideoFile" xml:space="preserve">
+    <value>يرجى اختيار ملف الفيديو</value>
+  </data>
+  <data name="SelectPosterImage" xml:space="preserve">
+    <value>اختر صورة الملصق</value>
+  </data>
+  <data name="SelectVideoFile" xml:space="preserve">
+    <value>اختر ملف الفيديو</value>
+  </data>
+  <data name="UploadNewPoster" xml:space="preserve">
+    <value>رفع ملصق جديد</value>
+  </data>
+  <data name="UploadNewVideo" xml:space="preserve">
+    <value>رفع فيديو جديد</value>
+  </data>
+  <data name="UploadPoster" xml:space="preserve">
+    <value>رفع الملصق</value>
+  </data>
+  <data name="UploadVideo" xml:space="preserve">
+    <value>رفع الفيديو</value>
+  </data>
+  <data name="VideoBanner" xml:space="preserve">
+    <value>بانر الفيديو</value>
+  </data>
+  <data name="VideoBannerDescription" xml:space="preserve">
+    <value>وصف بانر الفيديو</value>
+  </data>
+  <data name="VideoBannerManagement" xml:space="preserve">
+    <value>إدارة بانر الفيديو</value>
+  </data>
+  <data name="VideoDeletedSuccessfully" xml:space="preserve">
+    <value>تم حذف الفيديو بنجاح</value>
+  </data>
+  <data name="VideoExists" xml:space="preserve">
+    <value>الفيديو موجود بالفعل</value>
+  </data>
+  <data name="VideoFile" xml:space="preserve">
+    <value>ملف الفيديو</value>
+  </data>
+  <data name="VideoFileTooLarge" xml:space="preserve">
+    <value>ملف الفيديو كبير جداً</value>
+  </data>
+  <data name="VideoNotFound" xml:space="preserve">
+    <value>الفيديو غير موجود</value>
+  </data>
+  <data name="VideoRequirements" xml:space="preserve">
+    <value>متطلبات الفيديو</value>
+  </data>
+  <data name="VideoUploadedSuccessfully" xml:space="preserve">
+    <value>تم رفع الفيديو بنجاح</value>
+  </data>
+  <data name="YourBrowserDoesNotSupportVideo" xml:space="preserve">
+    <value>المتصفح الخاص بك لا يدعم الفيديو</value>
+  </data>
+  <data name="AddMoreImages" xml:space="preserve">
+    <value>إضافة المزيد من الصور</value>
+  </data>
+  <data name="CurrentImages" xml:space="preserve">
+    <value>الصور الحالية</value>
+  </data>
+  <data name="ImageFileTooLarge" xml:space="preserve">
+    <value>ملف الصورة كبير جداً</value>
+  </data>
+  <data name="InvalidImageFormat" xml:space="preserve">
+    <value>تنسيق صورة غير صالح</value>
+  </data>
+  <data name="NewImagePreview" xml:space="preserve">
+    <value>معاينة الصورة الجديدة</value>
+  </data>
+  <data name="NoImage" xml:space="preserve">
+    <value>لا توجد صورة</value>
+  </data>
+  <data name="NoImages" xml:space="preserve">
+    <value>لا توجد صور</value>
+  </data>
+  <data name="Preview" xml:space="preserve">
+    <value>معاينة</value>
+  </data>
+  <data name="UploadImage" xml:space="preserve">
+    <value>رفع صورة</value>
+  </data>
+  <data name="UploadNewImageReplace" xml:space="preserve">
+    <value>رفع صورة جديدة لاستبدال</value>
+  </data>
+  <data name="Uploading" xml:space="preserve">
+    <value>جاري الرفع...</value>
+  </data>
+  <data name="GuestOrder" xml:space="preserve">
+    <value>طلب ضيف</value>
+  </data>
+  <data name="NoOrdersFound" xml:space="preserve">
+    <value>لم يتم العثور على طلبات</value>
+  </data>
+  <data name="Refunded" xml:space="preserve">
+    <value>مسترد</value>
+  </data>
+  <data name="Rejected" xml:space="preserve">
+    <value>مرفوض</value>
+  </data>
+  <data name="TotalOrders" xml:space="preserve">
+    <value>إجمالي الطلبات</value>
+  </data>
+  <data name="ViewPurchases" xml:space="preserve">
+    <value>عرض المشتريات</value>
+  </data>
+  <data name="An error occurred. Please try again." xml:space="preserve">
+    <value>حدث خطأ. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="Available" xml:space="preserve">
+    <value>متاح</value>
+  </data>
+  <data name="BasicInformation" xml:space="preserve">
+    <value>المعلومات الأساسية</value>
+  </data>
+  <data name="ClearAll" xml:space="preserve">
+    <value>مسح الكل</value>
+  </data>
+  <data name="CopyLink" xml:space="preserve">
+    <value>نسخ الرابط</value>
+  </data>
+  <data name="CreateNew" xml:space="preserve">
+    <value>إنشاء جديد</value>
+  </data>
+  <data name="CreateNewOffer" xml:space="preserve">
+    <value>إنشاء عرض جديد</value>
+  </data>
+  <data name="Culture" xml:space="preserve">
+    <value>الثقافة</value>
+  </data>
+  <data name="Current" xml:space="preserve">
+    <value>الحالي</value>
+  </data>
+  <data name="Currently used" xml:space="preserve">
+    <value>مستخدم حالياً</value>
+  </data>
+  <data name="Days" xml:space="preserve">
+    <value>أيام</value>
+  </data>
+  <data name="EndsIn" xml:space="preserve">
+    <value>ينتهي خلال</value>
+  </data>
+  <data name="ExpiryDate" xml:space="preserve">
+    <value>تاريخ الانتهاء</value>
+  </data>
+  <data name="FailedToCopy" xml:space="preserve">
+    <value>فشل في النسخ</value>
+  </data>
+  <data name="FieldIsRequired" xml:space="preserve">
+    <value>هذا الحقل مطلوب</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>من</value>
+  </data>
+  <data name="Hours" xml:space="preserve">
+    <value>ساعات</value>
+  </data>
+  <data name="ISBN" xml:space="preserve">
+    <value>الرقم المعياري</value>
+  </data>
+  <data name="IsRequired" xml:space="preserve">
+    <value>مطلوب</value>
+  </data>
+  <data name="LastModified" xml:space="preserve">
+    <value>آخر تعديل</value>
+  </data>
+  <data name="LearnMore" xml:space="preserve">
+    <value>اعرف المزيد</value>
+  </data>
+  <data name="LinkCopied" xml:space="preserve">
+    <value>تم نسخ الرابط</value>
+  </data>
+  <data name="LoadingBestSellers" xml:space="preserve">
+    <value>جاري تحميل الأكثر مبيعاً...</value>
+  </data>
+  <data name="LoadingNewArrivals" xml:space="preserve">
+    <value>جاري تحميل الوصلات الحديثة...</value>
+  </data>
+  <data name="LoadingSpecialOffers" xml:space="preserve">
+    <value>جاري تحميل العروض الخاصة...</value>
+  </data>
+  <data name="ManageOffers" xml:space="preserve">
+    <value>إدارة العروض</value>
+  </data>
+  <data name="MaximumQuantity" xml:space="preserve">
+    <value>الكمية القصوى</value>
+  </data>
+  <data name="Minutes" xml:space="preserve">
+    <value>دقائق</value>
+  </data>
+  <data name="MostPopularProducts" xml:space="preserve">
+    <value>المنتجات الأكثر شعبية</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>لا</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>موافق</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>خصم</value>
+  </data>
+  <data name="Oldest" xml:space="preserve">
+    <value>الأقدم</value>
+  </data>
+  <data name="OnlyAvailable" xml:space="preserve">
+    <value>المتاح فقط</value>
+  </data>
+  <data name="OriginalPriceWillBeCalculated" xml:space="preserve">
+    <value>سيتم حساب السعر الأصلي</value>
+  </data>
+  <data name="PleaseEnterValidEmailAddress" xml:space="preserve">
+    <value>يرجى إدخال عنوان بريد إلكتروني صحيح</value>
+  </data>
+  <data name="PleaseFillAllRequiredFields" xml:space="preserve">
+    <value>يرجى ملء جميع الحقول المطلوبة</value>
+  </data>
+  <data name="PleaseFillRequiredFields" xml:space="preserve">
+    <value>يرجى ملء الحقول المطلوبة</value>
+  </data>
+  <data name="PleaseSelectPaymentMethod" xml:space="preserve">
+    <value>يرجى اختيار طريقة الدفع</value>
+  </data>
+  <data name="PleaseWait" xml:space="preserve">
+    <value>يرجى الانتظار...</value>
+  </data>
+  <data name="Pricing" xml:space="preserve">
+    <value>التسعير</value>
+  </data>
+  <data name="Rating" xml:space="preserve">
+    <value>التقييم</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>إعادة تعيين</value>
+  </data>
+  <data name="Retry" xml:space="preserve">
+    <value>إعادة المحاولة</value>
+  </data>
+  <data name="SAVE" xml:space="preserve">
+    <value>حفظ</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>حفظ التغييرات</value>
+  </data>
+  <data name="SaveFailed" xml:space="preserve">
+    <value>فشل الحفظ</value>
+  </data>
+  <data name="Saved" xml:space="preserve">
+    <value>تم الحفظ</value>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>جاري الحفظ...</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>الإعدادات</value>
+  </data>
+  <data name="ShopNow" xml:space="preserve">
+    <value>تسوق الآن</value>
+  </data>
+  <data name="Size" xml:space="preserve">
+    <value>الحجم</value>
+  </data>
+  <data name="Sort" xml:space="preserve">
+    <value>ترتيب</value>
+  </data>
+  <data name="StockNotificationAlreadySubscribed" xml:space="preserve">
+    <value>أنت مشترك بالفعل في إشعار المخزون</value>
+  </data>
+  <data name="StockNotificationSubscribed" xml:space="preserve">
+    <value>تم الاشتراك في إشعار المخزون</value>
+  </data>
+  <data name="TimeRemaining" xml:space="preserve">
+    <value>الوقت المتبقي</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>إلى</value>
+  </data>
+  <data name="TotalProducts" xml:space="preserve">
+    <value>إجمالي المنتجات</value>
+  </data>
+  <data name="TryDifferentFilter" xml:space="preserve">
+    <value>جرب فلتر مختلف</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>غير معروف</value>
+  </data>
+  <data name="ValidationError" xml:space="preserve">
+    <value>خطأ في التحقق</value>
+  </data>
+  <data name="Wishlist" xml:space="preserve">
+    <value>قائمة الأمنيات</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>نعم</value>
+  </data>
+  <data name="YourFile" xml:space="preserve">
+    <value>ملفك</value>
+  </data>
+  <data name="YourWishlistIsEmpty" xml:space="preserve">
+    <value>قائمة أمنياتك فارغة</value>
+  </data>
+  <data name="total" xml:space="preserve">
+    <value>المجموع</value>
+  </data>
+  <data name="Instruction1" xml:space="preserve">
+    <value>التعليمات 1</value>
+  </data>
+  <data name="Instruction2" xml:space="preserve">
+    <value>التعليمات 2</value>
+  </data>
+  <data name="Instruction3" xml:space="preserve">
+    <value>التعليمات 3</value>
+  </data>
+  <data name="Instruction4" xml:space="preserve">
+    <value>التعليمات 4</value>
+  </data>
+  <data name="Instruction5" xml:space="preserve">
+    <value>التعليمات 5</value>
+  </data>
+  <data name="Instructions" xml:space="preserve">
+    <value>التعليمات</value>
+  </data>
+  <data name="InvalidEmailFormat" xml:space="preserve">
+    <value>تنسيق بريد إلكتروني غير صالح</value>
+  </data>
+  <data name="NotifyMeWhenAvailable" xml:space="preserve">
+    <value>أخبرني عند التوفر</value>
+  </data>
+  <data name="AllBrands" xml:space="preserve">
+    <value>جميع العلامات التجارية</value>
   </data>
 </root>

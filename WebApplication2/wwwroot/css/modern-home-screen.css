@@ -1091,7 +1091,7 @@
 }
 
 .filter-group {
-    display: flex;
+    display: contents;
     flex-direction: column;
     gap: 0.75rem;
 }

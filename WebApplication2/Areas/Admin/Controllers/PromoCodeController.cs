@@ -95,18 +95,50 @@ namespace BulkyBook.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var promoCode = _unitOfWork.PromoCode.Get(p => p.Id == id, includeProperties: "ExcludedProducts,ExcludedProducts.Product");
+            var promoCode = _unitOfWork.PromoCode.Get(p => p.Id == id, includeProperties: "ExcludedProducts,ExcludedProducts.Product,ExcludedComboOffers,ExcludedComboOffers.ComboOffer");
             
             if (promoCode == null)
             {
                 return NotFound();
             }
 
-            // Load all products for selection
+            // Get current culture for localization
+            var requestCulture = HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+            var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+            
+            // Get all products for dropdown (excluding already excluded products)
+            var excludedProductIds = promoCode.ExcludedProducts?.Select(ep => ep.ProductId).ToList() ?? new List<int>();
+            
             var allProducts = _unitOfWork.product.GetAll(p => !p.IsDeleted, includeProperties: "categry")
+                .Where(p => !excludedProductIds.Contains(p.Id))
                 .OrderBy(p => p.Title)
+                .Select(p => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Text = (currentCulture == "ar" && !string.IsNullOrEmpty(p.TitleAr)) 
+                        ? $"{p.TitleAr} ({_localizer["Stock"].Value}: {p.StockQuantity})" 
+                        : $"{p.Title} ({_localizer["Stock"].Value}: {p.StockQuantity})",
+                    Value = p.Id.ToString()
+                })
                 .ToList();
-            ViewBag.AllProducts = allProducts;
+            
+            ViewBag.Products = allProducts;
+
+            // Get all combo offers for dropdown (excluding already excluded combo offers)
+            var excludedComboOfferIds = promoCode.ExcludedComboOffers?.Select(eco => eco.ComboOfferId).ToList() ?? new List<int>();
+            
+            var allComboOffers = _unitOfWork.ComboOffer.GetAll(co => !co.IsDeleted && co.IsActive, includeProperties: "ComboOfferItems")
+                .Where(co => !excludedComboOfferIds.Contains(co.Id))
+                .OrderBy(co => co.Name)
+                .Select(co => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Text = (currentCulture == "ar" && !string.IsNullOrEmpty(co.NameAr)) 
+                        ? $"{co.NameAr} ({_localizer["ComboPrice"].Value}: {co.ComboPrice} AED)" 
+                        : $"{co.Name} ({_localizer["ComboPrice"].Value}: {co.ComboPrice} AED)",
+                    Value = co.Id.ToString()
+                })
+                .ToList();
+            
+            ViewBag.ComboOffers = allComboOffers;
 
             return View(promoCode);
         }
@@ -239,7 +271,7 @@ namespace BulkyBook.Areas.Admin.Controllers
 
                 if (rowsAffected == 0)
                 {
-                    return Json(new { success = false, message = "Failed to update promo code" });
+                    return Json(new { success = false, message = _localizer["FailedToUpdatePromoCode"].Value });
                 }
 
                 var message = newIsActive ? _localizer["PromoCodeActivated"].Value : _localizer["PromoCodeDeactivated"].Value;
@@ -253,7 +285,7 @@ namespace BulkyBook.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "An error occurred: " + ex.Message });
+                return Json(new { success = false, message = string.Format(_localizer["AnErrorOccurredWithDetails"].Value, ex.Message) });
             }
         }
 
@@ -276,7 +308,7 @@ namespace BulkyBook.Areas.Admin.Controllers
 
             if (promoCode == null)
             {
-                return Json(new { success = false, message = "Promo code not found" });
+                return Json(new { success = false, message = _localizer["PromoCodeNotFound"].Value });
             }
 
             var excludedProducts = promoCode.ExcludedProducts?
@@ -284,7 +316,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                 {
                     id = ep.Id,
                     productId = ep.ProductId,
-                    productTitle = ep.Product?.Title ?? "Unknown",
+                    productTitle = ep.Product?.Title ?? _localizer["Unknown"].Value,
                     productTitleAr = ep.Product?.TitleAr ?? ""
                 })
                 .ToList()  ;
@@ -302,14 +334,14 @@ namespace BulkyBook.Areas.Admin.Controllers
                 var promoCode = _dbContext.PromoCodes.FirstOrDefault(p => p.Id == promoCodeId);
                 if (promoCode == null)
                 {
-                    return Json(new { success = false, message = "Promo code not found" });
+                    return Json(new { success = false, message = _localizer["PromoCodeNotFound"].Value });
                 }
 
                 // Check if product exists
                 var product = _unitOfWork.product.Get(p => p.Id == productId && !p.IsDeleted);
                 if (product == null)
                 {
-                    return Json(new { success = false, message = "Product not found" });
+                    return Json(new { success = false, message = _localizer["ProductNotFound"].Value });
                 }
 
                 // Check if already excluded
@@ -318,7 +350,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                 
                 if (existing != null)
                 {
-                    return Json(new { success = false, message = "Product is already excluded" });
+                    return Json(new { success = false, message = _localizer["ProductIsAlreadyExcluded"].Value });
                 }
 
                 // Add excluded product
@@ -331,18 +363,26 @@ namespace BulkyBook.Areas.Admin.Controllers
                 _dbContext.PromoCodeExcludedProducts.Add(excludedProduct);
                 _dbContext.SaveChanges();
 
+                // Get current culture for localization
+                var requestCulture = HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+                var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+                
+                var productTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr)) 
+                    ? product.TitleAr 
+                    : product.Title;
+
                 return Json(new 
                 { 
                     success = true, 
-                    message = "Product excluded successfully",
+                    message = _localizer["ProductExcludedSuccessfully"].Value,
                     excludedProductId = excludedProduct.Id,
-                    productTitle = product.Title,
+                    productTitle = productTitle,
                     productTitleAr = product.TitleAr ?? ""
                 });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "An error occurred: " + ex.Message });
+                return Json(new { success = false, message = string.Format(_localizer["AnErrorOccurredWithDetails"].Value, ex.Message) });
             }
         }
 
@@ -357,17 +397,17 @@ namespace BulkyBook.Areas.Admin.Controllers
 
                 if (excludedProduct == null)
                 {
-                    return Json(new { success = false, message = "Excluded product not found" });
+                    return Json(new { success = false, message = _localizer["ExcludedProductNotFound"].Value });
                 }
 
                 _dbContext.PromoCodeExcludedProducts.Remove(excludedProduct);
                 _dbContext.SaveChanges();
 
-                return Json(new { success = true, message = "Product removed from excluded list" });
+                return Json(new { success = true, message = _localizer["ProductRemovedFromExcludedList"].Value });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "An error occurred: " + ex.Message });
+                return Json(new { success = false, message = string.Format(_localizer["AnErrorOccurredWithDetails"].Value, ex.Message) });
             }
         }
 
@@ -393,6 +433,153 @@ namespace BulkyBook.Areas.Admin.Controllers
                 .ToList();
 
             return Json(products);
+        }
+
+        // GET: PromoCode/GetProductForDropdown
+        [HttpGet]
+        public IActionResult GetProductForDropdown(int productId)
+        {
+            var product = _unitOfWork.product.Get(p => p.Id == productId && !p.IsDeleted, includeProperties: "categry");
+            
+            if (product == null)
+            {
+                return Json(new { success = false, message = _localizer["ProductNotFound"].Value });
+            }
+
+            // Get current culture for localization
+            var requestCulture = HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+            var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+            
+            var productTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr)) 
+                ? product.TitleAr 
+                : product.Title;
+            
+            var stockText = _localizer["Stock"].Value;
+            var text = $"{productTitle} ({stockText}: {product.StockQuantity})";
+
+            return Json(new 
+            { 
+                success = true, 
+                value = product.Id.ToString(),
+                text = text
+            });
+        }
+
+        // POST: PromoCode/AddExcludedComboOffer
+        [HttpPost]
+        public IActionResult AddExcludedComboOffer(int promoCodeId, int comboOfferId)
+        {
+            try
+            {
+                // Check if promo code exists
+                var promoCode = _dbContext.PromoCodes.FirstOrDefault(p => p.Id == promoCodeId);
+                if (promoCode == null)
+                {
+                    return Json(new { success = false, message = _localizer["PromoCodeNotFound"].Value });
+                }
+
+                // Check if combo offer exists
+                var comboOffer = _unitOfWork.ComboOffer.Get(co => co.Id == comboOfferId && !co.IsDeleted);
+                if (comboOffer == null)
+                {
+                    return Json(new { success = false, message = _localizer["ComboOfferNotFound"].Value });
+                }
+
+                // Check if already excluded
+                var existing = _dbContext.PromoCodeExcludedComboOffers
+                    .FirstOrDefault(eco => eco.PromoCodeId == promoCodeId && eco.ComboOfferId == comboOfferId);
+                
+                if (existing != null)
+                {
+                    return Json(new { success = false, message = _localizer["ComboOfferIsAlreadyExcluded"].Value });
+                }
+
+                // Add excluded combo offer
+                var excludedComboOffer = new PromoCodeExcludedComboOffer
+                {
+                    PromoCodeId = promoCodeId,
+                    ComboOfferId = comboOfferId
+                };
+
+                _dbContext.PromoCodeExcludedComboOffers.Add(excludedComboOffer);
+                _dbContext.SaveChanges();
+
+                // Get current culture for localization
+                var requestCulture = HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+                var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+                
+                var comboOfferName = (currentCulture == "ar" && !string.IsNullOrEmpty(comboOffer.NameAr)) 
+                    ? comboOffer.NameAr 
+                    : comboOffer.Name;
+
+                return Json(new 
+                { 
+                    success = true, 
+                    message = _localizer["ComboOfferExcludedSuccessfully"].Value,
+                    excludedComboOfferId = excludedComboOffer.Id,
+                    comboOfferName = comboOfferName,
+                    comboOfferNameAr = comboOffer.NameAr ?? ""
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = string.Format(_localizer["AnErrorOccurredWithDetails"].Value, ex.Message) });
+            }
+        }
+
+        // POST: PromoCode/RemoveExcludedComboOffer
+        [HttpPost]
+        public IActionResult RemoveExcludedComboOffer(int excludedComboOfferId)
+        {
+            try
+            {
+                var excludedComboOffer = _dbContext.PromoCodeExcludedComboOffers
+                    .FirstOrDefault(eco => eco.Id == excludedComboOfferId);
+
+                if (excludedComboOffer == null)
+                {
+                    return Json(new { success = false, message = _localizer["ExcludedComboOfferNotFound"].Value });
+                }
+
+                _dbContext.PromoCodeExcludedComboOffers.Remove(excludedComboOffer);
+                _dbContext.SaveChanges();
+
+                return Json(new { success = true, message = _localizer["ComboOfferRemovedFromExcludedList"].Value });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = string.Format(_localizer["AnErrorOccurredWithDetails"].Value, ex.Message) });
+            }
+        }
+
+        // GET: PromoCode/GetComboOfferForDropdown
+        [HttpGet]
+        public IActionResult GetComboOfferForDropdown(int comboOfferId)
+        {
+            var comboOffer = _unitOfWork.ComboOffer.Get(co => co.Id == comboOfferId && !co.IsDeleted);
+            
+            if (comboOffer == null)
+            {
+                return Json(new { success = false, message = _localizer["ComboOfferNotFound"].Value });
+            }
+
+            // Get current culture for localization
+            var requestCulture = HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+            var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+            
+            var comboOfferName = (currentCulture == "ar" && !string.IsNullOrEmpty(comboOffer.NameAr)) 
+                ? comboOffer.NameAr 
+                : comboOffer.Name;
+            
+            var comboPriceText = _localizer["ComboPrice"].Value;
+            var text = $"{comboOfferName} ({comboPriceText}: {comboOffer.ComboPrice} AED)";
+
+            return Json(new 
+            { 
+                success = true, 
+                value = comboOffer.Id.ToString(),
+                text = text
+            });
         }
     }
 }

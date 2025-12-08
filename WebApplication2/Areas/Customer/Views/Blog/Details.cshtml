@@ -23,33 +23,12 @@
     <meta property="article:section" content="@Model.Category" />
     <link rel="canonical" href="@(ViewData["Canonical"] ?? (Context.Request.Scheme + "://" + Context.Request.Host + Context.Request.Path))" />
     
-    <script type="application/ld+json">
+    @if (ViewData["ArticleStructuredData"] != null)
     {
-        "@@context": "https://schema.org",
-        "@@type": "BlogPosting",
-        "headline": "@Model.Title",
-        "description": "@Model.MetaDescription",
-        "image": "@Context.Request.Scheme://@Context.Request.Host@Model.ImageUrl",
-        "datePublished": "@Model.PublishedDate.ToString("yyyy-MM-ddTHH:mm:ssZ")",
-        "dateModified": "@Model.PublishedDate.ToString("yyyy-MM-ddTHH:mm:ssZ")",
-        "author": {
-            "@@type": "Person",
-            "name": "@Model.Author"
-        },
-        "publisher": {
-            "@@type": "Organization",
-            "name": "Ideal Weight",
-            "logo": {
-                "@@type": "ImageObject",
-                "url": "@Context.Request.Scheme://@Context.Request.Host/images/logo.png"
-            }
-        },
-        "mainEntityOfPage": {
-            "@@type": "WebPage",
-            "@@id": "@(Context.Request.Scheme)://@(Context.Request.Host)@(Context.Request.Path)"
-        }
+        <script type="application/ld+json">
+        @Html.Raw(ViewData["ArticleStructuredData"])
+        </script>
     }
-    </script>
 }
 
 <link rel="stylesheet" href="~/css/blog.css" />

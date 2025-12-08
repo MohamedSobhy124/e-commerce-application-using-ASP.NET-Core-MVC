@@ -15,6 +15,7 @@ namespace BulkyBook.DataAccess.Repository
         public ICompanyRepository company { get; private set; }
 
         public ICategryReprository categry { get; private set; }
+        public IBrandRepository brand { get; private set; }
         public IProductReprository product { get; private set; }
 
         public IApplicationUserReprository   applicationUser { get; private set; }
@@ -39,11 +40,13 @@ namespace BulkyBook.DataAccess.Repository
         public IStockNotificationRepository StockNotification { get; private set; }
         public IComboOfferRepository ComboOffer { get; private set; }
         public IComboOfferItemRepository ComboOfferItem { get; private set; }
+        public IBrandRepository Brand { get; private set; }
 
         public UnitOfWork(ApplicationDBContext db) 
         {
             _db = db;
             categry=new CategryReprository(_db);
+            brand = new BrandRepository(_db);
             product = new ProductReprository(_db);
             company = new CompanyReprository(_db);
             applicationUser = new ApplicationUserReprository(_db);
@@ -67,6 +70,7 @@ namespace BulkyBook.DataAccess.Repository
             StockNotification = new StockNotificationRepository(_db);
             ComboOffer = new ComboOfferRepository(_db);
             ComboOfferItem = new ComboOfferItemRepository(_db);
+            Brand = new BrandRepository(_db);
 
         }
 

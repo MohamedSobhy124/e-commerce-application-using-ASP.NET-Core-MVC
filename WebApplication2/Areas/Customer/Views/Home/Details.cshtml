@@ -137,6 +137,12 @@
                             <div class="product-category-badge">
                                 <i class="bi bi-tag-fill me-2"></i>@Model.product.categry.Name
                             </div>
+                            @if (Model.product.Brand != null)
+                            {
+                                <div class="product-brand-badge" style="margin-top: 0.5rem;">
+                                    <i class="bi bi-award-fill me-2"></i>@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.Brand.NameAr) ? Model.product.Brand.NameAr : Model.product.Brand.Name)
+                                </div>
+                            }
 
                             <h3 class="product-category-name">@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)</h3>
 

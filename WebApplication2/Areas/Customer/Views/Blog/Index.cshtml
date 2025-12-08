@@ -18,23 +18,12 @@
     <meta property="og:url" content="@(Context.Request.Scheme)://@(Context.Request.Host)@(Context.Request.Path)" />
     <link rel="canonical" href="@(Context.Request.Scheme)://@(Context.Request.Host)@(Context.Request.Path)" />
     
-    <script type="application/ld+json">
+    @if (ViewData["BlogStructuredData"] != null)
     {
-        "@@context": "https://schema.org",
-        "@@type": "Blog",
-        "name": "Health & Wellness Blog",
-        "description": "@ViewData["Description"]",
-        "url": "@(Context.Request.Scheme)://@(Context.Request.Host)@(Context.Request.Path)",
-        "publisher": {
-            "@@type": "Organization",
-            "name": "Ideal Weight",
-            "logo": {
-                "@@type": "ImageObject",
-                "url": "@Context.Request.Scheme://@Context.Request.Host/images/logo.png"
-            }
-        }
+        <script type="application/ld+json">
+        @Html.Raw(ViewData["BlogStructuredData"])
+        </script>
     }
-    </script>
 }
 
 <link rel="stylesheet" href="~/css/blog.css" />

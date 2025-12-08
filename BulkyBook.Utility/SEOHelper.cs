@@ -199,6 +199,7 @@ namespace BulkyBook.Utility
     ""url"": ""{baseUrl}"",
     ""logo"": ""{baseUrl}/Images/Products/logo_white_bg.png"",
     ""description"": ""{EscapeJson(description)}"",
+    ""keywords"": ""ideal weight nutrition, ideal weight, nutrition, ideal weight solutions, nutrition supplements"",
     ""address"": {{
         ""@type"": ""PostalAddress"",
         ""streetAddress"": ""UAE"",
@@ -247,6 +248,9 @@ namespace BulkyBook.Utility
             var paymentAccepted = business["PaymentAccepted"] ?? "Cash, Credit Card, Debit Card, Online Payment";
             var currenciesAccepted = business["CurrenciesAccepted"] ?? "AED";
             
+            // Enhanced description with target keywords
+            var enhancedDescription = description + " Ideal Weight Nutrition specializes in ideal weight solutions and comprehensive nutrition programs. Expert nutrition advice for achieving your ideal weight.";
+            
             // Build opening hours
             var openingHours = new List<string>();
             var days = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
@@ -269,7 +273,8 @@ namespace BulkyBook.Utility
     ""url"": ""{baseUrl}"",
     ""logo"": ""{baseUrl}/Images/Products/logo_white_bg.png"",
     ""image"": ""{baseUrl}/Images/Products/logo_white_bg.png"",
-    ""description"": ""{EscapeJson(description)}"",
+    ""description"": ""{EscapeJson(enhancedDescription)}"",
+    ""keywords"": ""ideal weight nutrition, ideal weight, nutrition, ideal weight solutions, nutrition supplements, UAE"",
     ""address"": {{
         ""@type"": ""PostalAddress"",
         ""streetAddress"": ""{EscapeJson(streetAddress)}"",
@@ -361,6 +366,8 @@ namespace BulkyBook.Utility
     ""alternateName"": ""وزن مثالي للتغذية"",
     ""url"": ""{baseUrl}"",
     ""logo"": ""{baseUrl}/Images/Products/logo_white_bg.png"",
+    ""description"": ""Ideal Weight Nutrition - Your trusted source for ideal weight solutions and premium nutrition supplements in UAE. Expert nutrition advice, ideal weight programs, and quality nutrition products."",
+    ""keywords"": ""ideal weight nutrition, ideal weight, nutrition, ideal weight solutions, nutrition supplements, UAE"",
     ""potentialAction"": {{
         ""@type"": ""SearchAction"",
         ""target"": {{
@@ -375,8 +382,12 @@ namespace BulkyBook.Utility
         public static string GenerateHomePageStructuredData(string baseUrl, string siteName, string description, string culture = "en")
         {
             var keywords = culture == "ar"
-                ? "مكملات غذائية, بروتين, فيتامينات, مكملات رياضية, منتجات تخسيس, حمية غذائية, مكملات صحية, وزن مثالي, تغذية, مكملات الإمارات"
-                : "nutrition supplements, protein supplements, vitamins UAE, diet supplements, weight loss products, fitness nutrition, health supplements, ideal weight, nutrition store UAE";
+                ? "وزن مثالي للتغذية, وزن مثالي, التغذية, مكملات غذائية, بروتين, فيتامينات, مكملات رياضية, منتجات تخسيس, حمية غذائية, مكملات صحية, تغذية, مكملات الإمارات, برامج الوزن المثالي, حلول التغذية"
+                : "ideal weight nutrition, ideal weight, nutrition, ideal weight nutrition UAE, ideal weight solutions, nutrition supplements, protein supplements, vitamins UAE, diet supplements, weight loss products, fitness nutrition, health supplements, ideal weight, nutrition store UAE, ideal weight program, nutrition advice";
+
+            var aboutDescription = culture == "ar"
+                ? "وزن مثالي للتغذية - حلول الوزن المثالي والتغذية المتميزة في الإمارات. مكملات غذائية عالية الجودة، بروتين، فيتامينات، منتجات تخسيس، ولياقة بدنية في الإمارات"
+                : "Ideal Weight Nutrition - Ideal weight solutions and premium nutrition in UAE. High-quality nutrition supplements, protein, vitamins, diet products, and fitness nutrition in UAE";
 
             return $@"{{
     ""@context"": ""https://schema.org"",
@@ -393,8 +404,9 @@ namespace BulkyBook.Utility
     }},
     ""about"": {{
         ""@type"": ""Thing"",
-        ""name"": ""Nutrition Supplements"",
-        ""description"": ""Premium nutrition supplements, protein, vitamins, diet products, and fitness nutrition in UAE""
+        ""name"": ""{EscapeJson(culture == "ar" ? "وزن مثالي للتغذية" : "Ideal Weight Nutrition")}"",
+        ""description"": ""{EscapeJson(aboutDescription)}"",
+        ""alternateName"": ""{EscapeJson(culture == "ar" ? "التغذية والوزن المثالي" : "Ideal Weight and Nutrition")}""
     }},
     ""keywords"": ""{EscapeJson(keywords)}"",
     ""breadcrumb"": {{
@@ -403,7 +415,7 @@ namespace BulkyBook.Utility
             {{
                 ""@type"": ""ListItem"",
                 ""position"": 1,
-                ""name"": ""Home"",
+                ""name"": ""{EscapeJson(culture == "ar" ? "الرئيسية" : "Home")}"",
                 ""item"": ""{baseUrl}""
             }}
         ]
@@ -440,6 +452,191 @@ namespace BulkyBook.Utility
 }}";
         }
 
+        public static string GenerateFAQStructuredData(List<FAQItem> faqs, string baseUrl)
+        {
+            if (faqs == null || !faqs.Any()) return "";
+
+            var faqItems = new StringBuilder();
+            for (int i = 0; i < faqs.Count; i++)
+            {
+                var faq = faqs[i];
+                faqItems.Append($@"{{
+            ""@type"": ""Question"",
+            ""name"": ""{EscapeJson(faq.Question)}"",
+            ""acceptedAnswer"": {{
+                ""@type"": ""Answer"",
+                ""text"": ""{EscapeJson(faq.Answer)}""
+            }}
+        }}");
+                if (i < faqs.Count - 1) faqItems.Append(",");
+            }
+
+            return $@"{{
+    ""@context"": ""https://schema.org"",
+    ""@type"": ""FAQPage"",
+    ""mainEntity"": [
+        {faqItems}
+    ]
+}}";
+        }
+
+        public static string GenerateReviewStructuredData(string productName, double rating, int reviewCount, string baseUrl, string productUrl)
+        {
+            if (reviewCount == 0) return "";
+
+            return $@"{{
+    ""@context"": ""https://schema.org"",
+    ""@type"": ""Product"",
+    ""name"": ""{EscapeJson(productName)}"",
+    ""aggregateRating"": {{
+        ""@type"": ""AggregateRating"",
+        ""ratingValue"": ""{rating:F1}"",
+        ""reviewCount"": {reviewCount},
+        ""bestRating"": ""5"",
+        ""worstRating"": ""1""
+    }},
+    ""url"": ""{productUrl}""
+}}";
+        }
+
+        public static string GenerateItemListStructuredData(List<ItemListItem> items, string baseUrl, string listName)
+        {
+            if (items == null || !items.Any()) return "";
+
+            var itemList = new StringBuilder();
+            for (int i = 0; i < items.Count; i++)
+            {
+                var item = items[i];
+                itemList.Append($@"{{
+            ""@type"": ""ListItem"",
+            ""position"": {i + 1},
+            ""name"": ""{EscapeJson(item.Name)}"",
+            ""url"": ""{item.Url}"",
+            ""image"": ""{item.ImageUrl ?? ""}"",
+            ""description"": ""{EscapeJson(item.Description ?? "")}""
+        }}");
+                if (i < items.Count - 1) itemList.Append(",");
+            }
+
+            return $@"{{
+    ""@context"": ""https://schema.org"",
+    ""@type"": ""ItemList"",
+    ""name"": ""{EscapeJson(listName)}"",
+    ""itemListElement"": [
+        {itemList}
+    ]
+}}";
+        }
+
+        public static string GenerateWebPageStructuredData(string baseUrl, string pageTitle, string description, string pageUrl, string culture = "en")
+        {
+            return $@"{{
+    ""@context"": ""https://schema.org"",
+    ""@type"": ""WebPage"",
+    ""@id"": ""{pageUrl}#webpage"",
+    ""url"": ""{pageUrl}"",
+    ""name"": ""{EscapeJson(pageTitle)}"",
+    ""description"": ""{EscapeJson(description)}"",
+    ""inLanguage"": ""{culture}"",
+    ""isPartOf"": {{
+        ""@type"": ""WebSite"",
+        ""name"": ""Ideal Weight Nutrition"",
+        ""url"": ""{baseUrl}""
+    }},
+    ""about"": {{
+        ""@type"": ""Thing"",
+        ""name"": ""Nutrition Supplements""
+    }}
+}}";
+        }
+
+        public static string GenerateArticleStructuredData(ArticleData article, string baseUrl, string culture = "en")
+        {
+            var authorSchema = $@"{{
+        ""@type"": ""Person"",
+        ""name"": ""{EscapeJson(article.Author)}""
+    }}";
+
+            var publisherSchema = $@"{{
+        ""@type"": ""Organization"",
+        ""name"": ""Ideal Weight Nutrition"",
+        ""logo"": {{
+            ""@type"": ""ImageObject"",
+            ""url"": ""{baseUrl}/Images/Products/logo_white_bg.png""
+        }}
+    }}";
+
+            var imageSchema = !string.IsNullOrEmpty(article.ImageUrl)
+                ? $@",
+    ""image"": {{
+        ""@type"": ""ImageObject"",
+        ""url"": ""{article.ImageUrl}"",
+        ""width"": 1200,
+        ""height"": 630
+    }}"
+                : "";
+
+            var keywordsSchema = !string.IsNullOrEmpty(article.Keywords)
+                ? $@",
+    ""keywords"": ""{EscapeJson(article.Keywords)}"""
+                : "";
+
+            return $@"{{
+    ""@context"": ""https://schema.org"",
+    ""@type"": ""BlogPosting"",
+    ""@id"": ""{article.Url}#article"",
+    ""headline"": ""{EscapeJson(article.Headline)}"",
+    ""description"": ""{EscapeJson(article.Description)}"",
+    ""url"": ""{article.Url}"",
+    ""datePublished"": ""{article.DatePublished:yyyy-MM-ddTHH:mm:ssZ}"",
+    ""dateModified"": ""{article.DateModified:yyyy-MM-ddTHH:mm:ssZ}"",
+    ""author"": {authorSchema},
+    ""publisher"": {publisherSchema},
+    ""inLanguage"": ""{culture}"",
+    ""articleSection"": ""{EscapeJson(article.Category ?? "Health & Wellness")}"",
+    ""wordCount"": {article.WordCount ?? 0}{imageSchema}{keywordsSchema}
+}}";
+        }
+
+        public static string GenerateBlogStructuredData(string baseUrl, string siteName, string description, string culture = "en")
+        {
+            return $@"{{
+    ""@context"": ""https://schema.org"",
+    ""@type"": ""Blog"",
+    ""name"": ""{EscapeJson(siteName)} Blog"",
+    ""description"": ""{EscapeJson(description)}"",
+    ""url"": ""{baseUrl}/Customer/Blog"",
+    ""inLanguage"": ""{culture}"",
+    ""publisher"": {{
+        ""@type"": ""Organization"",
+        ""name"": ""Ideal Weight Nutrition"",
+        ""logo"": {{
+            ""@type"": ""ImageObject"",
+            ""url"": ""{baseUrl}/Images/Products/logo_white_bg.png""
+        }}
+    }}
+}}";
+        }
+
+        public static string GenerateCollectionPageStructuredData(string baseUrl, string pageTitle, string description, string pageUrl, int itemCount, string culture = "en")
+        {
+            return $@"{{
+    ""@context"": ""https://schema.org"",
+    ""@type"": ""CollectionPage"",
+    ""@id"": ""{pageUrl}#webpage"",
+    ""url"": ""{pageUrl}"",
+    ""name"": ""{EscapeJson(pageTitle)}"",
+    ""description"": ""{EscapeJson(description)}"",
+    ""inLanguage"": ""{culture}"",
+    ""numberOfItems"": {itemCount},
+    ""isPartOf"": {{
+        ""@type"": ""WebSite"",
+        ""name"": ""Ideal Weight Nutrition"",
+        ""url"": ""{baseUrl}""
+    }}
+}}";
+        }
+
         private static string EscapeJson(string input)
         {
             if (string.IsNullOrEmpty(input)) return "";
@@ -451,10 +648,38 @@ namespace BulkyBook.Utility
         }
     }
 
+    public class FAQItem
+    {
+        public string Question { get; set; }
+        public string Answer { get; set; }
+    }
+
+    public class ItemListItem
+    {
+        public string Name { get; set; }
+        public string Url { get; set; }
+        public string ImageUrl { get; set; }
+        public string Description { get; set; }
+    }
+
     public class BreadcrumbItem
     {
         public string Name { get; set; }
         public string Url { get; set; }
+    }
+
+    public class ArticleData
+    {
+        public string Headline { get; set; }
+        public string Description { get; set; }
+        public string Url { get; set; }
+        public DateTime DatePublished { get; set; }
+        public DateTime DateModified { get; set; }
+        public string Author { get; set; }
+        public string Category { get; set; }
+        public string ImageUrl { get; set; }
+        public string Keywords { get; set; }
+        public int? WordCount { get; set; }
     }
 }
 

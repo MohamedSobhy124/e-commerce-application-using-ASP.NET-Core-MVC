@@ -13,6 +13,7 @@ namespace BulkyBook.DataAccess.Data
                 
         }
         public DbSet<Categry> Categries { get; set; }
+        public DbSet<Brand> Brands { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ApplicationUser> applicationUsers { get; set; }
         public DbSet<Company> Companys { get; set; }
@@ -28,6 +29,7 @@ namespace BulkyBook.DataAccess.Data
         public DbSet<PromoCode> PromoCodes { get; set; }
         public DbSet<PromoCodeUsage> PromoCodeUsages { get; set; }
         public DbSet<PromoCodeExcludedProduct> PromoCodeExcludedProducts { get; set; }
+        public DbSet<PromoCodeExcludedComboOffer> PromoCodeExcludedComboOffers { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<ServiceOffer> ServiceOffers { get; set; }
         public DbSet<ServicePurchase> ServicePurchases { get; set; }
@@ -60,6 +62,7 @@ namespace BulkyBook.DataAccess.Data
 			modelBuilder.Entity<Product>().HasIndex(p => new { p.IsDeleted, p.StockQuantity }); // For stock queries
 			
 			modelBuilder.Entity<Categry>().HasIndex(c => c.IsDeleted);
+			modelBuilder.Entity<Brand>().HasIndex(b => b.IsDeleted);
 			modelBuilder.Entity<ProductOption>().HasIndex(o => new { o.IsDeleted, o.ProductId });
 			modelBuilder.Entity<ProductOptionValue>().HasIndex(ov => new { ov.IsDeleted, ov.ProductOptionId });
 			modelBuilder.Entity<ProductVariant>().HasIndex(v => new { v.IsDeleted, v.ProductId });
@@ -70,6 +73,7 @@ namespace BulkyBook.DataAccess.Data
 			
 			// Index on foreign keys for faster joins
 			modelBuilder.Entity<Product>().HasIndex(p => p.CategryId);
+			modelBuilder.Entity<Product>().HasIndex(p => p.BrandId);
 			modelBuilder.Entity<ShoppingCart>().HasIndex(c => new { c.ApplicationUserId, c.ProductId, c.ProductVariantId });
 			modelBuilder.Entity<OrderDetail>().HasIndex(od => new { od.OrderHeaderId, od.ProductId });
 			modelBuilder.Entity<ProductImage>().HasIndex(pi => pi.ProductId);

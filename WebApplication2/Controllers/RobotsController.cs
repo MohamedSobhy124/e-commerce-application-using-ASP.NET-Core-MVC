@@ -22,6 +22,14 @@ namespace BulkyBook.Controllers
                 var sitemapUrl = baseUrl + "/sitemap.xml";
 
                 var robotsContent = new StringBuilder();
+                robotsContent.AppendLine("# Crawl-delay for aggressive bots");
+                robotsContent.AppendLine("User-agent: AhrefsBot");
+                robotsContent.AppendLine("Crawl-delay: 10");
+                robotsContent.AppendLine();
+                robotsContent.AppendLine("User-agent: SemrushBot");
+                robotsContent.AppendLine("Crawl-delay: 10");
+                robotsContent.AppendLine();
+                robotsContent.AppendLine("# Default rules for all bots");
                 robotsContent.AppendLine("User-agent: *");
                 robotsContent.AppendLine("Allow: /");
                 robotsContent.AppendLine("Disallow: /Admin/");

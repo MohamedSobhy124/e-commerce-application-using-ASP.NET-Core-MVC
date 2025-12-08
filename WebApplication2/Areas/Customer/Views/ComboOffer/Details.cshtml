@@ -260,7 +260,7 @@
                 <div class="combo-image-container">
                     @if (!string.IsNullOrEmpty(Model.ImageUrl))
                     {
-                        <img src="@Model.ImageUrl" alt="@comboName" class="img-fluid w-100" style="height: 400px; object-fit: cover;" />
+                        <img src="@Model.ImageUrl" alt="@comboName" class="img-fluid w-100" style="height: 400px; object-fit: contain;" />
                     }
                     <div class="combo-badge-floating">
                         @Model.DiscountPercentage.ToString("F0")% @Localizer["Off"]
@@ -402,9 +402,9 @@
                         ?? item.Product?.ImageUrl 
                         ?? "/images/no-image.png";
                     
-                    var productPrice = item.ProductVariant != null 
-                        ? (double)item.ProductVariant.Price 
-                        : (item.Product?.Price ?? 0);
+                    var productPrice = item.ProductVariant != null
+                        ? (double)item.ProductVariant.ListPrice
+                        : (item.Product?.ListPrice ?? 0);
                     
                     <div class="product-card-combo">
                         <div class="product-image-wrapper" style="cursor: pointer;" >
@@ -429,7 +429,20 @@
                                     var optionValues = item.ProductVariant.VariantOptionValues
                                         .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
                                         .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
-                                        .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                                        .Select(
+                                        vov =>
+                                        {
+                                            var optionName = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ProductOption?.NameAr))
+                                                        ? vov.OptionValue.ProductOption.NameAr
+                                                        : vov.OptionValue?.ProductOption?.Name;
+
+                                            var optionValue = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ValueAr))
+                                                        ? vov.OptionValue.ValueAr
+                                                        : vov.OptionValue?.Value;
+
+                                            return $"{optionName}: {optionValue}";
+                                        }
+                                        )
                                         .Where(s => !string.IsNullOrEmpty(s))
                                         .ToList();
                                     variantName = string.Join(" / ", optionValues);

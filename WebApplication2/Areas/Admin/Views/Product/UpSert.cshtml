@@ -222,6 +222,16 @@
                                     <span asp-validation-for="product.CategryId" class="text-danger"></span>
                                 </div>
 
+                                <div class="admin-form-group">
+                                    <label asp-for="product.BrandId" class="admin-form-label">
+                                        <i class="bi bi-award me-2"></i>@Localizer["Brand"] <span class="text-muted">(Optional)</span>
+                                    </label>
+                                    <select asp-for="product.BrandId" asp-items="@Model.BrandList" class="admin-form-select">
+                                        <option value="">--- @Localizer["SelectBrand"] ---</option>
+                                    </select>
+                                    <span asp-validation-for="product.BrandId" class="text-danger"></span>
+                                </div>
+
                                 <!-- Product Type Field (in main form for new products) -->
                                 @if (Model.product.Id == 0)
                                 {

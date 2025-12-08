@@ -159,24 +159,27 @@ namespace BulkyBook.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (orderHeader.PaymentStatus == SD.PaymentStatusPaid)
-            {
-                var options = new RefundCreateOptions
-                {
-                    Reason = RefundReasons.RequestedByCustomer,
-                    PaymentIntent = orderHeader.PaymentIntentId
-                };
+            //if (orderHeader.PaymentStatus == SD.PaymentStatusPaid)
+            //{
+            //    var options = new RefundCreateOptions
+            //    {
+            //        Reason = RefundReasons.RequestedByCustomer,
+            //        PaymentIntent = orderHeader.PaymentIntentId
+            //    };
 
-                var service = new RefundService();
-                Refund refund = service.Create(options);
+            //    var service = new RefundService();
+            //    Refund refund = service.Create(options);
 
-                _unitOfWork.OrderHeader.UpdateStatus(orderHeader.Id, SD.StatusCancelled, SD.StatusRefunded);
-            }
-            else
-            {
-                _unitOfWork.OrderHeader.UpdateStatus(orderHeader.Id, SD.StatusCancelled, SD.StatusCancelled);
-            }
+            //    _unitOfWork.OrderHeader.UpdateStatus(orderHeader.Id, SD.StatusCancelled, SD.StatusRefunded);
+            //}
+            //else
+            //{
+            orderHeader.PaymentStatus = SD.StatusCancelled;
+            orderHeader.OrderStatus = SD.StatusCancelled;
+            _unitOfWork.OrderHeader.Update(orderHeader);
             _unitOfWork.save();
+            //}
+            
             TempData["success"] = "Order Cancelled Successfully.";
             return RedirectToAction(nameof(Details), new { id = id });
         }
@@ -187,7 +190,7 @@ namespace BulkyBook.Areas.Admin.Controllers
         public IActionResult GetAll(string status)
         {
             // Get all order headers without including ApplicationUser
-            IEnumerable<OrderHeader> objOrderHeaders = _unitOfWork.OrderHeader.GetAll().ToList();
+            IEnumerable<OrderHeader> objOrderHeaders = _unitOfWork.OrderHeader.GetAll().OrderByDescending(_=>_.Id).ToList();
 
             // Load ApplicationUser only for non-guest orders
             foreach (var order in objOrderHeaders)

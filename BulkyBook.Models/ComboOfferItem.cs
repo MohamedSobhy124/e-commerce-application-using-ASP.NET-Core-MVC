@@ -69,11 +69,11 @@ namespace BulkyBook.Models
             {
                 if (ProductVariant != null && !ProductVariant.IsDeleted)
                 {
-                    return (decimal)ProductVariant.Price * Quantity;
+                    return  ProductVariant.ListPrice ?? 0 * Quantity;
                 }
                 else if (Product != null)
                 {
-                    return (decimal)Product.Price * Quantity;
+                    return (decimal)Product.ListPrice * Quantity;
                 }
                 return 0;
             }
@@ -91,4 +91,6 @@ namespace BulkyBook.Models
         }
     }
 }
+
+
 

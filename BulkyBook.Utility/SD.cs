@@ -32,7 +32,7 @@ namespace BulkyBook.Utility
 
 		// Payment Methods
 		public const string PaymentMethodStripe = "Stripe";
-		public const string PaymentMethodTappy = "Tappy";
+		public const string PaymentMethodTappy = "Tabby";
 		public const string PaymentMethodTamara = "Tamara";
 
 
