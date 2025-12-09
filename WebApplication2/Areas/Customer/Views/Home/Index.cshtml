@@ -44,11 +44,21 @@
 <!-- Sticky Hero Search Box Header - At Top -->
 <header class="hero-search-box-sticky" id="heroSearchBoxSticky">
     <div class="container">
-        <div class="hero-search-box">
+        <!-- App Logo -->
+        <a href="@Url.Action("Index", "Home", new { area = "Customer" })" class="sticky-header-logo">
+            <img src="~/Images/Products/Logo2-removebg.png" alt="Ideal Weight Nutrition" class="logo-img" />
+        </a>
+        
+        <!-- Mobile: Search Icon Only (Initially) -->
+        <button type="button" class="mobile-search-toggle" id="mobileSearchToggle" aria-label="Toggle search">
+            <i class="bi bi-search"></i>
+        </button>
+        
+        <!-- Desktop & Mobile (when expanded) Search Box -->
+        <div class="hero-search-box" id="heroSearchBox">
             <form id="heroSearchForm" onsubmit="return false;">
                 <div class="advanced-search-container">
                     <div class="search-input-wrapper">
-                        <i class="bi bi-search search-icon"></i>
                         <input type="text" 
                                name="searchTerm" 
                                id="heroSearchInput"
@@ -65,23 +75,50 @@
                         </button>
                     </div>
                     <button type="submit" class="hero-search-btn magnetic-btn ripple">
-                        @Localizer["Search"]
+                        <span class="search-btn-text">@Localizer["Search"]</span>
+                        <i class="bi bi-search search-btn-icon"></i>
                     </button>
                 </div>
             </form>
         </div>
         
-        <!-- Header Actions -->
-        <div class="hero-header-actions">
+        <!-- Header Actions: Cart, Wishlist, Filter -->
+        <div class="hero-header-actions" id="heroHeaderActions">
+            <!-- Cart Icon -->
+            <button type="button"
+               class="header-action-btn cart-action-btn" 
+               title="@Localizer["ShoppingCart"]"
+               id="headerCartBtn"
+               onclick="openCartSidebar(); return false;">
+                <i class="bi bi-cart3"></i>
+                <span class="action-badge" id="headerCartBadge" style="display: none;">0</span>
+            </button>
+            
+            <!-- Wishlist Icon (Only for authenticated users) -->
+            @if (User.Identity.IsAuthenticated)
+            {
+                <button type="button" 
+                        class="header-action-btn wishlist-action-btn" 
+                        onclick="openWishlistSidebar()"
+                        title="@Localizer["Wishlist"]"
+                        id="headerWishlistBtn">
+                    <i class="bi bi-heart"></i>
+                    <span class="action-badge" id="headerWishlistBadge" style="display: none;">0</span>
+                </button>
+            }
+            
             <!-- Filter Button -->
-            <button type="button" class="modern-filter-toggle-header-btn" id="modernFilterToggleBtn" aria-label="Toggle filters">
+            <button type="button" 
+                    class="header-action-btn filter-action-btn modern-filter-toggle-header-btn" 
+                    id="modernFilterToggleBtn" 
+                    aria-label="Toggle filters"
+                    style="width: fit-content;"
+                    title="@Localizer["Filters"]">
                 <i class="bi bi-funnel-fill"></i>
                 <span class="filter-btn-text">@Localizer["Filters"]</span>
             </button>
         </div>
     </div>
-    
-     
 </header>
 
 @* Enhanced Video Banner Section - Two Part Design *@
@@ -1320,7 +1357,7 @@
                     {
                         <a asp-action="Details" asp-route-productId="@Product.Id" class="btn-select-options">
                             <i class="bi bi-list-check"></i>
-                            @Localizer["SelectOptions"]
+                            <span class="btn-select-options-text">@Localizer["SelectOptions"]</span>
                         </a>
                     }
                     else
@@ -1807,16 +1844,11 @@
 <!-- Overlay -->
 <div id="cartOverlay" class="cart-overlay" onclick="closeCartSidebar()"></div>
 
-<!-- Floating Cart Button -->
-    <button class="floating-cart-btn" onclick="openCartSidebar()" title="View Cart">
-        <i class="bi bi-cart3"></i>
-        <span id="floatingCartBadge" class="floating-cart-badge">0</span>
-    </button>
 
 @if (User.Identity.IsAuthenticated)
 {
-    <!-- Floating Wishlist Button -->
-    <button class="floating-wishlist-btn" onclick="openWishlistSidebar()" title="View Wishlist">
+    <!-- Floating Wishlist Button - Hidden on home page (moved to header) -->
+    <button class="floating-wishlist-btn home-page-hidden" onclick="openWishlistSidebar()" title="View Wishlist" style="display: none;">
         <i class="bi bi-heart-fill"></i>
         <span id="floatingWishlistBadge" class="floating-wishlist-badge" style="display: none;">0</span>
     </button>
@@ -1886,7 +1918,18 @@
         // Localizations for JavaScript
         const currentCulture = '@currentCulture';
         const localizations = {
-            selectOptions: '@Html.Raw(Localizer["SelectOptions"])'
+            selectOptions: '@Html.Raw(Localizer["SelectOptions"])',
+            addedToCart: '@Html.Raw(Localizer["ItemAddedToCart"] ?? "Product added to cart successfully")',
+            removedFromCart: '@Html.Raw(Localizer["ItemRemovedFromCart"] ?? "Product removed from cart")',
+            failedToAddToCart: '@Html.Raw(Localizer["FailedToAddToCart"] ?? "Failed to add to cart")',
+            failedToUpdateCart: '@Html.Raw(Localizer["FailedToUpdateCart"] ?? "Failed to update cart. Please try again.")',
+            flashSaleAddedToCart: '@Html.Raw(Localizer["ItemAddedToCart"] ?? "Flash sale item added to cart!")',
+            couldNotAddItemToCart: '@Html.Raw(Localizer["FailedToAddToCart"] ?? "Could not add item to cart")',
+            errorOccurred: '@Html.Raw(Localizer["AnErrorOccurredPleaseTryAgain"] ?? "An error occurred. Please try again.")',
+            itemRemovedFromCart: '@Html.Raw(Localizer["ItemRemovedFromCart"] ?? "Item removed from cart")',
+            addToCart: '@Html.Raw(Localizer["AddToCart"] ?? "Add to Cart")',
+            removeFromCart: '@Html.Raw(Localizer["RemoveFromCart"] ?? "Remove from Cart")',
+            inCart: '@Html.Raw(Localizer["InCart"] ?? "In Cart")'
         };
 
         // Newsletter Form Handler - Fully Implemented
@@ -2149,24 +2192,22 @@
             }
         }
 
-        // Function to update floating cart badge
+        // Function to update floating cart badge (now updates header badge instead)
         function updateFloatingCartBadge(count) {
-            const floatingBadge = document.getElementById('floatingCartBadge');
-            const floatingBtn = document.querySelector('.floating-cart-btn');
-            if (floatingBadge) {
-                floatingBadge.textContent = count;
-                // Add pulse animation
-                if (floatingBtn) {
-                    floatingBtn.classList.add('pulse');
-                    setTimeout(() => {
-                        floatingBtn.classList.remove('pulse');
-                    }, 600);
+            // Update header cart badge instead of floating badge
+            const headerCartBadge = document.getElementById('headerCartBadge');
+            if (headerCartBadge) {
+                if (count > 0) {
+                    headerCartBadge.textContent = count;
+                    headerCartBadge.style.display = 'flex';
+                } else {
+                    headerCartBadge.style.display = 'none';
                 }
             }
         }
 
-        // Function to open cart sidebar
-        function openCartSidebar() {
+        // Function to open cart sidebar (make it globally available)
+        window.openCartSidebar = function() {
             console.log('Opening cart sidebar...');
             const sidebar = document.getElementById('cartSidebar');
             const overlay = document.getElementById('cartOverlay');
@@ -2180,6 +2221,11 @@
             } else {
                 console.error('Cart sidebar or overlay not found!');
             }
+        };
+        
+        // Also keep local function for backward compatibility
+        function openCartSidebar() {
+            window.openCartSidebar();
         }
 
         // Function to close cart sidebar
@@ -2302,7 +2348,7 @@
                     if (button) {
                         button.classList.remove('in-cart');
                         button.querySelector('i').className = 'bi bi-plus-lg';
-                        button.title = 'Add to Cart';
+                        button.title = localizations.addToCart;
                     }
                     cartProductIds = cartProductIds.filter(id => id !== productId);
                     
@@ -2320,7 +2366,7 @@
                     }, 150);
                     
                     if (typeof toastr !== 'undefined') {
-                        toastr.info('Product removed from cart');
+                        toastr.info(localizations.removedFromCart);
                     }
                 }
             })
@@ -2361,7 +2407,7 @@
                         // Product was added
                         button.classList.add('in-cart');
                         button.querySelector('i').className = 'bi bi-check-lg';
-                        button.title = 'Remove from Cart';
+                        button.title = localizations.removeFromCart;
                         cartProductIds.push(productId);
                         
                         // Show notification
@@ -2387,7 +2433,7 @@
                         // Product was removed
                         button.classList.remove('in-cart');
                         button.querySelector('i').className = 'bi bi-plus-lg';
-                        button.title = 'Add to Cart';
+                        button.title = localizations.addToCart;
                         cartProductIds = cartProductIds.filter(id => id !== productId);
                         
                         // Show notification
@@ -2416,12 +2462,12 @@
                 button.querySelector('i').className = originalIcon;
                 button.querySelector('i').style.animation = '';
                 if (typeof toastr !== 'undefined') {
-                    toastr.error('Failed to update cart. Please try again.');
+                    toastr.error(localizations.failedToUpdateCart);
                 } else {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Error',
-                        text: 'Failed to update cart. Please try again.'
+                        title: '@Localizer["Error"]',
+                        text: localizations.failedToUpdateCart
                     });
                 }
             });
@@ -2589,12 +2635,12 @@
                                 ${(product.productType === 1 || product.productType === 'Variable')
                                     ? `<a href="/Customer/Home/Details?productId=${product.id}" class="btn-select-options">
                                         <i class="bi bi-list-check"></i>
-                                        ${localizations.selectOptions}
+                                        <span class="btn-select-options-text">${localizations.selectOptions}</span>
                                        </a>`
                                     : `<button class="btn-add-cart-quick ${cartClass}" 
                                         data-product-id="${product.id}"
                                         onclick="toggleCart(${product.id}, this); event.stopPropagation();" 
-                                        title="${isInCart ? 'In Cart' : 'Add to Cart'}">
+                                        title="${isInCart ? localizations.inCart : localizations.addToCart}">
                                         <i class="bi ${cartIcon}"></i>
                                        </button>`
                                 }
@@ -3437,7 +3483,7 @@
                 .then(data => {
                     if (data.success && data.isAdded) {
                         if (typeof toastr !== 'undefined') {
-                            toastr.success('Added to cart!');
+                            toastr.success(localizations.addedToCart);
                         }
                         if (typeof updateFloatingCartBadge === 'function') {
                             updateFloatingCartBadge(data.cartCount);
@@ -3447,7 +3493,7 @@
                 .catch(error => {
                     console.error('Error adding to cart:', error);
                     if (typeof toastr !== 'undefined') {
-                        toastr.error('Failed to add to cart');
+                        toastr.error(localizations.failedToAddToCart);
                     }
                 });
             }
@@ -3494,7 +3540,7 @@
                 .catch(error => {
                     console.error('Error removing from wishlist:', error);
                     if (typeof toastr !== 'undefined') {
-                        toastr.error('Failed to remove from wishlist');
+                        toastr.error(localizations.failedToUpdateCart || 'Failed to remove from wishlist');
                     }
                 });
             }
@@ -3730,6 +3776,128 @@
                 }
             }
         });
+        
+        // Mobile Search Toggle Functionality
+        (function() {
+            const mobileSearchToggle = document.getElementById('mobileSearchToggle');
+            const heroSearchBox = document.getElementById('heroSearchBox');
+            const heroHeaderActions = document.getElementById('heroHeaderActions');
+            const heroSearchInput = document.getElementById('heroSearchInput');
+            
+            if (mobileSearchToggle && heroSearchBox) {
+                // Toggle search box on mobile
+                mobileSearchToggle.addEventListener('click', function() {
+                    const isActive = heroSearchBox.classList.contains('active');
+                    
+                    if (isActive) {
+                        // Hide search box
+                        heroSearchBox.classList.remove('active');
+                        mobileSearchToggle.classList.remove('active');
+                        heroHeaderActions.classList.remove('mobile-hidden');
+                        // Clear search if empty
+                        if (!heroSearchInput.value.trim()) {
+                            heroSearchInput.blur();
+                        }
+                    } else {
+                        // Show search box
+                        heroSearchBox.classList.add('active');
+                        mobileSearchToggle.classList.add('active');
+                        heroHeaderActions.classList.add('mobile-hidden');
+                        // Focus on input
+                        setTimeout(() => {
+                            heroSearchInput.focus();
+                        }, 100);
+                    }
+                });
+                
+                // Close search when clicking outside on mobile
+                document.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 768) {
+                        const isClickInside = heroSearchBox.contains(e.target) || 
+                                             mobileSearchToggle.contains(e.target);
+                        
+                        if (!isClickInside && heroSearchBox.classList.contains('active')) {
+                            // Only close if input is empty
+                            if (!heroSearchInput.value.trim()) {
+                                heroSearchBox.classList.remove('active');
+                                mobileSearchToggle.classList.remove('active');
+                                heroHeaderActions.classList.remove('mobile-hidden');
+                            }
+                        }
+                    }
+                });
+                
+                // Update wishlist badge count
+                function updateWishlistBadge() {
+                    const wishlistBadge = document.getElementById('headerWishlistBadge');
+                    if (wishlistBadge) {
+                        // Get wishlist count from sidebar or make API call
+                        const sidebarCount = document.getElementById('sidebarWishlistCount');
+                        if (sidebarCount) {
+                            const count = parseInt(sidebarCount.textContent) || 0;
+                            if (count > 0) {
+                                wishlistBadge.textContent = count;
+                                wishlistBadge.style.display = 'flex';
+                            } else {
+                                wishlistBadge.style.display = 'none';
+                            }
+                        }
+                    }
+                }
+                
+                // Update wishlist badge when sidebar opens/closes
+                if (typeof openWishlistSidebar === 'function') {
+                    const originalOpenWishlist = openWishlistSidebar;
+                    window.openWishlistSidebar = function() {
+                        originalOpenWishlist();
+                        setTimeout(updateWishlistBadge, 300);
+                    };
+                }
+                
+                // Initial update
+                updateWishlistBadge();
+            }
+            
+            // Update cart badge from existing cart count element
+            function updateCartBadge() {
+                const cartCountElement = document.getElementById('cartCount');
+                const headerCartBadge = document.getElementById('headerCartBadge');
+                
+                if (cartCountElement && headerCartBadge) {
+                    const count = parseInt(cartCountElement.textContent.trim()) || 0;
+                    if (count > 0) {
+                        headerCartBadge.textContent = count;
+                        headerCartBadge.style.display = 'flex';
+                    } else {
+                        headerCartBadge.style.display = 'none';
+                    }
+                } else if (headerCartBadge) {
+                    // If cartCount element doesn't exist, try to get from nav
+                    const navCartCount = document.querySelector('#cartNavLink #cartCount');
+                    if (navCartCount) {
+                        const count = parseInt(navCartCount.textContent.trim()) || 0;
+                        if (count > 0) {
+                            headerCartBadge.textContent = count;
+                            headerCartBadge.style.display = 'flex';
+                        } else {
+                            headerCartBadge.style.display = 'none';
+                        }
+                    }
+                }
+            }
+            
+            // Update cart badge on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(updateCartBadge, 500);
+            });
+            
+            // Listen for cart updates (if cart is updated via AJAX)
+            if (typeof jQuery !== 'undefined') {
+                $(document).on('cartUpdated', function() {
+                    setTimeout(updateCartBadge, 300);
+                });
+            }
+        })();
     </script>
 }
 

@@ -175,7 +175,8 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice, productV
         if (data.success) {
             // Success!
             triggerSuccessAnimation(btn);
-            toastr.success(data.message || 'Flash sale item added to cart!');
+            const successMsg = data.message || (window.localizations?.flashSaleAddedToCart || 'Flash sale item added to cart!');
+            toastr.success(successMsg);
             
             // Update cart count if exists
             if (data.cartCount !== undefined) {
@@ -201,14 +202,16 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice, productV
 
         } else {
             // Error
-            toastr.error(data.message || 'Could not add item to cart');
+            const errorMsg = data.message || (window.localizations?.couldNotAddItemToCart || 'Could not add item to cart');
+            toastr.error(errorMsg);
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        toastr.error('An error occurred. Please try again.');
+        const errorMsg = window.localizations?.errorOccurred || 'An error occurred. Please try again.';
+        toastr.error(errorMsg);
         btn.innerHTML = originalText;
         btn.disabled = false;
     });

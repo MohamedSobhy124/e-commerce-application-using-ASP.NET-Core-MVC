@@ -145,7 +145,8 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
     const token = document.querySelector('input[name="__RequestVerificationToken"]');
     if (!token) {
         console.error('Anti-forgery token not found!');
-        toastr.error('Security token missing. Please refresh the page.');
+        const errorMsg = window.localizations?.errorOccurred || 'Security token missing. Please refresh the page.';
+        toastr.error(errorMsg);
         btn.disabled = false;
         btn.className = originalClass;
         btn.innerHTML = originalText;
@@ -182,7 +183,8 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
         
         if (data.success) {
             // Success!
-            toastr.success(data.message || 'Flash sale item added to cart!');
+            const successMsg = data.message || (window.localizations?.flashSaleAddedToCart || 'Flash sale item added to cart!');
+            toastr.success(successMsg);
             
             // Update cart count
             if (data.cartCount !== undefined) {
@@ -211,7 +213,8 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
 
         } else {
             // Error from server
-            toastr.error(data.message || 'Could not add item to cart');
+            const errorMsg = data.message || (window.localizations?.couldNotAddItemToCart || 'Could not add item to cart');
+            toastr.error(errorMsg);
             btn.disabled = false;
             btn.className = originalClass;
             btn.innerHTML = originalText;
@@ -219,7 +222,8 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
     })
     .catch(error => {
         console.error('Error adding to cart:', error);
-        toastr.error('An error occurred. Please try again.');
+        const errorMsg = window.localizations?.errorOccurred || 'An error occurred. Please try again.';
+        toastr.error(errorMsg);
         btn.disabled = false;
         btn.className = originalClass;
         btn.innerHTML = originalText;
@@ -326,7 +330,8 @@ function removeCartItem(productId, cartId) {
             loadCartItems();
             // Show success message
             if (typeof toastr !== 'undefined') {
-                toastr.success('Item removed from cart');
+                const successMsg = window.localizations?.itemRemovedFromCart || 'Item removed from cart';
+                toastr.success(successMsg);
             }
         } else {
             throw new Error('Failed to remove item');
@@ -335,7 +340,8 @@ function removeCartItem(productId, cartId) {
     .catch(error => {
         console.error('Error removing cart item:', error);
         if (typeof toastr !== 'undefined') {
-            toastr.error('Failed to remove item. Please try again.');
+            const errorMsg = window.localizations?.failedToUpdateCart || 'Failed to remove item. Please try again.';
+            toastr.error(errorMsg);
         }
     });
 }

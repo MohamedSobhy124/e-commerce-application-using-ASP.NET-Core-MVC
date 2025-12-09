@@ -211,7 +211,7 @@ namespace BulkyBook.Utility
     ""contactPoint"": [
         {{
             ""@type"": ""ContactPoint"",
-            ""telephone"": ""+971-52-738-3841"",
+            ""telephone"": ""+971-50-770-0559"",
             ""contactType"": ""Customer Service"",
             ""availableLanguage"": [""Arabic"", ""English""],
             ""areaServed"": ""AE"",
@@ -219,7 +219,7 @@ namespace BulkyBook.Utility
         }},
         {{
             ""@type"": ""ContactPoint"",
-            ""telephone"": ""+971-52-738-3841"",
+            ""telephone"": ""+971-50-770-0559"",
             ""contactType"": ""Sales"",
             ""availableLanguage"": [""Arabic"", ""English""]
         }}
@@ -238,7 +238,7 @@ namespace BulkyBook.Utility
         public static string GenerateLocalBusinessStructuredData(string baseUrl, string siteName, string description, Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             var business = configuration.GetSection("SiteSettings:Business");
-            var phone = business["Phone"] ?? "+971-52-738-3841";
+            var phone = business["Phone"] ?? "+971-50-770-0559";
             var email = business["Email"] ?? "info@idealweightnutrition.ae";
             var streetAddress = business["Address:StreetAddress"] ?? "UAE";
             var city = business["Address:City"] ?? "Dubai";

@@ -84,8 +84,8 @@
 .hero-search-box-sticky .container {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0 1rem;
+    gap: 1rem;
+    padding: 0 1.25rem;
     flex-wrap: nowrap;
 }
 

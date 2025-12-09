@@ -171,6 +171,15 @@
   <data name="AddToCart" xml:space="preserve">
     <value>أضف للسلة</value>
   </data>
+  <data name="RemoveFromCart" xml:space="preserve">
+    <value>إزالة من السلة</value>
+  </data>
+  <data name="FailedToAddToCart" xml:space="preserve">
+    <value>فشل إضافة المنتج إلى السلة</value>
+  </data>
+  <data name="FailedToUpdateCart" xml:space="preserve">
+    <value>فشل تحديث السلة. يرجى المحاولة مرة أخرى.</value>
+  </data>
   <data name="BuyNow" xml:space="preserve">
     <value>اشتر الآن</value>
   </data>

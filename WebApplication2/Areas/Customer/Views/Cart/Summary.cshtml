@@ -96,12 +96,14 @@
 										bool isComboOffer = details.ComboOfferId.HasValue && details.ComboOffer != null;
 										bool hasVariant = details.ProductVariantId.HasValue && details.ProductVariant != null;
 										
-										// Get display name
+										// Get display name - use localized version based on current culture
 										string displayName = isComboOffer 
 											? (currentCulture == "ar" && !string.IsNullOrEmpty(details.ComboOffer.NameAr) 
 												? details.ComboOffer.NameAr 
 												: details.ComboOffer.Name)
-											: details.product.Title;
+											: (currentCulture == "ar" && !string.IsNullOrEmpty(details.product.TitleAr) 
+												? details.product.TitleAr 
+												: details.product.Title);
 										
 										// Get variant display string
 										string variantDisplayText = null;

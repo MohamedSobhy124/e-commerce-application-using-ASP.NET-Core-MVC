@@ -51,12 +51,14 @@
                         bool hasFlashSale = item.FlashSaleItemId.HasValue && item.FlashSalePrice.HasValue;
                         bool hasVariant = item.ProductVariantId.HasValue && item.ProductVariant != null;
                         
-                        // Get display name
+                        // Get display name - use localized version based on current culture
                         string displayName = isComboOffer 
                             ? (currentCulture == "ar" && !string.IsNullOrEmpty(item.ComboOffer.NameAr) 
                                 ? item.ComboOffer.NameAr 
                                 : item.ComboOffer.Name)
-                            : item.product.Title;
+                            : (currentCulture == "ar" && !string.IsNullOrEmpty(item.product.TitleAr) 
+                                ? item.product.TitleAr 
+                                : item.product.Title);
                         
                         // Get image - use combo image if it's a combo, otherwise use product image
                         string productImageUrl = null;

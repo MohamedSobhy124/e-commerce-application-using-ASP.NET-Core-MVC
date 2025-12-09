@@ -353,7 +353,7 @@
 
 .product-price-mini {
     margin-bottom: 1rem;
-    display: flex;
+    display: flow;
     align-items: baseline;
     gap: 0.5rem;
 }

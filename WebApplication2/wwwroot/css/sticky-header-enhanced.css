@@ -1,0 +1,394 @@
+/* ===================================
+   Enhanced Sticky Header - Clean & Professional
+   =================================== */
+
+/* Sticky Header Logo - Larger & More Visible */
+.sticky-header-logo {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    text-decoration: none;
+    transition: var(--transition);
+    margin-right: 1.5rem;
+    padding: 0.25rem 0;
+}
+
+.sticky-header-logo:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.sticky-header-logo .logo-img {
+    height: 55px;
+    width: auto;
+    max-width: 200px;
+    min-width: 140px;
+    object-fit: contain;
+    transition: var(--transition);
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
+}
+
+.sticky-header-logo:hover .logo-img {
+    filter: brightness(1.05) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
+}
+
+/* Mobile Search Toggle Button - Only show on mobile */
+.mobile-search-toggle {
+    display: none;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: var(--white);
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(59, 157, 213, 0.3);
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-search-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(59, 157, 213, 0.4);
+}
+
+.mobile-search-toggle.active {
+    background: var(--danger-color);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Header Action Buttons - Clean & Consistent */
+.hero-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    transition: var(--transition);
+}
+
+.header-action-btn {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 1.5px solid var(--gray-300);
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: 0;
+    margin: 0;
+}
+
+button.header-action-btn {
+    background: var(--white);
+    border: 1.5px solid var(--gray-300);
+    color: var(--gray-700);
+}
+
+.header-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.header-action-btn:active {
+    transform: translateY(0);
+}
+
+/* Cart Action Button */
+.cart-action-btn {
+    background: var(--white);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.cart-action-btn:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* Wishlist Action Button */
+.wishlist-action-btn {
+    background: var(--white);
+    border-color: #ec4899;
+    color: #ec4899;
+}
+
+.wishlist-action-btn:hover {
+    background: #ec4899;
+    border-color: #ec4899;
+    color: var(--white);
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* Filter Action Button */
+.filter-action-btn {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+    color: var(--gray-700);
+}
+
+.filter-action-btn:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* Action Badge */
+.action-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+    color: var(--white);
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0 4px;
+    border: 2px solid var(--white);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    z-index: 10;
+}
+
+.action-badge:empty {
+    display: none;
+}
+
+/* Search Button Icon (for mobile) */
+.search-btn-icon {
+    display: none;
+}
+
+/* Desktop: Show search box, hide mobile toggle */
+.hero-search-box {
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* Mobile Responsive - Clean Layout */
+@media (max-width: 768px) {
+    /* Sticky header container */
+    .hero-search-box-sticky {
+        padding: 0.75rem 0;
+    }
+    
+    .hero-search-box-sticky .container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0 1rem;
+        flex-wrap: nowrap;
+    }
+    
+    /* Logo - Keep visible and good size */
+    .sticky-header-logo {
+        margin-right: 0.75rem;
+        order: 1;
+        flex-shrink: 0;
+    }
+    
+    .sticky-header-logo .logo-img {
+        height: 45px;
+        max-width: 160px;
+        min-width: 120px;
+    }
+    
+    /* Show mobile search toggle */
+    .mobile-search-toggle {
+        display: flex;
+        order: 2;
+        flex-shrink: 0;
+    }
+    
+    /* Hide search box by default on mobile */
+    .hero-search-box {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--white);
+        padding: 1rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        margin-top: 0.5rem;
+        border-top: 1px solid var(--gray-200);
+    }
+    
+    /* Show search box when active */
+    .hero-search-box.active {
+        display: block;
+    }
+    
+    /* Header actions - Keep visible */
+    .hero-header-actions {
+        display: flex;
+        gap: 0.5rem;
+        order: 3;
+        flex-shrink: 0;
+    }
+    
+    /* Hide header actions when search is active */
+    .hero-header-actions.mobile-hidden {
+        display: none;
+    }
+    
+    /* Make header actions slightly smaller on mobile */
+    .header-action-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+    
+    /* Hide filter text on mobile */
+    .filter-btn-text {
+        display: none;
+    }
+    
+    /* Show search icon in button on mobile */
+    .search-btn-icon {
+        display: inline-block;
+    }
+    
+    /* Hide search button text on mobile */
+    .search-btn-text {
+        display: none;
+    }
+    
+    /* Adjust action badge size */
+    .action-badge {
+        min-width: 18px;
+        height: 18px;
+        font-size: 0.65rem;
+        top: -4px;
+        right: -4px;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-search-box-sticky {
+        padding: 0.625rem 0;
+    }
+    
+    .hero-search-box-sticky .container {
+        padding: 0 0.75rem;
+        gap: 0.5rem;
+    }
+    
+    /* Logo - Still visible and good size */
+    .sticky-header-logo {
+        margin-right: 0.5rem;
+    }
+    
+    .sticky-header-logo .logo-img {
+        height: 40px;
+        max-width: 140px;
+        min-width: 100px;
+    }
+    
+    .header-action-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+    }
+    
+    .mobile-search-toggle {
+        width: 38px;
+        height: 38px;
+        font-size: 1.1rem;
+    }
+    
+    .action-badge {
+        min-width: 16px;
+        height: 16px;
+        font-size: 0.6rem;
+        top: -3px;
+        right: -3px;
+    }
+    
+    /* Search box styling on small mobile */
+    .hero-search-box.active {
+        padding: 0.75rem;
+        margin-top: 0.25rem;
+    }
+}
+
+/* Smooth transitions */
+.hero-search-box,
+.hero-header-actions {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ensure sticky header has proper background and spacing */
+.hero-search-box-sticky {
+    position: relative;
+}
+
+.hero-search-box-sticky .container {
+    position: relative;
+}
+
+/* Hide floating buttons on home page */
+.home-page .floating-cart-btn,
+.home-page .floating-wishlist-btn,
+.floating-wishlist-btn.home-page-hidden {
+    display: none !important;
+}
+
+/* Ensure cart badge displays properly */
+#headerCartBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+#headerCartBadge span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+#headerCartBadge #cartCount {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+    color: var(--white);
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0 4px;
+    border: 2px solid var(--white);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    z-index: 10;
+}
+
+#headerCartBadge i {
+    font-size: 1.2rem;
+}

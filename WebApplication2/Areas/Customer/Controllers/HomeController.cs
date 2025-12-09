@@ -413,16 +413,58 @@ namespace BulkyBook.Areas.Customer.Controllers
         public async Task<IActionResult> LoadFlashSalesSection()
         {
             var now = BulkyBook.Utility.DateTimeHelper.Now;
+            
+            // PERFORMANCE: Optimized query - use filtered includes and only load necessary data
             var activeFlashSales = await _dbContext.FlashSales
                 .AsNoTracking()
-                .Include(f => f.FlashSaleItems.Where(i => !i.IsDeleted && i.FlashSaleQuantity > 0))
-                    .ThenInclude(i => i.Product)
-                        .ThenInclude(p => p.ProductImages.Where(img => img.ImageInfo == null))
                 .Where(f => !f.IsDeleted 
                     && f.IsActive 
                     && f.StartDate <= now 
                     && f.EndDate >= now)
                 .OrderBy(f => f.EndDate)
+                .Select(f => new FlashSale
+                {
+                    Id = f.Id,
+                    Name = f.Name,
+                    NameAr = f.NameAr,
+                    Description = f.Description,
+                    DescriptionAr = f.DescriptionAr,
+                    ImageUrl = f.ImageUrl,
+                    StartDate = f.StartDate,
+                    EndDate = f.EndDate,
+                    FlashSaleItems = f.FlashSaleItems
+                        .Where(i => !i.IsDeleted && i.FlashSaleQuantity > 0)
+                        .Select(i => new FlashSaleItem
+                        {
+                            Id = i.Id,
+                            ProductId = i.ProductId,
+                            ProductVariantId = i.ProductVariantId,
+                            FlashSalePrice = i.FlashSalePrice,
+                            FlashSaleQuantity = i.FlashSaleQuantity,
+                            Product = new Product
+                            {
+                                Id = i.Product.Id,
+                                Title = i.Product.Title,
+                                TitleAr = i.Product.TitleAr,
+                                Price = i.Product.Price,
+                                ListPrice = i.Product.ListPrice,
+                                ImageUrl = i.Product.ImageUrl,
+                                ProductType = i.Product.ProductType,
+                                StockQuantity = i.Product.StockQuantity,
+                                // Only load first product image (optimized)
+                                ProductImages = i.Product.ProductImages
+                                    .Where(img => img.ImageInfo == null)
+                                    .Take(1)
+                                    .Select(img => new ProductImage
+                                    {
+                                        Id = img.Id,
+                                        ImageUrl = img.ImageUrl
+                                    })
+                                    .ToList()
+                            }
+                        })
+                        .ToList()
+                })
                 .ToListAsync();
             
             if (!activeFlashSales.Any())
@@ -430,24 +472,26 @@ namespace BulkyBook.Areas.Customer.Controllers
                 return Content(""); // Return empty if no flash sales
             }
             
-            // Load ProductVariant data for flash sales if needed
-            var flashSaleItemIds = activeFlashSales
+            // PERFORMANCE: Only load variants if needed (batch query for all variants at once)
+            var variantIds = activeFlashSales
                 .SelectMany(f => f.FlashSaleItems)
                 .Where(i => i.ProductVariantId.HasValue)
                 .Select(i => i.ProductVariantId.Value)
                 .Distinct()
                 .ToList();
             
-            if (flashSaleItemIds.Any())
+            if (variantIds.Any())
             {
+                // Load variants with minimal includes (only what's needed for display)
                 var variants = await _dbContext.ProductVariants
                     .AsNoTracking()
+                    .Where(v => variantIds.Contains(v.Id) && !v.IsDeleted)
                     .Include(v => v.VariantOptionValues.Where(vov => vov.OptionValue != null && !vov.OptionValue.IsDeleted))
                         .ThenInclude(vov => vov.OptionValue)
                             .ThenInclude(ov => ov.ProductOption)
-                    .Where(v => flashSaleItemIds.Contains(v.Id) && !v.IsDeleted)
                     .ToListAsync();
                 
+                // Map variants to flash sale items (in-memory, fast)
                 var variantDict = variants.ToDictionary(v => v.Id);
                 foreach (var flashSale in activeFlashSales)
                 {
@@ -1001,7 +1045,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 {
                     // Product exists in cart, remove it
                     _unitOfWork.shoppingCart.remove(shoppingCartFromDB);
-                    message = "Product removed from cart!";
+                    message = _localizer["ItemRemovedFromCart"]?.ToString() ?? "Product removed from cart!";
                     isAdded = false;
                 }
                 else
@@ -1014,7 +1058,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                         Count = 1
                     };
                     _unitOfWork.shoppingCart.add(newCart);
-                    message = "Product added to cart successfully!";
+                    message = _localizer["ItemAddedToCart"]?.ToString() ?? "Product added to cart successfully!";
                     isAdded = true;
                 }
 
@@ -1034,14 +1078,14 @@ namespace BulkyBook.Areas.Customer.Controllers
                 {
                     // Product exists in cart, remove it
                     BulkyBook.Utility.GuestCartHelper.RemoveFromCart(HttpContext.Session, productId);
-                    message = "Product removed from cart!";
+                    message = _localizer["ItemRemovedFromCart"]?.ToString() ?? "Product removed from cart!";
                     isAdded = false;
                 }
                 else
                 {
                     // Product doesn't exist, add it
                     BulkyBook.Utility.GuestCartHelper.AddToCart(HttpContext.Session, productId, 1);
-                    message = "Product added to cart successfully!";
+                    message = _localizer["ItemAddedToCart"]?.ToString() ?? "Product added to cart successfully!";
                     isAdded = true;
                 }
 
@@ -1207,6 +1251,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
         [HttpGet]
         [Authorize]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)] // Don't cache - user-specific data
         public async Task<IActionResult> GetWishlistItems()
         {
             if (!User.Identity.IsAuthenticated)
@@ -1219,82 +1264,116 @@ namespace BulkyBook.Areas.Customer.Controllers
 
             try
             {
-                var wishlistItems = _unitOfWork.wishlist.GetAll(w => w.ApplicationUserId == userId, 
-                    includeProperties: "product,product.ProductImages,product.ProductVariants").ToList();
-
-                // Get active flash sale prices for products (optimized query)
-                var now = BulkyBook.Utility.DateTimeHelper.Now;
-                var flashSaleItems = await _dbContext.FlashSaleItems
+                // PERFORMANCE: Use direct DbContext query with AsNoTracking for better performance
+                // Get wishlist items with products in a single optimized query
+                var wishlistItems = await _dbContext.Wishlists
                     .AsNoTracking()
-                    .Include(fsi => fsi.FlashSale)
-                    .Where(fsi => !fsi.IsDeleted 
-                        && fsi.FlashSaleQuantity > 0
-                        && fsi.FlashSale != null
-                        && !fsi.FlashSale.IsDeleted
-                        && fsi.FlashSale.IsActive
-                        && fsi.FlashSale.StartDate <= now
-                        && fsi.FlashSale.EndDate >= now)
+                    .Where(w => w.ApplicationUserId == userId)
+                    .Select(w => new
+                    {
+                        w.Id,
+                        w.ProductId,
+                        Product = new
+                        {
+                            w.product.Id,
+                            w.product.Title,
+                            w.product.TitleAr,
+                            w.product.Price,
+                            w.product.ListPrice,
+                            w.product.ImageUrl,
+                            w.product.ProductType,
+                            // Get first product image URL (optimized)
+                            FirstImageUrl = w.product.ProductImages
+                                .Where(img => img.ImageInfo == null)
+                                .Select(img => img.ImageUrl)
+                                .FirstOrDefault() ?? w.product.ImageUrl,
+                            // Get minimum variant price if product has variants (optimized in query)
+                            MinVariantPrice = w.product.ProductVariants
+                                .Where(v => !v.IsDeleted && v.StockQuantity > 0)
+                                .Select(v => (decimal?)v.Price)
+                                .DefaultIfEmpty()
+                                .Min(),
+                            // Get variant IDs for flash sale lookup
+                            VariantIds = w.product.ProductVariants
+                                .Where(v => !v.IsDeleted && v.StockQuantity > 0)
+                                .Select(v => v.Id)
+                                .ToList()
+                        }
+                    })
                     .ToListAsync();
-                
-                // Create dictionary for flash sale prices: key = productId, value = minimum flash sale price
-                var flashSalePrices = new Dictionary<int, decimal>();
-                var variantFlashSalePrices = new Dictionary<int, decimal>(); // key = variantId, value = flash sale price
-                
-                foreach (var item in flashSaleItems)
+
+                if (!wishlistItems.Any())
                 {
-                    if (item.ProductVariantId.HasValue)
-                    {
-                        // Variant flash sale
-                        var variantId = item.ProductVariantId.Value;
-                        if (!variantFlashSalePrices.ContainsKey(variantId) || variantFlashSalePrices[variantId] > item.FlashSalePrice)
-                        {
-                            variantFlashSalePrices[variantId] = item.FlashSalePrice;
-                        }
-                    }
-                    else
-                    {
-                        // Product flash sale
-                        if (!flashSalePrices.ContainsKey(item.ProductId) || flashSalePrices[item.ProductId] > item.FlashSalePrice)
-                        {
-                            flashSalePrices[item.ProductId] = item.FlashSalePrice;
-                        }
-                    }
+                    return Json(new { success = true, items = new List<object>(), count = 0 });
                 }
 
+                // PERFORMANCE: Only get flash sale prices for products in wishlist
+                var productIds = wishlistItems.Select(w => w.ProductId).ToList();
+                var variantIds = wishlistItems
+                    .Where(w => w.Product.VariantIds.Any())
+                    .SelectMany(w => w.Product.VariantIds)
+                    .Distinct()
+                    .ToList();
+
+                var now = BulkyBook.Utility.DateTimeHelper.Now;
+                
+                // PERFORMANCE: Get flash sale prices only for wishlist products using join (optimized)
+                var flashSaleItems = await (from fsi in _dbContext.FlashSaleItems
+                                           join fs in _dbContext.FlashSales on fsi.FlashSaleId equals fs.Id
+                                           where !fsi.IsDeleted 
+                                               && fsi.FlashSaleQuantity > 0
+                                               && !fs.IsDeleted
+                                               && fs.IsActive
+                                               && fs.StartDate <= now
+                                               && fs.EndDate >= now
+                                               && (productIds.Contains(fsi.ProductId) || (fsi.ProductVariantId.HasValue && variantIds.Contains(fsi.ProductVariantId.Value)))
+                                           select new
+                                           {
+                                               fsi.ProductId,
+                                               fsi.ProductVariantId,
+                                               fsi.FlashSalePrice
+                                           })
+                    .AsNoTracking()
+                    .ToListAsync();
+                
+                // Create dictionaries for fast lookup
+                var flashSalePrices = flashSaleItems
+                    .Where(fsi => !fsi.ProductVariantId.HasValue)
+                    .GroupBy(fsi => fsi.ProductId)
+                    .ToDictionary(g => g.Key, g => g.Min(fsi => fsi.FlashSalePrice));
+                
+                var variantFlashSalePrices = flashSaleItems
+                    .Where(fsi => fsi.ProductVariantId.HasValue)
+                    .GroupBy(fsi => fsi.ProductVariantId.Value)
+                    .ToDictionary(g => g.Key, g => g.Min(fsi => fsi.FlashSalePrice));
+
+                // Build result items (all processing in memory, no additional queries)
                 var items = wishlistItems.Select(item => 
                 {
-                    var product = item.product;
+                    var product = item.Product;
                     double displayPrice = (double)product.Price;
                     
-                    // Check if product has variants and calculate minimum price
-                    if (product.ProductType == BulkyBook.Models.ProductType.Variable && 
-                        product.ProductVariants != null && 
-                        product.ProductVariants.Any(v => !v.IsDeleted))
+                    // Check if product has variants
+                    if (product.ProductType == BulkyBook.Models.ProductType.Variable && product.MinVariantPrice.HasValue)
                     {
-                        // Product has variants - get minimum price considering flash sale prices
-                        var inStockVariants = product.ProductVariants
-                            .Where(v => !v.IsDeleted && v.StockQuantity > 0)
-                            .ToList();
+                        // Use minimum variant price from query
+                        displayPrice = (double)product.MinVariantPrice.Value;
                         
-                        if (inStockVariants.Any())
+                        // Check for variant flash sale prices
+                        var variantFlashSalePrice = product.VariantIds
+                            .Where(vid => variantFlashSalePrices.ContainsKey(vid))
+                            .Select(vid => variantFlashSalePrices[vid])
+                            .DefaultIfEmpty()
+                            .Min();
+                        
+                        if (variantFlashSalePrice > 0 && variantFlashSalePrice < (decimal)displayPrice)
                         {
-                            var variantPrices = inStockVariants.Select(v => 
-                            {
-                                // Check if variant is in flash sale
-                                if (variantFlashSalePrices.ContainsKey(v.Id))
-                                {
-                                    return (double)variantFlashSalePrices[v.Id];
-                                }
-                                // Check if product is in flash sale (applies to all variants)
-                                if (flashSalePrices.ContainsKey(product.Id))
-                                {
-                                    return (double)flashSalePrices[product.Id];
-                                }
-                                // Use regular variant price
-                                return (double)v.Price;
-                            }).ToList();
-                            
-                            displayPrice = variantPrices.Min();
+                            displayPrice = (double)variantFlashSalePrice;
+                        }
+                        // Check if product-level flash sale applies to variants
+                        else if (flashSalePrices.ContainsKey(product.Id) && flashSalePrices[product.Id] < (decimal)displayPrice)
+                        {
+                            displayPrice = (double)flashSalePrices[product.Id];
                         }
                     }
                     else
@@ -1311,7 +1390,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                         id = item.Id,
                         productId = item.ProductId,
                         title = product.Title,
-                        imageUrl = product.ProductImages?.FirstOrDefault()?.ImageUrl ?? product.ImageUrl ?? "/images/no-image.png",
+                        imageUrl = product.FirstImageUrl ?? product.ImageUrl ?? "/images/no-image.png",
                         price = displayPrice,
                         listPrice = product.ListPrice > 0 ? (double?)product.ListPrice : null,
                         productType = (int)product.ProductType
@@ -1320,8 +1399,9 @@ namespace BulkyBook.Areas.Customer.Controllers
 
                 return Json(new { success = true, items = items, count = items.Count });
             }
-            catch
+            catch (Exception ex)
             {
+                _logger?.LogError(ex, "Error getting wishlist items for user {UserId}", userId);
                 return Json(new { success = false, items = new List<object>(), count = 0 });
             }
         }
