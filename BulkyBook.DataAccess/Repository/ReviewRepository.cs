@@ -1,6 +1,7 @@
 using BulkyBook.DataAccess.Data;
 using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,6 +80,20 @@ namespace BulkyBook.DataAccess.Repository
             );
 
             return result;
+        }
+
+        public IEnumerable<Review> GetFeaturedTestimonials(int count = 10)
+        {
+            // Get approved reviews, prioritizing verified purchases and higher ratings
+            // Note: User will be loaded separately in controller due to Identity Discriminator filter issues
+            // Don't use AsNoTracking here because we need to attach User navigation property
+            return _db.Reviews
+                .Where(r => r.IsApproved)
+                .OrderByDescending(r => r.IsVerifiedPurchase) // Verified purchases first
+                .ThenByDescending(r => r.Rating) // Higher ratings next
+                .ThenByDescending(r => r.CreatedAt) // Most recent next
+                .Take(count)
+                .ToList();
         }
     }
 }

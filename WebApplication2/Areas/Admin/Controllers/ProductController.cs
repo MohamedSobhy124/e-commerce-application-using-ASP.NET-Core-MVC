@@ -301,6 +301,8 @@ namespace BulkyBook.Areas.Admin.Controllers
                     existingProduct.MinimumStockAlert = productVM.product.MinimumStockAlert;
                     existingProduct.ProductType = productVM.product.ProductType;
                     existingProduct.ExpiryDate = productVM.product.ExpiryDate;
+                    existingProduct.IsNew = productVM.product.IsNew;
+                    existingProduct.IsTrending = productVM.product.IsTrending;
                     
                     // Update ImageUrl only if provided
                     if (!string.IsNullOrEmpty(productVM.product.ImageUrl))

@@ -78,9 +78,22 @@
                                         
                                         <div class="col-12 col-sm-6 col-lg-3">
                                             <div class="product-card-simple h-100">
-                                                <div class="product-badge-new">
-                                                    <i class="bi bi-sparkles"></i> @Localizer["New"]
-                                                </div>
+                                                <!-- Product Status Badges (NEW/TRENDING) based on database flags -->
+                                                @if (product.IsTrending)
+                                                {
+                                                    <div class="badge-trending">
+                                                        <i class="bi bi-graph-up-arrow me-1"></i>
+                                                        @Localizer["TrendingProducts"]
+                                                    </div>
+                                                }
+                                                else if (product.IsNew)
+                                                {
+                                                    <div class="badge-new">
+                                                        <i class="bi bi-sparkles me-1"></i>
+                                                        @Localizer["NewProducts"]
+                                                    </div>
+                                                }
+                                                
                                                 @if (discount > 0)
                                                 {
                                                     <div class="product-badge-discount">-@discount%</div>

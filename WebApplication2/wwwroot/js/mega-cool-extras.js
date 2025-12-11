@@ -139,15 +139,7 @@
             } else if (isLowStock) {
                 // Low stock - add HOT badge to create urgency
                 badge = '<div class="badge-hot">🔥 LOW STOCK</div>';
-            } else {
-                // In stock - add random promotional badges
-                const random = Math.random();
-                if (random < 0.3) {
-                    badge = '<div class="badge-new">🆕 NEW</div>';
-                } else if (random < 0.5) {
-                    badge = '<div class="badge-trending">📈 TRENDING</div>';
-                }
-            }
+            } 
             
             if (badge) {
                 imageWrapper.insertAdjacentHTML('beforeend', badge);

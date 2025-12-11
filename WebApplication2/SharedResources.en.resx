@@ -2827,6 +2827,21 @@
   <data name="QuantityUpdatedSuccessfully" xml:space="preserve">
     <value>Quantity Updated Successfully</value>
   </data>
+  <data name="FlashSaleItemNotFound" xml:space="preserve">
+    <value>Flash sale item not found</value>
+  </data>
+  <data name="FlashSaleNoLongerActive" xml:space="preserve">
+    <value>This flash sale is no longer active</value>
+  </data>
+  <data name="FlashSaleItemSoldOut" xml:space="preserve">
+    <value>This item is sold out</value>
+  </data>
+  <data name="OnlyUnitsAvailable" xml:space="preserve">
+    <value>Only {0} units available</value>
+  </data>
+  <data name="FlashSaleItemAddedToCart" xml:space="preserve">
+    <value>Flash sale item added to cart!</value>
+  </data>
   <data name="FLASHSALE" xml:space="preserve">
     <value>FLASH SALE</value>
   </data>
@@ -3249,5 +3264,32 @@
   </data>
   <data name="AllBrands" xml:space="preserve">
     <value>All Brands</value>
+  </data>
+  <data name="AllProducts" xml:space="preserve">
+    <value>All Products</value>
+  </data>
+  <data name="NewProducts" xml:space="preserve">
+    <value>New Products</value>
+  </data>
+  <data name="TrendingProducts" xml:space="preserve">
+    <value>Trending Products</value>
+  </data>
+  <data name="ProductStatus" xml:space="preserve">
+    <value>Product Status</value>
+  </data>
+  <data name="MarkAsNewProduct" xml:space="preserve">
+    <value>Mark as New Product</value>
+  </data>
+  <data name="MarkAsTrendingProduct" xml:space="preserve">
+    <value>Mark as Trending Product</value>
+  </data>
+  <data name="NewProductHelpText" xml:space="preserve">
+    <value>Show this product in the "New Products" filter on the home page</value>
+  </data>
+  <data name="TrendingProductHelpText" xml:space="preserve">
+    <value>Show this product in the "Trending Products" filter on the home page</value>
+  </data>
+  <data name="Show" xml:space="preserve">
+    <value>Show</value>
   </data>
 </root>

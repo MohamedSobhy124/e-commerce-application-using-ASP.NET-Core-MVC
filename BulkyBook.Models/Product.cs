@@ -117,6 +117,13 @@ namespace BulkyBook.Models
         // Helper property to get default variant (for simple products or fallback)
         [NotMapped]
         public ProductVariant? DefaultVariant => ProductVariants?.FirstOrDefault();
+        
+        // Product Status Flags
+        [Display(Name = "Is New Product")]
+        public bool IsNew { get; set; } = false;
+        
+        [Display(Name = "Is Trending Product")]
+        public bool IsTrending { get; set; } = false;
     }
     
     public enum ProductType

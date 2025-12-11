@@ -37,10 +37,10 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         // Performance: Cache response for 5 minutes, vary by query parameters
-        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "brandId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" }, Location = ResponseCacheLocation.Any)]
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "brandId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability", "productFilter" }, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> Index(int? categoryId, int? brandId, string searchTerm, string sortBy, 
             decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
-            int? minRating = null, string availability = null)
+            int? minRating = null, string availability = null, string productFilter = null)
         {
             // PERFORMANCE: Load only essential data for initial page render
             // Sections (flash sales, discounted products, etc.) will be loaded lazily via AJAX
@@ -81,6 +81,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             ViewBag.InStock = inStock;
             ViewBag.MinRating = minRating;
             ViewBag.Availability = availability;
+            ViewBag.ProductFilter = productFilter;
             
             // Check if video banner file exists
             var videoPath = Path.Combine(_webHostEnvironment.WebRootPath, "videos", "home-banner.mp4");
@@ -138,6 +139,21 @@ namespace BulkyBook.Areas.Customer.Controllers
             if (brandId.HasValue && brandId.Value > 0)
             {
                 query = query.Where(p => p.BrandId.HasValue && p.BrandId.Value == brandId.Value);
+            }
+            
+            // Filter by product status (new or trending)
+            if (!string.IsNullOrEmpty(productFilter))
+            {
+                switch (productFilter.ToLower())
+                {
+                    case "new":
+                        query = query.Where(p => p.IsNew);
+                        break;
+                    case "trending":
+                        query = query.Where(p => p.IsTrending);
+                        break;
+                    // "all" or empty means no filter
+                }
             }
             
             // Filter by search term (case-insensitive) - includes Arabic fields
@@ -401,6 +417,43 @@ namespace BulkyBook.Areas.Customer.Controllers
                         // Wishlist repository not set up yet - already initialized as empty list
                     }
                 }
+            }
+            
+            // Load featured testimonials for homepage carousel
+            try
+            {
+                var featuredTestimonials = _unitOfWork.review.GetFeaturedTestimonials(12).ToList();
+                
+                // Load users separately because Include doesn't work well with Identity
+                if (featuredTestimonials.Any())
+                {
+                    var userIds = featuredTestimonials.Select(r => r.UserId).Distinct().Where(id => !string.IsNullOrEmpty(id)).ToList();
+                    
+                    if (userIds.Any())
+                    {
+                        // Load users using ApplicationUser repository
+                        var users = _dbContext.Set<ApplicationUser>()
+                            .Where(u => userIds.Contains(u.Id))
+                            .ToList()
+                            .ToDictionary(u => u.Id, u => u);
+                        
+                        // Attach users to reviews
+                        foreach (var testimonial in featuredTestimonials)
+                        {
+                            if (!string.IsNullOrEmpty(testimonial.UserId) && users.ContainsKey(testimonial.UserId))
+                            {
+                                testimonial.User = users[testimonial.UserId];
+                            }
+                        }
+                    }
+                }
+                
+                ViewBag.FeaturedTestimonials = featuredTestimonials;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading featured testimonials");
+                ViewBag.FeaturedTestimonials = new List<Review>();
             }
             
             return View(ProductList);
@@ -730,7 +783,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         public IActionResult LoadMoreProducts(int page = 0, int pageSize = 20, 
             int? categoryId = null, int? brandId = null, string searchTerm = null, string sortBy = null,
             decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
-            string availability = null)
+            string availability = null, string productFilter = null)
         {
             // PERFORMANCE: Use AsNoTracking for read-only queries (faster, less memory)
             // Only include necessary properties to reduce data transfer
@@ -793,6 +846,21 @@ namespace BulkyBook.Areas.Customer.Controllers
                     case "lowstock":
                         query = query.Where(p => p.StockQuantity > 0 && p.StockQuantity <= p.MinimumStockAlert);
                         break;
+                }
+            }
+            
+            // Filter by product status (new or trending)
+            if (!string.IsNullOrEmpty(productFilter))
+            {
+                switch (productFilter.ToLower())
+                {
+                    case "new":
+                        query = query.Where(p => p.IsNew);
+                        break;
+                    case "trending":
+                        query = query.Where(p => p.IsTrending);
+                        break;
+                    // "all" or empty means no filter
                 }
             }
             
@@ -954,6 +1022,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                 allVariantsOutOfStock = allVariantsOutOfStockDict.ContainsKey(p.Id) && allVariantsOutOfStockDict[p.Id],
                     categoryId = p.categry != null ? (int?)p.categry.Id : null,
                     categoryName = p.categry != null ? p.categry.Name : null,
+                    isNew = p.IsNew,
+                    isTrending = p.IsTrending,
                     productImages = p.ProductImages
                         .Where(img => img.ImageInfo == null)
                         .OrderBy(pi => pi.DisplayOrder)
@@ -1007,6 +1077,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                 hasVariants = p.hasVariants,
                 shouldShowPrice = p.shouldShowPrice,
                 allVariantsOutOfStock = p.allVariantsOutOfStock,
+                isNew = p.isNew,
+                isTrending = p.isTrending,
                 categry = p.categoryId.HasValue ? new { id = p.categoryId.Value, name = p.categoryName } : null,
                 productImages = p.productImages ?? new List<string>()
             }).ToList();
@@ -1018,11 +1090,11 @@ namespace BulkyBook.Areas.Customer.Controllers
         public IActionResult FilterProducts(
             int? categoryId = null, int? brandId = null, string searchTerm = null, string sortBy = null,
             decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
-            string availability = null)
+            string availability = null, string productFilter = null)
         {
             // Use the same logic as LoadMoreProducts but for page 0 (first page) - just call it directly
             return LoadMoreProducts(page: 0, pageSize: 20, categoryId: categoryId, brandId: brandId, searchTerm: searchTerm, 
-                sortBy: sortBy, minPrice: minPrice, maxPrice: maxPrice, inStock: inStock, availability: availability);
+                sortBy: sortBy, minPrice: minPrice, maxPrice: maxPrice, inStock: inStock, availability: availability, productFilter: productFilter);
         }
 
         [HttpPost]

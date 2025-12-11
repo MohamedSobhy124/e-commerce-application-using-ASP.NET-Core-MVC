@@ -61,14 +61,22 @@ else
                 <div class="card mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 12px; padding: 1rem; color: white;">
                     <div class="row align-items-center">
                         <div class="col-md-8">
+                            @{
+                                var flashSaleName = currentCulture == "ar" && !string.IsNullOrEmpty(flashSale.NameAr) 
+                                    ? flashSale.NameAr 
+                                    : flashSale.Name;
+                                var flashSaleDesc = currentCulture == "ar" && !string.IsNullOrEmpty(flashSale.DescriptionAr) 
+                                    ? flashSale.DescriptionAr 
+                                    : flashSale.Description;
+                            }
                             <h2 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 0.5rem;">
                                 <i class="bi bi-lightning-charge-fill me-2" style="font-size: 1.2rem;"></i>
-                                @flashSale.Name
+                                @flashSaleName
                             </h2>
-                            @if (!string.IsNullOrEmpty(flashSale.Description))
+                            @if (!string.IsNullOrEmpty(flashSaleDesc))
                             {
                                 <p style="font-size: 0.85rem; opacity: 0.95; margin-bottom: 0;">
-                                    @flashSale.Description
+                                    @flashSaleDesc
                                 </p>
                             }
                         </div>

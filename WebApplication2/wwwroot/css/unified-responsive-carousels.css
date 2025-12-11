@@ -237,11 +237,11 @@
 }
 
 .carousel-control-prev {
-    left: -25px;
+    left: 0px;
 }
 
 .carousel-control-next {
-    right: -25px;
+    right: 0px;
 }
 
 .carousel-control-prev-icon,
@@ -266,11 +266,11 @@
 /* Responsive Controls */
 @media (max-width: 1400px) {
     .carousel-control-prev {
-        left: -15px;
+        left: 15px;
     }
     
     .carousel-control-next {
-        right: -15px;
+        right: 15px;
     }
 }
 

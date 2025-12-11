@@ -245,10 +245,22 @@
         // Get flash sale info from clicked slide
         const slide = document.querySelector(`[data-flash-sale-id="${flashSaleId}"]`);
         const endDate = slide ? slide.getAttribute('data-flash-sale-end') : '';
-        const flashSaleName = slide ? slide.getAttribute('data-flash-sale-name') || slide.querySelector('.flash-sale-slide-title')?.textContent || 'Flash Sale' : 'Flash Sale';
+        
+        // Get localized flash sale name - prioritize data attribute, then fallback to title text
+        let flashSaleName = 'Flash Sale';
+        if (slide) {
+            // First try to get from data-flash-sale-name attribute (already localized in view)
+            flashSaleName = slide.getAttribute('data-flash-sale-name');
+            
+            // Fallback to title element text if data attribute is missing
+            if (!flashSaleName || flashSaleName.trim() === '') {
+                const titleElement = slide.querySelector('.flash-sale-slide-title');
+                flashSaleName = titleElement ? titleElement.textContent.trim() : 'Flash Sale';
+            }
+        }
         
         // Set title and timer
-        if (titleEl) titleEl.textContent = flashSaleName;
+        if (titleEl) titleEl.textContent = flashSaleName || 'Flash Sale';
         if (timerEl && endDate) {
             timerEl.setAttribute('data-flash-sale-end', endDate);
             updateModalTimer(timerEl);

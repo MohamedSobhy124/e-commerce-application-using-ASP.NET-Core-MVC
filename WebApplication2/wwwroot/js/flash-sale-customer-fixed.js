@@ -189,12 +189,21 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
             // Update cart count
             if (data.cartCount !== undefined) {
                 const cartCountElement = document.getElementById('cartCount');
+                const headerCartBadgeElement = document.getElementById('headerCartBadge');
                 if (cartCountElement) {
                     cartCountElement.textContent = data.cartCount;
                     // Pulse animation
                     cartCountElement.style.animation = 'none';
                     setTimeout(() => {
                         cartCountElement.style.animation = 'cartPulse 0.6s ease';
+                    }, 10);
+                }
+                if (headerCartBadgeElement) {
+                    headerCartBadgeElement.textContent = data.cartCount;
+                    // Pulse animation
+                    headerCartBadgeElement.style.animation = 'none';
+                    setTimeout(() => {
+                        headerCartBadgeElement.style.animation = 'cartPulse 0.6s ease';
                     }, 10);
                 }
             }

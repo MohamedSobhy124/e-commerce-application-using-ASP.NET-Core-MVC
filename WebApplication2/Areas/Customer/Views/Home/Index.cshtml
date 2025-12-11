@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Localization
 @using BulkyBook.Utility
+@using System
 @model IEnumerable<Product>
 @inject BulkyBook.DataAccess.Repository.IRepository.IUnitOfWork _unitOfWork
 @inject IConfiguration Configuration
@@ -34,6 +35,7 @@
     var maxPrice = ViewBag.MaxPrice as decimal?;
     var inStock = ViewBag.InStock as bool?;
     var availability = ViewBag.Availability as string ?? "";
+    var productFilter = ViewBag.ProductFilter as string ?? "";
     var minPriceRange = ViewBag.MinPriceRange as decimal? ?? 0;
     var maxPriceRange = ViewBag.MaxPriceRange as decimal? ?? 10000;
     var totalProducts = ViewBag.TotalProducts as int? ?? 0;
@@ -590,6 +592,22 @@
                                         <div class="col-12 col-sm-6 col-lg-3">
                                             <div class="offer-card h-100">
                                                 <a href="@Url.Action("Details", "Home", new { area = "Customer", productId = product.Id })" class="offer-card-link">
+                                                    <!-- Product Status Badges (NEW/TRENDING) -->
+                                                    @if (product.IsTrending)
+                                                    {
+                                                        <div class="badge-trending">
+                                                            <i class="bi bi-graph-up-arrow me-1"></i>
+                                                            @Localizer["TrendingProducts"]
+                                                        </div>
+                                                    }
+                                                    else if (product.IsNew)
+                                                    {
+                                                        <div class="badge-new">
+                                                            <i class="bi bi-sparkles me-1"></i>
+                                                            @Localizer["NewProducts"]
+                                                        </div>
+                                                    }
+                                                    
                                                     @if (discountPercent > 0)
                                                     {
                                                         <div class="offer-badge">-@discountPercent%</div>
@@ -816,7 +834,7 @@
 }
 
 <!-- Active Filters Display -->
-    @if (selectedCategory.HasValue || selectedBrand.HasValue || !string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(sortBy) || minPrice.HasValue || maxPrice.HasValue || !string.IsNullOrEmpty(availability))
+    @if (selectedCategory.HasValue || selectedBrand.HasValue || !string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(sortBy) || minPrice.HasValue || maxPrice.HasValue || !string.IsNullOrEmpty(availability) || !string.IsNullOrEmpty(productFilter))
     {
         <div class="modern-active-filters" id="modernActiveFilters">
             @if (!string.IsNullOrEmpty(searchTerm))
@@ -863,6 +881,16 @@
                 <span class="modern-active-filter-tag">
                     @Localizer["Sort"]: @sortBy
                     <button type="button" class="remove-btn" data-filter="sortBy">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </span>
+            }
+            @if (!string.IsNullOrEmpty(productFilter))
+            {
+                var filterLabel = productFilter == "new" ? Localizer["NewProducts"] : Localizer["TrendingProducts"];
+                <span class="modern-active-filter-tag">
+                    @Localizer["Show"]: @filterLabel
+                    <button type="button" class="remove-btn" data-filter="productFilter">
                         <i class="bi bi-x"></i>
                     </button>
                 </span>
@@ -1018,6 +1046,19 @@
                         <option value="">@Localizer["All"]</option>
                         <option value="instock" selected="@(availability == "instock")">@Localizer["InStock"]</option>
                         <option value="outofstock" selected="@(availability == "outofstock")">@Localizer["OutOfStock"]</option>
+                    </select>
+                </div>
+
+                <!-- Product Status Filter (New/Trending) -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="bi bi-star-fill"></i>
+                        @Localizer["Show"]
+                    </label>
+                    <select name="productFilter" class="filter-select modern-select">
+                        <option value="" selected="@(string.IsNullOrEmpty(productFilter))">@Localizer["AllProducts"]</option>
+                        <option value="new" selected="@(productFilter == "new")">@Localizer["NewProducts"]</option>
+                        <option value="trending" selected="@(productFilter == "trending")">@Localizer["TrendingProducts"]</option>
                     </select>
                 </div>
 
@@ -1240,6 +1281,22 @@
          style="cursor: pointer;">
         <!-- Product Image Carousel -->
         <div class="product-image-wrapper">
+            <!-- Product Status Badges (NEW/TRENDING) -->
+            @if (Product.IsTrending)
+            {
+                <div class="badge-trending">
+                    <i class="bi bi-graph-up-arrow me-1"></i>
+                    @Localizer["TrendingProducts"]
+                </div>
+            }
+            else if (Product.IsNew)
+            {
+                <div class="badge-new">
+                    <i class="bi bi-sparkles me-1"></i>
+                    @Localizer["NewProducts"]
+                </div>
+            }
+            
             @if (isAuthenticated)
             {
                 <!-- Wishlist Button (Only for logged-in users) -->
@@ -1729,6 +1786,142 @@
     </div>
 </section>
 
+<!-- Customer Testimonials Section -->
+@{
+    var featuredTestimonials = ViewBag.FeaturedTestimonials as IEnumerable<BulkyBook.Models.Review> ?? Enumerable.Empty<BulkyBook.Models.Review>();
+    var hasTestimonials = featuredTestimonials.Any();
+}
+
+@if (hasTestimonials)
+{
+    <section class="testimonials-section">
+        <div class="container">
+            <div class="testimonials-header text-center mb-5">
+                <h2 class="testimonials-title">
+                    <i class="bi bi-star-fill me-3"></i>
+                    @if(currentCulture == "ar") {
+                        <text>آراء عملائنا</text>
+                    } else {
+                        <text>Customer Testimonials</text>
+                    }
+                </h2>
+                <p class="testimonials-subtitle">
+                    @if(currentCulture == "ar") {
+                        <text>اكتشف ما يقوله عملاؤنا عن منتجاتنا وخدماتنا</text>
+                    } else {
+                        <text>Discover what our customers say about our products and services</text>
+                    }
+                </p>
+            </div>
+
+            <!-- Bootstrap Carousel with Smooth Slide Effect -->
+            <div id="testimonialsCarousel" class="carousel slide testimonials-carousel" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover" data-bs-touch="true">
+                <div class="carousel-inner">
+                    @{ 
+                        int testimonialIndex = 0;
+                    }
+                    @foreach (var testimonial in featuredTestimonials)
+                    {
+                        try
+                        {
+                            var userName = testimonial?.User?.Name ?? "Customer";
+                            var userLocation = !string.IsNullOrEmpty(testimonial?.User?.City) 
+                                ? (testimonial.User.City + (!string.IsNullOrEmpty(testimonial.User.State) ? ", " + testimonial.User.State : ""))
+                                : (currentCulture == "ar" ? "الإمارات العربية المتحدة" : "UAE");
+                            
+                            <div class="carousel-item @(testimonialIndex == 0 ? "active" : "")">
+                                <div class="testimonial-card-wrapper">
+                                    <div class="testimonial-card-inner">
+                                        <!-- Rating Stars -->
+                                        <div class="testimonial-rating mb-3">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                if (i <= testimonial.Rating)
+                                                {
+                                                    <i class="bi bi-star-fill"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-star"></i>
+                                                }
+                                            }
+                                        </div>
+
+                                        <!-- Review Text -->
+                                        <div class="testimonial-text mb-4">
+                                            <p>"@testimonial.Comment"</p>
+                                        </div>
+
+                                        <!-- Customer Info -->
+                                        <div class="testimonial-customer-info">
+                                            <!-- Customer Avatar -->
+                                            <div class="testimonial-avatar">
+                                                <span>
+                                                    @(userName.Length > 0 ? userName.Substring(0, 1).ToUpper() : "C")
+                                                </span>
+                                            </div>
+
+                                            <!-- Customer Details -->
+                                            <div class="testimonial-customer-details">
+                                                <div class="testimonial-customer-name">
+                                                    @userName
+                                                </div>
+                                                <div class="testimonial-customer-location">
+                                                    <i class="bi bi-geo-alt-fill"></i>
+                                                    <span>@userLocation</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Verified Purchase Badge -->
+                                            @if (testimonial.IsVerifiedPurchase)
+                                            {
+                                                <div class="verified-badge">
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                    <span>@if(currentCulture == "ar") { <text>شراء موثق</text> } else { <text>Verified Purchase</text> }</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log error but continue rendering other testimonials
+                            <div class="carousel-item @(testimonialIndex == 0 ? "active" : "")">
+                                <div class="testimonial-card-wrapper">
+                                    <div class="testimonial-card-inner">
+                                        <p>Error loading testimonial</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        testimonialIndex++;
+                    }
+                </div>
+                
+                <!-- Carousel Controls -->
+                <button class="carousel-control-prev testimonials-carousel-control" type="button" data-bs-target="#testimonialsCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">@Localizer["Previous"]</span>
+                </button>
+                <button class="carousel-control-next testimonials-carousel-control" type="button" data-bs-target="#testimonialsCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">@Localizer["Next"]</span>
+                </button>
+            </div>
+
+            <!-- Carousel Indicators -->
+            <div class="carousel-indicators testimonials-indicators">
+                @for (int i = 0; i < featuredTestimonials.Count(); i++)
+                {
+                    <button type="button" data-bs-target="#testimonialsCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
+                }
+            </div>
+        </div>
+    </section>
+}
+
 <!-- Newsletter Section - Only for Logged-in Users -->
 @if (User.Identity.IsAuthenticated)
 {
@@ -1907,6 +2100,7 @@
     <link rel="stylesheet" href="~/css/category-carousel.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/flash-sale-carousel.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/offers-carousel.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/testimonials.css" asp-append-version="true" />
 }
 
     @section Scripts {
@@ -1914,6 +2108,7 @@
     <script src="~/js/category-carousel.js" asp-append-version="true"></script>
     <script src="~/js/flash-sale-carousel.js" asp-append-version="true"></script>
     <script src="~/js/offers-carousel-responsive.js" asp-append-version="true"></script>
+    <script src="~/js/testimonials-enhance.js" asp-append-version="true"></script>
     <script>
         // Localizations for JavaScript
         const currentCulture = '@currentCulture';
@@ -2607,6 +2802,20 @@
                 imageHtml = `<img src="${imageUrl}" class="product-image" alt="${productTitle}" onerror="this.src='/images/placeholder.png'; this.onerror=null;" />`;
             }
             
+            // Product Status Badges (NEW/TRENDING)
+            let statusBadgeHtml = '';
+            if (product.isTrending === true) {
+                statusBadgeHtml = `<div class="badge-trending">
+                    <i class="bi bi-graph-up-arrow me-1"></i>
+                    @Localizer["TrendingProducts"]
+                </div>`;
+            } else if (product.isNew === true) {
+                statusBadgeHtml = `<div class="badge-new">
+                    <i class="bi bi-sparkles me-1"></i>
+                    @Localizer["NewProducts"]
+                </div>`;
+            }
+            
             return `
                 <div class="product-card stagger-item visible" 
                      data-stock-quantity="${product.stockQuantity || 0}" 
@@ -2614,6 +2823,7 @@
                      onclick="window.location.href='/Customer/Home/Details?productId=${product.id}'"
                      style="cursor: pointer;">
                     <div class="product-image-wrapper">
+                        ${statusBadgeHtml}
                         ${imageHtml}
                     </div>
                     <div class="product-content">
@@ -2663,6 +2873,7 @@
             if (urlParams.get('maxPrice')) params.append('maxPrice', urlParams.get('maxPrice'));
             if (urlParams.get('inStock')) params.append('inStock', urlParams.get('inStock'));
             if (urlParams.get('availability')) params.append('availability', urlParams.get('availability'));
+            if (urlParams.get('productFilter')) params.append('productFilter', urlParams.get('productFilter'));
             
             return params.toString();
         }
@@ -2710,6 +2921,7 @@
             if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
             if (filters.inStock !== undefined) params.append('inStock', filters.inStock);
             if (filters.availability) params.append('availability', filters.availability);
+            if (filters.productFilter) params.append('productFilter', filters.productFilter);
 
             // Update active category in category carousel
             if (filters.categoryId) {

@@ -3,10 +3,13 @@
 @model FlashSale
 
 @{
-    ViewData["Title"] = Model.Name;
-    Layout = "~/Views/Shared/_Layout.cshtml";
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var flashSaleName = currentCulture == "ar" && !string.IsNullOrEmpty(Model.NameAr) 
+        ? Model.NameAr 
+        : Model.Name;
+    ViewData["Title"] = flashSaleName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
 }
 
@@ -17,15 +20,20 @@
 <section class="flash-sale-hero" style="margin-top: 1rem;">
     <div class="container">
         <div class="flash-sale-hero-content">
+            @{
+                var flashSaleDesc = currentCulture == "ar" && !string.IsNullOrEmpty(Model.DescriptionAr) 
+                    ? Model.DescriptionAr 
+                    : Model.Description;
+            }
             <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap;">
                 <i class="bi bi-lightning-charge-fill lightning-icon"></i>
-                <h1 class="flash-sale-title">@Model.Name</h1>
+                <h1 class="flash-sale-title">@flashSaleName</h1>
                 <i class="bi bi-fire fire-icon lightning-icon"></i>
             </div>
-            @if (!string.IsNullOrEmpty(Model.Description))
+            @if (!string.IsNullOrEmpty(flashSaleDesc))
             {
                 <p class="flash-sale-subtitle">
-                    @Model.Description
+                    @flashSaleDesc
                 </p>
             }
             else

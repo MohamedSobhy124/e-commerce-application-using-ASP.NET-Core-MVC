@@ -47,9 +47,15 @@ namespace BulkyBook.Areas.Customer.Controllers
                 cartList = _unitOfWork.shoppingCart.GetAll(a=>a.ApplicationUserId==UserId,
                     includeProperties: "product,FlashSaleItem,ProductVariant,ComboOffer,product.ProductImages").ToList();
                 
-                // Load variant option values for each cart item
+                // Load variant option values for each cart item and filter out images with ImageInfo
                 foreach (var cart in cartList)
                 {
+                    // Filter out images with ImageInfo
+                    if (cart.product != null && cart.product.ProductImages != null)
+                    {
+                        cart.product.ProductImages = cart.product.ProductImages.Where(_ => _.ImageInfo == null).ToList();
+                    }
+                    
                     if (cart.ProductVariantId.HasValue && cart.ProductVariant != null)
                     {
                         // Ensure variant option values are loaded
@@ -78,6 +84,15 @@ namespace BulkyBook.Areas.Customer.Controllers
                     product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry,ProductImages"),
                     ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value, includeProperties: "VariantOptionValues,VariantOptionValues.OptionValue,VariantOptionValues.OptionValue.ProductOption") : null
                 }).ToList();
+                
+                // Filter out images with ImageInfo for guest cart items
+                foreach (var cart in cartList)
+                {
+                    if (cart.product != null && cart.product.ProductImages != null)
+                    {
+                        cart.product.ProductImages = cart.product.ProductImages.Where(_ => _.ImageInfo == null).ToList();
+                    }
+                }
             }
 
             ShoppingCartVM = new ShoppingCartVM()
@@ -108,6 +123,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 // Load variant option values for each cart item
                 foreach (var cart in cartItems)
                 {
+                    cart.product.ProductImages=cart.product.ProductImages.Where(_ => _.ImageInfo is null).ToList();
                     if (cart.ProductVariantId.HasValue && cart.ProductVariant != null)
                     {
                         // Ensure variant option values are loaded
@@ -136,6 +152,15 @@ namespace BulkyBook.Areas.Customer.Controllers
                     product = _unitOfWork.product.Get(p => p.Id == gc.ProductId, includeProperties: "categry,ProductImages"),
                     ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value, includeProperties: "VariantOptionValues,VariantOptionValues.OptionValue,VariantOptionValues.OptionValue.ProductOption") : null
                 }).ToList();
+                
+                // Filter out images with ImageInfo for guest cart items
+                foreach (var cart in cartItems)
+                {
+                    if (cart.product != null && cart.product.ProductImages != null)
+                    {
+                        cart.product.ProductImages = cart.product.ProductImages.Where(_ => _.ImageInfo == null).ToList();
+                    }
+                }
             }
             
             var requestCulture = HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
@@ -280,7 +305,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
                 if (flashSaleItem == null)
                 {
-                    return Json(new { success = false, message = "Flash sale item not found" });
+                    return Json(new { success = false, message = _localizer["FlashSaleItemNotFound"].Value });
                 }
 
                 // Check if flash sale is active
@@ -289,19 +314,19 @@ namespace BulkyBook.Areas.Customer.Controllers
                     now < flashSaleItem.FlashSale.StartDate || 
                     now > flashSaleItem.FlashSale.EndDate)
                 {
-                    return Json(new { success = false, message = "This flash sale is no longer active" });
+                    return Json(new { success = false, message = _localizer["FlashSaleNoLongerActive"].Value });
                 }
 
                 // Check if item has stock
                 if (flashSaleItem.FlashSaleQuantity <= 0)
                 {
-                    return Json(new { success = false, message = "This item is sold out" });
+                    return Json(new { success = false, message = _localizer["FlashSaleItemSoldOut"].Value });
                 }
 
                 // Check if requested quantity is available
                 if (count > flashSaleItem.FlashSaleQuantity)
                 {
-                    return Json(new { success = false, message = $"Only {flashSaleItem.FlashSaleQuantity} units available" });
+                    return Json(new { success = false, message = string.Format(_localizer["OnlyUnitsAvailable"].Value, flashSaleItem.FlashSaleQuantity) });
                 }
 
                 if (User.Identity.IsAuthenticated)
@@ -323,7 +348,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                         var newCount = cartFromDb.Count + count;
                         if (newCount > flashSaleItem.FlashSaleQuantity)
                         {
-                            return Json(new { success = false, message = $"Only {flashSaleItem.FlashSaleQuantity} units available" });
+                            return Json(new { success = false, message = string.Format(_localizer["OnlyUnitsAvailable"].Value, flashSaleItem.FlashSaleQuantity) });
                         }
                         cartFromDb.Count = newCount;
                         _unitOfWork.shoppingCart.update(cartFromDb);
@@ -350,7 +375,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
                     return Json(new { 
                         success = true, 
-                        message = "Flash sale item added to cart!",
+                        message = _localizer["FlashSaleItemAddedToCart"].Value,
                         cartCount = cartCount
                     });
                 }
@@ -369,7 +394,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                         var newCount = existingItem.Count + count;
                         if (newCount > flashSaleItem.FlashSaleQuantity)
                         {
-                            return Json(new { success = false, message = $"Only {flashSaleItem.FlashSaleQuantity} units available" });
+                            return Json(new { success = false, message = string.Format(_localizer["OnlyUnitsAvailable"].Value, flashSaleItem.FlashSaleQuantity) });
                         }
                         existingItem.Count = newCount;
                     }
@@ -392,14 +417,14 @@ namespace BulkyBook.Areas.Customer.Controllers
 
                     return Json(new { 
                         success = true, 
-                        message = "Flash sale item added to cart!",
+                        message = _localizer["FlashSaleItemAddedToCart"].Value,
                         cartCount = guestCart.Count
                     });
                 }
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "An error occurred: " + ex.Message });
+                return Json(new { success = false, message = string.Format(_localizer["AnErrorOccurredWithDetails"].Value, ex.Message) });
             }
         }
 
@@ -2047,11 +2072,14 @@ namespace BulkyBook.Areas.Customer.Controllers
 
             string imageUrl = null;
 
-            // Check if product has ProductImages
+            // Check if product has ProductImages (ignore images with ImageInfo)
             if (product.ProductImages != null && product.ProductImages.Any())
             {
-                // Get the first image ordered by DisplayOrder
-                var firstImage = product.ProductImages.OrderBy(pi => pi.DisplayOrder).FirstOrDefault();
+                // Get the first image ordered by DisplayOrder, excluding images with ImageInfo
+                var firstImage = product.ProductImages
+                    .Where(pi => pi.ImageInfo == null)
+                    .OrderBy(pi => pi.DisplayOrder)
+                    .FirstOrDefault();
                 if (firstImage != null && !string.IsNullOrEmpty(firstImage.ImageUrl))
                 {
                     imageUrl = firstImage.ImageUrl;

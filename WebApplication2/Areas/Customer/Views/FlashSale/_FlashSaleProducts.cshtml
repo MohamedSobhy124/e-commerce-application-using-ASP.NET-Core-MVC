@@ -27,6 +27,11 @@ else
             var product = item.Product;
             var variant = item.ProductVariant;
             
+            // Get localized product title
+            var productTitle = currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) 
+                ? product.TitleAr 
+                : product.Title;
+            
             // Use variant image if available, otherwise product image
             var imageUrl = variant?.ImageUrl ?? (product.ProductImages?.FirstOrDefault()?.ImageUrl ?? "/images/default-product.jpg");
             
@@ -44,7 +49,23 @@ else
                 var optionValues = variant.VariantOptionValues
                     .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
                     .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
-                    .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                .Select(vov =>
+                {
+                    if (vov.OptionValue == null) return "";
+
+                    var optionName = currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue.ProductOption?.NameAr)
+        ? vov.OptionValue.ProductOption.NameAr
+        : vov.OptionValue.ProductOption?.Name ?? "";
+                    var optionValue = currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue.ValueAr)
+        ? vov.OptionValue.ValueAr
+        : vov.OptionValue.Value ?? "";
+
+                    if (string.IsNullOrEmpty(optionName) || string.IsNullOrEmpty(optionValue))
+                        return optionValue ?? optionName ?? "";
+
+                    return $"{optionName}: {optionValue}";
+                })
+
                     .Where(s => !string.IsNullOrEmpty(s))
                     .ToList();
                 variantName = string.Join(", ", optionValues);
@@ -61,7 +82,7 @@ else
                     <!-- Product Image -->
                     <div class="flash-sale-product-image-wrapper">
                         <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-productId="@product.Id">
-                            <img src="@imageUrl" alt="@product.Title" class="flash-sale-product-image" />
+                            <img src="@imageUrl" alt="@productTitle" class="flash-sale-product-image" />
                         </a>
                         <div class="fire-effect">🔥</div>
                     </div>
@@ -71,7 +92,7 @@ else
                         <!-- Product Title -->
                         <h4 class="flash-sale-product-title">
                             <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-productId="@product.Id" style="color: inherit; text-decoration: none;">
-                                @product.Title
+                                @productTitle
                             </a>
                         </h4>
 
@@ -91,7 +112,7 @@ else
                                 <span class="flash-sale-current-price">@Html.Raw(currencySymbol) @item.FlashSalePrice.ToString("N2")</span>
                             </div>
                             <div class="flash-sale-discount-badge">
-                                @Localizer["SAVE"] @Html.Raw(currencySymbol) @((originalPrice - (decimal)item.FlashSalePrice).ToString("N2"))
+                                @Localizer["DiscountSave"] @Html.Raw(currencySymbol) @((originalPrice - (decimal)item.FlashSalePrice).ToString("N2"))
                             </div>
                         </div>
 
