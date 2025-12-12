@@ -155,8 +155,11 @@ namespace BulkyBook.Controllers
                 foreach (var product in products)
                 {
                     var lastModified = product.ModifiedDate ?? product.CreatedDate ;
+                    // Use slug for SEO-friendly URLs
+                    var productSlug = !string.IsNullOrEmpty(product.SlugEn) ? product.SlugEn : product.Id.ToString();
+                    // Add product URL
                     urls.Add(CreateUrlElementWithHreflang(
-                        baseUrl + $"/Customer/Home/Details?productId={product.Id}",
+                        baseUrl + $"/Customer/Home/Details/{productSlug}",
                         lastModified,
                         "weekly",
                         0.8,

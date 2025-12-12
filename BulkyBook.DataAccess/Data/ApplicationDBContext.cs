@@ -167,6 +167,9 @@ namespace BulkyBook.DataAccess.Data
 			
 			// ProductVariantOptionValue indexes (enhance existing)
 			modelBuilder.Entity<ProductVariantOptionValue>().HasIndex(vov => vov.ProductOptionValueId); // Reverse lookup
+			
+			// Unique indexes for product slugs (for SEO-friendly URLs)
+			modelBuilder.Entity<Product>().HasIndex(p => p.SlugEn).IsUnique().HasFilter("[SlugEn] IS NOT NULL");
 
 			//modelBuilder.Entity<Company>().HasData(
 			//	new Company

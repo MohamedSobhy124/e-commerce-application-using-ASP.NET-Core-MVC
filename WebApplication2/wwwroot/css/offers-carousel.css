@@ -63,7 +63,7 @@
     touch-action: pan-y pan-x; /* Allow both vertical and horizontal scrolling naturally */
     -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
     position: relative;
-    padding: 1rem 0;
+    padding: 1rem 0 3.5rem;
     width: 100%;
     overflow: hidden;
     will-change: transform; /* Optimize for carousel transitions */
@@ -108,7 +108,7 @@
     flex-wrap: wrap !important;
 }
 
-/* Force 1 product per slide on mobile and small tablets */
+/* Force 2 products per slide on mobile and small tablets */
 @media (max-width: 768px) {
     .offers-carousel .carousel-item {
         width: 100%;
@@ -120,24 +120,26 @@
         width: 100% !important;
         margin-left: 0 !important;
         margin-right: 0 !important;
+        gap: 0.5rem !important;
     }
     
     .offers-carousel .carousel-item .row > [class*="col-"] {
-        flex: 0 0 100% !important;
-        max-width: 100% !important;
-        width: 100% !important;
-        min-width: 0 !important;
-        padding-left: 0.75rem !important;
-        padding-right: 0.75rem !important;
+        flex: 0 0 calc(50% - 0.25rem) !important;
+        max-width: calc(50% - 0.25rem) !important;
+        width: calc(50% - 0.25rem) !important;
+        min-width: calc(50% - 0.25rem) !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
     }
     
-    /* Hide any extra columns that might appear (safety measure) */
-    .offers-carousel .carousel-item .row > [class*="col-"]:nth-child(n+2) {
+    /* Hide any extra columns beyond the 2nd */
+    .offers-carousel .carousel-item .row > [class*="col-"]:nth-child(n+3) {
         display: none !important;
     }
     
-    /* Ensure only first card is visible */
-    .offers-carousel .carousel-item .row > [class*="col-"]:first-child {
+    /* Ensure first 2 cards are visible */
+    .offers-carousel .carousel-item .row > [class*="col-"]:first-child,
+    .offers-carousel .carousel-item .row > [class*="col-"]:nth-child(2) {
         display: block !important;
     }
 }
@@ -328,7 +330,6 @@
 }
 
 .offer-price-new::before {
-    content: '💰';
     font-size: 1.5rem;
     animation: moneyShake 2s ease-in-out infinite;
 }
@@ -526,7 +527,11 @@
 /* Carousel Indicators */
 .offers-carousel-indicators {
     margin-bottom: 0;
-    bottom: -3rem;
+    bottom: -2.5rem;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
 }
 
 .offers-carousel-indicators button {
@@ -640,10 +645,15 @@
         height: 18px;
     }
     
-    /* Force 1 product per slide on small tablets (576-768px) */
+    /* Force 2 products per slide on small tablets (576-768px) */
     .offers-carousel .carousel-item .row > [class*="col-"] {
-        flex: 0 0 100% !important;
-        max-width: 100% !important;
+        flex: 0 0 calc(50% - 0.25rem) !important;
+        max-width: calc(50% - 0.25rem) !important;
+        width: calc(50% - 0.25rem) !important;
+    }
+    
+    .offers-carousel .carousel-item .row > [class*="col-"]:nth-child(n+3) {
+        display: none !important;
     }
 }
 
@@ -717,7 +727,7 @@
     }
     
     .offers-carousel-indicators {
-        bottom: -2.5rem;
+        bottom: -2rem;
         margin-bottom: 0.5rem;
     }
     
@@ -732,10 +742,15 @@
         height: 8px;
     }
     
-    /* Force 1 product per slide on mobile (< 576px) */
+    /* Force 2 products per slide on mobile (< 576px) */
     .offers-carousel .carousel-item .row > [class*="col-"] {
-        flex: 0 0 100%;
-        max-width: 100%;
+        flex: 0 0 calc(50% - 0.25rem) !important;
+        max-width: calc(50% - 0.25rem) !important;
+        width: calc(50% - 0.25rem) !important;
+    }
+    
+    .offers-carousel .carousel-item .row > [class*="col-"]:nth-child(n+3) {
+        display: none !important;
     }
 }
 

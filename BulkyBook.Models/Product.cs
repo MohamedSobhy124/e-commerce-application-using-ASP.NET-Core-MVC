@@ -19,6 +19,10 @@ namespace BulkyBook.Models
         [MaxLength(500)]
         public string TitleAr { get; set; }
         
+        // URL-friendly slug for SEO (auto-generated, optional to edit manually)
+        [MaxLength(100, ErrorMessage = "Slug must be 100 characters or less")]
+        public string? SlugEn { get; set; }
+        
         [Required]
         public string Description { get; set; }
         
@@ -124,6 +128,13 @@ namespace BulkyBook.Models
         
         [Display(Name = "Is Trending Product")]
         public bool IsTrending { get; set; } = false;
+        
+        // Helper method to get slug based on language
+        public string GetSlug()
+        {
+            // Return slug or fallback to ID if slug is not generated yet
+            return !string.IsNullOrEmpty(SlugEn) ? SlugEn : Id.ToString();
+        }
     }
     
     public enum ProductType

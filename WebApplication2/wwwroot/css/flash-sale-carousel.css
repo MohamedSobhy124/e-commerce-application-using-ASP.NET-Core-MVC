@@ -748,18 +748,18 @@
         height: 300px;
     }
     
+    /* Hide side arrows on mobile */
     .flash-sale-carousel-nav {
-        width: 36px;
-        height: 36px;
-        font-size: 1.2rem;
+        display: none !important;
     }
     
-    .flash-sale-carousel-nav.prev {
-        left: 0.25rem;
-    }
-    
-    .flash-sale-carousel-nav.next {
-        right: 0.25rem;
+    /* Show indicators below on mobile */
+    .flash-sale-carousel-indicators {
+        display: flex !important;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        position: relative;
     }
     
     .flash-sale-modal-content {
@@ -828,10 +828,6 @@
     .flash-sale-slide-image,
     .flash-sale-slide-placeholder {
         height: 250px;
-    }
-    
-    .flash-sale-carousel-nav {
-        display: none;
     }
 }
 

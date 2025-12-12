@@ -54,8 +54,8 @@
                                 <div class="product-image-wrapper-mini combo-offer-image-wrapper-mini">
                                     @if (comboImages.Count > 1)
                                     {
-                                        <div id="comboImageCarousel_@comboOffer.Id" class="carousel slide product-image-carousel" data-bs-ride="carousel" data-bs-interval="3000">
-                                            <div class="carousel-inner">
+                                        <div id="comboImageCarousel_@comboOffer.Id" class="carousel slide product-image-carousel" data-bs-ride="carousel" data-bs-interval="3000" data-bs-touch="true">
+                                            <div class="carousel-inner" style="min-height: auto;">
                                                 @for (int imgIndex = 0; imgIndex < comboImages.Count; imgIndex++)
                                                 {
                                                     <div class="carousel-item @(imgIndex == 0 ? "active" : "")">

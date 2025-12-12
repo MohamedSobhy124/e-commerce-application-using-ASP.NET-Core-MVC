@@ -69,7 +69,7 @@
                                                 <div class="product-badge-best-seller-trophy">
                                                     <i class="bi bi-trophy-fill"></i>
                                                 </div>
-                                                <a href="@Url.Action("Details", "Home", new { area = "Customer", productId = product.Id })" class="product-card-link">
+                                                <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="product-card-link">
                                                     <div class="product-card-image">
                                                         <img src="@productImage" alt="@productName" class="img-fluid" loading="lazy" />
                                                     </div>
@@ -87,7 +87,7 @@
                                                 <div class="product-card-actions" onclick="event.stopPropagation();">
                                                     @if (product.ProductType == BulkyBook.Models.ProductType.Variable)
                                                     {
-                                                        <a href="@Url.Action("Details", "Home", new { area = "Customer", productId = product.Id })" class="btn btn-show-details">
+                                                        <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="btn btn-show-details">
                                                             <i class="bi bi-eye me-1"></i>@Localizer["ViewDetails"]
                                                         </a>
                                                     }

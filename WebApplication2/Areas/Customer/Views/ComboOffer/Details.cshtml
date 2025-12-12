@@ -420,7 +420,7 @@
                             }
                         </div>
                         <div class="p-4">
-                            <h5 class="fw-bold mb-2" style="cursor: pointer;" onclick="window.location.href='@Url.Action("Details", "Home", new { area = "Customer", productId = item.ProductId })'">@productName</h5>
+                            <h5 class="fw-bold mb-2" style="cursor: pointer;" onclick="window.location.href='@Url.Action("Details", "Home", new { area = "Customer", slug = (item.Product != null ? item.Product.GetSlug() : item.ProductId.ToString()) })'">@productName</h5>
                             @if (item.ProductVariant != null)
                             {
                                 string variantName = "";

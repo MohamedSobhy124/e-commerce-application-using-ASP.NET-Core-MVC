@@ -653,8 +653,11 @@
     
     function createSimpleProductCard(product) {
         // Simple fallback product card HTML
+        // Get current culture from document or default to 'en'
+        const currentCulture = document.documentElement.lang || 'en';
+        const productSlug = product.slugEn || product.id;
         return `
-            <div class="product-card modern-stagger-item visible" onclick="window.location.href='/Customer/Home/Details?productId=${product.id}'">
+            <div class="product-card modern-stagger-item visible" onclick="window.location.href='/Customer/Home/Details/${productSlug}'">
                 <div class="product-image-wrapper">
                     <img src="${product.imageUrl || '/images/placeholder.png'}" class="product-image" alt="${product.title}" />
                 </div>

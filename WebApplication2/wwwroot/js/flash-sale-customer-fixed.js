@@ -189,7 +189,6 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
             // Update cart count
             if (data.cartCount !== undefined) {
                 const cartCountElement = document.getElementById('cartCount');
-                const headerCartBadgeElement = document.getElementById('headerCartBadge');
                 if (cartCountElement) {
                     cartCountElement.textContent = data.cartCount;
                     // Pulse animation
@@ -198,13 +197,14 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
                         cartCountElement.style.animation = 'cartPulse 0.6s ease';
                     }, 10);
                 }
-                if (headerCartBadgeElement) {
-                    headerCartBadgeElement.textContent = data.cartCount;
-                    // Pulse animation
-                    headerCartBadgeElement.style.animation = 'none';
-                    setTimeout(() => {
-                        headerCartBadgeElement.style.animation = 'cartPulse 0.6s ease';
-                    }, 10);
+                const headerCartBadge = document.getElementById('headerCartBadge');
+                if (headerCartBadge) {
+                    if (data.cartCount > 0) {
+                        headerCartBadge.textContent = data.cartCount;
+                        headerCartBadge.style.display = 'flex';
+                    } else {
+                        headerCartBadge.style.display = 'none';
+                    }
                 }
             }
 

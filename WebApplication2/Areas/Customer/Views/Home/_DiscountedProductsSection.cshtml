@@ -25,7 +25,7 @@
             </div>
             
             <!-- Bootstrap Carousel -->
-            <div id="offersCarousel" class="carousel slide offers-carousel" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
+            <div id="offersCarousel" class="carousel slide offers-carousel" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover" data-bs-touch="true">
                 <div class="carousel-inner">
                     @{
                         var productsList = discountedProducts.ToList();
@@ -80,7 +80,7 @@
                                         
                                         <div class="col-12 col-sm-6 col-lg-3">
                                             <div class="offer-card h-100">
-                                                <a href="@Url.Action("Details", "Home", new { area = "Customer", productId = product.Id })" class="offer-card-link">
+                                                <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="offer-card-link">
                                                     @if (discountPercent > 0)
                                                     {
                                                         <div class="offer-badge">-@discountPercent%</div>
@@ -109,7 +109,7 @@
                                                 <div class="product-card-actions" onclick="event.stopPropagation();">
                                                     @if (product.ProductType == BulkyBook.Models.ProductType.Variable)
                                                     {
-                                                        <a href="@Url.Action("Details", "Home", new { area = "Customer", productId = product.Id })" class="btn btn-show-details">
+                                                        <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="btn btn-show-details">
                                                             <i class="bi bi-eye me-1"></i>@Localizer["ViewDetails"]
                                                         </a>
                                                     }

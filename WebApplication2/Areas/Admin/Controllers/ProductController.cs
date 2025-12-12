@@ -189,6 +189,15 @@ namespace BulkyBook.Areas.Admin.Controllers
                 // For "multiple" option, no validation needed (images are optional)
             }
 
+            // Validate slug if manually entered
+            if (!string.IsNullOrWhiteSpace(productVM.product.SlugEn))
+            {
+                if (productVM.product.SlugEn.Length > 100)
+                {
+                    ModelState.AddModelError("product.SlugEn", "Slug must be 100 characters or less.");
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 string WWWRootPath = _webHostEnvironment.WebRootPath;
@@ -197,18 +206,18 @@ namespace BulkyBook.Areas.Admin.Controllers
                 // Handle multiple image uploads
                 if (files != null && files.Count > 0)
                 {
-                    // Get existing product if updating
-                    Product existingProduct = null;
+                    // Get existing product if updating (for image handling)
+                    Product existingProductForImages = null;
                     if (productVM.product.Id != 0)
                     {
-                        existingProduct = _unitOfWork.product.Get(a => a.Id == productVM.product.Id, includeProperties: "ProductImages");
+                        existingProductForImages = _unitOfWork.product.Get(a => a.Id == productVM.product.Id, includeProperties: "ProductImages");
                     }
 
                     int displayOrder = 0;
-                    if (existingProduct != null && existingProduct.ProductImages != null)
+                    if (existingProductForImages != null && existingProductForImages.ProductImages != null)
                     {
-                        displayOrder = existingProduct.ProductImages.Any() 
-                            ? existingProduct.ProductImages.Max(pi => pi.DisplayOrder) + 1 
+                        displayOrder = existingProductForImages.ProductImages.Any() 
+                            ? existingProductForImages.ProductImages.Max(pi => pi.DisplayOrder) + 1 
                             : 0;
                     }
 
@@ -258,6 +267,47 @@ namespace BulkyBook.Areas.Admin.Controllers
                     }
                 }
 
+                // Generate slug for SEO-friendly URLs
+                var allProducts = _dbContext.Products.AsNoTracking().ToList();
+                var existingSlugsEn = allProducts.Where(p => p.Id != productVM.product.Id && !string.IsNullOrEmpty(p.SlugEn)).Select(p => p.SlugEn).ToList();
+                
+                // Get existing product to check if title changed (for slug regeneration logic)
+                Product existingProductForSlug = null;
+                if (productVM.product.Id > 0)
+                {
+                    existingProductForSlug = _dbContext.Products.AsNoTracking().FirstOrDefault(p => p.Id == productVM.product.Id);
+                }
+                
+                // Generate slug (only if empty or title changed)
+                if (!string.IsNullOrWhiteSpace(productVM.product.Title))
+                {
+                    // Check if slug needs regeneration
+                    bool shouldRegenerate = string.IsNullOrWhiteSpace(productVM.product.SlugEn) ||
+                                             (existingProductForSlug != null && existingProductForSlug.Title != productVM.product.Title && 
+                                              productVM.product.SlugEn == existingProductForSlug.SlugEn);
+                    
+                    if (shouldRegenerate)
+                    {
+                        var baseSlug = BulkyBook.Utility.UrlSlugHelper.GenerateSlug(productVM.product.Title);
+                        productVM.product.SlugEn = BulkyBook.Utility.UrlSlugHelper.GenerateUniqueSlug(baseSlug, existingSlugsEn);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(productVM.product.SlugEn))
+                    {
+                        // Slug was manually edited - ensure it's clean and unique
+                        var cleanedSlug = BulkyBook.Utility.UrlSlugHelper.GenerateSlug(productVM.product.SlugEn);
+                        if (cleanedSlug != productVM.product.SlugEn)
+                        {
+                            // Clean invalid characters
+                            productVM.product.SlugEn = BulkyBook.Utility.UrlSlugHelper.GenerateUniqueSlug(cleanedSlug, existingSlugsEn);
+                        }
+                        else
+                        {
+                            // Ensure uniqueness
+                            productVM.product.SlugEn = BulkyBook.Utility.UrlSlugHelper.GenerateUniqueSlug(productVM.product.SlugEn, existingSlugsEn);
+                        }
+                    }
+                }
+                
                 int savedProductId = 0;
                 
                 if (productVM.product.Id == 0)
@@ -285,6 +335,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                     // Update properties
                     existingProduct.Title = productVM.product.Title;
                     existingProduct.TitleAr = productVM.product.TitleAr;
+                    existingProduct.SlugEn = productVM.product.SlugEn;
                     existingProduct.Description = productVM.product.Description;
                     existingProduct.DescriptionAr = productVM.product.DescriptionAr;
                     existingProduct.SuggestedUse = productVM.product.SuggestedUse;
@@ -1499,6 +1550,65 @@ namespace BulkyBook.Areas.Admin.Controllers
                 .ToList();
             
             return Json(new { data = allProducts });
+        }
+        #endregion
+
+        #region Slug Regeneration
+        /// <summary>
+        /// Regenerates slugs for all products (useful for fixing existing products with bad slugs)
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RegenerateAllSlugs()
+        {
+            try
+            {
+                var allProducts = _dbContext.Products.ToList();
+                var updatedCount = 0;
+
+                foreach (var product in allProducts)
+                {
+                    var originalSlugEn = product.SlugEn;
+
+                    // Get all other products' slugs for uniqueness check
+                    var existingSlugsEn = allProducts
+                        .Where(p => p.Id != product.Id && !string.IsNullOrEmpty(p.SlugEn))
+                        .Select(p => p.SlugEn)
+                        .ToList();
+
+                    // Regenerate slug
+                    if (!string.IsNullOrWhiteSpace(product.Title))
+                    {
+                        var baseSlugEn = UrlSlugHelper.GenerateSlug(product.Title);
+                        product.SlugEn = UrlSlugHelper.GenerateUniqueSlug(baseSlugEn, existingSlugsEn);
+                    }
+
+                    // Only update if slug changed
+                    if (product.SlugEn != originalSlugEn)
+                    {
+                        _dbContext.Products.Update(product);
+                        updatedCount++;
+                    }
+                }
+
+                _dbContext.SaveChanges();
+
+                return Json(new 
+                { 
+                    success = true, 
+                    message = $"Successfully regenerated slugs for {updatedCount} out of {allProducts.Count} products.",
+                    updatedCount = updatedCount,
+                    totalProducts = allProducts.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new 
+                { 
+                    success = false, 
+                    message = $"Error regenerating slugs: {ex.Message}" 
+                });
+            }
         }
         #endregion
     }

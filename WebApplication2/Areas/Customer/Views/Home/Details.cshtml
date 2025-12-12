@@ -19,7 +19,7 @@
     {
         new BreadcrumbItem { Name = currentCulture == "ar" ? "الرئيسية" : "Home", Url = $"{baseUrl}/Customer/Home" },
         new BreadcrumbItem { Name = Model.product.categry?.Name ?? (currentCulture == "ar" ? "الفئات" : "Categories"), Url = $"{baseUrl}/Customer/Home?categoryId={Model.product.CategryId}" },
-        new BreadcrumbItem { Name = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title, Url = $"{baseUrl}/Customer/Home/Details?productId={Model.product.Id}" }
+        new BreadcrumbItem { Name = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title, Url = $"{baseUrl}/Customer/Home/Details/{Model.product.GetSlug()}" }
     };
 }
   
@@ -80,7 +80,7 @@
                             
                             @if (productImages.Count > 1)
                             {
-                                <div id="productDetailsCarousel" class="carousel slide product-details-carousel" data-bs-ride="false" data-bs-interval="false">
+                                <div id="productDetailsCarousel" class="carousel slide product-details-carousel" data-bs-ride="false" data-bs-interval="false" data-bs-touch="true">
                                     <div class="carousel-inner">
                                         @for (int i = 0; i < productImages.Count; i++)
                                         {

@@ -129,7 +129,7 @@ else
 
                                 <!-- Product Image -->
                                 <div class="flash-sale-product-image-wrapper">
-                                    <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-productId="@product.Id">
+                                    <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()">
                                         <img src="@imageUrl" alt="@product.Title" class="flash-sale-product-image" />
                                     </a>
                                     <div class="fire-effect">🔥</div>
@@ -145,7 +145,7 @@ else
 
                                     <!-- Product Title -->
                                     <h4 class="flash-sale-product-title">
-                                        <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-productId="@product.Id" style="color: inherit; text-decoration: none;">
+                                        <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()" style="color: inherit; text-decoration: none;">
                                             @product.Title
                                         </a>
                                     </h4>

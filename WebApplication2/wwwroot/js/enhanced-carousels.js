@@ -1,12 +1,12 @@
 /**
  * Enhanced Carousel Functionality
- * On mobile: Each product becomes its own carousel-item for smooth one-by-one sliding
+ * On mobile: Show 2 products per slide for better browsing
  * On desktop: Keeps original structure with multiple products per slide
  */
 
 // Function to enhance carousels (can be called multiple times)
 function enhanceCarouselsForMobile() {
-    const carousels = document.querySelectorAll('.product-carousel:not([data-mobile-restructured="true"])');
+    const carousels = document.querySelectorAll('.product-carousel:not([data-mobile-restructured="true"]), .offers-carousel:not([data-mobile-restructured="true"])');
     
     carousels.forEach(function(carousel) {
         const carouselInner = carousel.querySelector('.carousel-inner');
@@ -22,32 +22,44 @@ function enhanceCarouselsForMobile() {
         
         if (allProducts.length <= 1) return;
         
-        // Create new carousel structure with one product per slide
+        // Create new carousel structure with 2 products per slide
         const newCarouselItems = [];
-        allProducts.forEach(function(productCol, index) {
-            // Get the product card element
-            const productCard = productCol.querySelector('.product-card-simple, .offer-card');
-            if (!productCard) return;
+        for (let i = 0; i < allProducts.length; i += 2) {
+            // Get current and next product (if exists)
+            const product1 = allProducts[i];
+            const product2 = allProducts[i + 1];
             
-            // Clone the entire column structure to preserve all attributes and classes
-            const newCol = productCol.cloneNode(true);
+            if (!product1) continue;
             
             // Create new carousel-item
             const newCarouselItem = document.createElement('div');
-            newCarouselItem.className = 'carousel-item' + (index === 0 ? ' active' : '');
+            newCarouselItem.className = 'carousel-item' + (i === 0 ? ' active' : '');
             
             // Create row wrapper
             const row = document.createElement('div');
             row.className = 'row g-3';
             
-            // Make the column full width
-            newCol.className = 'col-12';
+            // Clone first product column
+            const newCol1 = product1.cloneNode(true);
+            newCol1.className = 'col-6';
+            row.appendChild(newCol1);
             
-            // Add column to row
-            row.appendChild(newCol);
+            // Clone second product column if exists
+            if (product2) {
+                const newCol2 = product2.cloneNode(true);
+                newCol2.className = 'col-6';
+                row.appendChild(newCol2);
+            } else {
+                // If odd number, create empty spacer
+                const spacer = document.createElement('div');
+                spacer.className = 'col-6';
+                spacer.style.visibility = 'hidden';
+                row.appendChild(spacer);
+            }
+            
             newCarouselItem.appendChild(row);
             newCarouselItems.push(newCarouselItem);
-        });
+        }
         
         if (newCarouselItems.length === 0) return;
         
@@ -89,7 +101,7 @@ function enhanceCarouselsForMobile() {
             // Get interval from data attribute or default
             const interval = carousel.dataset.bsInterval || carousel.getAttribute('data-bs-interval') || '8000';
             
-            // Create new carousel instance
+            // Create new carousel instance with touch support
             const bsCarousel = new bootstrap.Carousel(carousel, {
                 interval: parseInt(interval),
                 wrap: true,
@@ -101,7 +113,7 @@ function enhanceCarouselsForMobile() {
 }
 
 function restoreDesktopCarousels() {
-    const carousels = document.querySelectorAll('.product-carousel[data-mobile-restructured="true"]');
+    const carousels = document.querySelectorAll('.product-carousel[data-mobile-restructured="true"], .offers-carousel[data-mobile-restructured="true"]');
     
     carousels.forEach(function(carousel) {
         if (carousel.dataset.originalHtml) {
@@ -135,42 +147,46 @@ function restoreDesktopCarousels() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if mobile and enhance carousels
-    if (window.innerWidth <= 767) {
-        enhanceCarouselsForMobile();
-    }
-    
-    // Re-enhance on resize
-    let resizeTimer;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function() {
-            if (window.innerWidth <= 767) {
-                enhanceCarouselsForMobile();
-            } else {
-                restoreDesktopCarousels();
-            }
-        }, 250);
-    });
-    
-    // Listen for dynamically loaded content (lazy-loaded sections)
-    let mutationTimer;
-    const observer = new MutationObserver(function(mutations) {
-        // Debounce to avoid too many calls
-        clearTimeout(mutationTimer);
-        mutationTimer = setTimeout(function() {
-            if (window.innerWidth <= 767) {
-                enhanceCarouselsForMobile();
-            }
-        }, 500);
-    });
-    
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-});
+// DISABLED: Using CSS-only approach for 2 items per slide on mobile
+// The CSS handles showing 2 items per slide without restructuring the DOM
+// This is more performant and doesn't break existing carousel functionality
+
+// document.addEventListener('DOMContentLoaded', function() {
+//     // Check if mobile and enhance carousels
+//     if (window.innerWidth <= 767) {
+//         enhanceCarouselsForMobile();
+//     }
+//     
+//     // Re-enhance on resize
+//     let resizeTimer;
+//     window.addEventListener('resize', function() {
+//         clearTimeout(resizeTimer);
+//         resizeTimer = setTimeout(function() {
+//             if (window.innerWidth <= 767) {
+//                 enhanceCarouselsForMobile();
+//             } else {
+//                 restoreDesktopCarousels();
+//             }
+//         }, 250);
+//     });
+//     
+//     // Listen for dynamically loaded content (lazy-loaded sections)
+//     let mutationTimer;
+//     const observer = new MutationObserver(function(mutations) {
+//         // Debounce to avoid too many calls
+//         clearTimeout(mutationTimer);
+//         mutationTimer = setTimeout(function() {
+//             if (window.innerWidth <= 767) {
+//                 enhanceCarouselsForMobile();
+//             }
+//         }, 500);
+//     });
+//     
+//     observer.observe(document.body, {
+//         childList: true,
+//         subtree: true
+//     });
+// });
 
 // Expose function globally so it can be called after AJAX loads
 window.enhanceCarouselsForMobile = enhanceCarouselsForMobile;

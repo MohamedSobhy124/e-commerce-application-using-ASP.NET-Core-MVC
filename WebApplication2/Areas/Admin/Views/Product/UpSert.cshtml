@@ -52,6 +52,49 @@
                                     </div>
                                 </div>
 
+                                <!-- URL Slug Fields - Auto-generated, Editable -->
+                                <div class="alert alert-info mb-3" role="alert">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-info-circle-fill me-2 mt-1" style="font-size: 1.2rem;"></i>
+                                        <div>
+                                            <strong>@(isArabic ? "معلومات عن روابط المنتجات (Slugs)" : "About Product URL Slugs")</strong>
+                                            <p class="mb-0 mt-1" style="font-size: 0.9rem;">
+                                                @(isArabic 
+                                                    ? "الروابط (Slugs) هي أجزاء من عنوان URL الخاص بالمنتج. يتم إنشاؤها تلقائياً من عنوان المنتج لتحسين محركات البحث (SEO). الروابط النظيفة تجعل عناوين URL أسهل في القراءة والفهم. مثال: /Customer/Home/Details/body-builder-whey-protein بدلاً من /Customer/Home/Details?productId=41"
+                                                    : "Slugs are parts of the product's URL. They are auto-generated from the product title for better SEO. Clean slugs make URLs easier to read and understand. Example: /Customer/Home/Details/body-builder-whey-protein instead of /Customer/Home/Details?productId=41")
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label class="admin-form-label d-flex justify-content-between align-items-center">
+                                                <span>
+                                                    <i class="bi bi-link-45deg me-2"></i>@(isArabic ? "رابط المنتج (إنجليزي)" : "Product URL Slug (English)") 
+                                                    <span class="text-muted small">(@(isArabic ? "يتم إنشاؤه تلقائياً" : "Auto-generated"))</span>
+                                                </span>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleSlugEdit('SlugEn')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                                    <i class="bi bi-pencil" id="editIconSlugEn"></i> <span id="editTextSlugEn">@(isArabic ? "تعديل" : "Edit")</span>
+                                                </button>
+                                            </label>
+                                            <div class="input-group">
+                                                <input asp-for="product.SlugEn" id="SlugEn" class="admin-form-control slug-input bg-light" readonly placeholder="@(isArabic ? "سيتم إنشاء الرابط تلقائياً من العنوان" : "Will be auto-generated from title")" />
+                                              
+                                            </div>
+                                            <small class="text-muted d-block mt-1">
+                                                <i class="bi bi-lightbulb me-1"></i>
+                                                @(isArabic ? "مثال: body-builder-whey-protein-chocolate-5-lb" : "Example: body-builder-whey-protein-chocolate-5-lb")
+                                                <span id="slugEnPreview" class="text-primary ms-2" style="font-weight: 500;"></span>
+                                            </small>
+                                            <div class="text-danger small mt-1">
+                                                <span asp-validation-for="product.SlugEn"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Description Fields - Both Languages -->
                                 <div class="row">
                                     <div class="col-md-6">
@@ -613,9 +656,144 @@
             VariantName = v.VariantName
         })  ));
 
+        // Slug generation and preview functions
+        function generateSlug(text) {
+            if (!text) return '';
+        
+            var specialCharsPattern = '[,\\.;:!?()\\[\\]{}""\'`~@@' + String.fromCharCode(35) + '$%^&*+=|\\\\/<>_]';
+            var specialCharsRegex = new RegExp(specialCharsPattern, 'g');
+            return text.toLowerCase()
+                .trim()
+                .replace(/\s+/g, '-')
+                .replace(specialCharsRegex, '-')
+                .replace(/[^\p{L}\p{N}\-]/gu, '')
+                .replace(/-+/g, '-')
+                .replace(/^-+|-+$/g, '')
+                .substring(0, 100);
+        }
+
+        function updateSlugPreview(titleInputSelector, slugInputId, previewId) {
+            const titleInput = document.querySelector(titleInputSelector);
+            const slugInput = document.getElementById(slugInputId);
+            const preview = document.getElementById(previewId);
+            
+            if (titleInput && slugInput && preview) {
+                titleInput.addEventListener('input', function() {
+                    if (!slugInput.readOnly) return; // Only update if read-only
+                    const generatedSlug = generateSlug(this.value);
+                    if (generatedSlug) {
+                        slugInput.value = generatedSlug;
+                        preview.textContent = generatedSlug;
+                        preview.style.display = 'inline';
+                    } else {
+                        preview.textContent = '';
+                        preview.style.display = 'none';
+                    }
+                });
+                
+                // Initial preview
+                if (titleInput.value) {
+                    const generatedSlug = generateSlug(titleInput.value);
+                    if (generatedSlug && slugInput.readOnly) {
+                        slugInput.value = generatedSlug;
+                        preview.textContent = generatedSlug;
+                        preview.style.display = 'inline';
+                    }
+                }
+            }
+        }
+
+        function toggleSlugEdit(slugId) {
+            const slugInput = document.getElementById(slugId);
+            const editIcon = document.getElementById('editIcon' + slugId);
+            const editText = document.getElementById('editText' + slugId);
+            
+            if (slugInput) {
+                if (slugInput.readOnly) {
+                    slugInput.readOnly = false;
+                    slugInput.classList.remove('bg-light');
+                    slugInput.classList.add('bg-white');
+                    if (editIcon) editIcon.className = 'bi bi-check';
+                    if (editText) editText.textContent = isArabic ? 'حفظ' : 'Save';
+                } else {
+                    slugInput.readOnly = true;
+                    slugInput.classList.add('bg-light');
+                    slugInput.classList.remove('bg-white');
+                    if (editIcon) editIcon.className = 'bi bi-pencil';
+                    if (editText) editText.textContent = isArabic ? 'تعديل' : 'Edit';
+                }
+            }
+        }
+
         // Initialize on page load
         // Prevent form submission completely
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize slug previews - use name attribute selector since ASP.NET Core generates IDs
+            const titleEnInput = document.querySelector('input[name="product.Title"]');
+            const titleArInput = document.querySelector('input[name="product.TitleAr"]');
+            
+            if (titleEnInput) {
+                titleEnInput.addEventListener('input', function() {
+                    const slugEnInput = document.getElementById('SlugEn');
+                    const preview = document.getElementById('slugEnPreview');
+                    if (slugEnInput && slugEnInput.readOnly && preview) {
+                        const generatedSlug = generateSlug(this.value);
+                        if (generatedSlug) {
+                            slugEnInput.value = generatedSlug;
+                            preview.textContent = generatedSlug;
+                            preview.style.display = 'inline';
+                        }
+                    }
+                });
+                // Initial preview
+                if (titleEnInput.value) {
+                    const slugEnInput = document.getElementById('SlugEn');
+                    const preview = document.getElementById('slugEnPreview');
+                    if (slugEnInput && slugEnInput.readOnly && preview) {
+                        const generatedSlug = generateSlug(titleEnInput.value);
+                        if (generatedSlug) {
+                            slugEnInput.value = generatedSlug;
+                            preview.textContent = generatedSlug;
+                            preview.style.display = 'inline';
+                        }
+                    }
+                }
+            }
+            
+            if (titleArInput) {
+                titleArInput.addEventListener('input', function() {
+                    const slugArInput = document.getElementById('SlugAr');
+                    const preview = document.getElementById('slugArPreview');
+                    if (slugArInput && slugArInput.readOnly && preview) {
+                        const generatedSlug = generateSlug(this.value);
+                        if (generatedSlug) {
+                            slugArInput.value = generatedSlug;
+                            preview.textContent = generatedSlug;
+                            preview.style.display = 'inline';
+                        }
+                    }
+                });
+                // Initial preview
+                if (titleArInput.value) {
+                    const slugArInput = document.getElementById('SlugAr');
+                    const preview = document.getElementById('slugArPreview');
+                    if (slugArInput && slugArInput.readOnly && preview) {
+                        const generatedSlug = generateSlug(titleArInput.value);
+                        if (generatedSlug) {
+                            slugArInput.value = generatedSlug;
+                            preview.textContent = generatedSlug;
+                            preview.style.display = 'inline';
+                        }
+                    }
+                }
+            }
+            
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
             const form = document.getElementById('productForm') || document.querySelector('form');
             if (form) {
                 // Remove any existing onsubmit handlers

@@ -1011,6 +1011,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                     id = p.Id,
                     title = p.Title,
                     titleAr = p.TitleAr,
+                    slugEn = p.SlugEn ?? string.Empty,
                 price = minPricesDict.ContainsKey(p.Id) ? minPricesDict[p.Id] : p.Price,
                     listPrice = p.ListPrice,
                     stockQuantity = p.StockQuantity,
@@ -1068,6 +1069,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                 id = p.id,
                 title = p.title,
                 titleAr = p.titleAr,
+                slugEn = p.slugEn,
                 price = p.price,
                 listPrice = p.listPrice,
                 stockQuantity = p.stockQuantity,
@@ -1350,6 +1352,7 @@ namespace BulkyBook.Areas.Customer.Controllers
                             w.product.Id,
                             w.product.Title,
                             w.product.TitleAr,
+                            w.product.SlugEn,
                             w.product.Price,
                             w.product.ListPrice,
                             w.product.ImageUrl,
@@ -1462,6 +1465,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                         id = item.Id,
                         productId = item.ProductId,
                         title = product.Title,
+                        titleAr = product.TitleAr,
+                        slugEn = product.SlugEn ?? string.Empty,
                         imageUrl = product.FirstImageUrl ?? product.ImageUrl ?? "/images/no-image.png",
                         price = displayPrice,
                         listPrice = product.ListPrice > 0 ? (double?)product.ListPrice : null,
@@ -1539,9 +1544,70 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
         
         // Performance: Cache product details for 5 minutes (product data changes infrequently)
-        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "productId" }, Location = ResponseCacheLocation.Any)]
-        public async Task<IActionResult> Details(int productId)
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "slug" }, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> Details(string slug)
         {
+            // Get current culture to determine which slug to use
+            var requestCulture = Request.HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+            var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+            var isArabic = currentCulture == "ar";
+            
+            Product product = null;
+            
+            // Try to find by slug first (preferred method)
+            if (!string.IsNullOrEmpty(slug))
+            {
+                product = await _dbContext.Products
+                    .AsNoTracking()
+                    .Where(p => !p.IsDeleted && p.SlugEn == slug)
+                    .Include(p => p.categry)
+                    .Include(p => p.Brand)
+                    .Include(p => p.ProductImages.OrderBy(pi => pi.DisplayOrder))
+                    .Include(p => p.ProductOptions.Where(o => !o.IsDeleted).OrderBy(o => o.DisplayOrder))
+                        .ThenInclude(o => o.OptionValues.Where(ov => !ov.IsDeleted).OrderBy(ov => ov.DisplayOrder))
+                    .Include(p => p.ProductVariants.Where(v => !v.IsDeleted))
+                        .ThenInclude(v => v.VariantOptionValues.Where(vov => vov.OptionValue != null && !vov.OptionValue.IsDeleted && vov.OptionValue.ProductOption != null && !vov.OptionValue.ProductOption.IsDeleted))
+                            .ThenInclude(vov => vov.OptionValue)
+                                .ThenInclude(ov => ov.ProductOption)
+                    .FirstOrDefaultAsync();
+            }
+            
+            // Fallback: If slug is numeric, try to find by ID (backward compatibility)
+            if (product == null && !string.IsNullOrEmpty(slug) && int.TryParse(slug, out int parsedProductId))
+            {
+                product = await _dbContext.Products
+                    .AsNoTracking()
+                    .Where(p => p.Id == parsedProductId && !p.IsDeleted)
+                    .Include(p => p.categry)
+                    .Include(p => p.Brand)
+                    .Include(p => p.ProductImages.OrderBy(pi => pi.DisplayOrder))
+                    .Include(p => p.ProductOptions.Where(o => !o.IsDeleted).OrderBy(o => o.DisplayOrder))
+                        .ThenInclude(o => o.OptionValues.Where(ov => !ov.IsDeleted).OrderBy(ov => ov.DisplayOrder))
+                    .Include(p => p.ProductVariants.Where(v => !v.IsDeleted))
+                        .ThenInclude(v => v.VariantOptionValues.Where(vov => vov.OptionValue != null && !vov.OptionValue.IsDeleted && vov.OptionValue.ProductOption != null && !vov.OptionValue.ProductOption.IsDeleted))
+                            .ThenInclude(vov => vov.OptionValue)
+                                .ThenInclude(ov => ov.ProductOption)
+                    .FirstOrDefaultAsync();
+                
+                // If found by ID, redirect to slug-based URL for SEO
+                if (product != null)
+                {
+                    var correctSlug = product.GetSlug();
+                    if (!string.IsNullOrEmpty(correctSlug) && correctSlug != slug)
+                    {
+                        return RedirectToAction("Details", new { slug = correctSlug });
+                    }
+                }
+            }
+            
+            // Check if product is deleted or not found
+            if (product == null)
+            {
+                return NotFound();
+            }
+            
+            var productId = product.Id;
+            
             // PERFORMANCE: Check purchase status efficiently with direct query
             var hasPurchased = false;
             try
@@ -1566,27 +1632,6 @@ namespace BulkyBook.Areas.Customer.Controllers
             {
                 // If error checking purchase, just set to false
                 hasPurchased = false;
-            }
-
-            // PERFORMANCE: Optimized query - load product with only necessary includes
-            var product = await _dbContext.Products
-                .AsNoTracking()
-                .Where(p => p.Id == productId && !p.IsDeleted)
-                .Include(p => p.categry)
-                .Include(p => p.Brand)
-                .Include(p => p.ProductImages.OrderBy(pi => pi.DisplayOrder))
-                .Include(p => p.ProductOptions.Where(o => !o.IsDeleted).OrderBy(o => o.DisplayOrder))
-                    .ThenInclude(o => o.OptionValues.Where(ov => !ov.IsDeleted).OrderBy(ov => ov.DisplayOrder))
-                .Include(p => p.ProductVariants.Where(v => !v.IsDeleted))
-                    .ThenInclude(v => v.VariantOptionValues.Where(vov => vov.OptionValue != null && !vov.OptionValue.IsDeleted && vov.OptionValue.ProductOption != null && !vov.OptionValue.ProductOption.IsDeleted))
-                        .ThenInclude(vov => vov.OptionValue)
-                            .ThenInclude(ov => ov.ProductOption)
-                .FirstOrDefaultAsync();
-            
-            // Check if product is deleted
-            if (product == null)
-            {
-                return NotFound();
             }
             
             ShoppingCart cart = new()
@@ -1684,7 +1729,16 @@ namespace BulkyBook.Areas.Customer.Controllers
             if (shoppingCart.Count < 1)
             {
                 TempData["error"] = "Quantity must be at least 1.";
-                return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
+                // Get product to get slug for redirect
+                var prod = _unitOfWork.product.Get(p => p.Id == shoppingCart.ProductId && !p.IsDeleted);
+                if (prod != null)
+                {
+                    var requestCulture = Request.HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+                    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+                    var slug = prod.SlugEn ?? prod.Id.ToString();
+                    return RedirectToAction("Details", new { slug = slug });
+                }
+                return RedirectToAction("Index");
             }
             
             // Get product to check stock
@@ -2020,10 +2074,36 @@ namespace BulkyBook.Areas.Customer.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error(int? statusCode = null)
         {
+            var status = statusCode ?? HttpContext.Response.StatusCode;
+            
+            // Set the status code in the response
+            Response.StatusCode = status;
+            
+            // If it's an API request (JSON), return JSON response
+            if (Request.Headers["Accept"].ToString().Contains("application/json") || 
+                Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(new 
+                { 
+                    error = true,
+                    statusCode = status,
+                    message = status switch
+                    {
+                        404 => "Resource not found",
+                        500 => "Internal server error",
+                        403 => "Access forbidden",
+                        401 => "Unauthorized",
+                        _ => "An error occurred"
+                    },
+                    requestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+                });
+            }
+            
+            // For regular requests, return the error view
             var errorViewModel = new ErrorViewModel 
             { 
                 RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                StatusCode = statusCode ?? HttpContext.Response.StatusCode
+                StatusCode = status
             };
             return View(errorViewModel);
         }

@@ -1,11 +1,16 @@
 ﻿@model IEnumerable<BulkyBook.Models.Product>
+@using Microsoft.AspNetCore.Localization
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var isArabic = currentCulture == "ar";
 }
 
 <partial name="_Notifications" />
+@Html.AntiForgeryToken()
 
 <div class="admin-wrapper">
     <div class="container">
@@ -23,10 +28,13 @@
                         <i class="bi bi-info-circle me-2"></i>
                         <span id="productCount">@Model.Count() @Localizer["Product"]</span>
                     </div>
-                    <a asp-action="UpSert" class="create-new-btn">
-                        <i class="bi bi-plus-circle me-2"></i>
-                        @Localizer["CreateNewProduct"]
-                    </a>
+                    <div class="d-flex gap-2">
+                
+                        <a asp-action="UpSert" class="create-new-btn">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            @Localizer["CreateNewProduct"]
+                        </a>
+                    </div>
                 </div>
 
                 <div class="admin-table-wrapper">
@@ -53,6 +61,56 @@
     <script>
         // Pass translations to JavaScript
         window.Localizer = @Html.Raw(Json.Serialize(Localizer.GetAllStrings().ToDictionary(s => s.Name, s => s.Value)));
+        
+        // Handle Regenerate Slugs button
+        document.getElementById('btnRegenerateSlugs')?.addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            const isArabic = '@isArabic' === 'True';
+            const confirmMessage = isArabic 
+                ? 'هل تريد إعادة إنشاء الروابط لجميع المنتجات؟ سيتم تحديث الروابط القديمة بروابط جديدة نظيفة.'
+                : 'Are you sure you want to regenerate slugs for all products? Old slugs will be updated with clean new slugs.';
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+            
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i><span>' + (isArabic ? 'جاري المعالجة...' : 'Processing...') + '</span>';
+            
+            // Get anti-forgery token
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || 
+                         document.querySelector('[name="__RequestVerificationToken"]')?.value || '';
+            
+            fetch('/Admin/Product/RegenerateAllSlugs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const successMsg = data.message || (isArabic ? 'تم إعادة إنشاء الروابط بنجاح' : 'Slugs regenerated successfully');
+                    alert(successMsg + (data.updatedCount ? '\n' + (isArabic ? 'تم تحديث: ' : 'Updated: ') + data.updatedCount + (isArabic ? ' منتج' : ' products') : ''));
+                    location.reload();
+                } else {
+                    alert(data.message || (isArabic ? 'حدث خطأ أثناء إعادة إنشاء الروابط' : 'Error regenerating slugs'));
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(isArabic ? 'حدث خطأ أثناء إعادة إنشاء الروابط' : 'Error regenerating slugs');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+        });
     </script>
     <script type="text/javascript" src="~/js/Product.js"></script>
 }

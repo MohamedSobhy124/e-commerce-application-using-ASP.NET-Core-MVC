@@ -497,8 +497,8 @@
 
 @media (max-width: 576px) {
     .combo-offer-card-mini {
-        min-width: 220px;
-        max-width: 220px;
+        min-width: 100px;
+        max-width: 150px;
     }
     
     .combo-offer-image-wrapper-mini {

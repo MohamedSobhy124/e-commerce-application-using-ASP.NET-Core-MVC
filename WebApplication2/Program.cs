@@ -153,6 +153,7 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
+    // Global error handling - works in both Development and Production
     if (app.Environment.IsDevelopment())
     {
         app.UseDeveloperExceptionPage();
@@ -160,8 +161,11 @@ var app = builder.Build();
     else
     {
         app.UseExceptionHandler("/Customer/Home/Error");
-        app.UseStatusCodePagesWithReExecute("/Customer/Home/Error", "?statusCode={0}");
     }
+    
+    // Global 404 and status code handling - works in ALL environments (including Development)
+    // This catches all 404 errors and routes them to the Error action
+    app.UseStatusCodePagesWithReExecute("/Customer/Home/Error", "?statusCode={0}");
  
 
 // Configure Static Files with Aggressive Caching
@@ -231,6 +235,14 @@ app.MapRazorPages();
 
 // Map SignalR Hub
 app.MapHub<BulkyBook.Hubs.NotificationHub>("/notificationHub");
+
+// Custom route for product details with slug in path (SEO-friendly)
+// This route must come BEFORE the default route to be matched first
+app.MapControllerRoute(
+    name: "productDetails",
+    pattern: "Customer/Home/Details/{slug}",
+    defaults: new { area = "Customer", controller = "Home", action = "Details" },
+    constraints: new { slug = @"[^/]+" }); // Ensure slug doesn't contain slashes
 
 app.MapControllerRoute(
     name: "default",

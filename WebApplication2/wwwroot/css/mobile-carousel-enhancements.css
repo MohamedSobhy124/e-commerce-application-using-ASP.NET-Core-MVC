@@ -8,7 +8,7 @@
     /* Apply EXACT same style as offers carousel to ALL product carousels */
     .product-carousel {
         position: relative;
-        padding: 1rem 0;
+        padding: 2rem 0;
         width: 100%;
         overflow: hidden;
     }
@@ -60,28 +60,24 @@
         top: 0;
     }
     
-    /* Force 1 product per slide on mobile - EXACT same as offers carousel */
+    /* Force 2 products per slide on mobile */
     .product-carousel .carousel-item .row > [class*="col-"] {
-        flex: 0 0 100% !important;
-        max-width: 100% !important;
-        width: 100% !important;
-        min-width: 0 !important;
-        padding-left: 0.75rem !important;
-        padding-right: 0.75rem !important;
+        flex: 0 0 calc(50% - 0.25rem) !important;
+        max-width: calc(50% - 0.25rem) !important;
+        width: calc(50% - 0.25rem) !important;
+        min-width: calc(50% - 0.25rem) !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
     }
     
-    /* Hide any extra columns that might appear - EXACT same as offers carousel */
-    .product-carousel .carousel-item .row > [class*="col-"]:nth-child(n+2) {
+    /* Hide any extra columns beyond the 2nd */
+    .product-carousel .carousel-item .row > [class*="col-"]:nth-child(n+3) {
         display: none !important;
     }
     
-    /* Ensure only first card is visible - EXACT same as offers carousel */
-    .product-carousel .carousel-item .row > [class*="col-"]:first-child {
-        display: block !important;
-    }
-    
-    /* After restructuring - each carousel-item contains one product */
-    .product-carousel .carousel-item .row > [class*="col-"] {
+    /* Ensure first 2 cards are visible */
+    .product-carousel .carousel-item .row > [class*="col-"]:first-child,
+    .product-carousel .carousel-item .row > [class*="col-"]:nth-child(2) {
         display: block !important;
     }
     
