@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
-using Stripe.Checkout;
 using System.Security.Claims;
 
 namespace BulkyBook.Areas.Customer.Controllers
@@ -21,10 +20,11 @@ namespace BulkyBook.Areas.Customer.Controllers
 		private readonly BulkyBook.Services.IStockService _stockService;
 		private readonly TappySettings _tappySettings;
 		private readonly TamaraSettings _tamaraSettings;
+		private readonly GeideaSettings _geideaSettings;
 		private readonly IStringLocalizer<SharedResources> _localizer;
 		public ShoppingCartVM  ShoppingCartVM { get; set; }
 
-        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, BulkyBook.Services.INotificationService notificationService, BulkyBook.Services.IStockService stockService, IOptions<TappySettings> tappySettings, IOptions<TamaraSettings> tamaraSettings, IStringLocalizer<SharedResources> localizer) 
+        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, BulkyBook.Services.INotificationService notificationService, BulkyBook.Services.IStockService stockService, IOptions<TappySettings> tappySettings, IOptions<TamaraSettings> tamaraSettings, IOptions<GeideaSettings> geideaSettings, IStringLocalizer<SharedResources> localizer) 
         {
          _unitOfWork = unitOfWork;
 			_emailSender = emailSender;
@@ -32,6 +32,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 			_stockService = stockService;
 			_tappySettings = tappySettings.Value;
 			_tamaraSettings = tamaraSettings.Value;
+			_geideaSettings = geideaSettings.Value;
 			_localizer = localizer;
         }
         public IActionResult Index()
@@ -1450,65 +1451,106 @@ namespace BulkyBook.Areas.Customer.Controllers
 					}
 					else
 					{
-						// Stripe payment logic (default)
-						var options = new SessionCreateOptions
+						var geideaHelper = new GeideaHelper(_geideaSettings);
+						
+						string callbackUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}";
+						string returnUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}";
+						
+						bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+						
+						if ((callbackUrl.Contains("localhost") || callbackUrl.Contains("127.0.0.1") || !callbackUrl.StartsWith("https://")) 
+							&& string.IsNullOrEmpty(_geideaSettings.CallbackUrlOverride))
 						{
-							SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
-							CancelUrl = domain + "customer/cart/index",
-							LineItems = new List<SessionLineItemOptions>(),
-							Mode = "payment",
+							if (isAjax)
+							{
+								return Json(new 
+								{ 
+									success = false, 
+									error = "Geidea requires a public HTTPS callback URL. " +
+											"For local testing, please configure 'CallbackUrlOverride' in appsettings.json with your ngrok URL or public domain. " +
+											"Example: 'CallbackUrlOverride': 'https://your-ngrok-url.ngrok.io'"
+								});
+							}
+							else
+							{
+								TempData["error"] = "Geidea requires a public HTTPS callback URL. " +
+													"For local testing, please configure 'CallbackUrlOverride' in appsettings.json with your ngrok URL or public domain.";
+								return RedirectToAction("Summary");
+							}
+						}
+						
+						if (!string.IsNullOrEmpty(_geideaSettings.CallbackUrlOverride))
+						{
+							var overrideBase = _geideaSettings.CallbackUrlOverride.TrimEnd('/');
+							callbackUrl = $"{overrideBase}/Customer/Cart/GeideaCallback?orderId={ShoppingCartVM.OrderHeader.Id}";
+							returnUrl = $"{overrideBase}/Customer/Cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}";
+						}
+						else
+						{
+							callbackUrl = domain + $"/Customer/Cart/GeideaCallback?orderId={ShoppingCartVM.OrderHeader.Id}";
+							returnUrl = domain + $"/Customer/Cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}";
+						}
+
+						var geideaRequest = new GeideaPaymentRequest
+						{
+							Amount = (decimal)ShoppingCartVM.OrderHeader.OrderTotal,
+							Currency = "AED",
+							OrderId = ShoppingCartVM.OrderHeader.Id.ToString(),
+							CustomerName = ShoppingCartVM.OrderHeader.Name,
+							CustomerEmail = ShoppingCartVM.OrderHeader.Email ?? (isGuest ? "" : applicationUser?.Email ?? ""),
+							CustomerPhone = ShoppingCartVM.OrderHeader.PhoneNumber,
+							ReturnUrl = callbackUrl, 
+							CancelUrl = domain + "/Customer/Cart/Index",
+							BillingAddress = ShoppingCartVM.OrderHeader.StreetAddress,
+							BillingCity = ShoppingCartVM.OrderHeader.City,
+							BillingState = ShoppingCartVM.OrderHeader.State,
+							BillingPostalCode = ShoppingCartVM.OrderHeader.PostalCode,
+							BillingCountryCode = "AE"
 						};
 
-						// Calculate the total from line items (subtotal before discount)
-						double lineItemsSubtotal = 0;
-						foreach (var item in ShoppingCartVM.ShoppingCartList)
-						{
-							lineItemsSubtotal += (item.Price * item.Count);
-						}
-
-						// Calculate discount ratio if promo code was applied
-						// This ensures line items total matches the discounted OrderTotal
-						double discountRatio = 1.0;
-						if (ShoppingCartVM.OrderHeader.DiscountAmount > 0 && lineItemsSubtotal > 0)
-						{
-							discountRatio = (double)ShoppingCartVM.OrderHeader.OrderTotal / lineItemsSubtotal;
-						}
-
-						// Add line items with adjusted prices to match the discounted total
-						foreach (var item in ShoppingCartVM.ShoppingCartList)
-						{
-							// Calculate adjusted price per unit to account for discount proportionally
-							double adjustedUnitPrice = item.Price * discountRatio;
-							
-							var sessionLineItem = new SessionLineItemOptions
-							{
-								PriceData = new SessionLineItemPriceDataOptions
-								{
-									UnitAmount = (long)Math.Round(adjustedUnitPrice * 100), // Convert to cents, ensure non-negative
-									Currency = "AED",
-									ProductData = new SessionLineItemPriceDataProductDataOptions
-									{
-										Name = item.product.Title
-									}
-								},
-								Quantity = item.Count
-							};
-							options.LineItems.Add(sessionLineItem);
-						}
-
-						var service = new SessionService();
-						Session session = service.Create(options);
+						var geideaResponse = await geideaHelper.CreatePaymentAsync(geideaRequest);
 						
-						// Store payment method and Stripe info
-						//_unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
-						ShoppingCartVM.OrderHeader.PaymentMethod = SD.PaymentMethodStripe;
-						ShoppingCartVM.OrderHeader.SessionId = session.Id;
-						ShoppingCartVM.OrderHeader.PaymentIntentId = session.PaymentIntentId;
+						if (!geideaResponse.Success)
+						{
+							if (isAjax)
+							{
+								return Json(new 
+								{ 
+									success = false, 
+									error = "Failed to create Geidea payment: " + geideaResponse.Message
+								});
+							}
+							else
+							{
+								TempData["error"] = "Failed to create Geidea payment: " + geideaResponse.Message;
+								return RedirectToAction("Summary");
+							}
+						}
+						
+						// Store payment method and Geidea info
+						ShoppingCartVM.OrderHeader.PaymentMethod = SD.PaymentMethodGeidea;
+						ShoppingCartVM.OrderHeader.SessionId = geideaResponse.TransactionId;
+						ShoppingCartVM.OrderHeader.PaymentIntentId = geideaResponse.TransactionId;
 						_unitOfWork.OrderHeader.Update(ShoppingCartVM.OrderHeader);
 						_unitOfWork.save();
 						
-						Response.Headers.Add("Location", session.Url);
-						return new StatusCodeResult(303);
+						if (isAjax)
+						{
+							// Return JSON with sessionId for Geidea v2 HPP JavaScript integration
+							return Json(new 
+							{ 
+								success = true, 
+								paymentMethod = SD.PaymentMethodGeidea,
+								sessionId = geideaResponse.TransactionId, // This is the sessionId for v2 HPP
+								orderId = ShoppingCartVM.OrderHeader.Id, // Order ID for redirect after payment
+								redirectUrl = geideaResponse.PaymentUrl // Keep for fallback if needed
+							});
+						}
+						else
+						{
+							Response.Headers.Add("Location", geideaResponse.PaymentUrl);
+							return new StatusCodeResult(303);
+						}
 					}
 				}
 
@@ -1519,6 +1561,44 @@ namespace BulkyBook.Areas.Customer.Controllers
 			return RedirectToAction(nameof(Index),"Home");
 		}
 
+
+		// Geidea Payment Callback (Webhook)
+		[HttpPost]
+		[AllowAnonymous]
+		public async Task<IActionResult> GeideaCallback(int orderId)
+		{
+			var orderHeader = _unitOfWork.OrderHeader.Get(o => o.Id == orderId);
+			
+			if (orderHeader == null)
+			{
+				return BadRequest("Order not found");
+			}
+
+				if (!string.IsNullOrEmpty(orderHeader.SessionId))
+				{
+					var geideaHelper = new GeideaHelper(_geideaSettings);
+					// Use order ID (merchant reference ID) for verification, not session ID
+					var verificationResponse = await geideaHelper.VerifyPaymentAsync(orderHeader.Id.ToString());
+
+				if (verificationResponse.Success && verificationResponse.IsPaid)
+				{
+					orderHeader.PaymentStatus = SD.PaymentStatusPaid;
+					orderHeader.OrderStatus = SD.StatusPaid;
+					if (!string.IsNullOrEmpty(orderHeader.SessionId))
+					{
+						orderHeader.PaymentIntentId = orderHeader.SessionId;
+					}
+					orderHeader.PaymentDate = BulkyBook.Utility.DateTimeHelper.Now;
+					
+					_unitOfWork.OrderHeader.Update(orderHeader);
+					_unitOfWork.save();
+					
+					return Ok(new { status = "success", message = "Payment verified and order updated" });
+				}
+			}
+
+			return Ok(new { status = "received", message = "Callback received" });
+		}
 
 		// Tappy Payment Callback
 		public async Task<IActionResult> TappyCallback(int orderId, string status = "", string payment_id = "")
@@ -1531,17 +1611,14 @@ namespace BulkyBook.Areas.Customer.Controllers
 				return RedirectToAction("Index", "Home");
 			}
 
-			// Check callback URL parameters first (Tabby sends status in URL)
 			string paymentStatus = Request.Query["status"].ToString().ToLower();
 			string paymentId = Request.Query["payment_id"].ToString();
 			
-			// If status is explicitly provided in query string, use it
 			if (string.IsNullOrEmpty(paymentStatus))
 			{
 				paymentStatus = status?.ToLower() ?? "";
 			}
 			
-			// If payment_id is in query string, update SessionId
 			if (!string.IsNullOrEmpty(paymentId))
 			{
 				orderHeader.SessionId = paymentId;
@@ -1551,8 +1628,6 @@ namespace BulkyBook.Areas.Customer.Controllers
 
 			bool paymentSuccessful = false;
 
-			// Check status from callback URL parameters first (Tabby sends status in URL)
-			// Tabby typically sends: status=authorized, status=created, status=rejected, etc.
 			if (paymentStatus == "authorized" || paymentStatus == "created" || paymentStatus == "approved" || paymentStatus == "success")
 			{
 				paymentSuccessful = true;
@@ -1563,9 +1638,6 @@ namespace BulkyBook.Areas.Customer.Controllers
 			}
 			else
 			{
-				// No explicit status in URL - try API verification as fallback
-				// Note: API verification may fail with 401 if credentials don't have verification permissions
-				// This is acceptable - Tabby only redirects to success URL after successful payment
 				if (!string.IsNullOrEmpty(orderHeader.SessionId))
 				{
 					try
@@ -1577,49 +1649,37 @@ namespace BulkyBook.Areas.Customer.Controllers
 						{
 							paymentSuccessful = true;
 						}
-						// If API verification returns 401, we can't verify via API but payment may still be valid
-						// Tabby typically only redirects to success URL after successful payment
 					}
 					catch (Exception ex)
 					{
-						// API verification failed (likely 401) - this is acceptable
-						// If user was redirected back from Tabby, assume payment was successful
-						// Tabby only redirects to success URL after successful payment
-						System.Diagnostics.Debug.WriteLine($"Tabby API verification error (expected if no verification permissions): {ex.Message}");
 					}
 				}
 				
-				// If redirected back from Tabby without explicit failure, assume success
-				// Tabby only redirects to success URL after successful payment
 				if (!paymentSuccessful)
 				{
-					paymentSuccessful = true; // Trust the redirect - Tabby only redirects on success
+					paymentSuccessful = true;  
 				}
 			}
 
 			if (paymentSuccessful)
 			{
-				// Payment successful
 				orderHeader.PaymentDate = BulkyBook.Utility.DateTimeHelper.Now;
 				orderHeader.PaymentStatus = SD.StatusPaid;
 				orderHeader.OrderStatus = SD.PaymentStatusPaid;
                 _unitOfWork.OrderHeader.Update(orderHeader);
 				_unitOfWork.save();
 				
-				// ⚡ PROCESS STOCK DEDUCTION AFTER TAPPY PAYMENT
 				await _stockService.ProcessOrderStockDeduction(orderId);
 
 				return RedirectToAction(nameof(OrderConfirmation), new { id = orderId });
 			}
 			else
 			{
-				// Payment failed or pending
 				TempData["error"] = "Payment verification failed. Please contact support with your order ID: " + orderId;
 				return RedirectToAction("Index", "Home");
 			}
 		}
 
-		// Tamara Payment Callback
 		public async Task<IActionResult> TamaraCallback(int orderId, string status = "")
 		{
 			var orderHeader = _unitOfWork.OrderHeader.Get(o => o.Id == orderId);
@@ -1632,18 +1692,15 @@ namespace BulkyBook.Areas.Customer.Controllers
 
 			if (status == "success" && !string.IsNullOrEmpty(orderHeader.SessionId))
 			{
-				// Authorize the order with Tamara
 				var tamaraHelper = new TamaraHelper(_tamaraSettings);
 				var authResponse = await tamaraHelper.AuthorizeOrderAsync(orderHeader.SessionId);
 				
 				if (authResponse.Success)
 				{
-					// Get order details to verify
 					var orderDetails = await tamaraHelper.GetOrderDetailsAsync(orderHeader.SessionId);
 					
 					if (orderDetails.Success && orderDetails.PaymentStatus?.ToLower() == "approved")
 					{
-						// Payment successful
 						_unitOfWork.OrderHeader.UpdateStatus(orderId, SD.StatusPaid, SD.PaymentStatusPaid);
 						orderHeader.PaymentDate = BulkyBook.Utility.DateTimeHelper.Now;
 						_unitOfWork.OrderHeader.Update(orderHeader);
@@ -1672,7 +1729,6 @@ namespace BulkyBook.Areas.Customer.Controllers
 			}
 		}
 
-		// Tamara Notification Webhook (for async notifications)
 		[HttpPost]
 		public async Task<IActionResult> TamaraNotification()
 		{
@@ -1683,7 +1739,6 @@ namespace BulkyBook.Areas.Customer.Controllers
 
 		public async Task<IActionResult> OrderConfirmation(int id)
 		{
-			// Get order header - don't include ApplicationUser for guest orders
 			OrderHeader orderHeader = _unitOfWork.OrderHeader.Get(u => u.Id == id);
 			
 			if (orderHeader == null)
@@ -1692,7 +1747,6 @@ namespace BulkyBook.Areas.Customer.Controllers
 				return RedirectToAction("Index", "Home");
 			}
 
-			// Load ApplicationUser only if it's not a guest order
 			if (!orderHeader.IsGuestOrder && !string.IsNullOrEmpty(orderHeader.ApplicationUserId))
 			{
 				orderHeader.ApplicationUser = _unitOfWork.applicationUser.Get(u => u.Id == orderHeader.ApplicationUserId);
@@ -1700,27 +1754,34 @@ namespace BulkyBook.Areas.Customer.Controllers
 
 			if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
 			{
-				//this is an order by customer
-				
-				// Handle Stripe payment verification
-				if (orderHeader.PaymentMethod == SD.PaymentMethodStripe)
+				if (orderHeader.PaymentMethod == SD.PaymentMethodGeidea)
 				{
-					var service = new SessionService();
-					Session session = service.Get(orderHeader.SessionId);
-
-					if (session.PaymentStatus.ToLower() == "paid")
+					// Only verify if payment status is not already paid
+					if (orderHeader.PaymentStatus != SD.PaymentStatusPaid)
 					{
-						_unitOfWork.OrderHeader.UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
-						_unitOfWork.OrderHeader.UpdateStatus(id, SD.StatusPaid, SD.PaymentStatusPaid);
-						_unitOfWork.save();
+						var geideaHelper = new GeideaHelper(_geideaSettings);
+						// Use order ID (merchant reference ID) for verification, not session ID
+						var verificationResponse = await geideaHelper.VerifyPaymentAsync(orderHeader.Id.ToString());
+
+						if (verificationResponse.Success && verificationResponse.IsPaid)
+						{
+							// Update payment status directly on the tracked entity
+							orderHeader.PaymentStatus = SD.PaymentStatusPaid;
+							orderHeader.OrderStatus = SD.StatusPaid;
+							if (!string.IsNullOrEmpty(orderHeader.SessionId))
+							{
+								orderHeader.PaymentIntentId = orderHeader.SessionId;
+							}
+							orderHeader.PaymentDate = BulkyBook.Utility.DateTimeHelper.Now;
+							
+							_unitOfWork.OrderHeader.Update(orderHeader);
+							_unitOfWork.save();
+						}
 					}
 				}
-				// Tappy and Tamara payments are already verified in their respective callbacks
-				//HttpContext.Session.Clear();
-
 			}
 
-			// ⚡ PROCESS STOCK DEDUCTION AFTER PAYMENT CONFIRMED
+			//  PROCESS STOCK DEDUCTION AFTER PAYMENT CONFIRMED
 			
             try
             {
@@ -1730,7 +1791,6 @@ namespace BulkyBook.Areas.Customer.Controllers
 
             try
             {
-                // Send notifications to all admins
                 await _notificationService.SendOrderNotificationToAdmins(orderHeader);
             }
             catch (Exception ex) { }
@@ -1761,7 +1821,6 @@ namespace BulkyBook.Areas.Customer.Controllers
 			}
 			else
 			{
-				// Clear cart from session for guest users
 				BulkyBook.Utility.GuestCartHelper.ClearCart(HttpContext.Session);
                 try
                 {
@@ -1769,8 +1828,6 @@ namespace BulkyBook.Areas.Customer.Controllers
 
                 }
                 catch (Exception ex) { }
-                // TODO: Send order confirmation email to guest user's email
-                // You can implement email sending here using orderHeader.Email
             }
 
 			return View(id);

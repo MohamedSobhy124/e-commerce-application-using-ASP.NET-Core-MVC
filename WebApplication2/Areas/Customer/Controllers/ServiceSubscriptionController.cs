@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
-using Stripe.Checkout;
 using System.Security.Claims;
 
 namespace BulkyBook.Areas.Customer.Controllers
@@ -18,17 +17,20 @@ namespace BulkyBook.Areas.Customer.Controllers
         private readonly IStringLocalizer<SharedResources> _localizer;
         private readonly INotificationService _notificationService;
         private readonly IConfiguration _configuration;
+        private readonly GeideaSettings _geideaSettings;
 
         public ServiceSubscriptionController(
             IUnitOfWork unitOfWork,
             IStringLocalizer<SharedResources> localizer,
             INotificationService notificationService,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IOptions<GeideaSettings> geideaSettings)
         {
             _unitOfWork = unitOfWork;
             _localizer = localizer;
             _notificationService = notificationService;
             _configuration = configuration;
+            _geideaSettings = geideaSettings.Value;
         }
 
         // GET: ServiceSubscription/Index
@@ -227,43 +229,50 @@ namespace BulkyBook.Areas.Customer.Controllers
             _unitOfWork.ServicePurchases.Add(purchase);
             _unitOfWork.save();
 
-            // Create Stripe checkout session
+            // Create Geidea payment session
             var domain = $"{Request.Scheme}://{Request.Host}";
-            var options = new SessionCreateOptions
+            var geideaHelper = new GeideaHelper(_geideaSettings);
+            
+            var geideaItems = new List<GeideaOrderItem>
             {
-                PaymentMethodTypes = new List<string> { "card" },
-                LineItems = new List<SessionLineItemOptions>
+                new GeideaOrderItem
                 {
-                    new SessionLineItemOptions
-                    {
-                        PriceData = new SessionLineItemPriceDataOptions
-                        {
-                            UnitAmount = (long)(amountToPay * 100), // Convert to cents
-                            Currency = "aed",
-                            ProductData = new SessionLineItemPriceDataProductDataOptions
-                            {
-                                Name = service.Title,
-                                Description = service.Description
-                            }
-                        },
-                        Quantity = 1
-                    }
-                },
-                Mode = "payment",
-                SuccessUrl = domain + $"/Customer/ServiceSubscription/PaymentSuccess?purchaseId={purchase.Id}",
-                CancelUrl = domain + $"/Customer/ServiceSubscription/Details/{serviceId}",
-                CustomerEmail = isGuest ? guestEmail : user?.Email
+                    Name = service.Title,
+                    Description = service.Description ?? service.Title,
+                    Quantity = 1,
+                    Price = amountToPay,
+                    Sku = service.Id.ToString()
+                }
             };
 
-            var serviceStripe = new Stripe.Checkout.SessionService();
-            Session session = serviceStripe.Create(options);
+            var geideaRequest = new GeideaPaymentRequest
+            {
+                Amount = amountToPay,
+                Currency = "AED",
+                OrderId = purchase.Id.ToString(),
+                CustomerName = isGuest ? guestName : user?.Name ?? "Customer",
+                CustomerEmail = isGuest ? guestEmail : user?.Email ?? "",
+                CustomerPhone = isGuest ? guestPhone : user?.PhoneNumber ?? "",
+                ReturnUrl = domain + $"/Customer/ServiceSubscription/PaymentSuccess?purchaseId={purchase.Id}",
+                CancelUrl = domain + $"/Customer/ServiceSubscription/Details/{serviceId}",
+                Items = geideaItems
+            };
+
+            var geideaResponse = await geideaHelper.CreatePaymentAsync(geideaRequest);
+            
+            if (!geideaResponse.Success)
+            {
+                TempData["error"] = "Failed to create Geidea payment: " + geideaResponse.Message;
+                return RedirectToAction(nameof(Details), new { id = serviceId });
+            }
 
             // Update purchase with session ID
-            purchase.SessionId = session.Id;
+            purchase.SessionId = geideaResponse.TransactionId;
+            purchase.PaymentIntentId = geideaResponse.TransactionId;
             _unitOfWork.ServicePurchases.Update(purchase);
             _unitOfWork.save();
 
-            Response.Headers.Add("Location", session.Url);
+            Response.Headers.Add("Location", geideaResponse.PaymentUrl);
             return new StatusCodeResult(303);
         }
 
@@ -280,25 +289,21 @@ namespace BulkyBook.Areas.Customer.Controllers
                 return NotFound();
             }
 
-            // Verify payment with Stripe
-            if (!string.IsNullOrEmpty(purchase.SessionId))
-            {
-                var serviceStripe = new Stripe.Checkout.SessionService();
-                var session = serviceStripe.Get(purchase.SessionId);
+			// Verify payment with Geidea
+			if (!string.IsNullOrEmpty(purchase.SessionId))
+			{
+				var geideaHelper = new GeideaHelper(_geideaSettings);
+				// Use purchase ID (merchant reference ID) for verification, not session ID
+				var verificationResponse = await geideaHelper.VerifyPaymentAsync(purchase.Id.ToString());
 
-                if (session.PaymentStatus == "paid")
+                if (verificationResponse.Success && verificationResponse.IsPaid)
                 {
                     purchase.PaymentStatus = "Approved";
-                    purchase.PaymentIntentId = session.PaymentIntentId;
+                    purchase.PaymentIntentId = purchase.SessionId;
                     
-                    // Get the actual amount paid from Stripe session
-                    // The amount_total is in cents, so divide by 100
-                    if (session.AmountTotal.HasValue)
-                    {
-                        purchase.AmountPaid = (decimal)session.AmountTotal.Value / 100;
-                    }
-                    // If AmountPaid is still 0, use the stored amountToPay value
-                    else if (purchase.AmountPaid == 0)
+                    // AmountPaid is already set when creating the purchase
+                    // If it's still 0, use the stored amountToPay value as fallback
+                    if (purchase.AmountPaid == 0)
                     {
                         // This shouldn't happen, but as a fallback, calculate from service type
                         if (purchase.ServiceSubscription?.ServiceType == ServiceType.Online)
@@ -319,6 +324,10 @@ namespace BulkyBook.Areas.Customer.Controllers
                     await SendServicePurchaseNotifications(purchase);
 
                     TempData["success"] = "Payment successful! Your service subscription has been confirmed.";
+                }
+                else
+                {
+                    TempData["error"] = "Payment verification failed. Please contact support.";
                 }
             }
 

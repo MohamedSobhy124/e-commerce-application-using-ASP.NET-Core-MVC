@@ -247,10 +247,10 @@
 								</h4>
 								<div class="payment-methods">
 									<div class="payment-method-option">
-										<input type="radio" id="paymentStripe" name="OrderHeader.PaymentMethod" value="@BulkyBook.Utility.SD.PaymentMethodStripe" checked />
-										<label for="paymentStripe" class="payment-method-label">
-											<i class="bi bi-stripe me-2"></i>
-											<span>Stripe</span>
+										<input type="radio" id="paymentGeidea" name="OrderHeader.PaymentMethod" value="@BulkyBook.Utility.SD.PaymentMethodGeidea" checked />
+										<label for="paymentGeidea" class="payment-method-label">
+											<i class="bi bi-credit-card me-2"></i>
+											<span>Geidea</span>
 											<small>@Localizer["CreditDebitCard"]</small>
 										</label>
 									</div>
@@ -828,17 +828,163 @@
 				return false;
 			}
 
-			// If validation passes, disable submit button and show loading
-			var $submitBtn = $('.place-order-btn');
-			$submitBtn.prop('disabled', true);
-			var originalText = $submitBtn.html();
-			$submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>' + localizedMessages.processing + '...');
+			// Check if Geidea payment method is selected BEFORE preventing default
+			var paymentMethod = $('input[name="OrderHeader.PaymentMethod"]:checked').val();
+			var geideaPaymentMethod = '@BulkyBook.Utility.SD.PaymentMethodGeidea';
 			
-			// Re-enable after 10 seconds as safety (in case of error)
-			setTimeout(function() {
-				$submitBtn.prop('disabled', false);
-				$submitBtn.html(originalText);
-			}, 10000);
+			// Only handle AJAX for Geidea if validation passed
+			if (paymentMethod === geideaPaymentMethod) {
+				// Prevent default form submission for Geidea
+				e.preventDefault();
+				e.stopPropagation();
+				
+				// If validation passes, submit form via AJAX for Geidea payment errors
+				var $submitBtn = $('.place-order-btn');
+				var originalText = $submitBtn.html();
+				// Submit via AJAX for Geidea to handle errors with SweetAlert
+				e.preventDefault();
+				$submitBtn.prop('disabled', true);
+				$submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>' + localizedMessages.processing + '...');
+				
+				var formData = $('#orderForm').serialize();
+				
+				$.ajax({
+					url: '@Url.Action("Summary", "Cart")',
+					type: 'POST',
+					data: formData,
+					headers: {
+						'X-Requested-With': 'XMLHttpRequest'
+					},
+					success: function(response) {
+						// Check if response is valid JSON object
+						if (response && typeof response === 'object') {
+							if (response.success === false && response.error) {
+								// Show error with SweetAlert
+								Swal.fire({
+									icon: 'error',
+									title: 'Payment Error',
+									html: response.error,
+									confirmButtonText: 'OK',
+									confirmButtonColor: '#dc2626'
+								});
+								$submitBtn.prop('disabled', false);
+								$submitBtn.html(originalText);
+							} else if (response.success === true) {
+								// Handle Geidea v2 HPP payment
+								if (response.paymentMethod === '@BulkyBook.Utility.SD.PaymentMethodGeidea' && response.sessionId) {
+									// Store orderId for redirect after payment
+									var orderId = response.orderId;
+									// Use Geidea v2 HPP JavaScript library
+									initiateGeideaPayment(response.sessionId, orderId, function(success) {
+										if (success && orderId) {
+											// Payment completed successfully, redirect to order confirmation
+											window.location.href = '@Url.Action("OrderConfirmation", "Cart")?id=' + orderId;
+										} else {
+											$submitBtn.prop('disabled', false);
+											$submitBtn.html(originalText);
+										}
+									});
+								} else if (response.redirectUrl) {
+									// Fallback: redirect to payment URL for other payment methods
+									window.location.href = response.redirectUrl;
+								} else {
+									// Unexpected response format
+									window.location.reload();
+								}
+							} else {
+								// Unexpected response format
+								window.location.reload();
+							}
+						} else {
+							// Response is not JSON (might be HTML), reload page
+							window.location.reload();
+						}
+					},
+					error: function(xhr, status, error) {
+						// Handle AJAX error
+						var errorMessage = 'An error occurred while processing your request.';
+						var errorDetails = '';
+						
+						// Try to parse error response if available
+						try {
+							if (xhr.responseJSON) {
+								if (xhr.responseJSON.error) {
+									errorMessage = xhr.responseJSON.error;
+								} else if (xhr.responseJSON.message) {
+									errorMessage = xhr.responseJSON.message;
+								} else if (xhr.responseJSON.title) {
+									errorMessage = xhr.responseJSON.title;
+									if (xhr.responseJSON.errors) {
+										var errorList = [];
+										for (var key in xhr.responseJSON.errors) {
+											if (xhr.responseJSON.errors.hasOwnProperty(key)) {
+												errorList.push(xhr.responseJSON.errors[key].join(', '));
+											}
+										}
+										if (errorList.length > 0) {
+											errorDetails = '<br><br>' + errorList.join('<br>');
+										}
+									}
+								}
+							} else if (xhr.responseText) {
+								// Check if it's HTML (validation error page)
+								if (xhr.responseText.indexOf('<html') > -1 || xhr.responseText.indexOf('<!DOCTYPE') > -1) {
+									errorMessage = 'Validation error. Please check all required fields and try again.';
+								} else if (xhr.responseText.length < 500) {
+									// If response is short, try to show it
+									errorMessage = 'Error: ' + xhr.responseText.substring(0, 200);
+								}
+							}
+						} catch (e) {
+							console.error('Error parsing response:', e);
+						}
+						
+						// Add status code info
+						if (xhr.status === 400) {
+							if (!errorMessage.includes('Validation')) {
+								errorMessage = 'Bad Request. ' + errorMessage;
+							}
+						} else if (xhr.status === 401) {
+							errorMessage = 'Authentication error. Please refresh the page and try again.';
+						} else if (xhr.status === 403) {
+							errorMessage = 'Access denied. You may not have permission to perform this action.';
+						} else if (xhr.status === 404) {
+							errorMessage = 'Page not found. Please refresh the page and try again.';
+						} else if (xhr.status === 500) {
+							errorMessage = 'Server error. Please try again later.';
+							errorDetails = errorDetails || '<br><br>If the problem persists, please contact support.';
+						}
+						
+						// Log error to console for debugging
+						console.error('AJAX Error:', {
+							status: xhr.status,
+							statusText: xhr.statusText,
+							response: xhr.responseText,
+							error: error
+						});
+						
+						Swal.fire({
+							icon: 'error',
+							title: 'Error',
+							html: errorMessage + errorDetails,
+							confirmButtonText: 'OK',
+							confirmButtonColor: '#dc2626'
+						});
+						$submitBtn.prop('disabled', false);
+						$submitBtn.html(originalText);
+					}
+				});
+			} else {
+				// For other payment methods, submit normally
+				$submitBtn.prop('disabled', true);
+				$submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>' + localizedMessages.processing + '...');
+				
+				// Re-enable after 10 seconds as safety (in case of error)
+				setTimeout(function() {
+					$submitBtn.prop('disabled', false);
+					$submitBtn.html(originalText);
+				}, 10000);
+			}
 		});
 
 		// Function to show validation error
@@ -895,6 +1041,78 @@
 		const currencySymbol = '@Html.Raw(currencySymbol)';
 		function formatCurrency(amount) {
 			return currencySymbol + ' ' + amount.toFixed(2);
+		}
+
+		// Geidea v2 HPP Payment Integration
+		function initiateGeideaPayment(sessionId, orderId, callback) {
+			// Load Geidea HPP v2 library if not already loaded
+			if (typeof GeideaCheckout === 'undefined') {
+				var script = document.createElement('script');
+					script.src = 'https://payments.geidea.ae/hpp/geideaCheckout.min.js';
+				script.onload = function() {
+					startGeideaPayment(sessionId, orderId, callback);
+				};
+				script.onerror = function() {
+					Swal.fire({
+						icon: 'error',
+						title: 'Payment Error',
+						text: 'Failed to load Geidea payment library. Please try again.',
+						confirmButtonText: 'OK'
+					});
+					if (callback) callback(false);
+				};
+				document.head.appendChild(script);
+			} else {
+				startGeideaPayment(sessionId, orderId, callback);
+			}
+		}
+
+		function startGeideaPayment(sessionId, orderId, callback) {
+			try {
+				// Initialize GeideaCheckout with callback handlers
+				const payment = new GeideaCheckout(
+					function onSuccess(data) {
+						// Payment successful
+						console.log('Geidea payment success', data);
+						if (callback) callback(true);
+					},
+					function onError(error) {
+						// Payment error
+						console.error('Geidea payment error', error);
+						Swal.fire({
+							icon: 'error',
+							title: 'Payment Error',
+							html: error && error.message ? error.message : 'Payment failed. Please try again.',
+							confirmButtonText: 'OK',
+							confirmButtonColor: '#dc2626'
+						});
+						if (callback) callback(false);
+					},
+					function onCancel() {
+						// Payment cancelled
+						console.log('Geidea payment cancelled');
+						Swal.fire({
+							icon: 'info',
+							title: 'Payment Cancelled',
+							text: 'Payment was cancelled. You can try again.',
+							confirmButtonText: 'OK'
+						});
+						if (callback) callback(false);
+					}
+				);
+
+				// Start payment with sessionId
+				payment.startPayment(sessionId);
+			} catch (error) {
+				console.error('Error initiating Geidea payment:', error);
+				Swal.fire({
+					icon: 'error',
+					title: 'Payment Error',
+					text: 'Failed to start payment. Please try again.',
+					confirmButtonText: 'OK'
+				});
+				if (callback) callback(false);
+			}
 		}
 	</script>
 }

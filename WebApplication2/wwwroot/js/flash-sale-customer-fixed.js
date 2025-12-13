@@ -242,6 +242,19 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
 }
 
 function openCartSidebar() {
+    // Check if on mobile and home page - don't open cart sidebar
+    const isMobile = window.innerWidth <= 768;
+    const currentPath = window.location.pathname.toLowerCase();
+    const isHomePage = currentPath === '/' || 
+                      currentPath === '/customer/home' || 
+                      currentPath === '/customer/home/index' ||
+                      currentPath.startsWith('/customer/home/index');
+    
+    if (isMobile && isHomePage) {
+        console.log('Cart sidebar disabled on mobile home screen');
+        return;
+    }
+    
     console.log('Opening cart sidebar...');
     const sidebar = document.getElementById('cartSidebar');
     const overlay = document.getElementById('cartOverlay');

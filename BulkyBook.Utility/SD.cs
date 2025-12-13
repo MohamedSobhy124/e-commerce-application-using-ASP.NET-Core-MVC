@@ -31,7 +31,7 @@ namespace BulkyBook.Utility
 		public const string PaymentStatusRejected = "Rejected";
 
 		// Payment Methods
-		public const string PaymentMethodStripe = "Stripe";
+		public const string PaymentMethodGeidea = "Geidea";
 		public const string PaymentMethodTappy = "Tabby";
 		public const string PaymentMethodTamara = "Tamara";
 

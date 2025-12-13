@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using BulkyBook.Utility;
-using Stripe;
 using BulkyBook.Models;
 using BulkyBook.DataAccess.DbInitializer;
 using Microsoft.AspNetCore.Localization;
@@ -106,9 +105,7 @@ var builder = WebApplication.CreateBuilder(args);
             
         });
 
-IServiceCollection serviceCollection = builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
-
-builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+builder.Services.Configure<GeideaSettings>(builder.Configuration.GetSection("Geidea"));
 builder.Services.Configure<TappySettings>(builder.Configuration.GetSection("Tappy"));
 builder.Services.Configure<TamaraSettings>(builder.Configuration.GetSection("Tamara"));
 builder.Services.Configure<WhatsAppSettings>(builder.Configuration.GetSection("WhatsApp"));
@@ -224,7 +221,6 @@ app.UseResponseCaching();
 var localizationOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
 app.UseRequestLocalization(localizationOptions);
 
-StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 app.UseRouting();
 app.UseSession();
 app.UseAuthentication();                                                                    

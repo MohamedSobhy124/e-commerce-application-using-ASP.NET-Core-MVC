@@ -91,7 +91,7 @@
                class="header-action-btn cart-action-btn" 
                title="@Localizer["ShoppingCart"]"
                id="headerCartBtn"
-               onclick="openCartSidebar(); return false;">
+               onclick="openCartSidebar(true); return false;">
                 <i class="bi bi-cart3"></i>
                 <span class="action-badge" id="headerCartBadge" style="display: none;">0</span>
             </button>
@@ -2076,7 +2076,7 @@
         <div class="fab-option" onclick="window.location.href='@Url.Action("Index", "Home")#features'" title="Features">
             <i class="bi bi-star"></i>
         </div>
-        <div class="fab-option" onclick="openCartSidebar()" title="Cart">
+        <div class="fab-option" onclick="openCartSidebar(true)" title="Cart">
             <i class="bi bi-cart"></i>
         </div>
     </div>
@@ -2390,7 +2390,24 @@
         }
 
         // Function to open cart sidebar (make it globally available)
-        window.openCartSidebar = function() {
+        // forceOpen: if true, will open even on mobile home screen (for user-initiated actions)
+        window.openCartSidebar = function(forceOpen = false) {
+            // Check if on mobile and home page - don't open cart sidebar automatically
+            // But allow if forceOpen is true (user clicked the cart icon)
+            if (!forceOpen) {
+                const isMobile = window.innerWidth <= 768;
+                const currentPath = window.location.pathname.toLowerCase();
+                const isHomePage = currentPath === '/' || 
+                                  currentPath === '/customer/home' || 
+                                  currentPath === '/customer/home/index' ||
+                                  currentPath.startsWith('/customer/home/index');
+                
+                if (isMobile && isHomePage) {
+                    console.log('Cart sidebar disabled on mobile home screen');
+                    return;
+                }
+            }
+            
             console.log('Opening cart sidebar...');
             const sidebar = document.getElementById('cartSidebar');
             const overlay = document.getElementById('cartOverlay');
@@ -2407,8 +2424,8 @@
         };
         
         // Also keep local function for backward compatibility
-        function openCartSidebar() {
-            window.openCartSidebar();
+        function openCartSidebar(forceOpen = false) {
+            window.openCartSidebar(forceOpen);
         }
 
         // Function to close cart sidebar

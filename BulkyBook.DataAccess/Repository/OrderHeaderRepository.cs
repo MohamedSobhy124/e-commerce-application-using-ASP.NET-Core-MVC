@@ -38,7 +38,7 @@ namespace BulkyBook.DataAccess.Repository
 			}
            _db.SaveChanges();
         }
-		public void UpdateStripePaymentID(int id, string sessionId, string paymentIntentId)
+		public void UpdatePaymentID(int id, string sessionId, string paymentIntentId)
 		{
 			var orderFromDb = _db.orderHeaders.FirstOrDefault(u => u.Id == id);
 			if (!string.IsNullOrEmpty(sessionId))
@@ -50,6 +50,14 @@ namespace BulkyBook.DataAccess.Repository
 				orderFromDb.PaymentIntentId = paymentIntentId;
 				orderFromDb.PaymentDate = BulkyBook.Utility.DateTimeHelper.Now;
 			}
+            _db.SaveChanges();
+        }
+
+		// Legacy method name kept for backward compatibility
+		[Obsolete("Use UpdatePaymentID instead")]
+		public void UpdateStripePaymentID(int id, string sessionId, string paymentIntentId)
+		{
+			UpdatePaymentID(id, sessionId, paymentIntentId);
 		}
 
 	}

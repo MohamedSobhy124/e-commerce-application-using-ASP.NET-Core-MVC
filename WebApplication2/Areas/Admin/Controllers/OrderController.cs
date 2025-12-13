@@ -4,8 +4,6 @@ using BulkyBook.Models.ViewModels;
 using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Stripe;
-using Stripe.Checkout;
 using System.Security.Claims;
 
 namespace BulkyBook.Areas.Admin.Controllers

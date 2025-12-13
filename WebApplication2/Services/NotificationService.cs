@@ -36,14 +36,11 @@ namespace BulkyBook.Services
 
         public async Task SendOrderNotificationToAdmins(OrderHeader orderHeader)
         {
-            // Get all admin users
             var adminNotificationEmail = _configuration["StockAlerts:AdminEmail"];
-            //var adminUser = await _userManager.FindByEmailAsync(adminNotificationEmail ?? string.Empty);
 
             if (!string.IsNullOrEmpty(adminNotificationEmail))
             {
            
-                // Send email to admin
                 var emailBody = GenerateAdminEmailTemplate(orderHeader);
                 await _emailSender.SendEmailAsync(
                     adminNotificationEmail ?? string.Empty,
@@ -57,7 +54,6 @@ namespace BulkyBook.Services
             var adminUsers = await _userManager.GetUsersInRoleAsync(SD.Role_Admin);
             foreach (var admin in adminUsers)
             {
-                // Log notification in database
                 await LogNotification(
                     admin.Id,
                     "New Order Received",
@@ -66,7 +62,6 @@ namespace BulkyBook.Services
                     orderHeader.Id
                 );
             }
-            // Send real-time push notification to all connected admins
             await _hubContext.Clients.Group("Admins").SendAsync(
                 "ReceiveOrderNotification",
                 new
@@ -123,13 +118,11 @@ namespace BulkyBook.Services
         public async Task SendOrderConfirmationToCustomerGuest(OrderHeader orderHeader)
         {
      
-            // Get order details (include ComboOffer to show combo names in email)
             var orderDetails = _unitOfWork.OrderDetail.GetAll(
                 o => o.OrderHeaderId == orderHeader.Id,
                 includeProperties: "Product,ComboOffer"
             ).ToList();
 
-            // Send email to customer
             var emailBody = GenerateCustomerEmailTemplate(orderHeader, orderDetails, null);
             await _emailSender.SendEmailAsync(
                 orderHeader.Email??string.Empty,
