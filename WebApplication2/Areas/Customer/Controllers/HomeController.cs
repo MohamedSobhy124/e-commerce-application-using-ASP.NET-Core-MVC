@@ -36,8 +36,8 @@ namespace BulkyBook.Areas.Customer.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-        // Performance: Cache response for 5 minutes, vary by query parameters
-        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "brandId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability", "productFilter" }, Location = ResponseCacheLocation.Any)]
+        // Performance: Cache response for 5 minutes, vary by query parameters and culture
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "categoryId", "brandId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability", "productFilter", "culture" }, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> Index(int? categoryId, int? brandId, string searchTerm, string sortBy, 
             decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
             int? minRating = null, string availability = null, string productFilter = null)
@@ -466,7 +466,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         // PERFORMANCE: Lazy-loaded sections - Load independently via AJAX to not block main page
         
         [HttpGet]
-        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "culture" }, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> LoadFlashSalesSection()
         {
             var now = BulkyBook.Utility.DateTimeHelper.Now;
@@ -566,7 +566,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "culture" }, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> LoadDiscountedProductsSection()
         {
             var discountedProducts = await GetDiscountedProductsAsync();
@@ -583,7 +583,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "culture" }, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> LoadBestSellersSection()
         {
             var bestSellers = await _dbContext.Products
@@ -609,7 +609,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "culture" }, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> LoadNewArrivalsSection()
         {
             var newArrivals = await _dbContext.Products
@@ -635,7 +635,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "culture" }, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> LoadServicesSection()
         {
             var activeServices = await _dbContext.ServiceSubscriptions
@@ -674,7 +674,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "culture" }, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> LoadCategoryProductsSection()
         {
             var allCategories = await _dbContext.Categries
@@ -721,7 +721,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "culture" }, Location = ResponseCacheLocation.Any)]
         public IActionResult LoadComboOffersSection()
         {
             var activeComboOffers = _unitOfWork.ComboOffer.GetActiveComboOffers().Take(6).ToList();
@@ -796,7 +796,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 60, VaryByQueryKeys = new[] { "page", "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability" })]
+        [ResponseCache(Duration = 60, VaryByQueryKeys = new[] { "page", "categoryId", "searchTerm", "sortBy", "minPrice", "maxPrice", "availability", "culture" })]
         public IActionResult LoadMoreProducts(int page = 0, int pageSize = 20, 
             int? categoryId = null, int? brandId = null, string searchTerm = null, string sortBy = null,
             decimal? minPrice = null, decimal? maxPrice = null, bool? inStock = null, 
@@ -1663,7 +1663,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
         
         // Performance: Cache product details for 5 minutes (product data changes infrequently)
-        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "slug" }, Location = ResponseCacheLocation.Any)]
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "slug", "culture" }, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> Details(string slug)
         {
             // Get current culture to determine which slug to use

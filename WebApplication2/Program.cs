@@ -32,15 +32,17 @@ var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddControllersWithViews(options =>
         {
             // Performance: Cache output for GET requests (except authenticated/admin pages)
+            // IMPORTANT: All cache profiles vary by culture to prevent localization issues
+            // Note: Culture is passed via query parameter, not header (cookie-based language switching)
             options.CacheProfiles.Add("DefaultCache", new Microsoft.AspNetCore.Mvc.CacheProfile
             {
                 Duration = 300, // 5 minutes
-                VaryByQueryKeys = new[] { "*" }
+                VaryByQueryKeys = new[] { "*" } // Includes culture parameter when used
             });
             options.CacheProfiles.Add("LongCache", new Microsoft.AspNetCore.Mvc.CacheProfile
             {
                 Duration = 3600, // 1 hour for static content
-                VaryByQueryKeys = new[] { "*" }
+                VaryByQueryKeys = new[] { "*" } // Includes culture parameter when used
             });
         })
             .AddViewLocalization()
