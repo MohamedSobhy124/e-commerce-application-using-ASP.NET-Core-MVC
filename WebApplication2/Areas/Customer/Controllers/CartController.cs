@@ -2217,6 +2217,71 @@ namespace BulkyBook.Areas.Customer.Controllers
             // Return placeholder if no image found
             return "/images/no-image.png";
         }
+
+        /// <summary>
+        /// Merges guest cart items into user's cart after login/register.
+        /// Only adds items that don't already exist in the user's cart.
+        /// </summary>
+        /// <param name="userId">The authenticated user's ID</param>
+        /// <param name="session">The HTTP session containing guest cart</param>
+        /// <returns>Number of items merged</returns>
+        public static int MergeGuestCartToUserCart(IUnitOfWork unitOfWork, string userId, ISession session)
+        {
+            var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(session);
+            if (guestCart == null || !guestCart.Any())
+            {
+                return 0; // No guest cart items to merge
+            }
+
+            // Get user's existing cart items
+            var userCartItems = unitOfWork.shoppingCart.GetAll(
+                c => c.ApplicationUserId == userId,
+                includeProperties: "product,ProductVariant,FlashSaleItem,ComboOffer"
+            ).ToList();
+
+            int mergedCount = 0;
+
+            foreach (var guestItem in guestCart)
+            {
+                // Check if this item already exists in user's cart
+                // Match by: ProductId, ProductVariantId, FlashSaleItemId, ComboOfferId
+                var existingItem = userCartItems.FirstOrDefault(uc =>
+                    uc.ProductId == guestItem.ProductId &&
+                    uc.ProductVariantId == guestItem.ProductVariantId &&
+                    uc.FlashSaleItemId == guestItem.FlashSaleItemId &&
+                    uc.ComboOfferId == guestItem.ComboOfferId
+                );
+
+                if (existingItem == null)
+                {
+                    // Item doesn't exist in user's cart - add it
+                    var newCartItem = new ShoppingCart
+                    {
+                        ProductId = guestItem.ProductId,
+                        Count = guestItem.Count,
+                        ApplicationUserId = userId,
+                        ProductVariantId = guestItem.ProductVariantId,
+                        FlashSaleItemId = guestItem.FlashSaleItemId,
+                        FlashSalePrice = guestItem.FlashSalePrice.HasValue ? (decimal?)guestItem.FlashSalePrice.Value : null,
+                        ComboOfferId = guestItem.ComboOfferId
+                    };
+
+                    unitOfWork.shoppingCart.Add(newCartItem);
+                    mergedCount++;
+                }
+                // If item exists, skip it (don't add duplicate)
+            }
+
+            if (mergedCount > 0)
+            {
+                unitOfWork.save();
+            }
+
+            // Clear guest cart after merging
+            BulkyBook.Utility.GuestCartHelper.ClearCart(session);
+
+            return mergedCount;
+        }
     }
 
 }

@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using BulkyBook.Areas.Customer.Controllers;
 
 namespace BulkyBook.Areas.Identity.Pages.Account
 {
@@ -208,6 +209,14 @@ namespace BulkyBook.Areas.Identity.Pages.Account
                     else
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
+                        
+                        // Merge guest cart into user cart after registration
+                        var mergedCount = CartController.MergeGuestCartToUserCart(_unitOfWork, user.Id, HttpContext.Session);
+                        if (mergedCount > 0)
+                        {
+                            _logger.LogInformation($"Merged {mergedCount} items from guest cart to user cart for new user {user.Id}");
+                        }
+                        
                         return LocalRedirect(returnUrl);
                     }
                 }

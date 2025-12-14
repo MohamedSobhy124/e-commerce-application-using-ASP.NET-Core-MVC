@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Areas.Customer.Controllers;
 
 namespace BulkyBook.Areas.Identity.Pages.Account
 {
@@ -29,13 +31,15 @@ namespace BulkyBook.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
+        private readonly IUnitOfWork _unitOfWork;
 
         public ExternalLoginModel(
             SignInManager<IdentityUser> signInManager,
             UserManager<IdentityUser> userManager,
             IUserStore<IdentityUser> userStore,
             ILogger<ExternalLoginModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IUnitOfWork unitOfWork)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -43,6 +47,7 @@ namespace BulkyBook.Areas.Identity.Pages.Account
             _emailStore = GetEmailStore();
             _logger = logger;
             _emailSender = emailSender;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -116,6 +121,18 @@ namespace BulkyBook.Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
+                
+                // Merge guest cart into user cart after external login
+                var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+                if (user != null)
+                {
+                    var mergedCount = CartController.MergeGuestCartToUserCart(_unitOfWork, user.Id, HttpContext.Session);
+                    if (mergedCount > 0)
+                    {
+                        _logger.LogInformation($"Merged {mergedCount} items from guest cart to user cart for user {user.Id}");
+                    }
+                }
+                
                 return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)
@@ -183,6 +200,14 @@ namespace BulkyBook.Areas.Identity.Pages.Account
                         }
 
                         await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                        
+                        // Merge guest cart into user cart after external registration
+                        var mergedCount = CartController.MergeGuestCartToUserCart(_unitOfWork, user.Id, HttpContext.Session);
+                        if (mergedCount > 0)
+                        {
+                            _logger.LogInformation($"Merged {mergedCount} items from guest cart to user cart for new external user {user.Id}");
+                        }
+                        
                         return LocalRedirect(returnUrl);
                     }
                 }
