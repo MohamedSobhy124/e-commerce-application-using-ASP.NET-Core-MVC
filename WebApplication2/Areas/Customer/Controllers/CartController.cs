@@ -221,6 +221,27 @@ namespace BulkyBook.Areas.Customer.Controllers
                     }
                 }
                 
+                // Get stock information for validation
+                int availableStock = 0;
+                int? flashSaleQuantity = null;
+                
+                if (cart.FlashSaleItemId.HasValue && cart.FlashSaleItem != null)
+                {
+                    // Flash sale item - use flash sale quantity
+                    flashSaleQuantity = cart.FlashSaleItem.FlashSaleQuantity;
+                    availableStock = cart.FlashSaleItem.FlashSaleQuantity;
+                }
+                else if (cart.ProductVariantId.HasValue && cart.ProductVariant != null)
+                {
+                    // Variant product - use variant stock
+                    availableStock = cart.ProductVariant.StockQuantity;
+                }
+                else if (cart.product != null)
+                {
+                    // Regular product - use product stock
+                    availableStock = cart.product.StockQuantity;
+                }
+                
                 return new
                 {
                     productId = cart.ProductId,
@@ -231,7 +252,10 @@ namespace BulkyBook.Areas.Customer.Controllers
                     cartId = cart.Id,
                     isFlashSale = cart.FlashSaleItemId.HasValue, // 🔥 Indicate if it's a flash sale item
                     isComboOffer = isComboOffer, // 🔥 Indicate if it's a combo offer
-                    variantName = variantName // 🔥 Include variant name if exists
+                    variantName = variantName, // 🔥 Include variant name if exists
+                    availableStock = availableStock, // 🔥 Stock available for this item
+                    flashSaleQuantity = flashSaleQuantity, // 🔥 Flash sale quantity if applicable
+                    flashSaleItemId = cart.FlashSaleItemId // 🔥 Flash sale item ID if applicable
                 };
             }).ToList();
 
@@ -654,7 +678,21 @@ namespace BulkyBook.Areas.Customer.Controllers
             {
                 if (User.Identity.IsAuthenticated)
                 {
-                    var cartFromDD = _unitOfWork.shoppingCart.Get(a => a.Id == CartId);
+                    var userId = ((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier).Value;
+                    ShoppingCart cartFromDD = null;
+                    
+                    if (CartId > 0)
+                    {
+                        // Try to find by CartId first
+                        cartFromDD = _unitOfWork.shoppingCart.Get(a => a.Id == CartId && a.ApplicationUserId == userId);
+                    }
+                    
+                    // If not found by CartId, try to find by ProductId
+                    if (cartFromDD == null && ProductId.HasValue)
+                    {
+                        cartFromDD = _unitOfWork.shoppingCart.Get(a => a.ProductId == ProductId.Value && a.ApplicationUserId == userId);
+                    }
+                    
                     if (cartFromDD == null)
                     {
                         return Json(new { success = false, message = _localizer["CartItemNotFound"].Value });
@@ -664,13 +702,14 @@ namespace BulkyBook.Areas.Customer.Controllers
                     _unitOfWork.save();
 
                     // Calculate order total after removal
-                    var userId = ((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier).Value;
                     var allCartItems = _unitOfWork.shoppingCart.GetAll(a => a.ApplicationUserId == userId, includeProperties: "product,FlashSaleItem,ProductVariant,ComboOffer");
                     var orderTotal = allCartItems.Sum(c => GetCartItemPrice(c) * c.Count);
+                    var cartCount = allCartItems.Count(); // Count of unique products
 
                     return Json(new { 
                         success = true, 
                         orderTotal = orderTotal,
+                        cartCount = cartCount,
                         message = "Item removed from cart"
                     });
                 }
@@ -680,10 +719,12 @@ namespace BulkyBook.Areas.Customer.Controllers
                     
                     var updatedCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
                     var orderTotal = updatedCart.Sum(c => (c.FlashSalePrice ?? c.ProductPrice) * c.Count);
+                    var cartCount = updatedCart.Count; // Count of unique products
 
                     return Json(new { 
                         success = true, 
                         orderTotal = orderTotal,
+                        cartCount = cartCount,
                         message = "Item removed from cart"
                     });
                 }

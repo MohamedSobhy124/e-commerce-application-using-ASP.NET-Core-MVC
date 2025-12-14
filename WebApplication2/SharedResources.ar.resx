@@ -171,15 +171,6 @@
   <data name="AddToCart" xml:space="preserve">
     <value>أضف للسلة</value>
   </data>
-  <data name="RemoveFromCart" xml:space="preserve">
-    <value>إزالة من السلة</value>
-  </data>
-  <data name="FailedToAddToCart" xml:space="preserve">
-    <value>فشل إضافة المنتج إلى السلة</value>
-  </data>
-  <data name="FailedToUpdateCart" xml:space="preserve">
-    <value>فشل تحديث السلة. يرجى المحاولة مرة أخرى.</value>
-  </data>
   <data name="BuyNow" xml:space="preserve">
     <value>اشتر الآن</value>
   </data>
@@ -1164,7 +1155,7 @@
     <value>عروض ساخنة الآن!</value>
   </data>
   <data name="FlashSale" xml:space="preserve">
-    <value>عرض لفترة محدودة</value>
+    <value>عرض فلاش</value>
   </data>
   <data name="LimitedTimeOffers" xml:space="preserve">
     <value>عروض لوقت محدود!</value>
@@ -2561,7 +2552,15 @@
   <data name="Brand" xml:space="preserve">
     <value>علامة تجارية</value>
   </data>
-
+  <data name="RemoveFromCart" xml:space="preserve">
+    <value>إزالة من السلة</value>
+  </data>
+  <data name="FailedToAddToCart" xml:space="preserve">
+    <value>فشل إضافة المنتج إلى السلة</value>
+  </data>
+  <data name="FailedToUpdateCart" xml:space="preserve">
+    <value>فشل تحديث السلة. يرجى المحاولة مرة أخرى.</value>
+  </data>
   <data name="AccountSettings" xml:space="preserve">
     <value>إعدادات الحساب</value>
   </data>
@@ -2728,7 +2727,7 @@
     <value>المنتج مستثنى بالفعل</value>
   </data>
   <data name="ProductNotFound" xml:space="preserve">
-    <value>المنتج غير موجود</value>
+    <value>المنتج غير موجود.</value>
   </data>
   <data name="ProductRemovedFromExcludedList" xml:space="preserve">
     <value>تم إزالة المنتج من قائمة الاستثناء</value>
@@ -2843,9 +2842,6 @@
   </data>
   <data name="FlashSaleItemAddedToCart" xml:space="preserve">
     <value>تم إضافة عنصر عرض الفلاش إلى السلة!</value>
-  </data>
-  <data name="FLASHSALE" xml:space="preserve">
-    <value>عرض فلاش</value>
   </data>
   <data name="LoadingFlashSales" xml:space="preserve">
     <value>جاري تحميل عروض الفلاش...</value>
@@ -3075,9 +3071,6 @@
   <data name="Days" xml:space="preserve">
     <value>أيام</value>
   </data>
-  <data name="EndsIn" xml:space="preserve">
-    <value>ينتهي خلال</value>
-  </data>
   <data name="ExpiryDate" xml:space="preserve">
     <value>تاريخ الانتهاء</value>
   </data>
@@ -3135,9 +3128,6 @@
   <data name="OK" xml:space="preserve">
     <value>موافق</value>
   </data>
-  <data name="Off" xml:space="preserve">
-    <value>خصم</value>
-  </data>
   <data name="Oldest" xml:space="preserve">
     <value>الأقدم</value>
   </data>
@@ -3173,9 +3163,6 @@
   </data>
   <data name="Retry" xml:space="preserve">
     <value>إعادة المحاولة</value>
-  </data>
-  <data name="SAVE" xml:space="preserve">
-    <value>حفظ</value>
   </data>
   <data name="SaveChanges" xml:space="preserve">
     <value>حفظ التغييرات</value>
@@ -3237,9 +3224,6 @@
   <data name="YourWishlistIsEmpty" xml:space="preserve">
     <value>قائمة أمنياتك فارغة</value>
   </data>
-  <data name="total" xml:space="preserve">
-    <value>المجموع</value>
-  </data>
   <data name="Instruction1" xml:space="preserve">
     <value>التعليمات 1</value>
   </data>
@@ -3293,5 +3277,134 @@
   </data>
   <data name="Show" xml:space="preserve">
     <value>إظهار</value>
+  </data>
+  <data name="MyOrders" xml:space="preserve">
+    <value>طلباتي</value>
+  </data>
+  <data name="BackToOrders" xml:space="preserve">
+    <value>العودة إلى الطلبات</value>
+  </data>
+  <data name="TransactionDetails" xml:space="preserve">
+    <value>تفاصيل المعاملة</value>
+  </data>
+  <data name="ShowDetails" xml:space="preserve">
+    <value>إظهار التفاصيل</value>
+  </data>
+  <data name="HideDetails" xml:space="preserve">
+    <value>إخفاء التفاصيل</value>
+  </data>
+  <data name="PaymentDate" xml:space="preserve">
+    <value>تاريخ الدفع</value>
+  </data>
+  <data name="PaymentDueDate" xml:space="preserve">
+    <value>تاريخ استحقاق الدفع</value>
+  </data>
+  <data name="TransactionID" xml:space="preserve">
+    <value>رقم المعاملة</value>
+  </data>
+  <data name="NotSpecified" xml:space="preserve">
+    <value>غير محدد</value>
+  </data>
+  <data name="MoreItems" xml:space="preserve">
+    <value>عناصر أخرى</value>
+  </data>
+  <data name="TrackingNumberWillBeAvailable" xml:space="preserve">
+    <value>سيتم توفير رقم التتبع بمجرد شحن الطلب</value>
+  </data>
+  <data name="StartShopping" xml:space="preserve">
+    <value>ابدأ التسوق</value>
+  </data>
+  <data name="StartShoppingToSeeOrders" xml:space="preserve">
+    <value>ابدأ التسوق لرؤية طلباتك هنا</value>
+  </data>
+  <data name="NoOrdersYet" xml:space="preserve">
+    <value>لا توجد طلبات بعد</value>
+  </data>
+  <data name="At" xml:space="preserve">
+    <value>في</value>
+  </data>
+  <data name="InProcess" xml:space="preserve">
+    <value>قيد المعالجة</value>
+  </data>
+  <data name="ViewYourOrderHistory" xml:space="preserve">
+    <value>عرض سجل طلباتك وتتبع الشحنات</value>
+  </data>
+  <data name="QuantityMustBeAtLeastOne" xml:space="preserve">
+    <value>يجب أن تكون الكمية على الأقل 1.</value>
+  </data>
+  <data name="SelectedVariantNotFound" xml:space="preserve">
+    <value>المتغير المحدد غير موجود.</value>
+  </data>
+  <data name="ItemSoldOutInFlashSale" xml:space="preserve">
+    <value>هذا العنصر نفد في البيع السريع.</value>
+  </data>
+  <data name="VariantOutOfStock" xml:space="preserve">
+    <value>هذا المتغير غير متوفر في المخزون.</value>
+  </data>
+  <data name="ProductOutOfStock" xml:space="preserve">
+    <value>هذا المنتج غير متوفر في المخزون.</value>
+  </data>
+  <data name="OnlyUnitsAvailableInFlashSale" xml:space="preserve">
+    <value>متوفر فقط {0} وحدة في البيع السريع. لديك بالفعل {1} في السلة.</value>
+  </data>
+  <data name="OnlyUnitsAvailableForVariant" xml:space="preserve">
+    <value>متوفر فقط {0} وحدة لهذا المتغير. لديك بالفعل {1} في السلة.</value>
+  </data>
+  <data name="OnlyUnitsAvailableInStock" xml:space="preserve">
+    <value>متوفر فقط {0} وحدة في المخزون. لديك بالفعل {1} في السلة.</value>
+  </data>
+  <data name="PleaseProvideBothOrderIDAndEmail" xml:space="preserve">
+    <value>يرجى تقديم رقم الطلب والبريد الإلكتروني</value>
+  </data>
+  <data name="OrderNotFoundPleaseCheck" xml:space="preserve">
+    <value>الطلب غير موجود. يرجى التحقق من رقم الطلب والبريد الإلكتروني.</value>
+  </data>
+  <data name="MaximumStockReached" xml:space="preserve">
+    <value>تم الوصول إلى الحد الأقصى للمخزون</value>
+  </data>
+  <data name="Increase" xml:space="preserve">
+    <value>زيادة</value>
+  </data>
+  <data name="FailedToUpdateQuantity" xml:space="preserve">
+    <value>فشل تحديث الكمية. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="SecurityTokenMissing" xml:space="preserve">
+    <value>رمز الأمان مفقود. يرجى تحديث الصفحة.</value>
+  </data>
+  <data name="CouldNotAddItemToCart" xml:space="preserve">
+    <value>تعذر إضافة العنصر إلى السلة</value>
+  </data>
+  <data name="FailedToRemoveItem" xml:space="preserve">
+    <value>فشل إزالة العنصر. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="CannotRemoveItemMissingInfo" xml:space="preserve">
+    <value>تعذر إزالة العنصر: معلومات المنتج مفقودة</value>
+  </data>
+  <data name="Combo" xml:space="preserve">
+    <value>عروض كومبو</value>
+  </data>
+  <data name="OnlyUnitsAvailableInFlashSaleSimple" xml:space="preserve">
+    <value>متوفر فقط {0} وحدة في البيع السريع.</value>
+  </data>
+  <data name="OnlyUnitsAvailableForVariantSimple" xml:space="preserve">
+    <value>متوفر فقط {0} وحدة لهذا المتغير.</value>
+  </data>
+  <data name="OnlyUnitsAvailableInStockSimple" xml:space="preserve">
+    <value>متوفر فقط {0} وحدة في المخزون.</value>
+  </data>
+  <data name="ViewAndEditYourProfile" xml:space="preserve">
+    <value>عرض وتعديل الملف الشخصى</value>
+  </data>
+  <data name="AccountInformation" xml:space="preserve">
+    <value>معلومات الحساب</value>
+  </data>
+  <data name="ViewOrders" xml:space="preserve">
+    <value>عرض الطلبات</value>
+  </data>
+  <data name="ManageProfile" xml:space="preserve">
+    <value>ادارة الملف الشخصى</value>
+  </data>
+  <data name="Discounted" xml:space="preserve">
+    <value>خصومات</value>
   </data>
 </root>

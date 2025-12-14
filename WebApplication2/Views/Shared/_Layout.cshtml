@@ -125,6 +125,7 @@
     <link rel="stylesheet" href="~/BulkyBook.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/modern-product-grid.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/sticky-header-enhanced.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/mobile-bottom-nav.css" asp-append-version="true" />
 
 
     <!-- Performance: Use CDN for icons and toastr -->
@@ -740,5 +741,11 @@
         <span class="whatsapp-tooltip">@Localizer["ChatWithUs"]</span>
     </a>
    
+    <!-- Cart Sidebar (available on all pages) -->
+    <partial name="_CartSidebar" />
+    
+    <!-- Mobile Bottom Navigation -->
+    <partial name="_MobileBottomNav" />
+  
 </body>
 </html>

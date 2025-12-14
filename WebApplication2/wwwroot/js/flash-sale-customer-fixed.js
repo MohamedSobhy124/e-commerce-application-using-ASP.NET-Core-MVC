@@ -145,7 +145,7 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
     const token = document.querySelector('input[name="__RequestVerificationToken"]');
     if (!token) {
         console.error('Anti-forgery token not found!');
-        const errorMsg = window.localizations?.errorOccurred || 'Security token missing. Please refresh the page.';
+        const errorMsg = window.localizations?.securityTokenMissing || window.localizations?.errorOccurred || 'Security token missing. Please refresh the page.';
         toastr.error(errorMsg);
         btn.disabled = false;
         btn.className = originalClass;
@@ -186,8 +186,9 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
             const successMsg = data.message || (window.localizations?.flashSaleAddedToCart || 'Flash sale item added to cart!');
             toastr.success(successMsg);
             
-            // Update cart count
+            // Update cart count everywhere (works on all screens)
             if (data.cartCount !== undefined) {
+                // Update navigation cart count
                 const cartCountElement = document.getElementById('cartCount');
                 if (cartCountElement) {
                     cartCountElement.textContent = data.cartCount;
@@ -197,6 +198,8 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
                         cartCountElement.style.animation = 'cartPulse 0.6s ease';
                     }, 10);
                 }
+                
+                // Update header cart badge
                 const headerCartBadge = document.getElementById('headerCartBadge');
                 if (headerCartBadge) {
                     if (data.cartCount > 0) {
@@ -205,6 +208,13 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
                     } else {
                         headerCartBadge.style.display = 'none';
                     }
+                }
+                
+                // Update mobile bottom nav cart badge
+                if (typeof window.updateFloatingCartBadge === 'function') {
+                    window.updateFloatingCartBadge(data.cartCount);
+                } else if (typeof updateFloatingCartBadge === 'function') {
+                    updateFloatingCartBadge(data.cartCount);
                 }
             }
 
@@ -222,7 +232,7 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
 
         } else {
             // Error from server
-            const errorMsg = data.message || (window.localizations?.couldNotAddItemToCart || 'Could not add item to cart');
+            const errorMsg = data.message || window.localizations?.couldNotAddItemToCart || window.localizations?.failedToAddToCart || 'Could not add item to cart';
             toastr.error(errorMsg);
             btn.disabled = false;
             btn.className = originalClass;
@@ -231,7 +241,7 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
     })
     .catch(error => {
         console.error('Error adding to cart:', error);
-        const errorMsg = window.localizations?.errorOccurred || 'An error occurred. Please try again.';
+        const errorMsg = window.localizations?.errorOccurred || window.localizations?.anErrorOccurredPleaseTryAgain || 'An error occurred. Please try again.';
         toastr.error(errorMsg);
         btn.disabled = false;
         btn.className = originalClass;
@@ -241,34 +251,83 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
     });
 }
 
-function openCartSidebar() {
-    // Check if on mobile and home page - don't open cart sidebar
-    const isMobile = window.innerWidth <= 768;
-    const currentPath = window.location.pathname.toLowerCase();
-    const isHomePage = currentPath === '/' || 
-                      currentPath === '/customer/home' || 
-                      currentPath === '/customer/home/index' ||
-                      currentPath.startsWith('/customer/home/index');
-    
-    if (isMobile && isHomePage) {
-        console.log('Cart sidebar disabled on mobile home screen');
-        return;
+function openCartSidebar(forceOpen = false) {
+    // Check if on mobile and home page - don't open cart sidebar automatically
+    // But allow if forceOpen is true (user clicked the cart icon)
+    if (!forceOpen) {
+        const isMobile = window.innerWidth <= 768;
+        const currentPath = window.location.pathname.toLowerCase();
+        const isHomePage = currentPath === '/' || 
+                          currentPath === '/customer/home' || 
+                          currentPath === '/customer/home/index' ||
+                          currentPath.startsWith('/customer/home/index');
+        
+        if (isMobile && isHomePage) {
+            console.log('Cart sidebar disabled on mobile home screen');
+            return;
+        }
     }
     
     console.log('Opening cart sidebar...');
-    const sidebar = document.getElementById('cartSidebar');
-    const overlay = document.getElementById('cartOverlay');
+    const sidebar = document.querySelector('.cart-sidebar-enhanced') || document.getElementById('cartSidebar');
+    const overlay = document.querySelector('.cart-overlay-enhanced') || document.getElementById('cartOverlay');
 
     if (sidebar && overlay) {
         sidebar.classList.add('active');
         overlay.classList.add('active');
         document.body.style.overflow = 'hidden'; // Prevent background scrolling
         console.log('Cart sidebar opened successfully');
-        loadCartItems();
+        
+        // Always load cart items when sidebar opens (on all pages)
+        // Use a small delay to ensure sidebar is fully visible
+        setTimeout(function() {
+            console.log('Loading cart items...');
+            // Load cart items if function is available (check global first, then local)
+            if (typeof window.loadCartItems === 'function') {
+                console.log('Calling window.loadCartItems');
+                window.loadCartItems();
+            } else if (typeof loadCartItems === 'function') {
+                console.log('Calling local loadCartItems');
+                loadCartItems();
+            } else {
+                console.error('loadCartItems function not available! Cart items will not load.');
+                // Try to fetch cart items directly as last resort
+                fetch('/Customer/Cart/GetCartItems')
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        throw new Error('Failed to fetch cart items');
+                    })
+                    .then(data => {
+                        console.log('Cart items fetched directly:', data);
+                        const container = document.getElementById('cartItemsContainer');
+                        if (container && data.items) {
+                            if (data.items.length > 0) {
+                                container.innerHTML = '<p>Cart items loaded. Please refresh the page.</p>';
+                            } else {
+                                const emptyState = document.getElementById('cartEmptyState');
+                                if (emptyState) {
+                                    emptyState.classList.remove('hidden');
+                                }
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Failed to fetch cart items directly:', error);
+                    });
+            }
+        }, 100);
     } else {
-        console.error('Cart sidebar or overlay not found!');
+        console.error('Cart sidebar or overlay not found!', {
+            sidebar: !!sidebar,
+            overlay: !!overlay
+        });
     }
 }
+
+// Make it globally available
+window.openCartSidebar = openCartSidebar;
 // Helper function to get currency symbol based on language
 function getCurrencySymbol() {
     // Try to get from cookie if language-switcher.js is loaded
@@ -295,10 +354,61 @@ function getProductImageUrl(imageUrl) {
 }
 
 // Create HTML for a cart item in the sidebar
+// Helper function to check if we're on home page
+function isHomePage() {
+    const currentPath = window.location.pathname.toLowerCase();
+    return currentPath === '/' || 
+           currentPath === '/customer/home' || 
+           currentPath === '/customer/home/index' ||
+           currentPath.startsWith('/customer/home/index') ||
+           currentPath === '/home' ||
+           currentPath === '/home/index';
+}
+
 function createCartItemHTML(item) {
     const imageUrl = getProductImageUrl(item.imageUrl);
     const price = formatCurrency(item.price);
     const total = formatCurrency(item.price * item.count);
+    
+    // Get available stock (flash sale quantity, variant stock, or product stock)
+    const availableStock = item.availableStock || 0;
+    const currentCount = item.count || 1;
+    const canIncrease = currentCount < availableStock;
+    const canDecrease = currentCount > 1;
+    
+    // Determine stock message
+    let stockMessage = '';
+    if (item.isFlashSale && item.flashSaleQuantity !== null && item.flashSaleQuantity !== undefined) {
+        if (item.flashSaleQuantity === 0) {
+            stockMessage = '<small class="text-danger d-block mt-1" style="font-size: 0.7rem;">⚡ Flash sale sold out</small>';
+        } else if (currentCount >= item.flashSaleQuantity) {
+            stockMessage = `<small class="text-warning d-block mt-1" style="font-size: 0.7rem;">⚡ Only ${item.flashSaleQuantity} available in flash sale</small>`;
+        }
+    } else if (availableStock > 0 && currentCount >= availableStock) {
+        stockMessage = `<small class="text-warning d-block mt-1" style="font-size: 0.7rem;">Only ${availableStock} available in stock</small>`;
+    } else if (availableStock === 0) {
+        stockMessage = '<small class="text-danger d-block mt-1" style="font-size: 0.7rem;">Out of stock</small>';
+    }
+    
+    // Quantity controls with validation
+    const quantityControls = `
+        <div class="cart-item-quantity-controls">
+            <button class="btn-quantity btn-quantity-minus ${!canDecrease ? 'disabled' : ''}" 
+                    onclick="${canDecrease ? `updateCartQuantityFromSidebar(${item.productId}, ${item.count - 1}, ${item.cartId || 'null'})` : 'return false;'}" 
+                    title="${canDecrease ? 'Decrease' : 'Minimum quantity reached'}"
+                    ${!canDecrease ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                <i class="bi bi-dash"></i>
+            </button>
+            <span class="cart-item-quantity-value">${item.count}</span>
+            <button class="btn-quantity btn-quantity-plus ${!canIncrease ? 'disabled' : ''}" 
+                    onclick="${canIncrease ? `updateCartQuantityFromSidebar(${item.productId}, ${item.count + 1}, ${item.cartId || 'null'})` : 'return false;'}" 
+                    title="${canIncrease ? (window.localizations?.increase || 'Increase') : (window.localizations?.maximumStockReached || 'Maximum stock reached')}"
+                    ${!canIncrease ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                <i class="bi bi-plus"></i>
+            </button>
+        </div>
+        ${stockMessage}
+    `;
     
     return `
         <div class="cart-sidebar-item" data-cart-id="${item.cartId || ''}" data-product-id="${item.productId}">
@@ -308,73 +418,227 @@ function createCartItemHTML(item) {
             </div>
             <div class="cart-item-details">
                 <h6 class="cart-item-title">${item.title}</h6>
-                ${item.variantName ? `<p class="cart-item-variant" style="font-size: 0.85rem; color: #666; margin-top: 0.25rem; margin-bottom: 0.25rem;">${item.variantName}</p>` : ''}
+                ${item.variantName ? `<p class="cart-item-variant">${item.variantName}</p>` : ''}
                 <div class="cart-item-meta">
-                    <span class="cart-item-quantity">Qty: ${item.count}</span>
-                    <span class="cart-item-price">${price}</span>
+                    ${quantityControls}
+                    <span class="cart-item-price">${total}</span>
                 </div>
-                <div style="margin-top: 0.25rem;">
-                    ${item.isFlashSale ? '<span class="badge bg-danger" style="font-size: 0.7rem; margin-right: 0.25rem;">Flash Sale</span>' : ''}
-                    ${item.isComboOffer ? '<span class="badge bg-warning text-dark" style="font-size: 0.7rem;">Combo Offer</span>' : ''}
+                ${(item.isFlashSale || item.isComboOffer) ? `
+                <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    ${item.isFlashSale ? `<span class="badge bg-danger" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">⚡ ${window.localizations?.flashSale || 'Flash Sale'}</span>` : ''}
+                    ${item.isComboOffer ? `<span class="badge bg-warning text-dark" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">📦 ${window.localizations?.combo || 'Combo'}</span>` : ''}
                 </div>
+                ` : ''}
             </div>
-            <button class="cart-item-remove" onclick="removeCartItem(${item.productId}, ${item.cartId || 'null'})" title="Remove">
-                <i class="bi bi-x-lg"></i>
+            <button class="cart-item-remove" onclick="removeCartItem(${item.productId}, ${item.cartId || 'null'})" title="${window.localizations?.remove || 'Remove'}" aria-label="${window.localizations?.remove || 'Remove'} item">
+                <i class="bi bi-trash"></i>
             </button>
         </div>
     `;
 }
 
+// Make createCartItemHTML globally available so it's used everywhere
+// Only set if not already set (to prevent overwriting with a recursive version)
+if (!window.createCartItemHTML) {
+    window.createCartItemHTML = createCartItemHTML;
+} else {
+    // If already set, make sure it's not the same function (prevent recursion)
+    const existingFunc = window.createCartItemHTML;
+    if (existingFunc !== createCartItemHTML && typeof existingFunc === 'function') {
+        // Keep the existing one if it's different, otherwise use ours
+        // But in this case, we want to use ours from flash-sale-customer-fixed.js
+        window.createCartItemHTML = createCartItemHTML;
+    }
+}
+
+// Function to update cart quantity from sidebar (for home page only)
+function updateCartQuantityFromSidebar(productId, newCount, cartId) {
+    if (newCount < 1) {
+        removeCartItem(productId, cartId);
+        return;
+    }
+
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    const formData = new FormData();
+    formData.append('productId', productId);
+    formData.append('count', newCount);
+    formData.append('__RequestVerificationToken', token);
+
+    fetch('/Customer/Cart/UpdateQuantity', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (!response.ok) {
+                throw new Error(data.message || window.localizations?.failedToUpdateQuantity || 'Failed to update quantity');
+            }
+            return data;
+        }).catch(err => {
+            // If JSON parsing fails, throw a generic error
+            if (!response.ok) {
+                throw new Error(window.localizations?.failedToUpdateQuantity || 'Failed to update quantity. Please try again.');
+            }
+            throw err;
+        });
+    })
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            if (typeof toastr !== 'undefined') {
+                const successMsg = data.message || window.localizations?.quantityUpdated || 'Quantity updated successfully';
+                toastr.success(successMsg, '', {
+                    timeOut: 2000
+                });
+            }
+            
+            // Reload cart items
+            if (typeof window.loadCartItems === 'function') {
+                window.loadCartItems();
+            } else if (typeof loadCartItems === 'function') {
+                loadCartItems();
+            }
+            // Update cart widget if available
+            if (typeof updateCartWidget === 'function') {
+                updateCartWidget();
+            }
+            // Update floating badge
+            if (typeof updateFloatingCartBadge === 'function') {
+                updateFloatingCartBadge(data.cartCount || 0);
+            } else if (typeof window.updateFloatingCartBadge === 'function') {
+                window.updateFloatingCartBadge(data.cartCount || 0);
+            }
+        } else {
+            // Show validation error message
+            const errorMsg = data.message || window.localizations?.failedToUpdateQuantity || 'Failed to update quantity';
+            throw new Error(errorMsg);
+        }
+    })
+    .catch(error => {
+        console.error('Error updating quantity:', error);
+        // Show the actual error message from the server
+        const errorMsg = error.message || window.localizations?.failedToUpdateQuantity || window.localizations?.failedToUpdateCart || 'Failed to update quantity. Please try again.';
+        if (typeof toastr !== 'undefined') {
+            toastr.error(errorMsg, '', {
+                timeOut: 5000,
+                extendedTimeOut: 3000,
+                closeButton: true
+            });
+        } else {
+            alert(errorMsg);
+        }
+    });
+}
+
+// Make it globally available
+window.updateCartQuantityFromSidebar = updateCartQuantityFromSidebar;
+
 // Remove item from cart
 function removeCartItem(productId, cartId) {
     console.log('Removing cart item:', { productId, cartId });
     
-    // Build URL based on whether we have cartId
-    let url = '/Customer/Cart/Remove';
-    if (cartId && cartId !== 'null') {
-        url += `?CartId=${cartId}&ProductId=${productId}`;
-    } else if (productId) {
-        url += `?ProductId=${productId}`;
+    // Get anti-forgery token
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    
+    // Build FormData with parameters
+    const formData = new FormData();
+    if (cartId && cartId !== 'null' && cartId !== null) {
+        formData.append('CartId', cartId);
+    }
+    if (productId) {
+        formData.append('ProductId', productId);
     } else {
         console.error('Cannot remove item: missing productId');
+        if (typeof toastr !== 'undefined') {
+            toastr.error('Cannot remove item: missing product information');
+        }
         return;
     }
+    
+    if (token) {
+        formData.append('__RequestVerificationToken', token);
+    }
 
-    fetch(url, {
-        method: 'GET',
+    fetch('/Customer/Cart/Remove', {
+        method: 'POST',
+        body: formData,
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
     .then(response => {
         if (response.ok) {
-            // Reload cart items
-            loadCartItems();
-            // Show success message
-            if (typeof toastr !== 'undefined') {
-                const successMsg = window.localizations?.itemRemovedFromCart || 'Item removed from cart';
-                toastr.success(successMsg);
-            }
+            return response.json();
         } else {
-            throw new Error('Failed to remove item');
+            throw new Error(window.localizations?.failedToRemoveItem || 'Failed to remove item');
+        }
+    })
+    .then(data => {
+        // Reload cart items (use global if available)
+        if (typeof window.loadCartItems === 'function') {
+            window.loadCartItems();
+        } else if (typeof loadCartItems === 'function') {
+            loadCartItems();
+        }
+        // Update cart widget if available
+        if (typeof updateCartWidget === 'function') {
+            updateCartWidget();
+        }
+        // Update floating badge
+        if (typeof updateFloatingCartBadge === 'function') {
+            updateFloatingCartBadge(data.cartCount || 0);
+        } else if (typeof window.updateFloatingCartBadge === 'function') {
+            window.updateFloatingCartBadge(data.cartCount || 0);
+        }
+        // Show success message
+        if (typeof toastr !== 'undefined') {
+            const successMsg = window.localizations?.itemRemovedFromCart || data.message || 'Item removed from cart';
+            toastr.success(successMsg);
         }
     })
     .catch(error => {
         console.error('Error removing cart item:', error);
         if (typeof toastr !== 'undefined') {
-            const errorMsg = window.localizations?.failedToUpdateCart || 'Failed to remove item. Please try again.';
+            const errorMsg = window.localizations?.failedToRemoveItem || window.localizations?.failedToUpdateCart || 'Failed to remove item. Please try again.';
             toastr.error(errorMsg);
         }
     });
 }
 
+// Make removeCartItem globally available
+window.removeCartItem = removeCartItem;
+
 function loadCartItems() {
+    // If global loadCartItems exists (from Home page), use it
+    if (window.loadCartItems && window.loadCartItems !== loadCartItems) {
+        console.log('Using global loadCartItems from Home page');
+        window.loadCartItems();
+        return;
+    }
+    
+    // Get isAuthenticated - try multiple sources
+    let isAuthenticated = false;
+    if (typeof window.isAuthenticated !== 'undefined') {
+        isAuthenticated = window.isAuthenticated;
+    } else if (typeof isAuthenticated !== 'undefined') {
+        isAuthenticated = isAuthenticated;
+    } else {
+        // Fallback: try to determine from DOM
+        const logoutLink = document.querySelector('a[href*="Logout"], a[href*="logout"]');
+        const loginLink = document.querySelector('a[href*="Login"], a[href*="login"]');
+        isAuthenticated = !!logoutLink && !loginLink;
+        // Cache it globally for future use
+        window.isAuthenticated = isAuthenticated;
+    }
     console.log('loadCartItems called, isAuthenticated:', isAuthenticated);
 
     console.log('Fetching cart items from server...');
     fetch('/Customer/Cart/GetCartItems')
         .then(response => {
             console.log('Cart items response received:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             return response.json();
         })
         .then(data => {
@@ -382,28 +646,77 @@ function loadCartItems() {
             const container = document.getElementById('cartItemsContainer');
             const countElement = document.getElementById('sidebarCartCount');
             const subtotalElement = document.getElementById('cartSubtotal');
+            const emptyState = document.getElementById('cartEmptyState');
 
+            if (!container || !countElement || !subtotalElement) {
+                console.error('Cart sidebar elements not found');
+                return;
+            }
+
+            // Hide/show empty state
+            if (emptyState) {
+                if (data.items && data.items.length > 0) {
+                    emptyState.classList.add('hidden');
+                } else {
+                    emptyState.classList.remove('hidden');
+                }
+            }
+            
             if (data.items && data.items.length > 0) {
-                container.innerHTML = data.items.map(item => createCartItemHTML(item)).join('');
+                // Use global createCartItemHTML if available, otherwise use local one
+                const createItemHTML = window.createCartItemHTML || createCartItemHTML;
+                if (!createItemHTML) {
+                    console.error('createCartItemHTML function not found');
+                    if (emptyState) emptyState.classList.remove('hidden');
+                    return;
+                }
+                
+                container.innerHTML = data.items.map(item => createItemHTML(item)).join('');
                 countElement.textContent = data.items.length;
                 subtotalElement.textContent = formatCurrency(data.subtotal);
 
                 // Update floating cart badge
-                updateFloatingCartBadge(data.items.length);
+                if (typeof updateFloatingCartBadge === 'function') {
+                    updateFloatingCartBadge(data.items.length);
+                } else if (typeof window.updateFloatingCartBadge === 'function') {
+                    window.updateFloatingCartBadge(data.items.length);
+                }
                 console.log('Cart items loaded successfully:', data.items.length, 'items');
             } else {
-                container.innerHTML = '<div class="cart-empty"><i class="bi bi-cart-x"></i><p>Your cart is empty</p></div>';
+                container.innerHTML = '';
                 countElement.textContent = '0';
-                subtotalElement.textContent = 'AED 0.00';
+                subtotalElement.textContent = formatCurrency(0);
 
                 // Update floating cart badge
-                updateFloatingCartBadge(0);
+                if (typeof updateFloatingCartBadge === 'function') {
+                    updateFloatingCartBadge(0);
+                } else if (typeof window.updateFloatingCartBadge === 'function') {
+                    window.updateFloatingCartBadge(0);
+                }
                 console.log('Cart is empty');
             }
         })
         .catch(error => {
             console.error('Error loading cart items:', error);
+            const container = document.getElementById('cartItemsContainer');
+            const emptyState = document.getElementById('cartEmptyState');
+            if (container) {
+                container.innerHTML = '';
+            }
+            if (emptyState) {
+                emptyState.classList.remove('hidden');
+            }
         });
+}
+
+// Make loadCartItems globally available (always use the one from flash-sale-customer-fixed.js as fallback)
+// This ensures it's available on all pages, not just Home/Offer
+if (!window.loadCartItems || window.loadCartItems === loadCartItems) {
+    window.loadCartItems = loadCartItems;
+} else {
+    // If Home page has its own version, keep it but also keep this as fallback
+    // Store the flash-sale version as backup
+    window.loadCartItemsFallback = loadCartItems;
 }
 
 // Initialize all flash sale timers

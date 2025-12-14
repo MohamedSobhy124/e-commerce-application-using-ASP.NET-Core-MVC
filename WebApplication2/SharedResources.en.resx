@@ -171,15 +171,6 @@
   <data name="AddToCart" xml:space="preserve">
     <value>Add to Cart</value>
   </data>
-  <data name="RemoveFromCart" xml:space="preserve">
-    <value>Remove from Cart</value>
-  </data>
-  <data name="FailedToAddToCart" xml:space="preserve">
-    <value>Failed to add to cart</value>
-  </data>
-  <data name="FailedToUpdateCart" xml:space="preserve">
-    <value>Failed to update cart. Please try again.</value>
-  </data>
   <data name="BuyNow" xml:space="preserve">
     <value>Buy Now</value>
   </data>
@@ -460,7 +451,7 @@
     <value>Products</value>
   </data>
   <data name="CartUpdatedSuccessfully" xml:space="preserve">
-    <value>Cart updated successfully</value>
+    <value>Cart Updated Successfully</value>
   </data>
   <data name="ClearFilters" xml:space="preserve">
     <value>Clear Filters</value>
@@ -1171,7 +1162,7 @@
     <value>View All Flash Sales</value>
   </data>
   <data name="OFF" xml:space="preserve">
-    <value>OFF</value>
+    <value>Off</value>
   </data>
   <data name="LoadMoreProducts" xml:space="preserve">
     <value>Load More Products</value>
@@ -2559,7 +2550,15 @@
   <data name="Brand" xml:space="preserve">
     <value>Brand</value>
   </data>
-
+  <data name="RemoveFromCart" xml:space="preserve">
+    <value>Remove from Cart</value>
+  </data>
+  <data name="FailedToAddToCart" xml:space="preserve">
+    <value>Failed to add to cart</value>
+  </data>
+  <data name="FailedToUpdateCart" xml:space="preserve">
+    <value>Failed to update cart. Please try again.</value>
+  </data>
   <data name="AccountSettings" xml:space="preserve">
     <value>Account Settings</value>
   </data>
@@ -2726,7 +2725,7 @@
     <value>Product is Already Excluded</value>
   </data>
   <data name="ProductNotFound" xml:space="preserve">
-    <value>Product Not Found</value>
+    <value>Product not found.</value>
   </data>
   <data name="ProductRemovedFromExcludedList" xml:space="preserve">
     <value>Product Removed From Excluded List</value>
@@ -2841,9 +2840,6 @@
   </data>
   <data name="FlashSaleItemAddedToCart" xml:space="preserve">
     <value>Flash sale item added to cart!</value>
-  </data>
-  <data name="FLASHSALE" xml:space="preserve">
-    <value>FLASH SALE</value>
   </data>
   <data name="LoadingFlashSales" xml:space="preserve">
     <value>Loading Flash Sales...</value>
@@ -3073,9 +3069,6 @@
   <data name="Days" xml:space="preserve">
     <value>Days</value>
   </data>
-  <data name="EndsIn" xml:space="preserve">
-    <value>Ends In</value>
-  </data>
   <data name="ExpiryDate" xml:space="preserve">
     <value>Expiry Date</value>
   </data>
@@ -3133,9 +3126,6 @@
   <data name="OK" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="Off" xml:space="preserve">
-    <value>Off</value>
-  </data>
   <data name="Oldest" xml:space="preserve">
     <value>Oldest</value>
   </data>
@@ -3171,9 +3161,6 @@
   </data>
   <data name="Retry" xml:space="preserve">
     <value>Retry</value>
-  </data>
-  <data name="SAVE" xml:space="preserve">
-    <value>SAVE</value>
   </data>
   <data name="SaveChanges" xml:space="preserve">
     <value>Save Changes</value>
@@ -3235,9 +3222,6 @@
   <data name="YourWishlistIsEmpty" xml:space="preserve">
     <value>Your Wishlist Is Empty</value>
   </data>
-  <data name="total" xml:space="preserve">
-    <value>total</value>
-  </data>
   <data name="Instruction1" xml:space="preserve">
     <value>Instruction 1</value>
   </data>
@@ -3291,5 +3275,134 @@
   </data>
   <data name="Show" xml:space="preserve">
     <value>Show</value>
+  </data>
+  <data name="MyOrders" xml:space="preserve">
+    <value>My Orders</value>
+  </data>
+  <data name="BackToOrders" xml:space="preserve">
+    <value>Back to Orders</value>
+  </data>
+  <data name="TransactionDetails" xml:space="preserve">
+    <value>Transaction Details</value>
+  </data>
+  <data name="ShowDetails" xml:space="preserve">
+    <value>Show Details</value>
+  </data>
+  <data name="HideDetails" xml:space="preserve">
+    <value>Hide Details</value>
+  </data>
+  <data name="PaymentDate" xml:space="preserve">
+    <value>Payment Date</value>
+  </data>
+  <data name="PaymentDueDate" xml:space="preserve">
+    <value>Payment Due Date</value>
+  </data>
+  <data name="TransactionID" xml:space="preserve">
+    <value>Transaction ID</value>
+  </data>
+  <data name="NotSpecified" xml:space="preserve">
+    <value>Not Specified</value>
+  </data>
+  <data name="MoreItems" xml:space="preserve">
+    <value>more items</value>
+  </data>
+  <data name="TrackingNumberWillBeAvailable" xml:space="preserve">
+    <value>Tracking number will be available once order is shipped</value>
+  </data>
+  <data name="StartShopping" xml:space="preserve">
+    <value>Start Shopping</value>
+  </data>
+  <data name="StartShoppingToSeeOrders" xml:space="preserve">
+    <value>Start shopping to see your orders here</value>
+  </data>
+  <data name="NoOrdersYet" xml:space="preserve">
+    <value>No Orders Yet</value>
+  </data>
+  <data name="At" xml:space="preserve">
+    <value>at</value>
+  </data>
+  <data name="InProcess" xml:space="preserve">
+    <value>In Process</value>
+  </data>
+  <data name="ViewYourOrderHistory" xml:space="preserve">
+    <value>View your order history and track shipments</value>
+  </data>
+  <data name="QuantityMustBeAtLeastOne" xml:space="preserve">
+    <value>Quantity must be at least 1.</value>
+  </data>
+  <data name="SelectedVariantNotFound" xml:space="preserve">
+    <value>Selected variant not found.</value>
+  </data>
+  <data name="ItemSoldOutInFlashSale" xml:space="preserve">
+    <value>This item is sold out in the flash sale.</value>
+  </data>
+  <data name="VariantOutOfStock" xml:space="preserve">
+    <value>This variant is out of stock.</value>
+  </data>
+  <data name="ProductOutOfStock" xml:space="preserve">
+    <value>This product is out of stock.</value>
+  </data>
+  <data name="OnlyUnitsAvailableInFlashSale" xml:space="preserve">
+    <value>Only {0} units available in the flash sale. You already have {1} in your cart.</value>
+  </data>
+  <data name="OnlyUnitsAvailableForVariant" xml:space="preserve">
+    <value>Only {0} units available for this variant. You already have {1} in your cart.</value>
+  </data>
+  <data name="OnlyUnitsAvailableInStock" xml:space="preserve">
+    <value>Only {0} units available in stock. You already have {1} in your cart.</value>
+  </data>
+  <data name="PleaseProvideBothOrderIDAndEmail" xml:space="preserve">
+    <value>Please provide both Order ID and Email</value>
+  </data>
+  <data name="OrderNotFoundPleaseCheck" xml:space="preserve">
+    <value>Order not found. Please check your Order ID and Email.</value>
+  </data>
+  <data name="MaximumStockReached" xml:space="preserve">
+    <value>Maximum stock reached</value>
+  </data>
+  <data name="Increase" xml:space="preserve">
+    <value>Increase</value>
+  </data>
+  <data name="FailedToUpdateQuantity" xml:space="preserve">
+    <value>Failed to update quantity. Please try again.</value>
+  </data>
+  <data name="SecurityTokenMissing" xml:space="preserve">
+    <value>Security token missing. Please refresh the page.</value>
+  </data>
+  <data name="CouldNotAddItemToCart" xml:space="preserve">
+    <value>Could not add item to cart</value>
+  </data>
+  <data name="FailedToRemoveItem" xml:space="preserve">
+    <value>Failed to remove item. Please try again.</value>
+  </data>
+  <data name="CannotRemoveItemMissingInfo" xml:space="preserve">
+    <value>Cannot remove item: missing product information</value>
+  </data>
+  <data name="Combo" xml:space="preserve">
+    <value>Combo</value>
+  </data>
+  <data name="OnlyUnitsAvailableInFlashSaleSimple" xml:space="preserve">
+    <value>Only {0} units available in the flash sale.</value>
+  </data>
+  <data name="OnlyUnitsAvailableForVariantSimple" xml:space="preserve">
+    <value>Only {0} units available for this variant.</value>
+  </data>
+  <data name="OnlyUnitsAvailableInStockSimple" xml:space="preserve">
+    <value>Only {0} units available in stock.</value>
+  </data>
+  <data name="ViewAndEditYourProfile" xml:space="preserve">
+    <value>View And Edit Your Profile</value>
+  </data>
+  <data name="AccountInformation" xml:space="preserve">
+    <value>Account Information</value>
+  </data>
+  <data name="ViewOrders" xml:space="preserve">
+    <value>View Orders</value>
+  </data>
+  <data name="ManageProfile" xml:space="preserve">
+    <value>Manage Profile</value>
+  </data>
+  <data name="Discounted" xml:space="preserve">
+    <value>Discounted</value>
   </data>
 </root>

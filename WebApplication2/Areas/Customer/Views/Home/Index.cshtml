@@ -487,6 +487,7 @@
     var hasDiscountedProducts = discountedProducts.Any();
 }
 
+
 @if (hasDiscountedProducts)
 {
     <section class="offers-section">
@@ -576,6 +577,41 @@
                                         
                                         var displayPrice = variantPrice ?? (decimal)product.Price;
                                         var displayListPrice = variantListPrice ?? (decimal)product.ListPrice;
+                                        
+                                        // Check for active flash sale for this product (non-variant items only)
+                                        var now = BulkyBook.Utility.DateTimeHelper.Now;
+                                        var activeFlashSaleItem = activeFlashSales
+                                            .SelectMany(fs => fs.FlashSaleItems ?? Enumerable.Empty<FlashSaleItem>())
+                                            .FirstOrDefault(fsi => fsi.ProductId == product.Id 
+                                                && fsi.ProductVariantId == null 
+                                                && !fsi.IsDeleted 
+                                                && fsi.FlashSaleQuantity > 0
+                                                && fsi.FlashSale != null
+                                                && fsi.FlashSale.IsActive
+                                                && now >= fsi.FlashSale.StartDate
+                                                && now <= fsi.FlashSale.EndDate);
+                                        
+                                        // If product has active flash sale, compare prices and use the lower one
+                                        if (activeFlashSaleItem != null)
+                                        {
+                                            var flashSalePrice = (decimal)activeFlashSaleItem.FlashSalePrice;
+                                            // Use flash sale price if it's lower than current display price
+                                            if (flashSalePrice < displayPrice)
+                                            {
+                                                displayPrice = flashSalePrice;
+                                                // Use product's original ListPrice (not product.Price) for old price
+                                                if (product.ListPrice > 0)
+                                                {
+                                                    displayListPrice = (decimal)product.ListPrice;
+                                                    discountPercent = (int)((displayListPrice - flashSalePrice) / displayListPrice * 100);
+                                                }
+                                                else if (product.Price > 0)
+                                                {
+                                                    displayListPrice = (decimal)product.Price;
+                                                    discountPercent = (int)((product.Price - (double)flashSalePrice) / product.Price * 100);
+                                                }
+                                            }
+                                        }
                                         
                                         <div class="col-12 col-sm-6 col-lg-3">
                                             <div class="offer-card h-100">
@@ -1990,40 +2026,7 @@
 </section>
 
 <!-- Cart Sidebar -->
-<div id="cartSidebar" class="cart-sidebar">
-    <div class="cart-header">
-        <h5 class="cart-title">
-            <i class="bi bi-cart3 me-2"></i>
-            @Localizer["Cart"]  (<span id="sidebarCartCount">0</span>)
-        </h5>
-        <button class="cart-close-btn" onclick="closeCartSidebar()">
-            <i class="bi bi-x-lg"></i>
-        </button>
-    </div>
-    
-    <div id="cartItemsContainer" class="cart-items-container">
-        <!-- Cart items will be loaded here -->
-    </div>
-    
-    <div class="cart-footer">
-        <div class="cart-subtotal">
-            <span>@Localizer["Subtotal"]:</span>
-            <span id="cartSubtotal" class="cart-subtotal-amount">@Html.Raw(currencySymbol) 0.00</span>
-        </div>
-        <a href="/Customer/Cart/Summary" class="btn btn-checkout w-100">
-            <i class="bi bi-lock-fill me-2"></i>@Localizer["Checkout"]
-        </a>   
-        <a href="/Customer/Cart/Index" class="btn btn-view-cart w-100 mt-2 d-none">
-            <i class="bi bi-lock-fill me-2"></i>@Localizer["ViewFullCart"]1
-        </a>
-        <a href="/Customer/Cart/Index" class="btn btn-view-cart w-100 mt-2">
-            @Localizer["ViewFullCart"] 
-        </a>
-    </div>
-</div>
-
-<!-- Overlay -->
-<div id="cartOverlay" class="cart-overlay" onclick="closeCartSidebar()"></div>
+<!-- Cart Sidebar is now in _Layout.cshtml as a partial view -->
 
 
 @if (User.Identity.IsAuthenticated)
@@ -2107,13 +2110,26 @@
             failedToAddToCart: '@Html.Raw(Localizer["FailedToAddToCart"] ?? "Failed to add to cart")',
             failedToUpdateCart: '@Html.Raw(Localizer["FailedToUpdateCart"] ?? "Failed to update cart. Please try again.")',
             flashSaleAddedToCart: '@Html.Raw(Localizer["ItemAddedToCart"] ?? "Flash sale item added to cart!")',
-            couldNotAddItemToCart: '@Html.Raw(Localizer["FailedToAddToCart"] ?? "Could not add item to cart")',
+            couldNotAddItemToCart: '@Html.Raw(Localizer["CouldNotAddItemToCart"] ?? "Could not add item to cart")',
             errorOccurred: '@Html.Raw(Localizer["AnErrorOccurredPleaseTryAgain"] ?? "An error occurred. Please try again.")',
             itemRemovedFromCart: '@Html.Raw(Localizer["ItemRemovedFromCart"] ?? "Item removed from cart")',
             addToCart: '@Html.Raw(Localizer["AddToCart"] ?? "Add to Cart")',
             removeFromCart: '@Html.Raw(Localizer["RemoveFromCart"] ?? "Remove from Cart")',
-            inCart: '@Html.Raw(Localizer["InCart"] ?? "In Cart")'
+            inCart: '@Html.Raw(Localizer["InCart"] ?? "In Cart")',
+            securityTokenMissing: '@Html.Raw(Localizer["SecurityTokenMissing"] ?? "Security token missing. Please refresh the page.")',
+            failedToUpdateQuantity: '@Html.Raw(Localizer["FailedToUpdateQuantity"] ?? "Failed to update quantity. Please try again.")',
+            failedToRemoveItem: '@Html.Raw(Localizer["FailedToRemoveItem"] ?? "Failed to remove item. Please try again.")',
+            cannotRemoveItemMissingInfo: '@Html.Raw(Localizer["CannotRemoveItemMissingInfo"] ?? "Cannot remove item: missing product information")',
+            quantityUpdated: '@Html.Raw(Localizer["QuantityUpdated"] ?? "Quantity updated successfully")',
+            maximumStockReached: '@Html.Raw(Localizer["MaximumStockReached"] ?? "Maximum stock reached")',
+            increase: '@Html.Raw(Localizer["Increase"] ?? "Increase")',
+            remove: '@Html.Raw(Localizer["Remove"] ?? "Remove")',
+            flashSale: '@Html.Raw(Localizer["FlashSale"] ?? "Flash Sale")',
+            combo: '@Html.Raw(Localizer["Combo"] ?? "Combo")'
         };
+        
+        // Make localizations globally available
+        window.localizations = localizations;
 
         // Newsletter Form Handler - Fully Implemented
         document.getElementById('newsletterForm')?.addEventListener('submit', function(e) {
@@ -2337,7 +2353,8 @@
         }
 
         // Function to update navigation cart count directly
-        function updateNavigationCartCount(count) {
+        // Make updateNavigationCartCount globally available
+        window.updateNavigationCartCount = function(count) {
             // Try to find cart link by ID first, then by href
             const cartLink = document.getElementById('cartNavLink') || document.querySelector('a[href*="/Customer/Cart/Index"]');
             
@@ -2375,9 +2392,10 @@
             }
         }
 
-        // Function to update floating cart badge (now updates header badge instead)
-        function updateFloatingCartBadge(count) {
-            // Update header cart badge instead of floating badge
+        // Function to update floating cart badge (now updates header badge and mobile nav badge)
+        // Make it globally available so it works on all screens
+        window.updateFloatingCartBadge = function(count) {
+            // Update header cart badge
             const headerCartBadge = document.getElementById('headerCartBadge');
             if (headerCartBadge) {
                 if (count > 0) {
@@ -2387,6 +2405,33 @@
                     headerCartBadge.style.display = 'none';
                 }
             }
+            
+            // Update mobile bottom nav cart badge
+            const mobileCartBadge = document.getElementById('mobileCartBadge');
+            if (mobileCartBadge) {
+                if (count > 0) {
+                    mobileCartBadge.textContent = count;
+                    mobileCartBadge.style.display = 'flex';
+                } else {
+                    mobileCartBadge.style.display = 'none';
+                }
+            }
+            
+            // Update navigation cart count element
+            const cartCountElement = document.getElementById('cartCount');
+            if (cartCountElement) {
+                if (count > 0) {
+                    cartCountElement.textContent = count;
+                    cartCountElement.style.display = 'inline-block';
+                } else {
+                    cartCountElement.style.display = 'none';
+                }
+            }
+        };
+        
+        // Also keep local function for backward compatibility
+        function updateFloatingCartBadge(count) {
+            window.updateFloatingCartBadge(count);
         }
 
         // Function to open cart sidebar (make it globally available)
@@ -2409,15 +2454,22 @@
             }
             
             console.log('Opening cart sidebar...');
-            const sidebar = document.getElementById('cartSidebar');
-            const overlay = document.getElementById('cartOverlay');
+            const sidebar = document.querySelector('.cart-sidebar-enhanced') || document.getElementById('cartSidebar');
+            const overlay = document.querySelector('.cart-overlay-enhanced') || document.getElementById('cartOverlay');
             
             if (sidebar && overlay) {
                 sidebar.classList.add('active');
                 overlay.classList.add('active');
                 document.body.style.overflow = 'hidden'; // Prevent background scrolling
                 console.log('Cart sidebar opened successfully');
-                loadCartItems();
+                // Use global loadCartItems if available, otherwise use local one
+                if (typeof window.loadCartItems === 'function') {
+                    window.loadCartItems();
+                } else if (typeof loadCartItems === 'function') {
+                    loadCartItems();
+                } else {
+                    console.error('loadCartItems function not found');
+                }
             } else {
                 console.error('Cart sidebar or overlay not found!');
             }
@@ -2430,75 +2482,198 @@
 
         // Function to close cart sidebar
         function closeCartSidebar() {
-            document.getElementById('cartSidebar').classList.remove('active');
-            document.getElementById('cartOverlay').classList.remove('active');
+            const sidebar = document.querySelector('.cart-sidebar-enhanced') || document.getElementById('cartSidebar');
+            const overlay = document.querySelector('.cart-overlay-enhanced') || document.getElementById('cartOverlay');
+            if (sidebar) sidebar.classList.remove('active');
+            if (overlay) overlay.classList.remove('active');
             document.body.style.overflow = ''; // Restore scrolling
         }
 
-        // Function to load cart items
-        function loadCartItems() {
+        // Function to load cart items (make globally available)
+        window.loadCartItems = function() {
+            const isAuthenticated = typeof window.isAuthenticated !== 'undefined' ? window.isAuthenticated : (typeof isAuthenticated !== 'undefined' ? isAuthenticated : false);
             console.log('loadCartItems called, isAuthenticated:', isAuthenticated);
 
             console.log('Fetching cart items from server...');
             fetch('/Customer/Cart/GetCartItems')
                 .then(response => {
                     console.log('Cart items response received:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Cart items data:', data);
+                    console.log('Cart items data received:', data);
+                    console.log('Items count:', data.items ? data.items.length : 0);
                     const container = document.getElementById('cartItemsContainer');
                     const countElement = document.getElementById('sidebarCartCount');
                     const subtotalElement = document.getElementById('cartSubtotal');
+                    const emptyState = document.getElementById('cartEmptyState');
+
+                    console.log('Cart elements found:', {
+                        container: !!container,
+                        countElement: !!countElement,
+                        subtotalElement: !!subtotalElement,
+                        emptyState: !!emptyState
+                    });
+
+                    if (!container || !countElement || !subtotalElement) {
+                        console.error('Cart sidebar elements not found', {
+                            container: !!container,
+                            countElement: !!countElement,
+                            subtotalElement: !!subtotalElement
+                        });
+                        return;
+                    }
+
+                    // Hide/show empty state
+                    if (emptyState) {
+                        if (data.items && data.items.length > 0) {
+                            emptyState.classList.add('hidden');
+                        } else {
+                            emptyState.classList.remove('hidden');
+                        }
+                    }
 
                     if (data.items && data.items.length > 0) {
-                        container.innerHTML = data.items.map(item => createCartItemHTML(item)).join('');
+                        // Use global createCartItemHTML from flash-sale-customer-fixed.js if available
+                        // This is the preferred function that handles page detection correctly
+                        let createItemHTML = null;
+                        
+                        // First, try to use the global function from flash-sale-customer-fixed.js
+                        if (window.createCartItemHTML && typeof window.createCartItemHTML === 'function') {
+                            // Verify it's not the local function (prevent recursion)
+                            const globalFunc = window.createCartItemHTML;
+                            if (globalFunc !== createCartItemHTML && globalFunc !== createCartItemHTMLLocal) {
+                                createItemHTML = globalFunc;
+                            }
+                        }
+                        
+                        // If global not available or is recursive, use local fallback
+                        if (!createItemHTML) {
+                            if (typeof createCartItemHTMLLocal !== 'undefined') {
+                                createItemHTML = createCartItemHTMLLocal;
+                            } else if (typeof createCartItemHTML !== 'undefined') {
+                                createItemHTML = createCartItemHTML;
+                            }
+                        }
+                        
+                        if (!createItemHTML) {
+                            console.error('createCartItemHTML function not found');
+                            if (emptyState) emptyState.classList.remove('hidden');
+                            return;
+                        }
+                        
+                        // Use the selected function to create HTML
+                        try {
+                            container.innerHTML = data.items.map(item => createItemHTML(item)).join('');
+                        } catch (error) {
+                            console.error('Error creating cart item HTML:', error);
+                            if (emptyState) emptyState.classList.remove('hidden');
+                            return;
+                        }
                         countElement.textContent = data.items.length;
-                        subtotalElement.textContent = formatCurrency(data.subtotal);
+                        
+                        // Use formatCurrency if available, otherwise use currencySymbol
+                        const formatPrice = typeof formatCurrency !== 'undefined' ? formatCurrency : (value) => {
+                            const symbol = typeof currencySymbol !== 'undefined' ? currencySymbol : 'AED';
+                            return symbol + ' ' + value.toFixed(2);
+                        };
+                        subtotalElement.textContent = formatPrice(data.subtotal);
                         
                         // Update floating cart badge
-                        updateFloatingCartBadge(data.items.length);
+                        if (typeof updateFloatingCartBadge === 'function') {
+                            updateFloatingCartBadge(data.items.length);
+                        } else if (typeof window.updateFloatingCartBadge === 'function') {
+                            window.updateFloatingCartBadge(data.items.length);
+                        }
                         console.log('Cart items loaded successfully:', data.items.length, 'items');
                     } else {
-                        container.innerHTML = '<div class="cart-empty"><i class="bi bi-cart-x"></i><p>@Localizer["YourCartIsEmpty"]</p></div>';
+                        container.innerHTML = '';
                         countElement.textContent = '0';
-                        subtotalElement.textContent = currencySymbol + ' 0.00';
+                        const symbol = typeof currencySymbol !== 'undefined' ? currencySymbol : 'AED';
+                        subtotalElement.textContent = symbol + ' 0.00';
                         
                         // Update floating cart badge
-                        updateFloatingCartBadge(0);
+                        if (typeof updateFloatingCartBadge === 'function') {
+                            updateFloatingCartBadge(0);
+                        } else if (typeof window.updateFloatingCartBadge === 'function') {
+                            window.updateFloatingCartBadge(0);
+                        }
                         console.log('Cart is empty');
                     }
                 })
                 .catch(error => {
                     console.error('Error loading cart items:', error);
+                    const container = document.getElementById('cartItemsContainer');
+                    const emptyState = document.getElementById('cartEmptyState');
+                    if (container) {
+                        container.innerHTML = '';
+                    }
+                    if (emptyState) {
+                        emptyState.classList.remove('hidden');
+                    }
                 });
+        };
+        
+        // Also keep local function for backward compatibility
+        function loadCartItems() {
+            window.loadCartItems();
         }
 
-        // Function to create cart item HTML
-        function createCartItemHTML(item) {
+        // Function to create cart item HTML (fallback for home page)
+        // NOTE: This is a LOCAL fallback function. The global createCartItemHTML from 
+        // flash-sale-customer-fixed.js should be used instead. This function should NOT
+        // call window.createCartItemHTML to prevent recursion.
+        function createCartItemHTMLLocal(item) {
+            // DO NOT call window.createCartItemHTML here - that would cause recursion
+            // This is a pure local implementation for fallback use only
+            // Fallback for home page (always show controls here since we're on home page)
+            const imageUrl = item.imageUrl || '/images/no-image.png';
+            const formatPrice = typeof formatCurrency !== 'undefined' ? formatCurrency : (value) => {
+                const symbol = typeof currencySymbol !== 'undefined' ? currencySymbol : 'AED';
+                return symbol + ' ' + value.toFixed(2);
+            };
             return `
-                <div class="cart-item" data-product-id="${item.productId}">
-                    <img src="${item.imageUrl}" alt="${item.title}" class="cart-item-image">
+                <div class="cart-sidebar-item" data-cart-id="${item.cartId || ''}" data-product-id="${item.productId}">
+                    <div class="cart-item-image-wrapper">
+                        <img src="${imageUrl}" alt="${item.title}" class="cart-sidebar-item-image" 
+                             onerror="this.src='/images/no-image.png'">
+                    </div>
                     <div class="cart-item-details">
                         <h6 class="cart-item-title">${item.title}</h6>
-                        ${item.variantName ? `<p class="cart-item-variant" style="font-size: 0.85rem; color: #666; margin-top: 0.25rem; margin-bottom: 0.25rem;">${item.variantName}</p>` : ''}
-                        <p class="cart-item-price">${formatCurrency(item.price * item.count)}</p>
-                        <div class="cart-item-quantity">
-                            <button class="btn btn-sm btn-outline-secondary" onclick="updateCartQuantity(${item.productId}, ${item.count - 1})">
-                                <i class="bi bi-dash"></i>
-                            </button>
-                            <span>${item.count}</span>
-                            <button class="btn btn-sm btn-outline-secondary" onclick="updateCartQuantity(${item.productId}, ${item.count + 1})">
-                                <i class="bi bi-plus"></i>
-                            </button>
-                            <button class="cart-item-remove" onclick="removeFromCart(${item.productId})" title="Remove">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                        ${item.variantName ? `<p class="cart-item-variant">${item.variantName}</p>` : ''}
+                        <div class="cart-item-meta">
+                            <div class="cart-item-quantity-controls">
+                                <button class="btn-quantity btn-quantity-minus" onclick="updateCartQuantityFromSidebar(${item.productId}, ${item.count - 1}, ${item.cartId || 'null'})" title="Decrease">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                                <span class="cart-item-quantity-value">${item.count}</span>
+                                <button class="btn-quantity btn-quantity-plus" onclick="updateCartQuantityFromSidebar(${item.productId}, ${item.count + 1}, ${item.cartId || 'null'})" title="Increase">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                            <span class="cart-item-price">${formatPrice(item.price * item.count)}</span>
                         </div>
+                        ${(item.isFlashSale || item.isComboOffer) ? `
+                        <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            ${item.isFlashSale ? '<span class="badge bg-danger" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">⚡ Flash Sale</span>' : ''}
+                            ${item.isComboOffer ? '<span class="badge bg-warning text-dark" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">📦 Combo</span>' : ''}
+                        </div>
+                        ` : ''}
                     </div>
+                    <button class="cart-item-remove" onclick="removeCartItem(${item.productId}, ${item.cartId || 'null'})" title="Remove" aria-label="Remove item">
+                        <i class="bi bi-trash"></i>
+                    </button>
                 </div>
             `;
         }
+        
+        // Note: We have createCartItemHTMLLocal as a local fallback
+        // The global createCartItemHTML from flash-sale-customer-fixed.js should be used
+        // DO NOT create a local createCartItemHTML function that calls window.createCartItemHTML
+        // as that would cause infinite recursion
 
         // Function to update cart quantity
         function updateCartQuantity(productId, newCount) {
@@ -2575,8 +2750,8 @@
             });
         }
 
-        // Function to toggle product in cart
-        function toggleCart(productId, button) {
+        // Function to toggle product in cart (make globally available)
+        window.toggleCart = function(productId, button) {
             const isCurrentlyInCart = button.classList.contains('in-cart');
             const originalIcon = button.querySelector('i').className;
             
@@ -2615,20 +2790,42 @@
                             toastr.success(data.message);
                         }
                         
-                        // Update floating cart badge
-                        updateFloatingCartBadge(data.cartCount);
+                        // Update cart count everywhere (works on all screens)
+                        if (typeof updateFloatingCartBadge === 'function') {
+                            updateFloatingCartBadge(data.cartCount);
+                        } else if (typeof window.updateFloatingCartBadge === 'function') {
+                            window.updateFloatingCartBadge(data.cartCount);
+                        }
                         
                         // Update navigation cart count immediately
-                        updateNavigationCartCount(data.cartCount);
+                        if (typeof updateNavigationCartCount === 'function') {
+                            updateNavigationCartCount(data.cartCount);
+                        }
                         
                         // Always update via AJAX to ensure it's synced (with small delay)
-                        setTimeout(() => {
-                            updateCartWidget();
-                        }, 150);
+                        if (typeof updateCartWidget === 'function') {
+                            setTimeout(() => {
+                                updateCartWidget();
+                            }, 150);
+                        }
                         
-                        console.log('About to open cart sidebar...');
-                        // Open the cart sidebar to show the added item
-                        openCartSidebar();
+                        // Open the cart sidebar to show the added item (only if sidebar exists and not mobile home)
+                        if (typeof openCartSidebar === 'function' || typeof window.openCartSidebar === 'function') {
+                            const openCart = window.openCartSidebar || openCartSidebar;
+                            const sidebar = document.querySelector('.cart-sidebar-enhanced') || document.getElementById('cartSidebar');
+                            if (sidebar) {
+                                const isMobile = window.innerWidth <= 768;
+                                const currentPath = window.location.pathname.toLowerCase();
+                                const isHomePage = currentPath === '/' || 
+                                                  currentPath === '/customer/home' || 
+                                                  currentPath === '/customer/home/index';
+                                
+                                // Only open on desktop, or on mobile if not home page
+                                if (!isMobile || !isHomePage) {
+                                    openCart(true); // forceOpen = true for user-initiated action
+                                }
+                            }
+                        }
                     } else {
                         // Product was removed
                         button.classList.remove('in-cart');
@@ -2641,16 +2838,24 @@
                             toastr.info(data.message);
                         }
                         
-                        // Update floating cart badge
-                        updateFloatingCartBadge(data.cartCount);
+                        // Update cart count everywhere (works on all screens)
+                        if (typeof updateFloatingCartBadge === 'function') {
+                            updateFloatingCartBadge(data.cartCount);
+                        } else if (typeof window.updateFloatingCartBadge === 'function') {
+                            window.updateFloatingCartBadge(data.cartCount);
+                        }
                         
                         // Update navigation cart count immediately
-                        updateNavigationCartCount(data.cartCount);
+                        if (typeof updateNavigationCartCount === 'function') {
+                            updateNavigationCartCount(data.cartCount);
+                        }
                         
                         // Always update via AJAX to ensure it's synced (with small delay)
-                        setTimeout(() => {
-                            updateCartWidget();
-                        }, 150);
+                        if (typeof updateCartWidget === 'function') {
+                            setTimeout(() => {
+                                updateCartWidget();
+                            }, 150);
+                        }
                     }
                 } else {
                     throw new Error(data.message || 'Failed to update cart');
@@ -3886,6 +4091,41 @@
             setTimeout(() => loadSection('/Customer/Home/LoadBestSellersSection', 'bestSellersSectionPlaceholder'), 900);
             setTimeout(() => loadSection('/Customer/Home/LoadNewArrivalsSection', 'newArrivalsSectionPlaceholder'), 1100);
             setTimeout(() => loadSection('/Customer/Home/LoadComboOffersSection', 'comboOffersSectionPlaceholder'), 1300);
+        });
+
+        // Sticky Header Scroll Detection - Enhanced Design
+        document.addEventListener('DOMContentLoaded', function() {
+            const stickyHeader = document.getElementById('heroSearchBoxSticky');
+            if (stickyHeader) {
+                let lastScrollTop = 0;
+                
+                function handleScroll() {
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    
+                    if (scrollTop > 50) {
+                        stickyHeader.classList.add('scrolled');
+                    } else {
+                        stickyHeader.classList.remove('scrolled');
+                    }
+                    
+                    lastScrollTop = scrollTop;
+                }
+                
+                // Throttle scroll events for better performance
+                let ticking = false;
+                window.addEventListener('scroll', function() {
+                    if (!ticking) {
+                        window.requestAnimationFrame(function() {
+                            handleScroll();
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
+                });
+                
+                // Initial check
+                handleScroll();
+            }
         });
 
         // Video Banner Optimization

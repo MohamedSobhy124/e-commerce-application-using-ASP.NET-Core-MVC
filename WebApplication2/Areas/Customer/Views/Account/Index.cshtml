@@ -1,0 +1,180 @@
+@using Microsoft.AspNetCore.Localization
+@inject IStringLocalizer<BulkyBook.SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["MyAccount"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+}
+
+<div class="container py-4" style="margin-top: 1rem;">
+    <!-- Page Header -->
+    <div class="text-center mb-4">
+        <h1 class="display-5 fw-bold mb-2">
+            <i class="bi bi-person-circle me-2"></i>@Localizer["MyAccount"]
+        </h1>
+        <p class="text-muted">@(Localizer["ManageMyAccount"]?.Value ?? "Manage your account settings")</p>
+    </div>
+
+    <!-- Account Cards Grid -->
+    <div class="row g-4">
+        <!-- Profile Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 account-card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; transition: transform 0.3s;">
+                <div class="card-body text-center p-4">
+                    <div class="account-icon-wrapper mb-3">
+                        <i class="bi bi-person-circle" style="font-size: 3rem; color: #3B9DD5;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">@Localizer["Profile"]</h5>
+                    <p class="card-text text-muted small">@(Localizer["ViewAndEditYourProfile"]?.Value ?? "View and edit your profile information")</p>
+                    <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-primary w-100">
+                        <i class="bi bi-arrow-right me-2"></i>@Localizer["ManageProfile"]
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 account-card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; transition: transform 0.3s;">
+                <div class="card-body text-center p-4">
+                    <div class="account-icon-wrapper mb-3">
+                        <i class="bi bi-bag-check" style="font-size: 3rem; color: #7BC043;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">@Localizer["Orders"]</h5>
+                    <p class="card-text text-muted small">@(Localizer["ViewYourOrderHistory"]?.Value ?? "View your order history and track shipments")</p>
+                    <a asp-area="Customer" asp-controller="Account" asp-action="Orders" class="btn btn-success w-100">
+                        <i class="bi bi-arrow-right me-2"></i>@Localizer["ViewOrders"]
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wishlist Card -->
+@*         <div class="col-md-6 col-lg-4">
+            <div class="card h-100 account-card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; transition: transform 0.3s;">
+                <div class="card-body text-center p-4">
+                    <div class="account-icon-wrapper mb-3">
+                        <i class="bi bi-heart" style="font-size: 3rem; color: #e91e63;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">@Localizer["Wishlist"]</h5>
+                    <p class="card-text text-muted small">@(Localizer["ViewYourSavedItems"]?.Value ?? "View your saved wishlist items")</p>
+                    <button onclick="openWishlistSidebar()" class="btn btn-danger w-100">
+                        <i class="bi bi-arrow-right me-2"></i>@Localizer["ViewWishlist"]
+                    </button>
+                </div>
+            </div>
+        </div> *@
+
+        <!-- Addresses Card -->
+     @*    <div class="col-md-6 col-lg-4">
+            <div class="card h-100 account-card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; transition: transform 0.3s;">
+                <div class="card-body text-center p-4">
+                    <div class="account-icon-wrapper mb-3">
+                        <i class="bi bi-geo-alt" style="font-size: 3rem; color: #ff9800;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">@Localizer["Addresses"]</h5>
+                    <p class="card-text text-muted small">@(Localizer["ManageYourAddresses"]?.Value ?? "Manage your shipping addresses")</p>
+                    <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-warning w-100">
+                        <i class="bi bi-arrow-right me-2"></i>@Localizer["ManageAddresses"]
+                    </a>
+                </div>
+            </div>
+        </div> *@
+
+        <!-- Security Card -->
+     @*    <div class="col-md-6 col-lg-4">
+            <div class="card h-100 account-card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; transition: transform 0.3s;">
+                <div class="card-body text-center p-4">
+                    <div class="account-icon-wrapper mb-3">
+                        <i class="bi bi-shield-lock" style="font-size: 3rem; color: #9c27b0;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">@Localizer["Security"]</h5>
+                    <p class="card-text text-muted small">@(Localizer["ChangePasswordAndSecurity"]?.Value ?? "Change your password and security settings")</p>
+                    <a asp-area="Identity" asp-page="/Account/Manage/ChangePassword" class="btn btn-purple w-100" style="background: #9c27b0; border: none;">
+                        <i class="bi bi-arrow-right me-2"></i>@Localizer["ChangePassword"]
+                    </a>
+                </div>
+            </div>
+        </div> *@
+
+        <!-- Notifications Card -->
+      @*   <div class="col-md-6 col-lg-4">
+            <div class="card h-100 account-card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; transition: transform 0.3s;">
+                <div class="card-body text-center p-4">
+                    <div class="account-icon-wrapper mb-3">
+                        <i class="bi bi-bell" style="font-size: 3rem; color: #00bcd4;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">@Localizer["Notifications"]</h5>
+                    <p class="card-text text-muted small">@(Localizer["ManageYourNotifications"]?.Value ?? "Manage your notification preferences")</p>
+                    <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-info w-100">
+                        <i class="bi bi-arrow-right me-2"></i>@Localizer["ViewNotifications"]
+                    </a>
+                </div>
+            </div>
+        </div> *@
+    </div>
+
+    <!-- User Info Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-info-circle me-2"></i>@(Localizer["AccountInformation"]?.Value ?? "Account Information")
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong>@Localizer["Username"]:</strong>
+                            <p class="text-muted mb-0">@ViewBag.UserName</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>@Localizer["Email"]:</strong>
+                            <p class="text-muted mb-0">
+                                @ViewBag.Email
+                                @if (ViewBag.EmailConfirmed == true)
+                                {
+                                    <span class="badge bg-success ms-2">
+                                        <i class="bi bi-check-circle me-1"></i>@(Localizer["EmailVerified"]?.Value ?? "Verified")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning ms-2">
+                                        <i class="bi bi-exclamation-circle me-1"></i>@(Localizer["EmailNotVerified"]?.Value ?? "Not Verified")
+                                    </span>
+                                }
+                            </p>
+                        </div>
+                        @if (!string.IsNullOrEmpty(ViewBag.PhoneNumber?.ToString()))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <strong>@Localizer["PhoneNumber"]:</strong>
+                                <p class="text-muted mb-0">@ViewBag.PhoneNumber</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .account-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .account-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(59, 157, 213, 0.1);
+        border-radius: 50%;
+    }
+</style>
+

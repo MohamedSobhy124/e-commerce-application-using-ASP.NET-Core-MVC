@@ -1,0 +1,877 @@
+@using Microsoft.AspNetCore.Localization
+@using BulkyBook.Utility
+@using BulkyBook.Models
+@inject IStringLocalizer<BulkyBook.SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["Offers"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    
+    var flashSales = ViewBag.FlashSales as IEnumerable<FlashSale> ?? Enumerable.Empty<FlashSale>();
+    var comboOffers = ViewBag.ComboOffers as IEnumerable<ComboOffer> ?? Enumerable.Empty<ComboOffer>();
+    var discountedProducts = ViewBag.DiscountedProducts as List<Product> ?? new List<Product>();
+    var hasFlashSales = ViewBag.HasFlashSales as bool? ?? false;
+    var hasComboOffers = ViewBag.HasComboOffers as bool? ?? false;
+    var hasDiscountedProducts = ViewBag.HasDiscountedProducts as bool? ?? false;
+    
+    var cartProductIds = ViewBag.CartProductIds as List<int> ?? new List<int>();
+}
+
+<partial name="_Notifications" />
+@Html.AntiForgeryToken()
+
+<!-- Enhanced Page Header -->
+<section class="offers-hero" style="margin-top: 1rem; padding: 2rem 0; background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); position: relative; overflow: hidden;">
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="text-center text-white">
+            <div style="animation: fadeInDown 0.6s;">
+                <h1 class="display-5 fw-bold mb-2" style="text-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+                    <i class="bi bi-tag-fill me-2" style="animation: pulse 2s ease-in-out infinite;"></i>@Localizer["Offers"]
+                </h1>
+                <p class="lead mb-0" style="opacity: 0.95; font-size: 1rem;">@Localizer["DontMissIncredibleDeals"]</p>
+            </div>
+        </div>
+    </div>
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%); animation: float 15s ease-in-out infinite;"></div>
+</section>
+
+<div class="container py-3">
+    <!-- Enhanced Tabs Navigation -->
+    @{
+        var tabCount = 0;
+        if (hasFlashSales) tabCount++;
+        if (hasComboOffers) tabCount++;
+        if (hasDiscountedProducts) tabCount++;
+    }
+
+    @if (tabCount > 1)
+    {
+        <ul class="nav nav-pills nav-justified mb-3" id="offersTab" role="tablist" style="background: white; padding: 0.5rem; border-radius: 15px; box-shadow: 0 3px 12px rgba(0,0,0,0.1); flex-wrap: wrap; gap: 0.4rem;">
+            @if (hasFlashSales)
+            {
+                <li class="nav-item" role="presentation" style="flex: 1; min-width: 110px;">
+                    <button class="nav-link active" id="flash-sales-tab" data-bs-toggle="tab" data-bs-target="#flash-sales" type="button" role="tab" style="border-radius: 12px; padding: 0.7rem 0.5rem; font-weight: 700; font-size: 0.8rem; transition: all 0.3s; border: 2px solid transparent; position: relative;">
+                        <i class="bi bi-lightning-charge-fill me-1"></i>
+                        <span class="d-none d-sm-inline">@Localizer["FlashSales"]</span>
+                        <span class="d-sm-none">@Localizer["Flash"]</span>
+                        <span class="badge ms-1" style="font-size: 0.65rem; padding: 0.25rem 0.5rem; border-radius: 50%; min-width: 1.5rem; height: 1.5rem; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.3) !important; color: white !important; border: 1px solid rgba(255, 255, 255, 0.5); font-weight: 800;">@flashSales.Count()</span>
+                    </button>
+                </li>
+            }
+            @if (hasComboOffers)
+            {
+                <li class="nav-item" role="presentation" style="flex: 1; min-width: 110px;">
+                    <button class="nav-link @(!hasFlashSales ? "active" : "")" id="combo-offers-tab" data-bs-toggle="tab" data-bs-target="#combo-offers" type="button" role="tab" style="border-radius: 12px; padding: 0.7rem 0.5rem; font-weight: 700; font-size: 0.8rem; transition: all 0.3s; border: 2px solid transparent; position: relative;">
+                        <i class="bi bi-box-seam me-1"></i>
+                        <span class="d-none d-sm-inline">@Localizer["ComboOffers"]</span>
+                        <span class="d-sm-none">@Localizer["Combo"]</span>
+                        <span class="badge ms-1" style="font-size: 0.65rem; padding: 0.25rem 0.5rem; border-radius: 50%; min-width: 1.5rem; height: 1.5rem; display: inline-flex; align-items: center; justify-content: center; background: #ffc107 !important; color: #1f2937 !important; border: 1px solid rgba(31, 41, 55, 0.1); font-weight: 800; box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);">@comboOffers.Count()</span>
+                    </button>
+                </li>
+            }
+            @if (hasDiscountedProducts)
+            {
+                <li class="nav-item" role="presentation" style="flex: 1; min-width: 110px;">
+                    <button class="nav-link @(!hasFlashSales && !hasComboOffers ? "active" : "")" id="discounted-products-tab" data-bs-toggle="tab" data-bs-target="#discounted-products" type="button" role="tab" style="border-radius: 12px; padding: 0.7rem 0.5rem; font-weight: 700; font-size: 0.8rem; transition: all 0.3s; border: 2px solid transparent; position: relative;">
+                        <i class="bi bi-percent me-1"></i>
+                        <span class="d-none d-sm-inline">@Localizer["DiscountedProducts"]</span>
+                        <span class="d-sm-none">@Localizer["Discounted"]</span>
+                        <span class="badge ms-1" style="font-size: 0.65rem; padding: 0.25rem 0.5rem; border-radius: 50%; min-width: 1.5rem; height: 1.5rem; display: inline-flex; align-items: center; justify-content: center; background: #ffc107 !important; color: #1f2937 !important; border: 1px solid rgba(31, 41, 55, 0.1); font-weight: 800; box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);">@discountedProducts.Count</span>
+                    </button>
+                </li>
+            }
+        </ul>
+    }
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="offersTabContent">
+        <!-- Flash Sales Tab -->
+        @if (hasFlashSales)
+        {
+            <div class="tab-pane fade @(hasFlashSales ? "show active" : "")" id="flash-sales" role="tabpanel">
+                @foreach (var flashSale in flashSales)
+                {
+                    var flashSaleItems = flashSale.FlashSaleItems?.Where(i => i.FlashSaleQuantity > 0 && i.Product != null).ToList() ?? new List<FlashSaleItem>();
+                    
+                    if (!flashSaleItems.Any()) continue;
+
+                    <div class="card mb-3" style="border: none; box-shadow: 0 3px 15px rgba(0,0,0,0.1); border-radius: 16px; overflow: hidden;">
+                        <!-- Flash Sale Header -->
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.25rem 1.5rem; color: white;">
+                            @{
+                                var flashSaleName = currentCulture == "ar" && !string.IsNullOrEmpty(flashSale.NameAr) 
+                                    ? flashSale.NameAr 
+                                    : flashSale.Name;
+                            }
+                            <div class="row align-items-center g-2">
+                                <div class="col-12 col-md-8">
+                                    <h4 class="mb-0" style="font-size: 1.2rem; font-weight: 800;">
+                                        <i class="bi bi-lightning-charge-fill me-2" style="animation: flash 1.5s ease-in-out infinite;"></i>@flashSaleName
+                                    </h4>
+                                </div>
+                                <div class="col-12 col-md-4 text-center text-md-end">
+                                    <div style="background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(12px); padding: 0.6rem 0.9rem; border-radius: 12px; display: inline-block; border: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="small mb-1" style="opacity: 0.95; font-size: 0.7rem; font-weight: 600;">@Localizer["ENDSIN"]</div>
+                                        <div id="timer_@flashSale.Id" data-flash-sale-end="@flashSale.EndDate.ToString("o")" class="flash-sale-timer" style="display: flex; gap: 0.3rem; justify-content: center; flex-wrap: wrap; font-size: 0.75rem;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Products Grid -->
+                        <div class="p-2 p-md-3">
+                            <div class="row g-2">
+                                @foreach (var item in flashSaleItems.Take(12))
+                                {
+                                    var product = item.Product;
+                                    var imageUrl = product.ProductImages?.FirstOrDefault()?.ImageUrl ?? "/images/default-product.jpg";
+                                    var discount = item.DiscountPercentage;
+                                    // Use ListPrice if available, otherwise use Price for old price display
+                                    var originalPrice = product.ListPrice > 0 ? product.ListPrice : product.Price;
+                                    var savings = originalPrice - (double)item.FlashSalePrice;
+                                    var isInCart = cartProductIds.Contains(product.Id);
+                                    var hasVariants = product.ProductType == BulkyBook.Models.ProductType.Variable && 
+                                                      product.ProductVariants != null && 
+                                                      product.ProductVariants.Any(v => !v.IsDeleted);
+                                    
+                                    <div class="col-4 col-sm-3 col-md-2-4 col-lg-2 col-xl-2">
+                                        <div class="offer-product-card" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; transition: all 0.3s; background: white; height: 100%; display: flex; flex-direction: column;">
+                                            <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()" class="text-decoration-none text-dark" style="flex: 1; display: flex; flex-direction: column;">
+                                                <div style="position: relative; padding-top: 100%; overflow: hidden; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);">
+                                                    @{
+                                                        var productNameForAlt = currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title;
+                                                    }
+                                                    <img src="@imageUrl" alt="@productNameForAlt" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s;">
+                                                    @if (discount > 0)
+                                                    {
+                                                        <span class="badge" style="position: absolute; top: 0.4rem; right: 0.4rem; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); font-size: 0.7rem; padding: 0.3rem 0.5rem; font-weight: 800; box-shadow: 0 3px 8px rgba(220,53,69,0.5); border-radius: 8px; z-index: 2;">
+                                                            -@discount% @Localizer["Off"]
+                                                        </span>
+                                                    }
+                                                    @if (product.StockQuantity <= 5 && product.StockQuantity > 0)
+                                                    {
+                                                        <span class="badge bg-warning" style="position: absolute; bottom: 0.4rem; left: 0.4rem; font-size: 0.65rem; padding: 0.25rem 0.4rem; font-weight: 700; border-radius: 6px; z-index: 2;">
+                                                            <i class="bi bi-exclamation-triangle me-1"></i>@Localizer["Only"] @product.StockQuantity
+                                                        </span>
+                                                    }
+                                                </div>
+                                                <div class="p-2" style="flex: 1; display: flex; flex-direction: column;">
+                                                    <h6 class="mb-1" style="font-size: 0.8rem; line-height: 1.35; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.2rem; flex: 1; color: #1f2937;">
+                                                        @(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)
+                                                    </h6>
+                                                    <div class="mt-auto">
+                                                        <div class="text-muted" style="text-decoration: line-through; font-size: 0.7rem; margin-bottom: 0.25rem; color: #9ca3af;">@Html.Raw(currencySymbol)@originalPrice.ToString("N2")</div>
+                                                        <div class="fw-bold text-danger" style="font-size: 0.9rem; line-height: 1.2; font-weight: 800;">@Html.Raw(currencySymbol)@item.FlashSalePrice.ToString("N2")</div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <div class="px-2 pb-2">
+                                                @if (hasVariants)
+                                                {
+                                                    <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()" 
+                                                       class="btn w-100 btn-primary" 
+                                                       style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3); text-decoration: none; display: flex; align-items: center; justify-content: center;"
+                                                       title="@Localizer["ViewDetails"]">
+                                                        <i class="bi bi-eye me-1"></i>
+                                                        <span class="d-none d-md-inline">@Localizer["ViewDetails"]</span>
+                                                        <span class="d-md-none">@Localizer["Details"]</span>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <button onclick="event.stopPropagation(); toggleCart(@product.Id, this, @item.Id, @((double)item.FlashSalePrice)); return false;" 
+                                                            class="btn w-100 @(isInCart ? "in-cart btn-success" : "btn-primary")" 
+                                                            data-product-id="@product.Id"
+                                                            data-flash-sale-item-id="@item.Id"
+                                                            data-flash-sale-price="@((double)item.FlashSalePrice)"
+                                                            style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: @(isInCart ? "linear-gradient(135deg, #7BC043 0%, #6ba836 100%)" : "linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%)"); transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3);"
+                                                            title="@(isInCart ? Localizer["RemoveFromCart"] : Localizer["AddToCart"])">
+                                                        <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart-plus") me-1"></i>
+                                                        <span class="d-none d-md-inline">@(isInCart ? Localizer["InCart"] : Localizer["AddToCart"])</span>
+                                                        <span class="d-md-none">@(isInCart ? "✓" : "+")</span>
+                                                    </button>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            @if (flashSaleItems.Count > 12)
+                            {
+                                <div class="text-center mt-3">
+                                    <a asp-area="Customer" asp-controller="FlashSale" asp-action="Details" asp-route-id="@flashSale.Id" class="btn btn-sm" style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); color: white; border: none; border-radius: 25px; padding: 0.6rem 2rem; font-size: 0.9rem; font-weight: 700; box-shadow: 0 4px 12px rgba(59,157,213,0.3);">
+                                        <i class="bi bi-arrow-left me-2"></i>@Localizer["ViewAll"] (@flashSaleItems.Count @Localizer["Items"])
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- Combo Offers Tab - Enhanced Design -->
+        @if (hasComboOffers)
+        {
+            <div class="tab-pane fade @(!hasFlashSales && hasComboOffers ? "show active" : "")" id="combo-offers" role="tabpanel">
+                <div class="row g-3">
+                    @foreach (var comboOffer in comboOffers)
+                    {
+                        <div class="col-12 col-sm-6 col-lg-4">
+                            <a asp-area="Customer" asp-controller="ComboOffer" asp-action="Details" asp-route-id="@comboOffer.Id" class="text-decoration-none text-dark">
+                                <div class="combo-offer-card-enhanced" style="border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-radius: 18px; overflow: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); background: white; height: 100%; display: flex; flex-direction: column;">
+                                    <!-- Image Section -->
+                                    <div style="position: relative; padding-top: 65%; overflow: hidden; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                        @if (!string.IsNullOrEmpty(comboOffer.ImageUrl))
+                                        {
+                                            <img src="@comboOffer.ImageUrl" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(comboOffer.NameAr) ? comboOffer.NameAr : comboOffer.Name)" 
+                                                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s;">
+                                        }
+                                        else
+                                        {
+                                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-box-seam" style="font-size: 3.5rem; color: white; opacity: 0.25;"></i>
+                                            </div>
+                                        }
+                                        <!-- Discount Badge -->
+                                        <div style="position: absolute; top: 1rem; right: 1rem; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 0.6rem 0.9rem; border-radius: 12px; font-weight: 900; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(220,53,69,0.5); z-index: 2; border: 2px solid rgba(255,255,255,0.3);">
+                                            @comboOffer.DiscountPercentage.ToString("F0")% @Localizer["Off"]
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Content Section -->
+                                    <div class="p-3" style="flex: 1; display: flex; flex-direction: column;">
+                                        <h5 class="fw-bold mb-2" style="font-size: 1.1rem; line-height: 1.4; color: #1f2937; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.8rem;">
+                                            @(currentCulture == "ar" && !string.IsNullOrEmpty(comboOffer.NameAr) ? comboOffer.NameAr : comboOffer.Name)
+                                        </h5>
+                                        
+                                        <!-- Pricing Section -->
+                                        <div class="mb-3 p-2" style="background: linear-gradient(135deg, rgba(59,157,213,0.08) 0%, rgba(123,192,67,0.08) 100%); border-radius: 12px; border-left: 3px solid #3B9DD5;">
+                                            <div class="d-flex align-items-baseline justify-content-between mb-1">
+                                                <div>
+                                                    <div class="text-decoration-line-through text-muted" style="font-size: 0.8rem; color: #9ca3af;">@Html.Raw(currencySymbol)@comboOffer.OriginalTotalPrice.ToString("N2")</div>
+                                                    <div class="fw-bold text-danger" style="font-size: 1.4rem; line-height: 1.2; font-weight: 900; margin-top: 0.2rem;">
+                                                        @Html.Raw(currencySymbol)@comboOffer.ComboPrice.ToString("N2")
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="text-success fw-bold" style="font-size: 0.85rem; margin-top: 0.5rem;">
+                                                <i class="bi bi-tag-fill me-1"></i>@Localizer["YouSave"] @Html.Raw(currencySymbol)@comboOffer.TotalSavings.ToString("N2")
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Products Count Badge -->
+                                        <div class="mb-3">
+                                            <span class="badge" style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 700; border-radius: 10px; box-shadow: 0 2px 8px rgba(59,157,213,0.3);">
+                                                <i class="bi bi-box-seam me-1"></i>@comboOffer.TotalProducts @Localizer["Products"]
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- View Details Button -->
+                                        <div class="mt-auto">
+                                            <div class="btn w-100" style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); color: white; border: none; border-radius: 12px; padding: 0.75rem; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(59,157,213,0.4); transition: all 0.3s;">
+                                                <i class="bi bi-eye me-2"></i>@Localizer["ViewDetails"]
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Discounted Products Tab -->
+        @if (hasDiscountedProducts)
+        {
+            <div class="tab-pane fade @(!hasFlashSales && !hasComboOffers ? "show active" : "")" id="discounted-products" role="tabpanel">
+                <div class="row g-2">
+                    @foreach (var product in discountedProducts)
+                    {
+                        var imageUrl = product.ProductImages?.FirstOrDefault()?.ImageUrl ?? "/images/default-product.jpg";
+                        var discountPercent = 0.0;
+                        var discountedPrice = product.Price;
+                        var listPrice = product.ListPrice;
+                        var isInCart = cartProductIds.Contains(product.Id);
+                        var hasVariants = product.ProductType == BulkyBook.Models.ProductType.Variable && 
+                                          product.ProductVariants != null && 
+                                          product.ProductVariants.Any(v => !v.IsDeleted);
+
+                        // Check for active flash sale for this product
+                        var now = BulkyBook.Utility.DateTimeHelper.Now;
+                        var activeFlashSaleItem = flashSales
+                            .SelectMany(fs => fs.FlashSaleItems ?? Enumerable.Empty<FlashSaleItem>())
+                            .FirstOrDefault(fsi => fsi.ProductId == product.Id 
+                                && fsi.ProductVariantId == null 
+                                && !fsi.IsDeleted 
+                                && fsi.FlashSaleQuantity > 0
+                                && fsi.FlashSale != null
+                                && fsi.FlashSale.IsActive
+                                && now >= fsi.FlashSale.StartDate
+                                && now <= fsi.FlashSale.EndDate);
+
+                        if (listPrice > product.Price && listPrice > 0)
+                        {
+                            discountedPrice = product.Price;
+                            discountPercent = ((listPrice - product.Price) / listPrice) * 100;
+                        }
+                        else if (product.ProductVariants != null && product.ProductVariants.Any())
+                        {
+                            var variantWithDiscount = product.ProductVariants
+                                .Where(v => !v.IsDeleted && v.StockQuantity > 0 && v.ListPrice.HasValue && v.ListPrice > v.Price)
+                                .OrderByDescending(v => ((v.ListPrice.Value - v.Price) / v.ListPrice.Value) * 100)
+                                .FirstOrDefault();
+                            
+                            if (variantWithDiscount != null)
+                            {
+                                discountedPrice = (double)variantWithDiscount.Price;
+                                discountPercent = (double)((variantWithDiscount.ListPrice.Value - variantWithDiscount.Price) / variantWithDiscount.ListPrice.Value) * 100;
+                                listPrice = (double)variantWithDiscount.ListPrice.Value;
+                            }
+                        }
+
+                        // If product has active flash sale, compare prices and use the lower one
+                        if (activeFlashSaleItem != null)
+                        {
+                            var flashSalePrice = (double)activeFlashSaleItem.FlashSalePrice;
+                            // Use flash sale price if it's lower than discounted price
+                            if (flashSalePrice < discountedPrice)
+                            {
+                                discountedPrice = flashSalePrice;
+                                // Use original ListPrice for discount calculation (not product.Price)
+                                if (product.ListPrice > 0)
+                                {
+                                    listPrice = product.ListPrice;
+                                    discountPercent = ((listPrice - flashSalePrice) / listPrice) * 100;
+                                }
+                                else if (product.Price > 0)
+                                {
+                                    listPrice = product.Price;
+                                    discountPercent = ((product.Price - flashSalePrice) / product.Price) * 100;
+                                }
+                            }
+                        }
+
+                        if (discountPercent <= 0) continue;
+
+                        <div class="col-4 col-sm-3 col-md-2-4 col-lg-2 col-xl-2">
+                            <div class="offer-product-card" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; transition: all 0.3s; background: white; height: 100%; display: flex; flex-direction: column;">
+                                <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()" class="text-decoration-none text-dark" style="flex: 1; display: flex; flex-direction: column;">
+                                    <div style="position: relative; padding-top: 100%; overflow: hidden; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);">
+                                        @{
+                                            var productNameForAlt2 = currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title;
+                                        }
+                                        <img src="@imageUrl" alt="@productNameForAlt2" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s;">
+                                        <span class="badge" style="position: absolute; top: 0.4rem; right: 0.4rem; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); font-size: 0.7rem; padding: 0.3rem 0.5rem; font-weight: 800; box-shadow: 0 3px 8px rgba(220,53,69,0.5); border-radius: 8px; z-index: 2;">
+                                            -@discountPercent.ToString("F0")% @Localizer["Off"]
+                                        </span>
+                                        @if (product.StockQuantity <= 5 && product.StockQuantity > 0)
+                                        {
+                                            <span class="badge bg-warning" style="position: absolute; bottom: 0.4rem; left: 0.4rem; font-size: 0.65rem; padding: 0.25rem 0.4rem; font-weight: 700; border-radius: 6px; z-index: 2;">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>@Localizer["Only"] @product.StockQuantity
+                                            </span>
+                                        }
+                                    </div>
+                                    <div class="p-2" style="flex: 1; display: flex; flex-direction: column;">
+                                        <h6 class="mb-1" style="font-size: 0.8rem; line-height: 1.35; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.2rem; flex: 1; color: #1f2937;">
+                                            @(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)
+                                        </h6>
+                                        <div class="mt-auto">
+                                            <div class="text-muted" style="text-decoration: line-through; font-size: 0.7rem; margin-bottom: 0.25rem; color: #9ca3af;">@Html.Raw(currencySymbol)@listPrice.ToString("N2")</div>
+                                            <div class="fw-bold text-danger" style="font-size: 0.9rem; line-height: 1.2; font-weight: 800;">@Html.Raw(currencySymbol)@discountedPrice.ToString("N2")</div>
+                                        </div>
+                                    </div>
+                                </a>
+                                <div class="px-2 pb-2">
+                                    @if (hasVariants)
+                                    {
+                                        <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()" 
+                                           class="btn w-100 btn-primary" 
+                                           style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3); text-decoration: none; display: flex; align-items: center; justify-content: center;"
+                                           title="@Localizer["ViewDetails"]">
+                                            <i class="bi bi-eye me-1"></i>
+                                            <span class="d-none d-md-inline">@Localizer["ViewDetails"]</span>
+                                            <span class="d-md-none">@Localizer["Details"]</span>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button onclick="event.stopPropagation(); toggleCart(@product.Id, this); return false;" 
+                                                class="btn w-100 @(isInCart ? "in-cart btn-success" : "btn-primary")" 
+                                                data-product-id="@product.Id"
+                                                style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: @(isInCart ? "linear-gradient(135deg, #7BC043 0%, #6ba836 100%)" : "linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%)"); transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3);"
+                                                title="@(isInCart ? Localizer["RemoveFromCart"] : Localizer["AddToCart"])">
+                                            <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart-plus") me-1"></i>
+                                            <span class="d-none d-md-inline">@(isInCart ? Localizer["InCart"] : Localizer["AddToCart"])</span>
+                                            <span class="d-md-none">@(isInCart ? "✓" : "+")</span>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Empty State -->
+    @if (!hasFlashSales && !hasComboOffers && !hasDiscountedProducts)
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 4rem; color: #ddd; margin-bottom: 1rem;"></i>
+            <h3 class="mt-3 text-muted">@(currentCulture == "ar" ? "لا توجد عروض متاحة حالياً" : "No Offers Available")</h3>
+            <p class="text-muted">@Localizer["CheckBackForAmazingDeals"]</p>
+            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn mt-3" style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); color: white; border: none; border-radius: 25px; padding: 0.75rem 2rem; font-weight: 700; box-shadow: 0 4px 15px rgba(59,157,213,0.3);">
+                <i class="bi bi-house-fill me-2"></i>@Localizer["BackToHome"]
+            </a>
+        </div>
+    }
+</div>
+
+<style>
+    .offers-hero {
+        border-radius: 0 0 25px 25px;
+    }
+
+    .offer-product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+    }
+
+    .offer-product-card:hover img {
+        transform: scale(1.12);
+    }
+
+    .combo-offer-card-enhanced:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15) !important;
+    }
+
+    .combo-offer-card-enhanced:hover img {
+        transform: scale(1.1);
+    }
+
+    .combo-offer-card-enhanced:hover .btn {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59,157,213,0.5) !important;
+    }
+
+    .nav-pills .nav-link {
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s;
+        color: #6c757d;
+        background: white;
+    }
+
+    .nav-pills .nav-link.active {
+        background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%) !important;
+        color: white !important;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(59,157,213,0.4);
+        transform: translateY(-2px);
+    }
+
+    .nav-pills .nav-link.active .badge {
+        background: rgba(255, 255, 255, 0.35) !important;
+        color: white !important;
+        border: 1px solid rgba(255, 255, 255, 0.5) !important;
+        box-shadow: 0 2px 6px rgba(255, 255, 255, 0.3);
+    }
+
+    .nav-pills .nav-link:not(.active) {
+        background: white;
+        color: #6c757d !important;
+        border: 2px solid #e5e7eb;
+    }
+
+    .nav-pills .nav-link:not(.active):hover {
+        background: #f0f8ff;
+        color: #3B9DD5;
+        border-color: #3B9DD5;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(59,157,213,0.2);
+    }
+
+    .nav-pills .nav-link:not(.active) .badge {
+        background: #ffc107 !important;
+        color: #1f2937 !important;
+        font-weight: 800;
+        border: 1px solid rgba(31, 41, 55, 0.1);
+        box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+    }
+
+    /* Responsive columns */
+    @@media (min-width: 1400px) {
+        .col-xl-2 {
+            flex: 0 0 auto;
+            width: 16.666667%;
+        }
+    }
+
+    @@media (min-width: 1200px) {
+        .col-lg-2 {
+            flex: 0 0 auto;
+            width: 20%;
+        }
+    }
+
+    @@media (min-width: 992px) {
+        .col-md-2-4 {
+            flex: 0 0 auto;
+            width: 20%;
+        }
+    }
+
+    @@media (max-width: 991px) {
+        .col-md-2-4 {
+            flex: 0 0 auto;
+            width: 25%;
+        }
+    }
+
+    @@media (max-width: 767px) {
+        .col-md-2-4 {
+            flex: 0 0 auto;
+            width: 33.333333%;
+        }
+    }
+
+    @@media (max-width: 575px) {
+        .col-4 {
+            flex: 0 0 auto;
+            width: 50%;
+        }
+    }
+
+    @@keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    @@keyframes flash {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(10px, 10px); }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Authentication status
+        const isAuthenticated = @Json.Serialize(User.Identity.IsAuthenticated);
+        window.isAuthenticated = isAuthenticated; // Make available globally
+        document.body.setAttribute('data-is-authenticated', isAuthenticated.toString());
+
+        // Localizations for JavaScript
+        const localizations = {
+            addedToCart: '@Html.Raw(Localizer["ItemAddedToCart"] ?? "Product added to cart successfully")',
+            removedFromCart: '@Html.Raw(Localizer["ItemRemovedFromCart"] ?? "Product removed from cart")',
+            failedToAddToCart: '@Html.Raw(Localizer["FailedToAddToCart"] ?? "Failed to add to cart")',
+            failedToUpdateCart: '@Html.Raw(Localizer["FailedToUpdateCart"] ?? "Failed to update cart. Please try again.")',
+            addToCart: '@Html.Raw(Localizer["AddToCart"] ?? "Add to Cart")',
+            removeFromCart: '@Html.Raw(Localizer["RemoveFromCart"] ?? "Remove from Cart")',
+            inCart: '@Html.Raw(Localizer["InCart"] ?? "In Cart")'
+        };
+
+        // Cart product IDs
+        let cartProductIds = @Html.Raw(Json.Serialize(ViewBag.CartProductIds ?? new List<int>()));
+
+        // Helper functions
+        function saveScrollPosition() {
+            sessionStorage.setItem('scrollPosition', window.scrollY || window.pageYOffset);
+        }
+
+        function updateFloatingCartBadge(count) {
+            const floatingBadge = document.getElementById('floatingCartBadge');
+            if (floatingBadge) {
+                if (count > 0) {
+                    floatingBadge.textContent = count;
+                    floatingBadge.style.display = 'flex';
+                } else {
+                    floatingBadge.style.display = 'none';
+                }
+            }
+        }
+
+        function updateNavigationCartCount(count) {
+            const navCartCount = document.getElementById('cartCount');
+            if (navCartCount) {
+                navCartCount.textContent = count;
+                navCartCount.style.display = count > 0 ? 'inline-block' : 'none';
+            }
+            
+            const headerCartBadge = document.getElementById('headerCartBadge');
+            if (headerCartBadge) {
+                if (count > 0) {
+                    headerCartBadge.textContent = count;
+                    headerCartBadge.style.display = 'flex';
+                } else {
+                    headerCartBadge.style.display = 'none';
+                }
+            }
+            
+            // Update mobile bottom nav cart badge
+            const mobileCartBadge = document.getElementById('mobileCartBadge');
+            if (mobileCartBadge) {
+                if (count > 0) {
+                    mobileCartBadge.textContent = count;
+                    mobileCartBadge.style.display = 'flex';
+                } else {
+                    mobileCartBadge.style.display = 'none';
+                }
+            }
+        }
+        
+        // Make functions globally available
+        window.updateFloatingCartBadge = updateFloatingCartBadge;
+        window.updateNavigationCartCount = updateNavigationCartCount;
+
+        function updateCartWidget() {
+            if (typeof loadCartItems === 'function') {
+                loadCartItems();
+            }
+        }
+
+        // Toggle Cart Function
+        window.toggleCart = function(productId, button, flashSaleItemId = null, flashSalePrice = null) {
+            const isCurrentlyInCart = button.classList.contains('in-cart');
+            const originalIcon = button.querySelector('i').className;
+            
+            saveScrollPosition();
+            
+            button.classList.add('loading');
+            button.querySelector('i').className = 'bi bi-arrow-repeat';
+            button.querySelector('i').style.animation = 'spin 1s linear infinite';
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const formData = new FormData();
+            formData.append('productId', productId);
+            
+            // Get flash sale info from button data attributes if not passed as parameters
+            const buttonFlashSaleItemId = button.getAttribute('data-flash-sale-item-id');
+            const buttonFlashSalePrice = button.getAttribute('data-flash-sale-price');
+            
+            // Use passed parameters or button data attributes
+            const finalFlashSaleItemId = flashSaleItemId || (buttonFlashSaleItemId ? parseInt(buttonFlashSaleItemId) : null);
+            const finalFlashSalePrice = flashSalePrice || (buttonFlashSalePrice ? parseFloat(buttonFlashSalePrice) : null);
+            
+            // Add flash sale info if available (always use lowest price)
+            if (finalFlashSaleItemId) {
+                formData.append('flashSaleItemId', finalFlashSaleItemId);
+            }
+            if (finalFlashSalePrice !== null && finalFlashSalePrice !== undefined) {
+                formData.append('flashSalePrice', finalFlashSalePrice);
+            }
+            
+            formData.append('__RequestVerificationToken', token);
+
+            fetch('/Customer/Home/ToggleCart', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server response:', data);
+                if (data.success) {
+                    button.classList.remove('loading');
+                    button.querySelector('i').style.animation = '';
+                    
+                    if (data.isAdded) {
+                        // Product was added
+                        button.classList.add('in-cart');
+                        button.classList.remove('btn-primary');
+                        button.classList.add('btn-success');
+                        button.querySelector('i').className = 'bi bi-check-lg';
+                        button.title = localizations.removeFromCart;
+                        button.style.background = 'linear-gradient(135deg, #7BC043 0%, #6ba836 100%)';
+                        cartProductIds.push(productId);
+                        
+                        // Show notification
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success(data.message);
+                        }
+                        
+                        // Update cart count everywhere (works on all screens)
+                        if (typeof updateFloatingCartBadge === 'function') {
+                            updateFloatingCartBadge(data.cartCount);
+                        } else if (typeof window.updateFloatingCartBadge === 'function') {
+                            window.updateFloatingCartBadge(data.cartCount);
+                        }
+                        
+                        // Update navigation cart count immediately
+                        if (typeof updateNavigationCartCount === 'function') {
+                            updateNavigationCartCount(data.cartCount);
+                        }
+                        
+                        // Always update via AJAX to ensure it's synced (with small delay)
+                        if (typeof updateCartWidget === 'function') {
+                            setTimeout(() => {
+                                updateCartWidget();
+                            }, 150);
+                        }
+                        
+                        // Open the cart sidebar to show the added item (only if sidebar exists and not mobile home)
+                        if (typeof openCartSidebar === 'function' || typeof window.openCartSidebar === 'function') {
+                            const openCart = window.openCartSidebar || openCartSidebar;
+                            const sidebar = document.querySelector('.cart-sidebar-enhanced') || document.getElementById('cartSidebar');
+                            if (sidebar) {
+                                const isMobile = window.innerWidth <= 768;
+                                const currentPath = window.location.pathname.toLowerCase();
+                                const isHomePage = currentPath === '/' || 
+                                                  currentPath === '/customer/home' || 
+                                                  currentPath === '/customer/home/index';
+                                
+                                // Only open on desktop, or on mobile if not home page
+                                if (!isMobile || !isHomePage) {
+                                    openCart(true); // forceOpen = true for user-initiated action
+                                }
+                            }
+                        }
+                    } else {
+                        // Product was removed
+                        button.classList.remove('in-cart');
+                        button.classList.remove('btn-success');
+                        button.classList.add('btn-primary');
+                        button.querySelector('i').className = 'bi bi-cart-plus';
+                        button.title = localizations.addToCart;
+                        button.style.background = 'linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%)';
+                        cartProductIds = cartProductIds.filter(id => id !== productId);
+                        
+                        // Show notification
+                        if (typeof toastr !== 'undefined') {
+                            toastr.info(data.message);
+                        }
+                        
+                        // Update cart count everywhere (works on all screens)
+                        if (typeof updateFloatingCartBadge === 'function') {
+                            updateFloatingCartBadge(data.cartCount);
+                        } else if (typeof window.updateFloatingCartBadge === 'function') {
+                            window.updateFloatingCartBadge(data.cartCount);
+                        }
+                        
+                        // Update navigation cart count immediately
+                        if (typeof updateNavigationCartCount === 'function') {
+                            updateNavigationCartCount(data.cartCount);
+                        }
+                        
+                        // Always update via AJAX to ensure it's synced (with small delay)
+                        if (typeof updateCartWidget === 'function') {
+                            setTimeout(() => {
+                                updateCartWidget();
+                            }, 150);
+                        }
+                    }
+                } else {
+                    throw new Error(data.message || 'Failed to update cart');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                button.classList.remove('loading');
+                button.querySelector('i').className = originalIcon;
+                button.querySelector('i').style.animation = '';
+                if (typeof toastr !== 'undefined') {
+                    toastr.error(localizations.failedToUpdateCart);
+                }
+            });
+        };
+
+        // Initialize cart count on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize cart count from cartProductIds
+            const initialCartCount = cartProductIds.length;
+            
+            // Update all cart badges
+            if (typeof updateFloatingCartBadge === 'function') {
+                updateFloatingCartBadge(initialCartCount);
+            } else if (typeof window.updateFloatingCartBadge === 'function') {
+                window.updateFloatingCartBadge(initialCartCount);
+            }
+            
+            if (typeof updateNavigationCartCount === 'function') {
+                updateNavigationCartCount(initialCartCount);
+            } else if (typeof window.updateNavigationCartCount === 'function') {
+                window.updateNavigationCartCount(initialCartCount);
+            }
+            
+            // Also try to get cart count from server to ensure accuracy
+            fetch('/Customer/Home/GetCartCount')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && typeof data.cartCount !== 'undefined') {
+                        const serverCartCount = data.cartCount || 0;
+                        // Update all cart badges with server count
+                        if (typeof updateFloatingCartBadge === 'function') {
+                            updateFloatingCartBadge(serverCartCount);
+                        } else if (typeof window.updateFloatingCartBadge === 'function') {
+                            window.updateFloatingCartBadge(serverCartCount);
+                        }
+                        
+                        if (typeof updateNavigationCartCount === 'function') {
+                            updateNavigationCartCount(serverCartCount);
+                        } else if (typeof window.updateNavigationCartCount === 'function') {
+                            window.updateNavigationCartCount(serverCartCount);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching cart count:', error);
+                });
+        });
+
+        // Flash sale timers
+        document.addEventListener('DOMContentLoaded', function() {
+            const timers = document.querySelectorAll('[id^="timer_"]');
+            timers.forEach(timer => {
+                const endDate = new Date(timer.getAttribute('data-flash-sale-end'));
+                updateTimer(timer, endDate);
+                setInterval(() => updateTimer(timer, endDate), 1000);
+            });
+        });
+
+        function updateTimer(element, endDate) {
+            const now = new Date();
+            const diff = endDate - now;
+
+            if (diff <= 0) {
+                element.innerHTML = '<span class="badge bg-danger">@Localizer["Expired"]</span>';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            let timerHtml = '';
+            if (days > 0) {
+                timerHtml += `<span style="background: rgba(255,255,255,0.35); backdrop-filter: blur(8px); padding: 0.3rem 0.5rem; border-radius: 8px; margin: 0 0.15rem; font-weight: 800; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">${days}d</span>`;
+            }
+            timerHtml += `<span style="background: rgba(255,255,255,0.35); backdrop-filter: blur(8px); padding: 0.3rem 0.5rem; border-radius: 8px; margin: 0 0.15rem; font-weight: 800; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">${hours.toString().padStart(2, '0')}</span>`;
+            timerHtml += `<span style="background: rgba(255,255,255,0.35); backdrop-filter: blur(8px); padding: 0.3rem 0.5rem; border-radius: 8px; margin: 0 0.15rem; font-weight: 800; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">${minutes.toString().padStart(2, '0')}</span>`;
+            timerHtml += `<span style="background: rgba(255,255,255,0.35); backdrop-filter: blur(8px); padding: 0.3rem 0.5rem; border-radius: 8px; margin: 0 0.15rem; font-weight: 800; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">${seconds.toString().padStart(2, '0')}</span>`;
+            
+            element.innerHTML = timerHtml;
+        }
+    </script>
+}

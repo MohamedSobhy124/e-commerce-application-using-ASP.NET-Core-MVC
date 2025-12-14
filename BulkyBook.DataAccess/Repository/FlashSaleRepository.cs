@@ -53,6 +53,9 @@ namespace BulkyBook.DataAccess.Repository
                 .Include(f => f.FlashSaleItems.Where(i => !i.IsDeleted && i.FlashSaleQuantity > 0))
                     .ThenInclude(i => i.Product)
                         .ThenInclude(p => p.ProductImages)
+                .Include(f => f.FlashSaleItems.Where(i => !i.IsDeleted && i.FlashSaleQuantity > 0))
+                    .ThenInclude(i => i.Product)
+                        .ThenInclude(p => p.ProductVariants.Where(v => !v.IsDeleted))
                 .Where(f => !f.IsDeleted 
                     && f.IsActive 
                     && f.StartDate <= now 

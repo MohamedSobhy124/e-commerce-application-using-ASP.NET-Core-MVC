@@ -9,6 +9,8 @@
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
     var discountedProducts = Model ?? Enumerable.Empty<BulkyBook.Models.Product>();
     var hasDiscountedProducts = discountedProducts.Any();
+    var activeFlashSales = ViewBag.ActiveFlashSales as IEnumerable<BulkyBook.Models.FlashSale> ?? Enumerable.Empty<BulkyBook.Models.FlashSale>();
+    var now = BulkyBook.Utility.DateTimeHelper.Now;
 }
 
 @if (hasDiscountedProducts)
@@ -61,8 +63,75 @@
                                             ? product.TitleAr 
                                             : product.Title;
                                         
-                                        var discountPercent = product.ListPrice > 0 
-                                            ? (int)((product.ListPrice - product.Price) / product.ListPrice * 100) 
+                                        // Calculate lowest price considering variants, discounts, and flash sales
+                                        var displayPrice = (decimal)product.Price;
+                                        var displayListPrice = (decimal)product.ListPrice;
+                                        
+                                        // Check for best variant price (including discounted variants)
+                                        if (product.ProductVariants != null && product.ProductVariants.Any())
+                                        {
+                                            var bestVariant = product.ProductVariants
+                                                .Where(v => !v.IsDeleted && v.StockQuantity > 0)
+                                                .OrderBy(v => v.Price)
+                                                .FirstOrDefault();
+                                            
+                                            if (bestVariant != null)
+                                            {
+                                                var variantPrice = (decimal)bestVariant.Price;
+                                                var variantListPrice = bestVariant.ListPrice ?? variantPrice;
+                                                
+                                                // Check for flash sale on this variant
+                                                var variantFlashSale = activeFlashSales
+                                                    .SelectMany(fs => fs.FlashSaleItems ?? Enumerable.Empty<BulkyBook.Models.FlashSaleItem>())
+                                                    .FirstOrDefault(fsi => fsi.ProductId == product.Id 
+                                                        && fsi.ProductVariantId == bestVariant.Id
+                                                        && !fsi.IsDeleted 
+                                                        && fsi.FlashSaleQuantity > 0
+                                                        && fsi.FlashSale != null
+                                                        && fsi.FlashSale.IsActive
+                                                        && now >= fsi.FlashSale.StartDate
+                                                        && now <= fsi.FlashSale.EndDate);
+                                                
+                                                if (variantFlashSale != null)
+                                                {
+                                                    var flashSalePrice = (decimal)variantFlashSale.FlashSalePrice;
+                                                    displayPrice = flashSalePrice < variantPrice ? flashSalePrice : variantPrice;
+                                                    // Use variant's original ListPrice (not variant.Price) for old price
+                                                    displayListPrice = bestVariant.ListPrice ?? variantPrice;
+                                                }
+                                                else
+                                                {
+                                                    displayPrice = variantPrice;
+                                                    displayListPrice = variantListPrice;
+                                                }
+                                            }
+                                        }
+                                        
+                                        // Check for flash sale on main product (non-variant)
+                                        var productFlashSale = activeFlashSales
+                                            .SelectMany(fs => fs.FlashSaleItems ?? Enumerable.Empty<BulkyBook.Models.FlashSaleItem>())
+                                            .FirstOrDefault(fsi => fsi.ProductId == product.Id 
+                                                && fsi.ProductVariantId == null
+                                                && !fsi.IsDeleted 
+                                                && fsi.FlashSaleQuantity > 0
+                                                && fsi.FlashSale != null
+                                                && fsi.FlashSale.IsActive
+                                                && now >= fsi.FlashSale.StartDate
+                                                && now <= fsi.FlashSale.EndDate);
+                                        
+                                        if (productFlashSale != null)
+                                        {
+                                            var flashSalePrice = (decimal)productFlashSale.FlashSalePrice;
+                                            if (flashSalePrice < displayPrice)
+                                            {
+                                                displayPrice = flashSalePrice;
+                                                // Use product's original ListPrice (not product.Price) for old price
+                                                displayListPrice = (decimal)product.ListPrice > 0 ? (decimal)product.ListPrice : (decimal)product.Price;
+                                            }
+                                        }
+                                        
+                                        var discountPercent = displayListPrice > 0 && displayListPrice > displayPrice
+                                            ? (int)((displayListPrice - displayPrice) / displayListPrice * 100) 
                                             : 0;
                                         
                                         var productImages = product.ProductImages != null && product.ProductImages.Any() 
@@ -75,8 +144,6 @@
                                         }
                                         
                                         var productImage = productImages.FirstOrDefault() ?? "/images/no-image.png";
-                                        var displayPrice = (decimal)product.Price;
-                                        var displayListPrice = (decimal)product.ListPrice;
                                         
                                         <div class="col-12 col-sm-6 col-lg-3">
                                             <div class="offer-card h-100">
