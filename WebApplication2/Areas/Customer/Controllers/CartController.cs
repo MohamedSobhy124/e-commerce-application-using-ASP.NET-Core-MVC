@@ -242,6 +242,13 @@ namespace BulkyBook.Areas.Customer.Controllers
                     availableStock = cart.product.StockQuantity;
                 }
                 
+                // Get product slug for details page link
+                string productSlug = null;
+                if (cart.product != null && !isComboOffer)
+                {
+                    productSlug = cart.product.GetSlug();
+                }
+                
                 return new
                 {
                     productId = cart.ProductId,
@@ -255,7 +262,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                     variantName = variantName, // 🔥 Include variant name if exists
                     availableStock = availableStock, // 🔥 Stock available for this item
                     flashSaleQuantity = flashSaleQuantity, // 🔥 Flash sale quantity if applicable
-                    flashSaleItemId = cart.FlashSaleItemId // 🔥 Flash sale item ID if applicable
+                    flashSaleItemId = cart.FlashSaleItemId, // 🔥 Flash sale item ID if applicable
+                    productSlug = productSlug // 🔥 Product slug for details page link
                 };
             }).ToList();
 

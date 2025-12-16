@@ -281,6 +281,29 @@
 .add-to-cart-btn.loading {
     pointer-events: none;
     opacity: 0.7;
+    cursor: wait !important;
+}
+
+/* Ensure all cart buttons show loading only in button, not blocking screen */
+button.loading,
+.btn.loading,
+.btn-add-cart-quick.loading,
+.discounted-cart-btn.loading,
+.best-seller-cart-btn.loading,
+.new-arrival-cart-btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+    cursor: wait !important;
+    position: relative;
+}
+
+button.loading i,
+.btn.loading i,
+.btn-add-cart-quick.loading i,
+.discounted-cart-btn.loading i,
+.best-seller-cart-btn.loading i,
+.new-arrival-cart-btn.loading i {
+    animation: spin 1s linear infinite;
 }
 
 .add-to-cart-btn.in-cart {

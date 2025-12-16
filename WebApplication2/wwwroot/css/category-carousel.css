@@ -2,6 +2,10 @@
 .category-section {
     width: 100%;
     margin: 2rem 0;
+    /* Allow vertical scrolling to pass through */
+    touch-action: pan-y pan-x;
+    overscroll-behavior-y: none;
+    position: relative;
 }
 
 .category-section-title {
@@ -38,8 +42,19 @@
     padding: 2rem 0 3rem;
     margin: 0;
     position: relative;
-    overflow: hidden;
+    overflow: hidden; /* Keep hidden for gradient background */
     background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(249, 250, 251, 0.5), rgba(255, 255, 255, 0));
+    /* Allow vertical scrolling to pass through */
+    touch-action: pan-y pan-x !important; /* Allow both vertical and horizontal panning */
+    overscroll-behavior-y: none !important; /* Allow vertical scroll to pass through */
+    pointer-events: auto; /* Ensure touch events work */
+}
+
+/* Ensure category section allows vertical scrolling */
+.category-section,
+.category-section * {
+    touch-action: pan-y pan-x !important;
+    overscroll-behavior-y: none !important;
 }
 
 .category-carousel-wrapper {
@@ -416,12 +431,16 @@
 .category-carousel {
     position: relative;
     overflow: hidden;
+    /* Allow vertical scrolling to pass through */
+    touch-action: pan-y pan-x;
 }
 
 .category-carousel .carousel-inner {
     position: relative;
     width: 100%;
     overflow: hidden;
+    /* Allow vertical scrolling to pass through */
+    touch-action: pan-y pan-x;
 }
 
 .category-carousel .carousel-item {

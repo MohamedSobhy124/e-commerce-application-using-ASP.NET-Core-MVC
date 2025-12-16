@@ -56,8 +56,7 @@
                     <button class="nav-link active" id="flash-sales-tab" data-bs-toggle="tab" data-bs-target="#flash-sales" type="button" role="tab" style="border-radius: 12px; padding: 0.7rem 0.5rem; font-weight: 700; font-size: 0.8rem; transition: all 0.3s; border: 2px solid transparent; position: relative;">
                         <i class="bi bi-lightning-charge-fill me-1"></i>
                         <span class="d-none d-sm-inline">@Localizer["FlashSales"]</span>
-                        <span class="d-sm-none">@Localizer["Flash"]</span>
-                        <span class="badge ms-1" style="font-size: 0.65rem; padding: 0.25rem 0.5rem; border-radius: 50%; min-width: 1.5rem; height: 1.5rem; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.3) !important; color: white !important; border: 1px solid rgba(255, 255, 255, 0.5); font-weight: 800;">@flashSales.Count()</span>
+                        <span class="d-sm-none">@Localizer["FlashSales"]</span>
                     </button>
                 </li>
             }
@@ -68,7 +67,6 @@
                         <i class="bi bi-box-seam me-1"></i>
                         <span class="d-none d-sm-inline">@Localizer["ComboOffers"]</span>
                         <span class="d-sm-none">@Localizer["Combo"]</span>
-                        <span class="badge ms-1" style="font-size: 0.65rem; padding: 0.25rem 0.5rem; border-radius: 50%; min-width: 1.5rem; height: 1.5rem; display: inline-flex; align-items: center; justify-content: center; background: #ffc107 !important; color: #1f2937 !important; border: 1px solid rgba(31, 41, 55, 0.1); font-weight: 800; box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);">@comboOffers.Count()</span>
                     </button>
                 </li>
             }
@@ -79,7 +77,6 @@
                         <i class="bi bi-percent me-1"></i>
                         <span class="d-none d-sm-inline">@Localizer["DiscountedProducts"]</span>
                         <span class="d-sm-none">@Localizer["Discounted"]</span>
-                        <span class="badge ms-1" style="font-size: 0.65rem; padding: 0.25rem 0.5rem; border-radius: 50%; min-width: 1.5rem; height: 1.5rem; display: inline-flex; align-items: center; justify-content: center; background: #ffc107 !important; color: #1f2937 !important; border: 1px solid rgba(31, 41, 55, 0.1); font-weight: 800; box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);">@discountedProducts.Count</span>
                     </button>
                 </li>
             }
@@ -172,8 +169,8 @@
                                                 @if (hasVariants)
                                                 {
                                                     <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()" 
-                                                       class="btn w-100 btn-primary" 
-                                                       style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3); text-decoration: none; display: flex; align-items: center; justify-content: center;"
+                                                       class="btn w-100 btn-primary"
+                                                       style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%) !important; transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3); text-decoration: none; display: flex; align-items: center; justify-content: center;"
                                                        title="@Localizer["ViewDetails"]">
                                                         <i class="bi bi-eye me-1"></i>
                                                         <span class="d-none d-md-inline">@Localizer["ViewDetails"]</span>
@@ -187,11 +184,10 @@
                                                             data-product-id="@product.Id"
                                                             data-flash-sale-item-id="@item.Id"
                                                             data-flash-sale-price="@((double)item.FlashSalePrice)"
-                                                            style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: @(isInCart ? "linear-gradient(135deg, #7BC043 0%, #6ba836 100%)" : "linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%)"); transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3);"
+                                                            style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: @(isInCart ? "linear-gradient(135deg, #7BC043 0%, #6ba836 100%)" : "linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%)") !important; transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3);"
                                                             title="@(isInCart ? Localizer["RemoveFromCart"] : Localizer["AddToCart"])">
                                                         <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart-plus") me-1"></i>
                                                         <span class="d-none d-md-inline">@(isInCart ? Localizer["InCart"] : Localizer["AddToCart"])</span>
-                                                        <span class="d-md-none">@(isInCart ? "✓" : "+")</span>
                                                     </button>
                                                 }
                                             </div>
@@ -272,7 +268,7 @@
                                         
                                         <!-- View Details Button -->
                                         <div class="mt-auto">
-                                            <div class="btn w-100" style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); color: white; border: none; border-radius: 12px; padding: 0.75rem; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(59,157,213,0.4); transition: all 0.3s;">
+                                            <div class="btn w-100" style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%) !important; color: white; border: none; border-radius: 12px; padding: 0.75rem; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(59,157,213,0.4); transition: all 0.3s;">
                                                 <i class="bi bi-eye me-2"></i>@Localizer["ViewDetails"]
                                             </div>
                                         </div>
@@ -390,8 +386,8 @@
                                     @if (hasVariants)
                                     {
                                         <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()" 
-                                           class="btn w-100 btn-primary" 
-                                           style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3); text-decoration: none; display: flex; align-items: center; justify-content: center;"
+                                           class="btn w-100 btn-primary"
+                                           style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%) !important; transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3); text-decoration: none; display: flex; align-items: center; justify-content: center;"
                                            title="@Localizer["ViewDetails"]">
                                             <i class="bi bi-eye me-1"></i>
                                             <span class="d-none d-md-inline">@Localizer["ViewDetails"]</span>
@@ -403,11 +399,10 @@
                                         <button onclick="event.stopPropagation(); toggleCart(@product.Id, this); return false;" 
                                                 class="btn w-100 @(isInCart ? "in-cart btn-success" : "btn-primary")" 
                                                 data-product-id="@product.Id"
-                                                style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: @(isInCart ? "linear-gradient(135deg, #7BC043 0%, #6ba836 100%)" : "linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%)"); transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3);"
+                                                style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: @(isInCart ? "linear-gradient(135deg, #7BC043 0%, #6ba836 100%)" : "linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%)") !important; transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3);"
                                                 title="@(isInCart ? Localizer["RemoveFromCart"] : Localizer["AddToCart"])">
                                             <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart-plus") me-1"></i>
                                             <span class="d-none d-md-inline">@(isInCart ? Localizer["InCart"] : Localizer["AddToCart"])</span>
-                                            <span class="d-md-none">@(isInCart ? "✓" : "+")</span>
                                         </button>
                                     }
                                 </div>

@@ -119,13 +119,36 @@
         // Just initialize any additional functionality here
         
         // Load wishlist items on page load if user is authenticated
-        const isAuthenticated = document.body.getAttribute('data-is-authenticated') === 'true' || 
-                                typeof window.isAuthenticated !== 'undefined' && window.isAuthenticated;
-        
-        if (isAuthenticated) {
-            loadWishlistItems();
-            loadWishlistCount();
-        }
+        // Use a small delay to ensure authentication state is set
+        setTimeout(function() {
+            let isAuthenticated = false;
+            
+            // Method 1: Check body attribute (set in layout)
+            const bodyAuth = document.body.getAttribute('data-is-authenticated');
+            if (bodyAuth === 'true') {
+                isAuthenticated = true;
+            }
+            
+            // Method 2: Check global window variable
+            if (!isAuthenticated && typeof window.isAuthenticated !== 'undefined') {
+                isAuthenticated = window.isAuthenticated === true;
+            }
+            
+            // Method 3: Check for logout link (indicates authenticated)
+            if (!isAuthenticated) {
+                const logoutLink = document.querySelector('a[href*="Logout"], a[href*="logout"]');
+                const loginLink = document.querySelector('a[href*="Login"], a[href*="login"]');
+                isAuthenticated = !!logoutLink && !loginLink;
+            }
+            
+            if (isAuthenticated) {
+                console.log('User is authenticated, loading wishlist items...');
+                loadWishlistItems();
+                loadWishlistCount();
+            } else {
+                console.log('User is not authenticated, skipping wishlist load');
+            }
+        }, 100); // Small delay to ensure authentication state is set
     }
     
     // Load wishlist items
@@ -163,9 +186,26 @@
 
     // Global function for wishlist toggle (called from onclick in view)
     window.toggleWishlist = function(productId, btn) {
-        // Check if user is authenticated
-        const isAuthenticated = document.body.getAttribute('data-is-authenticated') === 'true' || 
-                                typeof window.isAuthenticated !== 'undefined' && window.isAuthenticated;
+        // Check if user is authenticated - try multiple methods
+        let isAuthenticated = false;
+        
+        // Method 1: Check body attribute (set in layout)
+        const bodyAuth = document.body.getAttribute('data-is-authenticated');
+        if (bodyAuth === 'true') {
+            isAuthenticated = true;
+        }
+        
+        // Method 2: Check global window variable
+        if (!isAuthenticated && typeof window.isAuthenticated !== 'undefined') {
+            isAuthenticated = window.isAuthenticated === true;
+        }
+        
+        // Method 3: Check for logout link (indicates authenticated)
+        if (!isAuthenticated) {
+            const logoutLink = document.querySelector('a[href*="Logout"], a[href*="logout"]');
+            const loginLink = document.querySelector('a[href*="Login"], a[href*="login"]');
+            isAuthenticated = !!logoutLink && !loginLink;
+        }
         
         if (!isAuthenticated) {
             if (typeof toastr !== 'undefined') {

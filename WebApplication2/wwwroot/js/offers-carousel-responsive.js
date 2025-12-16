@@ -251,13 +251,108 @@
             }
             
             // Initialize carousel with auto-rotation
-            new bootstrap.Carousel(carousel, {
+            // For category carousel, disable Bootstrap's touch to allow vertical scrolling
+            const isCategoryCarousel = config.carouselId === 'categoryCarousel';
+            const carouselInstance = new bootstrap.Carousel(carousel, {
                 interval: 8000,
                 ride: 'carousel',
                 pause: 'hover',
                 wrap: true,
-                touch: true
+                touch: !isCategoryCarousel // Disable Bootstrap touch for category carousel to allow vertical scrolling
             });
+            
+            // Add custom touch handling for category carousel that allows vertical scrolling
+            if (isCategoryCarousel) {
+                let touchStartX = 0;
+                let touchStartY = 0;
+                let touchEndX = 0;
+                let touchEndY = 0;
+                let isVerticalScroll = false;
+                let touchMoved = false;
+                
+                // Prevent Bootstrap from interfering with vertical scrolling
+                const carouselInner = carousel.querySelector('.carousel-inner');
+                if (carouselInner) {
+                    // Set CSS to allow vertical scrolling
+                    carouselInner.style.touchAction = 'pan-y pan-x';
+                }
+                
+                carousel.addEventListener('touchstart', function(e) {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    isVerticalScroll = false;
+                    touchMoved = false;
+                }, { passive: true });
+                
+                carousel.addEventListener('touchmove', function(e) {
+                    if (!touchStartX || !touchStartY) return;
+                    
+                    touchMoved = true;
+                    touchEndX = e.touches[0].clientX;
+                    touchEndY = e.touches[0].clientY;
+                    
+                    const diffX = Math.abs(touchStartX - touchEndX);
+                    const diffY = Math.abs(touchStartY - touchEndY);
+                    
+                    // If vertical movement is greater than horizontal, it's a scroll - don't interfere
+                    // Use a threshold to determine if it's primarily vertical
+                    if (diffY > diffX && diffY > 15) {
+                        isVerticalScroll = true;
+                        // Don't prevent default - allow scrolling
+                        return;
+                    }
+                    
+                    // If it's clearly horizontal, allow carousel navigation
+                    if (diffX > diffY && diffX > 15) {
+                        isVerticalScroll = false;
+                    }
+                }, { passive: true });
+                
+                carousel.addEventListener('touchend', function(e) {
+                    if (!touchMoved) {
+                        // Reset if touch didn't move
+                        touchStartX = 0;
+                        touchStartY = 0;
+                        return;
+                    }
+                    
+                    if (isVerticalScroll) {
+                        // Reset for next touch - don't handle as carousel swipe
+                        touchStartX = 0;
+                        touchStartY = 0;
+                        touchEndX = 0;
+                        touchEndY = 0;
+                        isVerticalScroll = false;
+                        touchMoved = false;
+                        return;
+                    }
+                    
+                    const diffX = touchStartX - touchEndX;
+                    const swipeThreshold = 50;
+                    
+                    // Only handle horizontal swipes (not vertical scrolls)
+                    if (Math.abs(diffX) > swipeThreshold && !isVerticalScroll) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        if (diffX > 0) {
+                            // Swipe left - go to next
+                            carouselInstance.next();
+                        } else {
+                            // Swipe right - go to prev
+                            carouselInstance.prev();
+                        }
+                    }
+                    
+                    // Reset
+                    touchStartX = 0;
+                    touchStartY = 0;
+                    touchEndX = 0;
+                    touchEndY = 0;
+                    isVerticalScroll = false;
+                    touchMoved = false;
+                }, { passive: false });
+            }
         }
         
         function updateIndicators(totalSlides) {

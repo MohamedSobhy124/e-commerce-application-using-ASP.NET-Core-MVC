@@ -19,10 +19,10 @@
         <div class="flash-sale-hero-content">
             <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap;">
                 <i class="bi bi-lightning-charge-fill lightning-icon"></i>
-                <h1 class="flash-sale-title">@Localizer["AllFlashSales"]</h1>
+                <h1 class="flash-sale-title text-white">@Localizer["AllFlashSales"]</h1>
                 <i class="bi bi-fire fire-icon lightning-icon"></i>
             </div>
-            <p class="flash-sale-subtitle">
+            <p class="flash-sale-subtitle text-white">
                 @Localizer["DontMissIncredibleDeals"]
             </p>
         </div>
@@ -69,13 +69,13 @@ else
                                     ? flashSale.DescriptionAr 
                                     : flashSale.Description;
                             }
-                            <h2 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 0.5rem;">
+                            <h2 class=" text-white" style="font-size: 1.4rem; font-weight: 900; margin-bottom: 0.5rem;">
                                 <i class="bi bi-lightning-charge-fill me-2" style="font-size: 1.2rem;"></i>
                                 @flashSaleName
                             </h2>
                             @if (!string.IsNullOrEmpty(flashSaleDesc))
                             {
-                                <p style="font-size: 0.85rem; opacity: 0.95; margin-bottom: 0;">
+                                <p class=" text-white" style="font-size: 0.85rem; opacity: 0.95; margin-bottom: 0;">
                                     @flashSaleDesc
                                 </p>
                             }
@@ -106,18 +106,38 @@ else
                         var isLowStock = item.FlashSaleQuantity <= 5;
                         var isCriticalStock = item.FlashSaleQuantity <= 2;
                         
-                        // Build variant name string
+                        // Build variant name string with localization
                         string variantName = "";
                         if (variant != null && variant.VariantOptionValues != null)
                         {
                             var optionValues = variant.VariantOptionValues
                                 .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
                                 .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
-                                .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                                .Select(vov => 
+                                {
+                                    if (vov.OptionValue == null) return "";
+                                    
+                                    var optionName = currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue.ProductOption?.NameAr) 
+                                        ? vov.OptionValue.ProductOption.NameAr 
+                                        : vov.OptionValue.ProductOption?.Name ?? "";
+                                    var optionValue = currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue.ValueAr) 
+                                        ? vov.OptionValue.ValueAr 
+                                        : vov.OptionValue.Value ?? "";
+                                    
+                                    if (string.IsNullOrEmpty(optionName) || string.IsNullOrEmpty(optionValue))
+                                        return optionValue ?? optionName ?? "";
+                                    
+                                    return $"{optionName}: {optionValue}";
+                                })
                                 .Where(s => !string.IsNullOrEmpty(s))
                                 .ToList();
                             variantName = string.Join(", ", optionValues);
                         }
+                        
+                        // Get localized product name
+                        var productName = currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) 
+                            ? product.TitleAr 
+                            : product.Title;
 
                         <div class="col-md-6 col-lg-4 col-xl-3">
                             <div class="flash-sale-product-card">
@@ -130,7 +150,7 @@ else
                                 <!-- Product Image -->
                                 <div class="flash-sale-product-image-wrapper">
                                     <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()">
-                                        <img src="@imageUrl" alt="@product.Title" class="flash-sale-product-image" />
+                                        <img src="@imageUrl" alt="@productName" class="flash-sale-product-image" />
                                     </a>
                                     <div class="fire-effect">🔥</div>
                                 </div>
@@ -146,7 +166,7 @@ else
                                     <!-- Product Title -->
                                     <h4 class="flash-sale-product-title">
                                         <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()" style="color: inherit; text-decoration: none;">
-                                            @product.Title
+                                            @productName
                                         </a>
                                     </h4>
 

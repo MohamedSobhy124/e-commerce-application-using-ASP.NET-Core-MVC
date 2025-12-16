@@ -78,22 +78,7 @@
         padding: 0.5rem 1rem !important;
         font-size: 0.8rem !important;
     }
-    
-    .advanced-search-container {
-        padding: 0.75rem !important;
-        max-width: 800px;
-        margin: 0 auto;
-    }
-    
-    .hero-search-input {
-        padding: 0.75rem 1rem 0.75rem 2.75rem !important;
-        font-size: 1rem !important;
-    }
-    
-    .hero-search-btn {
-        padding: 0.75rem 2rem !important;
-        font-size: 1rem !important;
-    }
+     
 }
 
 /* Trust Badges - Compact */
@@ -115,44 +100,7 @@
     margin-right: 0.35rem !important;
 }
 
-/* Search Box - Compact */
-.hero-search-box {
-    max-width: 100%;
-    margin-bottom: 0.75rem;
-}
-
-.advanced-search-container {
-    padding: 0.5rem !important;
-    gap: 0.5rem !important;
-    border-radius: 12px !important;
-}
-
-.search-input-wrapper {
-    flex: 1;
-}
-
-.search-icon {
-    left: 0.75rem !important;
-    font-size: 0.9rem !important;
-}
-
-.hero-search-input {
-    padding: 0.6rem 0.75rem 0.6rem 2.25rem !important;
-    font-size: 0.875rem !important;
-    border-radius: 8px !important;
-}
-
-.hero-search-btn {
-    padding: 0.6rem 1.25rem !important;
-    font-size: 0.875rem !important;
-    border-radius: 8px !important;
-    white-space: nowrap;
-}
-
-.hero-search-btn i {
-    font-size: 0.8rem !important;
-    margin-right: 0.35rem !important;
-}
+ 
 
 /* Category Pills - Smaller */
 .hero-categories {
@@ -522,21 +470,7 @@
         padding: 0.3rem 0.6rem !important;
     }
 
-    /* Search - Full Width on Mobile */
-    .advanced-search-container {
-        flex-direction: column;
-        padding: 0.75rem !important;
-    }
-
-    .hero-search-input {
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
-
-    .hero-search-btn {
-        width: 100%;
-        padding: 0.65rem !important;
-    }
+     
 
     /* Categories - Smaller on Mobile */
     .hero-categories {

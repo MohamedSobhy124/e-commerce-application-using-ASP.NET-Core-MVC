@@ -51,15 +51,19 @@
             <img src="~/Images/Products/Logo2-removebg.png" alt="Ideal Weight Nutrition" class="logo-img" />
         </a>
         
-        <!-- Mobile: Search Icon Only (Initially) -->
-        <button type="button" class="mobile-search-toggle" id="mobileSearchToggle" aria-label="Toggle search">
-            <i class="bi bi-search"></i>
-        </button>
-        
-        <!-- Desktop & Mobile (when expanded) Search Box -->
+        <!-- Desktop & Mobile Search Box -->
         <div class="hero-search-box" id="heroSearchBox">
-            <form id="heroSearchForm" onsubmit="return false;">
-                <div class="advanced-search-container">
+            <form id="heroSearchForm" onsubmit="return false;" style="width:90%;>
+                <div class="advanced-search-container" id="advancedSearchContainer">
+                    <!-- Mobile Back Button (shown when search is focused) -->
+                    <button type="button" 
+                            class="mobile-search-back-btn" 
+                            id="mobileSearchBackBtn"
+                            aria-label="Back to menu"
+                            style="display: none;">
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+                    
                     <div class="search-input-wrapper">
                         <input type="text" 
                                name="searchTerm" 
@@ -209,9 +213,7 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Scroll Indicator -->
-        <div class="scroll-indicator"></div>
+         
     </section>
 }else{
 
@@ -1017,7 +1019,7 @@
                 <h2>@Localizer["ShopByCategory"]</h2>
             </div>
             <div class="category-carousel-container" id="categoryCarouselContainer">
-                <div id="categoryCarousel" class="carousel slide category-carousel" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover" data-bs-touch="true">
+                <div id="categoryCarousel" class="carousel slide category-carousel" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover" data-bs-touch="false">
                     <div class="carousel-inner">
                         @{
                             var categoriesList = displayCategories.ToList();
@@ -2327,27 +2329,17 @@
         }
 
         // Function to open cart sidebar (make it globally available)
-        // forceOpen: if true, will open even on mobile home screen (for user-initiated actions)
+        // This function delegates to the main openCartSidebar in flash-sale-customer-fixed.js
         window.openCartSidebar = function(forceOpen = false) {
-            // Check if on mobile and home page - don't open cart sidebar automatically
-            // But allow if forceOpen is true (user clicked the cart icon)
-            if (!forceOpen) {
-                const isMobile = window.innerWidth <= 768;
-                const currentPath = window.location.pathname.toLowerCase();
-                const isHomePage = currentPath === '/' || 
-                                  currentPath === '/customer/home' || 
-                                  currentPath === '/customer/home/index' ||
-                                  currentPath.startsWith('/customer/home/index');
-                
-                if (isMobile && isHomePage) {
-                    console.log('Cart sidebar disabled on mobile home screen');
-                    return;
-                }
-            }
-            
-            console.log('Opening cart sidebar...');
-            const sidebar = document.querySelector('.cart-sidebar-enhanced') || document.getElementById('cartSidebar');
-            const overlay = document.querySelector('.cart-overlay-enhanced') || document.getElementById('cartOverlay');
+            // Always allow cart to open - delegate to main function
+            if (typeof openCartSidebar === 'function' && openCartSidebar !== window.openCartSidebar) {
+                // Call the original function from flash-sale-customer-fixed.js
+                openCartSidebar(forceOpen);
+            } else {
+                // Fallback: open directly
+                console.log('Opening cart sidebar...');
+                const sidebar = document.querySelector('.cart-sidebar-new') || document.getElementById('cartSidebar');
+                const overlay = document.querySelector('.cart-sidebar-overlay') || document.getElementById('cartOverlay');
             
             if (sidebar && overlay) {
                 sidebar.classList.add('active');
@@ -2374,11 +2366,16 @@
 
         // Function to close cart sidebar
         function closeCartSidebar() {
-            const sidebar = document.querySelector('.cart-sidebar-enhanced') || document.getElementById('cartSidebar');
-            const overlay = document.querySelector('.cart-overlay-enhanced') || document.getElementById('cartOverlay');
-            if (sidebar) sidebar.classList.remove('active');
-            if (overlay) overlay.classList.remove('active');
-            document.body.style.overflow = ''; // Restore scrolling
+            if (typeof window.closeCartSidebar === 'function') {
+                window.closeCartSidebar();
+            } else {
+                // Fallback
+                const sidebar = document.querySelector('.cart-sidebar-new') || document.getElementById('cartSidebar');
+                const overlay = document.querySelector('.cart-sidebar-overlay') || document.getElementById('cartOverlay');
+                if (sidebar) sidebar.classList.remove('active');
+                if (overlay) overlay.classList.remove('active');
+                document.body.style.overflow = ''; // Restore scrolling
+            }
         }
 
         // Function to load cart items (make globally available)
@@ -2644,13 +2641,22 @@
 
         // Function to toggle product in cart (make globally available)
         window.toggleCart = function(productId, button) {
+            // Prevent multiple clicks
+            if (!button || button.disabled || button.classList.contains('loading')) {
+                return;
+            }
+            
             const isCurrentlyInCart = button.classList.contains('in-cart');
             const originalIcon = button.querySelector('i').className;
             
             // Save scroll position in case of any unexpected navigation
             saveScrollPosition();
             
+            // Disable button and show loading state ONLY in button (no screen blocking)
+            button.disabled = true;
             button.classList.add('loading');
+            button.style.opacity = '0.7';
+            button.style.cursor = 'wait';
             button.querySelector('i').className = 'bi bi-arrow-repeat';
             button.querySelector('i').style.animation = 'spin 1s linear infinite';
 
@@ -2667,7 +2673,11 @@
             .then(data => {
                 console.log('Server response:', data);
                 if (data.success) {
+                    // Remove loading state from button only
+                    button.disabled = false;
                     button.classList.remove('loading');
+                    button.style.opacity = '';
+                    button.style.cursor = '';
                     button.querySelector('i').style.animation = '';
                     
                     if (data.isAdded) {
@@ -2701,21 +2711,15 @@
                             }, 150);
                         }
                         
-                        // Open the cart sidebar to show the added item (only if sidebar exists and not mobile home)
+                        // Open the cart sidebar to show the added item - but NOT on mobile screens
                         if (typeof openCartSidebar === 'function' || typeof window.openCartSidebar === 'function') {
                             const openCart = window.openCartSidebar || openCartSidebar;
-                            const sidebar = document.querySelector('.cart-sidebar-enhanced') || document.getElementById('cartSidebar');
-                            if (sidebar) {
-                                const isMobile = window.innerWidth <= 768;
-                                const currentPath = window.location.pathname.toLowerCase();
-                                const isHomePage = currentPath === '/' || 
-                                                  currentPath === '/customer/home' || 
-                                                  currentPath === '/customer/home/index';
-                                
-                                // Only open on desktop, or on mobile if not home page
-                                if (!isMobile || !isHomePage) {
-                                    openCart(true); // forceOpen = true for user-initiated action
-                                }
+                            const sidebar = document.querySelector('.cart-sidebar-new') || document.getElementById('cartSidebar');
+                            const isMobile = window.innerWidth <= 768;
+                            
+                            // Only open sidebar on desktop, not on mobile
+                            if (sidebar && !isMobile) {
+                                openCart(true); // forceOpen = true for user-initiated action
                             }
                         }
                     } else {
@@ -2755,7 +2759,11 @@
             })
             .catch(error => {
                 console.error('Error:', error);
+                // Remove loading state from button only
+                button.disabled = false;
                 button.classList.remove('loading');
+                button.style.opacity = '';
+                button.style.cursor = '';
                 button.querySelector('i').className = originalIcon;
                 button.querySelector('i').style.animation = '';
                 if (typeof toastr !== 'undefined') {
@@ -3701,7 +3709,8 @@
         {
             <text>
             // Wishlist Sidebar Functions
-            function openWishlistSidebar() {
+            // Enhance or define the global functions with full functionality
+            window.openWishlistSidebar = function() {
                 const sidebar = document.getElementById('wishlistSidebar');
                 const overlay = document.getElementById('wishlistOverlay');
                 
@@ -3709,44 +3718,77 @@
                     sidebar.classList.add('active');
                     overlay.classList.add('active');
                     document.body.style.overflow = 'hidden';
-                    loadWishlistItemsToSidebar();
+                    // Always load items when sidebar opens
+                    if (typeof loadWishlistItemsToSidebar === 'function') {
+                        loadWishlistItemsToSidebar();
+                    } else if (typeof window.loadWishlistItemsToSidebar === 'function') {
+                        window.loadWishlistItemsToSidebar();
+                    }
                 }
-            }
+            };
 
-            function closeWishlistSidebar() {
+            window.closeWishlistSidebar = function() {
                 const sidebar = document.getElementById('wishlistSidebar');
                 const overlay = document.getElementById('wishlistOverlay');
                 
                 if (sidebar) sidebar.classList.remove('active');
                 if (overlay) overlay.classList.remove('active');
                 document.body.style.overflow = '';
-            }
+            };
+            
+            // Make loadWishlistItemsToSidebar globally available
+            window.loadWishlistItemsToSidebar = loadWishlistItemsToSidebar;
+            
+            // Make createWishlistItemHTML globally available
+            window.createWishlistItemHTML = createWishlistItemHTML;
 
             function loadWishlistItemsToSidebar() {
+                console.log('loadWishlistItemsToSidebar called');
                 fetch('/Customer/Home/GetWishlistItems')
-                    .then(response => response.json())
+                    .then(response => {
+                        console.log('Wishlist fetch response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
+                        console.log('Wishlist data received:', data);
                         const container = document.getElementById('wishlistItemsContainer');
                         const countElement = document.getElementById('sidebarWishlistCount');
+                        
+                        if (!container) {
+                            console.error('wishlistItemsContainer element not found!');
+                            return;
+                        }
 
                         if (data.success && data.items && data.items.length > 0) {
+                            console.log('Rendering', data.items.length, 'wishlist items');
                             container.innerHTML = data.items.map(item => createWishlistItemHTML(item)).join('');
                             if (countElement) countElement.textContent = data.count;
-                            updateFloatingWishlistBadge(data.count);
+                            if (typeof updateFloatingWishlistBadge === 'function') {
+                                updateFloatingWishlistBadge(data.count);
+                            }
                         } else {
+                            console.log('Wishlist is empty');
                             container.innerHTML = '<div class="wishlist-empty"><i class="bi bi-heart"></i><p>@Localizer["YourWishlistIsEmpty"]</p></div>';
                             if (countElement) countElement.textContent = '0';
-                            updateFloatingWishlistBadge(0);
+                            if (typeof updateFloatingWishlistBadge === 'function') {
+                                updateFloatingWishlistBadge(0);
+                            }
                         }
                     })
                     .catch(error => {
                         console.error('Error loading wishlist items:', error);
                         const container = document.getElementById('wishlistItemsContainer');
                         if (container) {
-                            container.innerHTML = '<div class="wishlist-empty"><p>Error loading wishlist</p></div>';
+                            container.innerHTML = '<div class="wishlist-empty"><p>Error loading wishlist: ' + error.message + '</p></div>';
                         }
                     });
             }
+            
+            // Make loadWishlistItemsToSidebar globally available
+            window.loadWishlistItemsToSidebar = loadWishlistItemsToSidebar;
 
             function createWishlistItemHTML(item) {
                 const discount = item.listPrice && item.listPrice > item.price 
@@ -3784,6 +3826,9 @@
                     </div>
                 `;
             }
+            
+            // Make createWishlistItemHTML globally available
+            window.createWishlistItemHTML = createWishlistItemHTML;
 
             function addToCartFromWishlist(productId, wishlistId) {
                 const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
@@ -3860,6 +3905,10 @@
                     }
                 });
             }
+            
+            // Make addToCartFromWishlist and removeFromWishlist globally available
+            window.addToCartFromWishlist = addToCartFromWishlist;
+            window.removeFromWishlist = removeFromWishlist;
 
             function updateFloatingWishlistBadge(count) {
                 const floatingBadge = document.getElementById('floatingWishlistBadge');
@@ -3953,22 +4002,16 @@
                                     initializeProductCarousels();
                                 }
                                 
-                                // Initialize Bootstrap carousels if they exist with touch support
-                                if (typeof bootstrap !== 'undefined') {
-                                    document.querySelectorAll('.carousel').forEach(carousel => {
-                                        // Check if carousel is already initialized
-                                        const existingCarousel = bootstrap.Carousel.getInstance(carousel);
-                                        if (!existingCarousel) {
-                                            // Get interval from data attribute or default to 8000
-                                            const interval = carousel.dataset.bsInterval || carousel.getAttribute('data-bs-interval') || '8000';
-                                            new bootstrap.Carousel(carousel, {
-                                                interval: parseInt(interval),
-                                                wrap: true,
-                                                touch: true // Enable touch support for mobile
-                                            });
-                                        }
-                                    });
-                                }
+                                // Initialize Bootstrap carousels if they exist with touch support and RTL support
+                                // Use the global function to ensure RTL support
+                                // Add a small delay to ensure DOM is fully updated
+                                setTimeout(() => {
+                                    if (typeof initializeCarouselsWithRTL === 'function') {
+                                        initializeCarouselsWithRTL();
+                                    } else if (typeof window.initializeCarouselsWithRTL === 'function') {
+                                        window.initializeCarouselsWithRTL();
+                                    }
+                                }, 100);
                                 
                                 // Enhance carousels for mobile if needed
                                 if (window.innerWidth <= 767 && typeof enhanceCarouselsForMobile === 'function') {
@@ -4008,6 +4051,134 @@
             setTimeout(() => loadSection('/Customer/Home/LoadComboOffersSection', 'comboOffersSectionPlaceholder'), 1300);
         });
 
+        // Initialize carousels with RTL support on page load
+        function initializeCarouselsWithRTL() {
+            if (typeof bootstrap !== 'undefined') {
+                const isRTL = document.documentElement.dir === 'rtl' || document.documentElement.getAttribute('dir') === 'rtl';
+                
+                document.querySelectorAll('.carousel').forEach(carousel => {
+                    // Check if carousel is already initialized
+                    let existingCarousel = bootstrap.Carousel.getInstance(carousel);
+                    
+                    // Get interval from data attribute or default to 8000
+                    const interval = carousel.dataset.bsInterval || carousel.getAttribute('data-bs-interval') || '8000';
+                    
+                    // If already initialized and RTL, dispose and reinitialize with RTL fixes
+                    if (existingCarousel && isRTL) {
+                        existingCarousel.dispose();
+                        existingCarousel = null;
+                    }
+                    
+                    if (!existingCarousel) {
+                        // Set dir attribute for RTL support
+                        if (isRTL) {
+                            carousel.setAttribute('dir', 'rtl');
+                        }
+                        
+                        const carouselInstance = new bootstrap.Carousel(carousel, {
+                            interval: parseInt(interval),
+                            wrap: true,
+                            touch: !isRTL // Disable Bootstrap's touch for RTL, we'll handle it manually
+                        });
+                        
+                        // Fix RTL carousel swipe direction for mobile
+                        if (isRTL) {
+                            // Handle touch/swipe manually for RTL to fix direction
+                            let touchStartX = 0;
+                            let touchStartY = 0;
+                            let touchEndX = 0;
+                            let touchEndY = 0;
+                            let touchStartTime = 0;
+                            let isHandlingSwipe = false;
+                            
+                            // Use a unique identifier to avoid duplicate handlers
+                            if (!carousel.dataset.rtlHandlerAdded) {
+                                carousel.dataset.rtlHandlerAdded = 'true';
+                                
+                                const handleTouchStart = function(e) {
+                                    touchStartX = e.changedTouches[0].screenX;
+                                    touchStartY = e.changedTouches[0].screenY;
+                                    touchStartTime = Date.now();
+                                    isHandlingSwipe = false;
+                                };
+                                
+                                const handleTouchMove = function(e) {
+                                    // Track movement
+                                    touchEndX = e.changedTouches[0].screenX;
+                                    touchEndY = e.changedTouches[0].screenY;
+                                };
+                                
+                                const handleTouchEnd = function(e) {
+                                    touchEndX = e.changedTouches[0].screenX;
+                                    touchEndY = e.changedTouches[0].screenY;
+                                    const touchDuration = Date.now() - touchStartTime;
+                                    const diffX = touchStartX - touchEndX;
+                                    const diffY = touchStartY - touchEndY;
+                                    const swipeThreshold = 50;
+                                    const maxDuration = 300; // Max swipe duration in ms
+                                    
+                                    // Check if movement is primarily horizontal (for carousel) or vertical (for scrolling)
+                                    const isHorizontalSwipe = Math.abs(diffX) > Math.abs(diffY);
+                                    
+                                    // Only handle if it's a quick horizontal swipe (not vertical scroll)
+                                    if (isHorizontalSwipe && Math.abs(diffX) > swipeThreshold && touchDuration < maxDuration && !isHandlingSwipe) {
+                                        isHandlingSwipe = true;
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        
+                                        // In RTL mode, the user expects:
+                                        // Swipe RIGHT → items move RIGHT (call prev() which moves content right)
+                                        // Swipe LEFT → items move LEFT (call next() which moves content left)
+                                        setTimeout(() => {
+                                            try {
+                                                // Use Bootstrap's data API to trigger slide instead of calling methods directly
+                                                if (diffX > 0) {
+                                                    // User swiped RIGHT = items should move RIGHT (trigger prev)
+                                                    const prevButton = carousel.querySelector('[data-bs-slide="prev"]');
+                                                    if (prevButton) {
+                                                        prevButton.click();
+                                                    } else {
+                                                        // Fallback: get instance and call method
+                                                        const instance = bootstrap.Carousel.getInstance(carousel);
+                                                        if (instance) instance.prev();
+                                                    }
+                                                } else {
+                                                    // User swiped LEFT = items should move LEFT (trigger next)
+                                                    const nextButton = carousel.querySelector('[data-bs-slide="next"]');
+                                                    if (nextButton) {
+                                                        nextButton.click();
+                                                    } else {
+                                                        // Fallback: get instance and call method
+                                                        const instance = bootstrap.Carousel.getInstance(carousel);
+                                                        if (instance) instance.next();
+                                                    }
+                                                }
+                                            } catch (err) {
+                                                console.error('Error triggering carousel slide:', err);
+                                            }
+                                            isHandlingSwipe = false;
+                                        }, 10);
+                                    }
+                                };
+                                
+                                carousel.addEventListener('touchstart', handleTouchStart, { passive: true });
+                                carousel.addEventListener('touchmove', handleTouchMove, { passive: true });
+                                carousel.addEventListener('touchend', handleTouchEnd, { passive: false });
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Make function globally available
+        window.initializeCarouselsWithRTL = initializeCarouselsWithRTL;
+        
+        // Initialize carousels on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCarouselsWithRTL();
+        });
+        
         // Sticky Header Scroll Detection - Enhanced Design
         document.addEventListener('DOMContentLoaded', function() {
             const stickyHeader = document.getElementById('heroSearchBoxSticky');
@@ -4151,54 +4322,80 @@
             }
         });
         
-        // Mobile Search Toggle Functionality
+        // Mobile Search Expand/Collapse Functionality
         (function() {
-            const mobileSearchToggle = document.getElementById('mobileSearchToggle');
             const heroSearchBox = document.getElementById('heroSearchBox');
             const heroHeaderActions = document.getElementById('heroHeaderActions');
             const heroSearchInput = document.getElementById('heroSearchInput');
+            const advancedSearchContainer = document.getElementById('advancedSearchContainer');
+            const mobileSearchBackBtn = document.getElementById('mobileSearchBackBtn');
+            const stickyHeader = document.getElementById('heroSearchBoxSticky');
             
-            if (mobileSearchToggle && heroSearchBox) {
-                // Toggle search box on mobile
-                mobileSearchToggle.addEventListener('click', function() {
-                    const isActive = heroSearchBox.classList.contains('active');
-                    
-                    if (isActive) {
-                        // Hide search box
-                        heroSearchBox.classList.remove('active');
-                        mobileSearchToggle.classList.remove('active');
-                        heroHeaderActions.classList.remove('mobile-hidden');
-                        // Clear search if empty
-                        if (!heroSearchInput.value.trim()) {
-                            heroSearchInput.blur();
-                        }
-                    } else {
-                        // Show search box
-                        heroSearchBox.classList.add('active');
-                        mobileSearchToggle.classList.add('active');
+            if (heroSearchBox && heroSearchInput && advancedSearchContainer) {
+                let isExpanded = false;
+                
+                // Function to expand search
+                function expandSearch() {
+                    if (window.innerWidth <= 768 && !isExpanded) {
+                        isExpanded = true;
+                        advancedSearchContainer.classList.add('expanded');
                         heroHeaderActions.classList.add('mobile-hidden');
-                        // Focus on input
-                        setTimeout(() => {
-                            heroSearchInput.focus();
-                        }, 100);
+                        if (mobileSearchBackBtn) {
+                            mobileSearchBackBtn.style.display = 'flex';
+                        }
+                        if (stickyHeader) {
+                            stickyHeader.classList.add('search-expanded');
+                        }
+                    }
+                }
+                
+                // Function to collapse search
+                function collapseSearch() {
+                    if (window.innerWidth <= 768 && isExpanded) {
+                        isExpanded = false;
+                        advancedSearchContainer.classList.remove('expanded');
+                        heroHeaderActions.classList.remove('mobile-hidden');
+                        if (mobileSearchBackBtn) {
+                            mobileSearchBackBtn.style.display = 'none';
+                        }
+                        if (stickyHeader) {
+                            stickyHeader.classList.remove('search-expanded');
+                        }
+                        heroSearchInput.blur();
+                    }
+                }
+                
+                // Expand on focus
+                heroSearchInput.addEventListener('focus', expandSearch);
+                
+                // Collapse on blur (if input is empty)
+                heroSearchInput.addEventListener('blur', function() {
+                    setTimeout(() => {
+                        if (!heroSearchInput.value.trim()) {
+                            collapseSearch();
+                        }
+                    }, 200);
+                });
+                
+                // Back button click
+                if (mobileSearchBackBtn) {
+                    mobileSearchBackBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        collapseSearch();
+                    });
+                }
+                
+                // Handle window resize
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 768) {
+                        collapseSearch();
                     }
                 });
                 
-                // Close search when clicking outside on mobile
-                document.addEventListener('click', function(e) {
-                    if (window.innerWidth <= 768) {
-                        const isClickInside = heroSearchBox.contains(e.target) || 
-                                             mobileSearchToggle.contains(e.target);
-                        
-                        if (!isClickInside && heroSearchBox.classList.contains('active')) {
-                            // Only close if input is empty
-                            if (!heroSearchInput.value.trim()) {
-                                heroSearchBox.classList.remove('active');
-                                mobileSearchToggle.classList.remove('active');
-                                heroHeaderActions.classList.remove('mobile-hidden');
-                            }
-                        }
-                    }
+                // Prevent collapse when clicking inside search container
+                advancedSearchContainer.addEventListener('click', function(e) {
+                    e.stopPropagation();
                 });
                 
                 // Update wishlist badge count

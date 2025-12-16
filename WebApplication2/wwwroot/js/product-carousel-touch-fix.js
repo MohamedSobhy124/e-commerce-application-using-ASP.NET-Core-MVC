@@ -20,10 +20,16 @@
     
     // Function to handle touch events for product carousels
     function setupCarouselTouchHandling() {
-        const carousels = document.querySelectorAll('#newArrivalsCarousel, #bestSellersCarousel');
+        const isRTL = document.documentElement.dir === 'rtl' || document.documentElement.getAttribute('dir') === 'rtl';
+        const carousels = document.querySelectorAll('#newArrivalsCarousel, #bestSellersCarousel, #offersCarousel');
         
         carousels.forEach(function(carousel) {
             if (!carousel) return;
+            
+            // Skip if RTL - let the RTL handler manage it
+            if (isRTL) {
+                return;
+            }
             
             // Remove any existing listeners to avoid duplicates
             const carouselInner = carousel.querySelector('.carousel-inner');
@@ -74,10 +80,16 @@
     
     // Also handle touch events on the entire carousel container
     function setupCarouselContainerTouchHandling() {
-        const carousels = document.querySelectorAll('#newArrivalsCarousel, #bestSellersCarousel');
+        const isRTL = document.documentElement.dir === 'rtl' || document.documentElement.getAttribute('dir') === 'rtl';
+        const carousels = document.querySelectorAll('#newArrivalsCarousel, #bestSellersCarousel, #offersCarousel');
         
         carousels.forEach(function(carousel) {
             if (!carousel) return;
+            
+            // Skip if RTL - let the RTL handler manage it
+            if (isRTL) {
+                return;
+            }
             
             // Allow vertical scrolling to pass through
             carousel.addEventListener('touchmove', function(e) {
@@ -106,7 +118,8 @@
                     if (node.nodeType === 1) { // Element node
                         if (node.id === 'newArrivalsCarousel' || 
                             node.id === 'bestSellersCarousel' ||
-                            node.querySelector && (node.querySelector('#newArrivalsCarousel') || node.querySelector('#bestSellersCarousel'))) {
+                            node.id === 'offersCarousel' ||
+                            node.querySelector && (node.querySelector('#newArrivalsCarousel') || node.querySelector('#bestSellersCarousel') || node.querySelector('#offersCarousel'))) {
                             shouldReinit = true;
                         }
                     }

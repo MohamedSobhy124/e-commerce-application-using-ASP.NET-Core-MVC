@@ -141,7 +141,7 @@
     <!-- Page-Specific Head Content (meta tags, structured data, etc.) -->
     @RenderSection("Head", required: false)
 </head>
-<body>
+<body data-is-authenticated="@(User.Identity.IsAuthenticated ? "true" : "false")">
     <!-- Simple Page Loader -->
     <div id="cool-loader">
         <div style="text-align: center;">
@@ -456,6 +456,16 @@
     <script src="~/js/flash-sale-customer-fixed.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
+    <!-- Global Authentication State -->
+    <script>
+        // Set global authentication state from body attribute (set in body tag)
+        (function() {
+            const isAuthenticated = document.body.getAttribute('data-is-authenticated') === 'true';
+            window.isAuthenticated = isAuthenticated;
+            console.log('Global authentication state set:', isAuthenticated);
+        })();
+    </script>
+    
     <!-- Back to Top Functionality -->
     <script>
         // Initialize navbar toggler state on page load
@@ -663,34 +673,70 @@
                 }, 600);
             };
 
-            // Show loader for AJAX requests
+            // Show loader for AJAX requests - but exclude cart operations
             if (typeof jQuery !== 'undefined') {
-                $(document).ajaxStart(function() {
-                    loader.style.display = 'flex';
-                    loader.classList.remove('hidden');
-                }).ajaxComplete(function() {
-                    setTimeout(function() {
-                        loader.classList.add('hidden');
-                        setTimeout(function() {
-                            loader.style.display = 'none';
-                        }, 600);
-                    }, 300);
-                });
-            }
-
-            // Also handle fetch API
-            const originalFetch = window.fetch;
-            window.fetch = function(...args) {
-                loader.style.display = 'flex';
-                loader.classList.remove('hidden');
-                return originalFetch.apply(this, args)
-                    .finally(function() {
+                $(document).ajaxStart(function(event, xhr, settings) {
+                    const url = settings?.url || '';
+                    const isCartOperation = url.includes('/ToggleCart') || 
+                                           url.includes('/AddToCart') || 
+                                           url.includes('/RemoveFromCart') ||
+                                           url.includes('/UpdateCart') ||
+                                           url.includes('/GetCartItems') ||
+                                           url.includes('/Cart/');
+                    
+                    // Don't show loader for cart operations
+                    if (!isCartOperation) {
+                        loader.style.display = 'flex';
+                        loader.classList.remove('hidden');
+                    }
+                }).ajaxComplete(function(event, xhr, settings) {
+                    const url = settings?.url || '';
+                    const isCartOperation = url.includes('/ToggleCart') || 
+                                           url.includes('/AddToCart') || 
+                                           url.includes('/RemoveFromCart') ||
+                                           url.includes('/UpdateCart') ||
+                                           url.includes('/GetCartItems') ||
+                                           url.includes('/Cart/');
+                    
+                    // Don't hide loader for cart operations (it was never shown)
+                    if (!isCartOperation) {
                         setTimeout(function() {
                             loader.classList.add('hidden');
                             setTimeout(function() {
                                 loader.style.display = 'none';
                             }, 600);
                         }, 300);
+                    }
+                });
+            }
+
+            // Also handle fetch API - but exclude cart operations and other quick actions
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                const url = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+                const isCartOperation = url.includes('/ToggleCart') || 
+                                       url.includes('/AddToCart') || 
+                                       url.includes('/RemoveFromCart') ||
+                                       url.includes('/UpdateCart') ||
+                                       url.includes('/GetCartItems') ||
+                                       url.includes('/Cart/');
+                
+                // Don't show loader for cart operations - they have their own button loaders
+                if (!isCartOperation) {
+                    loader.style.display = 'flex';
+                    loader.classList.remove('hidden');
+                }
+                
+                return originalFetch.apply(this, args)
+                    .finally(function() {
+                        if (!isCartOperation) {
+                            setTimeout(function() {
+                                loader.classList.add('hidden');
+                                setTimeout(function() {
+                                    loader.style.display = 'none';
+                                }, 600);
+                            }, 300);
+                        }
                     });
             };
         })();

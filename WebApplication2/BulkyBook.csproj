@@ -13,7 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="BulkyBook.Models\" />
     <Folder Include="wwwroot\Images\Products\" />
   </ItemGroup>
 

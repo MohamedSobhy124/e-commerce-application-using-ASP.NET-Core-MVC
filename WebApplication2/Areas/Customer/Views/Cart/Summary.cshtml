@@ -7,6 +7,10 @@
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/cart-summary-enhanced.css" asp-append-version="true" />
+}
+
 <form method="post" id="orderForm" novalidate>
 	<div class="order-summary-wrapper">
 		<div class="container">
@@ -34,51 +38,70 @@
 								
 								@if (Model.OrderHeader.IsGuestOrder || !User.Identity.IsAuthenticated)
 								{
-									<div class="alert alert-info">
-										<i class="bi bi-info-circle me-2"></i>
-										<strong>@Localizer["GuestCheckout"]</strong> - @Localizer["GuestCheckoutInfo"]
+									<div class="alert alert-info-enhanced">
+										<div class="alert-icon">
+											<i class="bi bi-info-circle-fill"></i>
+										</div>
+										<div class="alert-content">
+											<strong>@Localizer["GuestCheckout"]</strong>
+											<p class="mb-0">@Localizer["GuestCheckoutInfo"]</p>
+										</div>
 									</div>
-									<div class="form-row">
-										<label>@Localizer["EmailAddress"] *</label>
-										<input asp-for="OrderHeader.Email" type="email" class="form-control" required />
-										<span asp-validation-for="OrderHeader.Email" class="text-danger"></span>
+									<div class="form-row-enhanced">
+										<label class="form-label-enhanced">
+											<i class="bi bi-envelope-fill me-2"></i>@Localizer["EmailAddress"] <span class="text-danger">*</span>
+										</label>
+										<input asp-for="OrderHeader.Email" type="email" class="form-control-enhanced" placeholder="@Localizer["EnterYourEmail"]" required />
+										<span asp-validation-for="OrderHeader.Email" class="text-danger validation-message"></span>
 									</div>
 								}
 								
-								<div class="form-row">
-									<label>@Localizer["Name"] <span class="text-danger">*</span></label>
-									<input asp-for="OrderHeader.Name" class="form-control" required />
-									<span asp-validation-for="OrderHeader.Name" class="text-danger"></span>
+								<div class="form-row-enhanced">
+									<label class="form-label-enhanced">
+										<i class="bi bi-person-fill me-2"></i>@Localizer["Name"] <span class="text-danger">*</span>
+									</label>
+									<input asp-for="OrderHeader.Name" class="form-control-enhanced" placeholder="@Localizer["EnterYourName"]" required />
+									<span asp-validation-for="OrderHeader.Name" class="text-danger validation-message"></span>
 								</div>
 
-								<div class="form-row">
-									<label>@Localizer["Phone"] <span class="text-danger">*</span></label>
-									<input asp-for="OrderHeader.PhoneNumber" class="form-control" required />
-									<span asp-validation-for="OrderHeader.PhoneNumber" class="text-danger"></span>
+								<div class="form-row-enhanced">
+									<label class="form-label-enhanced">
+										<i class="bi bi-telephone-fill me-2"></i>@Localizer["Phone"] <span class="text-danger">*</span>
+									</label>
+									<input asp-for="OrderHeader.PhoneNumber" class="form-control-enhanced" placeholder="@Localizer["EnterYourPhone"]" required />
+									<span asp-validation-for="OrderHeader.PhoneNumber" class="text-danger validation-message"></span>
 								</div>
 
-								<div class="form-row">
-									<label>@Localizer["StreetAddress"] <span class="text-danger">*</span></label>
-									<input asp-for="OrderHeader.StreetAddress" class="form-control" required />
-									<span asp-validation-for="OrderHeader.StreetAddress" class="text-danger"></span>
+								<div class="form-row-enhanced">
+									<label class="form-label-enhanced">
+										<i class="bi bi-geo-alt-fill me-2"></i>@Localizer["StreetAddress"] <span class="text-danger">*</span>
+									</label>
+									<input asp-for="OrderHeader.StreetAddress" class="form-control-enhanced" placeholder="@Localizer["EnterStreetAddress"]" required />
+									<span asp-validation-for="OrderHeader.StreetAddress" class="text-danger validation-message"></span>
 								</div>
 
-								<div class="form-row">
-									<label>@Localizer["City"] <span class="text-danger">*</span></label>
-									<input asp-for="OrderHeader.City" class="form-control" required />
-									<span asp-validation-for="OrderHeader.City" class="text-danger"></span>
+								<div class="form-row-enhanced">
+									<label class="form-label-enhanced">
+										<i class="bi bi-building me-2"></i>@Localizer["City"] <span class="text-danger">*</span>
+									</label>
+									<input asp-for="OrderHeader.City" class="form-control-enhanced" placeholder="@Localizer["EnterCity"]" required />
+									<span asp-validation-for="OrderHeader.City" class="text-danger validation-message"></span>
 								</div>
 
-								<div class="form-row">
-									<label>@Localizer["State"] <span class="text-danger">*</span></label>
-									<input asp-for="OrderHeader.State" class="form-control" required />
-									<span asp-validation-for="OrderHeader.State" class="text-danger"></span>
+								<div class="form-row-enhanced">
+									<label class="form-label-enhanced">
+										<i class="bi bi-geo me-2"></i>@Localizer["State"] <span class="text-danger">*</span>
+									</label>
+									<input asp-for="OrderHeader.State" class="form-control-enhanced" placeholder="@Localizer["EnterState"]" required />
+									<span asp-validation-for="OrderHeader.State" class="text-danger validation-message"></span>
 								</div>
 
-								<div class="form-row">
-									<label>@Localizer["PostalCode"] <span class="text-danger">*</span></label>
-									<input asp-for="OrderHeader.PostalCode" class="form-control" required />
-									<span asp-validation-for="OrderHeader.PostalCode" class="text-danger"></span>
+								<div class="form-row-enhanced">
+									<label class="form-label-enhanced">
+										<i class="bi bi-mailbox me-2"></i>@Localizer["PostalCode"] <span class="text-danger">*</span>
+									</label>
+									<input asp-for="OrderHeader.PostalCode" class="form-control-enhanced" placeholder="@Localizer["EnterPostalCode"]" required />
+									<span asp-validation-for="OrderHeader.PostalCode" class="text-danger validation-message"></span>
 								</div>
 							</div>
 						</div>
@@ -152,33 +175,63 @@
 										// Create item key for promo code matching
 										string itemKey = $"{details.ProductId}_{details.ProductVariantId?.ToString() ?? "0"}_{details.FlashSaleItemId?.ToString() ?? "0"}_{details.ComboOfferId?.ToString() ?? "0"}";
 										
-										<li class="order-item" data-item-key="@itemKey" data-product-id="@details.ProductId" data-variant-id="@(details.ProductVariantId?.ToString() ?? "0")">
-											<div>
-												<h6 class="order-item-title">
+										// Get product image
+										string productImageUrl = null;
+										if (isComboOffer && !string.IsNullOrEmpty(details.ComboOffer.ImageUrl))
+										{
+											productImageUrl = details.ComboOffer.ImageUrl;
+										}
+										else if (details.product.ProductImages != null && details.product.ProductImages.Any())
+										{
+											var firstImage = details.product.ProductImages.OrderBy(pi => pi.DisplayOrder).FirstOrDefault();
+											productImageUrl = firstImage?.ImageUrl;
+										}
+										else if (!string.IsNullOrEmpty(details.product.ImageUrl))
+										{
+											productImageUrl = details.product.ImageUrl;
+										}
+										
+										if (string.IsNullOrEmpty(productImageUrl))
+										{
+											productImageUrl = "/images/no-image.png";
+										}
+										
+										<li class="order-item-enhanced" data-item-key="@itemKey" data-product-id="@details.ProductId" data-variant-id="@(details.ProductVariantId?.ToString() ?? "0")">
+											<div class="order-item-image-wrapper">
+												<img src="@productImageUrl" alt="@displayName" class="order-item-image" />
+											</div>
+											<div class="order-item-content">
+												<h6 class="order-item-title-enhanced">
 													@displayName
 													@if (isComboOffer)
 													{
-														<span class="badge bg-warning text-dark ms-2" style="font-size: 0.7rem;">@Localizer["ComboOffer"]</span>
+														<span class="badge badge-combo">@Localizer["ComboOffer"]</span>
 													}
-													<span class="promo-applied-badge badge bg-success ms-2" style="display: none; font-size: 0.7rem;">
+													<span class="promo-applied-badge badge badge-promo" style="display: none;">
 														<i class="bi bi-tag-fill"></i> @Localizer["DiscountApplied"]
 													</span>
 												</h6>
 												@if (hasVariant && !string.IsNullOrEmpty(variantDisplayText))
 												{
-													<small class="order-item-variant text-muted d-block">
+													<small class="order-item-variant-enhanced">
 														<i class="bi bi-tag-fill me-1"></i>@variantDisplayText
 													</small>
 												}
-												<small class="order-item-quantity">@Localizer["Quantity"]: @details.Count</small>
-												@if (isComboOffer)
-												{
-													<small class="text-muted d-block">@details.ComboOffer.TotalProducts @Localizer["Products"]</small>
-												}
+												<div class="order-item-meta">
+													<small class="order-item-quantity-enhanced">
+														<i class="bi bi-box-seam me-1"></i>@Localizer["Quantity"]: <strong>@details.Count</strong>
+													</small>
+													@if (isComboOffer)
+													{
+														<small class="order-item-products-count">
+															<i class="bi bi-grid me-1"></i>@details.ComboOffer.TotalProducts @Localizer["Products"]
+														</small>
+													}
+												</div>
 												<small class="item-discount-amount text-success" style="display: none;"></small>
 											</div>
-											<div class="text-end">
-												<div class="order-item-price">
+											<div class="order-item-price-wrapper">
+												<div class="order-item-price-enhanced">
 													<span class="original-price">@Html.Raw(currencySymbol) @((details.Price*details.Count).ToString("N2", System.Globalization.CultureInfo.InvariantCulture))</span>
 													<span class="discounted-price text-success" style="display: none;"></span>
 												</div>
@@ -276,20 +329,24 @@
 					</div>
 				</div>
 
-				<div class="order-summary-footer">
-					<div class="row align-items-center">
-						<div class="col-12 col-md-8">
-							<p class="estimate-delivery">
-								<i class="bi bi-calendar-check me-2"></i>
-								@Localizer["EstimatedDelivery"]: @BulkyBook.Utility.DateTimeHelper.Now.AddDays(7).ToShortDateString() - @BulkyBook.Utility.DateTimeHelper.Now.AddDays(14).ToShortDateString()
-							</p>
+				<div class="order-summary-footer-enhanced">
+					<div class="footer-content-wrapper">
+						<div class="estimate-delivery-enhanced">
+							<div class="delivery-icon">
+								<i class="bi bi-truck"></i>
+							</div>
+							<div class="delivery-text">
+								<strong>@Localizer["EstimatedDelivery"]</strong>
+								<p class="mb-0">@BulkyBook.Utility.DateTimeHelper.Now.AddDays(7).ToShortDateString() - @BulkyBook.Utility.DateTimeHelper.Now.AddDays(14).ToShortDateString()</p>
+							</div>
 						</div>
-						<div class="col-12 col-md-8">
-							<button type="submit" class="place-order-btn">
-								<i class="bi bi-check-circle me-2"></i>
-								@Localizer["PlaceOrder"]
-							</button>
-						</div>
+						<button type="submit" class="place-order-btn-enhanced">
+							<span class="btn-content">
+								<i class="bi bi-check-circle-fill me-2"></i>
+								<span>@Localizer["PlaceOrder"]</span>
+							</span>
+							<span class="btn-shine"></span>
+						</button>
 					</div>
 				</div>
 			</div>

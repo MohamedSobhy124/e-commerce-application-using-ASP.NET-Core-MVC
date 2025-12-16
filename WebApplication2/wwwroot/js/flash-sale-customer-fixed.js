@@ -252,25 +252,11 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
 }
 
 function openCartSidebar(forceOpen = false) {
-    // Check if on mobile and home page - don't open cart sidebar automatically
-    // But allow if forceOpen is true (user clicked the cart icon)
-    if (!forceOpen) {
-        const isMobile = window.innerWidth <= 768;
-        const currentPath = window.location.pathname.toLowerCase();
-        const isHomePage = currentPath === '/' || 
-                          currentPath === '/customer/home' || 
-                          currentPath === '/customer/home/index' ||
-                          currentPath.startsWith('/customer/home/index');
-        
-        if (isMobile && isHomePage) {
-            console.log('Cart sidebar disabled on mobile home screen');
-            return;
-        }
-    }
-    
-    console.log('Opening cart sidebar...');
-    const sidebar = document.querySelector('.cart-sidebar-enhanced') || document.getElementById('cartSidebar');
-    const overlay = document.querySelector('.cart-overlay-enhanced') || document.getElementById('cartOverlay');
+    // Always allow cart sidebar to open when user clicks (forceOpen = true)
+    // Only prevent automatic opens if needed (but allow manual opens)
+    console.log('Opening cart sidebar...', 'forceOpen:', forceOpen);
+    const sidebar = document.querySelector('.cart-sidebar-new') || document.getElementById('cartSidebar');
+    const overlay = document.querySelector('.cart-sidebar-overlay') || document.getElementById('cartOverlay');
 
     if (sidebar && overlay) {
         sidebar.classList.add('active');
@@ -410,14 +396,21 @@ function createCartItemHTML(item) {
         ${stockMessage}
     `;
     
+    // Build product details URL
+    const productDetailsUrl = item.productSlug 
+        ? `/Customer/Home/Details/${item.productSlug}` 
+        : `/Customer/Home/Details/${item.productId}`;
+    
     return `
         <div class="cart-sidebar-item" data-cart-id="${item.cartId || ''}" data-product-id="${item.productId}">
-            <div class="cart-item-image-wrapper">
+            <a href="${productDetailsUrl}" class="cart-item-image-wrapper" style="text-decoration: none; cursor: pointer;">
                 <img src="${imageUrl}" alt="${item.title}" class="cart-sidebar-item-image" 
                      onerror="this.src='/images/no-image.png'">
-            </div>
+            </a>
             <div class="cart-item-details">
-                <h6 class="cart-item-title">${item.title}</h6>
+                <a href="${productDetailsUrl}" class="cart-item-title-link" style="text-decoration: none; color: inherit; display: block;">
+                    <h6 class="cart-item-title">${item.title}</h6>
+                </a>
                 ${item.variantName ? `<p class="cart-item-variant">${item.variantName}</p>` : ''}
                 <div class="cart-item-meta">
                     ${quantityControls}
@@ -785,6 +778,332 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// ============================================
+// TOGGLE CART FUNCTION - Global availability
+// ============================================
+// Make toggleCart globally available for partial views
+if (typeof window.toggleCart === 'undefined') {
+    window.toggleCart = function(productId, button) {
+        // Prevent multiple clicks
+        if (!button || button.disabled || button.classList.contains('loading')) {
+            return;
+        }
+        
+        const isCurrentlyInCart = button && button.classList.contains('in-cart');
+        const originalIcon = button && button.querySelector('i') ? button.querySelector('i').className : '';
+        const originalText = button.innerHTML;
+        
+        // Save scroll position if function exists
+        if (typeof saveScrollPosition === 'function') {
+            saveScrollPosition();
+        }
+        
+        if (button) {
+            // Disable button and show loading state ONLY in button
+            button.disabled = true;
+            button.classList.add('loading');
+            button.style.opacity = '0.7';
+            button.style.cursor = 'wait';
+            
+            const icon = button.querySelector('i');
+            if (icon) {
+                icon.className = 'bi bi-arrow-repeat';
+                icon.style.animation = 'spin 1s linear infinite';
+            }
+        }
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        const formData = new FormData();
+        formData.append('productId', productId);
+        if (token) {
+            formData.append('__RequestVerificationToken', token);
+        }
+
+        fetch('/Customer/Home/ToggleCart', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Server response:', data);
+            if (data.success && button) {
+                // Remove loading state from button only
+                button.disabled = false;
+                button.classList.remove('loading');
+                button.style.opacity = '';
+                button.style.cursor = '';
+                const icon = button.querySelector('i');
+                if (icon) {
+                    icon.style.animation = '';
+                }
+                
+                if (data.isAdded) {
+                    // Product was added
+                    button.classList.add('in-cart');
+                    if (icon) {
+                        icon.className = 'bi bi-check-lg';
+                    }
+                    
+                    // Get localizations from window or use defaults
+                    const localizations = window.localizations || {};
+                    button.title = localizations.removeFromCart || 'Remove from Cart';
+                    
+                    // Update cart product IDs if available
+                    if (typeof window.cartProductIds !== 'undefined' && Array.isArray(window.cartProductIds)) {
+                        if (!window.cartProductIds.includes(productId)) {
+                            window.cartProductIds.push(productId);
+                        }
+                    }
+                    
+                    // Show notification
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success(data.message);
+                    }
+                    
+                    // Update cart count everywhere
+                    if (typeof window.updateFloatingCartBadge === 'function') {
+                        window.updateFloatingCartBadge(data.cartCount);
+                    } else if (typeof updateFloatingCartBadge === 'function') {
+                        updateFloatingCartBadge(data.cartCount);
+                    }
+                    
+                    // Update navigation cart count
+                    if (typeof window.updateNavigationCartCount === 'function') {
+                        window.updateNavigationCartCount(data.cartCount);
+                    } else if (typeof updateNavigationCartCount === 'function') {
+                        updateNavigationCartCount(data.cartCount);
+                    }
+                    
+                    // Update cart widget
+                    if (typeof window.updateCartWidget === 'function') {
+                        setTimeout(() => {
+                            window.updateCartWidget();
+                        }, 150);
+                    } else if (typeof updateCartWidget === 'function') {
+                        setTimeout(() => {
+                            updateCartWidget();
+                        }, 150);
+                    }
+                    
+                    // Open cart sidebar if available - but NOT on mobile screens
+                    if (typeof window.openCartSidebar === 'function') {
+                        const sidebar = document.querySelector('.cart-sidebar-new') || document.getElementById('cartSidebar');
+                        const isMobile = window.innerWidth <= 768;
+                        
+                        // Only open sidebar on desktop, not on mobile
+                        if (sidebar && !isMobile) {
+                            window.openCartSidebar(true);
+                        }
+                    }
+                } else {
+                    // Product was removed
+                    button.classList.remove('in-cart');
+                    if (icon) {
+                        icon.className = 'bi bi-plus-lg';
+                    }
+                    
+                    const localizations = window.localizations || {};
+                    button.title = localizations.addToCart || 'Add to Cart';
+                    
+                    // Update cart product IDs if available
+                    if (typeof window.cartProductIds !== 'undefined' && Array.isArray(window.cartProductIds)) {
+                        window.cartProductIds = window.cartProductIds.filter(id => id !== productId);
+                    }
+                    
+                    // Show notification
+                    if (typeof toastr !== 'undefined') {
+                        toastr.info(data.message);
+                    }
+                    
+                    // Update cart count everywhere
+                    if (typeof window.updateFloatingCartBadge === 'function') {
+                        window.updateFloatingCartBadge(data.cartCount);
+                    } else if (typeof updateFloatingCartBadge === 'function') {
+                        updateFloatingCartBadge(data.cartCount);
+                    }
+                    
+                    // Update navigation cart count
+                    if (typeof window.updateNavigationCartCount === 'function') {
+                        window.updateNavigationCartCount(data.cartCount);
+                    } else if (typeof updateNavigationCartCount === 'function') {
+                        updateNavigationCartCount(data.cartCount);
+                    }
+                    
+                    // Update cart widget
+                    if (typeof window.updateCartWidget === 'function') {
+                        setTimeout(() => {
+                            window.updateCartWidget();
+                        }, 150);
+                    } else if (typeof updateCartWidget === 'function') {
+                        setTimeout(() => {
+                            updateCartWidget();
+                        }, 150);
+                    }
+                }
+            } else {
+                throw new Error(data.message || 'Failed to update cart');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (button) {
+                // Remove loading state from button only
+                button.disabled = false;
+                button.classList.remove('loading');
+                button.style.opacity = '';
+                button.style.cursor = '';
+                const icon = button.querySelector('i');
+                if (icon) {
+                    icon.className = originalIcon;
+                    icon.style.animation = '';
+                }
+            }
+            
+            const localizations = window.localizations || {};
+            const errorMsg = localizations.failedToUpdateCart || 'Failed to update cart';
+            
+            if (typeof toastr !== 'undefined') {
+                toastr.error(errorMsg);
+            } else if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMsg
+                });
+            }
+        });
+    };
+}
+
+// ============================================
+// WISHLIST SIDEBAR FUNCTIONS (Global)
+// ============================================
+
+// Make wishlist sidebar functions globally available
+if (typeof window.openWishlistSidebar === 'undefined') {
+    window.openWishlistSidebar = function() {
+        const sidebar = document.getElementById('wishlistSidebar');
+        const overlay = document.getElementById('wishlistOverlay');
+        
+        if (sidebar && overlay) {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Always try to load wishlist items when sidebar opens
+            // Check if user is authenticated first
+            const isAuthenticated = document.body.getAttribute('data-is-authenticated') === 'true' || 
+                                    (typeof window.isAuthenticated !== 'undefined' && window.isAuthenticated);
+            
+            if (isAuthenticated) {
+                // Call loadWishlistItemsToSidebar if it exists (defined in Index.cshtml)
+                if (typeof loadWishlistItemsToSidebar === 'function') {
+                    loadWishlistItemsToSidebar();
+                } else if (typeof window.loadWishlistItemsToSidebar === 'function') {
+                    window.loadWishlistItemsToSidebar();
+                } else {
+                    // Fallback: load wishlist items directly
+                    console.log('Loading wishlist items directly...');
+                    fetch('/Customer/Home/GetWishlistItems')
+                        .then(response => {
+                            console.log('Wishlist response status:', response.status);
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Wishlist data received:', data);
+                            const container = document.getElementById('wishlistItemsContainer');
+                            const countElement = document.getElementById('sidebarWishlistCount');
+                            
+                            if (!container) {
+                                console.error('wishlistItemsContainer not found!');
+                                return;
+                            }
+                            
+                            if (data.success && data.items && data.items.length > 0) {
+                                console.log('Rendering', data.items.length, 'wishlist items');
+                                // Use global createWishlistItemHTML if available, otherwise use inline version
+                                const createHTML = window.createWishlistItemHTML;
+                                if (typeof createHTML === 'function') {
+                                    console.log('Using global createWishlistItemHTML function');
+                                    container.innerHTML = data.items.map(item => createHTML(item)).join('');
+                                } else {
+                                    console.log('Using inline HTML rendering');
+                                    // Fallback: simple HTML rendering
+                                    container.innerHTML = data.items.map(item => {
+                                        const currentCulture = document.documentElement.lang || 'en';
+                                        const displayTitle = (currentCulture === 'ar' && item.titleAr) ? item.titleAr : item.title;
+                                        const productSlug = item.slugEn || item.productId;
+                                        const isVariable = item.productType === 1;
+                                        const discount = item.listPrice && item.listPrice > item.price 
+                                            ? Math.floor((item.listPrice - item.price) / item.listPrice * 100) 
+                                            : 0;
+                                        
+                                        return `
+                                            <div class="wishlist-item" data-product-id="${item.productId}">
+                                                <img src="${item.imageUrl || '/images/no-image.png'}" alt="${displayTitle}" class="wishlist-item-image" onerror="this.src='/images/no-image.png'">
+                                                <div class="wishlist-item-details">
+                                                    <h6 class="wishlist-item-title">${displayTitle}</h6>
+                                                    <div class="wishlist-item-price">
+                                                        <span class="current-price">AED ${item.price.toFixed(2)}</span>
+                                                        ${item.listPrice && item.listPrice > item.price ? `<span class="list-price">AED ${item.listPrice.toFixed(2)}</span>` : ''}
+                                                    </div>
+                                                    <div class="wishlist-item-actions">
+                                                        ${isVariable
+                                                            ? `<a href="/Customer/Home/Details/${productSlug}" class="btn btn-select-options-from-wishlist" title="Select Options">
+                                                                <i class="bi bi-list-check me-1"></i>Select Options
+                                                               </a>`
+                                                            : `<button class="btn btn-add-cart-from-wishlist" onclick="if(typeof window.addToCartFromWishlist === 'function') { window.addToCartFromWishlist(${item.productId}, ${item.id}); } else { console.error('addToCartFromWishlist not available'); }" title="Add to Cart">
+                                                                <i class="bi bi-cart-plus me-1"></i>Add to Cart
+                                                               </button>`
+                                                        }
+                                                        <button class="btn btn-remove-wishlist" onclick="if(typeof window.removeFromWishlist === 'function') { window.removeFromWishlist(${item.id}, ${item.productId}); } else { console.error('removeFromWishlist not available'); }" title="Remove">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('');
+                                }
+                                if (countElement) countElement.textContent = data.count;
+                                
+                                // Update floating badge
+                                if (typeof window.updateFloatingWishlistBadge === 'function') {
+                                    window.updateFloatingWishlistBadge(data.count);
+                                }
+                            } else {
+                                console.log('Wishlist is empty or no items');
+                                container.innerHTML = '<div class="wishlist-empty"><i class="bi bi-heart"></i><p>Your wishlist is empty</p></div>';
+                                if (countElement) countElement.textContent = '0';
+                                if (typeof window.updateFloatingWishlistBadge === 'function') {
+                                    window.updateFloatingWishlistBadge(0);
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error loading wishlist items:', error);
+                            const container = document.getElementById('wishlistItemsContainer');
+                            if (container) {
+                                container.innerHTML = '<div class="wishlist-empty"><p>Error loading wishlist</p></div>';
+                            }
+                        });
+                }
+            }
+        }
+    };
+}
+
+if (typeof window.closeWishlistSidebar === 'undefined') {
+    window.closeWishlistSidebar = function() {
+        const sidebar = document.getElementById('wishlistSidebar');
+        const overlay = document.getElementById('wishlistOverlay');
+        
+        if (sidebar) sidebar.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+}
 
 
 
