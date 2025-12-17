@@ -1,5 +1,18 @@
 // Cart AJAX Operations
 $(document).ready(function () {
+    // Sync with localStorage after cart operations
+    function syncCartToLocalStorage(response) {
+        if (window.cartStorage && response) {
+            // Update localStorage after successful server operation
+            if (response.cartCount !== undefined) {
+                // Trigger sync from server to get latest state
+                setTimeout(() => {
+                    window.cartStorage.syncCartFromServer();
+                }, 500);
+            }
+        }
+    }
+
     // Handle Plus button click
     $(document).on('click', '.cart-quantity-btn.plus-btn', function (e) {
         e.preventDefault();
@@ -45,6 +58,9 @@ $(document).ready(function () {
                     if (response.message) {
                         showToast('success', response.message);
                     }
+                    
+                    // Sync with localStorage
+                    syncCartToLocalStorage(response);
                     
                     // Refresh cart items list if needed
                     if (response.shouldReload) {
@@ -141,6 +157,9 @@ $(document).ready(function () {
                     if (response.message) {
                         showToast('success', response.message);
                     }
+                    
+                    // Sync with localStorage
+                    syncCartToLocalStorage(response);
                 } else {
                     showToast('error', response.message || 'Failed to update quantity');
                     btn.html('<i class="bi bi-dash"></i>');
@@ -205,6 +224,9 @@ function removeCartItem(cartId, productId, btn) {
                 if (response.message) {
                     showToast('success', response.message);
                 }
+                
+                // Sync with localStorage
+                syncCartToLocalStorage(response);
             } else {
                 showToast('error', response.message || 'Failed to remove item');
                 btn.html('<i class="bi bi-trash-fill"></i>');

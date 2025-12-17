@@ -186,6 +186,16 @@ function addFlashSaleToCart(flashSaleItemId, productId, flashSalePrice) {
             const successMsg = data.message || (window.localizations?.flashSaleAddedToCart || 'Flash sale item added to cart!');
             toastr.success(successMsg);
             
+            // Sync with localStorage
+            if (window.cartStorage) {
+                window.cartStorage.addItem({
+                    productId: productId,
+                    count: 1,
+                    flashSaleItemId: flashSaleItemId,
+                    flashSalePrice: flashSalePrice
+                });
+            }
+            
             // Update cart count everywhere (works on all screens)
             if (data.cartCount !== undefined) {
                 // Update navigation cart count
@@ -1053,7 +1063,7 @@ if (typeof window.openWishlistSidebar === 'undefined') {
                                                             ? `<a href="/Customer/Home/Details/${productSlug}" class="btn btn-select-options-from-wishlist" title="Select Options">
                                                                 <i class="bi bi-list-check me-1"></i>Select Options
                                                                </a>`
-                                                            : `<button class="btn btn-add-cart-from-wishlist" onclick="if(typeof window.addToCartFromWishlist === 'function') { window.addToCartFromWishlist(${item.productId}, ${item.id}); } else { console.error('addToCartFromWishlist not available'); }" title="Add to Cart">
+                                                            : `<button class="btn btn-add-cart-from-wishlist" onclick="(function() { if(typeof window.addToCartFromWishlist === 'function') { window.addToCartFromWishlist(${item.productId}, ${item.id}); } else { console.error('addToCartFromWishlist function not available. Please ensure wishlist-helper.js is loaded.'); if(typeof toastr !== 'undefined') { toastr.error('Unable to add to cart. Please refresh the page.'); } } })();" title="Add to Cart">
                                                                 <i class="bi bi-cart-plus me-1"></i>Add to Cart
                                                                </button>`
                                                         }

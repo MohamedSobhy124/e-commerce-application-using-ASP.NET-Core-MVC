@@ -53,7 +53,7 @@
         
         <!-- Desktop & Mobile Search Box -->
         <div class="hero-search-box" id="heroSearchBox">
-            <form id="heroSearchForm" onsubmit="return false;" style="width:90%;>
+            <form id="heroSearchForm" onsubmit="return false;" style="width:90%;">
                 <div class="advanced-search-container" id="advancedSearchContainer">
                     <!-- Mobile Back Button (shown when search is focused) -->
                     <button type="button" 
@@ -2687,6 +2687,14 @@
                         button.title = localizations.removeFromCart;
                         cartProductIds.push(productId);
                         
+                        // Sync with localStorage
+                        if (window.cartStorage) {
+                            window.cartStorage.addItem({
+                                productId: productId,
+                                count: 1
+                            });
+                        }
+                        
                         // Show notification
                         if (typeof toastr !== 'undefined') {
                             toastr.success(data.message);
@@ -2728,6 +2736,11 @@
                         button.querySelector('i').className = 'bi bi-plus-lg';
                         button.title = localizations.addToCart;
                         cartProductIds = cartProductIds.filter(id => id !== productId);
+                        
+                        // Sync with localStorage
+                        if (window.cartStorage) {
+                            window.cartStorage.removeItem(productId);
+                        }
                         
                         // Show notification
                         if (typeof toastr !== 'undefined') {
@@ -3830,33 +3843,46 @@
             // Make createWishlistItemHTML globally available
             window.createWishlistItemHTML = createWishlistItemHTML;
 
-            function addToCartFromWishlist(productId, wishlistId) {
-                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-                const formData = new FormData();
-                formData.append('productId', productId);
-                formData.append('__RequestVerificationToken', token);
+            // Use global addToCartFromWishlist function from wishlist-helper.js
+            // If it's not available, define a local fallback
+            if (typeof window.addToCartFromWishlist === 'undefined') {
+                function addToCartFromWishlist(productId, wishlistId) {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    const formData = new FormData();
+                    formData.append('productId', productId);
+                    formData.append('__RequestVerificationToken', token);
 
-                fetch('/Customer/Home/ToggleCart', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.isAdded) {
+                    fetch('/Customer/Home/ToggleCart', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.isAdded) {
+                            // Sync with localStorage
+                            if (window.cartStorage) {
+                                window.cartStorage.addItem({
+                                    productId: productId,
+                                    count: 1
+                                });
+                            }
+
+                            if (typeof toastr !== 'undefined') {
+                                toastr.success(localizations.addedToCart);
+                            }
+                            if (typeof updateFloatingCartBadge === 'function') {
+                                updateFloatingCartBadge(data.cartCount);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error adding to cart:', error);
                         if (typeof toastr !== 'undefined') {
-                            toastr.success(localizations.addedToCart);
+                            toastr.error(localizations.failedToAddToCart);
                         }
-                        if (typeof updateFloatingCartBadge === 'function') {
-                            updateFloatingCartBadge(data.cartCount);
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error adding to cart:', error);
-                    if (typeof toastr !== 'undefined') {
-                        toastr.error(localizations.failedToAddToCart);
-                    }
-                });
+                    });
+                }
+                window.addToCartFromWishlist = addToCartFromWishlist;
             }
 
             function removeFromWishlist(wishlistId, productId) {

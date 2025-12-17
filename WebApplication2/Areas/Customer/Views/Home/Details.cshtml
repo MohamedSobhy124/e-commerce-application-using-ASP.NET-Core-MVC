@@ -635,6 +635,20 @@
 }
 
 @section Scripts {
+    <style>
+        @@keyframes cartPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        @@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
     <script>
         const productId = @Model.ProductId;
         const productType = @((int)Model.product.ProductType);
@@ -1288,18 +1302,18 @@
             $('#quantityError').hide();
         }
         
-        // Update form submission to include variant ID and validate quantity
+        // Update form submission to include variant ID and validate quantity - CONVERT TO AJAX
         $('form').on('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            
             // Validate quantity before submission
             if (!validateQuantity()) {
-                e.preventDefault();
                 return false;
             }
             
             if (productType === 1) {
                 const variantId = $('#selectedVariantId').val();
                 if (!variantId) {
-                    e.preventDefault();
                     Swal.fire({
                         icon: 'warning',
                         title: localizations.selectOptions,
@@ -1317,7 +1331,196 @@
                     }).appendTo(this);
                 }
             }
+            
+            // Get form data
+            const formData = new FormData(this);
+            const addToCartBtn = $('#addToCartBtn');
+            const originalBtnText = addToCartBtn.html();
+            
+            // Show loading state
+            addToCartBtn.prop('disabled', true);
+            addToCartBtn.html('<i class="bi bi-arrow-repeat spin"></i> @Localizer["Adding"]...');
+            
+            // Submit via AJAX
+            fetch(window.location.href, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(response => {
+                // Check if response is JSON
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    return response.json();
+                }
+                
+                // If redirected, it means success (non-AJAX fallback)
+                if (response.redirected) {
+                    return { success: true, message: '@Localizer["ItemAddedToCart"]' || 'Product added to cart successfully!' };
+                }
+                
+                // Try to parse as JSON, fallback to success
+                return response.json().catch(() => ({ success: true }));
+            })
+            .then(data => {
+                // Reset button
+                addToCartBtn.prop('disabled', false);
+                addToCartBtn.html(originalBtnText);
+                
+                if (data && data.success !== false) {
+                    // Success - update cart count
+                    const quantity = parseInt($('#quantityInput').val()) || 1;
+                    const variantId = $('#selectedVariantId').val();
+                    
+                    // Sync with localStorage
+                    if (window.cartStorage) {
+                        // Get product info for localStorage
+                        const item = {
+                            productId: productId,
+                            count: quantity,
+                            productVariantId: variantId ? parseInt(variantId) : null
+                        };
+                        
+                        // Check if there's a flash sale
+                        if (productType === 1 && variantId) {
+                            const variant = variants.find(v => v.id === parseInt(variantId));
+                            if (variant && variantFlashSaleMap[variant.id]) {
+                                item.flashSaleItemId = variantFlashSaleMap[variant.id].flashSaleItemId;
+                                item.flashSalePrice = variantFlashSaleMap[variant.id].flashSalePrice;
+                            }
+                        }
+                        
+                        window.cartStorage.addItem(item);
+                    }
+                    
+                    // Update cart count everywhere
+                    updateCartCountAfterAdd();
+                    
+                    // Show success message
+                    const successMsg = data.message || '@Localizer["ItemAddedToCart"]' || 'Product added to cart successfully!';
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success(successMsg);
+                    } else if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '@Localizer["Success"]',
+                            text: successMsg,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    }
+                    
+                    // Optionally open cart sidebar (desktop only)
+                    if (typeof openCartSidebar === 'function' || typeof window.openCartSidebar === 'function') {
+                        const openCart = window.openCartSidebar || openCartSidebar;
+                        const sidebar = document.querySelector('.cart-sidebar-new') || document.getElementById('cartSidebar');
+                        const isMobile = window.innerWidth <= 768;
+                        
+                        if (sidebar && !isMobile) {
+                            setTimeout(() => {
+                                openCart(true);
+                            }, 500);
+                        }
+                    }
+                } else {
+                    // Error
+                    const errorMsg = data.message || '@Localizer["FailedToAddToCart"]' || 'Failed to add product to cart';
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error(errorMsg);
+                    } else if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '@Localizer["Error"]',
+                            text: errorMsg
+                        });
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error adding to cart:', error);
+                addToCartBtn.prop('disabled', false);
+                addToCartBtn.html(originalBtnText);
+                
+                const errorMsg = '@Localizer["AnErrorOccurred"]' || 'An error occurred. Please try again.';
+                if (typeof toastr !== 'undefined') {
+                    toastr.error(errorMsg);
+                } else if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '@Localizer["Error"]',
+                        text: errorMsg
+                    });
+                }
+            });
+            
+            return false;
         });
+        
+        // Function to update cart count after adding to cart
+        function updateCartCountAfterAdd() {
+            // Get cart count from server
+            fetch('/Customer/Home/GetCartCount')
+                .then(response => response.json())
+                .then(data => {
+                    const cartCount = data.cartCount || 0;
+                    
+                    // Update navigation cart count
+                    const cartCountElement = document.getElementById('cartCount');
+                    if (cartCountElement) {
+                        cartCountElement.textContent = cartCount;
+                        if (cartCount > 0) {
+                            cartCountElement.style.display = 'inline-block';
+                            // Add pulse animation
+                            cartCountElement.style.animation = 'none';
+                            setTimeout(() => {
+                                cartCountElement.style.animation = 'cartPulse 0.6s ease';
+                            }, 10);
+                        } else {
+                            cartCountElement.style.display = 'none';
+                        }
+                    }
+                    
+                    // Update header cart badge
+                    const headerCartBadge = document.getElementById('headerCartBadge');
+                    if (headerCartBadge) {
+                        if (cartCount > 0) {
+                            headerCartBadge.textContent = cartCount;
+                            headerCartBadge.style.display = 'flex';
+                        } else {
+                            headerCartBadge.style.display = 'none';
+                        }
+                    }
+                    
+                    // Update floating cart badge
+                    if (typeof updateFloatingCartBadge === 'function') {
+                        updateFloatingCartBadge(cartCount);
+                    } else if (typeof window.updateFloatingCartBadge === 'function') {
+                        window.updateFloatingCartBadge(cartCount);
+                    }
+                    
+                    // Update cart widget
+                    if (typeof updateCartWidget === 'function') {
+                        setTimeout(() => {
+                            updateCartWidget();
+                        }, 150);
+                    }
+                    
+                    // Update localStorage cart count display
+                    if (window.cartStorage) {
+                        window.cartStorage.updateCartCountFromLocalStorage();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating cart count:', error);
+                    // Fallback: update from localStorage
+                    if (window.cartStorage) {
+                        window.cartStorage.updateCartCountFromLocalStorage();
+                    }
+                });
+        }
 
         function loadProductRating(productId) {
             fetch(`/Customer/Review/GetProductRating?productId=${productId}`)

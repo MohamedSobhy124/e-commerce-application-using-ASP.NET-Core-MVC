@@ -1847,7 +1847,15 @@ namespace BulkyBook.Areas.Customer.Controllers
             // Validate quantity
             if (shoppingCart.Count < 1)
             {
-                TempData["error"] = _localizer["QuantityMustBeAtLeastOne"]?.Value ?? "Quantity must be at least 1.";
+                var quantityErrorMsg = _localizer["QuantityMustBeAtLeastOne"]?.Value ?? "Quantity must be at least 1.";
+                
+                // Check if this is an AJAX request
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers["Accept"].ToString().Contains("application/json"))
+                {
+                    return Json(new { success = false, message = quantityErrorMsg });
+                }
+                
+                TempData["error"] = quantityErrorMsg;
                 // Get product to get slug for redirect
                 var prod = _unitOfWork.product.Get(p => p.Id == shoppingCart.ProductId && !p.IsDeleted);
                 if (prod != null)
@@ -1864,11 +1872,61 @@ namespace BulkyBook.Areas.Customer.Controllers
             var product = _unitOfWork.product.Get(p => p.Id == shoppingCart.ProductId && !p.IsDeleted);
             if (product == null)
             {
-                TempData["error"] = _localizer["ProductNotFound"]?.Value ?? "Product not found.";
+                var productNotFoundMsg = _localizer["ProductNotFound"]?.Value ?? "Product not found.";
+                
+                // Check if this is an AJAX request
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers["Accept"].ToString().Contains("application/json"))
+                {
+                    return Json(new { success = false, message = productNotFoundMsg });
+                }
+                
+                TempData["error"] = productNotFoundMsg;
                 return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
             }
             
-            // Validate quantity based on product type
+            // Get existing cart quantity BEFORE validation (to account for items already in cart)
+            int existingCartQuantity = 0;
+            int? existingFlashSaleItemId = null;
+            
+            if (User.Identity.IsAuthenticated)
+            {
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    // Check if item already exists in cart (considering variant and flash sale)
+                    var existingCartItem = _unitOfWork.shoppingCart.Get(
+                        a => a.ProductId == shoppingCart.ProductId && 
+                             a.ApplicationUserId == userId &&
+                             a.ProductVariantId == shoppingCart.ProductVariantId);
+                    
+                    if (existingCartItem != null)
+                    {
+                        existingCartQuantity = existingCartItem.Count;
+                        existingFlashSaleItemId = existingCartItem.FlashSaleItemId;
+                    }
+                }
+            }
+            else
+            {
+                // Guest user - check session cart
+                var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
+                var existingGuestItem = guestCart.FirstOrDefault(c => 
+                    c.ProductId == shoppingCart.ProductId && 
+                    c.ProductVariantId == shoppingCart.ProductVariantId);
+                
+                if (existingGuestItem != null)
+                {
+                    existingCartQuantity = existingGuestItem.Count;
+                    existingFlashSaleItemId = existingGuestItem.FlashSaleItemId;
+                }
+            }
+            
+            // Calculate total quantity (existing + new)
+            var totalQuantity = existingCartQuantity + shoppingCart.Count;
+            
+            // Validate quantity based on product type (checking TOTAL quantity)
             string? validationError = null;
             
             if (ProductVariantId.HasValue && ProductVariantId.Value > 0)
@@ -1879,7 +1937,15 @@ namespace BulkyBook.Areas.Customer.Controllers
                 var variant = _unitOfWork.ProductVariant.Get(v => v.Id == ProductVariantId.Value && !v.IsDeleted);
                 if (variant == null || variant.IsDeleted)
                 {
-                    TempData["error"] = _localizer["SelectedVariantNotFound"]?.Value ?? "Selected variant not found.";
+                    var variantNotFoundMsg = _localizer["SelectedVariantNotFound"]?.Value ?? "Selected variant not found.";
+                    
+                    // Check if this is an AJAX request
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers["Accept"].ToString().Contains("application/json"))
+                    {
+                        return Json(new { success = false, message = variantNotFoundMsg });
+                    }
+                    
+                    TempData["error"] = variantNotFoundMsg;
                     return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
                 }
                 
@@ -1903,8 +1969,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                     shoppingCart.FlashSaleItemId = variantFlashSaleItem.Id;
                     shoppingCart.FlashSalePrice = variantFlashSaleItem.FlashSalePrice;
                     
-                    // Check flash sale quantity instead of variant stock
-                    if (variantFlashSaleItem.FlashSaleQuantity < shoppingCart.Count)
+                    // Check flash sale quantity against TOTAL (existing + new)
+                    if (variantFlashSaleItem.FlashSaleQuantity < totalQuantity)
                     {
                         if (variantFlashSaleItem.FlashSaleQuantity == 0)
                         {
@@ -1912,11 +1978,23 @@ namespace BulkyBook.Areas.Customer.Controllers
                         }
                         else
                         {
-                            validationError = string.Format(_localizer["OnlyUnitsAvailableInFlashSaleSimple"]?.Value ?? "Only {0} units available in the flash sale.", variantFlashSaleItem.FlashSaleQuantity);
+                            var available = variantFlashSaleItem.FlashSaleQuantity - existingCartQuantity;
+                            if (available <= 0)
+                            {
+                                validationError = existingCartQuantity > 0
+                                    ? string.Format(_localizer["MaximumFlashSaleQuantityReached"]?.Value ?? "You already have {0} units in your cart. Maximum {1} units available in flash sale.", existingCartQuantity, variantFlashSaleItem.FlashSaleQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableInFlashSaleSimple"]?.Value ?? "Only {0} units available in the flash sale.", variantFlashSaleItem.FlashSaleQuantity);
+                            }
+                            else
+                            {
+                                validationError = existingCartQuantity > 0
+                                    ? string.Format(_localizer["OnlyUnitsAvailableInFlashSaleWithExisting"]?.Value ?? "Only {0} more units available in flash sale. You already have {1} in your cart (max {2}).", available, existingCartQuantity, variantFlashSaleItem.FlashSaleQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableInFlashSaleSimple"]?.Value ?? "Only {0} units available in the flash sale.", variantFlashSaleItem.FlashSaleQuantity);
+                            }
                         }
                     }
-                    // Also check variant stock
-                    else if (variant.StockQuantity < shoppingCart.Count)
+                    // Also check variant stock against TOTAL
+                    else if (variant.StockQuantity < totalQuantity)
                     {
                         if (variant.StockQuantity == 0)
                         {
@@ -1924,14 +2002,26 @@ namespace BulkyBook.Areas.Customer.Controllers
                         }
                         else
                         {
-                            validationError = string.Format(_localizer["OnlyUnitsAvailableForVariantSimple"]?.Value ?? "Only {0} units available for this variant.", variant.StockQuantity);
+                            var available = variant.StockQuantity - existingCartQuantity;
+                            if (available <= 0)
+                            {
+                                validationError = existingCartQuantity > 0
+                                    ? string.Format(_localizer["MaximumVariantQuantityReached"]?.Value ?? "You already have {0} units in your cart. Maximum {1} units available for this variant.", existingCartQuantity, variant.StockQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableForVariantSimple"]?.Value ?? "Only {0} units available for this variant.", variant.StockQuantity);
+                            }
+                            else
+                            {
+                                validationError = existingCartQuantity > 0
+                                    ? string.Format(_localizer["OnlyUnitsAvailableForVariantWithExisting"]?.Value ?? "Only {0} more units available for this variant. You already have {1} in your cart (max {2}).", available, existingCartQuantity, variant.StockQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableForVariantSimple"]?.Value ?? "Only {0} units available for this variant.", variant.StockQuantity);
+                            }
                         }
                     }
                 }
                 else
                 {
-                    // Not in flash sale - check variant stock quantity
-                    if (variant.StockQuantity < shoppingCart.Count)
+                    // Not in flash sale - check variant stock quantity against TOTAL
+                    if (variant.StockQuantity < totalQuantity)
                     {
                         if (variant.StockQuantity == 0)
                         {
@@ -1939,7 +2029,19 @@ namespace BulkyBook.Areas.Customer.Controllers
                         }
                         else
                         {
-                            validationError = string.Format(_localizer["OnlyUnitsAvailableForVariantSimple"]?.Value ?? "Only {0} units available for this variant.", variant.StockQuantity);
+                            var available = variant.StockQuantity - existingCartQuantity;
+                            if (available <= 0)
+                            {
+                                validationError = existingCartQuantity > 0
+                                    ? string.Format(_localizer["MaximumVariantQuantityReached"]?.Value ?? "You already have {0} units in your cart. Maximum {1} units available for this variant.", existingCartQuantity, variant.StockQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableForVariantSimple"]?.Value ?? "Only {0} units available for this variant.", variant.StockQuantity);
+                            }
+                            else
+                            {
+                                validationError = existingCartQuantity > 0
+                                    ? string.Format(_localizer["OnlyUnitsAvailableForVariantWithExisting"]?.Value ?? "Only {0} more units available for this variant. You already have {1} in your cart (max {2}).", available, existingCartQuantity, variant.StockQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableForVariantSimple"]?.Value ?? "Only {0} units available for this variant.", variant.StockQuantity);
+                            }
                         }
                     }
                 }
@@ -1966,8 +2068,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                     shoppingCart.FlashSaleItemId = simpleFlashSaleItem.Id;
                     shoppingCart.FlashSalePrice = simpleFlashSaleItem.FlashSalePrice;
                     
-                    // Check flash sale quantity
-                    if (simpleFlashSaleItem.FlashSaleQuantity < shoppingCart.Count)
+                    // Check flash sale quantity against TOTAL (existing + new)
+                    if (simpleFlashSaleItem.FlashSaleQuantity < totalQuantity)
                     {
                         if (simpleFlashSaleItem.FlashSaleQuantity == 0)
                         {
@@ -1975,11 +2077,23 @@ namespace BulkyBook.Areas.Customer.Controllers
                         }
                         else
                         {
-                            validationError = string.Format(_localizer["OnlyUnitsAvailableInFlashSaleSimple"]?.Value ?? "Only {0} units available in the flash sale.", simpleFlashSaleItem.FlashSaleQuantity);
+                            var available = simpleFlashSaleItem.FlashSaleQuantity - existingCartQuantity;
+                            if (available <= 0)
+                            {
+                                validationError = existingCartQuantity > 0
+                                    ? string.Format(_localizer["MaximumFlashSaleQuantityReached"]?.Value ?? "You already have {0} units in your cart. Maximum {1} units available in flash sale.", existingCartQuantity, simpleFlashSaleItem.FlashSaleQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableInFlashSaleSimple"]?.Value ?? "Only {0} units available in the flash sale.", simpleFlashSaleItem.FlashSaleQuantity);
+                            }
+                            else
+                            {
+                                validationError = existingCartQuantity > 0
+                                    ? string.Format(_localizer["OnlyUnitsAvailableInFlashSaleWithExisting"]?.Value ?? "Only {0} more units available in flash sale. You already have {1} in your cart (max {2}).", available, existingCartQuantity, simpleFlashSaleItem.FlashSaleQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableInFlashSaleSimple"]?.Value ?? "Only {0} units available in the flash sale.", simpleFlashSaleItem.FlashSaleQuantity);
+                            }
                         }
                     }
-                    // Also check product stock
-                    else if (product.StockQuantity < shoppingCart.Count)
+                    // Also check product stock against TOTAL
+                    else if (product.StockQuantity < totalQuantity)
                     {
                         if (product.StockQuantity == 0)
                         {
@@ -1987,14 +2101,26 @@ namespace BulkyBook.Areas.Customer.Controllers
                         }
                         else
                         {
-                            validationError = string.Format(_localizer["OnlyUnitsAvailableInStockSimple"]?.Value ?? "Only {0} units available in stock.", product.StockQuantity);
+                            var available = product.StockQuantity - existingCartQuantity;
+                            if (available <= 0)
+                            {
+                                validationError = existingCartQuantity > 0
+                                    ? string.Format(_localizer["MaximumProductQuantityReached"]?.Value ?? "You already have {0} units in your cart. Maximum {1} units available in stock.", existingCartQuantity, product.StockQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableInStockSimple"]?.Value ?? "Only {0} units available in stock.", product.StockQuantity);
+                            }
+                            else
+                            {
+                                validationError = existingCartQuantity > 0
+                                    ? string.Format(_localizer["OnlyUnitsAvailableInStockWithExisting"]?.Value ?? "Only {0} more units available in stock. You already have {1} in your cart (max {2}).", available, existingCartQuantity, product.StockQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableInStockSimple"]?.Value ?? "Only {0} units available in stock.", product.StockQuantity);
+                            }
                         }
                     }
                 }
                 else
                 {
-                    // Not in flash sale - check product stock
-                    if (product.StockQuantity < shoppingCart.Count)
+                    // Not in flash sale - check product stock against TOTAL
+                    if (product.StockQuantity < totalQuantity)
                     {
                         if (product.StockQuantity == 0)
                         {
@@ -2002,7 +2128,19 @@ namespace BulkyBook.Areas.Customer.Controllers
                         }
                         else
                         {
-                            validationError = string.Format(_localizer["OnlyUnitsAvailableInStockSimple"]?.Value ?? "Only {0} units available in stock.", product.StockQuantity);
+                            var available = product.StockQuantity - existingCartQuantity;
+                            if (available <= 0)
+                            {
+                                validationError = existingCartQuantity > 0
+                                    ? string.Format(_localizer["MaximumProductQuantityReached"]?.Value ?? "You already have {0} units in your cart. Maximum {1} units available in stock.", existingCartQuantity, product.StockQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableInStockSimple"]?.Value ?? "Only {0} units available in stock.", product.StockQuantity);
+                            }
+                            else
+                            {
+                                validationError = existingCartQuantity > 0
+                                    ? string.Format(_localizer["OnlyUnitsAvailableInStockWithExisting"]?.Value ?? "Only {0} more units available in stock. You already have {1} in your cart (max {2}).", available, existingCartQuantity, product.StockQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableInStockSimple"]?.Value ?? "Only {0} units available in stock.", product.StockQuantity);
+                            }
                         }
                     }
                 }
@@ -2011,6 +2149,15 @@ namespace BulkyBook.Areas.Customer.Controllers
             // If validation failed, return error
             if (!string.IsNullOrEmpty(validationError))
             {
+                // Check if this is an AJAX request
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers["Accept"].ToString().Contains("application/json"))
+                {
+                    return Json(new { 
+                        success = false, 
+                        message = validationError
+                    });
+                }
+                
                 TempData["error"] = validationError;
                 return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
             }
@@ -2031,10 +2178,14 @@ namespace BulkyBook.Areas.Customer.Controllers
 
                 if(shoppingCartFromDB != null)
                 {
-                    // Check total quantity after adding
+                    // Note: Validation already done upfront with totalQuantity check
+                    // This is just a safety check - should not be needed but kept for extra security
+                    // The totalQuantity was already validated against stock before reaching here
+                    
+                    // Check total quantity after adding (safety check)
                     var newTotalQuantity = shoppingCartFromDB.Count + shoppingCart.Count;
                     
-                    // Re-validate total quantity
+                    // Double-check validation (should already pass from upfront validation)
                     if (ProductVariantId.HasValue && ProductVariantId.Value > 0)
                     {
                         var variant = _unitOfWork.ProductVariant.Get(v => v.Id == ProductVariantId.Value && !v.IsDeleted);
@@ -2045,18 +2196,36 @@ namespace BulkyBook.Areas.Customer.Controllers
                             var flashSaleItem = _unitOfWork.FlashSaleItem.Get(f => f.Id == shoppingCart.FlashSaleItemId.Value);
                             if (flashSaleItem != null && flashSaleItem.FlashSaleQuantity < newTotalQuantity)
                             {
-                                TempData["error"] = flashSaleItem.FlashSaleQuantity == 0 
-                                    ? "This item is sold out in the flash sale." 
-                                    : $"Only {flashSaleItem.FlashSaleQuantity} units available in the flash sale. You already have {shoppingCartFromDB.Count} in your cart.";
+                                var available = flashSaleItem.FlashSaleQuantity - shoppingCartFromDB.Count;
+                                var errorMsg = available <= 0
+                                    ? string.Format(_localizer["MaximumFlashSaleQuantityReached"]?.Value ?? "You already have {0} units in your cart. Maximum {1} units available in flash sale.", shoppingCartFromDB.Count, flashSaleItem.FlashSaleQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableInFlashSaleWithExisting"]?.Value ?? "Only {0} more units available in flash sale. You already have {1} in your cart (max {2}).", available, shoppingCartFromDB.Count, flashSaleItem.FlashSaleQuantity);
+                                
+                                // Check if this is an AJAX request
+                                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers["Accept"].ToString().Contains("application/json"))
+                                {
+                                    return Json(new { success = false, message = errorMsg });
+                                }
+                                
+                                TempData["error"] = errorMsg;
                                 return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
                             }
                         }
                         
                         if (variant != null && variant.StockQuantity < newTotalQuantity)
                         {
-                            TempData["error"] = variant.StockQuantity == 0 
-                                ? (_localizer["VariantOutOfStock"]?.Value ?? "This variant is out of stock.")
-                                : string.Format(_localizer["OnlyUnitsAvailableForVariant"]?.Value ?? "Only {0} units available for this variant. You already have {1} in your cart.", variant.StockQuantity, shoppingCartFromDB.Count);
+                            var available = variant.StockQuantity - shoppingCartFromDB.Count;
+                            var variantErrorMsg = available <= 0
+                                ? string.Format(_localizer["MaximumVariantQuantityReached"]?.Value ?? "You already have {0} units in your cart. Maximum {1} units available for this variant.", shoppingCartFromDB.Count, variant.StockQuantity)
+                                : string.Format(_localizer["OnlyUnitsAvailableForVariantWithExisting"]?.Value ?? "Only {0} more units available for this variant. You already have {1} in your cart (max {2}).", available, shoppingCartFromDB.Count, variant.StockQuantity);
+                            
+                            // Check if this is an AJAX request
+                            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers["Accept"].ToString().Contains("application/json"))
+                            {
+                                return Json(new { success = false, message = variantErrorMsg });
+                            }
+                            
+                            TempData["error"] = variantErrorMsg;
                             return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
                         }
                     }
@@ -2068,18 +2237,36 @@ namespace BulkyBook.Areas.Customer.Controllers
                             var flashSaleItem = _unitOfWork.FlashSaleItem.Get(f => f.Id == shoppingCart.FlashSaleItemId.Value);
                             if (flashSaleItem != null && flashSaleItem.FlashSaleQuantity < newTotalQuantity)
                             {
-                                TempData["error"] = flashSaleItem.FlashSaleQuantity == 0 
-                                    ? (_localizer["ItemSoldOutInFlashSale"]?.Value ?? "This item is sold out in the flash sale.")
-                                    : string.Format(_localizer["OnlyUnitsAvailableInFlashSale"]?.Value ?? "Only {0} units available in the flash sale. You already have {1} in your cart.", flashSaleItem.FlashSaleQuantity, shoppingCartFromDB.Count);
+                                var available = flashSaleItem.FlashSaleQuantity - shoppingCartFromDB.Count;
+                                var flashSaleErrorMsg = available <= 0
+                                    ? string.Format(_localizer["MaximumFlashSaleQuantityReached"]?.Value ?? "You already have {0} units in your cart. Maximum {1} units available in flash sale.", shoppingCartFromDB.Count, flashSaleItem.FlashSaleQuantity)
+                                    : string.Format(_localizer["OnlyUnitsAvailableInFlashSaleWithExisting"]?.Value ?? "Only {0} more units available in flash sale. You already have {1} in your cart (max {2}).", available, shoppingCartFromDB.Count, flashSaleItem.FlashSaleQuantity);
+                                
+                                // Check if this is an AJAX request
+                                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers["Accept"].ToString().Contains("application/json"))
+                                {
+                                    return Json(new { success = false, message = flashSaleErrorMsg });
+                                }
+                                
+                                TempData["error"] = flashSaleErrorMsg;
                                 return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
                             }
                         }
                         
                         if (product.StockQuantity < newTotalQuantity)
                         {
-                            TempData["error"] = product.StockQuantity == 0 
-                                ? (_localizer["ProductOutOfStock"]?.Value ?? "This product is out of stock.")
-                                : string.Format(_localizer["OnlyUnitsAvailableInStock"]?.Value ?? "Only {0} units available in stock. You already have {1} in your cart.", product.StockQuantity, shoppingCartFromDB.Count);
+                            var available = product.StockQuantity - shoppingCartFromDB.Count;
+                            var productErrorMsg = available <= 0
+                                ? string.Format(_localizer["MaximumProductQuantityReached"]?.Value ?? "You already have {0} units in your cart. Maximum {1} units available in stock.", shoppingCartFromDB.Count, product.StockQuantity)
+                                : string.Format(_localizer["OnlyUnitsAvailableInStockWithExisting"]?.Value ?? "Only {0} more units available in stock. You already have {1} in your cart (max {2}).", available, shoppingCartFromDB.Count, product.StockQuantity);
+                            
+                            // Check if this is an AJAX request
+                            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers["Accept"].ToString().Contains("application/json"))
+                            {
+                                return Json(new { success = false, message = productErrorMsg });
+                            }
+                            
+                            TempData["error"] = productErrorMsg;
                             return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
                         }
                     }
@@ -2123,6 +2310,30 @@ namespace BulkyBook.Areas.Customer.Controllers
                     shoppingCart.FlashSalePrice.HasValue ? (double)shoppingCart.FlashSalePrice.Value : (double?)null);
             }
 
+            // Check if this is an AJAX request
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers["Accept"].ToString().Contains("application/json"))
+            {
+                // Get cart count
+                int cartCount = 0;
+                if (User.Identity.IsAuthenticated)
+                {
+                    var claimsIdentity = (ClaimsIdentity)User.Identity;
+                    var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+                    cartCount = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId).Count();
+                }
+                else
+                {
+                    var guestCart = BulkyBook.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
+                    cartCount = guestCart.Count;
+                }
+                
+                return Json(new { 
+                    success = true, 
+                    message = _localizer["CartUpdatedSuccessfully"]?.Value ?? "Cart Updated Successfully",
+                    cartCount = cartCount
+                });
+            }
+            
             TempData["success"] = _localizer["CartUpdatedSuccessfully"]?.Value ?? "Cart Updated Successfully";
             return RedirectToAction("Index");
         }
