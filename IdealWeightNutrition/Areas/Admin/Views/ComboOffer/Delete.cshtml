@@ -1,0 +1,66 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+@model IdealWeightNutrition.Models.ComboOffer
+
+@{
+    ViewData["Title"] = Localizer["DeleteComboOffer"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>
+                <i class="bi bi-trash me-2"></i>@Localizer["DeleteComboOffer"]
+            </h2>
+        </div>
+    </div>
+
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>@Localizer["Warning"]:</strong> @Localizer["AreYouSureDeleteComboOffer"]
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">@Localizer["Name"]:</dt>
+                <dd class="col-sm-9">@Model.Name</dd>
+
+                <dt class="col-sm-3">@Localizer["NameAr"]:</dt>
+                <dd class="col-sm-9" dir="rtl">@Model.NameAr</dd>
+
+                <dt class="col-sm-3">@Localizer["ComboPrice"]:</dt>
+                <dd class="col-sm-9">@Model.ComboPrice.ToString("C")</dd>
+
+                <dt class="col-sm-3">@Localizer["TotalProducts"]:</dt>
+                <dd class="col-sm-9">@Model.TotalProducts</dd>
+
+                <dt class="col-sm-3">@Localizer["Status"]:</dt>
+                <dd class="col-sm-9">
+                    @if (Model.IsCurrentlyActive)
+                    {
+                        <span class="badge bg-success">@Localizer["Active"]</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">@Localizer["Inactive"]</span>
+                    }
+                </dd>
+            </dl>
+
+            <form asp-action="Delete" method="post">
+                <input hidden asp-for="Id" />
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>@Localizer["Delete"]
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>@Localizer["Cancel"]
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

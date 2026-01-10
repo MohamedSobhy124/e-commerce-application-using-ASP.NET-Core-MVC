@@ -1,0 +1,92 @@
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+@model Dictionary<int, List<IdealWeightNutrition.Models.Product>>
+@inject IConfiguration Configuration
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var categories = ViewBag.Categories as IEnumerable<IdealWeightNutrition.Models.Categry> ?? Enumerable.Empty<IdealWeightNutrition.Models.Categry>();
+    var categoryProductsMap = Model ?? new Dictionary<int, List<IdealWeightNutrition.Models.Product>>();
+    var displayCategories = categories.ToList();
+    var hasCategories = displayCategories.Any();
+}
+
+@if (hasCategories)
+{
+    <section class="category-section">
+        <div class="category-section-title">
+            <h2>@Localizer["ShopByCategory"]</h2>
+        </div>
+        <div class="category-carousel-container" id="categoryCarouselContainer">
+            <button class="carousel-nav prev" onclick="scrollCategoryCarousel(-1)" aria-label="Previous categories">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="category-carousel-wrapper">
+                <div class="category-carousel" id="categoryCarousel">
+                    @for (int i = 0; i < displayCategories.Count; i++)
+                    {
+                        var category = displayCategories[i];
+                        var categoryProducts = categoryProductsMap.ContainsKey(category.Id) 
+                            ? categoryProductsMap[category.Id] 
+                            : new List<IdealWeightNutrition.Models.Product>();
+                        var categoryName = currentCulture == "ar" && !string.IsNullOrEmpty(category.NameAr) 
+                            ? category.NameAr 
+                            : category.Name;
+                        
+                        <div class="category-card"
+                             data-category-index="@i"
+                             data-category-id="@category.Id"
+                             role="button"
+                             tabindex="0"
+                             style="cursor: pointer;">
+                            <div class="category-circle">
+                                @if (!string.IsNullOrEmpty(category.ImageUrl))
+                                {
+                                    <div class="category-image-wrapper">
+                                        <img src="@category.ImageUrl" alt="@categoryName" class="category-image" />
+                                    </div>
+                                }
+                                else
+                                {
+                                        // Get products from the map, limit to 4 for display
+                                        var productsToShow = categoryProducts.Take(4).ToList();
+                                    
+                                    @if (productsToShow.Any())
+                                    {
+                                        <div class="category-products-grid">
+                                            @foreach (var product in productsToShow)
+                                            {
+                                                // Get product image - check ProductImages first (excluding info images), then ImageUrl
+                                                var productImage = product.ProductImages?.FirstOrDefault(pi => pi.ImageInfo == null)?.ImageUrl 
+                                                    ?? product.ProductImages?.FirstOrDefault()?.ImageUrl 
+                                                    ?? product.ImageUrl;
+                                                
+                                                if (!string.IsNullOrEmpty(productImage))
+                                                {
+                                                    <img src="@productImage" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)" class="category-product-mini" />
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        // Fallback icon if no products available
+                                        <div class="category-image-wrapper">
+                                            <i class="bi bi-box-seam" style="font-size: 2.5rem; color: #667eea;"></i>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                            <div class="category-label">@categoryName</div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <button class="carousel-nav next" onclick="scrollCategoryCarousel(1)" aria-label="Next categories">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+}
+

@@ -1,0 +1,711 @@
+﻿@model IEnumerable<IdealWeightNutrition.Models.Product>
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+
+@{
+    ViewData["Title"] = Localizer["ProductsList"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var isArabic = currentCulture == "ar";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+}
+
+<partial name="_Notifications" />
+@Html.AntiForgeryToken()
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">
+                    <i class="bi bi-box-seam-fill me-3"></i>
+                    @Localizer["ProductsList"]
+                </h2>
+            </div>
+
+            <div class="admin-card-body">
+                <!-- Product Statistics Cards -->
+                <div class="order-stats-container" id="productStatsContainer">
+                    <div class="order-stat-card all">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-list-ul"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["TotalProducts"]</div>
+                        <div class="order-stat-value" id="statAll">0</div>
+                    </div>
+                    <div class="order-stat-card approved">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["Active"]</div>
+                        <div class="order-stat-value" id="statActive">0</div>
+                    </div>
+                    <div class="order-stat-card pending">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["LowStock"]</div>
+                        <div class="order-stat-value" id="statLowStock">0</div>
+                    </div>
+                    <div class="order-stat-card inprocess">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-x-circle"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["OutOfStock"]</div>
+                        <div class="order-stat-value" id="statOutOfStock">0</div>
+                    </div>
+                    <div class="order-stat-card shipped">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["InStock"]</div>
+                        <div class="order-stat-value" id="statInStock">0</div>
+                    </div>
+                    <div class="order-stat-card delivered">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["NewProducts"]</div>
+                        <div class="order-stat-value" id="statNew">0</div>
+                    </div>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div class="order-filter-tabs">
+                    <button class="filter-tab active" onclick="filterProducts('all')">
+                        <i class="bi bi-list-ul"></i>@Localizer["AllProducts"]
+                    </button>
+                    <button class="filter-tab" onclick="filterProducts('active')">
+                        <i class="bi bi-check-circle"></i>@Localizer["Active"]
+                    </button>
+                    <button class="filter-tab" onclick="filterProducts('lowstock')">
+                        <i class="bi bi-exclamation-triangle"></i>@Localizer["LowStock"]
+                    </button>
+                    <button class="filter-tab" onclick="filterProducts('outofstock')">
+                        <i class="bi bi-x-circle"></i>@Localizer["OutOfStock"]
+                    </button>
+                    <button class="filter-tab" onclick="filterProducts('instock')">
+                        <i class="bi bi-box-seam"></i>@Localizer["InStock"]
+                    </button>
+                    <button class="filter-tab" onclick="filterProducts('new')">
+                        <i class="bi bi-star"></i>@Localizer["NewProducts"]
+                    </button>
+                    <button class="filter-tab" onclick="filterProducts('trending')">
+                        <i class="bi bi-graph-up-arrow"></i>@Localizer["TrendingProducts"]
+                    </button>
+                    <button class="filter-tab" onclick="filterProducts('deleted')">
+                        <i class="bi bi-trash"></i>@Localizer["Deleted"]
+                    </button>
+                </div>
+
+                <!-- Search Box -->
+                <div class="search-box-container" style="margin-bottom: 1.5rem;">
+                    <div class="input-group" style="max-width: 500px;">
+                        <button class="btn btn-outline-secondary"
+                                onclick="clearSearch()"
+                                style="border: 2px solid #e9ecef;">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                        <input type="text"
+                               id="productSearchInput"
+                               class="form-control"
+                               placeholder="@Localizer["SearchProductsPlaceholder"]"
+                               style="border: 2px solid #e9ecef; padding: 0.75rem 1rem; font-size: 1rem;">
+                    </div>
+                    <small class="text-muted d-block mt-2">
+                        <i class="bi bi-info-circle me-1"></i>@Localizer["SearchHint"]
+                    </small>
+                </div>
+
+                <!-- Create New Product Button -->
+                <div class="d-flex justify-content-end mb-3">
+                    <a asp-action="UpSert" class="create-new-btn">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        @Localizer["CreateNewProduct"]
+                    </a>
+                </div>
+
+                <!-- Product Table -->
+                <div class="order-table-wrapper">
+                    <div id="productTable" style="min-height: 400px; background: white; border-radius: 12px;">
+                        <div style="text-align: center; padding: 3rem; color: #667eea;">
+                            <i class="bi bi-arrow-repeat" style="font-size: 3rem; animation: spin 1s linear infinite;"></i>
+                            <p style="margin-top: 1rem; font-size: 1.2rem; font-weight: 600;">Loading Products...</p>
+                            <p style="font-size: 0.9rem; color: #6c757d;">If this message persists, check browser console (F12)</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <style>
+                    @@keyframes spin {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                    }
+                    
+                    /* Enhanced Tabulator Styling */
+                    #productTable .tabulator {
+                        border: none;
+                        border-radius: 16px;
+                        overflow: hidden;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                    }
+                    
+                    #productTable .tabulator-header {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        border: none;
+                    }
+                    
+                    #productTable .tabulator-header .tabulator-col {
+                        background: transparent;
+                        border-right: 1px solid rgba(255,255,255,0.2);
+                    }
+                    
+                    #productTable .tabulator-col-title {
+                        color: white;
+                        font-weight: 600;
+                        font-size: 0.95rem;
+                    }
+                    
+                    #productTable .tabulator-arrow {
+                        border-bottom-color: white;
+                        border-top-color: white;
+                    }
+                    
+                    #productTable .tabulator-row {
+                        border-bottom: 1px solid #f0f0f0;
+                        transition: all 0.2s ease;
+                    }
+                    
+                    #productTable .tabulator-row:hover {
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                        transform: scale(1.01);
+                        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+                    }
+                    
+                    #productTable .tabulator-row.tabulator-row-even {
+                        background: #fafbfc;
+                    }
+                    
+                    #productTable .tabulator-row.tabulator-row-even:hover {
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    }
+                    
+                    #productTable .tabulator-row.deleted-row {
+                        background-color: #ffebee !important;
+                    }
+                    
+                    #productTable .tabulator-row.deleted-row:hover {
+                        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%) !important;
+                    }
+                    
+                    #productTable .tabulator-cell {
+                        padding: 14px 10px;
+                        vertical-align: middle;
+                    }
+                    
+                    /* Pagination Styling */
+                    #productTable .tabulator-footer {
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                        border: none;
+                        padding: 1rem;
+                        border-radius: 0 0 16px 16px;
+                    }
+                    
+                    #productTable .tabulator-page {
+                        background: white;
+                        border: 2px solid #dee2e6;
+                        color: #667eea;
+                        margin: 0 3px;
+                        border-radius: 8px;
+                        padding: 8px 14px;
+                        font-weight: 600;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+                    
+                    #productTable .tabulator-page:hover:not([disabled]) {
+                        background: #667eea;
+                        color: white;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+                    }
+                    
+                    #productTable .tabulator-page.active {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border-color: transparent;
+                        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                        transform: scale(1.05);
+                    }
+                    
+                    #productTable .tabulator-page[disabled] {
+                        opacity: 0.4;
+                        cursor: not-allowed;
+                    }
+                    
+                    #productTable .tabulator-pages {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.25rem;
+                    }
+                    
+                    /* Mobile Responsive */
+                    @@media (max-width: 768px) {
+                        #productTable .tabulator-cell {
+                            padding: 10px 6px;
+                            font-size: 0.875rem;
+                        }
+                        
+                        #productTable .tabulator-page {
+                            padding: 6px 10px;
+                            font-size: 0.875rem;
+                            margin: 0 2px;
+                        }
+                        
+                        #productTable .tabulator-footer {
+                            padding: 0.75rem 0.5rem;
+                        }
+                    }
+
+                    .tabulator .tabulator-footer .tabulator-paginator{
+                        display:inline-flex !important;
+                        flex:0 !important;
+                    }
+                    
+                    /* Search Box Styling */
+                    .search-box-container {
+                        animation: slideInDown 0.5s ease-out;
+                    }
+                    
+                    @@keyframes slideInDown {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                </style>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/order-index.css" />
+    <!-- Tabulator CSS -->
+    <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
+}
+
+@section Scripts {
+    <!-- Tabulator JS -->
+    <script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+    
+    <script>
+        // Pass translations to JavaScript
+        window.productTranslations = {
+            id: '@Html.Raw(Localizer["ID"].Value)',
+            title: '@Html.Raw(Localizer["TitleEnglish"].Value)',
+            titleAr: '@Html.Raw(Localizer["TitleArabic"].Value)',
+            price: '@Html.Raw(Localizer["Price"].Value)',
+            stock: '@Html.Raw(Localizer["Stock"].Value)',
+            category: '@Html.Raw(Localizer["Category"].Value)',
+            actions: '@Html.Raw(Localizer["Actions"].Value)',
+            edit: '@Html.Raw(Localizer["Edit"].Value)',
+            delete: '@Html.Raw(Localizer["Delete"].Value)',
+            deleted: '@Html.Raw(Localizer["Deleted"].Value)',
+            noActions: '@Html.Raw(Localizer["NoActions"]?.Value ?? "No Actions")',
+            undelete: '@Html.Raw(Localizer["Undelete"]?.Value ?? "Undelete")',
+            restore: '@Html.Raw(Localizer["Restore"]?.Value ?? "Restore")',
+            areYouSure: '@Html.Raw(Localizer["AreYouSure"]?.Value ?? "Are you sure?")',
+            deleteConfirm: '@Html.Raw(Localizer["DeleteConfirmMessage"]?.Value ?? "You won't be able to revert this!")',
+            restoreConfirm: '@Html.Raw(Localizer["RestoreConfirmMessage"]?.Value ?? "This will restore the product and make it available again.")',
+            yesDelete: '@Html.Raw(Localizer["YesDeleteIt"]?.Value ?? "Yes, delete it!")',
+            yesRestore: '@Html.Raw(Localizer["YesRestoreIt"]?.Value ?? "Yes, restore it!")',
+            cancel: '@Html.Raw(Localizer["Cancel"]?.Value ?? "Cancel")'
+        };
+    </script>
+    <script>
+        
+        // Load statistics function
+        window.loadProductStatistics = function() {
+            fetch('/Admin/Product/GetProductStatistics')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.stats) {
+                        document.getElementById('statAll').textContent = data.stats.all || 0;
+                        document.getElementById('statActive').textContent = data.stats.active || 0;
+                        document.getElementById('statLowStock').textContent = data.stats.lowStock || 0;
+                        document.getElementById('statOutOfStock').textContent = data.stats.outOfStock || 0;
+                        document.getElementById('statInStock').textContent = data.stats.inStock || 0;
+                        document.getElementById('statNew').textContent = data.stats.newProducts || 0;
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load statistics:', error);
+                });
+        };
+        
+        // Initialize filter in global scope
+        window.currentFilter = 'all';
+        
+        window.addEventListener('load', function() {
+            
+            // Load statistics first
+            window.loadProductStatistics();
+            
+            setTimeout(function() {
+                if (typeof Tabulator === 'undefined') {
+                    console.error('❌ Tabulator NOT LOADED');
+                    document.getElementById('productTable').innerHTML = '<div style="padding:2rem;text-align:center;color:red;"><h3>⚠️ Tabulator Library Failed to Load</h3><p>Please check your internet connection or try refreshing the page.</p></div>';
+                    return;
+                }
+                
+                
+                var table = new Tabulator("#productTable", {
+                    height: "800px",
+                    layout: "fitDataFill",
+                    responsiveLayout: false,
+                    placeholder: "No products found",
+                    pagination: true,
+                    paginationMode: "remote",
+                    paginationSize: 10,
+                    paginationSizeSelector: [10, 25, 50, 100],
+                    paginationCounter: "rows",
+                    ajaxURL: "/Admin/Product/GetAll",
+                    ajaxParams: function() {
+                        var filter = window.currentFilter === 'all' ? '' : window.currentFilter;
+                        return { filter: filter };
+                    },
+                    ajaxURLGenerator: function(url, config, params){
+                        var filter = window.currentFilter === 'all' ? '' : window.currentFilter;
+                        var searchValue = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
+                        
+                        var queryParams = [
+                            `start=${(params.page - 1) * params.size}`,
+                            `length=${params.size}`,
+                            `filter=${encodeURIComponent(filter)}`,
+                            `searchValue=${encodeURIComponent(searchValue)}`
+                        ];
+                        
+                        if (params.sort && params.sort.length > 0) {
+                            queryParams.push(`sortColumn=${params.sort[0].field}`);
+                            queryParams.push(`sortDirection=${params.sort[0].dir}`);
+                        }
+                        
+                        var finalUrl = url + '?' + queryParams.join('&');
+                        return finalUrl;
+                    },
+                    ajaxResponse: function(url, params, response) {
+                        return {
+                            last_page: response.last_page || 1,
+                            data: response.data || []
+                        };
+                    },
+                    columns: [
+                        {
+                            title: window.productTranslations.id, 
+                            field: "id",
+                            widthGrow: 1,
+                            minWidth: 80,
+                            sorter: "number",
+                            headerSort: true,
+                            formatter: function(cell) {
+                                var productId = cell.getValue();
+                                var rowData = cell.getRow().getData();
+                                var html = '<span style="font-weight:600;color:#667eea;">#' + productId + '</span>';
+                                if (rowData.isDeleted) {
+                                    html += ' <span class="badge bg-danger" style="margin-left:0.5rem;">' + window.productTranslations.deleted + '</span>';
+                                }
+                                if (rowData.isNew) {
+                                    html += ' <span class="badge bg-info" style="margin-left:0.5rem;">NEW</span>';
+                                }
+                                if (rowData.isTrending) {
+                                    html += ' <span class="badge bg-warning" style="margin-left:0.5rem;">TRENDING</span>';
+                                }
+                                return html;
+                            }
+                        },
+                        {
+                            title: window.productTranslations.titleAr,
+                            field: "titleAr",
+                            width: 400,
+                            sorter: "string",
+                            headerSort: true,
+                            formatter: function(cell) {
+                                var value = cell.getValue() || 'N/A';
+                                var rowData = cell.getRow().getData();
+                                if (rowData.isDeleted) {
+                                    return '<span style="text-decoration: line-through; color: #c62828;">' + value + '</span>';
+                                }
+                                return '<div style="font-weight:500;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + value + '">' + value + '</div>';
+                            }
+                        },   {
+                            title: window.productTranslations.title, 
+                            field: "title",
+                            width: 250,
+                            sorter: "string",
+                            headerSort: true,
+                            formatter: function(cell) {
+                                var value = cell.getValue() || 'N/A';
+                                var rowData = cell.getRow().getData();
+                                if (rowData.isDeleted) {
+                                    return '<span style="text-decoration: line-through; color: #c62828;">' + value + '</span>';
+                                }
+                                return '<div style="font-weight:500;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + value + '">' + value + '</div>';
+                            }
+                        },
+                        {
+                            title: window.productTranslations.category, 
+                            field: "category",
+                            widthGrow: 1.5,
+                            minWidth: 120,
+                            sorter: "string",
+                            headerSort: true,
+                            formatter: function(cell) {
+                                var value = cell.getValue() || 'N/A';
+                                return '<small style="color:#6c757d">' + value + '</small>';
+                            }
+                        },
+                        {
+                            title: window.productTranslations.price, 
+                            field: "price",
+                            widthGrow: 1.5,
+                            minWidth: 100,
+                            sorter: "number",
+                            headerSort: true,
+                            hozAlign: "right",
+                            formatter: function(cell) {
+                                var price = parseFloat(cell.getValue());
+                                var rowData = cell.getRow().getData();
+                                var html = '<strong style="color:#059669;font-size:1.1rem">@currencySymbol ' + price.toFixed(2) + '</strong>';
+                                if (rowData.listPrice && rowData.listPrice > price) {
+                                    html += '<br><small style="color:#9ca3af;text-decoration:line-through;">@currencySymbol ' + parseFloat(rowData.listPrice).toFixed(2) + '</small>';
+                                }
+                                return html;
+                            }
+                        },
+                        {
+                            title: window.productTranslations.stock, 
+                            field: "stockQuantity",
+                            widthGrow: 1.5,
+                            minWidth: 100,
+                            sorter: "number",
+                            headerSort: true,
+                            hozAlign: "center",
+                            formatter: function(cell) {
+                                var stock = parseInt(cell.getValue());
+                                var rowData = cell.getRow().getData();
+                                var minAlert = rowData.minimumStockAlert || 0;
+                                
+                                var badgeStyle = '';
+                                var icon = '';
+                                
+                                if (stock <= 0) {
+                                    badgeStyle = 'background:linear-gradient(135deg,#ef4444,#dc2626);color:white';
+                                    icon = 'bi-x-circle';
+                                } else if (stock <= minAlert) {
+                                    badgeStyle = 'background:linear-gradient(135deg,#f59e0b,#d97706);color:white';
+                                    icon = 'bi-exclamation-triangle';
+                                } else {
+                                    badgeStyle = 'background:linear-gradient(135deg,#10b981,#059669);color:white';
+                                    icon = 'bi-check-circle';
+                                }
+                                
+                                return '<span style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.375rem 0.75rem;border-radius:20px;font-size:0.875rem;font-weight:600;' + badgeStyle + '"><i class="bi ' + icon + '"></i>' + stock + '</span>';
+                            }
+                        },
+                        {
+                            title: window.productTranslations.actions, 
+                            field: "actions",
+                            widthGrow: 1.5,
+                            minWidth: 150,
+                            headerSort: false,
+                            hozAlign: "center",
+                            formatter: function(cell) {
+                                var productId = cell.getRow().getData().id;
+                                var rowData = cell.getRow().getData();
+                                
+                                if (rowData.isDeleted) {
+                                    return `
+                                        <div class="btn-group" role="group">
+                                            <a onclick="undeleteProduct(${productId}); event.stopPropagation(); return false;" class="btn btn-sm btn-success" style="padding:0.5rem 1rem;border-radius:8px;font-weight:600;transition:all 0.2s;">
+                                                <i class="bi bi-arrow-counterclockwise me-1"></i>${window.productTranslations.restore || window.productTranslations.undelete}
+                                            </a>
+                                        </div>
+                                    `;
+                                }
+                                
+                                return `
+                                    <div class="btn-group" role="group">
+                                     <a onclick="deleteProduct(${productId}); event.stopPropagation(); return false;" class="btn btn-sm btn-danger" style="padding:0.5rem 1rem;border-radius:8px;font-weight:600;transition:all 0.2s;">
+                                            <i class="bi bi-trash-fill me-1"></i>${window.productTranslations.delete}
+                                        </a>
+                                    <a href="/Admin/Product/UpSert?id=${productId}" class="btn btn-sm btn-dark" onclick="event.stopPropagation();" style="padding:0.5rem 1rem;border-radius:8px;font-weight:600;transition:all 0.2s;">
+                                            <i class="bi bi-pencil-square me-1"></i>${window.productTranslations.edit}
+                                        </a>
+                                       
+                                    </div>
+                                `;
+                            },
+                            cellClick: function(e, cell){
+                                e.stopPropagation();
+                            }
+                        }
+                    ],
+                    initialSort: [
+                        {column: "id", dir: "desc"}
+                    ],
+                    rowFormatter: function(row){
+                        var data = row.getData();
+                        if (data.isDeleted) {
+                            row.getElement().classList.add('deleted-row');
+                        }
+                        row.getElement().style.cursor = "pointer";
+                    }
+                });
+                
+                window.productTable = table;
+                
+            }, 1500);
+        });
+        
+        window.filterProducts = function(filter) {
+            window.currentFilter = filter;
+            
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            const tabs = document.querySelectorAll('.filter-tab');
+            tabs.forEach(tab => {
+                const onclickAttr = tab.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes(`'${filter}'`)) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            if (window.productTable) {
+                window.productTable.setPage(1).then(function(){
+                    window.productTable.setData();
+                });
+            }
+        };
+        
+        window.searchProducts = function() {
+            var searchValue = document.getElementById('productSearchInput').value;
+            
+            if (window.productTable) {
+                window.productTable.setPage(1).then(function(){
+                    window.productTable.setData();
+                });
+            }
+        };
+        
+        window.clearSearch = function() {
+            document.getElementById('productSearchInput').value = '';
+            window.searchProducts();
+        };
+        
+        window.deleteProduct = function(productId) {
+            Swal.fire({
+                title: window.productTranslations.areYouSure,
+                text: window.productTranslations.deleteConfirm,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: window.productTranslations.yesDelete,
+                cancelButtonText: window.productTranslations.cancel
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/Admin/Product/Delete?id=' + productId, {
+                        method: 'DELETE',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Deleted!', data.massage || data.message || 'Product deleted successfully', 'success');
+                            if (window.productTable) {
+                                window.productTable.setData();
+                            }
+                            window.loadProductStatistics();
+                        } else {
+                            Swal.fire('Error!', data.massage || data.message || 'Error deleting product', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Error!', 'Error deleting product: ' + error, 'error');
+                    });
+                }
+            });
+        };
+        
+        window.undeleteProduct = function(productId) {
+            Swal.fire({
+                title: window.productTranslations.areYouSure,
+                text: window.productTranslations.restoreConfirm || 'This will restore the product and make it available again.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: window.productTranslations.yesRestore || 'Yes, restore it!',
+                cancelButtonText: window.productTranslations.cancel
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/Admin/Product/Undelete?id=' + productId, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Restored!', data.message || 'Product restored successfully', 'success');
+                            if (window.productTable) {
+                                window.productTable.setData();
+                            }
+                            window.loadProductStatistics();
+                        } else {
+                            Swal.fire('Error!', data.message || 'Error restoring product', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Error!', 'Error restoring product: ' + error, 'error');
+                    });
+                }
+            });
+        };
+        
+        // Add event listener for search input (with debounce)
+        var searchTimeout;
+        document.addEventListener('DOMContentLoaded', function() {
+            var searchInput = document.getElementById('productSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(function() {
+                        window.searchProducts();
+                    }, 500);
+                });
+                
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        clearTimeout(searchTimeout);
+                        window.searchProducts();
+                    }
+                });
+            }
+        });
+        
+    </script>
+}

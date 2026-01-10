@@ -1,0 +1,44 @@
+# Robots.txt for Ideal Weight Nutrition - UAE SEO Optimized
+# https://idealweightnutrition.ae
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://idealweightnutrition.ae/sitemap.xml
+
+# Disallow admin and API endpoints
+Disallow: /Admin/
+Disallow: /Identity/
+Disallow: /api/
+Disallow: /Account/
+Disallow: /Cart/Summary
+Disallow: /Cart/OrderConfirmation
+Disallow: /*?*culture=*
+Disallow: /*?*searchTerm=*
+Disallow: /*?*sortBy=*
+Disallow: /*?*page=*
+
+# Allow important pages
+Allow: /Customer/Home
+Allow: /Customer/Home/Details
+Allow: /Customer/FlashSale
+Allow: /Customer/ServiceSubscription
+Allow: /Customer/Blog
+Allow: /Customer/ComboOffer
+
+# Google Bot Specific Rules
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing Bot Specific Rules
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 0
+
+# Yandex Bot (for Russian/Middle East searches)
+User-agent: Yandex
+Allow: /
+Crawl-delay: 1
+

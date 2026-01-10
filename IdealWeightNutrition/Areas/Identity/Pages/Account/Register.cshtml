@@ -1,0 +1,163 @@
+﻿@page
+@model RegisterModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["Register"];
+}
+
+<div class="auth-container">
+    <div class="auth-card" style="max-width: 600px;">
+        <div class="auth-header">
+            <i class="bi bi-heart-pulse"></i>
+            <h2>@Localizer["CreateAccount"]</h2>
+            <p>@Localizer["JoinIdealWeightToday"]</p>
+        </div>
+        <div class="auth-body">
+            <!-- Google Registration -->
+            @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+            {
+                <div class="social-login">
+                    <h3>@Localizer["QuickSignUpWith"]</h3>
+                    <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        @foreach (var provider in Model.ExternalLogins!)
+                        {
+                            <button type="submit" name="provider" value="@provider.Name" class="btn-google">
+                                @if (provider.Name == "Google")
+                                {
+                                    <img src="https://www.google.com/favicon.ico" alt="Google" />
+                                }
+                                @Localizer["SignUpWithGoogle"]
+                            </button>
+                        }
+                    </form>
+                </div>
+
+                <div class="auth-divider">
+                    <span>@Localizer["OrRegisterWithEmail"]</span>
+                </div>
+            }
+
+            <!-- Registration Form -->
+            <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="auth-form">
+                <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
+                
+                <div class="row">
+                    <div class="col-md-12 form-group">
+                        <label asp-for="Input.Email">
+                            <i class="bi bi-envelope me-2"></i>@Localizer["Email"]
+                        </label>
+                        <input asp-for="Input.Email" class="form-control" autocomplete="username" 
+                               placeholder="@Localizer["YourEmailAddress"]" />
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12 form-group">
+                        <label asp-for="Input.Name">
+                            <i class="bi bi-person me-2"></i>@Localizer["FullName"]
+                        </label>
+                        <input asp-for="Input.Name" class="form-control" autocomplete="name" 
+                               placeholder="John Doe" />
+                        <span asp-validation-for="Input.Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label asp-for="Input.Password">
+                            <i class="bi bi-lock me-2"></i>@Localizer["Password"]
+                        </label>
+                        <input asp-for="Input.Password" class="form-control" type="password" 
+                               autocomplete="new-password" placeholder="••••••••" />
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label asp-for="Input.ConfirmPassword">
+                            <i class="bi bi-lock-fill me-2"></i>@Localizer["ConfirmPassword"]
+                        </label>
+                        <input asp-for="Input.ConfirmPassword" class="form-control" type="password" 
+                               autocomplete="new-password" placeholder="••••••••" />
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label asp-for="Input.PhoneNumber">
+                            <i class="bi bi-telephone me-2"></i>@Localizer["Phone"]
+                        </label>
+                        <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="tel" 
+                               placeholder="+971 50 000 0000" />
+                        <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label asp-for="Input.City">
+                            <i class="bi bi-geo-alt me-2"></i>@Localizer["City"]
+                        </label>
+                        <input asp-for="Input.City" class="form-control" autocomplete="address-level2"
+                               placeholder="Dubai" />
+                        <span asp-validation-for="Input.City" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <label asp-for="Input.StreetAddress">
+                            <i class="bi bi-house me-2"></i>@Localizer["StreetAddress"]
+                        </label>
+                        <input asp-for="Input.StreetAddress" class="form-control" autocomplete="street-address" 
+                               placeholder="123 Main St" />
+                        <span asp-validation-for="Input.StreetAddress" class="text-danger"></span>
+                    </div>
+
+                 
+
+                    <div class="col-md-4 form-group d-none">
+                        <label asp-for="Input.State">
+                            <i class="bi bi-map me-2"></i>@Localizer["State"]
+                        </label>
+                        <input asp-for="Input.State" class="form-control" autocomplete="address-level1" 
+                               placeholder="UAE" />
+                        <span asp-validation-for="Input.State" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 form-group d-none">
+                        <label asp-for="Input.PostalCode">
+                            <i class="bi bi-mailbox me-2"></i>@Localizer["PostalCode"]
+                        </label>
+                        <input asp-for="Input.PostalCode" class="form-control" autocomplete="postal-code" 
+                               placeholder="00000" />
+                        <span asp-validation-for="Input.PostalCode" class="text-danger"></span>
+                    </div>
+
+                    <!-- Hidden - Auto-set to Customer role -->
+                    <input type="hidden" asp-for="Input.Role" value="Customer" />
+                </div>
+                
+                <button id="registerSubmit" type="submit" class="btn-auth-submit">
+                    <i class="bi bi-person-plus me-2"></i>@Localizer["CreateAccount"]
+                </button>
+            </form>
+        </div>
+        
+        <div class="auth-footer">
+            <p>
+                @Localizer["AlreadyHaveAccount"]
+                <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="auth-link">
+                    @Localizer["SignInHere"]
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function(){
+            $('#Input_Role').change(function(){
+                var Selection = $('#Input_Role option:selected').text();
+                if (Selection == 'Company') {
+                    $('#Input_CompanyId').show();
+                } else {
+                    $('#Input_CompanyId').hide();
+                }
+            });
+        });
+    </script>
+}

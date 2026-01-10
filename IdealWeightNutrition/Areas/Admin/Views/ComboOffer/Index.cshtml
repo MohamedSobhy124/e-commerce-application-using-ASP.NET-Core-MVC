@@ -1,0 +1,159 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+@model IEnumerable<IdealWeightNutrition.Models.ComboOffer>
+
+@{
+    ViewData["Title"] = Localizer["ComboOffers"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">
+                    <i class="bi bi-box-seam me-2"></i>@Localizer["ComboOffers"]
+                </h2>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>@Localizer["CreateNew"]
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>@TempData["error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>@Localizer["Image"]</th>
+                                <th>@Localizer["Name"]</th>
+                                <th>@Localizer["ComboPrice"]</th>
+                                <th>@Localizer["Discount"]</th>
+                                <th>@Localizer["Products"]</th>
+                                <th>@Localizer["StartDate"]</th>
+                                <th>@Localizer["EndDate"]</th>
+                                <th>@Localizer["Status"]</th>
+                                <th class="text-end">@Localizer["Actions"]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var comboOffer in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(comboOffer.ImageUrl))
+                                        {
+                                            <img src="@comboOffer.ImageUrl" alt="@comboOffer.Name" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                                <i class="bi bi-image text-muted"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong>@comboOffer.Name</strong>
+                                        @if (!string.IsNullOrEmpty(comboOffer.NameAr))
+                                        {
+                                            <br />
+                                            <small class="text-muted">@comboOffer.NameAr</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">@comboOffer.ComboPrice.ToString("C")</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger">@comboOffer.DiscountPercentage.ToString("F1")% @Localizer["Off"]</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@comboOffer.TotalProducts @Localizer["Items"]</span>
+                                    </td>
+                                    <td>
+                                        <small>@comboOffer.StartDate.ToString("MM/dd/yyyy HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <small>@comboOffer.EndDate.ToString("MM/dd/yyyy HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        @if (comboOffer.IsCurrentlyActive)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>@Localizer["Active"]
+                                            </span>
+                                        }
+                                        else if (comboOffer.HasEnded)
+                                        {
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-x-circle me-1"></i>@Localizer["Ended"]
+                                            </span>
+                                        }
+                                        else if (!comboOffer.HasStarted)
+                                        {
+                                            <span class="badge bg-warning">
+                                                <i class="bi bi-clock me-1"></i>@Localizer["Upcoming"]
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-pause-circle me-1"></i>@Localizer["Inactive"]
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Details" asp-route-id="@comboOffer.Id" class="btn btn-sm btn-info" title="@Localizer["Details"]">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@comboOffer.Id" class="btn btn-sm btn-warning" title="@Localizer["Edit"]">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-action="AddProducts" asp-route-id="@comboOffer.Id" class="btn btn-sm btn-primary" title="@Localizer["ManageProducts"]">
+                                                <i class="bi bi-box-seam"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@comboOffer.Id" class="btn btn-sm btn-danger" title="@Localizer["Delete"]">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-box-seam display-1 text-muted"></i>
+                    <p class="text-muted mt-3">@Localizer["NoComboOffersFound"]</p>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>@Localizer["CreateFirstComboOffer"]
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+

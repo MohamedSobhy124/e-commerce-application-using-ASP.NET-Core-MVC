@@ -1,0 +1,578 @@
+﻿@page
+@model EmailModel
+@{
+    ViewData["Title"] = Localizer["ManageEmail"];
+    ViewData["ActivePage"] = ManageNavPages.Email;
+}
+
+<div class="page-header mb-4">
+    <h3 class="page-title">
+        <i class="bi bi-envelope me-2"></i>@ViewData["Title"]
+    </h3>
+    <p class="page-subtitle">@Localizer["EmailSubtitle"]</p>
+</div>
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<div class="email-form-wrapper">
+    <form id="email-form" method="post" class="modern-form">
+        <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+        
+        <div class="form-card">
+            <div class="form-card-header">
+                <i class="bi bi-envelope-check me-2"></i>
+                <span>@Localizer["CurrentEmail"]</span>
+            </div>
+            <div class="form-card-body">
+                @if (Model.IsEmailConfirmed)
+                {
+                    <div class="form-floating mb-3">
+                        <div class="input-group">
+                            <input asp-for="Email" class="form-control" placeholder="@Localizer["Email"]" disabled />
+                            <span class="input-group-text bg-success text-white">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </span>
+                        </div>
+    
+                        <small class="form-text text-success">
+                            <i class="bi bi-check-circle me-1"></i>@Localizer["EmailVerified"]
+                        </small>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-floating mb-3">
+                        <input asp-for="Email" class="form-control" placeholder="@Localizer["Email"]" disabled />
+                        <label asp-for="Email" class="form-label">
+                            <i class="bi bi-envelope me-2"></i>@Localizer["Email"]
+                        </label>
+                        <small class="form-text text-warning">
+                            <i class="bi bi-exclamation-triangle me-1"></i>@Localizer["EmailNotVerified"]
+                        </small>
+                    </div>
+                    <button id="email-verification" type="submit" asp-page-handler="SendVerificationEmail" class="btn btn-outline-primary mb-3">
+                        <i class="bi bi-send me-2"></i>@Localizer["SendVerificationEmail"]
+                    </button>
+                }
+            </div>
+        </div>
+        
+        <div class="form-card">
+            <div class="form-card-header">
+                <i class="bi bi-envelope-plus me-2"></i>
+                <span>@Localizer["ChangeEmail"]</span>
+            </div>
+            <div class="form-card-body">
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.NewEmail" class="form-control" autocomplete="email" aria-required="true" placeholder="@Localizer["NewEmail"]" />
+                 
+                    <span asp-validation-for="Input.NewEmail" class="text-danger"></span>
+                    <small class="form-text text-muted">
+                        <i class="bi bi-info-circle me-1"></i>@Localizer["NewEmailHint"]
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" class="btn btn-primary btn-lg">
+                <i class="bi bi-check-circle me-2"></i>@Localizer["ChangeEmail"]
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Styles {
+    <style>
+        /* Modern Page Header with Gradient */
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2.5rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -5%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .page-title i {
+            font-size: 2.5rem;
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+        
+        @@keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .page-subtitle {
+            color: rgba(255,255,255,0.95);
+            margin: 0;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .email-form-wrapper {
+            margin-top: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Cool Card Design with Glass Morphism */
+        .form-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: slideInUp 0.6s ease-out;
+        }
+        
+        @@keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .form-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .form-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .form-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .form-card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .form-card:hover .form-card-header::before {
+            left: 100%;
+        }
+        
+        .form-card-header i {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .form-card-body {
+            padding: 2rem 1.5rem;
+            background: white;
+        }
+
+        /* Enhanced Form Controls */
+        .form-floating {
+            position: relative;
+        }
+        
+        .form-floating .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .form-floating .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .form-floating .form-control:disabled {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        
+        .form-floating label {
+            padding: 1rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        /* Input Group with Icon */
+        .input-group {
+            position: relative;
+        }
+        
+        .input-group-text {
+            border: 2px solid #e9ecef;
+            border-left: none;
+            border-radius: 0 12px 12px 0;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group-text.bg-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            border-color: #10b981;
+            animation: successPulse 2s ease-in-out infinite;
+        }
+        
+        @@keyframes successPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+
+        /* Status Badges */
+        .form-text {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .form-text.text-success {
+            color: #10b981 !important;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .form-text.text-warning {
+            color: #f59e0b !important;
+            padding: 0.5rem 1rem;
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .form-text.text-muted {
+            color: #6c757d !important;
+            padding: 0.5rem 1rem;
+            background: rgba(108, 117, 125, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid #6c757d;
+        }
+
+        /* Action Buttons */
+        .form-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            animation: slideInUp 0.6s ease-out 0.4s both;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+        
+        .btn-primary i,
+        .btn-primary span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-outline-primary {
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .btn-outline-primary:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Validation Summary */
+        .alert-danger {
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+            border-left: 4px solid #dc2626;
+            animation: shake 0.5s;
+        }
+        
+        @@keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Mobile Responsive */
+        @@media (max-width: 768px) {
+            .page-header {
+                padding: 2rem 1.5rem;
+                border-radius: 15px;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .page-title i {
+                font-size: 2rem;
+            }
+            
+            .page-subtitle {
+                font-size: 1rem;
+            }
+            
+            .form-card-header {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+            
+            .form-card-body {
+                padding: 1.25rem 1rem;
+            }
+            
+            .btn-primary {
+                padding: 0.875rem 2rem;
+                font-size: 1rem;
+                width: 100%;
+            }
+            
+            .btn-outline-primary {
+                width: 100%;
+                padding: 0.75rem 1rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            .form-floating .form-control {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+        
+        /* Extra Small Devices */
+        @@media (max-width: 576px) {
+            .page-header {
+                padding: 1.5rem 1rem;
+                border-radius: 12px;
+            }
+
+            input#Email {
+                width: 100%;
+            }
+            .page-title {
+                font-size: 1.25rem;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .page-title i {
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .form-card {
+                border-radius: 15px;
+            }
+            
+            .form-card-header {
+                padding: 0.875rem;
+                font-size: 0.95rem;
+            }
+            
+            .email-form-wrapper {
+                padding: 0 0.5rem;
+            }
+        }
+        
+        /* Tablet Landscape */
+        @@media (min-width: 769px) and (max-width: 1024px) {
+            .email-form-wrapper {
+                max-width: 700px;
+            }
+            
+            .btn-primary {
+                padding: 0.875rem 2.5rem;
+            }
+        }
+        
+        /* Touch Device Improvements */
+        @@media (hover: none) {
+            .form-card:hover {
+                transform: none;
+            }
+            
+            .btn-primary:hover {
+                transform: none;
+            }
+            
+            .form-card-header::before {
+                display: none;
+            }
+        }
+        
+        /* Loading State */
+        .btn[disabled] {
+            opacity: 0.6;
+            cursor: not-allowed;
+            position: relative;
+        }
+        
+        .btn[disabled]::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spinner 0.6s linear infinite;
+        }
+        
+        @@keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Focus States for Accessibility */
+        .form-control:focus,
+        .btn:focus {
+            outline: 3px solid rgba(102, 126, 234, 0.3);
+            outline-offset: 2px;
+        }
+        
+        /* Dark Mode Support (if needed in future) */
+        @@media (prefers-color-scheme: dark) {
+            .form-card {
+                background: rgba(30, 30, 30, 0.95);
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+            
+            .form-card-body {
+                color: #e9ecef;
+            }
+            
+            .form-control {
+                background: #2a2a2a;
+                color: #e9ecef;
+                border-color: #444;
+            }
+            
+            .form-text.text-muted {
+                color: #9ca3af !important;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

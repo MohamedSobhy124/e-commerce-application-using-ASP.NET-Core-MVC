@@ -1,0 +1,818 @@
+﻿@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Localization
+@inject IConfiguration Configuration
+
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture.RequestCulture.Culture.Name;
+    var isRtl = currentCulture == "ar";
+}
+<!DOCTYPE html>
+<html lang="@currentCulture" dir="@(isRtl ? "rtl" : "ltr")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 " />
+    @{
+        var pageTitle = ViewData["Title"]?.ToString() ?? "";
+        var isHomePage = string.IsNullOrEmpty(pageTitle) || pageTitle == "Home" || pageTitle == "الرئيسية";
+        var titleSuffix = currentCulture == "ar" 
+            ? "ايديال ويت للتغذية | وزن مثالي للتغذية | وزن مثالي | حلول التغذية والوزن المثالي في الإمارات"
+            : "Ideal Weight Nutrition | Ideal Weight Nutrition UAE | Ideal Weight Solutions | Nutrition Supplements UAE";
+        
+        var finalTitle = isHomePage
+            ? (currentCulture == "ar" 
+                ? "ايديال ويت للتغذية - وزن مثالي للتغذية - وزن مثالي - حلول التغذية المتكاملة | مكملات التغذية الإمارات"
+                : "Ideal Weight Nutrition - Ideal Weight Nutrition UAE - Ideal Weight & Nutrition Solutions | Premium Nutrition Supplements UAE")
+            : $"{pageTitle} - {titleSuffix}";
+    }
+    <title>@finalTitle</title>
+    
+    <!-- Google Search Console Verification -->
+    @{
+        var googleVerification = Configuration["SiteSettings:GoogleSearchConsoleVerification"] ?? "";
+        if (!string.IsNullOrEmpty(googleVerification))
+        {
+            <meta name="google-site-verification" content="@googleVerification" />
+        }
+    }
+    
+    <!-- Favicon and App Icons - Multiple sizes for better Google Search visibility -->
+    @{
+        var faviconBaseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
+    }
+    <link rel="icon" type="image/x-icon" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <link rel="apple-touch-icon" sizes="57x57" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <link rel="shortcut icon" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <meta name="msapplication-TileImage" content="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <meta name="msapplication-TileColor" content="#7c3aed" />
+    
+    <!-- SEO Meta Tags Partial -->
+    <partial name="_SEOMetaTags" />
+    
+    @{
+        string baseUrl;
+        string siteName;
+        string siteDescription;
+        string pageDescription;
+        string pageImage;
+        
+        try
+        {
+            baseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
+            siteName = Configuration["SiteSettings:SiteName"] ?? "Ideal Weight Nutrition";
+            siteDescription = currentCulture == "ar" 
+                ? (Configuration["SiteSettings:SiteDescriptionAr"] ?? "مكملات صحية ولياقة بدنية متميزة في الإمارات")
+                : (Configuration["SiteSettings:SiteDescription"] ?? "Premium health and fitness supplements in UAE");
+            pageTitle = ViewData["Title"]?.ToString() ?? (currentCulture == "ar" ? "الرئيسية" : "Home");
+            pageDescription = ViewData["Description"]?.ToString() ?? siteDescription;
+            pageImage = ViewData["Image"]?.ToString() ?? baseUrl + "/Images/Products/logo_white_bg.png";
+        }
+        catch
+        {
+            baseUrl = Context.Request.Scheme + "://" + Context.Request.Host;
+            siteName = "Ideal Weight Nutrition";
+            siteDescription = currentCulture == "ar" 
+                ? "مكملات صحية ولياقة بدنية متميزة في الإمارات"
+                : "Premium health and fitness supplements in UAE";
+            pageTitle = ViewData["Title"]?.ToString() ?? (currentCulture == "ar" ? "الرئيسية" : "Home");
+            pageDescription = ViewData["Description"]?.ToString() ?? siteDescription;
+            pageImage = baseUrl + "/Images/Products/logo_white_bg.png";
+        }
+    }
+    
+    <!-- SEO Meta Tags are now handled by _SEOMetaTags partial above -->
+    
+    <!-- Structured Data (JSON-LD) - Organization, LocalBusiness & Website (Global) -->
+    @{
+        // Ensure baseUrl uses HTTPS for better SEO
+        baseUrl = baseUrl.Replace("http://", "https://");
+        var orgSchema = SEOHelper.GenerateOrganizationStructuredData(baseUrl, siteName, siteDescription);
+        var localBusinessSchema = SEOHelper.GenerateLocalBusinessStructuredData(baseUrl, siteName, siteDescription, Configuration);
+        var websiteSchema = SEOHelper.GenerateWebsiteStructuredData(baseUrl, siteName);
+    }
+    <script type="application/ld+json">
+    @Html.Raw(orgSchema)
+    </script>
+    
+    <script type="application/ld+json">
+    @Html.Raw(localBusinessSchema)
+    </script>
+    
+    <script type="application/ld+json">
+    @Html.Raw(websiteSchema)
+    </script>
+     
+    
+    <!-- Page-Specific Structured Data (will be added by individual pages) -->
+    @RenderSection("StructuredData", required: false)
+    
+    <!-- Performance Optimization: Resource Hints -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://code.jquery.com">
+    <link rel="dns-prefetch" href="https://cdn.datatables.net">
+    
+    <!-- Preload LCP Image (Largest Contentful Paint) -->
+    @if (ViewBag.LcpImageUrl != null && !string.IsNullOrEmpty(ViewBag.LcpImageUrl.ToString()))
+    {
+        <link rel="preload" href="@ViewBag.LcpImageUrl" as="image" fetchpriority="high">
+    }
+    
+    <!-- Critical CSS: Load synchronously (above-the-fold content) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"></noscript>
+    
+    <!-- Critical CSS: Core styles needed for initial render -->
+    <link rel="stylesheet" href="~/css/font-optimization.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/hero-welcome.css" asp-append-version="true" />
+    @if (isRtl)
+    {
+        <link rel="stylesheet" href="~/css/rtl.css" asp-append-version="true" />
+    }
+    
+    <!-- Non-Critical CSS: Defer loading to improve FCP/LCP -->
+    <link rel="preload" href="~/css/order-details.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/order-details.css" asp-append-version="true"></noscript>
+
+    <!-- Non-Critical CSS: Deferred loading (loads after page render) -->
+    <link rel="preload" href="~/css/page-animations.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/page-animations.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/ultra-cool-effects.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/ultra-cool-effects.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/ecommerce-pro-features.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/ecommerce-pro-features.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/mega-cool-extras.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/mega-cool-extras.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/flash-sale-compact.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/flash-sale-compact.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/flash-sale-customer.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/flash-sale-customer.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/flash-sale-admin.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/flash-sale-admin.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/home.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/home.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/home-enhanced.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/home-enhanced.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/product-details.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/product-details.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/cart.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/cart.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/cool-loader.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/cool-loader.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/admin.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/admin.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/forms.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/forms.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/animations.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/animations.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/external-login.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/external-login.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/notification-bell.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/notification-bell.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/ideal-weight-theme.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/ideal-weight-theme.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/whatsapp.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/whatsapp.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/back-to-top.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/back-to-top.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/reviews.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/reviews.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/enhanced-navigation.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/enhanced-navigation.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/auth-pages.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/auth-pages.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/wishlist.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/wishlist.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/services-home.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/services-home.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/home-enhanced-sections.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/home-enhanced-sections.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/home-compact-mobile.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/home-compact-mobile.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/home-professional-enhancements.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/home-professional-enhancements.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/lazy-loaded-sections.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/lazy-loaded-sections.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/combo-offers.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/combo-offers.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/unified-responsive-carousels.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/unified-responsive-carousels.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/mobile-carousel-enhancements.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/mobile-carousel-enhancements.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/IdealWeightNutrition.styles.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/IdealWeightNutrition.styles.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/modern-product-grid.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/modern-product-grid.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/sticky-header-enhanced.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/sticky-header-enhanced.css" asp-append-version="true"></noscript>
+    
+    <link rel="preload" href="~/css/mobile-bottom-nav.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="~/css/mobile-bottom-nav.css" asp-append-version="true"></noscript>
+
+
+    <!-- Non-Critical External CSS: Already handled above with preload -->
+    
+    <!-- Toastr CSS - Load synchronously for notifications -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" crossorigin="anonymous">
+    
+    <!-- Custom Toastr Styles - Load after CDN to override defaults -->
+    <link rel="stylesheet" href="~/css/notifications.css" asp-append-version="true" />
+    
+    <!-- Page-Specific Styles -->
+    @RenderSection("Styles", required: false)
+    
+    <!-- Page-Specific Head Content (meta tags, structured data, etc.) -->
+    @RenderSection("Head", required: false)
+</head>
+<body data-is-authenticated="@(User.Identity.IsAuthenticated ? "true" : "false")">
+  
+
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-toggleable-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span style="font-family: Cairo;">@Localizer["IdealWeight"]</span>
+
+                    <img src="~/images/Products/3.png" alt="Logo" class="img-fluid me-2" style="max-height: 40px;">
+                </a>
+
+                <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door me-1"></i>@Localizer["Home"]
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Customer" asp-controller="ServiceSubscription" asp-action="Index">
+                                <i class="bi bi-briefcase me-1"></i>@Localizer["OurServices"]
+                            </a>
+                        </li>
+
+                        @if(User.IsInRole(SD.Role_Admin)){ 
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-gear me-1"></i>@Localizer["Management"]
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Order" asp-action="Index">
+                                            <i class="bi bi-receipt me-2"></i>@Localizer["Orders"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="ReturnRequest" asp-action="Index">
+                                            <i class="bi bi-arrow-return-left me-2"></i>@Localizer["ReturnRequests"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Review" asp-action="Index">
+                                            <i class="bi bi-star-fill me-2"></i>@Localizer["Reviews"]
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Brand" asp-action="Index">
+                                            <i class="bi bi-tag me-2"></i>@Localizer["Brands"]
+                                        </a>
+                                    </li> 
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Categries" asp-action="Index">
+                                            <i class="bi bi-tag me-2"></i>@Localizer["Category"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">
+                                            <i class="bi bi-box me-2"></i>@Localizer["Product"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="FlashSale" asp-action="Index">
+                                            <i class="bi bi-lightning-charge-fill me-2"></i>@Localizer["FlashSales"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="PromoCode" asp-action="Index">
+                                            <i class="bi bi-tag-fill me-2"></i>@Localizer["PromoCodes"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="ComboOffer" asp-action="Index">
+                                            <i class="bi bi-box-seam me-2"></i>@Localizer["ComboOffers"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="ServiceSubscription" asp-action="Index">
+                                            <i class="bi bi-briefcase-fill me-2"></i>@Localizer["ServiceSubscriptions"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="NewsletterSubscription" asp-action="Index">
+                                            <i class="bi bi-envelope-heart me-2"></i>@Localizer["NewsletterSubscribers"]
+                                        </a>
+                                    </li>
+                                   @*  <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="VideoBanner" asp-action="Index">
+                                            <i class="bi bi-play-circle-fill me-2"></i>@Localizer["VideoBanner"]
+                                        </a>
+                                    </li> *@
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="User" asp-action="CreateAdminUser">
+                                            <i class="bi bi-person-plus-fill me-2"></i> @Localizer["CreateNewUser"]
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle notification-nav-link" href="#" id="notificationDropdownToggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-bell-fill me-1"></i>@Localizer["Notifications"]
+                                    <span id="notificationBadge" class="notification-badge">0</span>
+                                    <span class="notification-dot" id="notificationDot"></span>
+                                </a>
+                                <div id="notificationDropdown" class="dropdown-menu notification-dropdown-menu" aria-labelledby="notificationDropdownToggle">
+                                    <div class="notification-dropdown-header">
+                                        <h5 class="notification-dropdown-title">
+                                            <i class="bi bi-bell me-2"></i>@Localizer["Notifications"]
+                                        </h5>
+                                        <button class="mark-all-read-btn" onclick="markAllAsRead(); event.stopPropagation();">
+                                            @Localizer["MarkAllRead"]
+                                        </button>
+                                    </div>
+                                    <div id="notificationList" class="notification-list">
+                                        <div class="notification-empty">
+                                            <i class="bi bi-bell-slash"></i>
+                                            <p>@Localizer["NoNotificationsYet"]</p>
+                                        </div>
+                                    </div>
+                                    <div class="notification-dropdown-footer">
+                                        <a href="#" class="view-all-notifications">@Localizer["ViewAllNotifications"]</a>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link" id="cartNavLink" asp-area="Customer" asp-controller="Cart" asp-action="Index">
+                                @await Component.InvokeAsync("ShoppingCart")
+                            </a>
+                        </li>
+
+                        <!-- Language Switcher -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-globe me-1"></i>
+                                <span id="currentLanguageDisplay">
+                                    @{
+                                        var langDisplay = currentCulture == "ar" ? "العربية" : "English";
+                                    }
+                                    @langDisplay
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+                                @{
+                                    var currentPath = Context.Request.Path.Value ?? "/";
+                                    var queryString = Context.Request.QueryString.Value ?? "";
+                                    // Remove existing culture parameter if present
+                                    var cleanQueryString = queryString
+                                        .Replace("?culture=ar", "")
+                                        .Replace("&culture=ar", "")
+                                        .Replace("?culture=en", "")
+                                        .Replace("&culture=en", "");
+                                    var querySeparator = string.IsNullOrEmpty(cleanQueryString) ? "?" : (cleanQueryString.Contains("?") ? "&" : "?");
+                                    var arUrl = $"{currentPath}{querySeparator}culture=ar{cleanQueryString}";
+                                    var enUrl = $"{currentPath}{querySeparator}culture=en{cleanQueryString}";
+                                }
+                                <li>
+                                    <a href="@arUrl" 
+                                    onclick="event.preventDefault(); switchToArabic(); return false;" 
+                                    id="langButtonAr"
+                                    class="dropdown-item @(currentCulture == "ar" ? "active" : "")">
+                                        <i class="bi bi-translate me-2"></i> العربية
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="@enUrl" 
+                                    onclick="event.preventDefault(); switchToEnglish(); return false;" 
+                                    id="langButtonEn"
+                                    class="dropdown-item @(currentCulture == "en" ? "active" : "")">
+                                        <i class="bi bi-translate me-2"></i> English
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div style="padding-left: .5rem; padding-right: .5rem;">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="enhanced-footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Company Info -->
+                <div class="footer-section">
+                    <h3 class="footer-logo">
+                        <i class="bi bi-heart-pulse me-2"></i>
+                        @Localizer["IdealWeight"]
+                    </h3>
+                    <p class="footer-description">
+                        @Localizer["YourTrustedHealthPartner"]
+                    </p>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/share/1FBf7DDTc7/" target="_blank" rel="noopener noreferrer" class="social-link" title="Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="https://www.snapchat.com/add/ideal_weight?share_id=Kdx1LDLl_uw&locale=en-GB" target="_blank" rel="noopener noreferrer" class="social-link" title="Snapchat">
+                            <i class="bi bi-camera"></i>
+                        </a>
+                        <a href="https://www.instagram.com/idealweightnutrition?utm_source=qr&igsh=MW1wdGxpeHZlZ2d5cg==" target="_blank" rel="noopener noreferrer" class="social-link" title="Instagram">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+                   
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="footer-section">
+                    <h4 class="footer-title">@Localizer["QuickLinks"]</h4>
+                    <ul class="footer-links">
+                        <li>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["Home"]
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="AboutUs" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["AboutUs"]
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="PrivacyPolicy" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["PrivacyPolicy"]
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Terms" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["TermsAndConditions"]
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Customer" asp-controller="Blog" asp-action="Index" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["Blog"]
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Customer Service -->
+                <div class="footer-section">
+                    <h4 class="footer-title">@Localizer["CustomerService"]</h4>
+                    <ul class="footer-links">
+                        <li>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="HelpCenter" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["HelpCenter"]
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Shipping" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["ShippingInfo"]
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Returns" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["Returns"]
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="TrackOrder" class="footer-link">
+                                <i class="bi bi-chevron-right"></i>
+                                @Localizer["TrackOrder"]
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+             @*    <div class="footer-section">
+                    <h4 class="footer-title">@Localizer["Newsletter"]</h4>
+                    <p class="footer-description">
+                        Subscribe to get special offers, free giveaways, and updates.
+                    </p>
+                    <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Thank you for subscribing!');">
+                        <input type="email" class="newsletter-input" placeholder="Your email address" required />
+                        <button type="submit" class="newsletter-btn">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </form>
+                </div> *@
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 <strong>Ideal Weight </strong>. @Localizer["AllRightsReserved"]</p>
+                <button id="backToTopBtn" class="back-to-top-btn" title="@Localizer["BackToTop"]">
+                    <i class="bi bi-arrow-up"></i>
+                </button>
+            </div>
+        </div>
+    </footer>
+    <!-- Performance: Use CDN for common libraries (faster, globally cached) -->
+    <!-- Critical JavaScript: Load synchronously (needed for initial render) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    
+    <!-- Non-Critical JavaScript: Defer loading (loads after page render) -->
+    <script src="~/js/enhanced-carousels.js" asp-append-version="true" defer></script>
+    <script src="~/js/product-carousel-touch-fix.js" asp-append-version="true" defer></script>
+    
+    <!-- Toastr JavaScript - Load before toastr-config.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js" crossorigin="anonymous"></script>
+    <script src="~/js/toastr-config.js" asp-append-version="true"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js" crossorigin="anonymous" defer></script>
+    <script src="~/js/notifications.js" asp-append-version="true" defer></script>
+    <script src="~/js/notification-handler.js" asp-append-version="true" defer></script>
+    <script src="~/js/language-switcher.js" asp-append-version="true" defer></script>
+    <script src="~/js/ultra-cool-effects.js" asp-append-version="true" defer></script>
+    <script src="~/js/ecommerce-pro-features.js" asp-append-version="true" defer></script>
+    <script src="~/js/mega-cool-extras.js" asp-append-version="true" defer></script>
+    <script src="~/js/cart-storage-manager.js" asp-append-version="true" defer></script>
+    <script src="~/js/wishlist-helper.js" asp-append-version="true" defer></script>
+    <script src="~/js/flash-sale-customer-fixed.js" asp-append-version="true" defer></script>
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+
+    <!-- Global Authentication State -->
+    <script>
+        // Set global authentication state from body attribute (set in body tag)
+        (function() {
+            const isAuthenticated = document.body.getAttribute('data-is-authenticated') === 'true';
+            window.isAuthenticated = isAuthenticated;
+        })();
+    </script>
+    
+    <!-- Back to Top Functionality -->
+    <script>
+        // Initialize navbar toggler state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const navbarCollapse = document.querySelector('#navbarNav');
+            
+            if (navbarToggler && navbarCollapse) {
+                // Force collapsed state by default (shows hamburger)
+                navbarToggler.classList.add('collapsed');
+                navbarToggler.setAttribute('aria-expanded', 'false');
+            }
+        });
+        
+        // Back to Top Button
+        const backToTopBtn = document.getElementById('backToTopBtn');
+        const navbar = document.querySelector('.navbar');
+
+        // Show/hide button based on scroll position + sticky navbar effect
+        window.addEventListener('scroll', function() {
+        // Back to top button
+        if (window.pageYOffset > 300) {
+        backToTopBtn.classList.add('show');
+        } else {
+        backToTopBtn.classList.remove('show');
+        }
+
+        // Sticky navbar effect
+        if (window.pageYOffset > 50) {
+        navbar.classList.add('scrolled');
+        } else {
+        navbar.classList.remove('scrolled');
+        }
+        });
+
+        // Smooth scroll to top
+        backToTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+        });
+        });
+
+        // Handle navbar toggle icon change (hamburger to X)
+        const navbarToggler = document.querySelector('.navbar-toggler');
+        const navbarCollapse = document.querySelector('#navbarNav');
+        
+        if (navbarToggler && navbarCollapse) {
+            // Initialize: Always ensure collapsed class and aria-expanded='false' on page load
+            // This ensures hamburger icon shows by default
+            function initializeToggler() {
+                // Force collapsed state on initial load
+                navbarToggler.classList.add('collapsed');
+                navbarToggler.setAttribute('aria-expanded', 'false');
+            }
+            
+            // Set initial state immediately and on load
+            initializeToggler();
+            window.addEventListener('load', initializeToggler);
+            
+            // Listen for Bootstrap collapse events
+            navbarCollapse.addEventListener('show.bs.collapse', function() {
+                // Menu opening - remove collapsed class (shows X)
+                navbarToggler.classList.remove('collapsed');
+                navbarToggler.setAttribute('aria-expanded', 'true');
+            });
+            
+            navbarCollapse.addEventListener('shown.bs.collapse', function() {
+                // Menu fully open - ensure X icon
+                navbarToggler.classList.remove('collapsed');
+                navbarToggler.setAttribute('aria-expanded', 'true');
+            });
+            
+            navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                // Menu closing - add collapsed class (shows hamburger)
+                navbarToggler.classList.add('collapsed');
+                navbarToggler.setAttribute('aria-expanded', 'false');
+            });
+            
+            navbarCollapse.addEventListener('hidden.bs.collapse', function() {
+                // Menu fully closed - ensure hamburger icon
+                navbarToggler.classList.add('collapsed');
+                navbarToggler.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+        const navbar = document.querySelector('.navbar-collapse');
+        const toggler = document.querySelector('.navbar-toggler');
+
+        // Don't close if clicking on a dropdown toggle or inside a dropdown menu
+        if (event.target.closest('.dropdown-toggle') || event.target.closest('.dropdown-menu')) {
+        return;
+        }
+
+        if (navbar && navbar.classList.contains('show')) {
+        if (!navbar.contains(event.target) && !toggler.contains(event.target)) {
+        const bsCollapse = new bootstrap.Collapse(navbar, {
+        toggle: false
+        });
+        bsCollapse.hide();
+        }
+        }
+        });
+
+        // Close mobile menu when clicking a link (but not dropdown toggles)
+        document.querySelectorAll('.navbar-nav .nav-link:not(.dropdown-toggle)').forEach(link => {
+        link.addEventListener('click', function(e) {
+        // Don't close if clicking on a dropdown toggle or inside a dropdown
+        if (e.target.closest('.dropdown-toggle') || e.target.closest('.dropdown-menu')) {
+        return;
+        }
+        const navbar = document.querySelector('.navbar-collapse');
+        if (navbar && navbar.classList.contains('show')) {
+        const bsCollapse = new bootstrap.Collapse(navbar);
+        bsCollapse.hide();
+        }
+        });
+        });
+    </script>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script>
+            // Set user roles for SignalR
+            const userRoles = '@(string.Join(",", User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value)))';
+            if (typeof setUserRoles === 'function') {
+            setUserRoles(userRoles);
+            }
+        </script>
+        @if (User.IsInRole(SD.Role_Admin))
+        {
+        }
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                loadNotifications();  // Load notifications count on page load
+            });
+        </script>
+    }
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+    <!-- Performance: Use CDN for DataTables and SweetAlert2 - Defer non-critical -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js" crossorigin="anonymous" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" crossorigin="anonymous" defer></script>
+   
+    <!-- Floating Call Button -->
+    @{
+        var callPhone = Configuration["Call:PhoneNumber"] ?? Configuration["SiteSettings:Business:Phone"] ?? "971527383841";
+        // Keep original phone for display
+        var callPhoneDisplay = callPhone;
+        // Remove spaces, dashes, and parentheses for tel: link, but keep + if present
+        var callPhoneFormatted = callPhone.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "");
+        // Ensure it starts with + if it doesn't already
+        if (!callPhoneFormatted.StartsWith("+") && !callPhoneFormatted.StartsWith("tel:"))
+        {
+            callPhoneFormatted = "+" + callPhoneFormatted;
+        }
+        var callUrl = $"tel:{callPhoneFormatted}";
+        var callEnabled = Configuration.GetValue<bool>("Call:Enabled", true);
+        var callTooltipText = currentCulture == "ar" ? "اتصل بنا" : "Call Us";
+    }
+    @if (callEnabled)
+    {
+        <a href="@callUrl" 
+           class="floating-call-btn call-pulse"
+           title="@callTooltipText - @callPhoneDisplay">
+            <i class="bi bi-telephone-fill"></i>
+            <span class="call-tooltip">
+                <span class="call-tooltip-text">@callTooltipText</span>
+                <span class="call-tooltip-phone">@callPhoneDisplay</span>
+            </span>
+        </a>
+    }
+
+    <!-- Floating WhatsApp Button -->
+    @{
+        var whatsAppPhone = Configuration["WhatsApp:PhoneNumber"] ?? "971507700559"; ;  
+        var whatsAppMessage = currentCulture == "ar"
+        ? (Configuration["WhatsApp:DefaultMessageAr"] ?? "مرحباً! أنا مهتم بمنتجاتكم.")
+        : (Configuration["WhatsApp:DefaultMessage"] ?? "Hello! I'm interested in your products.");
+        var whatsAppUrl = $"https://wa.me/{whatsAppPhone}?text={Uri.EscapeDataString(whatsAppMessage)}";
+    }
+    <a href="@whatsAppUrl" 
+       target="_blank" 
+       class="floating-whatsapp-btn whatsapp-pulse"
+       title="@Localizer["ChatOnWhatsApp"]">
+        <i class="bi bi-whatsapp"></i>
+        <span class="whatsapp-tooltip">@Localizer["ChatWithUs"]</span>
+    </a>
+   
+    <!-- Cart Sidebar (available on all pages) -->
+    <partial name="_CartSidebar" />
+    
+    <!-- Mobile Bottom Navigation -->
+    <partial name="_MobileBottomNav" />
+  
+</body>
+</html>

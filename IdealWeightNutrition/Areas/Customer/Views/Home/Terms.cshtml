@@ -1,0 +1,281 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+@{
+    ViewData["Title"] = Localizer["TermsAndConditions"];
+    var currentLang = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="page-header text-center mb-5">
+                <h1 class="display-4" style="color: #1976D2; font-weight: 800;">
+                    <i class="bi bi-file-earmark-text me-3"></i>
+                    @if(currentLang == "ar") {
+                        <text>شروط الاستخدام</text>
+                    } else {
+                        <text>Terms of Use</text>
+                    }
+                </h1>
+                <div class="underline" style="width: 100px; height: 4px; background: linear-gradient(90deg, #3B9DD5, #7BC043); margin: 1rem auto;"></div>
+            </div>
+
+            @if(currentLang == "ar") 
+            {
+                <!-- Arabic Content -->
+                <div class="content-section" style="direction: rtl; text-align: right;">
+                    <!-- Privacy Policy Reference -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #3B9DD5; font-weight: 700;">
+                                <i class="bi bi-shield-lock me-3"></i>سياسة الخصوصية
+                            </h2>
+                            <p class="lead" style="line-height: 1.8; color: #555;">
+                                يرجى الاطلاع على سياسة الخصوصية التي بموجبها نقدم خدماتنا لعملائنا لفهم ممارساتنا من سياسة الخصوصية.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Payment and Purchases -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-credit-card me-3"></i>الدفع والمشتريات
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                أنت توافق على تقديم بيانات الحساب الحالية والدقيقة والكاملة ومعلومات الشراء لجميع المشتريات التي تتم من خلال الموقع بما في ذلك البريد الإلكتروني وطريقة الدفع وتاريخ انتهاء صلاحية بطاقة الدفع 
+                                حتى نتمكن من إكمال معاملاتك والاتصال بك حسب الحاجة. كما توافق على تحديث معلومات الحساب والدفع بسرعة معك إذا لزم الأمر.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                سيتم إضافة قيمة ضريبة المبيعات إلى سعر الشراء وفقًا لما نعتبره مطلوبًا. قد تخضع الأسعار للتغيير من قبلنا في أي وقت. يجب أن تكون جميع المدفوعات بالدرهم الإماراتي. 
+                                لاحظ أنه أثناء الدفع، قد تفرض عليك البنك رسومًا إضافية للدفع بعملة مختلفة، ومعدل العملة عرضة للتغيير.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                أنت توافق على دفع جميع الرسوم لمشترياتك بالأسعار المعمول بها وأي رسوم شحن معمول بها، وتخولنا تحصيل المبالغ اللازمة لأي رسوم من مزود الدفع الخاص بك عند تقديم الطلب. 
+                                إذا كان طلبك يخضع لرسوم دورية، فإنك توافق على تحصيل طريقة الدفع الخاصة بك على أساس دوري دون الحاجة إلى موافقتك المسبقة على كل معاملة لمثل هذه الرسوم، حتى تلغي الطلب.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                نحتفظ بالحق في تصحيح أي أخطاء في التسعير أو عدم الدقة حتى لو طلبنا أو تلقينا الدفع. نحتفظ بالحق في رفض أي طلب يتم تقديمه من خلال الموقع. 
+                                يجوز لنا، وفقًا لتقديرنا الخاص، تحديد أو إلغاء الكميات المشتراة لكل شخص أو أسرة أو طلب. قد تشمل هذه القيود الطلبات المقدمة من أو تحت نفس حساب العميل، أو نفس طريقة الدفع، أو تلك التي تستخدم نفس عنوان الفوترة أو الشحن.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                نحتفظ أيضًا بالحق في تحديد أو منع الطلبات، وفقًا لتقديرنا الخاص، التي يبدو أنها تم تقديمها من قبل التجار أو الموزعين أو الموزعين. 
+                                لاحظ أن منتجات التصفية لا تخضع للتبديل أو الإلغاء.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Validity -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                                <i class="bi bi-person-check me-3"></i>الصلاحية
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                باستخدام موقعنا، أنت تمثل وتضمن أنك تبلغ من العمر 18 عامًا على الأقل أو أكبر. أنت قادر على الوصول إلى الشروط والأحكام والتمثيلات والضمانات المنصوص عليها في هذه الاتفاقية وعرضها. 
+                                الموقع غير مخصص أو مصمم للمستخدمين الذين تقل أعمارهم عن 18 عامًا. لا يتم جمع أي معلومات شخصية من أي شخص نحدده على أنه أقل من 18 عامًا.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                إذا كان عمرك أقل من 18 عامًا، فأنت غير مخول بالكشف عن أو إرسال أي معلومات شخصية إلينا. 
+                                يتم إدارة الموقع من الإمارات العربية المتحدة والمعلومات الشخصية التي نتلقاها منا تخضع لسياسات الخصوصية في الإمارات العربية المتحدة.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Copyright and Trademarks -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-copyright me-3"></i>حقوق النشر والعلامات التجارية
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                أنت تقر بأن جميع المواد على الموقع وبرامج المراجعات والمكافآت، بما في ذلك تصميم الموقع والنصوص والرسومات والأصوات والصور والبرامج والملفات الأخرى بما في ذلك اختيارها وترتيبها، (يشار إليها مجتمعة باسم "المواد")، 
+                                هي ملكيتنا وتخضع ومحمية بموجب قوانين حقوق النشر في دولة الإمارات العربية المتحدة وحقوق الملكية الفكرية.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                العلامات التجارية وعلامات الخدمة والأسماء التجارية والشعارات (يشار إليها مجتمعة باسم "العلامات التجارية") الواردة في الموقع، بما في ذلك على سبيل المثال لا الحصر، هي الملكية الحصرية لـ WaptFit 
+                                ولا يجوز نسخها أو استخدامها كليًا أو جزئيًا دون الحصول على إذن كتابي مسبق من Ideal Weight.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                بالإضافة إلى ذلك، جميع عناوين الصفحات والرسومات والأيقونات هي علامات تجارية لـ idealweightnutrition.ae ولا يجوز نسخها أو استخدامها بطريقة أخرى، كليًا أو جزئيًا، دون الحصول على إذن كتابي مسبق من idealweightnutrition.ae. 
+                                حقوق النشر والعلامات التجارية وأسماء المنتجات أو الشركات أو الشعارات أو الملكية الفكرية هي ملكية أصحابها فقط وجميع الحقوق محفوظة.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Return and Exchange -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                                <i class="bi bi-arrow-left-right me-3"></i>الإرجاع والتبديل
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                يمكنك مراجعة سياسة الإرجاع <a asp-area="Customer" asp-controller="Home" asp-action="Returns" style="color: #7BC043; font-weight: 600;">هنا</a>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Approval -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-check-circle me-3"></i>الموافقة
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                بمجرد موافقتك على الشروط والأحكام، يعتبر ذلك اتفاقًا بينك وبيننا.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Contact -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                                <i class="bi bi-telephone-fill me-3"></i>تواصل معنا
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                إذا كان لديك أي أسئلة حول هذه الاتفاقية، اتصل بفريق خدمة العملاء لدينا على:
+                            </p>
+                            <div class="contact-info text-center mt-4 p-4" style="background: #E3F2FD; border-radius: 12px;">
+                                <p class="mb-2">
+                                    <strong>البريد الإلكتروني:</strong> <a href="mailto:info@idealweightnutrition.ae" style="color: #7BC043; font-weight: 700;">info@idealweightnutrition.ae</a>
+                                </p>
+                                <p class="mb-0">
+                                    <strong>رقم الهاتف:</strong> <a href="tel:+971507700559" style="color: #7BC043; font-weight: 700;">+971 50 770 0559</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- English Content -->
+                <div class="content-section">
+                    <!-- Privacy Policy Reference -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #3B9DD5; font-weight: 700;">
+                                <i class="bi bi-shield-lock me-3"></i>Privacy Policy
+                            </h2>
+                            <p class="lead" style="line-height: 1.8; color: #555;">
+                                Please see the privacy policy under which we provide our services to our customers to understand our practices from Privacy & Policy.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Payment and Purchases -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-credit-card me-3"></i>Payment and purchases
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                You agree to provide current, accurate and complete account data and purchase information for all purchases made through the site including email, payment method and payment card expiration date so that we can complete your transactions and contact you as needed. 
+                                You also agree to promptly update account and payment information with you if required.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                The sales tax value will be added to the purchase price according to what we deem required. Prices may be subject to change by us at any time. All payments must be in UAE Dirhams. 
+                                Note that while paying, your bank may charge you additional fees for paying in a different currency, and the currency rate is subject to change.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                You agree to pay all fees for your purchases at the applicable prices and any applicable shipping fees, and you authorize us to collect from your payment provider the necessary amounts for any such fees when you place an order. 
+                                If your order is subject to a periodic fee, you agree to charge your Payment Method on a periodic basis without requiring your prior approval on each transaction for such fee, until such time as you cancel the order.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                We reserve the right to correct any pricing errors or inaccuracies even if we have requested or received payment. We reserve the right to refuse any order placed through the Site. 
+                                We may, at our sole discretion, limit or cancel quantities purchased per person, household or order. These restrictions could include orders placed by or under the same customer account, the same payment method, or those that use the same address of invoicing or of expedition.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                We also reserve the right to limit or prohibit orders, in our sole judgment, that appear to have been placed by dealers, resellers or distributors. 
+                                Note that liquidation products are not subject to exchange or cancellation.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Validity -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                                <i class="bi bi-person-check me-3"></i>Validity
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                By using our site, you represent and warrant that you are at least 18 years of age or older. You are able to access and view the terms, conditions, representations and warranties set forth in this Agreement. 
+                                The Site is not intended or designed for users under the age of 18. No personal information is collected from anyone we identify as under 18 years of age.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                If you are under the age of 18, you are not authorized to disclose or submit any personal information to us. 
+                                The site is managed from the United Arab Emirates and the personal information that is received from us is subject to the privacy policies of the United Arab Emirates.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Copyright and Trademarks -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-copyright me-3"></i>Copyright and trademarks
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                You acknowledge that all materials on the Site and the Reviews and Rewards Programs, including the Site design, text, graphics, sounds, images, software and other files including their selection and arrangement, (collectively, the "Materials"), 
+                                are our property and are subject to and protected by state copyrights. United Arab Emirates laws and intellectual property rights.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                The trademarks, service marks, trade names and logos (collectively, the "Trademarks") contained on the Site, including without limitation, are the exclusive property of WaptFit and may not be copied or used in whole or in part without prior written permission from Ideal Weight.
+                            </p>
+                            <p style="line-height: 1.8; color: #555;">
+                                In addition, all page titles, graphics and icons are trademarks of idealweightnutrition.ae and may not be copied or otherwise used, in whole or in part, without the prior written permission of idealweightnutrition.ae. 
+                                Copyright, trademarks, product or company names, logos or intellectual property are the property of their respective owners only and all rights reserved.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Return and Exchange -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                                <i class="bi bi-arrow-left-right me-3"></i>Return and exchange
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                You can review the return policy <a asp-area="Customer" asp-controller="Home" asp-action="Returns" style="color: #7BC043; font-weight: 600;">Here</a>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Approval -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                                <i class="bi bi-check-circle me-3"></i>Approval
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                Once you agree to the terms and conditions, it is considered an agreement between you and us.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Contact -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                                <i class="bi bi-telephone-fill me-3"></i>Connect with us
+                            </h2>
+                            <p style="line-height: 1.8; color: #555;">
+                                If you have any questions about this Agreement, contact our customer service team at:
+                            </p>
+                            <div class="contact-info text-center mt-4 p-4" style="background: #E3F2FD; border-radius: 12px;">
+                                <p class="mb-2">
+                                    <strong>Email:</strong> <a href="mailto:info@idealweightnutrition.ae" style="color: #7BC043; font-weight: 700;">info@idealweightnutrition.ae</a>
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Phone number:</strong> <a href="tel:+971507700559" style="color: #7BC043; font-weight: 700;">+971 50 770 0559</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

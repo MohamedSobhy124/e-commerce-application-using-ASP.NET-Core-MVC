@@ -1,0 +1,1344 @@
+﻿@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+@model ShoppingCartVM
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cart-summary-enhanced.css" asp-append-version="true" />
+}
+
+<form method="post" id="orderForm" novalidate>
+	<div class="order-summary-wrapper">
+		<div class="container">
+			<div class="order-summary-card">
+
+				<div class="order-summary-header">
+					<h5 class="order-summary-title">
+						<i class="bi bi-file-earmark-text me-2"></i>
+						@Localizer["OrderSummary"]
+					</h5>
+					<a asp-action="Index" class="back-to-cart-btn">
+						<i class="bi bi-arrow-left me-2"></i>
+						@Localizer["BackToCart"]
+					</a>
+				</div>
+
+				<div class="order-summary-body">
+					<div class="row">
+						<div class="col-12 col-lg-6 pb-4">
+							<div class="shipping-details-section">
+								<h4>
+									<i class="bi bi-truck me-2"></i>
+									@Localizer["ShippingDetails"]
+								</h4>
+								
+								@if (Model.OrderHeader.IsGuestOrder || !User.Identity.IsAuthenticated)
+								{
+									<div class="alert alert-info-enhanced">
+										<div class="alert-icon">
+											<i class="bi bi-info-circle-fill"></i>
+										</div>
+										<div class="alert-content">
+											<strong>@Localizer["GuestCheckout"]</strong>
+											<p class="mb-0">@Localizer["GuestCheckoutInfo"]</p>
+										</div>
+									</div>
+									<div class="form-row-enhanced">
+										<label class="form-label-enhanced">
+											<i class="bi bi-envelope-fill me-2"></i>@Localizer["EmailAddress"] <span class="text-danger">*</span>
+										</label>
+										<input asp-for="OrderHeader.Email" type="email" class="form-control-enhanced" placeholder="@Localizer["EnterYourEmail"]" required />
+										<span asp-validation-for="OrderHeader.Email" class="text-danger validation-message"></span>
+									</div>
+								}
+								
+								<div class="form-row-enhanced">
+									<label class="form-label-enhanced">
+										<i class="bi bi-person-fill me-2"></i>@Localizer["Name"] <span class="text-danger">*</span>
+									</label>
+									<input asp-for="OrderHeader.Name" class="form-control-enhanced" placeholder="@Localizer["EnterYourName"]" required />
+									<span asp-validation-for="OrderHeader.Name" class="text-danger validation-message"></span>
+								</div>
+
+								<div class="form-row-enhanced">
+									<label class="form-label-enhanced">
+										<i class="bi bi-telephone-fill me-2"></i>@Localizer["Phone"] <span class="text-danger">*</span>
+									</label>
+									<input asp-for="OrderHeader.PhoneNumber" class="form-control-enhanced" placeholder="@Localizer["EnterYourPhone"]" required />
+									<span asp-validation-for="OrderHeader.PhoneNumber" class="text-danger validation-message"></span>
+								</div>
+
+								<div class="form-row-enhanced">
+									<label class="form-label-enhanced">
+										<i class="bi bi-geo-alt-fill me-2"></i>@Localizer["StreetAddress"] <span class="text-danger">*</span>
+									</label>
+									<input asp-for="OrderHeader.StreetAddress" class="form-control-enhanced" placeholder="@Localizer["EnterStreetAddress"]" required />
+									<span asp-validation-for="OrderHeader.StreetAddress" class="text-danger validation-message"></span>
+								</div>
+
+								<div class="form-row-enhanced">
+									<label class="form-label-enhanced">
+										<i class="bi bi-building me-2"></i>@Localizer["City"] <span class="text-danger">*</span>
+									</label>
+									<input asp-for="OrderHeader.City" class="form-control-enhanced" placeholder="@Localizer["EnterCity"]" required />
+									<span asp-validation-for="OrderHeader.City" class="text-danger validation-message"></span>
+								</div>
+
+								<div class="form-row-enhanced">
+									<label class="form-label-enhanced">
+										<i class="bi bi-geo me-2"></i>@Localizer["State"] <span class="text-danger">*</span>
+									</label>
+									<input asp-for="OrderHeader.State" class="form-control-enhanced" placeholder="@Localizer["EnterState"]" required />
+									<span asp-validation-for="OrderHeader.State" class="text-danger validation-message"></span>
+								</div>
+
+								<div class="form-row-enhanced">
+									<label class="form-label-enhanced">
+										<i class="bi bi-mailbox me-2"></i>@Localizer["PostalCode"] <span class="text-danger">*</span>
+									</label>
+									<input asp-for="OrderHeader.PostalCode" class="form-control-enhanced" placeholder="@Localizer["EnterPostalCode"]" required />
+									<span asp-validation-for="OrderHeader.PostalCode" class="text-danger validation-message"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-12 col-lg-5 offset-lg-1">
+							<div class="order-items-section">
+								<h4>
+									<i class="bi bi-basket3 me-2"></i>
+									@Localizer["OrderItems"]
+								</h4>
+								<ul class="order-items-list" id="orderItemsList">
+									@foreach(var details in Model.ShoppingCartList)
+									{
+										// Check if this is a combo offer
+										bool isComboOffer = details.ComboOfferId.HasValue && details.ComboOffer != null;
+										bool hasVariant = details.ProductVariantId.HasValue && details.ProductVariant != null;
+										
+										// Get display name - use localized version based on current culture
+										string displayName = isComboOffer 
+											? (currentCulture == "ar" && !string.IsNullOrEmpty(details.ComboOffer.NameAr) 
+												? details.ComboOffer.NameAr 
+												: details.ComboOffer.Name)
+											: (currentCulture == "ar" && !string.IsNullOrEmpty(details.product.TitleAr) 
+												? details.product.TitleAr 
+												: details.product.Title);
+										
+										// Get variant display string
+										string variantDisplayText = null;
+										if (hasVariant && details.ProductVariant != null)
+										{
+											// Try to get variant option values directly
+											if (details.ProductVariant.VariantOptionValues != null && details.ProductVariant.VariantOptionValues.Any())
+											{
+												var variantParts = details.ProductVariant.VariantOptionValues
+													.OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+													.ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+													.Select(vov => 
+													{
+														if (vov.OptionValue == null) return "";
+														
+														var optionName = currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue.ProductOption?.NameAr) 
+															? vov.OptionValue.ProductOption.NameAr 
+															: vov.OptionValue.ProductOption?.Name ?? "";
+														var optionValue = currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue.ValueAr) 
+															? vov.OptionValue.ValueAr 
+															: vov.OptionValue.Value ?? "";
+														
+														if (string.IsNullOrEmpty(optionName) || string.IsNullOrEmpty(optionValue))
+															return optionValue ?? optionName ?? "";
+														
+														return $"{optionName}: {optionValue}";
+													})
+													.Where(v => !string.IsNullOrEmpty(v));
+												
+												variantDisplayText = variantParts.Any() ? string.Join(" / ", variantParts) : Localizer["Default"].Value;
+											}
+											else
+											{
+												// If no option values, check if VariantName property is available
+												variantDisplayText = !string.IsNullOrEmpty(details.ProductVariant.VariantName) 
+													? details.ProductVariant.VariantName 
+													: Localizer["Default"].Value;
+											}
+										}
+										else if (details.ProductVariantId.HasValue && details.ProductVariant == null)
+										{
+											// Variant ID exists but variant not loaded - show default
+											variantDisplayText = Localizer["Default"].Value;
+										}
+										
+										// Create item key for promo code matching
+										string itemKey = $"{details.ProductId}_{details.ProductVariantId?.ToString() ?? "0"}_{details.FlashSaleItemId?.ToString() ?? "0"}_{details.ComboOfferId?.ToString() ?? "0"}";
+										
+										// Get product image - prioritize variant image if available
+										string productImageUrl = null;
+										if (isComboOffer && !string.IsNullOrEmpty(details.ComboOffer.ImageUrl))
+										{
+											productImageUrl = details.ComboOffer.ImageUrl;
+										}
+										else if (details.ProductVariantId.HasValue)
+										{
+											// Check ProductVariant first
+											if (details.ProductVariant != null && !string.IsNullOrEmpty(details.ProductVariant.ImageUrl))
+											{
+												// Use variant image if available - normalize path (convert backslashes to forward slashes)
+												productImageUrl = details.ProductVariant.ImageUrl.Replace('\\', '/');
+												// Ensure it starts with / if it's a relative path
+												if (!productImageUrl.StartsWith("/") && !productImageUrl.StartsWith("http"))
+												{
+													productImageUrl = "/" + productImageUrl;
+												}
+											}
+											// If ProductVariant is null or has no image, check FlashSaleItem.ProductVariant for flash sale items
+											else if (details.FlashSaleItemId.HasValue && details.FlashSaleItem != null && details.FlashSaleItem.ProductVariant != null && !string.IsNullOrEmpty(details.FlashSaleItem.ProductVariant.ImageUrl))
+											{
+												// Use FlashSaleItem variant image
+												productImageUrl = details.FlashSaleItem.ProductVariant.ImageUrl.Replace('\\', '/');
+												// Ensure it starts with / if it's a relative path
+												if (!productImageUrl.StartsWith("/") && !productImageUrl.StartsWith("http"))
+												{
+													productImageUrl = "/" + productImageUrl;
+												}
+											}
+										}else{
+											if (details.product.ProductImages != null && details.product.ProductImages.Any())
+											{
+												var firstImage = details.product.ProductImages.OrderBy(pi => pi.DisplayOrder).FirstOrDefault(_ => _.ImageInfo == null);
+												productImageUrl = firstImage?.ImageUrl;
+											}
+											else if (!string.IsNullOrEmpty(details.product.ImageUrl))
+											{
+												productImageUrl = details.product.ImageUrl;
+											}
+
+										}
+										
+										 
+											
+									 
+										
+										<li class="order-item-enhanced" data-item-key="@itemKey" data-product-id="@details.ProductId" data-variant-id="@(details.ProductVariantId?.ToString() ?? "0")">
+											<div class="order-item-image-wrapper">
+												<img src="@productImageUrl" alt="@displayName" class="order-item-image" />
+											</div>
+											<div class="order-item-content">
+												<h6 class="order-item-title-enhanced">
+													@displayName
+													@if (isComboOffer)
+													{
+														<span class="badge badge-combo">@Localizer["ComboOffer"]</span>
+													}
+													<span class="promo-applied-badge badge badge-promo" style="display: none;">
+														<i class="bi bi-tag-fill"></i> @Localizer["DiscountApplied"]
+													</span>
+												</h6>
+												@if (hasVariant && !string.IsNullOrEmpty(variantDisplayText))
+												{
+													<small class="order-item-variant-enhanced">
+														<i class="bi bi-tag-fill me-1"></i>@variantDisplayText
+													</small>
+												}
+												<div class="order-item-meta">
+													<small class="order-item-quantity-enhanced">
+														<i class="bi bi-box-seam me-1"></i>@Localizer["Quantity"]: <strong>@details.Count</strong>
+													</small>
+													@if (isComboOffer)
+													{
+														<small class="order-item-products-count">
+															<i class="bi bi-grid me-1"></i>@details.ComboOffer.TotalProducts @Localizer["Products"]
+														</small>
+													}
+												</div>
+												<small class="item-discount-amount text-success" style="display: none;"></small>
+											</div>
+											<div class="order-item-price-wrapper">
+												<div class="order-item-price-enhanced">
+													<span class="original-price">@Html.Raw(currencySymbol) @((details.Price*details.Count).ToString("N2", System.Globalization.CultureInfo.InvariantCulture))</span>
+													<span class="discounted-price text-success" style="display: none;"></span>
+												</div>
+											</div>
+										</li>
+									}
+
+									<li class="order-item order-total-item">
+										<small class="order-total-label">@Localizer["Subtotal"]</small>
+										<strong class="order-subtotal-value">@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2", System.Globalization.CultureInfo.InvariantCulture)</strong>
+									</li>
+								</ul>
+							</div>
+
+							<!-- Promo Code Section -->
+							<div class="promo-code-section mt-4">
+								<h4>
+									<i class="bi bi-tag me-2"></i>
+									@Localizer["PromoCode"]
+								</h4>
+								<div class="promo-code-input-group">
+									<input type="text" id="promoCodeInput" class="form-control" placeholder="@Localizer["EnterPromoCode"]" />
+									<button type="button" id="applyPromoBtn" class="btn btn-primary">
+										<i class="bi bi-check-circle"></i> @Localizer["Apply"]
+									</button>
+								</div>
+								<div id="promoCodeMessage" class="mt-2"></div>
+								<div id="promoCodeDetails" class="promo-applied-box mt-3" style="display: none;">
+									<div class="d-flex justify-content-between align-items-center">
+										<div>
+											<i class="bi bi-check-circle-fill text-success me-2"></i>
+											<strong id="appliedPromoCode"></strong>
+											<span id="promoDiscountText" class="text-muted ms-2"></span>
+										</div>
+										<button type="button" id="removePromoBtn" class="btn btn-sm btn-danger">
+											<i class="bi bi-x"></i> @Localizer["Remove"]
+										</button>
+									</div>
+									<div class="discount-details mt-2">
+										<div class="d-flex justify-content-between">
+											<span>@Localizer["Discount"]:</span>
+											<span class="text-success" id="discountAmount">-$0.00</span>
+										</div>
+									</div>
+								</div>
+								<input type="hidden" asp-for="OrderHeader.PromoCodeId" id="promoCodeIdInput" />
+								<input type="hidden" asp-for="OrderHeader.PromoCodeText" id="promoCodeTextInput" />
+							</div>
+
+							<!-- Order Total -->
+							<div class="order-total-section mt-4">
+								<div class="d-flex justify-content-between align-items-center">
+									<h4 class="mb-0">
+										<i class="bi bi-wallet2 me-2"></i>
+										@Localizer["Total"]
+									</h4>
+									<strong class="order-final-total" id="finalTotal">@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2", System.Globalization.CultureInfo.InvariantCulture)</strong>
+								</div>
+							</div>
+
+							<!-- Payment Method Selection -->
+							<div class="payment-method-section mt-4">
+								<h4>
+									<i class="bi bi-credit-card me-2"></i>
+									@Localizer["PaymentMethod"]
+								</h4>
+								<div class="payment-methods">
+									<div class="payment-method-option">
+										<input type="radio" id="paymentGeidea" name="OrderHeader.PaymentMethod" value="@IdealWeightNutrition.Utility.SD.PaymentMethodGeidea" checked />
+										<label for="paymentGeidea" class="payment-method-label">
+											<i class="bi bi-credit-card me-2"></i>
+											<span>Geidea</span>
+											<small>@Localizer["CreditDebitCard"]</small>
+										</label>
+									</div>
+									<div class="payment-method-option">
+										<input type="radio" id="paymentTappy" name="OrderHeader.PaymentMethod" value="@IdealWeightNutrition.Utility.SD.PaymentMethodTappy" />
+										<label for="paymentTappy" class="payment-method-label">
+											<i class="bi bi-wallet2 me-2"></i>
+											<span>Tabby</span>
+											<small>@Localizer["DigitalWallet"]</small>
+										</label>
+									</div>
+									@{
+										bool tamaraAvailable = ViewData["TamaraAvailable"] != null && (bool)ViewData["TamaraAvailable"];
+										string tamaraPublicKey = ViewData["TamaraPublicKey"]?.ToString() ?? "";
+										double tamaraOrderTotal = ViewData["TamaraOrderTotal"] != null ? (double)ViewData["TamaraOrderTotal"] : 0;
+									}
+									@if (tamaraAvailable)
+									{
+										<div class="payment-method-option">
+											<input type="radio" id="paymentTamara" name="OrderHeader.PaymentMethod" value="@IdealWeightNutrition.Utility.SD.PaymentMethodTamara" />
+											<label for="paymentTamara" class="payment-method-label">
+												<i class="bi bi-calendar-check me-2"></i>
+												<span>Tamara</span>
+												<small>@Localizer["BuyNowPayLater"]</small>
+											</label>
+										</div>
+										@if (!string.IsNullOrEmpty(tamaraPublicKey) && tamaraOrderTotal > 0)
+										{
+											<!-- Tamara Widget V2 - Checkout Page -->
+											<div id="tamara-widget-checkout-page" data-public-key="@tamaraPublicKey" data-amount="@tamaraOrderTotal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" data-currency="AED" data-country="AE" data-widget-type="checkout_page" style="margin-top: 15px;"></div>
+										}
+									}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="order-summary-footer-enhanced">
+					<div class="footer-content-wrapper">
+						<div class="estimate-delivery-enhanced">
+							<div class="delivery-icon">
+								<i class="bi bi-truck"></i>
+							</div>
+							<div class="delivery-text">
+								<strong>@Localizer["EstimatedDelivery"]</strong>
+								<p class="mb-0">@IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(7).ToShortDateString() - @IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(14).ToShortDateString()</p>
+							</div>
+						</div>
+						<button type="submit" class="place-order-btn-enhanced">
+							<span class="btn-content">
+								<i class="bi bi-check-circle-fill me-2"></i>
+								<span>@Localizer["PlaceOrder"]</span>
+							</span>
+							<span class="btn-shine"></span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+<style>
+	.payment-method-section {
+		margin-top: 2rem;
+		padding: 1.5rem;
+		background: #f8f9fa;
+		border-radius: 12px;
+		border: 2px solid #e0e0e0;
+	}
+
+	.payment-method-section h4 {
+		color: #1976D2;
+		font-weight: 700;
+		margin-bottom: 1.5rem;
+		font-size: 1.25rem;
+	}
+
+	.payment-methods {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.payment-method-option {
+		position: relative;
+	}
+
+	.payment-method-option input[type="radio"] {
+		position: absolute;
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.payment-method-label {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 1.25rem 1.5rem;
+		background: white;
+		border: 2px solid #e0e0e0;
+		border-radius: 10px;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		position: relative;
+	}
+
+	.payment-method-label i {
+		font-size: 2rem;
+		color: #7BC043;
+	}
+
+	.payment-method-label span {
+		font-weight: 700;
+		color: #333;
+		font-size: 1.1rem;
+	}
+
+	.payment-method-label small {
+		display: block;
+		color: #666;
+		font-size: 0.875rem;
+		margin-top: 0.25rem;
+	}
+
+	.payment-method-option input[type="radio"]:checked + .payment-method-label {
+		border-color: #3B9DD5;
+		background: linear-gradient(135deg, #E3F2FD 0%, #F1F8E9 100%);
+		box-shadow: 0 4px 12px rgba(59, 157, 213, 0.2);
+	}
+
+	.payment-method-option input[type="radio"]:checked + .payment-method-label::after {
+		content: '✓';
+		position: absolute;
+		right: 1.5rem;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 30px;
+		height: 30px;
+		background: #3B9DD5;
+		color: white;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 700;
+		font-size: 1.2rem;
+	}
+
+	.payment-method-label:hover {
+		border-color: #3B9DD5;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+	}
+
+	@@media (max-width: 768px) {
+		.payment-method-section {
+			padding: 1rem;
+		}
+
+		.payment-method-label {
+			padding: 1rem;
+		}
+
+		.payment-method-label i {
+			font-size: 1.5rem;
+		}
+
+		.payment-method-label span {
+			font-size: 1rem;
+		}
+	}
+
+	/* Promo Code Section Styles */
+	.promo-code-section {
+		padding: 1.5rem;
+		background: #f8f9fa;
+		border-radius: 12px;
+		border: 2px solid #e0e0e0;
+	}
+
+	.promo-code-section h4 {
+		color: #1976D2;
+		font-weight: 700;
+		margin-bottom: 1rem;
+		font-size: 1.25rem;
+	}
+
+	.promo-code-input-group {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.promo-code-input-group input {
+		flex: 1;
+		padding: 0.75rem;
+		border: 2px solid #e0e0e0;
+		border-radius: 8px;
+		font-size: 1rem;
+		text-transform: uppercase;
+	}
+
+	.promo-code-input-group button {
+		padding: 0.75rem 1.5rem;
+		border-radius: 8px;
+		font-weight: 600;
+		background: #7BC043;
+		border: none;
+		color: white;
+		transition: all 0.3s ease;
+	}
+
+	.promo-code-input-group button:hover {
+		background: #6AA139;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(123, 192, 67, 0.3);
+	}
+
+	.promo-applied-box {
+		padding: 1rem;
+		background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+		border: 2px solid #7BC043;
+		border-radius: 8px;
+	}
+
+	.discount-details {
+		font-size: 0.95rem;
+		padding-top: 0.5rem;
+		border-top: 1px solid rgba(123, 192, 67, 0.3);
+	}
+
+	.order-total-section {
+		padding: 1.5rem;
+		background: linear-gradient(135deg, #E3F2FD 0%, #F1F8E9 100%);
+		border-radius: 12px;
+		border: 2px solid #3B9DD5;
+	}
+
+	.order-total-section h4 {
+		color: #1976D2;
+		font-weight: 700;
+	}
+
+	.order-final-total {
+		font-size: 1.75rem;
+		color: #7BC043;
+		font-weight: 700;
+	}
+
+	.promo-discount-applied {
+		background-color: #E8F5E9;
+		border-left: 4px solid #7BC043;
+		padding-left: 0.5rem;
+		transition: all 0.3s ease;
+	}
+
+	.promo-applied-badge {
+		animation: pulse 2s ease-in-out infinite;
+	}
+
+	@@keyframes pulse {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.7; }
+	}
+
+	.item-discount-amount {
+		font-weight: 600;
+		display: block;
+		margin-top: 0.25rem;
+	}
+
+	.order-item-price {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+	}
+
+	.discounted-price {
+		font-weight: 700;
+		font-size: 1.1em;
+	}
+
+	.order-item-variant {
+		font-size: 0.85rem;
+		margin-top: 0.25rem;
+		margin-bottom: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		background-color: #f0f0f0;
+		border-radius: 4px;
+		display: inline-block;
+	}
+
+	.order-item-variant i {
+		font-size: 0.75rem;
+		color: #6c757d;
+	}
+
+	.form-control.is-invalid {
+		border-color: #dc3545;
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6 .4.4.4-.4M6 8.5V6'/%3e%3c/svg%3e");
+		background-repeat: no-repeat;
+		background-position: right calc(0.375em + 0.1875rem) center;
+		background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+		padding-right: calc(1.5em + 0.75rem);
+	}
+
+	.validation-error-message {
+		font-size: 0.875rem;
+		margin-top: 0.25rem;
+	}
+
+	.validation-summary-error {
+		animation: slideDown 0.3s ease-out;
+	}
+
+	@@keyframes slideDown {
+		from {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+</style>
+
+@section Scripts {
+	<script>
+		var subtotal = @Model.OrderHeader.OrderTotal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+		var currentDiscount = 0;
+		var currentPromoCodeId = null;
+
+		// Localized messages for validation
+		var localizedMessages = {
+			fieldIsRequired: '@Html.Raw(Localizer["FieldIsRequired"].Value)',
+			isRequired: '@Html.Raw(Localizer["IsRequired"].Value)',
+			invalidEmailFormat: '@Html.Raw(Localizer["InvalidEmailFormat"].Value)',
+			pleaseEnterValidEmail: '@Html.Raw(Localizer["PleaseEnterValidEmailAddress"].Value)',
+			pleaseSelectPaymentMethod: '@Html.Raw(Localizer["PleaseSelectPaymentMethod"].Value)',
+			pleaseFillAllRequiredFields: '@Html.Raw(Localizer["PleaseFillAllRequiredFields"].Value)',
+			validationError: '@Html.Raw(Localizer["ValidationError"].Value)',
+			processing: '@Html.Raw(Localizer["Processing"].Value)',
+			name: '@Html.Raw(Localizer["Name"].Value)',
+			phone: '@Html.Raw(Localizer["Phone"].Value)',
+			streetAddress: '@Html.Raw(Localizer["StreetAddress"].Value)',
+			city: '@Html.Raw(Localizer["City"].Value)',
+			state: '@Html.Raw(Localizer["State"].Value)',
+			postalCode: '@Html.Raw(Localizer["PostalCode"].Value)',
+			emailAddress: '@Html.Raw(Localizer["EmailAddress"].Value)'
+		};
+
+		$(document).ready(function() {
+			// Apply promo code
+			$('#applyPromoBtn').click(function() {
+				var promoCode = $('#promoCodeInput').val().trim().toUpperCase();
+				
+				if (!promoCode) {
+					showPromoMessage('@Localizer["PleaseEnterPromoCode"]', 'danger');
+					return;
+				}
+
+				// Disable button and show loading
+				$(this).prop('disabled', true).html('<i class="spinner-border spinner-border-sm"></i> @Localizer["Applying"]');
+
+				$.ajax({
+					url: '@Url.Action("ValidatePromoCode", "Cart")',
+					type: 'POST',
+					data: { 
+						promoCode: promoCode,
+						__RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+					},
+					success: function(response) {
+						if (response.success) {
+							// Show promo details
+							$('#appliedPromoCode').text(response.promoCode);
+							$('#promoDiscountText').text('(' + response.discountText + ')');
+							$('#discountAmount').text('-' + formatCurrency(response.discountAmount));
+							$('#promoCodeDetails').slideDown();
+							$('#promoCodeInput').prop('disabled', true);
+							
+							// Update hidden fields
+							$('#promoCodeIdInput').val(response.promoCodeId);
+							$('#promoCodeTextInput').val(response.promoCode);
+							
+							// Update item-level discounts display
+							updateItemDiscountsDisplay(response.itemDiscounts, response.eligibleItems);
+							
+							// Update totals
+							currentDiscount = response.discountAmount;
+							currentPromoCodeId = response.promoCodeId;
+							updateTotals();
+							
+							showPromoMessage(response.message, 'success');
+						} else {
+							showPromoMessage(response.message, 'danger');
+						}
+					},
+					error: function() {
+						showPromoMessage('@Localizer["AnErrorOccurredPleaseTryAgain"]', 'danger');
+					},
+					complete: function() {
+						$('#applyPromoBtn').prop('disabled', false).html('<i class="bi bi-check-circle"></i> @Localizer["Apply"]');
+					}
+				});
+			});
+
+			// Remove promo code
+			$('#removePromoBtn').click(function() {
+				$('#promoCodeDetails').slideUp();
+				$('#promoCodeInput').val('').prop('disabled', false);
+				$('#promoCodeIdInput').val('');
+				$('#promoCodeTextInput').val('');
+				$('#promoCodeMessage').html('');
+				
+				// Remove item-level discount indicators
+				clearItemDiscountsDisplay();
+				
+				currentDiscount = 0;
+				currentPromoCodeId = null;
+				updateTotals();
+			});
+
+			// Function to update item-level discounts display
+			function updateItemDiscountsDisplay(itemDiscounts, eligibleItems) {
+				// First, clear all previous indicators
+				clearItemDiscountsDisplay();
+				
+				if (!itemDiscounts || !eligibleItems || eligibleItems.length === 0) return;
+				
+				// Update each eligible item
+				eligibleItems.forEach(function(item) {
+					var itemKey = item.itemKey;
+					var discountAmount = item.discountAmount || 0;
+					
+					if (discountAmount > 0) {
+						// Find the list item by item key
+						var $listItem = $('.order-item[data-item-key="' + itemKey + '"]');
+						
+						if ($listItem.length > 0) {
+							// Show promo badge
+							$listItem.find('.promo-applied-badge').show();
+							
+							// Show discount amount
+							var $discountAmount = $listItem.find('.item-discount-amount');
+							var discountText = '-' + formatCurrency(discountAmount);
+							$discountAmount.text(discountText).show();
+							
+							// Update price display
+							var originalPrice = item.originalPrice;
+							var discountedPrice = item.discountedPrice;
+							
+							var $originalPrice = $listItem.find('.original-price');
+							var $discountedPrice = $listItem.find('.discounted-price');
+							
+							$originalPrice.addClass('text-decoration-line-through text-muted');
+							$discountedPrice.text(formatCurrency(discountedPrice)).show();
+							
+							// Highlight the item
+							$listItem.addClass('promo-discount-applied');
+						}
+					}
+				});
+			}
+
+			// Function to clear item-level discounts display
+			function clearItemDiscountsDisplay() {
+				$('.order-item').each(function() {
+					$(this).find('.promo-applied-badge').hide();
+					$(this).find('.item-discount-amount').hide();
+					$(this).find('.original-price').removeClass('text-decoration-line-through text-muted');
+					$(this).find('.discounted-price').hide();
+					$(this).removeClass('promo-discount-applied');
+				});
+			}
+
+		// Convert input to uppercase
+		$('#promoCodeInput').on('input', function() {
+			$(this).val($(this).val().toUpperCase());
+		});
+
+		// Form validation before submission
+		$('#orderForm').on('submit', function(e) {
+			var isValid = true;
+			var firstInvalidField = null;
+			var errorMessages = [];
+
+			// Clear previous validation errors
+			$('.form-control').removeClass('is-invalid');
+			$('.validation-error-message').remove();
+
+			// Check required fields
+			var requiredFields = [
+				{ selector: 'input[name="OrderHeader.Name"]', label: localizedMessages.name },
+				{ selector: 'input[name="OrderHeader.PhoneNumber"]', label: localizedMessages.phone },
+				{ selector: 'input[name="OrderHeader.StreetAddress"]', label: localizedMessages.streetAddress },
+				{ selector: 'input[name="OrderHeader.City"]', label: localizedMessages.city },
+				{ selector: 'input[name="OrderHeader.State"]', label: localizedMessages.state },
+				{ selector: 'input[name="OrderHeader.PostalCode"]', label: localizedMessages.postalCode }
+			];
+
+			// Check guest email if guest checkout
+			var isGuest = @((Model.OrderHeader.IsGuestOrder || !User.Identity.IsAuthenticated).ToString().ToLower());
+			if (isGuest) {
+				requiredFields.push({ selector: 'input[name="OrderHeader.Email"]', label: localizedMessages.emailAddress });
+			}
+
+			// Validate each required field
+			requiredFields.forEach(function(field) {
+				var $field = $(field.selector);
+				var value = $field.val() ? $field.val().trim() : '';
+				
+				if (!value) {
+					isValid = false;
+					$field.addClass('is-invalid');
+					
+					if (!firstInvalidField) {
+						firstInvalidField = $field;
+					}
+					
+					// Add error message
+					var errorMsg = localizedMessages.fieldIsRequired.replace('{0}', field.label);
+					if (!errorMsg || errorMsg.includes('{0}')) {
+						errorMsg = field.label + ' ' + localizedMessages.isRequired;
+					}
+					errorMessages.push(errorMsg);
+					
+					// Show error message below field
+					if ($field.next('.validation-error-message').length === 0) {
+						$field.after('<div class="validation-error-message text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>' + errorMsg + '</div>');
+					}
+				}
+			});
+
+			// Validate email format if guest
+			if (isGuest) {
+				var $emailField = $('input[name="OrderHeader.Email"]');
+				var email = $emailField.val() ? $emailField.val().trim() : '';
+				var emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+				
+				if (email && !emailRegex.test(email)) {
+					isValid = false;
+					$emailField.addClass('is-invalid');
+					var emailError = localizedMessages.invalidEmailFormat || localizedMessages.pleaseEnterValidEmail;
+					if ($emailField.next('.validation-error-message').length === 0) {
+						$emailField.after('<div class="validation-error-message text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>' + emailError + '</div>');
+					}
+					if (!firstInvalidField) {
+						firstInvalidField = $emailField;
+					}
+				}
+			}
+
+			// Check payment method is selected
+			var paymentMethod = $('input[name="OrderHeader.PaymentMethod"]:checked').val();
+			if (!paymentMethod) {
+				isValid = false;
+				var paymentError = localizedMessages.pleaseSelectPaymentMethod || 'Please select a payment method';
+				errorMessages.push(paymentError);
+				
+				// Show error near payment methods
+				if ($('.payment-method-section .validation-error-message').length === 0) {
+					$('.payment-method-section').append('<div class="validation-error-message alert alert-danger mt-2"><i class="bi bi-exclamation-circle me-2"></i>' + paymentError + '</div>');
+				}
+			}
+
+			// If validation fails, prevent submission
+			if (!isValid) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				// Scroll to first invalid field
+				if (firstInvalidField) {
+					$('html, body').animate({
+						scrollTop: firstInvalidField.offset().top - 100
+					}, 500);
+					firstInvalidField.focus();
+				} else {
+					// Scroll to payment method section if that's the issue
+					$('html, body').animate({
+						scrollTop: $('.payment-method-section').offset().top - 100
+					}, 500);
+				}
+
+				// Show summary error message
+				var summaryError = errorMessages.length > 0 
+					? errorMessages.join('<br>')
+					: localizedMessages.pleaseFillAllRequiredFields || 'Please fill all required fields';
+				
+				showValidationError(summaryError);
+				return false;
+			}
+
+			// Check if Geidea payment method is selected BEFORE preventing default
+			var paymentMethod = $('input[name="OrderHeader.PaymentMethod"]:checked').val();
+			var geideaPaymentMethod = '@IdealWeightNutrition.Utility.SD.PaymentMethodGeidea';
+			
+			// Only handle AJAX for Geidea if validation passed
+			if (paymentMethod === geideaPaymentMethod) {
+				// Prevent default form submission for Geidea
+				e.preventDefault();
+				e.stopPropagation();
+				
+				// If validation passes, submit form via AJAX for Geidea payment errors
+				var $submitBtn = $('.place-order-btn');
+				var originalText = $submitBtn.html();
+				// Submit via AJAX for Geidea to handle errors with SweetAlert
+				e.preventDefault();
+				$submitBtn.prop('disabled', true);
+				$submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>' + localizedMessages.processing + '...');
+				
+				var formData = $('#orderForm').serialize();
+				
+				$.ajax({
+					url: '@Url.Action("Summary", "Cart")',
+					type: 'POST',
+					data: formData,
+					headers: {
+						'X-Requested-With': 'XMLHttpRequest'
+					},
+					success: function(response) {
+						// Check if response is valid JSON object
+						if (response && typeof response === 'object') {
+							if (response.success === false && response.error) {
+								// Show error with SweetAlert
+								Swal.fire({
+									icon: 'error',
+									title: 'Payment Error',
+									html: response.error,
+									confirmButtonText: 'OK',
+									confirmButtonColor: '#dc2626'
+								});
+								$submitBtn.prop('disabled', false);
+								$submitBtn.html(originalText);
+							} else if (response.success === true) {
+								// Handle Geidea v2 HPP payment
+								if (response.paymentMethod === '@IdealWeightNutrition.Utility.SD.PaymentMethodGeidea' && response.sessionId) {
+									// Store orderId for redirect after payment
+									var orderId = response.orderId;
+									// Use Geidea v2 HPP JavaScript library
+									initiateGeideaPayment(response.sessionId, orderId, function(success) {
+										if (success && orderId) {
+											// Payment completed successfully, redirect to order confirmation
+											window.location.href = '@Url.Action("OrderConfirmation", "Cart")?id=' + orderId;
+										} else {
+											$submitBtn.prop('disabled', false);
+											$submitBtn.html(originalText);
+										}
+									});
+								} else if (response.redirectUrl) {
+									// Fallback: redirect to payment URL for other payment methods
+									window.location.href = response.redirectUrl;
+								} else {
+									// Unexpected response format
+									window.location.reload();
+								}
+							} else {
+								// Unexpected response format
+								window.location.reload();
+							}
+						} else {
+							// Response is not JSON (might be HTML), reload page
+							window.location.reload();
+						}
+					},
+					error: function(xhr, status, error) {
+						// Handle AJAX error
+						var errorMessage = 'An error occurred while processing your request.';
+						var errorDetails = '';
+						
+						// Try to parse error response if available
+						try {
+							if (xhr.responseJSON) {
+								if (xhr.responseJSON.error) {
+									errorMessage = xhr.responseJSON.error;
+								} else if (xhr.responseJSON.message) {
+									errorMessage = xhr.responseJSON.message;
+								} else if (xhr.responseJSON.title) {
+									errorMessage = xhr.responseJSON.title;
+									if (xhr.responseJSON.errors) {
+										var errorList = [];
+										for (var key in xhr.responseJSON.errors) {
+											if (xhr.responseJSON.errors.hasOwnProperty(key)) {
+												errorList.push(xhr.responseJSON.errors[key].join(', '));
+											}
+										}
+										if (errorList.length > 0) {
+											errorDetails = '<br><br>' + errorList.join('<br>');
+										}
+									}
+								}
+							} else if (xhr.responseText) {
+								// Check if it's HTML (validation error page)
+								if (xhr.responseText.indexOf('<html') > -1 || xhr.responseText.indexOf('<!DOCTYPE') > -1) {
+									errorMessage = 'Validation error. Please check all required fields and try again.';
+								} else if (xhr.responseText.length < 500) {
+									// If response is short, try to show it
+									errorMessage = 'Error: ' + xhr.responseText.substring(0, 200);
+								}
+							}
+						} catch (e) {
+							console.error('Error parsing response:', e);
+						}
+						
+						// Add status code info
+						if (xhr.status === 400) {
+							if (!errorMessage.includes('Validation')) {
+								errorMessage = 'Bad Request. ' + errorMessage;
+							}
+						} else if (xhr.status === 401) {
+							errorMessage = 'Authentication error. Please refresh the page and try again.';
+						} else if (xhr.status === 403) {
+							errorMessage = 'Access denied. You may not have permission to perform this action.';
+						} else if (xhr.status === 404) {
+							errorMessage = 'Page not found. Please refresh the page and try again.';
+						} else if (xhr.status === 500) {
+							errorMessage = 'Server error. Please try again later.';
+							errorDetails = errorDetails || '<br><br>If the problem persists, please contact support.';
+						}
+						
+						// Log error to console for debugging
+						console.error('AJAX Error:', {
+							status: xhr.status,
+							statusText: xhr.statusText,
+							response: xhr.responseText,
+							error: error
+						});
+						
+						Swal.fire({
+							icon: 'error',
+							title: 'Error',
+							html: errorMessage + errorDetails,
+							confirmButtonText: 'OK',
+							confirmButtonColor: '#dc2626'
+						});
+						$submitBtn.prop('disabled', false);
+						$submitBtn.html(originalText);
+					}
+				});
+			} else {
+				// For other payment methods, submit normally
+				$submitBtn.prop('disabled', true);
+				$submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>' + localizedMessages.processing + '...');
+				
+				// Re-enable after 10 seconds as safety (in case of error)
+				setTimeout(function() {
+					$submitBtn.prop('disabled', false);
+					$submitBtn.html(originalText);
+				}, 10000);
+			}
+		});
+
+		// Function to show validation error
+		function showValidationError(message) {
+			// Remove existing error alert
+			$('.validation-summary-error').remove();
+			
+			// Add error alert at top of form
+			var errorHtml = '<div class="validation-summary-error alert alert-danger alert-dismissible fade show" role="alert" style="margin-bottom: 1.5rem;">' +
+				'<i class="bi bi-exclamation-triangle-fill me-2"></i>' +
+				'<strong>' + localizedMessages.validationError + ':</strong> ' + message +
+				'<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+				'</div>';
+			
+			$('.order-summary-body').prepend(errorHtml);
+			
+			// Auto-dismiss after 10 seconds
+			setTimeout(function() {
+				$('.validation-summary-error').fadeOut(function() {
+					$(this).remove();
+				});
+			}, 10000);
+		}
+
+		// Remove validation errors on input
+		$('.form-control').on('input change', function() {
+			$(this).removeClass('is-invalid');
+			$(this).next('.validation-error-message').remove();
+		});
+
+		// Remove payment method error on selection
+		$('input[name="OrderHeader.PaymentMethod"]').on('change', function() {
+			$('.payment-method-section .validation-error-message').remove();
+		});
+	});
+
+		function updateTotals() {
+			var finalTotal = subtotal - currentDiscount;
+			$('#finalTotal').text(formatCurrency(finalTotal));
+		}
+
+		function showPromoMessage(message, type) {
+			var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+			var icon = type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill';
+			
+			$('#promoCodeMessage').html(
+				'<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+				'<i class="bi bi-' + icon + ' me-2"></i>' + message +
+				'<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+				'</div>'
+			);
+		}
+
+		const currencySymbol = '@Html.Raw(currencySymbol)';
+		function formatCurrency(amount) {
+			return currencySymbol + ' ' + amount.toFixed(2);
+		}
+
+		// Geidea v2 HPP Payment Integration
+		function initiateGeideaPayment(sessionId, orderId, callback) {
+			// Load Geidea HPP v2 library if not already loaded
+			if (typeof GeideaCheckout === 'undefined') {
+				var script = document.createElement('script');
+					script.src = 'https://payments.geidea.ae/hpp/geideaCheckout.min.js';
+				script.onload = function() {
+					startGeideaPayment(sessionId, orderId, callback);
+				};
+				script.onerror = function() {
+							console.log('initiateGeideaPayment');
+					Swal.fire({
+						icon: 'error',
+						title: 'Payment Error',
+						text: 'Failed to load Geidea payment library. Please try again.',
+						confirmButtonText: 'OK'
+					});
+					if (callback) callback(false);
+				};
+				document.head.appendChild(script);
+			} else {
+				startGeideaPayment(sessionId, orderId, callback);
+			}
+		}
+
+		function startGeideaPayment(sessionId, orderId, callback) {
+			try {
+				// Initialize GeideaCheckout with callback handlers
+				const payment = new GeideaCheckout(
+					function onSuccess(data) {
+						// Payment successful
+						console.log('Geidea payment success', data);
+						if (callback) callback(true);
+					},
+					function onError(error) {
+						// Payment error - extract all available error information
+						console.error('Geidea payment error', error);
+						
+						// Build detailed error message
+						let errorMessage = 'Payment failed. Please try again.';
+						let errorDetails = [];
+						
+						if (error) {
+							// Extract error message
+							if (error.message) {
+								errorMessage = error.message;
+							} else if (typeof error === 'string') {
+								errorMessage = error;
+							} else if (error.error) {
+								errorMessage = error.error;
+							} else if (error.errorMessage) {
+								errorMessage = error.errorMessage;
+							}
+							
+							// Extract additional error details
+							if (error.code) {
+								errorDetails.push(`Error Code: ${error.code}`);
+							}
+							if (error.status) {
+								errorDetails.push(`Status: ${error.status}`);
+							}
+							if (error.statusCode) {
+								errorDetails.push(`Status Code: ${error.statusCode}`);
+							}
+							if (error.responseCode) {
+								errorDetails.push(`Response Code: ${error.responseCode}`);
+							}
+							if (error.detailedResponseCode) {
+								errorDetails.push(`Detailed Response Code: ${error.detailedResponseCode}`);
+							}
+							if (error.detailedResponseMessage) {
+								errorDetails.push(`Details: ${error.detailedResponseMessage}`);
+							}
+							if (error.responseMessage) {
+								errorDetails.push(`Response: ${error.responseMessage}`);
+							}
+							
+							// Log full error object for debugging
+							console.error('Full Geidea error object:', JSON.stringify(error, null, 2));
+						}
+						
+						// Build HTML content for SweetAlert
+						let htmlContent = `<div style="text-align: left;">
+							<p style="margin-bottom: 10px; font-weight: 600; color: #dc2626;">${errorMessage}</p>
+							${errorDetails.length > 0 ? `<div style="margin-top: 15px; padding: 10px; background-color: #fef2f2; border-radius: 6px; border-left: 3px solid #dc2626;">
+								<p style="margin: 0 0 8px 0; font-weight: 600; color: #991b1b; font-size: 0.875rem;">Error Details:</p>
+								<ul style="margin: 0; padding-left: 20px; color: #7f1d1d; font-size: 0.875rem;">
+									${errorDetails.map(detail => `<li style="margin-bottom: 4px;">${detail}</li>`).join('')}
+								</ul>
+							</div>` : ''}
+						</div>`;
+						
+						Swal.fire({
+							icon: 'error',
+							title: 'Payment Failed',
+							html: htmlContent,
+							confirmButtonText: 'OK',
+							confirmButtonColor: '#dc2626',
+							width: '500px',
+							customClass: {
+								popup: 'swal2-popup-enhanced',
+								title: 'swal2-title-enhanced',
+								htmlContainer: 'swal2-html-container-enhanced'
+							}
+						});
+						if (callback) callback(false);
+					},
+					function onCancel() {
+						// Payment cancelled
+						console.log('Geidea payment cancelled');
+						Swal.fire({
+							icon: 'info',
+							title: 'Payment Cancelled',
+							text: 'Payment was cancelled. You can try again.',
+							confirmButtonText: 'OK',
+							customClass: {
+								popup: 'swal2-popup-enhanced',
+								title: 'swal2-title-enhanced'
+							}
+						});
+						if (callback) callback(false);
+					}
+				);
+
+				// Start payment with sessionId
+				payment.startPayment(sessionId);
+			} catch (error) {
+				console.error('Error initiating Geidea payment:', error);
+				let errorMessage = 'Failed to start payment. Please try again.';
+				if (error && error.message) {
+					errorMessage = error.message;
+				}
+				Swal.fire({
+					icon: 'error',
+					title: 'Payment Error',
+					html: `<div style="text-align: left;">
+						<p style="margin-bottom: 0;">${errorMessage}</p>
+						${error && error.stack ? `<p style="margin-top: 10px; font-size: 0.75rem; color: #6b7280;">Technical details logged to console.</p>` : ''}
+					</div>`,
+					confirmButtonText: 'OK',
+					confirmButtonColor: '#dc2626',
+					customClass: {
+						popup: 'swal2-popup-enhanced',
+						title: 'swal2-title-enhanced'
+					}
+				});
+				if (callback) callback(false);
+			}
+		}
+		
+		// Initialize Tamara Widget V2 for Checkout Page
+		@{
+			bool tamaraAvailableCheckout = ViewData["TamaraAvailable"] != null && (bool)ViewData["TamaraAvailable"];
+			string tamaraPublicKeyCheckout = ViewData["TamaraPublicKey"]?.ToString() ?? "";
+			double tamaraOrderTotalCheckout = ViewData["TamaraOrderTotal"] != null ? (double)ViewData["TamaraOrderTotal"] : 0;
+		}
+		@if (tamaraAvailableCheckout && !string.IsNullOrEmpty(tamaraPublicKeyCheckout) && tamaraOrderTotalCheckout > 0)
+		{
+			<text>
+			(function() {
+				// Load Tamara Widget V2 script
+				if (!window.TamaraWidget) {
+					var script = document.createElement('script');
+					script.src = 'https://cdn.tamara.co/widget-v2/tamara-widget.js';
+					script.async = true;
+					script.onload = function() {
+						initializeTamaraCheckoutWidget();
+					};
+					document.head.appendChild(script);
+				} else {
+					initializeTamaraCheckoutWidget();
+				}
+				
+				function initializeTamaraCheckoutWidget() {
+					var widgetElement = document.getElementById('tamara-widget-checkout-page');
+					if (widgetElement && window.TamaraWidget) {
+						var publicKey = widgetElement.getAttribute('data-public-key');
+						var amount = parseFloat(widgetElement.getAttribute('data-amount'));
+						var currency = widgetElement.getAttribute('data-currency') || 'AED';
+						var country = widgetElement.getAttribute('data-country') || 'AE';
+						
+						if (publicKey && amount > 0) {
+							try {
+								window.TamaraWidget.init({
+									publicKey: publicKey,
+									amount: amount,
+									currency: currency,
+									country: country,
+									widgetType: 'checkout_page',
+									containerId: 'tamara-widget-checkout-page'
+								});
+							} catch (e) {
+								console.error('Tamara widget initialization error:', e);
+							}
+						}
+					}
+				}
+			})();
+			</text>
+		}
+		 
+	</script>
+}

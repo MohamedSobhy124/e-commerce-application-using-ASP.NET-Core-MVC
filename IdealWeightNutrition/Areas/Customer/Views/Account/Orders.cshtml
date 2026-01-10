@@ -1,0 +1,473 @@
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+@using IdealWeightNutrition.Models
+@using IdealWeightNutrition.Helpers
+@model IEnumerable<OrderHeader>
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["MyOrders"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var orders = Model ?? Enumerable.Empty<OrderHeader>();
+    var hasOrders = orders.Any();
+    
+    // Get order details from ViewBag
+    var orderDetailsDict = ViewBag.OrderDetails as Dictionary<int, List<OrderDetail>> ?? new Dictionary<int, List<OrderDetail>>();
+    
+    // Helper function to translate status values
+    Func<string, string> translateStatus = (status) =>
+    {
+        if (string.IsNullOrEmpty(status)) return Localizer["Pending"]?.Value ?? "Pending";
+        var translated = Localizer[status]?.Value;
+        return translated ?? status;
+    };
+}
+
+<div class="container py-4" style="margin-top: 1rem;">
+    <!-- Page Header -->
+    <div class="text-center mb-4">
+        <h1 class="display-5 fw-bold mb-2" style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            <i class="bi bi-bag-check-fill me-2"></i>@Localizer["MyOrders"]
+        </h1>
+        <p class="text-muted">@(Localizer["ViewYourOrderHistory"]?.Value ?? "View your order history and track shipments")</p>
+    </div>
+
+    @if (!hasOrders)
+    {
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <div class="empty-orders-icon mb-4" style="width: 150px; height: 150px; margin: 0 auto; background: linear-gradient(135deg, rgba(59, 157, 213, 0.1) 0%, rgba(123, 192, 67, 0.1) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-bag-x" style="font-size: 5rem; color: #3B9DD5;"></i>
+            </div>
+            <h3 class="fw-bold mb-2" style="color: #1f2937;">@(Localizer["NoOrdersYet"]?.Value ?? "No Orders Yet")</h3>
+            <p class="text-muted mb-4">@(Localizer["StartShoppingToSeeOrders"]?.Value ?? "Start shopping to see your orders here")</p>
+            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-primary" style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); border: none; padding: 0.75rem 2rem; border-radius: 25px; font-weight: 700;">
+                <i class="bi bi-arrow-left me-2"></i>@Localizer["StartShopping"]
+            </a>
+        </div>
+    }
+    else
+    {
+        <!-- Orders List -->
+        <div class="row g-4">
+            @foreach (var order in orders)
+            {
+                var orderDetails = orderDetailsDict.ContainsKey(order.Id) ? orderDetailsDict[order.Id] : new List<OrderDetail>();
+                var totalItems = orderDetails.Sum(od => od.Count);
+                var orderStatusColor = order.OrderStatus switch
+                {
+                    "Approved" => "#7BC043",
+                    "InProcess" => "#3B9DD5",
+                    "Shipped" => "#667eea",
+                    "Cancelled" => "#dc3545",
+                    "Refunded" => "#6c757d",
+                    _ => "#ffc107"
+                };
+                var paymentStatusColor = order.PaymentStatus switch
+                {
+                    "Approved" => "#7BC043",
+                    "Pending" => "#ffc107",
+                    "Rejected" => "#dc3545",
+                    _ => "#6c757d"
+                };
+
+                <div class="col-12">
+                    <div class="order-card" style="background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(59, 157, 213, 0.1);">
+                        <!-- Order Header -->
+                        <div class="order-header" style="background: linear-gradient(135deg, rgba(59, 157, 213, 0.05) 0%, rgba(123, 192, 67, 0.05) 100%); padding: 1.5rem; border-bottom: 2px solid rgba(59, 157, 213, 0.1);">
+                            <div class="row align-items-center">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="order-icon-wrapper" style="width: 60px; height: 60px; background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3);">
+                                            <i class="bi bi-receipt-cutoff" style="font-size: 1.5rem; color: white;"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-1 fw-bold" style="color: #1f2937;">
+                                                @(Localizer["Order"]?.Value ?? "Order") #@order.Id
+                                            </h5>
+                                            <p class="mb-0 text-muted" style="font-size: 0.9rem;">
+                                                <i class="bi bi-calendar3 me-1"></i>@order.OrderDate.ToString("MMM dd, yyyy", System.Globalization.CultureInfo.GetCultureInfo(currentCulture)) @(Localizer["At"]?.Value ?? "at") @order.OrderDate.ToString("HH:mm", System.Globalization.CultureInfo.GetCultureInfo(currentCulture))
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-end justify-content-md-end gap-2">
+                                        <div class="order-status-badge" style="display: inline-block; padding: 0.5rem 1rem; border-radius: 25px; font-weight: 700; font-size: 0.85rem; background: @orderStatusColor; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                                            <i class="bi bi-circle-fill me-1" style="font-size: 0.6rem;"></i>@translateStatus(order.OrderStatus)
+                                        </div>
+                                        <div class="payment-status-badge" style="display: inline-block; padding: 0.5rem 1rem; border-radius: 25px; font-weight: 700; font-size: 0.85rem; background: @paymentStatusColor; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                                            <i class="bi bi-credit-card me-1"></i>@translateStatus(order.PaymentStatus)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Items -->
+                        <div class="order-items" style="padding: 1.5rem;">
+                            <h6 class="fw-bold mb-3" style="color: #1f2937; font-size: 1rem;">
+                                <i class="bi bi-box-seam me-2" style="color: #3B9DD5;"></i>@totalItems @(totalItems == 1 ? (Localizer["Item"]?.Value ?? "Item") : (Localizer["Items"]?.Value ?? "Items"))
+                            </h6>
+                            
+                            <div class="order-items-list">
+                                @foreach (var detail in orderDetails.Take(3))
+                                {
+                                    var product = detail.Product;
+                                    var productName = currentCulture == "ar" && !string.IsNullOrEmpty(product?.TitleAr) ? product.TitleAr : product?.Title ?? "Product";
+                                    var productImage = product?.ProductImages?.FirstOrDefault(pi => pi.ImageInfo == null)?.ImageUrl 
+                                        ?? product?.ProductImages?.FirstOrDefault()?.ImageUrl 
+                                        ?? product?.ImageUrl 
+                                        ?? "/images/default-product.jpg";
+                                    
+                                    <div class="order-item-row" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 12px; margin-bottom: 0.75rem; transition: all 0.3s;">
+                                        <div class="order-item-image" style="width: 80px; height: 80px; flex-shrink: 0; border-radius: 10px; overflow: hidden; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                            <img src="@productImage" alt="@productName" style="width: 100%; height: 100%; object-fit: cover;" />
+                                        </div>
+                                        <div class="order-item-info" style="flex: 1; min-width: 0;">
+                                            <h6 class="mb-1 fw-bold" style="font-size: 0.95rem; color: #1f2937; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                                @productName
+                                            </h6>
+                                            @if (detail.ProductVariantId.HasValue && detail.ProductVariant != null)
+                                            {
+                                                var variantOptions = detail.ProductVariant.VariantOptionValues?
+                                                    .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                                                    .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+                                                    .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                                                    .Where(s => !string.IsNullOrEmpty(s))
+                                                    .ToList() ?? new List<string>();
+                                                
+                                                if (variantOptions.Any())
+                                                {
+                                                    <p class="mb-1 text-muted" style="font-size: 0.8rem;">
+                                                        <i class="bi bi-tag me-1"></i>@string.Join(", ", variantOptions)
+                                                    </p>
+                                                }
+                                            }
+                                            @if (detail.FlashSaleItemId.HasValue)
+                                            {
+                                                <span class="badge" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); font-size: 0.7rem; padding: 0.25rem 0.5rem;">
+                                                    <i class="bi bi-lightning-fill me-1"></i>@(Localizer["FlashSale"]?.Value ?? "Flash Sale")
+                                                </span>
+                                            }
+                                        </div>
+                                        <div class="order-item-details text-end" style="flex-shrink: 0;">
+                                            <div class="mb-1">
+                                                <span class="text-muted" style="font-size: 0.85rem;">@Localizer["Qty"]:</span>
+                                                <span class="fw-bold" style="color: #1f2937;">@detail.Count</span>
+                                            </div>
+                                            <div class="fw-bold" style="color: #3B9DD5; font-size: 1.1rem;">
+                                                @Html.Raw(currencySymbol)@detail.Price.ToString("N2")
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                
+                                @if (orderDetails.Count > 3)
+                                {
+                                    <div class="text-center mt-3">
+                                        <span class="text-muted" style="font-size: 0.9rem;">
+                                            <i class="bi bi-three-dots me-1"></i>@(orderDetails.Count - 3) @(Localizer["MoreItems"]?.Value ?? "more items")
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Transaction Information Section -->
+                        <div class="transaction-section" style="background: linear-gradient(135deg, rgba(59, 157, 213, 0.03) 0%, rgba(123, 192, 67, 0.03) 100%); padding: 1.5rem; border-top: 1px solid rgba(59, 157, 213, 0.1);">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h6 class="mb-0 fw-bold" style="color: #1f2937; font-size: 1rem;">
+                                    <i class="bi bi-credit-card-2-front me-2" style="color: #3B9DD5;"></i>@(Localizer["TransactionDetails"]?.Value ?? "Transaction Details")
+                                </h6>
+                                <button class="btn btn-sm btn-link p-0 toggle-transaction" style="color: #3B9DD5; text-decoration: none; font-weight: 700;" data-order-id="@order.Id">
+                                    <i class="bi bi-chevron-down me-1"></i><span class="toggle-text">@(Localizer["ShowDetails"]?.Value ?? "Show Details")</span>
+                                </button>
+                            </div>
+                            
+                            <div class="transaction-details" id="transaction-@order.Id" style="display: none;">
+                                <div class="row g-3">
+                                    <!-- Payment Method -->
+                                    <div class="col-md-6">
+                                        <div class="transaction-info-card" style="background: white; padding: 1rem; border-radius: 10px; border: 1px solid rgba(59, 157, 213, 0.1);">
+                                            <label class="text-muted small mb-1 d-block">
+                                                <i class="bi bi-wallet2 me-1"></i>@(Localizer["PaymentMethod"]?.Value ?? "Payment Method")
+                                            </label>
+                                            <p class="mb-0 fw-bold" style="color: #1f2937;">
+                                                @if (!string.IsNullOrEmpty(order.PaymentMethod))
+                                                {
+                                                    <span>@order.PaymentMethod</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">@(Localizer["NotSpecified"]?.Value ?? "Not Specified")</span>
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Payment Date -->
+                                    <div class="col-md-6">
+                                        <div class="transaction-info-card" style="background: white; padding: 1rem; border-radius: 10px; border: 1px solid rgba(59, 157, 213, 0.1);">
+                                            <label class="text-muted small mb-1 d-block">
+                                                <i class="bi bi-calendar-check me-1"></i>@(Localizer["PaymentDate"]?.Value ?? "Payment Date")
+                                            </label>
+                                            <p class="mb-0 fw-bold" style="color: #1f2937;">
+                                                @if (order.PaymentDate > DateTime.MinValue && order.PaymentDate.Year > 2000)
+                                                {
+                                                    <span>@order.PaymentDate.ToString("MMM dd, yyyy", System.Globalization.CultureInfo.GetCultureInfo(currentCulture)) @(Localizer["At"]?.Value ?? "at") @order.PaymentDate.ToString("HH:mm", System.Globalization.CultureInfo.GetCultureInfo(currentCulture))</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">@(Localizer["Pending"]?.Value ?? "Pending")</span>
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Payment Due Date -->
+                                    @if (order.PaymentDueDate > DateTime.MinValue && order.PaymentDueDate.Year > 2000 && order.PaymentStatus != "Approved" && order.PaymentStatus != Localizer["Approved"]?.Value)
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="transaction-info-card" style="background: white; padding: 1rem; border-radius: 10px; border: 1px solid rgba(59, 157, 213, 0.1);">
+                                                <label class="text-muted small mb-1 d-block">
+                                                    <i class="bi bi-calendar-x me-1"></i>@(Localizer["PaymentDueDate"]?.Value ?? "Payment Due Date")
+                                                </label>
+                                                <p class="mb-0 fw-bold" style="color: #dc3545;">
+                                                    @order.PaymentDueDate.ToString("MMM dd, yyyy", System.Globalization.CultureInfo.GetCultureInfo(currentCulture))
+                                                </p>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <!-- Payment Intent ID -->
+                                    @if (!string.IsNullOrEmpty(order.PaymentIntentId))
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="transaction-info-card" style="background: white; padding: 1rem; border-radius: 10px; border: 1px solid rgba(59, 157, 213, 0.1);">
+                                                <label class="text-muted small mb-1 d-block">
+                                                    <i class="bi bi-receipt me-1"></i>@(Localizer["TransactionID"]?.Value ?? "Transaction ID")
+                                                </label>
+                                                <p class="mb-0" style="font-size: 0.85rem; color: #3B9DD5; word-break: break-all;">
+                                                    <code style="background: rgba(59, 157, 213, 0.1); padding: 0.25rem 0.5rem; border-radius: 5px;">@order.PaymentIntentId</code>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <!-- Session ID -->
+                                    @if (!string.IsNullOrEmpty(order.SessionId))
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="transaction-info-card" style="background: white; padding: 1rem; border-radius: 10px; border: 1px solid rgba(59, 157, 213, 0.1);">
+                                                <label class="text-muted small mb-1 d-block">
+                                                    <i class="bi bi-key me-1"></i>@(Localizer["SessionID"]?.Value ?? "Session ID")
+                                                </label>
+                                                <p class="mb-0" style="font-size: 0.85rem; color: #3B9DD5; word-break: break-all;">
+                                                    <code style="background: rgba(59, 157, 213, 0.1); padding: 0.25rem 0.5rem; border-radius: 5px;">@order.SessionId</code>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <!-- Promo Code Used -->
+                                    @if (!string.IsNullOrEmpty(order.PromoCodeText))
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="transaction-info-card" style="background: white; padding: 1rem; border-radius: 10px; border: 1px solid rgba(59, 157, 213, 0.1);">
+                                                <label class="text-muted small mb-1 d-block">
+                                                    <i class="bi bi-tag-fill me-1"></i>@(Localizer["PromoCode"]?.Value ?? "Promo Code")
+                                                </label>
+                                                <p class="mb-0 fw-bold" style="color: #7BC043;">
+                                                    @order.PromoCodeText
+                                                </p>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Footer -->
+                        <div class="order-footer" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); padding: 1.5rem; border-top: 1px solid rgba(59, 157, 213, 0.1);">
+                            <div class="row align-items-center">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    @if (!string.IsNullOrEmpty(order.TrackingNumber))
+                                    {
+                                        <div class="tracking-info">
+                                            <p class="mb-1 fw-bold" style="color: #1f2937; font-size: 0.9rem;">
+                                                <i class="bi bi-truck me-2" style="color: #3B9DD5;"></i>@(Localizer["TrackingNumber"]?.Value ?? "Tracking Number")
+                                            </p>
+                                            <p class="mb-0" style="color: #3B9DD5; font-weight: 700; font-size: 1rem;">
+                                                @order.TrackingNumber
+                                            </p>
+                                            @if (!string.IsNullOrEmpty(order.Carrier))
+                                            {
+                                                <p class="mb-0 text-muted" style="font-size: 0.85rem;">
+                                                    @(Localizer["Carrier"]?.Value ?? "Carrier"): @order.Carrier
+                                                </p>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">
+                                            <i class="bi bi-info-circle me-1"></i>@(Localizer["TrackingNumberWillBeAvailable"]?.Value ?? "Tracking number will be available once order is shipped")
+                                        </p>
+                                    }
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <div class="order-total-section">
+                                        @if (order.OrderSubtotal.HasValue && order.OrderSubtotal.Value > 0)
+                                        {
+                                            <div class="d-flex justify-content-md-end justify-content-between mb-1">
+                                                <span class="text-muted me-3">@(Localizer["Subtotal"]?.Value ?? "Subtotal"):</span>
+                                                <span>@Html.Raw(currencySymbol)@order.OrderSubtotal.Value.ToString("N2")</span>
+                                            </div>
+                                        }
+                                        @if (order.DiscountAmount.HasValue && order.DiscountAmount.Value > 0)
+                                        {
+                                            <div class="d-flex justify-content-md-end justify-content-between mb-1">
+                                                <span class="text-success me-3">
+                                                    <i class="bi bi-tag me-1"></i>@(Localizer["Discount"]?.Value ?? "Discount"):
+                                                </span>
+                                                <span class="text-success fw-bold">-@Html.Raw(currencySymbol)@order.DiscountAmount.Value.ToString("N2")</span>
+                                            </div>
+                                        }
+                                        <div class="d-flex justify-content-md-end justify-content-between align-items-center pt-2" style="border-top: 2px solid rgba(59, 157, 213, 0.2);">
+                                            <span class="fw-bold me-3" style="font-size: 1.1rem; color: #1f2937;">@(Localizer["Total"]?.Value ?? "Total"):</span>
+                                            <span class="fw-bold" style="font-size: 1.3rem; color: #3B9DD5;">
+                                                @Html.Raw(currencySymbol)@order.OrderTotal.ToString("N2")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a href="@Url.EncryptedAction("OrderDetails", "Account", order.Id, new { area = "Customer" })" 
+                                           class="btn btn-primary" 
+                                           style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); border: none; border-radius: 10px; padding: 0.6rem 1.5rem; font-weight: 700; box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3);">
+                                            <i class="bi bi-eye me-2"></i>@Localizer["ViewDetails"]
+                                        </a>
+                                        @if (!string.IsNullOrEmpty(order.TrackingNumber))
+                                        {
+                                            <a asp-area="Customer" asp-controller="Home" asp-action="OrderTracking" asp-route-trackingNumber="@order.TrackingNumber" 
+                                               class="btn btn-outline-primary" 
+                                               style="border: 2px solid #3B9DD5; color: #3B9DD5; border-radius: 10px; padding: 0.6rem 1.5rem; font-weight: 700; background: white;">
+                                                <i class="bi bi-truck me-2"></i>@Localizer["TrackOrder"]
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .order-card {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .order-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+    }
+
+    .order-item-row:hover {
+        background: linear-gradient(135deg, rgba(59, 157, 213, 0.05) 0%, rgba(123, 192, 67, 0.05) 100%) !important;
+        transform: translateX(5px);
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .order-card:nth-child(1) { animation-delay: 0.1s; }
+    .order-card:nth-child(2) { animation-delay: 0.2s; }
+    .order-card:nth-child(3) { animation-delay: 0.3s; }
+    .order-card:nth-child(4) { animation-delay: 0.4s; }
+    .order-card:nth-child(5) { animation-delay: 0.5s; }
+
+    .transaction-details {
+        animation: slideDown 0.3s ease-out;
+        overflow: hidden;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            max-height: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            max-height: 1000px;
+            transform: translateY(0);
+        }
+    }
+
+    .toggle-transaction i {
+        transition: transform 0.3s ease;
+    }
+
+    .toggle-transaction.active i {
+        transform: rotate(180deg);
+    }
+
+    .transaction-info-card {
+        transition: all 0.3s ease;
+    }
+
+    .transaction-info-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 157, 213, 0.15);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle transaction details toggle
+        document.querySelectorAll('.toggle-transaction').forEach(button => {
+            button.addEventListener('click', function() {
+                const orderId = this.getAttribute('data-order-id');
+                const details = document.getElementById('transaction-' + orderId);
+                const icon = this.querySelector('i');
+                const text = this.querySelector('.toggle-text');
+                
+                if (details.style.display === 'none' || !details.style.display) {
+                    details.style.display = 'block';
+                    icon.classList.remove('bi-chevron-down');
+                    icon.classList.add('bi-chevron-up');
+                    text.textContent = '@(Localizer["HideDetails"]?.Value ?? "Hide Details")';
+                    this.classList.add('active');
+                } else {
+                    details.style.display = 'none';
+                    icon.classList.remove('bi-chevron-up');
+                    icon.classList.add('bi-chevron-down');
+                    text.textContent = '@(Localizer["ShowDetails"]?.Value ?? "Show Details")';
+                    this.classList.remove('active');
+                }
+            });
+        });
+    });
+</script>
+

@@ -1,0 +1,204 @@
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+@model IEnumerable<IdealWeightNutrition.Models.Product>
+@inject IConfiguration Configuration
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var bestSellers = Model ?? Enumerable.Empty<IdealWeightNutrition.Models.Product>();
+    var hasBestSellers = bestSellers.Any();
+    var activeFlashSales = ViewBag.ActiveFlashSales as IEnumerable<IdealWeightNutrition.Models.FlashSale> ?? Enumerable.Empty<IdealWeightNutrition.Models.FlashSale>();
+    var now = IdealWeightNutrition.Utility.DateTimeHelper.Now;
+}
+
+@if (hasBestSellers)
+{
+    <section class="best-sellers-section">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">
+                        <i class="bi bi-trophy-fill"></i>
+                        @Localizer["BestSellers"]
+                    </h2>
+                    <p class="section-subtitle">@Localizer["MostPopularProducts"]</p>
+                </div>
+            </div>
+            
+            <div id="bestSellersCarousel" class="carousel slide product-carousel" data-bs-ride="carousel" data-bs-interval="8000" data-bs-touch="true">
+                <div class="carousel-inner">
+                    @{
+                        var productsList = bestSellers.ToList();
+                        var itemsPerSlide = 4;
+                        var totalSlides = (int)Math.Ceiling(productsList.Count / (double)itemsPerSlide);
+                        
+                        for (int slideIndex = 0; slideIndex < totalSlides; slideIndex++)
+                        {
+                            var slideProducts = productsList.Skip(slideIndex * itemsPerSlide).Take(itemsPerSlide).ToList();
+                            if (!slideProducts.Any()) continue;
+                            
+                            <div class="carousel-item @(slideIndex == 0 ? "active" : "")">
+                                <div class="row g-3 g-md-4">
+                                    @foreach (var product in slideProducts)
+                                    {
+                                        var productName = currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) 
+                                            ? product.TitleAr 
+                                            : product.Title;
+                                        
+                                        // Calculate lowest price considering variants, discounts, and flash sales
+                                        var displayPrice = (decimal)product.Price;
+                                        var displayListPrice = (decimal)product.ListPrice;
+                                        
+                                        // Check for best variant price (including discounted variants)
+                                        if (product.ProductVariants != null && product.ProductVariants.Any())
+                                        {
+                                            var bestVariant = product.ProductVariants
+                                                .Where(v => !v.IsDeleted && v.StockQuantity > 0)
+                                                .OrderBy(v => v.Price)
+                                                .FirstOrDefault();
+                                            
+                                            if (bestVariant != null)
+                                            {
+                                                var variantPrice = (decimal)bestVariant.Price;
+                                                var variantListPrice = bestVariant.ListPrice ?? variantPrice;
+                                                
+                                                // Check for flash sale on this variant
+                                                var variantFlashSale = activeFlashSales
+                                                    .SelectMany(fs => fs.FlashSaleItems ?? Enumerable.Empty<IdealWeightNutrition.Models.FlashSaleItem>())
+                                                    .FirstOrDefault(fsi => fsi.ProductId == product.Id 
+                                                        && fsi.ProductVariantId == bestVariant.Id
+                                                        && !fsi.IsDeleted 
+                                                        && fsi.FlashSaleQuantity > 0
+                                                        && fsi.FlashSale != null
+                                                        && fsi.FlashSale.IsActive
+                                                        && now >= fsi.FlashSale.StartDate
+                                                        && now <= fsi.FlashSale.EndDate);
+                                                
+                                                if (variantFlashSale != null)
+                                                {
+                                                    var flashSalePrice = (decimal)variantFlashSale.FlashSalePrice;
+                                                    displayPrice = flashSalePrice < variantPrice ? flashSalePrice : variantPrice;
+                                                    // Use variant's original ListPrice (not variant.Price) for old price
+                                                    displayListPrice = bestVariant.ListPrice ?? variantPrice;
+                                                }
+                                                else
+                                                {
+                                                    displayPrice = variantPrice;
+                                                    displayListPrice = variantListPrice;
+                                                }
+                                            }
+                                        }
+                                        
+                                        // Check for flash sale on main product (non-variant)
+                                        var productFlashSale = activeFlashSales
+                                            .SelectMany(fs => fs.FlashSaleItems ?? Enumerable.Empty<IdealWeightNutrition.Models.FlashSaleItem>())
+                                            .FirstOrDefault(fsi => fsi.ProductId == product.Id 
+                                                && fsi.ProductVariantId == null
+                                                && !fsi.IsDeleted 
+                                                && fsi.FlashSaleQuantity > 0
+                                                && fsi.FlashSale != null
+                                                && fsi.FlashSale.IsActive
+                                                && now >= fsi.FlashSale.StartDate
+                                                && now <= fsi.FlashSale.EndDate);
+                                        
+                                        if (productFlashSale != null)
+                                        {
+                                            var flashSalePrice = (decimal)productFlashSale.FlashSalePrice;
+                                            if (flashSalePrice < displayPrice)
+                                            {
+                                                displayPrice = flashSalePrice;
+                                                // Use product's original ListPrice (not product.Price) for old price
+                                                displayListPrice = (decimal)product.ListPrice > 0 ? (decimal)product.ListPrice : (decimal)product.Price;
+                                            }
+                                        }
+                                        
+                                        var discount = displayListPrice > 0 && displayListPrice > displayPrice
+                                            ? (int)((displayListPrice - displayPrice) / displayListPrice * 100)
+                                            : 0;
+                                        
+                                        var productImages = product.ProductImages != null && product.ProductImages.Any() 
+                                            ? product.ProductImages.OrderBy(pi => pi.DisplayOrder).Select(pi => pi.ImageUrl).ToList()
+                                            : new List<string>();
+                                        
+                                        if (!productImages.Any() && !string.IsNullOrEmpty(product.ImageUrl))
+                                        {
+                                            productImages.Add(product.ImageUrl);
+                                        }
+                                        
+                                        var productImage = productImages.FirstOrDefault() ?? "/images/no-image.png";
+                                        
+                                        <div class="col-12 col-sm-6 col-lg-3">
+                                            <div class="product-card-simple h-100">
+                                                @if (discount > 0)
+                                                {
+                                                    <div class="product-badge-best-seller">-@discount%</div>
+                                                }
+                                                <div class="product-badge-best-seller-trophy">
+                                                    <i class="bi bi-trophy-fill"></i>
+                                                </div>
+                                                <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="product-card-link">
+                                                    <div class="product-card-image">
+                                                        <img src="@productImage" alt="@productName" class="img-fluid" loading="lazy" />
+                                                    </div>
+                                                    <div class="product-card-content">
+                                                        <h3 class="product-card-title">@productName</h3>
+                                                        <div class="product-card-price">
+                                                            @if (discount > 0 && displayListPrice > 0)
+                                                            {
+                                                                <span class="product-price-old">@Html.Raw(currencySymbol)@displayListPrice.ToString("N2")</span>
+                                                            }
+                                                            <span class="product-price-current">@Html.Raw(currencySymbol)@displayPrice.ToString("N2")</span>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                                <div class="product-card-actions" onclick="event.stopPropagation();">
+                                                    @if (product.ProductType == IdealWeightNutrition.Models.ProductType.Variable)
+                                                    {
+                                                        <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="btn btn-show-details">
+                                                            <i class="bi bi-eye me-1"></i>@Localizer["View"]
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button class="btn btn-add-cart-quick bestseller-cart-btn" 
+                                                                data-product-id="@product.Id"
+                                                                onclick="toggleCart(@product.Id, this); event.stopPropagation();" 
+                                                                title="@Localizer["AddToCart"]">
+                                                            <i class="bi bi-cart-plus"></i>@Localizer["AddToCart"]
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+                
+                @if (totalSlides > 1)
+                {
+                    <button class="carousel-control-prev" type="button" data-bs-target="#bestSellersCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">@Localizer["Previous"]</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#bestSellersCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">@Localizer["Next"]</span>
+                    </button>
+                    
+                    <div class="carousel-indicators">
+                        @for (int i = 0; i < totalSlides; i++)
+                        {
+                            <button type="button" data-bs-target="#bestSellersCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-label="Slide @(i + 1)"></button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+

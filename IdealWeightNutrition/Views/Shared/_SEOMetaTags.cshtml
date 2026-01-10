@@ -1,0 +1,258 @@
+@using IdealWeightNutrition.Models.ViewModels
+@using IdealWeightNutrition.Utility
+@using Microsoft.AspNetCore.Localization
+@inject IConfiguration Configuration
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    
+    var seo = ViewData["SEO"] as SEOViewModel;
+    var baseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
+    var siteName = Configuration["SiteSettings:SiteName"] ?? "Ideal Weight Nutrition";
+    var siteDescription = currentCulture == "ar" 
+        ? (Configuration["SiteSettings:SiteDescriptionAr"] ?? "مكملات صحية ولياقة بدنية متميزة في الإمارات")
+        : (Configuration["SiteSettings:SiteDescription"] ?? "Premium health and fitness supplements in UAE");
+    
+    var pageTitle = seo?.Title ?? ViewData["Title"]?.ToString() ?? (currentCulture == "ar" ? "الرئيسية" : "Home");
+    var pageDescription = seo?.Description ?? ViewData["Description"]?.ToString() ?? siteDescription;
+    var pageKeywords = seo?.Keywords ?? ViewData["Keywords"]?.ToString() ?? (currentCulture == "ar" ? "مكملات غذائية, صحة, لياقة, وزن مثالي, الإمارات" : "nutrition supplements, health, fitness, ideal weight, UAE");
+    var pageImage = seo?.ImageUrl ?? ViewData["Image"]?.ToString() ?? baseUrl + "/Images/Products/logo_white_bg.png";
+    var canonicalUrl = seo?.CanonicalUrl ?? (baseUrl + Context.Request.Path + Context.Request.QueryString);
+    
+    // Ensure baseUrl uses HTTPS for better SEO
+    baseUrl = baseUrl.Replace("http://", "https://");
+    
+    // Logo URL for Google Search and social media - Using absolute HTTPS URL
+    var logoUrl = baseUrl + "/Images/Products/logo_white_bg.png";
+    var logoUrl192 = baseUrl + "/Images/Products/logo_white_bg.png";
+    var logoUrl512 = baseUrl + "/Images/Products/logo_white_bg.png";
+    
+    // Ensure image URL is absolute
+    if (!string.IsNullOrEmpty(pageImage) && !pageImage.StartsWith("http"))
+    {
+        pageImage = baseUrl + (pageImage.StartsWith("/") ? "" : "/") + pageImage;
+    }
+    
+    // Ensure pageImage uses HTTPS
+    pageImage = pageImage.Replace("http://", "https://");
+}
+
+<!-- Primary Meta Tags - Optimized for "ideal weight nutrition", "ideal weight", "nutrition" -->
+<meta name="title" content="@(pageTitle) - @siteName" />
+<meta name="description" content="@pageDescription" />
+<meta name="keywords" content="@pageKeywords" />
+<meta name="subject" content="@(currentCulture == "ar" ? "وزن مثالي للتغذية، وزن مثالي، التغذية" : "Ideal Weight Nutrition, Ideal Weight, Nutrition")" />
+<meta name="topic" content="@(currentCulture == "ar" ? "التغذية والوزن المثالي" : "Nutrition and Ideal Weight")" />
+<meta name="classification" content="@(currentCulture == "ar" ? "متجر التغذية والوزن المثالي" : "Nutrition and Ideal Weight Store")" />
+<meta name="author" content="@siteName" />
+<meta name="robots" content="index, follow" />
+<meta name="language" content="@currentCulture" />
+<meta name="revisit-after" content="7 days" />
+<meta name="distribution" content="global" />
+<meta name="rating" content="general" />
+
+<!-- Open Graph / Facebook - Enhanced for Google Search Logo Display -->
+<meta property="og:type" content="@(seo?.PageType ?? "website")" />
+<meta property="og:url" content="@canonicalUrl" />
+<meta property="og:title" content="@(pageTitle) - @siteName" />
+<meta property="og:description" content="@pageDescription" />
+<!-- Primary Open Graph Image - For Google Search Results -->
+<meta property="og:image" content="@logoUrl" />
+<meta property="og:image:secure_url" content="@logoUrl" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="1200" />
+<meta property="og:image:alt" content="@siteName - @(currentCulture == "ar" ? "ايديال ويت للتغذية" : "Ideal Weight Nutrition") Logo" />
+<!-- Additional images for better social sharing -->
+@if (seo?.PageType == "product")
+{
+    <meta property="og:image" content="@pageImage" />
+    <meta property="og:image:secure_url" content="@pageImage" />
+}
+<meta property="og:site_name" content="@siteName" />
+<meta property="og:locale" content="@(currentCulture == "ar" ? "ar_AE" : "en_US")" />
+<!-- Organization Logo for Google Knowledge Graph -->
+<meta property="og:logo" content="@logoUrl" />
+<meta property="business:logo" content="@logoUrl" />
+@if (currentCulture == "ar")
+{
+    <meta property="og:locale:alternate" content="en_US" />
+}
+else
+{
+    <meta property="og:locale:alternate" content="ar_AE" />
+}
+@if (seo?.PageType == "product" && seo.Price.HasValue)
+{
+    <meta property="product:price:amount" content="@seo.Price.Value.ToString("F2")" />
+    <meta property="product:price:currency" content="@seo.Currency" />
+    <meta property="product:availability" content="@(seo.InStock ? "in stock" : "out of stock")" />
+}
+
+<!-- Twitter Card - Enhanced for Logo Display -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content="@canonicalUrl" />
+<meta name="twitter:title" content="@(pageTitle) - @siteName" />
+<meta name="twitter:description" content="@pageDescription" />
+<!-- Twitter Logo Image - Primary for brand recognition -->
+<meta name="twitter:image" content="@logoUrl" />
+<meta name="twitter:image:alt" content="@siteName - @(currentCulture == "ar" ? "ايديال ويت للتغذية" : "Ideal Weight Nutrition") Logo" />
+@if (seo?.PageType == "product")
+{
+    <!-- Product image for products -->
+    <meta name="twitter:image:src" content="@pageImage" />
+}
+
+<!-- Canonical URL -->
+<link rel="canonical" href="@canonicalUrl" />
+
+<!-- Google Search Console - Organization Logo -->
+<link rel="image_src" href="@logoUrl" />
+<meta itemprop="image" content="@logoUrl" />
+<meta itemprop="logo" content="@logoUrl" />
+
+<!-- Web App Manifest for PWA and Logo Recognition -->
+<link rel="manifest" href="/manifest.json" />
+
+<!-- Apple Touch Icons - Enhanced for iOS -->
+<link rel="apple-touch-icon" sizes="180x180" href="@logoUrl192" />
+<link rel="apple-touch-icon" sizes="152x152" href="@logoUrl192" />
+<link rel="apple-touch-icon" sizes="144x144" href="@logoUrl192" />
+<link rel="apple-touch-icon" sizes="120x120" href="@logoUrl192" />
+<link rel="apple-touch-icon" sizes="114x114" href="@logoUrl192" />
+<link rel="apple-touch-icon" sizes="76x76" href="@logoUrl192" />
+<link rel="apple-touch-icon" sizes="72x72" href="@logoUrl192" />
+<link rel="apple-touch-icon" sizes="60x60" href="@logoUrl192" />
+<link rel="apple-touch-icon" sizes="57x57" href="@logoUrl192" />
+<link rel="apple-touch-icon" href="@logoUrl192" />
+
+<!-- Alternate Languages - Proper multilingual support for "ideal weight nutrition", "ideal weight", "nutrition" -->
+@{
+    var currentPath = Context.Request.Path.Value ?? "/";
+    var queryString = Context.Request.QueryString.Value ?? "";
+    var arUrl = baseUrl + currentPath + (currentPath.Contains("?") ? "&" : "?") + "culture=ar" + queryString.Replace("?culture=en", "").Replace("&culture=en", "");
+    var enUrl = baseUrl + currentPath + (currentPath.Contains("?") ? "&" : "?") + "culture=en" + queryString.Replace("?culture=ar", "").Replace("&culture=ar", "");
+    var defaultUrl = baseUrl + currentPath + queryString;
+}
+<link rel="alternate" hreflang="ar" href="@arUrl" />
+<link rel="alternate" hreflang="en" href="@enUrl" />
+<link rel="alternate" hreflang="x-default" href="@defaultUrl" />
+
+<!-- Additional SEO for Arabic searches -->
+@if (currentCulture == "ar")
+{
+    <meta name="keywords" content="ايديال ويت للتغذية, ايديال ويت للتغذية الإمارات, ايديال ويت للتغذية دبي, ايديال ويت للتغذية أبوظبي, وزن مثالي للتغذية, وزن مثالي للتغذية الإمارات, وزن مثالي, وزن مثالي الإمارات, وزن مثالي دبي, التغذية, مكملات التغذية, حلول الوزن المثالي, برنامج الوزن المثالي, مكملات الوزن المثالي, منتجات الوزن المثالي, @pageKeywords" />
+    <meta property="og:title" content="@(pageTitle) - ايديال ويت للتغذية - وزن مثالي للتغذية" />
+}
+else
+{
+    <meta name="keywords" content="ideal weight nutrition, ideal weight nutrition UAE, ideal weight nutrition Dubai, ideal weight nutrition Abu Dhabi, ideal weight, ideal weight UAE, ideal weight Dubai, ideal weight solutions, ideal weight program, ideal weight supplements, ideal weight products, nutrition, nutrition supplements, nutrition products, nutrition store, nutrition store UAE, @pageKeywords" />
+    <meta property="og:title" content="@(pageTitle) - Ideal Weight Nutrition - Ideal Weight Nutrition UAE" />
+}
+
+<!-- Geo Tags - UAE Specific -->
+<meta name="geo.region" content="AE" />
+<meta name="geo.placename" content="United Arab Emirates" />
+<meta name="geo.position" content="25.2048;55.2708" />
+<meta name="ICBM" content="25.2048, 55.2708" />
+<meta name="geo.region" content="AE-DU" />
+<meta name="DC.title" content="@(pageTitle) - @siteName" />
+<meta name="DC.creator" content="@siteName" />
+<meta name="DC.subject" content="@pageKeywords" />
+<meta name="DC.description" content="@pageDescription" />
+<meta name="DC.publisher" content="@siteName" />
+<meta name="DC.contributor" content="@siteName" />
+<meta name="DC.coverage" content="United Arab Emirates" />
+<meta name="DC.language" content="@currentCulture" />
+
+<!-- Enhanced Keywords for Better SEO - Targeting "ideal weight nutrition", "ideal weight", "nutrition" -->
+<meta name="keywords" content="ideal weight nutrition, ideal weight nutrition UAE, ideal weight nutrition Dubai, ideal weight nutrition Abu Dhabi, ideal weight, ideal weight solutions, ideal weight program, ideal weight supplements, ideal weight products, ideal weight UAE, ideal weight Dubai, nutrition, nutrition supplements, nutrition products, nutrition store, nutrition store UAE, nutrition store Dubai, nutrition advice, nutrition expert, nutrition consultation, nutrition program, nutrition plan, nutrition diet, nutrition health, nutrition fitness, nutrition weight loss, nutrition weight management, nutrition supplements UAE, nutrition supplements Dubai, nutrition supplements Abu Dhabi, nutrition supplements online, buy nutrition supplements, nutrition supplements delivery, nutrition supplements free delivery, diet supplements, diet products, diet plan, diet program, diet weight loss, protein supplements, protein powder, protein UAE, protein Dubai, protein supplements UAE, vitamins, vitamins UAE, vitamins Dubai, vitamins supplements, multivitamins, health supplements, health products, health and wellness, fitness supplements, fitness nutrition, sports nutrition, weight loss, weight loss supplements, weight loss products, weight loss program, weight management, weight control, weight reduction, supplements, supplements UAE, supplements Dubai, supplements Abu Dhabi, supplements online, buy supplements, supplements delivery, free delivery UAE, UAE delivery, Dubai delivery, Abu Dhabi delivery, Sharjah delivery, online supplements store, online nutrition store, e-commerce supplements, supplements e-commerce, ideal weight nutrition store, ideal weight nutrition online, ideal weight nutrition website, ideal weight nutrition shop, ideal weight nutrition UAE store, ideal weight nutrition Dubai store, ideal weight nutrition Abu Dhabi store, وزن مثالي للتغذية, وزن مثالي للتغذية الإمارات, وزن مثالي للتغذية دبي, وزن مثالي للتغذية أبوظبي, وزن مثالي, حلول الوزن المثالي, برنامج الوزن المثالي, مكملات الوزن المثالي, منتجات الوزن المثالي, وزن مثالي الإمارات, وزن مثالي دبي, التغذية, مكملات التغذية, منتجات التغذية, متجر التغذية, متجر التغذية الإمارات, متجر التغذية دبي, نصائح التغذية, خبير التغذية, استشارة التغذية, برنامج التغذية, خطة التغذية, حمية التغذية, التغذية الصحية, التغذية واللياقة, التغذية لفقدان الوزن, التغذية لإدارة الوزن, مكملات التغذية الإمارات, مكملات التغذية دبي, مكملات التغذية أبوظبي, مكملات التغذية أونلاين, شراء مكملات التغذية, توصيل مكملات التغذية, توصيل مجاني الإمارات, توصيل الإمارات, توصيل دبي, توصيل أبوظبي, مكملات غذائية, مكملات غذائية الإمارات, مكملات غذائية دبي, مكملات غذائية أبوظبي, مكملات غذائية أونلاين, شراء مكملات غذائية, توصيل مكملات غذائية, متجر مكملات غذائية, متجر مكملات غذائية أونلاين, @pageKeywords" />
+
+<!-- Additional SEO Meta Tags -->
+<meta name="theme-color" content="#007bff" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="format-detection" content="telephone=yes" />
+
+<!-- Mobile Optimization -->
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="HandheldFriendly" content="true" />
+<meta name="MobileOptimized" content="320" />
+
+<!-- Content Language -->
+<meta http-equiv="content-language" content="@currentCulture" />
+
+<!-- Cache Control -->
+<meta http-equiv="Cache-Control" content="public, max-age=3600" />
+
+<!-- Additional Open Graph Tags -->
+<meta property="og:type" content="@(seo?.PageType ?? "website")" />
+@if (seo?.PageType == "product")
+{
+    <meta property="product:brand" content="@(seo.Brand ?? "Ideal Weight Nutrition")" />
+    <meta property="product:category" content="@(seo.Category ?? "")" />
+    <meta property="product:availability" content="@(seo.InStock ? "in stock" : "out of stock")" />
+    <meta property="product:condition" content="new" />
+    <meta property="product:retailer" content="Ideal Weight Nutrition" />
+    <meta property="product:retailer_item_id" content="@(ViewData["ProductId"]?.ToString() ?? "")" />
+    @if (seo.Rating.HasValue && seo.ReviewCount.HasValue && seo.ReviewCount > 0)
+    {
+        <meta property="product:rating:value" content="@seo.Rating.Value.ToString("F1")" />
+        <meta property="product:rating:scale" content="5" />
+    }
+}
+
+<!-- Twitter Card Enhanced -->
+<meta name="twitter:site" content="@("@idealweightnutrition")" />
+<meta name="twitter:creator" content="@("@idealweightnutrition")" />
+<meta name="twitter:domain" content="idealweightnutrition.ae" />
+
+<!-- Business Information -->
+<meta name="contact" content="info@idealweightnutrition.ae" />
+<meta name="copyright" content="Ideal Weight Nutrition" />
+<meta name="reply-to" content="info@idealweightnutrition.ae" />
+
+<!-- Rich Snippets Support -->
+<meta name="application-name" content="Ideal Weight Nutrition" />
+<meta name="msapplication-TileColor" content="#007bff" />
+<meta name="msapplication-config" content="/browserconfig.xml" />
+
+<!-- UAE-Specific SEO Enhancements -->
+<meta name="target" content="all" />
+<meta name="audience" content="all" />
+<meta name="coverage" content="worldwide" />
+<meta name="distribution" content="global" />
+<meta name="rating" content="general" />
+
+<!-- Additional UAE Location Tags -->
+<meta name="geo.region" content="AE-DU" />
+<meta name="geo.placename" content="Dubai, United Arab Emirates" />
+<meta name="geo.position" content="25.2048;55.2708" />
+<meta name="ICBM" content="25.2048, 55.2708" />
+
+<!-- Arabic Language Support -->
+@if (currentCulture == "ar")
+{
+    <meta name="language" content="ar-AE" />
+    <meta http-equiv="content-language" content="ar-AE" />
+}
+else
+{
+    <meta name="language" content="en-AE" />
+    <meta http-equiv="content-language" content="en-AE" />
+}
+
+<!-- Enhanced Open Graph for UAE Market -->
+<meta property="og:country-name" content="United Arab Emirates" />
+<meta property="og:region" content="Dubai" />
+<meta property="og:locale:alternate" content="ar_AE" />
+<meta property="og:locale:alternate" content="en_US" />
+
+<!-- Business Hours for UAE -->
+<meta property="business:hours" content="Mo-Su 09:00-22:00" />
+<meta property="business:contact_data:street_address" content="UAE" />
+<meta property="business:contact_data:locality" content="Dubai" />
+<meta property="business:contact_data:region" content="Dubai" />
+<meta property="business:contact_data:postal_code" content="" />
+<meta property="business:contact_data:country_name" content="United Arab Emirates" />
+

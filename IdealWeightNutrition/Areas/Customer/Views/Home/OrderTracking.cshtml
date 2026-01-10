@@ -1,0 +1,178 @@
+@model OrderHeader
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["OrderTracking"]?.Value ?? "Order Tracking";
+    var orderDetails = ViewBag.OrderDetails as IEnumerable<OrderDetail>;
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    
+    // Format currency with language-specific symbol and comma as decimal separator
+    // Generic function that handles both decimal and double
+    Func<object, string> formatCurrency = (amount) => 
+    {
+        decimal value = amount is decimal d ? d : (amount is double db ? (decimal)db : Convert.ToDecimal(amount));
+        return $"{currencySymbol} {value.ToString("N2", System.Globalization.CultureInfo.InvariantCulture).Replace(".", ",")}";
+    };
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-check-circle me-2"></i>
+                        @(Localizer["Order"]?.Value ?? "Order") #@Model.Id
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>@(Localizer["OrderStatus"]?.Value ?? "Order Status"):</strong> @Model.OrderStatus
+                        <br />
+                        <strong>@(Localizer["PaymentStatus"]?.Value ?? "Payment Status"):</strong> @Model.PaymentStatus
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="mb-3">
+                                <i class="bi bi-person me-2"></i>
+                                @(Localizer["CustomerInformation"]?.Value ?? "Customer Information")
+                            </h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>@(Localizer["Name"]?.Value ?? "Name"):</strong></td>
+                                    <td>@Model.Name</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>@(Localizer["Email"]?.Value ?? "Email"):</strong></td>
+                                    <td>@Model.Email</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>@(Localizer["Phone"]?.Value ?? "Phone"):</strong></td>
+                                    <td>@Model.PhoneNumber</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5 class="mb-3">
+                                <i class="bi bi-truck me-2"></i>
+                                @(Localizer["ShippingInformation"]?.Value ?? "Shipping Information")
+                            </h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>@(Localizer["Address"]?.Value ?? "Address"):</strong></td>
+                                    <td>
+                                        @Model.StreetAddress<br />
+                                        @Model.City, @Model.State @Model.PostalCode
+                                    </td>
+                                </tr>
+                                @if (!string.IsNullOrEmpty(Model.Carrier))
+                                {
+                                    <tr>
+                                        <td><strong>@(Localizer["Carrier"]?.Value ?? "Carrier"):</strong></td>
+                                        <td>@Model.Carrier</td>
+                                    </tr>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.TrackingNumber))
+                                {
+                                    <tr>
+                                        <td><strong>@(Localizer["TrackingNumber"]?.Value ?? "Tracking Number"):</strong></td>
+                                        <td>@Model.TrackingNumber</td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <h5 class="mb-3">
+                        <i class="bi bi-basket3 me-2"></i>
+                        @(Localizer["OrderItems"]?.Value ?? "Order Items")
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>@(Localizer["Product"]?.Value ?? "Product")</th>
+                                    <th>@(Localizer["Price"]?.Value ?? "Price")</th>
+                                    <th>@(Localizer["Quantity"]?.Value ?? "Quantity")</th>
+                                    <th class="text-end">@(Localizer["Total"]?.Value ?? "Total")</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in orderDetails)
+                                {
+                                    <tr>
+                                        <td>@item.Product.Title</td>
+                                        <td>@formatCurrency(item.Price)</td>
+                                        <td>@item.Count</td>
+                                        <td class="text-end">@formatCurrency(item.Price * item.Count)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>@(Localizer["OrderTotal"]?.Value ?? "Order Total"):</strong></td>
+                                    <td class="text-end"><strong>@formatCurrency(Model.OrderTotal)</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <p class="text-muted">
+                                <i class="bi bi-calendar me-2"></i>
+                                <strong>@(Localizer["OrderDate"]?.Value ?? "Order Date"):</strong> @Model.OrderDate.ToString("MMM dd, yyyy")
+                            </p>
+                        </div>
+                        @if (Model.ShippingDate != DateTime.MinValue)
+                        {
+                            <div class="col-md-6">
+                                <p class="text-muted">
+                                    <i class="bi bi-truck me-2"></i>
+                                    <strong>@(Localizer["ShippingDate"]?.Value ?? "Shipping Date"):</strong> @Model.ShippingDate.ToString("MMM dd, yyyy")
+                                </p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mb-4">
+                <a asp-action="TrackOrder" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-search me-2"></i>
+                    @(Localizer["TrackAnotherOrder"]?.Value ?? "Track Another Order")
+                </a>
+                <a asp-action="Index" class="btn btn-primary">
+                    <i class="bi bi-shop me-2"></i>
+                    @(Localizer["ContinueShopping"]?.Value ?? "Continue Shopping")
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        padding: 1.5rem;
+    }
+
+    .table-borderless td {
+        padding: 0.5rem 1rem;
+    }
+</style>
+

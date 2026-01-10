@@ -1,0 +1,24 @@
+/* Font Display Optimization for Better Performance */
+/* This ensures fonts don't block rendering */
+
+@font-face {
+    font-family: 'Bootstrap Icons';
+    font-display: swap; /* Show fallback immediately, swap when font loads */
+}
+
+/* Apply font-display: swap to all custom fonts */
+@font-face {
+    font-family: 'Cairo';
+    font-display: swap;
+}
+
+/* Optimize icon font loading */
+.bi, [class^="bi-"], [class*=" bi-"] {
+    font-display: swap;
+}
+
+/* Prevent layout shift during font load */
+body {
+    font-display: swap;
+}
+

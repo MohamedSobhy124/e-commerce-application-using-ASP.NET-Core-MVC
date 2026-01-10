@@ -1,0 +1,74 @@
+{
+  "name": "Ideal Weight Nutrition - وزن مثالي للتغذية",
+  "short_name": "Ideal Weight",
+  "description": "Ideal Weight Nutrition - UAE's premier destination for ideal weight solutions and premium nutrition supplements",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/Images/Products/logo_white_bg.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Images/Products/logo_white_bg.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Images/Products/logo_white_bg.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Images/Products/logo_white_bg.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["health", "fitness", "shopping", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Shop Products",
+      "short_name": "Shop",
+      "description": "Browse our nutrition supplements",
+      "url": "/Customer/Home",
+      "icons": [
+        {
+          "src": "/Images/Products/logo_white_bg.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any"
+        }
+      ]
+    },
+    {
+      "name": "Flash Sales",
+      "short_name": "Sales",
+      "description": "View current flash sales",
+      "url": "/Customer/FlashSale",
+      "icons": [
+        {
+          "src": "/Images/Products/logo_white_bg.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
+

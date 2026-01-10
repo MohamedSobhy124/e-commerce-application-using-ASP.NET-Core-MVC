@@ -1,0 +1,372 @@
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+@using Microsoft.AspNetCore.Html
+@model IdealWeightNutrition.Models.ViewModels.ReturnRequestVM
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["RequestReturn"]?.Value ?? "Request Return";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var orderDetails = ViewBag.OrderDetails as List<OrderDetail> ?? new List<OrderDetail>();
+    
+    // Format currency helper - returns HTML string with proper encoding
+    Func<object, IHtmlContent> formatCurrency = (amount) => 
+    {
+        decimal value = amount is decimal d ? d : (amount is double db ? (decimal)db : Convert.ToDecimal(amount));
+        var formattedValue = value.ToString("N2", System.Globalization.CultureInfo.InvariantCulture).Replace(".", ",");
+        return Html.Raw($"{currencySymbol} {formattedValue}");
+    };
+}
+
+<div class="container py-4" style="margin-top: 1rem;">
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <p class="mb-0">@error.ErrorMessage</p>
+            }
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="display-5 fw-bold mb-2" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                <i class="bi bi-arrow-return-left me-2"></i>@(Localizer["RequestReturn"]?.Value ?? "Request Return")
+            </h1>
+            <p class="text-muted mb-0">@(Localizer["OrderNumber"]?.Value ?? "Order Number"): #@Model.OrderHeaderId</p>
+        </div>
+        <a asp-action="OrderDetails" asp-route-id="@Model.OrderHeaderId" class="btn btn-outline-primary" style="border-radius: 10px; padding: 0.6rem 1.5rem;">
+            <i class="bi bi-arrow-left me-2"></i>@Localizer["BackToOrderDetails"]
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card" style="border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 20px; overflow: hidden;">
+                <div class="card-header" style="background: linear-gradient(135deg, rgba(220, 53, 69, 0.05) 0%, rgba(200, 35, 51, 0.05) 100%); padding: 1.5rem; border-bottom: 2px solid rgba(220, 53, 69, 0.1);">
+                    <h5 class="mb-0 fw-bold" style="color: #1f2937;">
+                        <i class="bi bi-box-seam me-2" style="color: #dc3545;"></i>@(Localizer["SelectItemsToReturn"]?.Value ?? "Select Items to Return")
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="RequestReturn" method="post" id="returnRequestForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="OrderHeaderId" />
+                        <input type="hidden" asp-for="IsGuestOrder" />
+                        
+                        @if (ViewBag.IsGuestView == true || Model.IsGuestOrder)
+                        {
+                            <div class="alert alert-info mb-4" style="border-left: 4px solid #0dcaf0; border-radius: 8px;">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-info-circle-fill me-2" style="font-size: 1.2rem; color: #0dcaf0;"></i>
+                                    <div>
+                                        <strong>@(Localizer["GuestReturnRequest"]?.Value ?? "Guest Return Request")</strong>
+                                        <p class="mb-2 mt-1">@(Localizer["GuestReturnInfo"]?.Value ?? "Please verify your email address to submit a return request. You will receive updates about your return request via email.")</p>
+                                        <div class="mt-2">
+                                            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-person-plus me-1"></i>@(Localizer["CreateAccountForEasierTracking"]?.Value ?? "Create an account for easier tracking")
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label asp-for="Email" class="form-label fw-semibold">
+                                    <i class="bi bi-envelope-fill me-2"></i>@(Localizer["EmailAddress"]?.Value ?? "Email Address") <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="Email" type="email" class="form-control" placeholder="@(Localizer["EnterYourEmail"]?.Value ?? "Enter your email address")" required />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="bi bi-shield-check me-1"></i>@(Localizer["EmailMustMatchOrder"]?.Value ?? "This email must match the email used when placing the order.")
+                                </small>
+                            </div>
+                        }
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 50px;">
+                                            <input type="checkbox" id="selectAll" />
+                                        </th>
+                                        <th>@(Localizer["Product"]?.Value ?? "Product")</th>
+                                        <th class="text-center">@(Localizer["OrderedQty"]?.Value ?? "Ordered Qty")</th>
+                                        <th class="text-center">@(Localizer["ReturnQty"]?.Value ?? "Return Qty")</th>
+                                        <th class="text-end">@(Localizer["Price"]?.Value ?? "Price")</th>
+                                        <th class="text-end">@(Localizer["Total"]?.Value ?? "Total")</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < Model.Items.Count; i++)
+                                    {
+                                        var item = Model.Items[i];
+                                        var orderDetail = orderDetails.FirstOrDefault(od => od.Id == item.OrderDetailId);
+                                        if (orderDetail == null) continue;
+                                        
+                                        var product = orderDetail.Product;
+                                        var productName = currentCulture == "ar" && !string.IsNullOrEmpty(product?.TitleAr) ? product.TitleAr : product?.Title ?? "Product";
+                                        var productImage = product?.ProductImages?.FirstOrDefault(pi => pi.ImageInfo == null)?.ImageUrl 
+                                            ?? product?.ProductImages?.FirstOrDefault()?.ImageUrl 
+                                            ?? product?.ImageUrl 
+                                            ?? "/images/default-product.jpg";
+                                        
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" class="item-checkbox" 
+                                                       data-order-detail-id="@item.OrderDetailId"
+                                                       data-max-qty="@orderDetail.Count"
+                                                       onchange="toggleItemReturn(@i)" />
+                                                <input type="hidden" asp-for="Items[i].OrderDetailId" />
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@productImage" alt="@productName" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 10px;" />
+                                                    <div>
+                                                        <strong>@productName</strong>
+                                                        @if (orderDetail.ProductVariantId.HasValue && orderDetail.ProductVariant != null)
+                                                        {
+                                                            var variantOptions = orderDetail.ProductVariant.VariantOptionValues?
+                                                                .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                                                                .Select(vov => $"{vov.OptionValue?.ProductOption?.Name}: {vov.OptionValue?.Value}")
+                                                                .Where(s => !string.IsNullOrEmpty(s))
+                                                                .ToList() ?? new List<string>();
+                                                            
+                                                            if (variantOptions.Any())
+                                                            {
+                                                                <br /><small class="text-muted">@string.Join(", ", variantOptions)</small>
+                                                            }
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-secondary">@orderDetail.Count</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="number" 
+                                                       asp-for="Items[i].Quantity" 
+                                                       class="form-control return-qty" 
+                                                       min="0" 
+                                                       max="@orderDetail.Count"
+                                                       style="width: 80px; margin: 0 auto;"
+                                                       onchange="updateItemTotal(@i)"
+                                                       disabled />
+                                            </td>
+                                            <td class="text-end">
+                                                @formatCurrency(orderDetail.Price)
+                                            </td>
+                                            <td class="text-end">
+                                                <strong class="item-total" data-price="@orderDetail.Price">@formatCurrency(0)</strong>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td colspan="5">
+                                                <div class="mb-2">
+                                                    <label class="form-label small">@(Localizer["ItemReason"]?.Value ?? "Reason for this item") (Optional):</label>
+                                                    <textarea asp-for="Items[i].ItemReason" 
+                                                              class="form-control form-control-sm" 
+                                                              rows="2" 
+                                                              placeholder="@(Localizer["EnterReasonForThisItem"]?.Value ?? "Enter reason for returning this item...")"
+                                                              disabled></textarea>
+                                                </div>
+                                                <div>
+                                                    <label class="form-label small">@(Localizer["ItemCondition"]?.Value ?? "Item Condition"):</label>
+                                                    <select asp-for="Items[i].ItemCondition" class="form-select form-select-sm" disabled>
+                                                        <option value="New">@(Localizer["New"]?.Value ?? "New")</option>
+                                                        <option value="Used">@(Localizer["Used"]?.Value ?? "Used")</option>
+                                                        <option value="Damaged">@(Localizer["Damaged"]?.Value ?? "Damaged")</option>
+                                                        <option value="Defective">@(Localizer["Defective"]?.Value ?? "Defective")</option>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <td colspan="5" class="text-end fw-bold">@(Localizer["TotalRefundAmount"]?.Value ?? "Total Refund Amount"):</td>
+                                        <td class="text-end">
+                                            <strong class="fs-5 text-danger" id="totalRefundAmount">@formatCurrency(0)</strong>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <div class="mt-4">
+                            <label asp-for="Reason" class="form-label fw-bold">
+                                @(Localizer["ReturnReason"]?.Value ?? "Return Reason") <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="Reason" 
+                                      class="form-control" 
+                                      rows="4" 
+                                      placeholder="@(Localizer["EnterReturnReason"]?.Value ?? "Please provide a reason for your return request...")"
+                                      required></textarea>
+                            <span asp-validation-for="Reason" class="text-danger"></span>
+                        </div>
+
+                        <div class="mt-3">
+                            <label asp-for="AdditionalNotes" class="form-label">
+                                @(Localizer["AdditionalNotes"]?.Value ?? "Additional Notes") (@(Localizer["Optional"]?.Value ?? "Optional"))
+                            </label>
+                            <textarea asp-for="AdditionalNotes" 
+                                      class="form-control" 
+                                      rows="3" 
+                                      placeholder="@(Localizer["EnterAdditionalNotes"]?.Value ?? "Any additional information you'd like to provide...")"></textarea>
+                        </div>
+
+                        <div class="alert alert-info mt-4">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>@(Localizer["ReturnPolicy"]?.Value ?? "Return Policy"):</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>@(Localizer["ReturnPolicyItem1"]?.Value ?? "Items must be returned within 14 days of delivery")</li>
+                                <li>@(Localizer["ReturnPolicyItem2"]?.Value ?? "Items must be in original condition with tags attached")</li>
+                                <li>@(Localizer["ReturnPolicyItem3"]?.Value ?? "Refund will be processed within 5-7 business days after we receive the items")</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <a asp-action="OrderDetails" asp-route-id="@Model.OrderHeaderId" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-2"></i>@(Localizer["Cancel"]?.Value ?? "Cancel")
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-lg" id="submitBtn" disabled>
+                                <i class="bi bi-check-circle me-2"></i>@(Localizer["SubmitReturnRequest"]?.Value ?? "Submit Return Request")
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card" style="border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 20px; overflow: hidden; position: sticky; top: 100px;">
+                <div class="card-header" style="background: linear-gradient(135deg, rgba(220, 53, 69, 0.05) 0%, rgba(200, 35, 51, 0.05) 100%); padding: 1.5rem; border-bottom: 2px solid rgba(220, 53, 69, 0.1);">
+                    <h5 class="mb-0 fw-bold" style="color: #1f2937;">
+                        <i class="bi bi-info-circle me-2" style="color: #dc3545;"></i>@(Localizer["ReturnSummary"]?.Value ?? "Return Summary")
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label class="text-muted small mb-1">@(Localizer["OrderNumber"]?.Value ?? "Order Number")</label>
+                        <p class="mb-0 fw-bold">#@Model.OrderHeaderId</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small mb-1">@(Localizer["OrderDate"]?.Value ?? "Order Date")</label>
+                        <p class="mb-0 fw-bold">@Model.OrderHeader?.OrderDate.ToString("MMM dd, yyyy", System.Globalization.CultureInfo.GetCultureInfo(currentCulture))</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small mb-1">@(Localizer["OrderStatus"]?.Value ?? "Order Status")</label>
+                        <p class="mb-0">
+                            <span class="badge bg-info">@Model.OrderHeader?.OrderStatus</span>
+                        </p>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between align-items-center pt-2">
+                        <span class="fw-bold" style="font-size: 1.1rem;">@(Localizer["EstimatedRefund"]?.Value ?? "Estimated Refund"):</span>
+                        <span class="fw-bold fs-4 text-danger" id="summaryRefundAmount">@formatCurrency(0)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Get currency symbol - will be updated from data attribute after DOM loads
+        var currencySymbol = '@Html.Raw(currencySymbol)';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update currency symbol from data attribute if available
+            var currencyDataElement = document.getElementById('currencySymbolData');
+            if (currencyDataElement) {
+                var symbolFromData = currencyDataElement.getAttribute('data-symbol');
+                if (symbolFromData) {
+                    currencySymbol = symbolFromData;
+                }
+            }
+            // Select all checkbox
+            document.getElementById('selectAll').addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.item-checkbox');
+                checkboxes.forEach(cb => {
+                    cb.checked = this.checked;
+                    const index = Array.from(cb.closest('tbody').querySelectorAll('.item-checkbox')).indexOf(cb);
+                    toggleItemReturn(index);
+                });
+            });
+
+            // Initialize all items
+            @for (int i = 0; i < Model.Items.Count; i++)
+            {
+                <text>
+                updateItemTotal(@i);
+                </text>
+            }
+        });
+
+        function toggleItemReturn(index) {
+            const checkbox = document.querySelectorAll('.item-checkbox')[index];
+            const qtyInput = document.querySelectorAll('.return-qty')[index];
+            const reasonTextarea = checkbox.closest('tr').nextElementSibling.querySelector('textarea');
+            const conditionSelect = checkbox.closest('tr').nextElementSibling.querySelector('select');
+            
+            if (checkbox.checked) {
+                qtyInput.disabled = false;
+                qtyInput.value = qtyInput.max;
+                if (reasonTextarea) reasonTextarea.disabled = false;
+                if (conditionSelect) conditionSelect.disabled = false;
+                updateItemTotal(index);
+            } else {
+                qtyInput.disabled = true;
+                qtyInput.value = 0;
+                if (reasonTextarea) reasonTextarea.value = '';
+                if (reasonTextarea) reasonTextarea.disabled = true;
+                if (conditionSelect) conditionSelect.disabled = true;
+                updateItemTotal(index);
+            }
+            updateTotalAndSubmitButton();
+        }
+        
+        function updateItemTotal(index) {
+            const checkbox = document.querySelectorAll('.item-checkbox')[index];
+            const qtyInput = document.querySelectorAll('.return-qty')[index];
+            const totalElement = document.querySelectorAll('.item-total')[index];
+            const price = parseFloat(totalElement.getAttribute('data-price'));
+            const qty = checkbox.checked ? parseInt(qtyInput.value) || 0 : 0;
+            const total = price * qty;
+            
+            totalElement.textContent = currencySymbol + ' ' + total.toFixed(2).replace('.', ',');
+            updateTotalAndSubmitButton();
+        }
+
+        function updateTotalAndSubmitButton() {
+            let total = 0;
+            document.querySelectorAll('.item-checkbox').forEach((checkbox, index) => {
+                if (checkbox.checked) {
+                    const qtyInput = document.querySelectorAll('.return-qty')[index];
+                    const totalElement = document.querySelectorAll('.item-total')[index];
+                    const price = parseFloat(totalElement.getAttribute('data-price'));
+                    const qty = parseInt(qtyInput.value) || 0;
+                    total += price * qty;
+                }
+            });
+            
+            document.getElementById('totalRefundAmount').textContent = currencySymbol + ' ' + total.toFixed(2).replace('.', ',');
+            document.getElementById('summaryRefundAmount').textContent = currencySymbol + ' ' + total.toFixed(2).replace('.', ',');
+            
+            // Enable submit button if at least one item is selected
+            const hasSelectedItems = Array.from(document.querySelectorAll('.item-checkbox')).some(cb => cb.checked);
+            document.getElementById('submitBtn').disabled = !hasSelectedItems || total === 0;
+        }
+    </script>
+    
+    <!-- Hidden element to store currency symbol for JavaScript -->
+    <div id="currencySymbolData" data-symbol="@Html.Raw(currencySymbol)" style="display: none;"></div>
+}
+

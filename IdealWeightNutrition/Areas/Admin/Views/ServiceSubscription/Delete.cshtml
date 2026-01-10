@@ -1,0 +1,51 @@
+@model IdealWeightNutrition.Models.ServiceSubscription
+
+@{
+    ViewData["Title"] = "Delete Service Subscription";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Delete Service Subscription</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <strong>Warning!</strong> Are you sure you want to delete this service subscription? This action cannot be undone.
+                    </div>
+
+                    <div class="mb-4">
+                        <h4>@Model.Title</h4>
+                        @if (!string.IsNullOrEmpty(Model.TitleAr))
+                        {
+                            <p class="text-muted">@Model.TitleAr</p>
+                        }
+                        <p><strong>Price:</strong> @Model.Price.ToString("C")</p>
+                        <p><strong>Type:</strong> @(Model.ServiceType == ServiceType.Online ? "Online" : "Offline")</p>
+                    </div>
+
+                    @if (Model.ServicePurchases != null && Model.ServicePurchases.Any())
+                    {
+                        <div class="alert alert-danger">
+                            <strong>Cannot delete!</strong> This service has @Model.ServicePurchases.Count() purchase(s). Please remove all purchases first.
+                        </div>
+                        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                    }
+                    else
+                    {
+                        <form asp-action="Delete" method="post">
+                            <input type="hidden" asp-for="Id" />
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash me-2"></i>Delete Service
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

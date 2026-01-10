@@ -1,0 +1,86 @@
+@model IdealWeightNutrition.Models.PromoCode
+
+@{
+    ViewData["Title"] = Localizer["DeletePromoCode"];
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="mb-0">@Localizer["DeletePromoCode"]</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong>@Localizer["Warning"]!</strong> @Localizer["AreYouSureDeletePromoCode"]
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>@Localizer["Code"]:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            <span class="text-primary fs-5">@Model.Code</span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>@Localizer["Description"]:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            @Model.Description
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>@Localizer["Discount"]:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            @if (Model.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
+                            {
+                                <span class="badge bg-success">@Model.DiscountValue%</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info">@Model.DiscountValue.ToString("C")</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>@Localizer["ValidPeriod"]:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            @Model.StartDate.ToString("MMM dd, yyyy") - @Model.EndDate.ToString("MMM dd, yyyy")
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>@Localizer["TimesUsed"]:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            <span class="badge bg-primary">@Model.TimesUsed</span>
+                        </div>
+                    </div>
+
+                    <form asp-action="Delete" method="post" class="mt-4">
+                        <input type="hidden" asp-for="Id" />
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> @Localizer["YesDelete"]
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> @Localizer["Cancel"]
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

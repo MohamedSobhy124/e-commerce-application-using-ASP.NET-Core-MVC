@@ -1,0 +1,1934 @@
+﻿@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+@using IdealWeightNutrition.Models.ViewModels
+@inject IConfiguration Configuration
+@model ShoppingCart
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var baseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
+    
+    // Get SEO data from ViewData (set by controller)
+    var seo = ViewData["SEO"] as SEOViewModel;
+    var productRating = ViewData["ProductRating"] as double?;
+    var productReviewCount = ViewData["ProductReviewCount"] as int?;
+    
+    // Generate breadcrumbs
+    var breadcrumbs = new List<BreadcrumbItem>
+    {
+        new BreadcrumbItem { Name = currentCulture == "ar" ? "الرئيسية" : "Home", Url = $"{baseUrl}/Customer/Home" },
+        new BreadcrumbItem { Name = Model.product.categry?.Name ?? (currentCulture == "ar" ? "الفئات" : "Categories"), Url = $"{baseUrl}/Customer/Home?categoryId={Model.product.CategryId}" },
+        new BreadcrumbItem { Name = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title, Url = $"{baseUrl}/Customer/Home/Details/{Model.product.GetSlug()}" }
+    };
+    
+    // Tamara settings for widget
+    bool tamaraAvailable = ViewData["TamaraAvailable"] != null && (bool)ViewData["TamaraAvailable"];
+    string tamaraPublicKey = ViewData["TamaraPublicKey"]?.ToString() ?? "";
+    double tamaraProductPrice = ViewData["TamaraProductPrice"] != null ? (double)ViewData["TamaraProductPrice"] : Model.product.Price;
+}
+  
+<form method="post">
+    <input hidden asp-for="ProductId" />
+    <div class="product-details-wrapper">
+
+        <div class="product-details-header">
+            <div class="text-center">
+                <h2>@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)</h2>
+            </div>
+        </div>
+
+        <div class="product-details-body"> 
+
+            <a asp-action="Index" class="back-button">
+                <i class="bi bi-arrow-left"></i>
+                <span>@Localizer["BackToProducts"]</span>
+            </a>
+
+            <div class="container my-4">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="product-main-image">
+                            @{
+                                // Exclude info images (marked with ImageInfo == "INFO_IMAGE")
+                                var productImages = Model.product.ProductImages != null && Model.product.ProductImages.Any() 
+                                    ? Model.product.ProductImages
+                                        .Where(pi => pi.ImageInfo != "INFO_IMAGE")
+                                        .OrderBy(pi => pi.DisplayOrder)
+                                        .Select(pi => pi.ImageUrl)
+                                        .ToList()
+                                    : new List<string>();
+                                
+                                // If no ProductImages but has ImageUrl, use that
+                                if (!productImages.Any() && !string.IsNullOrEmpty(Model.product.ImageUrl))
+                                {
+                                    productImages.Add(Model.product.ImageUrl);
+                                }
+                                
+                                // For Variable products, add variant images
+                                if (Model.product.ProductType == IdealWeightNutrition.Models.ProductType.Variable && 
+                                    Model.product.ProductVariants != null && Model.product.ProductVariants.Any())
+                                {
+                                    var variantImages = Model.product.ProductVariants
+                                        .Where(v => !string.IsNullOrEmpty(v.ImageUrl))
+                                        .Select(v => v.ImageUrl)
+                                        .Distinct()
+                                        .ToList();
+                                    
+                                    // Append variant images to product images
+                                    productImages.AddRange(variantImages);
+                                }
+                                
+                                // Get info image separately
+                                var infoImage = Model.product.ProductImages?.FirstOrDefault(pi => pi.ImageInfo == "INFO_IMAGE");
+                            }
+                            
+                            @if (productImages.Count > 1)
+                            {
+                                <div id="productDetailsCarousel" class="carousel slide product-details-carousel" data-bs-ride="false" data-bs-interval="false" data-bs-touch="true">
+                                    <div class="carousel-inner">
+                                        @for (int i = 0; i < productImages.Count; i++)
+                                        {
+                                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                <img class="img-fluid product-image-clickable" src="@productImages[i]" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title) - Image @(i+1)" data-image-url="@productImages[i]" data-product-name="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)">
+                                            </div>
+                                        }
+                                    </div>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#productDetailsCarousel" data-bs-slide="prev" onclick="pauseCarouselAfterInteraction()">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#productDetailsCarousel" data-bs-slide="next" onclick="pauseCarouselAfterInteraction()">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                    <div class="carousel-indicators">
+                                        @for (int i = 0; i < productImages.Count; i++)
+                                        {
+                                            <button type="button" data-bs-target="#productDetailsCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i+1)" onclick="pauseCarouselAfterInteraction()"></button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else if (productImages.Count == 1)
+                            {
+                                <img class="img-fluid product-image-clickable" src="@productImages[0]" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)" data-image-url="@productImages[0]" data-product-name="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)">
+                            }
+                            else
+                            {
+                                <img class="img-fluid product-image-clickable" src="@Model.product.ImageUrl" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)" data-image-url="@Model.product.ImageUrl" data-product-name="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)">
+                            }
+                        </div>
+                        
+                        <!-- Info Image Section (separate from product images) - Desktop only -->
+                        @if (infoImage != null && !string.IsNullOrEmpty(infoImage.ImageUrl))
+                        {
+                            <div class="product-info-image-section mt-4 d-none d-md-block">
+                                <h5 class="mb-3" style="color: #1976D2; font-weight: 600;">
+                                    <i class="bi bi-info-circle me-2"></i>@Localizer["ProductInformation"]
+                                </h5>
+                                <div class="info-image-container" style="border: 2px solid #dee2e6; border-radius: 8px; padding: 10px; background: #f8f9fa;">
+                                    <img class="img-fluid" 
+                                         src="@infoImage.ImageUrl" 
+                                         alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title) - @Localizer["ProductInformation"]"
+                                         style="max-width: 100%; height: auto; border-radius: 4px;" />
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="product-info">
+                            <div class="product-category-badge">
+                                <i class="bi bi-tag-fill me-2"></i>@Model.product.categry.Name
+                            </div>
+                            @if (Model.product.Brand != null)
+                            {
+                                <div class="product-brand-badge" style="margin-top: 0.5rem;">
+                                    <i class="bi bi-award-fill me-2"></i>@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.Brand.NameAr) ? Model.product.Brand.NameAr : Model.product.Brand.Name)
+                                </div>
+                            }
+
+                            <h3 class="product-category-name">@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)</h3>
+
+                            <!-- Product Options (for Variable Products) -->
+                            @if (Model.product.ProductType == IdealWeightNutrition.Models.ProductType.Variable && Model.product.ProductOptions != null && Model.product.ProductOptions.Any())
+                            {
+                                <div id="productOptionsSection" class="product-options-section mb-4">
+                                    @foreach (var option in Model.product.ProductOptions.OrderBy(o => o.DisplayOrder))
+                                    {
+                                        <div class="product-option-group mb-3">
+                                            <label class="product-option-label">
+                                                <strong>@(currentCulture == "ar" && !string.IsNullOrEmpty(option.NameAr) ? option.NameAr : option.Name):</strong>
+                                            </label>
+                                            <div class="product-option-values d-flex flex-wrap gap-2 mt-2">
+                                                @foreach (var value in option.OptionValues.OrderBy(v => v.DisplayOrder))
+                                                {
+                                                    var displayValue = currentCulture == "ar" && !string.IsNullOrEmpty(value.ValueAr) ? value.ValueAr : value.Value;
+                                                    <button type="button" 
+                                                            class="btn btn-outline-primary product-option-value-btn" 
+                                                            data-option-id="@option.Id" 
+                                                            data-value-id="@value.Id"
+                                                            onclick="selectOptionValue(@option.Id, @value.Id, '@Html.Raw(displayValue.Replace("'", "\\'"))')">
+                                                        @displayValue
+                                                    </button>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                    <input type="hidden" id="selectedVariantId" name="ProductVariantId" />
+                                    <div id="variantInfo" class="alert alert-info mt-2" style="display: none;">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        <span id="variantInfoText"></span>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="product-price-area">
+                                @if (Model.product.ProductType == IdealWeightNutrition.Models.ProductType.Simple)
+                                {
+                                        var flashSaleItem = ViewData["FlashSaleItem"] as IdealWeightNutrition.Models.FlashSaleItem;
+                                        var isInFlashSale = flashSaleItem != null && flashSaleItem.FlashSaleQuantity > 0;
+                                        var productPrice = isInFlashSale ? (double)flashSaleItem.FlashSalePrice : Model.product.Price;
+                                        var originalPrice = Model.product.Price;
+                                        var tabbyMonthly = productPrice / 4;
+                                        var tamaraPayment = productPrice / 4;
+                                        var tabbyAmount = currencySymbol + " " + tabbyMonthly.ToString("N2");
+                                        var tamaraAmount = currencySymbol + " " + tamaraPayment.ToString("N2");
+                                        var tabbyText = string.Format(Localizer["InstallmentTabby"].ToString(), tabbyAmount);
+                                        
+                                        // Tamara text with Arabic format: "أو قسم فاتورتك على 4 دفعات بقيمة {0} بدون رسوم تأخير، متوافقة مع الشريعة الإسلامية"
+                                        string tamaraText;
+                                        if (currentCulture == "ar")
+                                        {
+                                            tamaraText = $"أو قسم فاتورتك على <strong>4</strong> دفعات بقيمة <strong>{tamaraAmount}</strong> بدون رسوم تأخير، متوافقة مع الشريعة الإسلامية <a href=\"#\" class=\"tamara-learn-more\" style=\"color: #7c3aed; text-decoration: underline;\">اعرف أكثر</a>";
+                                        }
+                                        else
+                                        {
+                                            tamaraText = string.Format(Localizer["InstallmentTamara"].ToString(), tamaraAmount);
+                                        }
+                                    <div class="product-price-with-installments">
+                                        <div class="product-price-section-main">
+                                            @if (isInFlashSale)
+                                            {
+                                                <div class="flash-sale-badge-inline" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #f59e0b 100%); color: white; padding: 0.3rem 0.8rem; border-radius: 5px; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                                    <i class="bi bi-lightning-fill"></i> @Localizer["FLASHSALE"]
+                                                </div>
+                                                <p class="product-old-price" style="text-decoration: line-through; color: #999; font-size: 1.1rem; margin-bottom: 0.3rem;">
+                                                    @Localizer["OriginalPrice"]: @Html.Raw(currencySymbol) @originalPrice.ToString("N2")
+                                                </p>
+                                                <p class="product-new-price" id="productPrice" style="color: #ef4444; font-size: 1.8rem; font-weight: 700;">
+                                                    @Html.Raw(currencySymbol) @productPrice.ToString("N2")
+                                                </p>
+                                                <div style="color: #10b981; font-size: 0.9rem; margin-top: 0.3rem;">
+                                                    <i class="bi bi-tag-fill"></i> @Localizer["YouSave"]: @Html.Raw(currencySymbol) @((originalPrice - productPrice).ToString("N2"))
+                                                </div>
+                                            }
+                                            else if (Model.product.ListPrice > Model.product.Price)
+                                            {
+                                                <p class="product-old-price">
+                                                    @Localizer["OriginalPrice"]: @Html.Raw(currencySymbol) @Model.product.ListPrice.ToString("N2")
+                                                </p>
+                                            }
+                                            @if (!isInFlashSale)
+                                            {
+                                                <p class="product-new-price" id="productPrice">@Html.Raw(currencySymbol) @Model.product.Price.ToString("N2")</p>
+                                            }
+                                            @if (Model.product.ExpiryDate.HasValue)
+                                            {
+                                                <div class="expiry-date-info mt-2">
+                                                    <i class="bi bi-calendar-x me-1"></i>
+                                                    <span>@Localizer["ExpiryDate"]: @Model.product.ExpiryDate.Value.ToString("yyyy-MM-dd")</span>
+                                                </div>
+                                            }
+                                        </div>
+                                        
+                                        <!-- Payment Installment Options -->
+                                        <div class="product-installments-section">
+                                            <div class="payment-installments">
+                                                <!-- Tabby Option -->
+                                                <div class="installment-option installment-tabby">
+                                                    <div class="installment-content">
+                                                        <div class="installment-logo">
+                                                            <img src="~/Images/tappy.png" alt="@Localizer["Tabby"]" class="installment-logo-img" />
+                                                        </div>
+                                                        <div class="installment-text">
+                                                            <span>@Html.Raw(tabbyText)</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Tamara Option -->
+                                                @if (tamaraAvailable && !string.IsNullOrEmpty(tamaraPublicKey))
+                                                {
+                                                    <div class="installment-option installment-tamara">
+                                                        <div class="installment-content">
+                                                            <div class="installment-logo">
+                                                                <img src="~/Images/tamara.png" alt="@Localizer["Tamara"]" class="installment-logo-img" />
+                                                            </div>
+                                                            <div class="installment-text">
+                                                                <div>@Html.Raw(tamaraText)</div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Tamara Widget V2 - Product Page -->
+                                                        <div id="tamara-widget-product-page" data-public-key="@tamaraPublicKey" data-amount="@tamaraProductPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" data-currency="AED" data-country="AE" data-widget-type="product_page"></div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="installment-option installment-tamara">
+                                                        <div class="installment-content">
+                                                            <div class="installment-logo">
+                                                                <img src="~/Images/tamara.png" alt="@Localizer["Tamara"]" class="installment-logo-img" />
+                                                            </div>
+                                                            <div class="installment-text">
+                                                                <div>@Html.Raw(tamaraText)</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="product-price-with-installments">
+                                        <div class="product-price-section-main">
+                                            <div id="variantFlashSaleBadge" style="display: none; background: linear-gradient(135deg, #FF6B35 0%, #f59e0b 100%); color: white; padding: 0.3rem 0.8rem; border-radius: 5px; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                                <i class="bi bi-lightning-fill"></i> @Localizer["FLASHSALE"]
+                                            </div>
+                                            <p class="product-old-price" id="variantListPrice" style="display: none;"></p>
+                                            <p class="product-new-price" id="variantPrice">@Localizer["SelectOptions"]</p>
+                                            <div id="variantSavings" style="display: none; color: #10b981; font-size: 0.9rem; margin-top: 0.3rem;">
+                                                <i class="bi bi-tag-fill"></i> <span id="variantSavingsText"></span>
+                                            </div>
+                                            <p class="product-tax-notice">@Localizer["AdditionalTaxMayApply"]</p>
+                                            <div id="stockInfo" class="stock-info mt-2" style="display: none;">
+                                                <span id="stockStatus" class="badge"></span>
+                                            </div>
+                                            <div id="expiryDateInfo" class="expiry-date-info mt-2" style="display: none;">
+                                                <i class="bi bi-calendar-x me-1"></i>
+                                                <span id="expiryDateText"></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Payment Installment Options for Variants (hidden initially) -->
+                                        <div class="product-installments-section">
+                                            <div class="payment-installments" id="variantInstallments" style="display: none;">
+                                                <!-- Tabby Option -->
+                                                <div class="installment-option installment-tabby">
+                                                    <div class="installment-content">
+                                                        <div class="installment-logo">
+                                                            <img src="~/Images/tappy.png" alt="@Localizer["Tabby"]" class="installment-logo-img" />
+                                                        </div>
+                                                        <div class="installment-text">
+                                                            <span id="variantTabbyText"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Tamara Option -->
+                                                @if (tamaraAvailable && !string.IsNullOrEmpty(tamaraPublicKey))
+                                                {
+                                                    <div class="installment-option installment-tamara">
+                                                        <div class="installment-content">
+                                                            <div class="installment-logo">
+                                                                <img src="~/Images/tamara.png" alt="@Localizer["Tamara"]" class="installment-logo-img" />
+                                                            </div>
+                                                            <div class="installment-text">
+                                                                <div id="variantTamaraText"></div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Tamara Widget V2 - Product Page (for variants) -->
+                                                        <div id="tamara-widget-variant-page" data-public-key="@tamaraPublicKey" data-currency="AED" data-country="AE" data-widget-type="product_page" style="display: none;"></div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="installment-option installment-tamara">
+                                                        <div class="installment-content">
+                                                            <div class="installment-logo">
+                                                                <img src="~/Images/tamara.png" alt="@Localizer["Tamara"]" class="installment-logo-img" />
+                                                            </div>
+                                                            <div class="installment-text">
+                                                                <div id="variantTamaraText"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                             
+                                
+                                @if (ViewData["AllVariantsOutOfStock"] as bool? == true)
+                                {
+                                    <div class="out-of-stock-alert mt-3">
+                                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                                            <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
+                                            <div>
+                                                <strong>@Localizer["OutOfStock"]</strong>
+                                                <p class="mb-0 mt-1">@Localizer["AllVariantsOutOfStock"]</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Stock Notification Form -->
+                                        <div class="stock-notification-form mt-3">
+                                            <h6 class="mb-2">
+                                                <i class="bi bi-bell-fill me-2"></i>
+                                                @Localizer["NotifyMeWhenAvailable"]
+                                            </h6>
+                                            
+                                            @if (User.Identity.IsAuthenticated)
+                                            {
+                                                <!-- Logged in user - simple button -->
+                                                <button type="button" class="btn btn-primary w-100" id="subscribeStockNotificationBtn">
+                                                    <i class="bi bi-bell me-2"></i>
+                                                    @Localizer["NotifyMeWhenAvailable"]
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <!-- Guest user - button that opens SweetAlert -->
+                                                <button type="button" class="btn btn-primary w-100" id="subscribeStockNotificationGuestBtn">
+                                                    <i class="bi bi-bell me-2"></i>
+                                                    @Localizer["NotifyMeWhenAvailable"]
+                                                </button>
+                                            }
+                                            
+                                            <div id="stockNotificationMessage" class="mt-2" style="display: none;"></div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="product-actions">
+                                <div class="quantity-selector-wrapper">
+                                    <label class="quantity-label">@Localizer["Quantity"]:</label>
+                                    <div class="quantity-selector">
+                                        <button type="button" class="quantity-btn quantity-btn-minus" id="quantityDecrease" aria-label="Decrease quantity">
+                                            <i class="bi bi-dash-lg"></i>
+                                        </button>
+                                        <input type="number" asp-for="Count" value="1" min="1" class="product-quantity-input" id="quantityInput" readonly>
+                                        <button type="button" class="quantity-btn quantity-btn-plus" id="quantityIncrease" aria-label="Increase quantity">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="submit" class="add-to-cart-button mt-4" id="addToCartBtn" @(Model.product.ProductType == IdealWeightNutrition.Models.ProductType.Variable ? "disabled" : "")>
+                                    <i class="bi bi-cart-plus"></i>
+                                    <span>@Localizer["AddToCart"]</span>
+                                </button>
+                            </div>
+                          
+                            <!-- WhatsApp Inquiry Button -->
+                            @{
+                                var whatsAppPhone = Configuration["WhatsApp:PhoneNumber"] ?? "971507700559"; ;
+                                var productName = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title;
+                                var productUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+                                var currentLang = System.Globalization.CultureInfo.CurrentUICulture.Name;
+                                var whatsAppMsg = currentLang == "ar"
+                                    ? $"مرحباً! أنا مهتم بهذا المنتج: {productName}\n{productUrl}"
+                                    : $"Hello! I'm interested in this product: {productName}\n{productUrl}";
+                                var whatsAppProductUrl = $"https://wa.me/{whatsAppPhone}?text={Uri.EscapeDataString(whatsAppMsg)}";
+                            }
+                            <div class="mt-3 mb-3">
+                                <a href="@whatsAppProductUrl" 
+                                   target="_blank" 
+                                   class="whatsapp-product-btn"
+                                   rel="noopener noreferrer">
+                                    <i class="bi bi-whatsapp"></i>
+                                    <span>@Localizer["AskAboutProduct"]</span>
+                                </a>
+                            </div>
+                            
+                            <!-- Info Image Section - Mobile only (after add to cart) -->
+                            @if (infoImage != null && !string.IsNullOrEmpty(infoImage.ImageUrl))
+                            {
+                                <div class="product-info-image-section-mobile mt-3 mb-3 d-md-none">
+                                    <h5 class="mb-3" style="color: #1976D2; font-weight: 600;">
+                                        <i class="bi bi-info-circle me-2"></i>@Localizer["ProductInformation"]
+                                    </h5>
+                                    <div class="info-image-container" style="border: 2px solid #dee2e6; border-radius: 8px; padding: 10px; background: #f8f9fa;">
+                                        <img class="img-fluid" 
+                                             src="@infoImage.ImageUrl" 
+                                             alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title) - @Localizer["ProductInformation"]"
+                                             style="max-width: 100%; height: auto; border-radius: 4px;" />
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Product Details Tabs Section -->
+                            @{
+                                var hasDescription = !string.IsNullOrWhiteSpace(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.DescriptionAr) ? Model.product.DescriptionAr : Model.product.Description);
+                                var hasSuggestedUse = !string.IsNullOrWhiteSpace(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.SuggestedUseAr) ? Model.product.SuggestedUseAr : Model.product.SuggestedUse);
+                                var hasHealthNotes = !string.IsNullOrWhiteSpace(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.HealthNotesAr) ? Model.product.HealthNotesAr : Model.product.HealthNotes);
+                                var hasSpecification = !string.IsNullOrWhiteSpace(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.SpecificationAr) ? Model.product.SpecificationAr : Model.product.Specification);
+                                
+                                var tabsCount = (hasDescription ? 1 : 0) + (hasSuggestedUse ? 1 : 0) + (hasHealthNotes ? 1 : 0) + (hasSpecification ? 1 : 0);
+                            }
+                            
+                            @if (tabsCount > 0)
+                            {
+                                <div class="product-details-tabs-section mt-3">
+                                    <h4 class="product-details-title mb-3">
+                                        <i class="bi bi-info-circle me-2"></i>@Localizer["ProductDetails"]
+                                    </h4>
+                                    
+                                    <!-- Cool Tabs Design -->
+                                    <div class="custom-tabs-wrapper">
+                                        <ul class="nav nav-tabs custom-nav-tabs" id="productDetailsTabs" role="tablist">
+                                            @if (hasDescription)
+                                            {
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">
+                                                        <i class="bi bi-file-text me-2"></i>@Localizer["Description"]
+                                                    </button>
+                                                </li>
+                                            }
+                                            @if (hasSuggestedUse)
+                                            {
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link @(!hasDescription ? "active" : "")" id="suggesteduse-tab" data-bs-toggle="tab" data-bs-target="#suggesteduse" type="button" role="tab" aria-controls="suggesteduse" aria-selected="@(!hasDescription ? "true" : "false")">
+                                                        <i class="bi bi-lightbulb me-2"></i>@Localizer["SuggestedUse"]
+                                                    </button>
+                                                </li>
+                                            }
+                                            @if (hasHealthNotes)
+                                            {
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link @(!hasDescription && !hasSuggestedUse ? "active" : "")" id="healthnotes-tab" data-bs-toggle="tab" data-bs-target="#healthnotes" type="button" role="tab" aria-controls="healthnotes" aria-selected="@(!hasDescription && !hasSuggestedUse ? "true" : "false")">
+                                                        <i class="bi bi-heart-pulse me-2"></i>@Localizer["HealthNotes"]
+                                                    </button>
+                                                </li>
+                                            }
+                                            @if (hasSpecification)
+                                            {
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link @(!hasDescription && !hasSuggestedUse && !hasHealthNotes ? "active" : "")" id="specification-tab" data-bs-toggle="tab" data-bs-target="#specification" type="button" role="tab" aria-controls="specification" aria-selected="@(!hasDescription && !hasSuggestedUse && !hasHealthNotes ? "true" : "false")">
+                                                        <i class="bi bi-list-check me-2"></i>@Localizer["Specification"]
+                                                    </button>
+                                                </li>
+                                            }
+                                        </ul>
+                                        
+                                        <div class="tab-content custom-tab-content" id="productDetailsTabContent">
+                                            @if (hasDescription)
+                                            {
+                                                <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+                                                    <div class="tab-content-body preserve-line-breaks">
+                                                        @{
+                                                            var descriptionText = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.DescriptionAr) 
+                                                                ? Model.product.DescriptionAr 
+                                                                : Model.product.Description;
+                                                        }
+                                                        @Html.Raw(descriptionText)
+                                                    </div>
+                                                </div>
+                                            }
+                                            @if (hasSuggestedUse)
+                                            {
+                                                <div class="tab-pane fade @(!hasDescription ? "show active" : "")" id="suggesteduse" role="tabpanel" aria-labelledby="suggesteduse-tab">
+                                                    <div class="tab-content-body preserve-line-breaks">
+                                                        @{
+                                                            var suggestedUseText = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.SuggestedUseAr) 
+                                                                ? Model.product.SuggestedUseAr 
+                                                                : Model.product.SuggestedUse;
+                                                        }
+                                                        @Html.Raw(suggestedUseText)
+                                                    </div>
+                                                </div>
+                                            }
+                                            @if (hasHealthNotes)
+                                            {
+                                                <div class="tab-pane fade @(!hasDescription && !hasSuggestedUse ? "show active" : "")" id="healthnotes" role="tabpanel" aria-labelledby="healthnotes-tab">
+                                                    <div class="tab-content-body preserve-line-breaks">
+                                                        @{
+                                                            var healthNotesText = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.HealthNotesAr) 
+                                                                ? Model.product.HealthNotesAr 
+                                                                : Model.product.HealthNotes;
+                                                        }
+                                                        @Html.Raw(healthNotesText)
+                                                    </div>
+                                                </div>
+                                            }
+                                            @if (hasSpecification)
+                                            {
+                                                <div class="tab-pane fade @(!hasDescription && !hasSuggestedUse && !hasHealthNotes ? "show active" : "")" id="specification" role="tabpanel" aria-labelledby="specification-tab">
+                                                    <div class="tab-content-body preserve-line-breaks">
+                                                        @{
+                                                            var specificationText = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.SpecificationAr) 
+                                                                ? Model.product.SpecificationAr 
+                                                                : Model.product.Specification;
+                                                        }
+                                                        @Html.Raw(specificationText)
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Reviews Section (OUTSIDE the Add to Cart form) -->
+<div class="container my-4">
+    <div class="row">
+        <div class="col-12">
+                <div class="product-reviews-section mt-5">
+                    <div class="reviews-header">
+                        <h4>
+                            <i class="bi bi-star-fill me-2"></i>
+                            @Localizer["CustomerReviews"]
+                        </h4>
+                        <div class="reviews-rating-summary">
+                            <div class="rating-stars" id="averageRating">
+                                <i class="bi bi-star"></i>
+                                <i class="bi bi-star"></i>
+                                <i class="bi bi-star"></i>
+                                <i class="bi bi-star"></i>
+                                <i class="bi bi-star"></i>
+                            </div>
+                            <span class="rating-average" id="averageRatingText">0.0</span>
+                            <span class="rating-count">(<span id="reviewCount">0</span> @Localizer["Reviews"])</span>
+                        </div>
+                    </div>
+
+                    <!-- Review Submission Form -->
+                @if (User.Identity.IsAuthenticated && Model.CanReview)
+                    {
+                        <div class="review-form-section">
+                            <h5>@Localizer["WriteReview"]</h5>
+                            <form asp-area="Customer" asp-controller="Review" asp-action="Submit" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@Model.ProductId" />
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">@Localizer["YourRating"] *</label>
+                                    <div class="star-rating-input">
+                                        <input type="radio" name="rating" value="5" id="star5" required />
+                                        <label for="star5"><i class="bi bi-star-fill"></i></label>
+                                        
+                                        <input type="radio" name="rating" value="4" id="star4" />
+                                        <label for="star4"><i class="bi bi-star-fill"></i></label>
+                                        
+                                        <input type="radio" name="rating" value="3" id="star3" />
+                                        <label for="star3"><i class="bi bi-star-fill"></i></label>
+                                        
+                                        <input type="radio" name="rating" value="2" id="star2" />
+                                        <label for="star2"><i class="bi bi-star-fill"></i></label>
+                                        
+                                        <input type="radio" name="rating" value="1" id="star1" />
+                                        <label for="star1"><i class="bi bi-star-fill"></i></label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">@Localizer["YourReview"] *</label>
+                                    <textarea name="comment" class="form-control" rows="4" 
+                                              placeholder="@Localizer["ShareYourExperience"]" 
+                                              minlength="10" maxlength="1000" required></textarea>
+                                    <small class="text-muted">@Localizer["MinimumCharacters"]: 10</small>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-send me-2"></i>
+                                    @Localizer["SubmitReview"]
+                                </button>
+                            </form>
+                        </div>
+                    }
+                else if (User.Identity.IsAuthenticated)
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            @Localizer["LoginToReview"]
+                        </div>
+                    }
+
+                    <!-- Reviews Display -->
+                    <div class="reviews-list" id="reviewsList">
+                        <div class="reviews-loading">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+
+@section StructuredData {
+    @if (seo != null)
+    {
+        var productSchema = SEOHelper.GenerateProductStructuredData(Model.product, seo, baseUrl, productRating, productReviewCount);
+        var breadcrumbSchema = SEOHelper.GenerateBreadcrumbStructuredData(breadcrumbs, baseUrl);
+        
+        <script type="application/ld+json">
+        @Html.Raw(productSchema)
+        </script>
+        
+        <script type="application/ld+json">
+        @Html.Raw(breadcrumbSchema)
+        </script>
+    }
+}
+
+@section Scripts {
+    @{
+        // Declare Tamara variables in Scripts section scope
+        bool tamaraAvailableScript = ViewData["TamaraAvailable"] != null && (bool)ViewData["TamaraAvailable"];
+        string tamaraPublicKeyScript = ViewData["TamaraPublicKey"]?.ToString() ?? "";
+    }
+    <style>
+        @@keyframes cartPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        @@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <script>
+        const productId = @Model.ProductId;
+        const productType = @((int)Model.product.ProductType);
+        let selectedOptions = {};
+        let variants = @Html.Raw(Json.Serialize(Model.product.ProductVariants?.Select(v => new {
+            id = v.Id,
+            price = v.Price,
+            listPrice = v.ListPrice,
+            stockQuantity = v.StockQuantity,
+            imageUrl = v.ImageUrl,
+            expiryDate = v.ExpiryDate.HasValue ? v.ExpiryDate.Value.ToString("yyyy-MM-dd") : (string?)null,
+            optionValueIds = v.VariantOptionValues?.Select(vov => vov.OptionValue.Id).ToList()
+        }) ));
+        const productStockQuantity = @Model.product.StockQuantity;
+        
+        // Flash sale data for variants
+        @{
+            var variantFlashSaleDict = ViewData["VariantFlashSaleItems"] as Dictionary<int, IdealWeightNutrition.Models.FlashSaleItem>;
+            var variantFlashSaleData = variantFlashSaleDict?.Select(kvp => new {
+                variantId = kvp.Key,
+                flashSalePrice = (double)kvp.Value.FlashSalePrice,
+                flashSaleItemId = kvp.Value.Id,
+                flashSaleQuantity = kvp.Value.FlashSaleQuantity,
+                originalPrice =  kvp.Value.ProductVariant?.ListPrice 
+            }).ToList()  ;
+        }
+        const variantFlashSales = @Html.Raw(Json.Serialize(variantFlashSaleData));
+        const variantFlashSaleMap = {};
+        if (variantFlashSales) {
+            variantFlashSales.forEach(item => {
+                variantFlashSaleMap[item.variantId] = {
+                    flashSalePrice: item.flashSalePrice,
+                    flashSaleItemId: item.flashSaleItemId,
+                    flashSaleQuantity: item.flashSaleQuantity,
+                    originalPrice: item.originalPrice
+                };
+            });
+        }
+        
+        // Store all product images for carousel (exclude info images)
+        let allProductImages = @Html.Raw(Json.Serialize(
+            Model.product.ProductType == IdealWeightNutrition.Models.ProductType.Variable && 
+            Model.product.ProductVariants != null && Model.product.ProductVariants.Any()
+                ? (Model.product.ProductImages != null && Model.product.ProductImages.Any()
+                    ? Model.product.ProductImages
+                        .Where(pi => pi.ImageInfo != "INFO_IMAGE")
+                        .OrderBy(pi => pi.DisplayOrder)
+                        .Select(pi => pi.ImageUrl)
+                        .ToList()
+                    : (!string.IsNullOrEmpty(Model.product.ImageUrl) ? new List<string> { Model.product.ImageUrl } : new List<string>()))
+                    .Concat(Model.product.ProductVariants
+                        .Where(v => !string.IsNullOrEmpty(v.ImageUrl))
+                        .Select(v => v.ImageUrl)
+                        .Distinct())
+                    .ToList()
+                : (Model.product.ProductImages != null && Model.product.ProductImages.Any()
+                    ? Model.product.ProductImages
+                        .Where(pi => pi.ImageInfo != "INFO_IMAGE")
+                        .OrderBy(pi => pi.DisplayOrder)
+                        .Select(pi => pi.ImageUrl)
+                        .ToList()
+                    : (!string.IsNullOrEmpty(Model.product.ImageUrl) ? new List<string> { Model.product.ImageUrl } : new List<string>()))
+        ));
+        let options = @Html.Raw(Json.Serialize(Model.product.ProductOptions?.Select(o => new {
+            id = o.Id,
+            name = o.Name,
+            nameAr = o.NameAr,
+            values = o.OptionValues?.Select(v => new { id = v.Id, optionId = o.Id, value = v.Value, valueAr = v.ValueAr }).ToList() 
+        }) ));
+        
+        // Create a map of option value ID to option ID for quick lookup
+        const optionValueToOptionMap = {};
+        if (options) {
+            options.forEach(opt => {
+                if (opt.values) {
+                    opt.values.forEach(val => {
+                        optionValueToOptionMap[val.id] = opt.id;
+                    });
+                }
+            });
+        }
+        
+        const currentCulture = '@currentCulture';
+
+        // Localized strings for JavaScript
+        const localizations = {
+            selectOptions: '@Html.Raw(Localizer["SelectOptions"])',
+            originalPrice: '@Html.Raw(Localizer["OriginalPrice"])',
+            inStock: '@Html.Raw(Localizer["InStock"])',
+            outOfStock: '@Html.Raw(Localizer["OutOfStock"])',
+            variantNotFound: '@Html.Raw(Localizer["VariantNotFound"])',
+            pleaseSelect: '@Html.Raw(Localizer["PleaseSelect"])',
+            moreOptions: '@Html.Raw(Localizer["MoreOptions"])',
+            selectAllOptions: '@Html.Raw(Localizer["SelectAllOptions"])',
+            onlyAvailable: '@Html.Raw(Localizer["OnlyAvailable"] ?? "Only {0} units available in stock")',
+            outOfStockMsg: '@Html.Raw(Localizer["OutOfStock"] ?? "This product is out of stock")',
+            installmentTabby: '@Html.Raw(Localizer["InstallmentTabby"])',
+            installmentTamara: '@Html.Raw(Localizer["InstallmentTamara"])',
+            flashSale: '@Html.Raw(Localizer["FLASHSALE"] ?? "FLASH SALE")',
+            youSave: '@Html.Raw(Localizer["YouSave"] ?? "You Save")',
+            expiryDate: '@Html.Raw(Localizer["ExpiryDate"])'
+        };
+
+        // Load reviews when page loads
+        $(document).ready(function() {
+            loadReviews(productId);
+            loadProductRating(productId);
+            
+            // Initialize stock notification
+            initializeStockNotification();
+            
+            // Disable carousel auto-rotation on page load
+            const carousel = document.getElementById('productDetailsCarousel');
+            if (carousel) {
+                // Wait for Bootstrap to initialize, then disable auto-rotation
+                setTimeout(() => {
+                    const carouselInstance = bootstrap.Carousel.getInstance(carousel);
+                    if (carouselInstance) {
+                        carouselInstance._config.interval = false;
+                        carouselInstance._config.ride = false;
+                        carouselInstance.pause();
+                    }
+                }, 100);
+            }
+            
+            if (productType === 1) {
+                initializeVariantSelection();
+            }
+            
+            // Initialize quantity validation
+            initializeQuantityValidation();
+            
+            // Initialize stock notification
+            initializeStockNotification();
+        });
+
+        function initializeVariantSelection() {
+            // Reset all option buttons
+            $('.product-option-value-btn').removeClass('active');
+            selectedOptions = {};
+            
+            // Auto-select first variant with stock
+            // Use setTimeout to ensure DOM is ready and allow selection to complete
+            setTimeout(() => {
+                autoSelectFirstVariantWithStock();
+                // Update variant info after a short delay to ensure all selections are processed
+                setTimeout(() => {
+                    updateVariantInfo();
+                }, 100);
+            }, 50);
+            
+            // Reset to first product image
+            resetToFirstImage();
+        }
+        
+        // Auto-select the first variant that has stock quantity > 0
+        function autoSelectFirstVariantWithStock() {
+            if (!variants || variants.length === 0) {
+                return;
+            }
+            
+            // Find first variant with stock > 0
+            const firstVariantWithStock = variants.find(v => v.stockQuantity > 0);
+            
+            if (!firstVariantWithStock || !firstVariantWithStock.optionValueIds || firstVariantWithStock.optionValueIds.length === 0) {
+                return;
+            }
+            
+            // Select the option values for this variant
+            firstVariantWithStock.optionValueIds.forEach(valueId => {
+                const optionId = optionValueToOptionMap[valueId];
+                if (optionId && options) {
+                    // Find the option and value from the options array
+                    const option = options.find(opt => opt.id === optionId);
+                    if (option && option.values) {
+                        const value = option.values.find(val => val.id === valueId);
+                        if (value) {
+                            // Get display text based on current culture
+                            const valueText = currentCulture === 'ar' && value.valueAr 
+                                ? value.valueAr 
+                                : value.value;
+                            
+                            // Select this option value
+                            selectOptionValue(optionId, valueId, valueText);
+                        }
+                    }
+                }
+            });
+        }
+        
+        function resetToFirstImage() {
+            const carousel = document.getElementById('productDetailsCarousel');
+            if (carousel) {
+                let carouselInstance = bootstrap.Carousel.getInstance(carousel);
+                if (!carouselInstance) {
+                    carouselInstance = new bootstrap.Carousel(carousel, {
+                        interval: false, // Disable auto-rotation
+                        ride: false // Disable auto-start
+                    });
+                } else {
+                    // Ensure auto-rotation is disabled
+                    carouselInstance._config.interval = false;
+                    carouselInstance._config.ride = false;
+                    carouselInstance.pause(); // Stop any auto-rotation
+                }
+                carouselInstance.to(0);
+            }
+        }
+
+        function selectOptionValue(optionId, valueId, valueText) {
+            // Toggle selection
+            const btn = $(`.product-option-value-btn[data-option-id="${optionId}"][data-value-id="${valueId}"]`);
+            
+            // Deselect other values in the same option
+            $(`.product-option-value-btn[data-option-id="${optionId}"]`).removeClass('active');
+            btn.addClass('active');
+            
+            selectedOptions[optionId] = valueId;
+            
+            // Check if all options are selected
+            const allOptionsSelected = options.every(opt => selectedOptions[opt.id] !== undefined);
+            
+            if (allOptionsSelected) {
+                findAndDisplayVariant();
+            } else {
+                // Reset variant info
+                $('#selectedVariantId').val('');
+                $('#variantPrice').text(localizations.selectOptions).css({
+                    'color': '',
+                    'font-size': '',
+                    'font-weight': ''
+                });
+                $('#variantListPrice').hide();
+                $('#variantFlashSaleBadge').hide();
+                $('#variantSavings').hide();
+                $('#variantInstallments').hide();
+                $('#stockInfo').hide();
+                $('#expiryDateInfo').hide();
+                $('#addToCartBtn').prop('disabled', true);
+                
+                // Reset to first product image
+                resetToFirstImage();
+            }
+        }
+
+        function findAndDisplayVariant() {
+            const selectedValueIds = Object.values(selectedOptions).map(id => parseInt(id)).sort((a, b) => a - b);
+            
+            // Find matching variant
+            const variant = variants.find(v => {
+                const variantValueIds = (v.optionValueIds || []).map(id => parseInt(id)).sort((a, b) => a - b);
+                return variantValueIds.length === selectedValueIds.length &&
+                       variantValueIds.every((id, index) => id === selectedValueIds[index]);
+            });
+            
+            if (variant) {
+                $('#selectedVariantId').val(variant.id);
+                
+                // Check if variant is in flash sale
+                const flashSaleData = variantFlashSaleMap[variant.id];
+                let displayPrice = variant.price;
+                let originalPrice = variant.price;
+                let isInFlashSale = false;
+                
+                if (flashSaleData && flashSaleData.flashSaleQuantity > 0) {
+                    isInFlashSale = true;
+                    displayPrice = flashSaleData.flashSalePrice;
+                    originalPrice = flashSaleData.originalPrice;
+                    
+                    // Show flash sale badge
+                    $('#variantFlashSaleBadge').show();
+                    
+                    // Show original price crossed out
+                    $('#variantListPrice')
+                        .html('<span style="text-decoration: line-through; color: #999;">' + localizations.originalPrice + ': ' + formatCurrency(originalPrice) + '</span>')
+                        .show();
+                    
+                    // Show flash sale price prominently
+                    $('#variantPrice')
+                        .text(formatCurrency(displayPrice))
+                        .css({
+                            'color': '#ef4444',
+                            'font-size': '1.8rem',
+                            'font-weight': '700'
+                        });
+                    
+                    // Show savings
+                    const savings = originalPrice - displayPrice;
+                    $('#variantSavingsText').text(localizations.youSave + ': ' + formatCurrency(savings));
+                    $('#variantSavings').show();
+                } else {
+                    // Not in flash sale - normal display
+                    $('#variantFlashSaleBadge').hide();
+                    $('#variantSavings').hide();
+                    $('#variantPrice')
+                        .text(formatCurrency(variant.price))
+                        .css({
+                            'color': '',
+                            'font-size': '',
+                            'font-weight': ''
+                        });
+                    
+                    if (variant.listPrice && variant.listPrice > variant.price) {
+                        $('#variantListPrice').text(localizations.originalPrice + ': ' + formatCurrency(variant.listPrice)).show();
+                    } else {
+                        $('#variantListPrice').hide();
+                    }
+                }
+                
+                // Update installment amounts based on display price
+                const variantPrice = displayPrice;
+                const tabbyMonthly = variantPrice / 4;
+                const tamaraPayment = variantPrice / 4;
+                
+                const tabbyText = localizations.installmentTabby.replace('{0}', currencySymbol + ' ' + tabbyMonthly.toFixed(2));
+                
+                // Tamara text with Arabic format
+                let tamaraText;
+                const currentCultureJS = '@currentCulture';
+                const tamaraAmount = currencySymbol + ' ' + tamaraPayment.toFixed(2);
+                
+                if (currentCultureJS === 'ar') {
+                    tamaraText = `أو قسم فاتورتك على <strong>4</strong> دفعات بقيمة <strong>${tamaraAmount}</strong> بدون رسوم تأخير، متوافقة مع الشريعة الإسلامية <a href="#" class="tamara-learn-more" style="color: #7c3aed; text-decoration: underline;">اعرف أكثر</a>`;
+                } else {
+                    tamaraText = localizations.installmentTamara.replace('{0}', tamaraAmount);
+                }
+                
+                $('#variantTabbyText').text(tabbyText);
+                $('#variantTamaraText').html(tamaraText);
+                $('#variantInstallments').show();
+                
+                // Update Tamara Widget for variant
+                @if (tamaraAvailableScript && !string.IsNullOrEmpty(tamaraPublicKeyScript))
+                {
+                    <text>
+                    var tamaraWidgetElement = document.getElementById('tamara-widget-variant-page');
+                    if (tamaraWidgetElement && window.TamaraWidget) {
+                        try {
+                            // Destroy existing widget if any
+                            if (tamaraWidgetElement.tamaraWidgetInstance) {
+                                tamaraWidgetElement.tamaraWidgetInstance.destroy();
+                            }
+                            
+                            // Initialize with new amount
+                            var publicKey = tamaraWidgetElement.getAttribute('data-public-key');
+                            var currency = tamaraWidgetElement.getAttribute('data-currency') || 'AED';
+                            var country = tamaraWidgetElement.getAttribute('data-country') || 'AE';
+                            
+                            if (publicKey && variantPrice > 0) {
+                                window.TamaraWidget.init({
+                                    publicKey: publicKey,
+                                    amount: variantPrice,
+                                    currency: currency,
+                                    country: country,
+                                    widgetType: 'product_page',
+                                    containerId: 'tamara-widget-variant-page'
+                                });
+                                tamaraWidgetElement.style.display = 'block';
+                            }
+                        } catch (e) {
+                            console.error('Tamara widget update error:', e);
+                        }
+                    }
+                    </text>
+                }
+                
+                // Update stock info
+                const stockStatus = $('#stockStatus');
+                if (variant.stockQuantity > 0) {
+                    stockStatus.removeClass('bg-danger bg-warning').addClass('bg-success');
+                    stockStatus.text(localizations.inStock + ': ' + variant.stockQuantity);
+                } else {
+                    stockStatus.removeClass('bg-success bg-warning').addClass('bg-danger');
+                    stockStatus.text(localizations.outOfStock);
+                }
+                $('#stockInfo').show();
+                
+                // Update expiry date info
+                const expiryDateInfo = $('#expiryDateInfo');
+                const expiryDateText = $('#expiryDateText');
+                if (variant.expiryDate) {
+                    expiryDateText.text(localizations.expiryDate + ': ' + variant.expiryDate);
+                    expiryDateInfo.show();
+                } else {
+                    expiryDateInfo.hide();
+                }
+                
+                $('#addToCartBtn').prop('disabled', variant.stockQuantity === 0);
+                $('#variantInfo').hide();
+                
+                // Update product image to show variant image if available
+                updateProductImage(variant.imageUrl);
+                
+                // Update quantity input max value based on variant stock
+                updateQuantityInputMax(variant.stockQuantity);
+            } else {
+                $('#selectedVariantId').val('');
+                $('#variantPrice').text(localizations.variantNotFound).css({
+                    'color': '',
+                    'font-size': '',
+                    'font-weight': ''
+                });
+                $('#variantListPrice').hide();
+                $('#variantFlashSaleBadge').hide();
+                $('#variantSavings').hide();
+                $('#variantInstallments').hide();
+                $('#stockInfo').hide();
+                $('#expiryDateInfo').hide();
+                $('#addToCartBtn').prop('disabled', true);
+                $('#variantInfo').show().find('#variantInfoText').text(localizations.variantNotFound);
+                
+                // Reset quantity input max
+                updateQuantityInputMax(productStockQuantity);
+            }
+        }
+
+        const currencySymbol = '@Html.Raw(currencySymbol)';
+        function formatCurrency(amount) {
+            return currencySymbol + ' ' + amount.toFixed(2);
+        }
+        
+        function updateProductImage(variantImageUrl) {
+            if (!variantImageUrl) return;
+            
+            const carousel = document.getElementById('productDetailsCarousel');
+            if (carousel) {
+                // Normalize the variant image URL (handle both relative and absolute paths)
+                const normalizedVariantUrl = variantImageUrl.replace(/\\/g, '/');
+                const variantFileName = normalizedVariantUrl.split('/').pop();
+                
+                // Find the carousel item with this image
+                const carouselItems = carousel.querySelectorAll('.carousel-item');
+                let targetIndex = -1;
+                
+                carouselItems.forEach((item, index) => {
+                    const img = item.querySelector('img');
+                    if (img) {
+                        const imgSrc = img.src || img.getAttribute('src') || '';
+                        const imgFileName = imgSrc.split('/').pop();
+                        
+                        // Check if the image matches by filename or full path
+                        if (imgFileName === variantFileName || 
+                            imgSrc.includes(variantFileName) || 
+                            imgSrc.includes(normalizedVariantUrl)) {
+                            targetIndex = index;
+                        }
+                    }
+                });
+                
+                // If image not found in carousel, check allProductImages array
+                if (targetIndex === -1 && allProductImages) {
+                    allProductImages.forEach((imgUrl, index) => {
+                        const normalizedImgUrl = imgUrl.replace(/\\/g, '/');
+                        if (normalizedImgUrl === normalizedVariantUrl || 
+                            normalizedImgUrl.includes(variantFileName) ||
+                            normalizedImgUrl.endsWith(variantFileName)) {
+                            targetIndex = index;
+                        }
+                    });
+                }
+                
+                if (targetIndex >= 0) {
+                    // Get or create carousel instance
+                    let carouselInstance = bootstrap.Carousel.getInstance(carousel);
+                    if (!carouselInstance) {
+                        carouselInstance = new bootstrap.Carousel(carousel, {
+                            interval: false, // Disable auto-rotation
+                            ride: false // Disable auto-start
+                        });
+                    } else {
+                        // Disable auto-rotation if it's already initialized
+                        carouselInstance._config.interval = false;
+                        carouselInstance._config.ride = false;
+                    }
+                    
+                    // Switch to the variant image and stop auto-rotation
+                    carouselInstance.pause(); // Stop any auto-rotation first
+                    
+                    // Ensure interval is disabled
+                    carouselInstance._config.interval = false;
+                    carouselInstance._config.ride = false;
+                    
+                    // Switch to the variant image
+                    carouselInstance.to(targetIndex);
+                    
+                    // Prevent carousel from auto-rotating after slide completes
+                    const pauseAfterSlide = () => {
+                        carouselInstance.pause();
+                        carouselInstance._config.interval = false;
+                    };
+                    
+                    // Remove any existing listeners to avoid duplicates
+                    carousel.removeEventListener('slid.bs.carousel', pauseAfterSlide);
+                    carousel.addEventListener('slid.bs.carousel', pauseAfterSlide, { once: false });
+                    
+                    // Also prevent auto-rotation on any user interaction
+                    const preventAutoRotate = () => {
+                        carouselInstance.pause();
+                        carouselInstance._config.interval = false;
+                    };
+                    carousel.removeEventListener('slide.bs.carousel', preventAutoRotate);
+                    carousel.addEventListener('slide.bs.carousel', preventAutoRotate);
+                }
+            } else {
+                // Single image display - replace it
+                const imgElement = document.querySelector('.product-main-image img');
+                if (imgElement) {
+                    imgElement.src = variantImageUrl;
+                }
+            }
+        }
+
+        function updateVariantInfo() {
+            const selectedCount = Object.keys(selectedOptions).length;
+            const totalOptions = options.length;
+            
+            if (selectedCount < totalOptions) {
+                $('#variantInfo').show().find('#variantInfoText').text(
+                    `${localizations.pleaseSelect} ${totalOptions - selectedCount} ${localizations.moreOptions}`
+                );
+            } else {
+                $('#variantInfo').hide();
+            }
+        }
+        
+        // Function to pause carousel after any user interaction (manual navigation)
+        function pauseCarouselAfterInteraction() {
+            const carousel = document.getElementById('productDetailsCarousel');
+            if (carousel) {
+                setTimeout(() => {
+                    const carouselInstance = bootstrap.Carousel.getInstance(carousel);
+                    if (carouselInstance) {
+                        carouselInstance.pause();
+                        carouselInstance._config.interval = false;
+                        carouselInstance._config.ride = false;
+                    }
+                }, 50);
+            }
+        }
+
+        // Initialize quantity validation
+        function initializeQuantityValidation() {
+            const quantityInput = $('#quantityInput');
+            const decreaseBtn = $('#quantityDecrease');
+            const increaseBtn = $('#quantityIncrease');
+            
+            // Set initial max value based on product type
+            if (productType === 0) {
+                // Simple product - use product stock
+                updateQuantityInputMax(productStockQuantity);
+            } else {
+                // Variable product - will be updated when variant is selected
+                updateQuantityInputMax(productStockQuantity);
+            }
+            
+            // Decrease button click
+            decreaseBtn.on('click', function() {
+                if ($(this).prop('disabled')) return;
+                const currentValue = parseInt(quantityInput.val()) || 1;
+                if (currentValue > 1) {
+                    quantityInput.val(currentValue - 1);
+                    validateQuantity();
+                    // Add visual feedback
+                    $(this).addClass('quantity-btn-clicked');
+                    setTimeout(() => $(this).removeClass('quantity-btn-clicked'), 200);
+                }
+            });
+            
+            // Increase button click
+            increaseBtn.on('click', function() {
+                if ($(this).prop('disabled')) return;
+                const currentValue = parseInt(quantityInput.val()) || 1;
+                quantityInput.val(currentValue + 1);
+                validateQuantity();
+                // Add visual feedback
+                $(this).addClass('quantity-btn-clicked');
+                setTimeout(() => $(this).removeClass('quantity-btn-clicked'), 200);
+            });
+            
+            // Validate on input change (if user types directly)
+            quantityInput.on('input change', function() {
+                validateQuantity();
+            });
+            
+            // Validate on blur
+            quantityInput.on('blur', function() {
+                validateQuantity();
+            });
+            
+            // Prevent scrolling when focused on input
+            quantityInput.on('wheel', function(e) {
+                e.preventDefault();
+            });
+        }
+        
+        // Update quantity input max attribute
+        function updateQuantityInputMax(maxQuantity) {
+            const quantityInput = $('#quantityInput');
+            const decreaseBtn = $('#quantityDecrease');
+            const increaseBtn = $('#quantityIncrease');
+            
+            quantityInput.attr('max', maxQuantity);
+            
+            // If current value exceeds max, adjust it
+            const currentValue = parseInt(quantityInput.val()) || 1;
+            if (currentValue > maxQuantity && maxQuantity > 0) {
+                quantityInput.val(maxQuantity);
+            } else if (maxQuantity === 0) {
+                quantityInput.val(1);
+            }
+            
+            // Update button states
+            const newValue = parseInt(quantityInput.val()) || 1;
+            decreaseBtn.prop('disabled', newValue <= 1);
+            increaseBtn.prop('disabled', maxQuantity > 0 && newValue >= maxQuantity);
+        }
+        
+        // Validate quantity against available stock
+        function validateQuantity() {
+            const quantityInput = $('#quantityInput');
+            const decreaseBtn = $('#quantityDecrease');
+            const increaseBtn = $('#quantityIncrease');
+            const quantity = parseInt(quantityInput.val()) || 1;
+            let maxQuantity = 0;
+            let errorMessage = '';
+            
+            if (productType === 0) {
+                // Simple product - check product stock
+                maxQuantity = productStockQuantity;
+            } else {
+                // Variable product - check variant stock
+                const variantId = $('#selectedVariantId').val();
+                if (variantId) {
+                    const variant = variants.find(v => v.id === parseInt(variantId));
+                    if (variant) {
+                        maxQuantity = variant.stockQuantity;
+                    } else {
+                        maxQuantity = 0;
+                    }
+                } else {
+                    // No variant selected yet
+                    maxQuantity = productStockQuantity;
+                }
+            }
+            
+            // Validate quantity
+            if (quantity < 1) {
+                quantityInput.val(1);
+                updateQuantityInputMax(maxQuantity);
+                return true;
+            }
+            
+            if (maxQuantity === 0) {
+                errorMessage = localizations.outOfStockMsg;
+                quantityInput.val(1);
+                decreaseBtn.prop('disabled', true);
+                increaseBtn.prop('disabled', true);
+                showQuantityError(errorMessage);
+                return false;
+            }
+            
+            if (quantity > maxQuantity) {
+                errorMessage = localizations.onlyAvailable.replace(/\{0\}/g, maxQuantity);
+                quantityInput.val(maxQuantity);
+                updateQuantityInputMax(maxQuantity);
+                showQuantityError(errorMessage);
+                return false;
+            }
+            
+            // Update button states
+            decreaseBtn.prop('disabled', quantity <= 1);
+            increaseBtn.prop('disabled', quantity >= maxQuantity);
+            
+            // Clear any error messages
+            hideQuantityError();
+            return true;
+        }
+        
+        // Show quantity error message
+        function showQuantityError(message) {
+            let errorDiv = $('#quantityError');
+            if (errorDiv.length === 0) {
+                errorDiv = $('<div id="quantityError" class="text-danger small mt-1"></div>');
+                $('#quantityInput').after(errorDiv);
+            }
+            errorDiv.text(message).show();
+            
+            // Auto-hide after 3 seconds
+            setTimeout(function() {
+                hideQuantityError();
+            }, 3000);
+        }
+        
+        // Hide quantity error message
+        function hideQuantityError() {
+            $('#quantityError').hide();
+        }
+        
+        // Update form submission to include variant ID and validate quantity - CONVERT TO AJAX
+        $('form').on('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            
+            // Validate quantity before submission
+            if (!validateQuantity()) {
+                return false;
+            }
+            
+            if (productType === 1) {
+                const variantId = $('#selectedVariantId').val();
+                if (!variantId) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: localizations.selectOptions,
+                        text: localizations.selectAllOptions
+                    });
+                    return false;
+                }
+                
+                // Add variant ID to form
+                if (!$('input[name="ProductVariantId"]').length) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'ProductVariantId',
+                        value: variantId
+                    }).appendTo(this);
+                }
+            }
+            
+            // Get form data
+            const formData = new FormData(this);
+            const addToCartBtn = $('#addToCartBtn');
+            const originalBtnText = addToCartBtn.html();
+            
+            // Show loading state
+            addToCartBtn.prop('disabled', true);
+            addToCartBtn.html('<i class="bi bi-arrow-repeat spin"></i> @Localizer["Adding"]...');
+            
+            // Submit via AJAX
+            fetch(window.location.href, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(response => {
+                // Check if response is JSON
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    return response.json();
+                }
+                
+                // If redirected, it means success (non-AJAX fallback)
+                if (response.redirected) {
+                    return { success: true, message: '@Localizer["ItemAddedToCart"]' || 'Product added to cart successfully!' };
+                }
+                
+                // Try to parse as JSON, fallback to success
+                return response.json().catch(() => ({ success: true }));
+            })
+            .then(data => {
+                // Reset button
+                addToCartBtn.prop('disabled', false);
+                addToCartBtn.html(originalBtnText);
+                
+                if (data && data.success !== false) {
+                    // Success - update cart count
+                    const quantity = parseInt($('#quantityInput').val()) || 1;
+                    const variantId = $('#selectedVariantId').val();
+                    
+                    // Sync with localStorage
+                    if (window.cartStorage) {
+                        // Get product info for localStorage
+                        const item = {
+                            productId: productId,
+                            count: quantity,
+                            productVariantId: variantId ? parseInt(variantId) : null
+                        };
+                        
+                        // Check if there's a flash sale
+                        if (productType === 1 && variantId) {
+                            const variant = variants.find(v => v.id === parseInt(variantId));
+                            if (variant && variantFlashSaleMap[variant.id]) {
+                                item.flashSaleItemId = variantFlashSaleMap[variant.id].flashSaleItemId;
+                                item.flashSalePrice = variantFlashSaleMap[variant.id].flashSalePrice;
+                            }
+                        }
+                        
+                        window.cartStorage.addItem(item);
+                    }
+                    
+                    // Update cart count everywhere
+                    updateCartCountAfterAdd();
+                    
+                    // Show success message
+                    const successMsg = data.message || '@Localizer["ItemAddedToCart"]' || 'Product added to cart successfully!';
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success(successMsg);
+                    } else if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '@Localizer["Success"]',
+                            text: successMsg,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    }
+                    
+                    // Optionally open cart sidebar (desktop only)
+                    if (typeof openCartSidebar === 'function' || typeof window.openCartSidebar === 'function') {
+                        const openCart = window.openCartSidebar || openCartSidebar;
+                        const sidebar = document.querySelector('.cart-sidebar-new') || document.getElementById('cartSidebar');
+                        const isMobile = window.innerWidth <= 768;
+                        
+                        if (sidebar && !isMobile) {
+                            setTimeout(() => {
+                                openCart(true);
+                            }, 500);
+                        }
+                    }
+                } else {
+                    // Error
+                    const errorMsg = data.message || '@Localizer["FailedToAddToCart"]' || 'Failed to add product to cart';
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error(errorMsg);
+                    } else if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '@Localizer["Error"]',
+                            text: errorMsg
+                        });
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error adding to cart:', error);
+                addToCartBtn.prop('disabled', false);
+                addToCartBtn.html(originalBtnText);
+                
+                const errorMsg = '@Localizer["AnErrorOccurred"]' || 'An error occurred. Please try again.';
+                if (typeof toastr !== 'undefined') {
+                    toastr.error(errorMsg);
+                } else if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '@Localizer["Error"]',
+                        text: errorMsg
+                    });
+                }
+            });
+            
+            return false;
+        });
+        
+        // Function to update cart count after adding to cart
+        function updateCartCountAfterAdd() {
+            // Get cart count from server
+            fetch('/Customer/Home/GetCartCount')
+                .then(response => response.json())
+                .then(data => {
+                    const cartCount = data.cartCount || 0;
+                    
+                    // Update navigation cart count
+                    const cartCountElement = document.getElementById('cartCount');
+                    if (cartCountElement) {
+                        cartCountElement.textContent = cartCount;
+                        if (cartCount > 0) {
+                            cartCountElement.style.display = 'inline-block';
+                            // Add pulse animation
+                            cartCountElement.style.animation = 'none';
+                            setTimeout(() => {
+                                cartCountElement.style.animation = 'cartPulse 0.6s ease';
+                            }, 10);
+                        } else {
+                            cartCountElement.style.display = 'none';
+                        }
+                    }
+                    
+                    // Update header cart badge
+                    const headerCartBadge = document.getElementById('headerCartBadge');
+                    if (headerCartBadge) {
+                        if (cartCount > 0) {
+                            headerCartBadge.textContent = cartCount;
+                            headerCartBadge.style.display = 'flex';
+                        } else {
+                            headerCartBadge.style.display = 'none';
+                        }
+                    }
+                    
+                    // Update floating cart badge
+                    if (typeof updateFloatingCartBadge === 'function') {
+                        updateFloatingCartBadge(cartCount);
+                    } else if (typeof window.updateFloatingCartBadge === 'function') {
+                        window.updateFloatingCartBadge(cartCount);
+                    }
+                    
+                    // Update cart widget
+                    if (typeof updateCartWidget === 'function') {
+                        setTimeout(() => {
+                            updateCartWidget();
+                        }, 150);
+                    }
+                    
+                    // Update localStorage cart count display
+                    if (window.cartStorage) {
+                        window.cartStorage.updateCartCountFromLocalStorage();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating cart count:', error);
+                    // Fallback: update from localStorage
+                    if (window.cartStorage) {
+                        window.cartStorage.updateCartCountFromLocalStorage();
+                    }
+                });
+        }
+
+        function loadProductRating(productId) {
+            fetch(`/Customer/Review/GetProductRating?productId=${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    $('#averageRatingText').text(data.averageRating.toFixed(1));
+                    $('#reviewCount').text(data.reviewCount);
+                    displayStars(data.averageRating, '#averageRating');
+                })
+                .catch(error => {
+                    console.error('Error loading rating:', error);
+                });
+        }
+
+        function loadReviews(productId) {
+            fetch(`/Customer/Review/GetReviews?productId=${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.reviews.length > 0) {
+                        let html = '';
+                        data.reviews.forEach(review => {
+                            html += createReviewHTML(review);
+                        });
+                        $('#reviewsList').html(html);
+                    } else {
+                        $('#reviewsList').html('<div class="reviews-empty"><i class="bi bi-star"></i><p>@Localizer["NoReviewsYet"]</p></div>');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading reviews:', error);
+                    $('#reviewsList').html('<p class="text-muted text-center">@Localizer["NoReviewsYet"]</p>');
+                });
+        }
+
+        function createReviewHTML(review) {
+            const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+            const verifiedBadge = review.isVerifiedPurchase 
+                ? '<span class="badge bg-success ms-2"><i class="bi bi-check-circle"></i> @Localizer["VerifiedPurchase"]</span>' 
+                : '';
+            
+            return `
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="review-user">
+                            <strong>${review.userName}</strong>
+                            ${verifiedBadge}
+                        </div>
+                        <div class="review-meta">
+                            <span class="review-rating">${stars}</span>
+                            <span class="review-date">${review.date}</span>
+                        </div>
+                    </div>
+                    <div class="review-comment">
+                        ${review.comment}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayStars(rating, selector) {
+            const fullStars = Math.floor(rating);
+            const hasHalf = (rating % 1) >= 0.5;
+            let html = '';
+            
+            for (let i = 0; i < fullStars; i++) {
+                html += '<i class="bi bi-star-fill"></i>';
+            }
+            if (hasHalf) {
+                html += '<i class="bi bi-star-half"></i>';
+            }
+            for (let i = fullStars + (hasHalf ? 1 : 0); i < 5; i++) {
+                html += '<i class="bi bi-star"></i>';
+            }
+            
+            $(selector).html(html);
+        }
+        
+        // Stock Notification Functions
+        function initializeStockNotification() {
+            // For logged in users
+            $('#subscribeStockNotificationBtn').on('click', function() {
+                subscribeToStockNotification(null, null);
+            });
+            
+            // For guest users - show SweetAlert modal
+            $('#subscribeStockNotificationGuestBtn').on('click', function() {
+                showStockNotificationModal();
+            });
+        }
+        
+        function showStockNotificationModal() {
+            Swal.fire({
+                title: '@Localizer["NotifyMeWhenAvailable"]',
+                html: `
+                    <div class="text-start">
+                        <div class="mb-3">
+                            <label for="swal-email" class="form-label">@Localizer["Email"] <span class="text-danger">*</span></label>
+                            <input type="email" id="swal-email" class="form-control" placeholder="@Localizer["Email"]" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="swal-phone" class="form-label">@Localizer["PhoneNumber"]</label>
+                            <input type="tel" id="swal-phone" class="form-control" placeholder="@Localizer["PhoneNumber"]">
+                        </div>
+                    </div>
+                `,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: '@Localizer["Subscribe"]',
+                cancelButtonText: '@Localizer["Cancel"]',
+                confirmButtonColor: '#7c3aed',
+                cancelButtonColor: '#6b7280',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const email = document.getElementById('swal-email').value;
+                    const phone = document.getElementById('swal-phone').value;
+                    
+                    if (!email) {
+                        Swal.showValidationMessage('@Localizer["EmailIsRequired"]');
+                        return false;
+                    }
+                    
+                    // Validate email format
+                    const emailRegex = new RegExp('^[^\\s@@]+@@[^\\s@@]+\\.[^\\s@@]+$');
+                    if (!emailRegex.test(email)) {
+                        Swal.showValidationMessage('@Localizer["PleaseEnterValidEmail"]');
+                        return false;
+                    }
+                    
+                    return { email: email, phone: phone || null };
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    subscribeToStockNotification(result.value.email, result.value.phone);
+                }
+            });
+        }
+        
+        function subscribeToStockNotification(email, phone) {
+            const variantId = $('#selectedVariantId').val();
+            const btn = $('#subscribeStockNotificationBtn, #subscribeStockNotificationGuestBtn');
+            const messageDiv = $('#stockNotificationMessage');
+            
+            // Disable button
+            if (btn.length) btn.prop('disabled', true);
+            
+            // Get anti-forgery token
+            const token = $('input[name="__RequestVerificationToken"]').val();
+            
+            // Show loading
+            Swal.fire({
+                title: '@Localizer["Processing"]',
+                text: '@Localizer["PleaseWait"]',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            $.ajax({
+                url: '/Customer/Home/SubscribeStockNotification',
+                type: 'POST',
+                data: {
+                    productId: productId,
+                    variantId: variantId || null,
+                    email: email,
+                    phoneNumber: phone,
+                    __RequestVerificationToken: token
+                },
+                success: function(response) {
+                    Swal.close();
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '@Localizer["Success"]',
+                            text: response.message,
+                            confirmButtonColor: '#7c3aed'
+                        });
+                        
+                        // Hide button and show success message
+                        if (btn.length) btn.hide();
+                        messageDiv.removeClass('alert-danger').addClass('alert alert-success');
+                        messageDiv.html('<i class="bi bi-check-circle me-2"></i>' + response.message).show();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '@Localizer["Error"]',
+                            text: response.message,
+                            confirmButtonColor: '#7c3aed'
+                        });
+                        
+                        // Re-enable button
+                        if (btn.length) btn.prop('disabled', false);
+                        messageDiv.removeClass('alert-success').addClass('alert alert-danger');
+                        messageDiv.html('<i class="bi bi-exclamation-circle me-2"></i>' + response.message).show();
+                    }
+                },
+                error: function() {
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'error',
+                        title: '@Localizer["Error"]',
+                        text: 'An error occurred. Please try again later.',
+                        confirmButtonColor: '#7c3aed'
+                    });
+                    
+                    // Re-enable button
+                    if (btn.length) btn.prop('disabled', false);
+                    messageDiv.removeClass('alert-success').addClass('alert alert-danger');
+                    messageDiv.html('<i class="bi bi-exclamation-circle me-2"></i>An error occurred. Please try again later.').show();
+                }
+            });
+        }
+        
+        // Initialize Tamara Widget V2 for Product Page
+        @if (tamaraAvailableScript && !string.IsNullOrEmpty(tamaraPublicKeyScript))
+        {
+            <text>
+            (function() {
+                // Load Tamara Widget V2 script
+                if (!window.TamaraWidget) {
+                    var script = document.createElement('script');
+                    script.src = 'https://cdn.tamara.co/widget-v2/tamara-widget.js';
+                    script.async = true;
+                    script.onload = function() {
+                        initializeTamaraWidget();
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    initializeTamaraWidget();
+                }
+                
+                function initializeTamaraWidget() {
+                    var widgetElement = document.getElementById('tamara-widget-product-page');
+                    if (widgetElement && window.TamaraWidget) {
+                        var publicKey = widgetElement.getAttribute('data-public-key');
+                        var amount = parseFloat(widgetElement.getAttribute('data-amount'));
+                        var currency = widgetElement.getAttribute('data-currency') || 'AED';
+                        var country = widgetElement.getAttribute('data-country') || 'AE';
+                        
+                        if (publicKey && amount > 0) {
+                            try {
+                                window.TamaraWidget.init({
+                                    publicKey: publicKey,
+                                    amount: amount,
+                                    currency: currency,
+                                    country: country,
+                                    widgetType: 'product_page',
+                                    containerId: 'tamara-widget-product-page'
+                                });
+                            } catch (e) {
+                                console.error('Tamara widget initialization error:', e);
+                            }
+                        }
+                    }
+                }
+            })();
+            </text>
+        }
+    </script>
+    
+    <!-- Image Modal -->
+    <div class="modal fade" id="productImageModal" tabindex="-1" aria-labelledby="productImageModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content" style="background: transparent; border: none; position: relative;">
+                <div class="modal-body" style="padding: 0; text-align: center; position: relative;">
+                    <button type="button" class="btn-close-modal" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                    <img id="modalProductImage" src="" alt="Product image" class="img-fluid" style="max-width: 100%; max-height: 80vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                    <h5 id="modalProductName" class="mt-3 text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Image modal functionality for product details page
+        $(document).ready(function() {
+            $('.product-image-clickable').on('click', function() {
+                const imageUrl = $(this).data('image-url');
+                const productName = $(this).data('product-name');
+                
+                if (imageUrl) {
+                    $('#modalProductImage').attr('src', imageUrl);
+                    $('#modalProductImage').attr('alt', productName || 'Product image');
+                    $('#modalProductName').text(productName || '');
+                    $('#productImageModal').modal('show');
+                }
+            });
+            
+            // Close modal on ESC key
+            $(document).on('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    $('#productImageModal').modal('hide');
+                }
+            });
+            
+            // Close modal when clicking outside the image (on backdrop)
+            $('#productImageModal').on('click', function(e) {
+                // Check if click is on the backdrop (not on modal content)
+                if ($(e.target).hasClass('modal') || $(e.target).hasClass('modal-backdrop')) {
+                    $('#productImageModal').modal('hide');
+                }
+            });
+            
+            // Prevent closing when clicking on the image itself
+            $('#productImageModal .modal-body').on('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+    </script>
+}

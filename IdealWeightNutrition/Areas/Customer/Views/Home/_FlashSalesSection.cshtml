@@ -1,0 +1,118 @@
+@using Microsoft.AspNetCore.Localization
+@model IEnumerable<IdealWeightNutrition.Models.FlashSale>
+@inject IConfiguration Configuration
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var activeFlashSales = Model ?? Enumerable.Empty<IdealWeightNutrition.Models.FlashSale>();
+    var hasActiveFlashSales = activeFlashSales.Any();
+}
+
+@if (hasActiveFlashSales)
+{
+    <!-- FLASH SALE CAROUSEL SECTION -->
+    <section class="flash-sale-carousel-section">
+        <div class="container">
+            <!-- View All Button -->
+            <div class="text-center mt-3">
+                <a href="@Url.Action("Index", "FlashSale", new { area = "Customer" })" class="view-all-flash-sales-btn">
+                    @Localizer["ViewAllFlashSales"]
+                    <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
+            <div class="flash-sale-carousel-wrapper">
+                <button class="flash-sale-carousel-nav prev" data-action="prev-slide" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                
+                <div class="flash-sale-carousel" id="flashSaleCarousel">
+                    @foreach (var flashSale in activeFlashSales)
+                    {
+                        var flashSaleName = currentCulture == "ar" && !string.IsNullOrEmpty(flashSale.NameAr) 
+                            ? flashSale.NameAr 
+                            : flashSale.Name;
+                        var flashSaleDesc = currentCulture == "ar" && !string.IsNullOrEmpty(flashSale.DescriptionAr) 
+                            ? flashSale.DescriptionAr 
+                            : flashSale.Description;
+                        
+                        <div class="flash-sale-slide" 
+                             data-flash-sale-id="@flashSale.Id"
+                             data-flash-sale-end="@flashSale.EndDate.ToString("o")"
+                             data-flash-sale-name="@flashSaleName"
+                             data-action="open-flash-sale">
+                            @if (!string.IsNullOrEmpty(flashSale.ImageUrl))
+                            {
+                                <img src="@flashSale.ImageUrl" alt="@flashSaleName" class="flash-sale-slide-image" />
+                            }
+                            else
+                            {
+                                <div class="flash-sale-slide-placeholder">
+                                    <i class="bi bi-lightning-charge-fill"></i>
+                                    <h3>@flashSaleName</h3>
+                                    @if (!string.IsNullOrEmpty(flashSaleDesc))
+                                    {
+                                        <p>@flashSaleDesc</p>
+                                    }
+                                </div>
+                            }
+                            <div class="flash-sale-slide-overlay">
+                                <div class="flash-sale-slide-content">
+                                    <h3 class="flash-sale-slide-title">@flashSaleName</h3>
+                                 
+                                    <div class="flash-sale-slide-timer" data-flash-sale-end="@flashSale.EndDate.ToString("o")">
+                                        <!-- Timer will be populated by JavaScript -->
+                                    </div>
+                                    <button class="flash-sale-slide-btn">
+                                        @Localizer["ShopNow"]
+                                        <i class="bi bi-arrow-left ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                <button class="flash-sale-carousel-nav next" data-action="next-slide" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+            
+            <!-- Carousel Indicators -->
+            <div class="flash-sale-carousel-indicators" id="flashSaleIndicators">
+                @for (int i = 0; i < activeFlashSales.Count(); i++)
+                {
+                    <button class="flash-sale-indicator @(i == 0 ? "active" : "")" 
+                            data-action="go-to-slide"
+                            data-slide-index="@i"
+                            aria-label="Go to slide @(i + 1)"></button>
+                }
+            </div>
+            
+           
+        </div>
+    </section>
+     
+    <!-- Flash Sale Products Modal -->
+    <div class="flash-sale-products-modal" id="flashSaleProductsModal">
+        <div class="flash-sale-modal-overlay" onclick="closeFlashSaleProducts()"></div>
+        <div class="flash-sale-modal-content">
+            <button class="flash-sale-modal-close" onclick="closeFlashSaleProducts()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <div class="flash-sale-modal-header">
+                <h2 id="modalFlashSaleTitle"></h2>
+                <div id="modalFlashSaleTimer" class="flash-sale-timer" data-flash-sale-end=""></div>
+            </div>
+            <div class="flash-sale-modal-body" id="flashSaleProductsContainer">
+                <div class="text-center py-5" id="flashSaleLoadingSpinner">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading amazing deals...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

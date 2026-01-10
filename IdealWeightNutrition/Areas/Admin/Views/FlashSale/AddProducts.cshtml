@@ -1,0 +1,674 @@
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+@{
+    ViewData["Title"] = Localizer["AddProductsToFlashSale"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var flashSale = ViewBag.FlashSale as FlashSale;
+    var products = ViewBag.Products as List<SelectListItem>;
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+}
+@inject IdealWeightNutrition.DataAccess.Repository.IRepository.IUnitOfWork _unitOfWork
+
+<link rel="stylesheet" href="~/css/flash-sale-add-products.css" />
+
+<div class="admin-wrapper">
+    <div class="container-fluid">
+        <div class="admin-form-wrapper add-products-wrapper" style="max-width: 1400px;">
+            <div class="admin-form-header add-products-header">
+                <div class="header-content">
+                    <div class="header-icon">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <div class="header-text">
+                        <h2 class="admin-form-title">
+                            @Localizer["AddProductsToFlashSale"]
+                        </h2>
+                        <p class="header-subtitle">
+                            <i class="bi bi-tag me-2"></i>
+                            @Localizer["FlashSale"]: <strong>@flashSale.Name</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-form-body">
+                <!-- Add Product Form -->
+                <div class="card add-product-form-card mb-4">
+                    <div class="card-header add-product-form-header">
+                        <div class="d-flex align-items-center">
+                            <div class="form-header-icon">
+                                <i class="bi bi-bag-plus-fill"></i>
+                            </div>
+                            <div class="form-header-content">
+                                <h5 class="mb-0">
+                                    @Localizer["AddNewProduct"]
+                                </h5>
+                                <small class="form-header-subtitle">@Localizer["SelectProductAndSetFlashSaleDetails"]</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body add-product-form-body">
+                        <form id="addProductForm">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" id="flashSaleId" value="@flashSale.Id" />
+
+                            <div class="add-product-form-grid">
+                                <!-- Product Selection -->
+                                <div class="form-field-wrapper">
+                                    <label for="productSelect" class="form-label">
+                                        <i class="bi bi-box-seam"></i>
+                                        <span>@Localizer["SelectProduct"]</span>
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <select id="productSelect" class="form-select">
+                                        <option value="">-- @Localizer["SelectProduct"] --</option>
+                                        @foreach (var product in products)
+                                        {
+                                            <option value="@product.Value">@product.Text</option>
+                                        }
+                                    </select>
+                                    <div id="productInfoBox" class="product-info-compact mt-2" style="display: none;">
+                                        <div class="info-compact-item">
+                                            <span class="info-compact-label">@Localizer["Product"]:</span>
+                                            <span class="info-compact-value" id="productName"></span>
+                                        </div>
+                                        <div class="info-compact-item">
+                                            <span class="info-compact-label">@Localizer["Stock"]:</span>
+                                            <span id="productStock" class="badge bg-success badge-sm"></span>
+                                        </div>
+                                        <div class="info-compact-item">
+                                            <span class="info-compact-label">@Localizer["Price"]:</span>
+                                            <span id="productPrice" class="badge bg-secondary badge-sm"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Variant Selection (for Variable Products) -->
+                                <div class="form-field-wrapper" id="variantSelectContainer" style="display: none;">
+                                    <label for="variantSelect" class="form-label">
+                                        <i class="bi bi-list-check"></i>
+                                        <span>@Localizer["SelectVariant"]</span>
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <select id="variantSelect" class="form-select">
+                                        <option value="">-- @Localizer["SelectVariant"] --</option>
+                                    </select>
+                                    <div id="variantInfoBox" class="variant-info-compact mt-2" style="display: none;">
+                                        <div class="info-compact-item">
+                                            <span class="info-compact-label">@Localizer["Price"]:</span>
+                                            <span id="variantPrice" class="badge bg-info badge-sm"></span>
+                                        </div>
+                                        <div class="info-compact-item">
+                                            <span class="info-compact-label">@Localizer["Stock"]:</span>
+                                            <span id="variantStock" class="badge bg-success badge-sm"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Flash Sale Quantity -->
+                                <div class="form-field-wrapper">
+                                    <label for="flashQuantity" class="form-label">
+                                        <i class="bi bi-hash"></i>
+                                        <span>@Localizer["FlashSaleQuantity"]</span>
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" id="flashQuantity" class="form-control" min="1" placeholder="@Localizer["EnterQuantity"]" />
+                                    <small class="form-help-text">
+                                        <i class="bi bi-info-circle"></i>
+                                        @Localizer["MustBeLessOrEqualStock"]
+                                    </small>
+                                </div>
+
+                                <!-- Flash Sale Price -->
+                                <div class="form-field-wrapper">
+                                    <label for="flashPrice" class="form-label">
+                                        <i class="bi bi-currency-dollar"></i>
+                                        <span>@Localizer["FlashSalePrice"]</span>
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" id="flashPrice" class="form-control" step="0.01" min="0.01" placeholder="@Localizer["EnterPrice"]" />
+                                    <div id="discountInfo" class="discount-info-compact" style="display: none;">
+                                        <span class="badge bg-success badge-sm" id="discountBadge"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Add Button -->
+                                <div class="form-field-wrapper form-button-wrapper mt-4">
+                                    <button type="button" onclick="addProduct()" class="btn btn-add-product">
+                                        <i class="bi bi-plus-circle-fill"></i>
+                                        <span>@Localizer["Add"]</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Current Products List -->
+                <div class="card products-list-card shadow-sm border-0">
+                    <div class="card-header products-list-header">
+                        <div class="d-flex align-items-center justify-content-between w-100">
+                            <div class="d-flex align-items-center">
+                                <div class="list-header-icon">
+                                    <i class="bi bi-list-ul"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">@Localizer["ProductsInFlashSale"]</h5>
+                                    <small class="list-header-subtitle">@Localizer["ManageFlashSaleProducts"]</small>
+                                </div>
+                            </div>
+                            <span class="badge product-count-badge" id="productCount">
+                                <i class="bi bi-box-seam me-1"></i>
+                                @(flashSale.FlashSaleItems?.Count ?? 0) @Localizer["Products"]
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body products-list-body">
+                        @if (flashSale.FlashSaleItems == null || !flashSale.FlashSaleItems.Any())
+                        {
+                            <div id="emptyState" class="empty-state-container">
+                                <div class="empty-state-icon">
+                                    <i class="bi bi-inbox"></i>
+                                </div>
+                                <h4 class="empty-state-title">@Localizer["NoProductsAddedYet"]</h4>
+                                <p class="empty-state-text">@Localizer["AddAtLeastOneProduct"]</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div id="emptyState" style="display: none;"></div>
+                        }
+
+                        <div id="productsContainer" class="products-grid-compact">
+                            @if (flashSale.FlashSaleItems != null)
+                            {
+                                foreach (var item in flashSale.FlashSaleItems)
+                                {
+                                    var variant = item.ProductVariantId.HasValue 
+                                        ? _unitOfWork.ProductVariant.Get(v => v.Id == item.ProductVariantId.Value, includeProperties: "VariantOptionValues.OptionValue.ProductOption")
+                                        : null;
+                                    
+                                    var originalPrice = variant?.Price ?? (decimal)(item.Product?.Price ?? 0);
+                                    var discount = originalPrice > 0 
+                                        ? Math.Round(((double)originalPrice - (double)item.FlashSalePrice) / (double)originalPrice * 100, 0)
+                                        : 0;
+                                    
+                                    string variantName = "";
+                                    if (variant != null && variant.VariantOptionValues != null)
+                                    {
+                                        var optionValues = variant.VariantOptionValues
+                                            .Where(vov => vov.OptionValue != null 
+                                                && !vov.OptionValue.IsDeleted 
+                                                && vov.OptionValue.ProductOption != null 
+                                                && !vov.OptionValue.ProductOption.IsDeleted) // Filter deleted items
+                                            .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                                            .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+                                            .Select(vov => {
+                                                var optionName = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ProductOption?.NameAr)) 
+                                                    ? vov.OptionValue.ProductOption.NameAr 
+                                                    : vov.OptionValue?.ProductOption?.Name;
+                                                
+                                                var optionValue = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ValueAr)) 
+                                                    ? vov.OptionValue.ValueAr 
+                                                    : vov.OptionValue?.Value;
+                                                
+                                                return $"{optionName}: {optionValue}";
+                                            })
+                                            .Where(s => !string.IsNullOrEmpty(s))
+                                            .ToList();
+                                        variantName = string.Join(" / ", optionValues);
+                                    }
+
+                                    <div class="product-item-compact" id="product_@item.Id">
+                                        <div class="product-card-compact">
+                                            <div class="product-card-compact-header">
+                                                @{
+                                                    var productTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(item.Product?.TitleAr)) 
+                                                        ? item.Product.TitleAr 
+                                                        : item.Product?.Title;
+                                                }
+                                                <h6 class="product-card-compact-title">@productTitle</h6>
+                                                <button onclick="removeProduct(@item.Id)" class="btn-remove-compact" title="@Localizer["Remove"]">
+                                                    <i class="bi bi-x"></i>
+                                                </button>
+                                            </div>
+                                            
+                                            @if (!string.IsNullOrEmpty(variantName))
+                                            {
+                                                <div class="variant-badge-compact">
+                                                    <i class="bi bi-tag"></i>
+                                                    <span>@variantName</span>
+                                                </div>
+                                            }
+
+                                            <div class="product-details-compact">
+                                                <div class="detail-item-compact">
+                                                    <span class="detail-label">@Localizer["Quantity"]:</span>
+                                                    <span class="detail-value">@item.FlashSaleQuantity</span>
+                                                </div>
+                                                <div class="detail-item-compact">
+                                                    <span class="detail-label">@Localizer["NormalPrice"]:</span>
+                                                    <span class="detail-value original-price-compact">@Html.Raw(currencySymbol) @originalPrice.ToString("N2")</span>
+                                                </div>
+                                                <div class="detail-item-compact">
+                                                    <span class="detail-label">@Localizer["FlashSalePrice"]:</span>
+                                                    <span class="detail-value flash-price-compact">@Html.Raw(currencySymbol) @item.FlashSalePrice.ToString("N2")</span>
+                                                </div>
+                                                <div class="detail-item-compact">
+                                                    <span class="detail-label">@Localizer["Discount"]:</span>
+                                                    <span class="badge bg-success badge-sm">-@discount%</span>
+                                                </div>
+                                            </div>
+                                            <div class="product-card-compact-badge">
+                                                <i class="bi bi-lightning-charge-fill"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="form-actions mt-4">
+                    <a asp-action="Details" asp-route-id="@flashSale.Id" class="btn btn-primary btn-lg">
+                        <i class="bi bi-eye me-2"></i>
+                        @Localizer["ViewFlashSale"]
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary btn-lg">
+                        <i class="bi bi-arrow-left me-2"></i>
+                        @Localizer["BackToList"]
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    
+    <style>
+        /* Custom styling for Select2 dropdown */
+        .select2-container--bootstrap-5 .select2-selection {
+            min-height: 38px;
+            border: 1px solid #ced4da;
+        }
+        
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            line-height: 36px;
+            padding-left: 12px;
+        }
+        
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+        
+        .select2-dropdown {
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+        }
+        
+        .select2-search--dropdown .select2-search__field {
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            padding: 0.375rem 0.75rem;
+        }
+        
+        .select2-results__option {
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .select2-results__option--highlighted {
+            background-color: #0d6efd;
+        }
+    </style>
+}
+
+@section Scripts {
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2 for product dropdown with search functionality
+            $('#productSelect').select2({
+                theme: 'bootstrap-5',
+                placeholder: '@Html.Raw(Localizer["SelectProduct"])',
+                allowClear: true,
+                width: '100%',
+                // Enable search - no minimum input length required
+                minimumInputLength: 0,
+                // Close dropdown when clicking outside
+                closeOnSelect: true
+            });
+        });
+    </script>
+    
+    <script>
+        // Localizations for JavaScript
+        const localizations = {
+            selectVariant: '@Html.Raw(Localizer["SelectVariant"])',
+            variantPrice: '@Html.Raw(Localizer["VariantPrice"])',
+            variantStock: '@Html.Raw(Localizer["VariantStock"])',
+            stock: '@Html.Raw(Localizer["Stock"])',
+            units: '@Html.Raw(Localizer["units"])',
+            removeProduct: '@Html.Raw(Localizer["RemoveProduct"])',
+            removeProductConfirm: '@Html.Raw(Localizer["RemoveProductConfirm"])',
+            yesRemoveIt: '@Html.Raw(Localizer["YesRemoveIt"])',
+            cancel: '@Html.Raw(Localizer["Cancel"])',
+            products: '@Html.Raw(Localizer["Products"])',
+            anErrorOccurred: '@Html.Raw(Localizer["AnErrorOccurred"])'
+        };
+
+        let currentStockQty = 0;
+        let currentPrice = 0;
+        let currentProductType = 0;
+        let selectedVariant = null;
+
+        // Get product info when selected (works with both regular select and Select2)
+        $('#productSelect').on('change', function() {
+            const productId = $(this).val();
+            if (!productId) {
+                // Hide product info
+                document.getElementById('productInfoBox').style.display = 'none';
+                
+                // Hide and reset variant dropdown
+                document.getElementById('variantSelectContainer').style.display = 'none';
+                const variantSelect = $('#variantSelect');
+                
+                // Destroy Select2 if it exists
+                if (variantSelect.hasClass('select2-hidden-accessible')) {
+                    variantSelect.select2('destroy');
+                }
+                
+                // Clear variant options
+                variantSelect.empty();
+                variantSelect.append('<option value="">-- ' + localizations.selectVariant + ' --</option>');
+                selectedVariant = null;
+                return;
+            }
+
+            fetch(`/Admin/FlashSale/GetProductInfo?productId=${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        currentProductType = data.productType || 0;
+                        currentStockQty = data.stockQuantity;
+                        currentPrice = data.price;
+
+                        document.getElementById('productName').textContent = data.title;
+                        document.getElementById('productStock').textContent = data.stockQuantity ;
+                        document.getElementById('productPrice').textContent =  data.price.toFixed(2);
+                        document.getElementById('productInfoBox').style.display = 'block';
+
+                        // If variable product, show variant dropdown
+                        if (currentProductType === 1 && data.variants && data.variants.length > 0) {
+                            // Clear and populate variant dropdown
+                            const variantSelect = $('#variantSelect');
+                            
+                            // Destroy existing Select2 instance if it exists
+                            if (variantSelect.hasClass('select2-hidden-accessible')) {
+                                variantSelect.select2('destroy');
+                            }
+                            
+                            // Clear existing options
+                            variantSelect.empty();
+                            variantSelect.append('<option value="">-- ' + localizations.selectVariant + ' --</option>');
+                            
+                            // Add all variants
+                            data.variants.forEach(variant => {
+                                // Format: "Size: L / Color: Red - Price: 20.00 (Stock: 4)"
+                                const displayText = variant.name + ' - ' + localizations.variantPrice + ': ' + variant.price.toFixed(2) + ' (' + localizations.stock + ': ' + variant.stockQuantity + ')';
+                                const option = $('<option></option>')
+                                    .attr('value', variant.id)
+                                    .text(displayText)
+                                    .attr('data-price', variant.price)
+                                    .attr('data-stock', variant.stockQuantity);
+                                variantSelect.append(option);
+                            });
+                            
+                            // Show variant container
+                            document.getElementById('variantSelectContainer').style.display = 'block';
+                            document.getElementById('variantInfoBox').style.display = 'none';
+                            
+                            // Initialize Select2 for variant dropdown
+                            variantSelect.select2({
+                                theme: 'bootstrap-5',
+                                placeholder: localizations.selectVariant,
+                                allowClear: true,
+                                width: '100%',
+                                minimumInputLength: 0,
+                                closeOnSelect: true
+                            });
+                        } else {
+                            // Hide variant container for non-variable products
+                            document.getElementById('variantSelectContainer').style.display = 'none';
+                            
+                            // Destroy Select2 if it exists
+                            const variantSelect = $('#variantSelect');
+                            if (variantSelect.hasClass('select2-hidden-accessible')) {
+                                variantSelect.select2('destroy');
+                            }
+                            
+                            variantSelect.val('').trigger('change');
+                            selectedVariant = null;
+                        }
+
+                        // Set max quantity
+                        document.getElementById('flashQuantity').max = data.stockQuantity;
+                        updatePriceAndStock();
+                    }
+                });
+        });
+
+        // Handle variant selection (works with Select2)
+        $('#variantSelect').on('change', function() {
+            const variantId = $(this).val();
+            if (!variantId) {
+                selectedVariant = null;
+                document.getElementById('variantInfoBox').style.display = 'none';
+                updatePriceAndStock();
+                return;
+            }
+
+            // Get selected option data
+            const selectedOption = $(this).find('option:selected');
+            selectedVariant = {
+                id: parseInt(variantId),
+                price: parseFloat(selectedOption.data('price')),
+                stockQuantity: parseInt(selectedOption.data('stock'))
+            };
+
+            document.getElementById('variantPrice').textContent = selectedVariant.price.toFixed(2);
+            document.getElementById('variantStock').textContent = selectedVariant.stockQuantity + ' ' + localizations.units;
+            document.getElementById('variantInfoBox').style.display = 'block';
+            updatePriceAndStock();
+        });
+
+        function updatePriceAndStock() {
+            if (selectedVariant) {
+                currentPrice = selectedVariant.price;
+                currentStockQty = selectedVariant.stockQuantity;
+                document.getElementById('flashQuantity').max = selectedVariant.stockQuantity;
+            } else {
+                // Use product values
+                const productId = $('#productSelect').val();
+                if (productId) {
+                    fetch(`/Admin/FlashSale/GetProductInfo?productId=${productId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                currentPrice = data.price;
+                                currentStockQty = data.stockQuantity;
+                                document.getElementById('flashQuantity').max = data.stockQuantity;
+                            }
+                        });
+                }
+            }
+            // Update discount calculation
+            const flashPrice = parseFloat(document.getElementById('flashPrice').value);
+            if (flashPrice > 0 && currentPrice > 0) {
+                const discount = Math.round(((currentPrice - flashPrice) / currentPrice) * 100);
+                if (discount > 0) {
+                    document.getElementById('discountBadge').textContent = `-${discount}% @Localizer["OFF"]`;
+                    document.getElementById('discountInfo').style.display = 'block';
+                } else {
+                    document.getElementById('discountInfo').style.display = 'none';
+                }
+            }
+        }
+
+        // Calculate discount when price changes
+        document.getElementById('flashPrice').addEventListener('input', function() {
+            const flashPrice = parseFloat(this.value);
+            if (flashPrice > 0 && currentPrice > 0) {
+                const discount = Math.round(((currentPrice - flashPrice) / currentPrice) * 100);
+                if (discount > 0) {
+                    document.getElementById('discountBadge').textContent = `-${discount}% @Localizer["OFF"]`;
+                    document.getElementById('discountInfo').style.display = 'block';
+                } else {
+                    document.getElementById('discountInfo').style.display = 'none';
+                }
+            } else {
+                document.getElementById('discountInfo').style.display = 'none';
+            }
+        });
+
+        // Add product to flash sale
+        function addProduct() {
+            const flashSaleId = document.getElementById('flashSaleId').value;
+            const productId = $('#productSelect').val();
+            const variantId = $('#variantSelect').val();
+            const quantity = document.getElementById('flashQuantity').value;
+            const price = document.getElementById('flashPrice').value;
+
+            // Validation
+            if (!productId) {
+                toastr.error('@Localizer["PleaseSelectProduct"]');
+                return;
+            }
+            if (currentProductType === 1 && !variantId) {
+                toastr.error('@Localizer["PleaseSelectVariant"]');
+                return;
+            }
+            if (!quantity || quantity <= 0) {
+                toastr.error('@Localizer["PleaseEnterValidQuantity"]');
+                return;
+            }
+            if (parseInt(quantity) > currentStockQty) {
+                toastr.error('@Localizer["QuantityCannotExceedStock"]');
+                return;
+            }
+            if (!price || price <= 0) {
+                toastr.error('@Localizer["PleaseEnterValidPrice"]');
+                return;
+            }
+
+            // Show loading
+            Swal.fire({
+                title: '@Localizer["AddingProduct"]',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Add product
+            const params = new URLSearchParams({
+                flashSaleId: flashSaleId,
+                productId: productId,
+                quantity: quantity,
+                price: price
+            });
+            if (variantId) {
+                params.append('productVariantId', variantId);
+            }
+
+            fetch('/Admin/FlashSale/AddProductToSale', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: params
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.close();
+                if (data.success) {
+                    toastr.success(data.message);
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    toastr.error(data.message);
+                }
+            })
+            .catch(error => {
+                Swal.close();
+                toastr.error('@Localizer["AnErrorOccurred"]');
+                console.error('Error:', error);
+            });
+        }
+
+        // Remove product from flash sale
+        function removeProduct(itemId) {
+            if (!itemId || itemId === 0) {
+                console.error('Invalid itemId:', itemId);
+                toastr.error('Invalid product ID');
+                return;
+            }
+            
+            Swal.fire({
+                title: localizations.removeProduct,
+                text: localizations.removeProductConfirm,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: localizations.yesRemoveIt,
+                cancelButtonText: localizations.cancel
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/Admin/FlashSale/RemoveProduct?itemId=${itemId}`, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            toastr.success(data.message);
+                            const productElement = document.getElementById('product_' + itemId);
+                            if (productElement) {
+                                productElement.remove();
+                            }
+                            
+                            // Update count
+                            const container = document.getElementById('productsContainer');
+                            const count = container.children.length;
+                            document.getElementById('productCount').textContent = count + ' ' + localizations.products;
+                            
+                            // Show empty state if no products
+                            if (count === 0) {
+                                document.getElementById('emptyState').style.display = 'block';
+                            }
+                        } else {
+                            toastr.error(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        toastr.error(localizations.anErrorOccurred);
+                        console.error('Error:', error);
+                    });
+                }
+            });
+        }
+    </script>
+}
+

@@ -1,0 +1,92 @@
+﻿@page
+@model LoginModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["Login"];
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <i class="bi bi-heart-pulse"></i>
+            <h2>@Localizer["WelcomeBack"]</h2>
+            <p>@Localizer["SignInToYourAccount"]</p>
+        </div>
+        <div class="auth-body">
+            <form id="account" method="post" class="auth-form">
+                <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
+                
+                <div class="form-group">
+                    <label asp-for="Input.Email">
+                        <i class="bi bi-envelope me-2"></i>@Localizer["Email"]
+                    </label>
+                    <input asp-for="Input.Email" class="form-control" autocomplete="username" 
+                           placeholder="@Localizer["YourEmailAddress"]" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Input.Password">
+                        <i class="bi bi-lock me-2"></i>@Localizer["Password"]
+                    </label>
+                    <input asp-for="Input.Password" class="form-control" type="password" autocomplete="current-password" 
+                           placeholder="••••••••" />
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+                
+                <div class="forgot-password">
+                    <a asp-page="./ForgotPassword" class="auth-link">
+                        <i class="bi bi-question-circle me-1"></i>@Localizer["ForgotPassword"]
+                    </a>
+                </div>
+                
+                <div class="auth-checkbox">
+                    <input type="checkbox" asp-for="Input.RememberMe" id="rememberMe" />
+                    <label for="rememberMe">@Localizer["RememberMe"]</label>
+                </div>
+                
+                <button id="login-submit" type="submit" class="btn-auth-submit">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>@Localizer["Login"]
+                </button>
+            </form>
+
+            <!-- External Login -->
+            @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+            {
+                <div class="auth-divider">
+                    <span>@Localizer["OrRegisterWithEmail"]</span>
+                </div>
+                
+                <div class="social-login">
+                    <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        @foreach (var provider in Model.ExternalLogins!)
+                        {
+                            <button type="submit" name="provider" value="@provider.Name" class="btn-google">
+                                @if (provider.Name == "Google")
+                                {
+                                    <img src="https://www.google.com/favicon.ico" alt="Google" />
+                                }
+                                @Localizer["SignUpWithGoogle"]
+                            </button>
+                        }
+                    </form>
+                </div>
+            }
+        </div>
+        
+        <div class="auth-footer">
+            <p>
+                @Localizer["DontHaveAccount"]
+                <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="auth-link">
+                    @Localizer["RegisterNow"]
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

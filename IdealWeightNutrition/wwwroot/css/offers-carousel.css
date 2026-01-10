@@ -1,0 +1,771 @@
+/* Bootstrap Offers Carousel - Modern & Professional */
+.offers-section {
+    padding: 2rem 0;
+    margin: 1rem 0;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.offers-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981, #3b82f6);
+    background-size: 300% 100%;
+    animation: gradientFlow 8s ease infinite;
+}
+
+@keyframes gradientFlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Header */
+.offers-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.offers-title {
+    font-size: 2.75rem;
+    font-weight: 900;
+    color: #111827;
+    margin: 0 0 0.75rem 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.offers-icon {
+    font-size: 2.5rem;
+    animation: flame 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.5));
+}
+
+@keyframes flame {
+    0%, 100% { transform: scale(1) rotate(-2deg); }
+    50% { transform: scale(1.1) rotate(2deg); }
+}
+
+.offers-subtitle {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin: 0;
+    font-weight: 500;
+}
+
+/* Carousel Container */
+.offers-carousel {
+    touch-action: pan-y pan-x; /* Allow both vertical and horizontal scrolling naturally */
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+    position: relative;
+    padding: 1rem 0 3.5rem;
+    width: 100%;
+    overflow: hidden;
+    will-change: transform; /* Optimize for carousel transitions */
+    overscroll-behavior-x: contain; /* Prevent scroll chaining to parent */
+    overscroll-behavior-y: none; /* Allow vertical scroll to pass through to page */
+}
+
+/* Allow vertical scrolling on carousel items */
+.offers-carousel .carousel-inner,
+.offers-carousel .carousel-item {
+    touch-action: pan-y pan-x; /* Allow both vertical and horizontal scrolling */
+}
+
+.offers-carousel .carousel-inner {
+    will-change: transform; /* Optimize for carousel transitions */
+    transform: translateZ(0); /* Force GPU acceleration */
+    -webkit-transform: translateZ(0);
+}
+
+.offers-carousel .carousel-item {
+    backface-visibility: hidden; /* Prevent flickering */
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0); /* Force GPU acceleration */
+    -webkit-transform: translateZ(0);
+}
+
+.offers-carousel .carousel-inner {
+    padding: 1rem 0;
+    width: 100%;
+}
+
+.offers-carousel .carousel-item {
+    width: 100%;
+}
+
+/* Ensure proper column sizing for responsive behavior */
+.offers-carousel .carousel-item .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+/* Force 2 products per slide on mobile and small tablets */
+@media (max-width: 768px) {
+    .offers-carousel .carousel-item {
+        width: 100%;
+    }
+    
+    .offers-carousel .carousel-item .row {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        gap: 0.5rem !important;
+    }
+    
+    .offers-carousel .carousel-item .row > [class*="col-"] {
+        flex: 0 0 calc(50% - 0.25rem) !important;
+        max-width: calc(50% - 0.25rem) !important;
+        width: calc(50% - 0.25rem) !important;
+        min-width: calc(50% - 0.25rem) !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+    
+    /* Hide any extra columns beyond the 2nd */
+    .offers-carousel .carousel-item .row > [class*="col-"]:nth-child(n+3) {
+        display: none !important;
+    }
+    
+    /* Ensure first 2 cards are visible */
+    .offers-carousel .carousel-item .row > [class*="col-"]:first-child,
+    .offers-carousel .carousel-item .row > [class*="col-"]:nth-child(2) {
+        display: block !important;
+    }
+}
+
+/* Offer Card */
+.offer-card {
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.offer-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(239, 68, 68, 0.2);
+}
+
+.offer-card-link {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+}
+
+/* Discount Badge - Enhanced */
+.offer-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 0.65rem 1.1rem;
+    border-radius: 50px;
+    font-weight: 900;
+    font-size: 1.1rem;
+    z-index: 15;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5), 0 0 0 3px rgba(255, 255, 255, 0.8);
+    animation: discountPulse 2s ease-in-out infinite;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 70px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.offer-badge::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    z-index: -1;
+    opacity: 0.3;
+    filter: blur(8px);
+    animation: discountGlow 2s ease-in-out infinite;
+}
+
+@keyframes discountPulse {
+    0%, 100% { 
+        transform: translateY(0) scale(1);
+    }
+    50% { 
+        transform: translateY(-3px) scale(1.05);
+    }
+}
+
+@keyframes discountGlow {
+    0%, 100% { 
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
+}
+
+/* Mobile adjustments for discount badge */
+@media (max-width: 768px) {
+    .offer-badge {
+        top: 0.5rem;
+        right: 0.5rem;
+        padding: 0.5rem 0.85rem;
+        font-size: 0.95rem;
+        min-width: 60px;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.8);
+    }
+}
+
+/* Image */
+.offer-card-image {
+    width: 100%;
+    height: 120px;
+    background: #f9fafb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.offer-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.6s ease;
+}
+
+.offer-card:hover .offer-card-image img {
+    transform: scale(1.15);
+}
+
+/* Content */
+.offer-card-content {
+    padding: 1rem;
+    background: #ffffff;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.offer-card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.5em;
+    flex-grow: 1;
+}
+
+/* Pricing - Enhanced */
+.offer-card-price {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+    padding: 0.6rem;
+    background: linear-gradient(135deg, #fef2f2 0%, #f0fdf4 100%);
+    border-radius: 12px;
+    width: 100%;
+    border: 2px solid #fee2e2;
+}
+
+.offer-price-old {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    text-decoration: line-through;
+    font-weight: 600;
+    position: relative;
+    display: inline-block;
+}
+
+.offer-price-old::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 2px;
+    background: #ef4444;
+    transform: translateY(-50%);
+}
+
+.offer-price-new {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: #ef4444;
+    line-height: 1.2;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.offer-price-new::before {
+    font-size: 1rem;
+    animation: moneyShake 2s ease-in-out infinite;
+}
+
+@keyframes moneyShake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+}
+
+.offer-save {
+    font-size: 0.8rem;
+    color: #10b981;
+    font-weight: 800;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    padding: 0.3rem 0.7rem;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 2px solid #10b981;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.15rem;
+}
+
+ 
+@keyframes savePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+/* Mobile price adjustments */
+@media (max-width: 768px) {
+    .offer-card-price {
+        padding: 0.6rem;
+        gap: 0.4rem;
+    }
+
+    .offer-price-old {
+        font-size: 0.9rem;
+    }
+
+    .offer-price-new {
+        font-size: 1rem;
+    }
+
+    .offer-price-new::before {
+        font-size: 1.3rem;
+    }
+
+    .offer-save {
+        font-size: 0.85rem;
+        padding: 0.35rem 0.7rem;
+    }
+}
+}
+
+/* Product Card Actions - Buttons Container */
+.offer-card .product-card-actions {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    margin-top: auto;
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Show Details Button */
+.btn-show-details {
+    width: 100%;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-show-details:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-show-details i {
+    font-size: 1rem;
+}
+
+/* Add to Cart Button - Full Width in Offer Cards */
+.offer-card .btn-add-cart-quick,
+.offer-card .discounted-cart-btn,
+.offer-card .bestseller-cart-btn,
+.offer-card .newarrival-cart-btn {
+    width: 100% !important;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    cursor: pointer;
+    height: auto;
+    min-height: 44px;
+}
+
+.offer-card .btn-add-cart-quick:hover,
+.offer-card .discounted-cart-btn:hover,
+.offer-card .bestseller-cart-btn:hover,
+.offer-card .newarrival-cart-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.offer-card .btn-add-cart-quick.in-cart,
+.offer-card .discounted-cart-btn.in-cart,
+.offer-card .bestseller-cart-btn.in-cart,
+.offer-card .newarrival-cart-btn.in-cart {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.offer-card .btn-add-cart-quick i,
+.offer-card .discounted-cart-btn i,
+.offer-card .bestseller-cart-btn i,
+.offer-card .newarrival-cart-btn i {
+    font-size: 1rem;
+}
+
+/* Carousel Controls */
+.offers-carousel-control {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(239, 68, 68, 0.2);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 1;
+    transition: all 0.3s ease;
+    z-index: 15;
+}
+
+.offers-carousel-control:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.offers-carousel-control:focus {
+    outline: 2px solid #ef4444;
+    outline-offset: 2px;
+}
+
+.offers-carousel-control .carousel-control-prev-icon,
+.offers-carousel-control .carousel-control-next-icon {
+    filter: invert(27%) sepia(97%) saturate(2837%) hue-rotate(346deg) brightness(94%) contrast(92%);
+    width: 24px;
+    height: 24px;
+}
+
+.offers-carousel-control:hover .carousel-control-prev-icon,
+.offers-carousel-control:hover .carousel-control-next-icon {
+    filter: invert(1);
+}
+ 
+
+.offers-carousel-control.carousel-control-next {
+    right: 10px;
+}
+
+/* Carousel Indicators */
+.offers-carousel-indicators {
+    margin-bottom: 0;
+    bottom: -2.5rem;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.offers-carousel-indicators button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #d1d5db;
+    border: none;
+    opacity: 1;
+    transition: all 0.3s ease;
+    margin: 0 0.375rem;
+}
+
+.offers-carousel-indicators button:hover {
+    background: #ef4444;
+    transform: scale(1.2);
+}
+
+.offers-carousel-indicators button.active {
+    background: #ef4444;
+    width: 32px;
+    border-radius: 16px;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+    
+    
+    .offers-carousel-control.carousel-control-next {
+        right: 5px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .offers-title {
+        font-size: 2.25rem;
+    }
+    
+    .offer-card-image {
+        height: 120px;
+    }
+}
+
+@media (max-width: 992px) {
+    .offers-section {
+        padding: 3rem 0;
+        margin: 1rem 0;
+    }
+    
+    .offers-header {
+        margin-bottom: 2rem;
+    }
+    
+    .offers-title {
+        font-size: 1.875rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .offers-icon {
+        font-size: 2rem;
+    }
+    
+    .offers-subtitle {
+        font-size: 1rem;
+    }
+    
+    .offer-card-image {
+        height: 110px;
+    }
+    
+    .offers-carousel-control {
+        width: 42px;
+        height: 42px;
+    }
+    
+    
+    
+    .offers-carousel-control.carousel-control-next {
+        right: 5px;
+    }
+    
+    .offers-carousel-control .carousel-control-prev-icon,
+    .offers-carousel-control .carousel-control-next-icon {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .offers-section {
+        padding: 1rem 0;
+    }
+    
+    .offer-card-image {
+        height: 100px;
+    }
+    
+    .offers-carousel-control {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .offers-carousel-control .carousel-control-prev-icon,
+    .offers-carousel-control .carousel-control-next-icon {
+        width: 18px;
+        height: 18px;
+    }
+    
+    /* Force 2 products per slide on small tablets (576-768px) */
+    .offers-carousel .carousel-item .row > [class*="col-"] {
+        flex: 0 0 calc(50% - 0.25rem) !important;
+        max-width: calc(50% - 0.25rem) !important;
+        width: calc(50% - 0.25rem) !important;
+    }
+    
+    .offers-carousel .carousel-item .row > [class*="col-"]:nth-child(n+3) {
+        display: none !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .offers-section {
+        padding: 2rem 0;
+    }
+    
+    .offers-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .offers-title {
+        font-size: 1.5rem;
+    }
+    
+    .offers-icon {
+        font-size: 1.75rem;
+    }
+    
+    .offers-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .offer-card-image {
+        height: 90px;
+    }
+    
+    .offer-card-content {
+        padding: 0.75rem;
+    }
+    
+    .offer-card-title {
+        font-size: 0.85rem;
+        margin-bottom: 0.6rem;
+        min-height: 2.2em;
+    }
+    
+    .offer-card .product-card-actions {
+        padding: 0 1rem 1rem 1rem;
+    }
+    
+    .offer-card .btn-show-details,
+    .offer-card .btn-add-cart-quick,
+    .offer-card .discounted-cart-btn {
+        font-size: 0.8rem;
+        padding: 0.625rem 0.875rem;
+        min-height: 40px;
+    }
+    
+    .offer-price-new {
+        font-size: 1rem;
+    }
+    
+    .offer-badge {
+        font-size: 0.875rem;
+        padding: 0.4rem 0.8rem;
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+    
+    .offers-carousel-control {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .offers-carousel-control .carousel-control-prev-icon,
+    .offers-carousel-control .carousel-control-next-icon {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .offers-carousel-indicators {
+        bottom: -2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .offers-carousel-indicators button {
+        width: 8px;
+        height: 8px;
+        margin: 0 0.25rem;
+    }
+    
+    .offers-carousel-indicators button.active {
+        width: 24px;
+        height: 8px;
+    }
+    
+    /* Force 2 products per slide on mobile (< 576px) */
+    .offers-carousel .carousel-item .row > [class*="col-"] {
+        flex: 0 0 calc(50% - 0.25rem) !important;
+        max-width: calc(50% - 0.25rem) !important;
+        width: calc(50% - 0.25rem) !important;
+    }
+    
+    .offers-carousel .carousel-item .row > [class*="col-"]:nth-child(n+3) {
+        display: none !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .offers-carousel-control {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .offers-carousel-control .carousel-control-prev-icon,
+    .offers-carousel-control .carousel-control-next-icon {
+        width: 14px;
+        height: 14px;
+    }
+}
+.offers-carousel-indicators [data-bs-target] {
+    background-color: #d1d5db;
+    height: 12px;
+    border: none;
+    opacity: 1;
+    transition: all 0.3s ease;
+    margin: 0 0.375rem;
+}
+
+.offers-carousel-indicators [data-bs-target].active {
+    background-color: #ef4444;
+    width: 32px;
+    height: 12px;
+    border-radius: 16px;
+}

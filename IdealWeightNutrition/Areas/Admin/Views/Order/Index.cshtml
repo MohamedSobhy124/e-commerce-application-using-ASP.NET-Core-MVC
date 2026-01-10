@@ -1,0 +1,1116 @@
+@model IEnumerable<OrderHeader>
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+
+@{
+    ViewData["Title"] = Localizer["OrdersManagement"];
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+}
+
+<partial name="_Notifications" />
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">
+                    <i class="bi bi-receipt me-3"></i>
+                    @Localizer["OrdersManagement"]
+                </h2>
+            </div>
+
+            <div class="admin-card-body">
+                <!-- Order Statistics Cards -->
+                <div class="order-stats-container" id="orderStatsContainer">
+                    <div class="order-stat-card all">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-list-ul"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["TotalOrders"]</div>
+                        <div class="order-stat-value" id="statAll">0</div>
+                    </div>
+                    <div class="order-stat-card pending">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["Pending"]</div>
+                        <div class="order-stat-value" id="statPending">0</div>
+                    </div>
+                    <div class="order-stat-card approved">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["Approved"]</div>
+                        <div class="order-stat-value" id="statApproved">0</div>
+                    </div>
+                    <div class="order-stat-card inprocess">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-gear"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["Processing"]</div>
+                        <div class="order-stat-value" id="statProcessing">0</div>
+                    </div>
+                    <div class="order-stat-card shipped">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-truck"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["Shipped"]</div>
+                        <div class="order-stat-value" id="statShipped">0</div>
+                    </div>
+                    <div class="order-stat-card delivered">
+                        <div class="order-stat-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="order-stat-label">@Localizer["Delivered"]</div>
+                        <div class="order-stat-value" id="statDelivered">0</div>
+                    </div>
+                </div>
+
+            
+
+                <!-- Compact Advanced Filters -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="filters-container" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 16px; padding: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #e9ecef;">
+                            <!-- Header with Toggle -->
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <button class="btn btn-sm btn-link p-0 text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters" aria-expanded="false" aria-controls="advancedFilters" style="color: #667eea;">
+                                        <i class="bi bi-funnel-fill me-1"></i>
+                                        <span class="fw-semibold">Filters</span>
+                                        <i class="bi bi-chevron-down ms-1" id="filterToggleIcon"></i>
+                                    </button>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" onclick="clearAllFilters()" style="border-radius: 8px; padding: 0.25rem 0.75rem;">
+                                    <i class="bi bi-x-circle me-1"></i>Clear
+                                </button>
+                            </div>
+                            
+                            <!-- Always Visible: Order Status Tabs & Search -->
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                <!-- Order Status Filter Tabs (Compact) -->
+                                <div class="order-filter-tabs-compact">
+                                    <button class="filter-tab-compact active" onclick="filterOrders('all')" data-filter-type="status" data-filter-value="all" title="All Orders">
+                                        <i class="bi bi-list-ul"></i> All
+                    </button>
+                                    <button class="filter-tab-compact" onclick="filterOrders('Pending')" data-filter-type="status" data-filter-value="Pending" title="Pending">
+                                        <i class="bi bi-clock"></i> Pending
+                    </button>
+                                    <button class="filter-tab-compact" onclick="filterOrders('Approved')" data-filter-type="status" data-filter-value="Approved" title="Approved">
+                                        <i class="bi bi-check-circle"></i> Approved
+                    </button>
+                                    <button class="filter-tab-compact" onclick="filterOrders('Processing')" data-filter-type="status" data-filter-value="Processing" title="Processing">
+                                        <i class="bi bi-gear"></i> Processing
+                    </button>
+                                    <button class="filter-tab-compact" onclick="filterOrders('Shipped')" data-filter-type="status" data-filter-value="Shipped" title="Shipped">
+                                        <i class="bi bi-truck"></i> Shipped
+                    </button>
+                                    <button class="filter-tab-compact" onclick="filterOrders('Delivered')" data-filter-type="status" data-filter-value="Delivered" title="Delivered">
+                                        <i class="bi bi-check-circle-fill"></i> Delivered
+                    </button>
+                                    <button class="filter-tab-compact" onclick="filterOrders('Cancelled')" data-filter-type="status" data-filter-value="Cancelled" title="Cancelled">
+                                        <i class="bi bi-x-circle"></i> Cancelled
+                    </button>
+                </div>
+                                
+                                <!-- Search Box (Compact) -->
+                                <div class="search-box-compact ms-auto">
+                                    <div class="input-group" style="max-width: 320px;">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-search"></i>
+                                        </span>
+                                        <input type="text"
+                                               id="orderSearchInput"
+                                               class="form-control"
+                                               placeholder="Search orders..."
+                                               style="border-left: none; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="clearSearch()" style="border-left: none; padding: 0.5rem 0.75rem;">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Collapsible Advanced Filters -->
+                            <div class="collapse" id="advancedFilters">
+                                <div class="border-top pt-3 mt-2">
+                                    <div class="row g-2">
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold text-muted mb-1">
+                                                <i class="bi bi-credit-card me-1"></i>Payment Status
+                                            </label>
+                                            <select id="paymentStatusFilter" class="form-select form-select-sm" onchange="applyFilters()" style="border-radius: 8px;">
+                                                <option value="">All</option>
+                                                <option value="Paid">Paid</option>
+                                                <option value="Pending">Pending</option>
+                                                <option value="Rejected">Rejected</option>
+                                                <option value="Refunded">Refunded</option>
+                                                <option value="PartiallyRefunded">Partially Refunded</option>
+                                                <option value="Cancelled">Cancelled</option>
+                                                <option value="Authorized">Authorized</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold text-muted mb-1">
+                                                <i class="bi bi-wallet2 me-1"></i>Payment Method
+                                            </label>
+                                            <select id="paymentMethodFilter" class="form-select form-select-sm" onchange="applyFilters()" style="border-radius: 8px;">
+                                                <option value="">All</option>
+                                                <option value="Tamara">Tamara</option>
+                                                <option value="Geidea">Geidea</option>
+                                                <option value="Tabby">Tabby</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold text-muted mb-1">
+                                                <i class="bi bi-calendar-event me-1"></i>From Date
+                                            </label>
+                                            <input type="date" id="dateFromFilter" class="form-control form-control-sm" onchange="applyFilters()" style="border-radius: 8px;">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold text-muted mb-1">
+                                                <i class="bi bi-calendar-check me-1"></i>To Date
+                                            </label>
+                                            <input type="date" id="dateToFilter" class="form-control form-control-sm" onchange="applyFilters()" style="border-radius: 8px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Order Table -->
+                <div class="order-table-wrapper">
+                    <div id="orderTable" style="min-height: 400px; background: white; border-radius: 12px;">
+                        <div style="text-align: center; padding: 3rem; color: #667eea;">
+                            <i class="bi bi-arrow-repeat" style="font-size: 3rem; animation: spin 1s linear infinite;"></i>
+                            <p style="margin-top: 1rem; font-size: 1.2rem; font-weight: 600;">Loading Orders...</p>
+                            <p style="font-size: 0.9rem; color: #6c757d;">If this message persists, check browser console (F12)</p>
+                    </div>
+                </div>
+                </div>
+                
+                <style>
+                    @@keyframes spin {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                    }
+                    
+                    /* Enhanced Tabulator Styling */
+                    #orderTable .tabulator {
+                        border: none;
+                        border-radius: 16px;
+                        overflow: hidden;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                    }
+                    
+                    #orderTable .tabulator-header {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        border: none;
+                    }
+                    
+                    #orderTable .tabulator-header .tabulator-col {
+                        background: transparent;
+                        border-right: 1px solid rgba(255,255,255,0.2);
+                    }
+                    
+                    #orderTable .tabulator-col-title {
+                        color: white;
+                        font-weight: 600;
+                        font-size: 0.95rem;
+                    }
+                    
+                    #orderTable .tabulator-arrow {
+                        border-bottom-color: white;
+                        border-top-color: white;
+                    }
+                    
+                    #orderTable .tabulator-row {
+                        border-bottom: 1px solid #f0f0f0;
+                        transition: all 0.2s ease;
+                    }
+                    
+                    #orderTable .tabulator-row:hover {
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                        transform: scale(1.01);
+                        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+                    }
+                    
+                    #orderTable .tabulator-row.tabulator-row-even {
+                        background: #fafbfc;
+                    }
+                    
+                    #orderTable .tabulator-row.tabulator-row-even:hover {
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    }
+                    
+                    #orderTable .tabulator-cell {
+                        padding: 14px 10px;
+                        vertical-align: middle;
+                    }
+                    
+                    /* Pagination Styling */
+                    #orderTable .tabulator-footer {
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                        border: none;
+                        padding: 1rem;
+                        border-radius: 0 0 16px 16px;
+                    }
+                    
+                    #orderTable .tabulator-page {
+                        background: white;
+                        border: 2px solid #dee2e6;
+                        color: #667eea;
+                        margin: 0 3px;
+                        border-radius: 8px;
+                        padding: 8px 14px;
+                        font-weight: 600;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+                    
+                    #orderTable .tabulator-page:hover:not([disabled]) {
+                        background: #667eea;
+                        color: white;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+                    }
+                    
+                    #orderTable .tabulator-page.active {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border-color: transparent;
+                        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                        transform: scale(1.05);
+                    }
+                    
+                    #orderTable .tabulator-page[disabled] {
+                        opacity: 0.4;
+                        cursor: not-allowed;
+                    }
+                    
+                    #orderTable .tabulator-pages {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.25rem;
+                    }
+                    
+                    /* Mobile Responsive */
+                    @@media (max-width: 768px) {
+                        #orderTable .tabulator-cell {
+                            padding: 10px 6px;
+                            font-size: 0.875rem;
+                        }
+                        
+                        #orderTable .tabulator-page {
+                            padding: 6px 10px;
+                            font-size: 0.875rem;
+                            margin: 0 2px;
+                        }
+                        
+                        #orderTable .tabulator-footer {
+                            padding: 0.75rem 0.5rem;
+                        }
+                    }
+
+                    .tabulator .tabulator-footer .tabulator-paginator{
+                        display:inline-flex !important;
+                        flex:0 !important;
+                    }
+                    
+                    /* Search Box Styling */
+                    .search-box-container {
+                        animation: slideInDown 0.5s ease-out;
+                    }
+                    
+                    @@keyframes slideInDown {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                    
+                    .search-box-container .input-group-text {
+                        border-radius: 12px 0 0 12px;
+                        padding: 0.75rem 1rem;
+                    }
+                    
+                    .search-box-container .form-control {
+                        border-radius: 0;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .search-box-container .form-control:focus {
+                        border-color: #667eea;
+                        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
+                        transform: translateY(-2px);
+                    }
+                    
+                    .search-box-container .btn {
+                        border-radius: 0 12px 12px 0;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .search-box-container .btn:hover {
+                        background: #ef4444;
+                        color: white;
+                        border-color: #ef4444;
+                    }
+                    
+                    /* Order ID Link Styling */
+                    .order-id-link:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+                        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+                    }
+                    
+                    .order-id-link:active {
+                        transform: translateY(0);
+                    }
+                    
+                    /* ========== ENHANCED COMPACT FILTER STYLES ========== */
+                    
+                    /* Compact Filter Tabs - Premium Design */
+                    .order-filter-tabs-compact {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 0.5rem;
+                        align-items: center;
+                        padding: 0.5rem;
+                        background: rgba(255, 255, 255, 0.6);
+                        border-radius: 12px;
+                        backdrop-filter: blur(10px);
+                        border: 1px solid rgba(102, 126, 234, 0.1);
+                    }
+                    
+                    .filter-tab-compact {
+                        padding: 0.5rem 1rem;
+                        border: 2px solid transparent;
+                        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                        border-radius: 10px;
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                        color: #495057;
+                        cursor: pointer;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        white-space: nowrap;
+                        position: relative;
+                        overflow: hidden;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                    }
+                    
+                    .filter-tab-compact::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: -100%;
+                        width: 100%;
+                        height: 100%;
+                        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+                        transition: left 0.5s;
+                    }
+                    
+                    .filter-tab-compact:hover::before {
+                        left: 100%;
+                    }
+                    
+                    .filter-tab-compact:hover {
+                        border-color: #667eea;
+                        color: #667eea;
+                        transform: translateY(-2px) scale(1.02);
+                        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+                        background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+                    }
+                    
+                    .filter-tab-compact.active {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        border-color: transparent;
+                        color: white;
+                        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                        transform: translateY(-1px);
+                        animation: pulseGlow 2s infinite;
+                    }
+                    
+                    .filter-tab-compact.active::before {
+                        display: none;
+                    }
+                    
+                    @@keyframes pulseGlow {
+                        0%, 100% {
+                            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                        }
+                        50% {
+                            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.6);
+                        }
+                    }
+                    
+                    .filter-tab-compact i {
+                        font-size: 0.95rem;
+                        transition: transform 0.3s ease;
+                    }
+                    
+                    .filter-tab-compact:hover i {
+                        transform: scale(1.1) rotate(5deg);
+                    }
+                    
+                    .filter-tab-compact.active i {
+                        animation: iconBounce 1s infinite;
+                    }
+                    
+                    @@keyframes iconBounce {
+                        0%, 100% {
+                            transform: translateY(0);
+                        }
+                        50% {
+                            transform: translateY(-2px);
+                        }
+                    }
+                    
+                    /* Filters Container - Premium Design */
+                    .filters-container {
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        position: relative;
+                        overflow: hidden;
+                    }
+                    
+                    .filters-container::after {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: -100%;
+                        width: 100%;
+                        height: 3px;
+                        background: linear-gradient(90deg, transparent, #667eea, #764ba2, transparent);
+                        animation: shimmer 3s infinite;
+                    }
+                    
+                    @@keyframes shimmer {
+                        0% {
+                            left: -100%;
+                        }
+                        100% {
+                            left: 100%;
+                        }
+                    }
+                    
+                    .filters-container:hover {
+                        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+                        transform: translateY(-2px);
+                    }
+                    
+                    /* Collapse Animation */
+                    #advancedFilters.collapsing {
+                        transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+                    
+                    #advancedFilters.show {
+                        animation: slideDown 0.35s ease-out;
+                    }
+                    
+                    @@keyframes slideDown {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-10px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                    
+                    /* Search Box Compact - Premium Design */
+                    .search-box-compact .input-group {
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                        border-radius: 10px;
+                        overflow: hidden;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .search-box-compact .input-group:hover {
+                        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+                        transform: translateY(-1px);
+                    }
+                    
+                    .search-box-compact .input-group-text {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        border: none;
+                        color: white;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .search-box-compact .input-group:hover .input-group-text {
+                        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+                    }
+                    
+                    .search-box-compact .form-control {
+                        border-left: none;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .search-box-compact .form-control:focus {
+                        border-color: #667eea;
+                        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+                        background: #fafbff;
+                    }
+                    
+                    .search-box-compact .btn-outline-secondary {
+                        border-left: none;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .search-box-compact .btn-outline-secondary:hover {
+                        background: #ef4444;
+                        border-color: #ef4444;
+                        color: white;
+                        transform: scale(1.05);
+                    }
+                    
+                    /* Form Controls - Premium Styling */
+                    .form-select-sm, .form-control-sm {
+                        font-size: 0.875rem;
+                        border: 2px solid #e9ecef;
+                        transition: all 0.3s ease;
+                        background: white;
+                    }
+                    
+                    .form-select-sm:hover, .form-control-sm:hover {
+                        border-color: #667eea;
+                        box-shadow: 0 2px 6px rgba(102, 126, 234, 0.1);
+                    }
+                    
+                    .form-select-sm:focus, .form-control-sm:focus {
+                        border-color: #667eea;
+                        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+                        background: #fafbff;
+                        transform: translateY(-1px);
+                    }
+                    
+                    /* Filter Labels */
+                    .form-label.small {
+                        font-size: 0.8rem;
+                        letter-spacing: 0.5px;
+                        text-transform: uppercase;
+                    }
+                    
+                    .form-label.small i {
+                        color: #667eea;
+                        transition: transform 0.3s ease;
+                    }
+                    
+                    .form-label.small:hover i {
+                        transform: scale(1.2) rotate(15deg);
+                    }
+                    
+                    /* Clear Button - Enhanced */
+                    .btn-outline-danger {
+                        transition: all 0.3s ease;
+                        font-weight: 600;
+                    }
+                    
+                    .btn-outline-danger:hover {
+                        transform: translateY(-2px) scale(1.05);
+                        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+                    }
+                    
+                    /* Filter Toggle Button */
+                    [data-bs-toggle="collapse"] {
+                        transition: all 0.3s ease;
+                    }
+                    
+                    [data-bs-toggle="collapse"]:hover {
+                        color: #764ba2 !important;
+                        transform: translateX(3px);
+                    }
+                    
+                    /* Responsive - Enhanced */
+                    @@media (max-width: 768px) {
+                        .order-filter-tabs-compact {
+                            width: 100%;
+                            margin-bottom: 0.75rem;
+                            padding: 0.75rem;
+                        }
+                        
+                        .filter-tab-compact {
+                            flex: 1;
+                            min-width: calc(50% - 0.25rem);
+                            justify-content: center;
+                            padding: 0.6rem 0.8rem;
+                            font-size: 0.8rem;
+                        }
+                        
+                        .search-box-compact {
+                            width: 100%;
+                            margin-top: 0.75rem;
+                        }
+                        
+                        .search-box-compact .input-group {
+                            max-width: 100% !important;
+                        }
+                        
+                        .filters-container {
+                            padding: 0.75rem !important;
+                        }
+                    }
+                </style>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/order-index.css" />
+    <!-- Tabulator CSS -->
+    <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
+}
+
+@section Scripts {
+    <!-- Tabulator JS -->
+    <script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+    
+    <script>
+        // Pass translations to JavaScript
+        window.orderTranslations = {
+            orderID: '@Html.Raw(Localizer["OrderID"].Value)',
+            customer: '@Html.Raw(Localizer["Customer"].Value)',
+            email: '@Html.Raw(Localizer["Email"].Value)',
+            paymentMethod: '@Html.Raw(Localizer["PaymentMethod"].Value)',
+            phone: '@Html.Raw(Localizer["Phone"].Value)',
+            orderDate: '@Html.Raw(Localizer["OrderDate"].Value)',
+            total: '@Html.Raw(Localizer["Total"].Value)',
+            orderStatus: '@Html.Raw(Localizer["OrderStatus"].Value)',
+            paymentStatus: '@Html.Raw(Localizer["PaymentStatus"].Value)',
+            actions: '@Html.Raw(Localizer["Actions"].Value)',
+            pending: '@Html.Raw(Localizer["Pending"].Value)',
+            approved: '@Html.Raw(Localizer["Approved"].Value)',
+            processing: '@Html.Raw(Localizer["Processing"].Value)',
+            shipped: '@Html.Raw(Localizer["Shipped"].Value)',
+            delivered: '@Html.Raw(Localizer["Delivered"].Value)',
+            cancelled: '@Html.Raw(Localizer["Cancelled"].Value)',
+            paid: '@Html.Raw(Localizer["Paid"]?.Value ?? "Paid")',
+            refunded: '@Html.Raw(Localizer["Refunded"].Value)',
+            rejected: '@Html.Raw(Localizer["Rejected"].Value)',
+            guestOrder: '@Html.Raw(Localizer["GuestOrder"].Value)',
+            noOrdersFound: '@Html.Raw(Localizer["NoOrdersFound"].Value)',
+            details: '@Html.Raw(Localizer["Details"].Value)',
+            na: '@Html.Raw(Localizer["NA"]?.Value ?? "N/A")',
+            showingOrders: '@Html.Raw(Localizer["ShowingOrders"]?.Value ?? "Showing {start} to {end} of {total} orders")',
+            search: '@Html.Raw(Localizer["Search"]?.Value ?? "Search...")'
+        };
+    </script>
+    <script>
+        // INLINE TEST - Direct initialization
+        
+        // Load statistics function (define first)
+        window.loadOrderStatistics = function() {
+            fetch('/Admin/Order/GetOrderStatistics')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.stats) {
+                        document.getElementById('statAll').textContent = data.stats.all || 0;
+                        document.getElementById('statPending').textContent = data.stats.pending || 0;
+                        document.getElementById('statApproved').textContent = data.stats.approved || 0;
+                        document.getElementById('statProcessing').textContent = data.stats.processing || 0;
+                        document.getElementById('statShipped').textContent = data.stats.shipped || 0;
+                        document.getElementById('statDelivered').textContent = data.stats.delivered || 0;
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load statistics:', error);
+                });
+        };
+        
+        window.addEventListener('load', function() {
+            
+            // Load statistics first
+            window.loadOrderStatistics();
+            
+            setTimeout(function() {
+                if (typeof Tabulator === 'undefined') {
+                    console.error('❌ Tabulator NOT LOADED');
+                    document.getElementById('orderTable').innerHTML = '<div style="padding:2rem;text-align:center;color:red;"><h3>⚠️ Tabulator Library Failed to Load</h3><p>Please check your internet connection or try refreshing the page.</p></div>';
+                    return;
+                }
+                
+                
+                // Global filter variables
+                window.currentFilter = 'all';
+                window.currentPaymentStatus = '';
+                window.currentPaymentMethod = '';
+                window.currentDateFrom = '';
+                window.currentDateTo = '';
+                
+                var table = new Tabulator("#orderTable", {
+                    height: "800px",
+                    layout: "fitDataFill",
+                    responsiveLayout: false,
+                    placeholder: "No orders found",
+                    pagination: true,
+                    paginationMode: "remote",
+                    paginationSize: 10,
+                    paginationSizeSelector: [10, 25, 50, 100],
+                    paginationCounter: "rows",
+                    ajaxURL: "/Admin/Order/GetAll",
+                    ajaxParams: function() {
+                        return {
+                            status: window.currentFilter === 'all' ? '' : window.currentFilter,
+                            paymentStatus: window.currentPaymentStatus || '',
+                            paymentMethod: window.currentPaymentMethod || '',
+                            dateFrom: window.currentDateFrom || '',
+                            dateTo: window.currentDateTo || '',
+                            searchValue: document.getElementById('orderSearchInput') ? document.getElementById('orderSearchInput').value : ''
+                        };
+                    },
+                    ajaxURLGenerator: function(url, config, params){
+                        var status = window.currentFilter === 'all' ? '' : window.currentFilter;
+                        var searchValue = document.getElementById('orderSearchInput') ? document.getElementById('orderSearchInput').value : '';
+                        var paymentStatus = window.currentPaymentStatus || '';
+                        var paymentMethod = window.currentPaymentMethod || '';
+                        var dateFrom = window.currentDateFrom || '';
+                        var dateTo = window.currentDateTo || '';
+                        
+                        var queryParams = [
+                            `start=${(params.page - 1) * params.size}`,
+                            `length=${params.size}`,
+                            `status=${encodeURIComponent(status)}`,
+                            `paymentStatus=${encodeURIComponent(paymentStatus)}`,
+                            `paymentMethod=${encodeURIComponent(paymentMethod)}`,
+                            `dateFrom=${encodeURIComponent(dateFrom)}`,
+                            `dateTo=${encodeURIComponent(dateTo)}`,
+                            `searchValue=${encodeURIComponent(searchValue)}`
+                        ];
+                        
+                        if (params.sort && params.sort.length > 0) {
+                            queryParams.push(`sortColumn=${params.sort[0].field}`);
+                            queryParams.push(`sortDirection=${params.sort[0].dir}`);
+                        }
+                        
+                        var finalUrl = url + '?' + queryParams.join('&');
+                        console.log('Filter URL:', finalUrl); // Debug log
+                        return finalUrl;
+                    },
+                    ajaxResponse: function(url, params, response) {
+                        // Return object with last_page for pagination
+                        return {
+                            last_page: response.last_page || 1,
+                            data: response.data || []
+                        };
+                    },
+                    columns: [
+                        {
+                            title: "@Localizer["OrderID"]", 
+                            field: "id",
+                            widthGrow: 1,
+                            minWidth: 100,
+                            sorter: "number",
+                            headerSort: true,
+                            formatter: function(cell) {
+                                var orderId = cell.getValue();
+                                return '<a href="/Admin/Order/Details/' + orderId + '" class="order-id-link" onclick="event.stopPropagation();" style="display:inline-block;padding:0.5rem 1rem;border-radius:8px;font-weight:600;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;color:white;text-decoration:none;transition:all 0.2s;">#' + orderId + '</a>';
+                            },
+                            cellClick: function(e, cell){
+                                e.stopPropagation();
+                            }
+                        },
+                        {
+                            title: "@Localizer["Customer"]", 
+                            field: "name",
+                            widthGrow: 2,
+                            minWidth: 120,
+                            sorter: "string",
+                            headerSort: true,
+                            formatter: function(cell) {
+                                var value = cell.getValue() || 'N/A';
+                                return '<div style="font-weight:500">' + value + '</div>';
+                            }
+                        },
+                        {
+                            title: "@Localizer["Email"]", 
+                            field: "email",
+                            widthGrow: 2,
+                            minWidth: 150,
+                            sorter: "string",
+                            headerSort: false,
+                            formatter: function(cell) {
+                                var value = cell.getValue() || 'N/A';
+                                return '<small style="color:#6c757d">' + value + '</small>';
+                            }
+                        },
+                        {
+                            title: "@Localizer["Phone"]", 
+                            field: "phoneNumber",
+                            widthGrow: 1.5,
+                            minWidth: 110,
+                            formatter: function(cell) {
+                                var value = cell.getValue() || 'N/A';
+                                return '<span style="font-family:monospace">' + value + '</span>';
+                            }
+                        },
+                        {
+                            title: "@Localizer["OrderDate"]", 
+                            field: "orderDate",
+                            widthGrow: 2,
+                            minWidth: 140,
+                            sorter: "string",
+                            headerSort: true,
+                            sorterParams: {
+                                format: "iso"
+                            },
+                            formatter: function(cell) {
+                                var date = new Date(cell.getValue());
+                                return '<div style="font-size:0.9rem">' + date.toLocaleDateString('en-US', {
+                                    month: 'short', 
+                                    day: 'numeric', 
+                                    year: 'numeric'
+                                }) + '<br><small style="color:#6c757d">' + date.toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }) + '</small></div>';
+                            }
+                        }, {
+                            title: "@Localizer["PaymentMethod"]",
+                            field: "paymentMethod",
+                            widthGrow: 2,
+                            minWidth: 150,
+                            sorter: "string",
+                            headerSort: false,
+                            formatter: function(cell) {
+                                var value = cell.getValue() || 'N/A';
+                                return '<small style="color:#6c757d">' + value + '</small>';
+                            }
+                        },
+                        {
+                            title: "@Localizer["Total"]", 
+                            field: "orderTotal",
+                            widthGrow: 1.5,
+                            minWidth: 100,
+                            sorter: "number",
+                            headerSort: true,
+                            hozAlign: "right",
+                            formatter: function(cell) {
+                                return '<strong style="color:#059669;font-size:1.1rem">@currencySymbol ' + parseFloat(cell.getValue()).toFixed(2) + '</strong>';
+                            }
+                        },
+                        {
+                            title: "@Localizer["OrderStatus"]", 
+                            field: "orderStatus",
+                            widthGrow: 2,
+                            minWidth: 130,
+                            sorter: "string",
+                            headerSort: true,
+                            formatter: function(cell) {
+                                var status = (cell.getValue() || '').toLowerCase();
+                                var badgeStyle = '';
+                                var icon = 'bi-hourglass';
+                                
+                                if (status.includes('delivered')) {
+                                    badgeStyle = 'background:linear-gradient(135deg,#10b981,#059669);color:white';
+                                    icon = 'bi-check-circle-fill';
+                                } else if (status.includes('approved')) {
+                                    badgeStyle = 'background:linear-gradient(135deg,#10b981,#059669);color:white';
+                                    icon = 'bi-check-circle';
+                                } else if (status.includes('shipped')) {
+                                    badgeStyle = 'background:linear-gradient(135deg,#3b82f6,#2563eb);color:white';
+                                    icon = 'bi-truck';
+                                } else if (status.includes('cancel')) {
+                                    badgeStyle = 'background:linear-gradient(135deg,#ef4444,#dc2626);color:white';
+                                    icon = 'bi-x-circle';
+                                } else if (status.includes('process')) {
+                                    badgeStyle = 'background:linear-gradient(135deg,#06b6d4,#0891b2);color:white';
+                                    icon = 'bi-gear';
+                                } else if (status.includes('pending')) {
+                                    badgeStyle = 'background:linear-gradient(135deg,#f59e0b,#d97706);color:white';
+                                    icon = 'bi-clock';
+                                }
+                                
+                                return '<span style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.375rem 0.75rem;border-radius:20px;font-size:0.875rem;font-weight:600;' + badgeStyle + '"><i class="bi ' + icon + '"></i>' + cell.getValue() + '</span>';
+                            }
+                        },
+                        {
+                            title: "@Localizer["PaymentStatus"]", 
+                            field: "paymentStatus",
+                            widthGrow: 2,
+                            minWidth: 130,
+                            formatter: function(cell) {
+                                var status = (cell.getValue() || '').toLowerCase();
+                                var badgeStyle = 'background:#fef3c7;color:#92400e;border:2px solid #f59e0b';
+                                var icon = 'bi-clock';
+                                
+                                if (status.includes('paid')) {
+                                    badgeStyle = 'background:#d1fae5;color:#065f46;border:2px solid #10b981';
+                                    icon = 'bi-check-circle-fill';
+                                } else if (status.includes('reject')) {
+                                    badgeStyle = 'background:#fee2e2;color:#991b1b;border:2px solid #ef4444';
+                                    icon = 'bi-x-circle';
+                                } else if (status.includes('refund')) {
+                                    badgeStyle = 'background:#e0e7ff;color:#4338ca;border:2px solid #6366f1';
+                                    icon = 'bi-arrow-counterclockwise';
+                                }
+                                
+                                return '<span style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.375rem 0.75rem;border-radius:20px;font-size:0.875rem;font-weight:600;' + badgeStyle + '"><i class="bi ' + icon + '"></i>' + cell.getValue() + '</span>';
+                            }
+                        },
+                        {
+                            title: "@Localizer["Actions"]", 
+                            field: "actions",
+                            widthGrow: 1,
+                            minWidth: 100,
+                            headerSort: false,
+                            hozAlign: "center",
+                            formatter: function(cell) {
+                                var orderId = cell.getRow().getData().id;
+                                return '<a href="/Admin/Order/Details/' + orderId + '" class="btn btn-sm btn-primary" onclick="event.stopPropagation();" style="padding:0.5rem 1rem;border-radius:8px;font-weight:600;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;transition:all 0.2s;"><i class="bi bi-eye me-1"></i>@Localizer["Details"]</a>';
+                            },
+                            cellClick: function(e, cell){
+                                e.stopPropagation(); // Prevent row click when clicking button
+                            }
+                        }
+                    ],
+                    initialSort: [
+                        {column: "id", dir: "desc"}
+                    ],
+                    
+                   
+                    
+                    rowFormatter: function(row){
+                        row.getElement().style.cursor = "pointer";
+                    }
+                });
+                
+              
+                window.orderTable = table;
+                
+            }, 1500);
+        });
+        
+        window.filterOrders = function(status) {
+            window.currentFilter = status;
+            
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            const tabs = document.querySelectorAll('.filter-tab');
+            tabs.forEach(tab => {
+                const filterValue = tab.getAttribute('data-filter-value');
+                if (filterValue === status) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Reload table data with new filter
+            applyFilters();
+        };
+        
+        window.applyFilters = function() {
+            // Update filter values from UI
+            window.currentPaymentStatus = document.getElementById('paymentStatusFilter') ? document.getElementById('paymentStatusFilter').value : '';
+            window.currentPaymentMethod = document.getElementById('paymentMethodFilter') ? document.getElementById('paymentMethodFilter').value : '';
+            window.currentDateFrom = document.getElementById('dateFromFilter') ? document.getElementById('dateFromFilter').value : '';
+            window.currentDateTo = document.getElementById('dateToFilter') ? document.getElementById('dateToFilter').value : '';
+            
+            // Reload table data with all filters
+            if (window.orderTable) {
+                window.orderTable.setPage(1).then(function(){
+                    window.orderTable.setData();
+                });
+            }
+        };
+        
+        window.clearAllFilters = function() {
+            // Reset all filters
+            window.currentFilter = 'all';
+            window.currentPaymentStatus = '';
+            window.currentPaymentMethod = '';
+            window.currentDateFrom = '';
+            window.currentDateTo = '';
+            
+            // Reset UI
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector('.filter-tab[data-filter-value="all"]')?.classList.add('active');
+            
+            if (document.getElementById('paymentStatusFilter')) {
+                document.getElementById('paymentStatusFilter').value = '';
+            }
+            if (document.getElementById('paymentMethodFilter')) {
+                document.getElementById('paymentMethodFilter').value = '';
+            }
+            if (document.getElementById('dateFromFilter')) {
+                document.getElementById('dateFromFilter').value = '';
+            }
+            if (document.getElementById('dateToFilter')) {
+                document.getElementById('dateToFilter').value = '';
+            }
+            if (document.getElementById('orderSearchInput')) {
+                document.getElementById('orderSearchInput').value = '';
+            }
+            
+            // Reload table
+            applyFilters();
+        };
+        
+        // Search function (triggered by input)
+        window.searchOrders = function() {
+            var searchValue = document.getElementById('orderSearchInput').value;
+            
+            if (window.orderTable) {
+                window.orderTable.setPage(1).then(function(){
+                    window.orderTable.setData();
+                });
+            }
+        };
+        
+        // Clear search
+        window.clearSearch = function() {
+            document.getElementById('orderSearchInput').value = '';
+            window.searchOrders();
+        };
+        
+        // Add event listener for search input (with debounce)
+        var searchTimeout;
+        document.addEventListener('DOMContentLoaded', function() {
+            var searchInput = document.getElementById('orderSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(function() {
+                        window.searchOrders();
+                    }, 500); // Wait 500ms after user stops typing
+                });
+                
+                // Search on Enter key
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        clearTimeout(searchTimeout);
+                        window.searchOrders();
+                    }
+                });
+            }
+            
+            // Toggle icon rotation for collapse
+            var filterToggle = document.querySelector('[data-bs-toggle="collapse"][data-bs-target="#advancedFilters"]');
+            var filterToggleIcon = document.getElementById('filterToggleIcon');
+            if (filterToggle && filterToggleIcon) {
+                filterToggle.addEventListener('click', function() {
+                    setTimeout(function() {
+                        var isExpanded = filterToggle.getAttribute('aria-expanded') === 'true';
+                        filterToggleIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+                        filterToggleIcon.style.transition = 'transform 0.3s ease';
+                    }, 10);
+                });
+            }
+        });
+        
+    </script>
+}
+

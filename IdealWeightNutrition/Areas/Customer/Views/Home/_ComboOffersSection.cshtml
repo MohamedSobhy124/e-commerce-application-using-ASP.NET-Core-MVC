@@ -1,0 +1,120 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+@model IEnumerable<IdealWeightNutrition.Models.ComboOffer>
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var comboOffers = Model?.ToList() ?? new List<IdealWeightNutrition.Models.ComboOffer>();
+    var hasComboOffers = comboOffers.Any();
+}
+
+@if (hasComboOffers)
+{
+    <section class="combo-offers-section" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">
+                        <i class="bi bi-box-seam-fill"></i>
+                        @Localizer["ComboOffers"]
+                    </h2>
+                    <p class="section-subtitle">@Localizer["SaveMoreWithComboDeals"]</p>
+                </div>
+                <a asp-area="Customer" asp-controller="ComboOffer" asp-action="Index" class="view-all-link">
+                    @Localizer["ViewAll"] <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="products-carousel-wrapper">
+                <div class="products-carousel">
+                    @foreach (var comboOffer in comboOffers)
+                    {
+                        var comboName = currentCulture == "ar" && !string.IsNullOrEmpty(comboOffer.NameAr) 
+                            ? comboOffer.NameAr 
+                            : comboOffer.Name;
+                        
+                        var comboImages = new List<string>();
+                        if (comboOffer.ComboOfferImages != null && comboOffer.ComboOfferImages.Any())
+                        {
+                            comboImages = comboOffer.ComboOfferImages.OrderBy(img => img.DisplayOrder).Select(img => img.ImageUrl).ToList();
+                        }
+                        if (!string.IsNullOrEmpty(comboOffer.ImageUrl) && !comboImages.Contains(comboOffer.ImageUrl))
+                        {
+                            comboImages.Insert(0, comboOffer.ImageUrl);
+                        }
+                        
+                        var mainImage = comboImages.FirstOrDefault() ?? "/images/default-product.jpg";
+                        
+                        <div class="product-card-mini combo-offer-card-mini">
+                            <a asp-area="Customer" asp-controller="ComboOffer" asp-action="Details" asp-route-id="@comboOffer.Id" class="text-decoration-none text-dark">
+                                <div class="product-image-wrapper-mini combo-offer-image-wrapper-mini">
+                                    @if (comboImages.Count > 1)
+                                    {
+                                        <div id="comboImageCarousel_@comboOffer.Id" class="carousel slide product-image-carousel" data-bs-ride="carousel" data-bs-interval="3000" data-bs-touch="true">
+                                            <div class="carousel-inner" style="min-height: auto;">
+                                                @for (int imgIndex = 0; imgIndex < comboImages.Count; imgIndex++)
+                                                {
+                                                    <div class="carousel-item @(imgIndex == 0 ? "active" : "")">
+                                                        <img src="@comboImages[imgIndex]" alt="@comboName" class="product-image-mini" />
+                                                    </div>
+                                                }
+                                            </div>
+                                            <button class="carousel-control-prev" type="button" data-bs-target="#comboImageCarousel_@comboOffer.Id" data-bs-slide="prev">
+                                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            </button>
+                                            <button class="carousel-control-next" type="button" data-bs-target="#comboImageCarousel_@comboOffer.Id" data-bs-slide="next">
+                                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <img src="@mainImage" alt="@comboName" class="product-image-mini" />
+                                    }
+                                    
+                                    <div class="product-badge-mini combo-offer-badge-mini">
+                                        <span class="badge bg-danger">@comboOffer.DiscountPercentage.ToString("F0")% @Localizer["Off"]</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="product-content-mini">
+                                    <h3 class="product-title-mini combo-offer-title-mini">
+                                        @comboName
+                                    </h3>
+                                    
+                                    <div class="product-price-mini combo-offer-price-mini">
+                                        <div class="product-price-old-mini">
+                                            <span class="text-decoration-line-through text-muted" style="font-size: 0.85rem;">@Html.Raw(currencySymbol)@comboOffer.OriginalTotalPrice.ToString("N2")</span>
+                                        </div>
+                                        <div class="product-price-new-mini">
+                                            <span style="font-size: 1.3rem; font-weight: 800; color: #10b981;">@Html.Raw(currencySymbol)@comboOffer.ComboPrice.ToString("N2")</span>
+                                        </div>
+                                        <div class="combo-offer-savings-mini" style="font-size: 0.8rem; color: #10b981; font-weight: 600; margin-top: 0.25rem;">
+                                            <i class="bi bi-tag-fill me-1"></i>@Localizer["DiscountSave"] @Html.Raw(currencySymbol)@comboOffer.TotalSavings.ToString("N2")
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="combo-offer-info-mini" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.85rem; color: #64748b;">
+                                        <i class="bi bi-box-seam"></i>
+                                        <span>@comboOffer.TotalProducts @Localizer["Items"]</span>
+                                    </div>
+                                    
+                                    <div class="product-actions-mini" style="margin-top: 0.75rem;">
+                                        <span class="btn btn-primary btn-sm w-100" style="font-size: 0.85rem;">
+                                            <i class="bi bi-eye me-1"></i>@Localizer["View"]
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
