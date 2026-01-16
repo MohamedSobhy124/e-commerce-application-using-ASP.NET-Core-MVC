@@ -109,7 +109,17 @@ namespace IdealWeightNutrition.Utility
                 if (attachmentBytes != null && attachmentBytes.Length > 0)
                 {
                     var stream = new System.IO.MemoryStream(attachmentBytes);
-                    var attachment = new Attachment(stream, attachmentFileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                    // Determine MIME type based on file extension
+                    string mimeType = "application/octet-stream";
+                    if (attachmentFileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                    {
+                        mimeType = "application/pdf";
+                    }
+                    else if (attachmentFileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) || attachmentFileName.EndsWith(".xls", StringComparison.OrdinalIgnoreCase))
+                    {
+                        mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    }
+                    var attachment = new Attachment(stream, attachmentFileName, mimeType);
                     mailMessage.Attachments.Add(attachment);
                 }
 

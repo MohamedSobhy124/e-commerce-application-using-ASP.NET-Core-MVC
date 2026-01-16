@@ -22,18 +22,21 @@ namespace IdealWeightNutrition.Services
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly InvoiceService _invoiceService;
         public NotificationService(
             IUnitOfWork unitOfWork,
             IEmailSender emailSender,
             IHubContext<NotificationHub> hubContext,
             UserManager<IdentityUser> userManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            InvoiceService invoiceService)
         {
             _unitOfWork = unitOfWork;
             _emailSender = emailSender;
             _hubContext = hubContext;
             _userManager = userManager;
             _configuration = configuration;
+            _invoiceService = invoiceService;
         }
 
         public async Task SendOrderNotificationToAdmins(OrderHeader orderHeader)
@@ -92,16 +95,44 @@ namespace IdealWeightNutrition.Services
             // Get order details
             var orderDetails = _unitOfWork.OrderDetail.GetAll(
                 o => o.OrderHeaderId == orderHeader.Id,
-                includeProperties: "Product"
+                includeProperties: "Product,ComboOffer"
             ).ToList();
+
+            // Generate PDF invoice
+            byte[] invoicePdf = null;
+            try
+            {
+                invoicePdf = _invoiceService.GenerateInvoicePdf(orderHeader, orderDetails, customer);
+            }
+            catch (Exception ex)
+            {
+                // Log error but continue with email sending
+                // In production, you might want to log this to a logging service
+            }
 
             // Send email to customer
             var emailBody = GenerateCustomerEmailTemplate(orderHeader, orderDetails, customer);
-            await _emailSender.SendEmailAsync(
-                customer.Email,
-                $"Order Confirmation #{orderHeader.Id} - Ideal Weight",
-                emailBody
-            );
+            
+            // Send email with PDF attachment if available
+            if (invoicePdf != null && _emailSender is EmailSender customEmailSender)
+            {
+                await customEmailSender.SendEmailWithAttachmentAsync(
+                    customer.Email,
+                    $"Order Confirmation #{orderHeader.Id} - Ideal Weight",
+                    emailBody,
+                    invoicePdf,
+                    $"Invoice-{orderHeader.Id}.pdf"
+                );
+            }
+            else
+            {
+                // Fallback: send email without attachment
+                await _emailSender.SendEmailAsync(
+                    customer.Email,
+                    $"Order Confirmation #{orderHeader.Id} - Ideal Weight",
+                    emailBody
+                );
+            }
 
             // Send real-time notification to customer
             await _hubContext.Clients.User(customer.Id).SendAsync(
@@ -125,13 +156,40 @@ namespace IdealWeightNutrition.Services
                 includeProperties: "Product,ComboOffer"
             ).ToList();
 
-            var emailBody = GenerateCustomerEmailTemplate(orderHeader, orderDetails, null);
-            await _emailSender.SendEmailAsync(
-                orderHeader.Email??string.Empty,
-                $"Order Confirmation #{orderHeader.Id} - Ideal Weight",
-                emailBody
-            );
+            // Generate PDF invoice
+            byte[] invoicePdf = null;
+            try
+            {
+                invoicePdf = _invoiceService.GenerateInvoicePdf(orderHeader, orderDetails, null);
+            }
+            catch (Exception ex)
+            {
+                // Log error but continue with email sending
+                // In production, you might want to log this to a logging service
+            }
 
+            var emailBody = GenerateCustomerEmailTemplate(orderHeader, orderDetails, null);
+            
+            // Send email with PDF attachment if available
+            if (invoicePdf != null && _emailSender is EmailSender customEmailSender)
+            {
+                await customEmailSender.SendEmailWithAttachmentAsync(
+                    orderHeader.Email ?? string.Empty,
+                    $"Order Confirmation #{orderHeader.Id} - Ideal Weight",
+                    emailBody,
+                    invoicePdf,
+                    $"Invoice-{orderHeader.Id}.pdf"
+                );
+            }
+            else
+            {
+                // Fallback: send email without attachment
+                await _emailSender.SendEmailAsync(
+                    orderHeader.Email ?? string.Empty,
+                    $"Order Confirmation #{orderHeader.Id} - Ideal Weight",
+                    emailBody
+                );
+            }
         
         }
 

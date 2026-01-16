@@ -147,6 +147,7 @@ builder.Services.AddHsts(options =>
 });
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IEmailSender,EmailSender>();
+builder.Services.AddScoped<InvoiceService>();
 builder.Services.AddScoped<IdealWeightNutrition.Services.INotificationService, IdealWeightNutrition.Services.NotificationService>();
 builder.Services.AddScoped<IdealWeightNutrition.Services.IStockService, IdealWeightNutrition.Services.StockService>();
 
