@@ -1,0 +1,378 @@
+@model IEnumerable<IdealWeightNutrition.Models.City>
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["CitiesManagement"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<partial name="_Notifications" />
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">
+                    <i class="bi bi-building me-3"></i>
+                    @Localizer["CitiesManagement"]
+                </h2>
+                <div class="admin-header-actions">
+                    <a asp-action="Upsert" class="create-new-btn">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        @Localizer["AddNewCity"]
+                    </a>
+                </div>
+            </div>
+
+            <div class="admin-card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="text-muted">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <span>@Model.Count() @Localizer["Cities"]</span>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" id="searchInput" class="form-control" placeholder="@Localizer["SearchCities"]" />
+                    </div>
+                </div>
+
+                @if (!Model.Any())
+                {
+                    <div class="alert alert-info text-center py-5">
+                        <i class="bi bi-inbox" style="font-size: 3rem; color: #3B9DD5;"></i>
+                        <h4 class="mt-3">@Localizer["NoCitiesYet"]</h4>
+                        <p class="mb-3">@Localizer["CreateCitiesToManageDelivery"]</p>
+                        <a asp-action="Upsert" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            @Localizer["CreateFirstCity"]
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="row" id="citiesContainer">
+                        @foreach (var city in Model)
+                        {
+                            var remoteAreasCount = ViewBag.RemoteAreasCount != null && ((Dictionary<int, int>)ViewBag.RemoteAreasCount).ContainsKey(city.Id) 
+                                ? ((Dictionary<int, int>)ViewBag.RemoteAreasCount)[city.Id] 
+                                : 0;
+                            <div class="col-md-6 col-lg-4 mb-4 city-card-item" data-city-name="@city.Name.ToLower() @city.NameAr?.ToLower() @city.Emirate.ToLower()">
+                                <div class="city-card @(!city.IsActive ? "inactive" : "")">
+                                    <div class="city-card-header">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h5 class="city-name mb-1">
+                                                    <i class="bi bi-geo-alt-fill me-2"></i>
+                                                    @city.Name
+                                                </h5>
+                                                @if (!string.IsNullOrEmpty(city.NameAr))
+                                                {
+                                                    <p class="city-name-ar mb-0" dir="rtl">@city.NameAr</p>
+                                                }
+                                            </div>
+                                            <div class="city-status">
+                                                <button class="btn btn-sm toggle-active-btn @(city.IsActive ? "btn-success" : "btn-secondary")" 
+                                                        data-city-id="@city.Id" 
+                                                        title="@(city.IsActive ? Localizer["Active"] : Localizer["Inactive"])">
+                                                    <i class="bi bi-@(city.IsActive ? "check-circle-fill" : "x-circle")"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="city-card-body">
+                                        <div class="city-info-item">
+                                            <i class="bi bi-map me-2"></i>
+                                            <strong>@Localizer["Emirate"]:</strong> @city.Emirate
+                                        </div>
+                                        <div class="city-info-item">
+                                            <i class="bi bi-currency-dollar me-2"></i>
+                                            <strong>@Localizer["DeliveryCharge"]:</strong> 
+                                            <span class="delivery-charge-badge">@city.DeliveryCharge.ToString("N2") AED</span>
+                                        </div>
+                                        <div class="city-info-item">
+                                            <i class="bi bi-geo-alt me-2"></i>
+                                            <strong>@Localizer["RemoteAreas"]:</strong> 
+                                            <span class="badge bg-info">@remoteAreasCount</span>
+                                        </div>
+                                        <div class="city-info-item">
+                                            <i class="bi bi-sort-numeric-down me-2"></i>
+                                            <strong>@Localizer["DisplayOrder"]:</strong> @city.DisplayOrder
+                                        </div>
+                                    </div>
+                                    <div class="city-card-footer">
+                                        <div class="btn-group w-100" role="group">
+                                            <a asp-action="Upsert" asp-route-id="@city.Id" class="btn btn-sm btn-primary" title="@Localizer["Edit"]">
+                                                <i class="bi bi-pencil me-1"></i> @Localizer["Edit"]
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-info manage-areas-btn" 
+                                                    data-city-id="@city.Id" 
+                                                    data-city-name="@city.Name"
+                                                    title="@Localizer["ManageRemoteAreas"]">
+                                                <i class="bi bi-list-ul me-1"></i> @Localizer["Areas"]
+                                            </button>
+                                            <a asp-action="Delete" asp-route-id="@city.Id" class="btn btn-sm btn-danger" title="@Localizer["Delete"]">
+                                                <i class="bi bi-trash me-1"></i> @Localizer["Delete"]
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Remote Areas Modal -->
+<div class="modal fade" id="remoteAreasModal" tabindex="-1" aria-labelledby="remoteAreasModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="remoteAreasModalLabel">
+                    <i class="bi bi-list-ul me-2"></i>
+                    @Localizer["ManageRemoteAreas"]: <span id="modalCityName"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="remoteAreasContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">@Localizer["Loading"]</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function() {
+            // Search functionality
+            $('#searchInput').on('keyup', function() {
+                var searchText = $(this).val().toLowerCase();
+                $('.city-card-item').each(function() {
+                    var cityData = $(this).data('city-name') || '';
+                    if (cityData.includes(searchText)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+
+            // Toggle active status
+            $('.toggle-active-btn').on('click', function() {
+                var btn = $(this);
+                var cityId = btn.data('city-id');
+                
+                $.ajax({
+                    url: '@Url.Action("ToggleActive", "City")',
+                    type: 'POST',
+                    data: { id: cityId },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        }
+                    },
+                    error: function() {
+                        var errorMsg = '@Html.Raw(Localizer["ErrorUpdatingCityStatus"].Value)';
+                        alert(errorMsg);
+                    }
+                });
+            });
+
+            // Manage remote areas
+            $('.manage-areas-btn').on('click', function() {
+                var cityId = $(this).data('city-id');
+                var cityName = $(this).data('city-name');
+                $('#modalCityName').text(cityName);
+                $('#remoteAreasModal').modal('show');
+                loadRemoteAreas(cityId);
+            });
+
+            function loadRemoteAreas(cityId) {
+                var loadingText = '@Html.Raw(Localizer["Loading"].Value)';
+                $('#remoteAreasContent').html('<div class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">' + loadingText + '</span></div></div>');
+                
+                $.ajax({
+                    url: '@Url.Action("GetRemoteAreas", "City")',
+                    type: 'GET',
+                    data: { cityId: cityId },
+                    success: function(response) {
+                        if (response.success) {
+                            renderRemoteAreas(response.data, cityId);
+                        }
+                    },
+                    error: function() {
+                        var errorMsg = '@Html.Raw(Localizer["ErrorLoadingRemoteAreas"].Value)';
+                        $('#remoteAreasContent').html('<div class="alert alert-danger">' + errorMsg + '</div>');
+                    }
+                });
+            }
+
+            function renderRemoteAreas(areas, cityId) {
+                var localizedRemoteAreas = '@Html.Raw(Localizer["RemoteAreas"].Value)';
+                var localizedAddArea = '@Html.Raw(Localizer["AddRemoteArea"].Value)';
+                var localizedNoAreas = '@Html.Raw(Localizer["NoRemoteAreasYet"].Value)';
+                var localizedName = '@Html.Raw(Localizer["Name"].Value)';
+                var localizedNameAr = '@Html.Raw(Localizer["NameArabic"].Value)';
+                var localizedCharge = '@Html.Raw(Localizer["DeliveryCharge"].Value)';
+                var localizedOrder = '@Html.Raw(Localizer["DisplayOrder"].Value)';
+                var localizedStatus = '@Html.Raw(Localizer["Status"].Value)';
+                var localizedActions = '@Html.Raw(Localizer["Actions"].Value)';
+                var localizedActive = '@Html.Raw(Localizer["Active"].Value)';
+                var localizedInactive = '@Html.Raw(Localizer["Inactive"].Value)';
+                
+                var html = '<div class="d-flex justify-content-between align-items-center mb-3">';
+                html += '<h6 class="mb-0">' + localizedRemoteAreas + '</h6>';
+                html += '<button class="btn btn-sm btn-primary" onclick="openAddRemoteAreaModal(' + cityId + ')">';
+                html += '<i class="bi bi-plus-circle me-1"></i> ' + localizedAddArea + '</button>';
+                html += '</div>';
+
+                if (areas.length === 0) {
+                    html += '<div class="alert alert-info">' + localizedNoAreas + '</div>';
+                } else {
+                    html += '<div class="table-responsive"><table class="table table-hover">';
+                    html += '<thead><tr><th>' + localizedName + '</th><th>' + localizedNameAr + '</th><th>' + localizedCharge + '</th><th>' + localizedOrder + '</th><th>' + localizedStatus + '</th><th>' + localizedActions + '</th></tr></thead>';
+                    html += '<tbody>';
+                    areas.forEach(function(area) {
+                        html += '<tr>';
+                        html += '<td>' + area.name + '</td>';
+                        html += '<td dir="rtl">' + (area.nameAr || '-') + '</td>';
+                        html += '<td><span class="badge bg-success">' + area.deliveryCharge.toFixed(2) + ' AED</span></td>';
+                        html += '<td>' + area.displayOrder + '</td>';
+                        html += '<td><span class="badge bg-' + (area.isActive ? 'success' : 'secondary') + '">' + (area.isActive ? localizedActive : localizedInactive) + '</span></td>';
+                        html += '<td>';
+                        html += '<button class="btn btn-sm btn-primary me-1" onclick="editRemoteArea(' + area.id + ')" title="@Localizer["Edit"]"><i class="bi bi-pencil"></i></button>';
+                        html += '<button class="btn btn-sm btn-danger" onclick="deleteRemoteArea(' + area.id + ', ' + cityId + ')" title="@Localizer["Delete"]"><i class="bi bi-trash"></i></button>';
+                        html += '</td>';
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table></div>';
+                }
+
+                $('#remoteAreasContent').html(html);
+            }
+
+            window.openAddRemoteAreaModal = function(cityId) {
+                // This will be handled by RemoteAreaController
+                window.location.href = '@Url.Action("Upsert", "RemoteArea")?cityId=' + cityId;
+            };
+
+            window.editRemoteArea = function(areaId) {
+                window.location.href = '@Url.Action("Upsert", "RemoteArea")?id=' + areaId;
+            };
+
+            window.deleteRemoteArea = function(areaId, cityId) {
+                var confirmMessage = '@Html.Raw(Localizer["AreYouSureDeleteArea"].Value)';
+                if (confirm(confirmMessage)) {
+                    $.ajax({
+                        url: '@Url.Action("Delete", "RemoteArea")',
+                        type: 'POST',
+                        data: { id: areaId },
+                        success: function() {
+                            loadRemoteAreas(cityId);
+                        },
+                        error: function() {
+                            var errorMsg = '@Html.Raw(Localizer["ErrorDeletingRemoteArea"].Value)';
+                            alert(errorMsg);
+                        }
+                    });
+                }
+            };
+        });
+    </script>
+}
+
+<style>
+    .city-card {
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .city-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+
+    .city-card.inactive {
+        opacity: 0.7;
+        background: #f8f9fa;
+    }
+
+    .city-card-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #dee2e6;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .city-name {
+        color: white;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .city-name-ar {
+        color: rgba(255,255,255,0.9);
+        font-size: 0.9rem;
+    }
+
+    .city-card-body {
+        padding: 1.25rem;
+        flex-grow: 1;
+    }
+
+    .city-info-item {
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .city-info-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .delivery-charge-badge {
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    .city-card-footer {
+        padding: 1rem 1.25rem;
+        border-top: 1px solid #dee2e6;
+        background: #f8f9fa;
+        border-radius: 0 0 12px 12px;
+    }
+
+    .search-box {
+        max-width: 300px;
+    }
+
+    .toggle-active-btn {
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-group .btn {
+        flex: 1;
+    }
+</style>

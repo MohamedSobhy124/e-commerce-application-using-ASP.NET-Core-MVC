@@ -4,6 +4,7 @@ using IdealWeightNutrition.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IdealWeightNutrition.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260113191732_RemoteAreas_table")]
+    partial class RemoteAreas_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -722,9 +725,6 @@ namespace IdealWeightNutrition.DataAccess.Migrations
                     b.Property<string>("ApplicationUserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Area")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Carrier")
                         .HasColumnType("nvarchar(max)");
 
@@ -832,9 +832,6 @@ namespace IdealWeightNutrition.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("AllowFreeDelivery")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Author")
                         .HasColumnType("nvarchar(max)");
 
@@ -861,9 +858,6 @@ namespace IdealWeightNutrition.DataAccess.Migrations
 
                     b.Property<DateTime?>("ExpiryDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<double>("FreeDeliveryMinimumAmount")
-                        .HasColumnType("float");
 
                     b.Property<string>("HealthNotes")
                         .HasColumnType("nvarchar(max)");

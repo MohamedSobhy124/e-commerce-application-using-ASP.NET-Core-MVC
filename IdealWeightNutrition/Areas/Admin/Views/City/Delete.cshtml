@@ -1,0 +1,113 @@
+@model IdealWeightNutrition.Models.City
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["DeleteCity"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var remoteAreasCount = ViewBag.RemoteAreasCount != null && ((Dictionary<int, int>)ViewBag.RemoteAreasCount).ContainsKey(Model.Id) 
+        ? ((Dictionary<int, int>)ViewBag.RemoteAreasCount)[Model.Id] 
+        : 0;
+}
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">
+                    <i class="bi bi-exclamation-triangle-fill me-3 text-warning"></i>
+                    @Localizer["DeleteCity"]
+                </h2>
+            </div>
+
+            <div class="admin-card-body">
+                @if (remoteAreasCount > 0)
+                {
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>@Localizer["CannotDeleteCity"]</strong> @string.Format(Localizer["CityHasRemoteAreas"].Value, remoteAreasCount)
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>@Localizer["Warning"]</strong> @Localizer["AreYouSureDeleteCity"]
+                    </div>
+                }
+
+                <div class="card">
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-3">@Localizer["CityNameEnglish"]:</dt>
+                            <dd class="col-sm-9"><strong>@Model.Name</strong></dd>
+
+                            @if (!string.IsNullOrEmpty(Model.NameAr))
+                            {
+                                <dt class="col-sm-3">@Localizer["CityNameArabic"]:</dt>
+                                <dd class="col-sm-9" dir="rtl"><strong>@Model.NameAr</strong></dd>
+                            }
+
+                            <dt class="col-sm-3">@Localizer["Emirate"]:</dt>
+                            <dd class="col-sm-9">@Model.Emirate</dd>
+
+                            <dt class="col-sm-3">@Localizer["DeliveryCharge"]:</dt>
+                            <dd class="col-sm-9">
+                                <span class="badge bg-success">@Model.DeliveryCharge.ToString("N2") AED</span>
+                            </dd>
+
+                            <dt class="col-sm-3">@Localizer["Status"]:</dt>
+                            <dd class="col-sm-9">
+                                <span class="badge bg-@(Model.IsActive ? "success" : "secondary")">
+                                    @(Model.IsActive ? Localizer["Active"] : Localizer["Inactive"])
+                                </span>
+                            </dd>
+
+                            <dt class="col-sm-3">@Localizer["RemoteAreas"]:</dt>
+                            <dd class="col-sm-9">
+                                <span class="badge bg-info">@remoteAreasCount</span>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                @if (remoteAreasCount == 0)
+                {
+                    <form asp-action="Delete" method="post" class="mt-4">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-trash me-2"></i>
+                                @Localizer["Delete"]
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                @Localizer["Cancel"]
+                            </a>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="form-actions mt-4">
+                        <a asp-action="Upsert" asp-route-id="@Model.Id" class="btn btn-primary btn-lg">
+                            <i class="bi bi-pencil me-2"></i>
+                            @Localizer["EditCity"]
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary btn-lg">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            @Localizer["BackToList"]
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        padding: 1.5rem 0;
+    }
+</style>

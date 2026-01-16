@@ -30,22 +30,20 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
             var isArabic = currentCulture == "ar";
             var baseUrl = _configuration["SiteSettings:BaseUrl"] ?? Request.Scheme + "://" + Request.Host;
 
-            ViewData["Title"] = isArabic 
+            // Use SEO helper for Blog page - Educational/Informational keywords
+            var blogTitle = isArabic 
                 ? "مدونة الصحة والعافية - نصائح وإرشادات الخبراء"
                 : "Health & Wellness Blog - Expert Tips & Guides";
-            ViewData["Description"] = isArabic
+            var blogDescription = isArabic
                 ? "اكتشف نصائح صحية من الخبراء، ونصائح إدارة الوزن، وأدلة التغذية، ومراجعات المنتجات من مدونة الصحة والعافية لدينا."
                 : "Discover expert health tips, weight management advice, nutrition guides, and product reviews from our health and wellness blog.";
-            ViewData["Keywords"] = isArabic
-                ? "مدونة صحية، نصائح العافية، إدارة الوزن، نصائح التغذية، نمط حياة صحي، نصائح اللياقة"
-                : "health blog, wellness tips, weight management, nutrition advice, healthy lifestyle, fitness tips";
+            
+            var seo = SEOHelper.GetBlogPageSEO(blogTitle, blogDescription, baseUrl, currentCulture);
+            ViewData["SEO"] = seo;
 
             var blogs = GetBlogPosts();
             
             // Add Blog structured data
-            var blogDescription = isArabic
-                ? "مدونة الصحة والعافية - نصائح وإرشادات الخبراء"
-                : "Health & Wellness Blog - Expert Tips & Guides";
             ViewData["BlogStructuredData"] = SEOHelper.GenerateBlogStructuredData(
                 baseUrl, 
                 "Ideal Weight Nutrition", 

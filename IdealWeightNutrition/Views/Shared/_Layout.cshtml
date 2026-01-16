@@ -41,20 +41,21 @@
     @{
         var faviconBaseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
     }
-    <link rel="icon" type="image/x-icon" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
-    <link rel="apple-touch-icon" sizes="152x152" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
-    <link rel="apple-touch-icon" sizes="144x144" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
-    <link rel="apple-touch-icon" sizes="120x120" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
-    <link rel="apple-touch-icon" sizes="114x114" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
-    <link rel="apple-touch-icon" sizes="76x76" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
-    <link rel="apple-touch-icon" sizes="72x72" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
-    <link rel="apple-touch-icon" sizes="60x60" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
-    <link rel="apple-touch-icon" sizes="57x57" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
-    <link rel="shortcut icon" href="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
-    <meta name="msapplication-TileImage" content="@(faviconBaseUrl)/Images/Products/logo_white_bg_Ficon.png" />
+    <link rel="icon" type="image/x-icon" href="@(faviconBaseUrl)/images/brand/logo-google.png" />
+ 
+    <link rel="icon" type="image/png" sizes="32x32" href="@(faviconBaseUrl)/images/brand/logo-google.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="@(faviconBaseUrl)/images/brand/logo-google.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="@(faviconBaseUrl)/images/brand/logo-google.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="@(faviconBaseUrl)/images/brand/logo-google.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="@(faviconBaseUrl)/images/brand/logo-google.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="@(faviconBaseUrl)/images/brand/logo-google.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="@(faviconBaseUrl)/images/brand/logo-google.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="@(faviconBaseUrl)/images/brand/logo-google.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="@(faviconBaseUrl)/images/brand/logo-google.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="@(faviconBaseUrl)/images/brand/logo-google.png" />
+    <link rel="apple-touch-icon" sizes="57x57" href="@(faviconBaseUrl)/images/brand/logo-google.png" />
+    <link rel="shortcut icon" href="@(faviconBaseUrl)/images/brand/logo-google.png" />
+    <meta name="msapplication-TileImage" content="@@(faviconBaseUrl)/images/brand/logo-google.png" />
     <meta name="msapplication-TileColor" content="#7c3aed" />
     
     <!-- SEO Meta Tags Partial -->
@@ -76,7 +77,7 @@
                 : (Configuration["SiteSettings:SiteDescription"] ?? "Premium health and fitness supplements in UAE");
             pageTitle = ViewData["Title"]?.ToString() ?? (currentCulture == "ar" ? "الرئيسية" : "Home");
             pageDescription = ViewData["Description"]?.ToString() ?? siteDescription;
-            pageImage = ViewData["Image"]?.ToString() ?? baseUrl + "/Images/Products/logo_white_bg.png";
+            pageImage = baseUrl + "/images/brand/logo-google.png";
         }
         catch
         {
@@ -87,7 +88,7 @@
                 : "Premium health and fitness supplements in UAE";
             pageTitle = ViewData["Title"]?.ToString() ?? (currentCulture == "ar" ? "الرئيسية" : "Home");
             pageDescription = ViewData["Description"]?.ToString() ?? siteDescription;
-            pageImage = baseUrl + "/Images/Products/logo_white_bg.png";
+            pageImage = baseUrl + "/images/brand/logo-google.png";
         }
     }
     
@@ -358,9 +359,15 @@
                                             <i class="bi bi-briefcase-fill me-2"></i>@Localizer["ServiceSubscriptions"]
                                         </a>
                                     </li>
-                                    <li>
+                                   @*  <li>
                                         <a class="dropdown-item" asp-area="Admin" asp-controller="NewsletterSubscription" asp-action="Index">
                                             <i class="bi bi-envelope-heart me-2"></i>@Localizer["NewsletterSubscribers"]
+                                        </a>
+                                    </li> *@
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="City" asp-action="Index">
+                                                    <i class="bi bi-building me-2"></i>@Localizer["CitiesDeliveryAreas"]
                                         </a>
                                     </li>
                                    @*  <li>

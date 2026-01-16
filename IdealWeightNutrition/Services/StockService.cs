@@ -249,8 +249,6 @@ namespace IdealWeightNutrition.Services
                 // Check if we have enough stock
                 if (product.StockQuantity < quantity)
                 {
-                    Console.WriteLine($"Insufficient stock for product {productId}. Available: {product.StockQuantity}, Requested: {quantity}");
-                    // Still decrease to 0 to prevent negative stock
                     product.StockQuantity = 0;
                 }
                 else

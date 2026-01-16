@@ -47,6 +47,8 @@ namespace IdealWeightNutrition.DataAccess.Data
         public DbSet<OrderAuditLog> OrderAuditLogs { get; set; }
         public DbSet<ReturnRequest> ReturnRequests { get; set; }
         public DbSet<ReturnRequestItem> ReturnRequestItems { get; set; }
+        public DbSet<City> Cities { get; set; }
+        public DbSet<RemoteArea> RemoteAreas { get; set; }
 
 
 

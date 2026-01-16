@@ -1417,6 +1417,7 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 
 			// Initialize empty fields for guest
 			ShoppingCartVM.OrderHeader.IsGuestOrder = true;
+			ShoppingCartVM.OrderHeader.PostalCode = "00000"; // Set default postal code
 		}
 
 		ShoppingCartVM.ShoppingCartList = cartList;
@@ -1426,6 +1427,19 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 			cart.Price = GetCartItemPrice(cart); // 🔥 Use new method that checks flash sale price
 			ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
 			}
+			
+			// Set default postal code if not set
+			if (string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.PostalCode))
+			{
+				ShoppingCartVM.OrderHeader.PostalCode = "00000";
+			}
+			
+			// Load active cities for dropdown
+			var cities = _unitOfWork.City.GetAll(c => c.IsActive, includeProperties: null)
+				.OrderBy(c => c.DisplayOrder)
+				.ThenBy(c => c.Name)
+				.ToList();
+			ViewData["Cities"] = cities;
 			
 			// Check if Tamara payment is available for this order amount
 			bool tamaraAvailable = false;
@@ -1452,6 +1466,146 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 			return View(ShoppingCartVM);
 		}
 
+		[HttpGet]
+		public IActionResult GetAreasByCity(int cityId)
+		{
+			var currentCulture = HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>()?.RequestCulture.Culture.Name ?? "en";
+			var city = _unitOfWork.City.Get(c => c.Id == cityId && c.IsActive);
+
+			if (city == null)
+			{
+				return Json(new { success = false, message = _localizer["CityNotFound"].Value });
+			}
+
+			var remoteAreas = _unitOfWork.RemoteArea.GetAll(ra => ra.CityId == cityId && ra.IsActive)
+				.OrderBy(ra => ra.DisplayOrder)
+				.ThenBy(ra => ra.Name)
+				.Select(ra => new
+				{
+					id = ra.Id,
+					name = currentCulture == "ar" && !string.IsNullOrEmpty(ra.NameAr) ? ra.NameAr : ra.Name,
+					deliveryCharge = ra.DeliveryCharge
+				})
+				.ToList();
+
+			return Json(new
+			{
+				success = true,
+				cityDefaultCharge = city.DeliveryCharge,
+				hasRemoteAreas = remoteAreas.Any(),
+				areas = remoteAreas
+			});
+		}
+
+		[HttpGet]
+		public IActionResult CheckFreeDeliveryEligibility(int? cityId, string areaName = null)
+		{
+			IEnumerable<ShoppingCart> cartList;
+
+			if (User.Identity.IsAuthenticated)
+			{
+				var claimsIdentity = (ClaimsIdentity)User.Identity;
+				var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+				cartList = _unitOfWork.shoppingCart.GetAll(u => u.ApplicationUserId == userId,
+					includeProperties: "product,FlashSaleItem,ProductVariant,ComboOffer");
+			}
+			else
+			{
+				var guestCart = IdealWeightNutrition.Utility.GuestCartHelper.GetGuestCart(HttpContext.Session);
+				cartList = guestCart.Select(gc => new ShoppingCart
+				{
+					ProductId = gc.ProductId,
+					Count = gc.Count,
+					ProductVariantId = gc.ProductVariantId,
+					FlashSaleItemId = gc.FlashSaleItemId,
+					FlashSalePrice = (decimal?)gc.FlashSalePrice,
+					ComboOfferId = gc.ComboOfferId,
+					product = _unitOfWork.product.Get(p => p.Id == gc.ProductId),
+					ProductVariant = gc.ProductVariantId.HasValue ? _unitOfWork.ProductVariant.Get(v => v.Id == gc.ProductVariantId.Value) : null
+				}).ToList();
+			}
+
+			// Calculate subtotal
+			double subtotal = 0;
+			foreach (var cart in cartList)
+			{
+				cart.Price = GetCartItemPrice(cart);
+				subtotal += (cart.Price * cart.Count);
+			}
+
+			// Check if all products allow free delivery and get maximum minimum amount
+			bool allProductsAllowFreeDelivery = true;
+			double maxFreeDeliveryMinimum = 0;
+
+			foreach (var cart in cartList)
+			{
+				if (cart.product == null)
+				{
+					cart.product = _unitOfWork.product.Get(p => p.Id == cart.ProductId);
+				}
+
+				if (cart.product != null)
+				{
+					if (!cart.product.AllowFreeDelivery)
+					{
+						allProductsAllowFreeDelivery = false;
+						break;
+					}
+					else
+					{
+						if (cart.product.FreeDeliveryMinimumAmount > maxFreeDeliveryMinimum)
+						{
+							maxFreeDeliveryMinimum = cart.product.FreeDeliveryMinimumAmount;
+						}
+					}
+				}
+			}
+
+			// Get delivery charge
+			double deliveryCharge = 0;
+			if (cityId.HasValue)
+			{
+				var city = _unitOfWork.City.Get(c => c.Id == cityId.Value && c.IsActive);
+				if (city != null)
+				{
+					if (!string.IsNullOrWhiteSpace(areaName) && areaName != "OTHER")
+					{
+						var remoteArea = _unitOfWork.RemoteArea.Get(ra =>
+							ra.CityId == city.Id &&
+							(ra.Name == areaName || ra.NameAr == areaName) &&
+							ra.IsActive);
+						if (remoteArea != null)
+						{
+							deliveryCharge = remoteArea.DeliveryCharge;
+						}
+						else
+						{
+							deliveryCharge = city.DeliveryCharge;
+						}
+					}
+					else
+					{
+						deliveryCharge = city.DeliveryCharge;
+					}
+
+					// Check if free delivery applies
+					if (allProductsAllowFreeDelivery && subtotal >= maxFreeDeliveryMinimum)
+					{
+						deliveryCharge = 0;
+					}
+				}
+			}
+
+			return Json(new
+			{
+				success = true,
+				allProductsAllowFreeDelivery = allProductsAllowFreeDelivery,
+				maxFreeDeliveryMinimum = maxFreeDeliveryMinimum,
+				subtotal = subtotal,
+				deliveryCharge = deliveryCharge,
+				isFreeDelivery = deliveryCharge == 0 && allProductsAllowFreeDelivery && subtotal >= maxFreeDeliveryMinimum
+			});
+		}
 
 		[HttpPost]
 		[ActionName("Summary")]
@@ -1487,16 +1641,23 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 				validationErrors.Add(_localizer["City"].Value + " " + (_localizer["IsRequired"].Value ?? "is required"));
 			}
 
+			// Area is required if city is selected
+			if (!string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.City) && string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.Area))
+			{
+				hasValidationErrors = true;
+				validationErrors.Add(_localizer["Area"].Value + " " + (_localizer["IsRequired"].Value ?? "is required"));
+			}
+
 			if (string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.State))
 			{
 				hasValidationErrors = true;
 				validationErrors.Add(_localizer["State"].Value + " " + (_localizer["IsRequired"].Value ?? "is required"));
 			}
 
+			// Postal code is hidden, set default value
 			if (string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.PostalCode))
 			{
-				hasValidationErrors = true;
-				validationErrors.Add(_localizer["PostalCode"].Value + " " + (_localizer["IsRequired"].Value ?? "is required"));
+				ShoppingCartVM.OrderHeader.PostalCode = "00000";
 			}
 
 			// Validate email for guest orders
@@ -1573,6 +1734,13 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 					ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
 				}
 
+				// Load cities for dropdown in case of validation error
+				var cities = _unitOfWork.City.GetAll(c => c.IsActive, includeProperties: null)
+					.OrderBy(c => c.DisplayOrder)
+					.ThenBy(c => c.Name)
+					.ToList();
+				ViewData["Cities"] = cities;
+
 				TempData["error"] = string.Join(", ", validationErrors);
 				return View(ShoppingCartVM);
 			}
@@ -1642,6 +1810,82 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 				ShoppingCartVM.OrderHeader.OrderSubtotal = subtotal;
 				ShoppingCartVM.OrderHeader.OrderTotal = subtotal;
 
+				// Get delivery charge based on selected city and area
+				// Priority: Check RemoteArea first (if area is selected), then City default charge
+				// Also check if all products allow free delivery and if order meets minimum amount
+				double deliveryCharge = 0;
+				bool allProductsAllowFreeDelivery = true;
+				double maxFreeDeliveryMinimum = 0;
+				
+				// Check if all products in cart allow free delivery and get the maximum minimum amount
+				foreach (var cart in ShoppingCartVM.ShoppingCartList)
+				{
+					// Load product if not already loaded
+					if (cart.product == null)
+					{
+						cart.product = _unitOfWork.product.Get(p => p.Id == cart.ProductId);
+					}
+					
+					if (cart.product != null)
+					{
+						if (!cart.product.AllowFreeDelivery)
+						{
+							allProductsAllowFreeDelivery = false;
+							break; // If any product doesn't allow free delivery, stop checking
+						}
+						else
+						{
+							// Track the maximum minimum amount required
+							if (cart.product.FreeDeliveryMinimumAmount > maxFreeDeliveryMinimum)
+							{
+								maxFreeDeliveryMinimum = cart.product.FreeDeliveryMinimumAmount;
+							}
+						}
+					}
+				}
+				
+				if (!string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.City))
+				{
+					// First, get the city
+					var selectedCity = _unitOfWork.City.Get(c => 
+						(c.Name == ShoppingCartVM.OrderHeader.City || c.NameAr == ShoppingCartVM.OrderHeader.City) && c.IsActive);
+					
+					if (selectedCity != null)
+					{
+						// If area is specified, check if it's a remote area
+						if (!string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.Area))
+						{
+							var selectedRemoteArea = _unitOfWork.RemoteArea.Get(ra => 
+								ra.CityId == selectedCity.Id &&
+								(ra.Name == ShoppingCartVM.OrderHeader.Area || ra.NameAr == ShoppingCartVM.OrderHeader.Area) && 
+								ra.IsActive);
+							
+							if (selectedRemoteArea != null)
+							{
+								// Use remote area's specific delivery charge
+								deliveryCharge = selectedRemoteArea.DeliveryCharge;
+							}
+							else
+							{
+								// Area is "Other" or custom - use city's default delivery charge
+								deliveryCharge = selectedCity.DeliveryCharge;
+							}
+						}
+						else
+						{
+							// No area selected - use city's default delivery charge
+							deliveryCharge = selectedCity.DeliveryCharge;
+						}
+						
+						// Check if free delivery applies
+						if (allProductsAllowFreeDelivery && subtotal >= maxFreeDeliveryMinimum)
+						{
+							// All products allow free delivery and order meets minimum amount
+							deliveryCharge = 0;
+						}
+					}
+				}
+
 				// Apply promo code if provided
 				if (ShoppingCartVM.OrderHeader.PromoCodeId.HasValue && ShoppingCartVM.OrderHeader.PromoCodeId.Value > 0)
 				{
@@ -1687,6 +1931,9 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 						}
 					}
 				}
+
+				// Add delivery charge to order total (after promo code discount)
+				ShoppingCartVM.OrderHeader.OrderTotal += deliveryCharge;
 
 				if (isGuest || applicationUser.CompanyId.GetValueOrDefault() == 0)
 				{
@@ -3607,6 +3854,8 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
             // Return placeholder if no image found
             return "/images/no-image.png";
         }
+
+        
 
         /// <summary>
         /// Merges guest cart items into user's cart after login/register.

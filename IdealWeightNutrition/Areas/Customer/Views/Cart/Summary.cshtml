@@ -72,6 +72,45 @@
 									<span asp-validation-for="OrderHeader.PhoneNumber" class="text-danger validation-message"></span>
 								</div>
 
+
+
+							<div class="form-row-enhanced">
+								<label class="form-label-enhanced">
+									<i class="bi bi-building me-2"></i>@Localizer["City"] <span class="text-danger">*</span>
+								</label>
+								<select asp-for="OrderHeader.City" id="citySelect" class="form-control-enhanced" required>
+									<option value="">@Localizer["SelectCity"]</option>
+									@if (ViewData["Cities"] != null)
+									{
+										@foreach (var city in (IEnumerable<IdealWeightNutrition.Models.City>)ViewData["Cities"])
+										{
+											var cityName = System.Globalization.CultureInfo.CurrentCulture.Name == "ar" && !string.IsNullOrEmpty(city.NameAr) ? city.NameAr : city.Name;
+											<option value="@cityName" data-city-id="@city.Id" data-city-delivery-charge="@city.DeliveryCharge">@cityName</option>
+										}
+									}
+								</select>
+								<span asp-validation-for="OrderHeader.City" class="text-danger validation-message"></span>
+							</div>
+
+							<div class="form-row-enhanced" id="areaRow" style="display: none;">
+								<label class="form-label-enhanced">
+									<i class="bi bi-geo-alt me-2"></i>@Localizer["Area"] <span class="text-danger">*</span>
+								</label>
+								<select asp-for="OrderHeader.Area" id="areaSelect" name="OrderHeader.Area" class="form-control-enhanced">
+									<option value="">@Localizer["SelectArea"]</option>
+								</select>
+								<span asp-validation-for="OrderHeader.Area" class="text-danger validation-message"></span>
+							</div>
+
+							<div class="form-row-enhanced" id="customAreaRow" style="display: none;">
+								<label class="form-label-enhanced">
+									<i class="bi bi-pencil me-2"></i>@Localizer["EnterArea"] <span class="text-danger">*</span>
+								</label>
+								<input type="text" id="customAreaInput" class="form-control-enhanced" placeholder="@Localizer["EnterAreaName"]" />
+								<span class="text-danger validation-message" id="customAreaError" style="display: none;"></span>
+							</div>
+
+						 
 								<div class="form-row-enhanced">
 									<label class="form-label-enhanced">
 										<i class="bi bi-geo-alt-fill me-2"></i>@Localizer["StreetAddress"] <span class="text-danger">*</span>
@@ -79,30 +118,21 @@
 									<input asp-for="OrderHeader.StreetAddress" class="form-control-enhanced" placeholder="@Localizer["EnterStreetAddress"]" required />
 									<span asp-validation-for="OrderHeader.StreetAddress" class="text-danger validation-message"></span>
 								</div>
-
-								<div class="form-row-enhanced">
-									<label class="form-label-enhanced">
-										<i class="bi bi-building me-2"></i>@Localizer["City"] <span class="text-danger">*</span>
-									</label>
-									<input asp-for="OrderHeader.City" class="form-control-enhanced" placeholder="@Localizer["EnterCity"]" required />
-									<span asp-validation-for="OrderHeader.City" class="text-danger validation-message"></span>
-								</div>
-
-								<div class="form-row-enhanced">
+								<div class="form-row-enhanced" style="display: none;">
 									<label class="form-label-enhanced">
 										<i class="bi bi-geo me-2"></i>@Localizer["State"] <span class="text-danger">*</span>
 									</label>
-									<input asp-for="OrderHeader.State" class="form-control-enhanced" placeholder="@Localizer["EnterState"]" required />
+									<input asp-for="OrderHeader.State" id="stateInput" name="OrderHeader.State" class="form-control-enhanced" value="" />
 									<span asp-validation-for="OrderHeader.State" class="text-danger validation-message"></span>
 								</div>
 
-								<div class="form-row-enhanced">
-									<label class="form-label-enhanced">
-										<i class="bi bi-mailbox me-2"></i>@Localizer["PostalCode"] <span class="text-danger">*</span>
-									</label>
-									<input asp-for="OrderHeader.PostalCode" class="form-control-enhanced" placeholder="@Localizer["EnterPostalCode"]" required />
-									<span asp-validation-for="OrderHeader.PostalCode" class="text-danger validation-message"></span>
-								</div>
+							<div class="form-row-enhanced" style="display: none;">
+								<label class="form-label-enhanced">
+									<i class="bi bi-mailbox me-2"></i>@Localizer["PostalCode"] <span class="text-danger">*</span>
+								</label>
+								<input asp-for="OrderHeader.PostalCode" class="form-control-enhanced" value="00000" />
+								<span asp-validation-for="OrderHeader.PostalCode" class="text-danger validation-message"></span>
+							</div>
 							</div>
 						</div>
 
@@ -307,6 +337,25 @@
 								<input type="hidden" asp-for="OrderHeader.PromoCodeText" id="promoCodeTextInput" />
 							</div>
 
+							<!-- Delivery Charge -->
+							<div class="delivery-charge-section mt-3" id="deliveryChargeSection" style="display: none;">
+								<div class="d-flex justify-content-between align-items-center">
+									<span>
+										<i class="bi bi-truck me-2"></i>
+										@Localizer["DeliveryCharge"]
+									</span>
+									<strong id="deliveryChargeTotal">@Html.Raw(currencySymbol) 0.00</strong>
+								</div>
+							</div>
+							
+							<!-- Free Delivery Message -->
+							<div class="free-delivery-message mt-2" id="freeDeliveryMessage" style="display: none;">
+								<div class="alert alert-success mb-0">
+									<i class="bi bi-check-circle-fill me-2"></i>
+									<strong>@Localizer["FreeDelivery"]</strong>
+								</div>
+							</div>
+
 							<!-- Order Total -->
 							<div class="order-total-section mt-4">
 								<div class="d-flex justify-content-between align-items-center">
@@ -376,7 +425,7 @@
 							</div>
 							<div class="delivery-text">
 								<strong>@Localizer["EstimatedDelivery"]</strong>
-								<p class="mb-0">@IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(7).ToShortDateString() - @IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(14).ToShortDateString()</p>
+								<p class="mb-0">@IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(2).ToShortDateString() - @IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(4).ToShortDateString()</p>
 							</div>
 						</div>
 						<button type="submit" class="place-order-btn-enhanced">
@@ -663,6 +712,11 @@
 		var subtotal = @Model.OrderHeader.OrderTotal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
 		var currentDiscount = 0;
 		var currentPromoCodeId = null;
+		var deliveryCharge = 0;
+		
+		// Store localized strings for JavaScript
+		var localizedOther = '@Html.Raw(Localizer["Other"].Value)';
+		var localizedSelectArea = '@Html.Raw(Localizer["SelectArea"].Value)';
 
 		// Localized messages for validation
 		var localizedMessages = {
@@ -678,6 +732,7 @@
 			phone: '@Html.Raw(Localizer["Phone"].Value)',
 			streetAddress: '@Html.Raw(Localizer["StreetAddress"].Value)',
 			city: '@Html.Raw(Localizer["City"].Value)',
+			area: '@Html.Raw(Localizer["Area"].Value)',
 			state: '@Html.Raw(Localizer["State"].Value)',
 			postalCode: '@Html.Raw(Localizer["PostalCode"].Value)',
 			emailAddress: '@Html.Raw(Localizer["EmailAddress"].Value)'
@@ -827,9 +882,8 @@
 				{ selector: 'input[name="OrderHeader.Name"]', label: localizedMessages.name },
 				{ selector: 'input[name="OrderHeader.PhoneNumber"]', label: localizedMessages.phone },
 				{ selector: 'input[name="OrderHeader.StreetAddress"]', label: localizedMessages.streetAddress },
-				{ selector: 'input[name="OrderHeader.City"]', label: localizedMessages.city },
-				{ selector: 'input[name="OrderHeader.State"]', label: localizedMessages.state },
-				{ selector: 'input[name="OrderHeader.PostalCode"]', label: localizedMessages.postalCode }
+				{ selector: '#citySelect', label: localizedMessages.city },
+				{ selector: '#areaSelect', label: localizedMessages.area }
 			];
 
 			// Check guest email if guest checkout
@@ -841,6 +895,17 @@
 			// Validate each required field
 			requiredFields.forEach(function(field) {
 				var $field = $(field.selector);
+				
+				// Skip area select validation if custom area input is visible (city has no remote areas)
+				if (field.selector === '#areaSelect' && $('#customAreaRow').is(':visible')) {
+					return; // Skip area select validation if manual input is shown directly
+				}
+				
+				// Skip area select validation if "Other" is selected and custom input is filled
+				if (field.selector === '#areaSelect' && $('#areaSelect').val() === 'OTHER' && $('#customAreaInput').val().trim()) {
+					return;
+				}
+				
 				var value = $field.val() ? $field.val().trim() : '';
 				
 				if (!value) {
@@ -864,6 +929,39 @@
 					}
 				}
 			});
+
+			// Validate custom area input if it's visible
+			if ($('#customAreaRow').is(':visible')) {
+				var customAreaValue = $('#customAreaInput').val() ? $('#customAreaInput').val().trim() : '';
+				if (!customAreaValue) {
+					isValid = false;
+					$('#customAreaInput').addClass('is-invalid');
+					$('#customAreaError').text(localizedMessages.area + ' ' + localizedMessages.isRequired).show();
+					if (!firstInvalidField) {
+						firstInvalidField = $('#customAreaInput');
+					}
+				} else {
+					$('#customAreaError').hide();
+					$('#customAreaInput').removeClass('is-invalid');
+				}
+			}
+			
+			// Validate area select if dropdown is visible (not custom input)
+			if ($('#areaRow').is(':visible') && !$('#customAreaRow').is(':visible')) {
+				var areaValue = $('#areaSelect').val();
+				if (!areaValue || areaValue === '') {
+					isValid = false;
+					$('#areaSelect').addClass('is-invalid');
+					if (!firstInvalidField) {
+						firstInvalidField = $('#areaSelect');
+					}
+					var errorMsg = localizedMessages.area + ' ' + localizedMessages.isRequired;
+					errorMessages.push(errorMsg);
+					if ($('#areaSelect').next('.validation-error-message').length === 0) {
+						$('#areaSelect').after('<div class="validation-error-message text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>' + errorMsg + '</div>');
+					}
+				}
+			}
 
 			// Validate email format if guest
 			if (isGuest) {
@@ -922,6 +1020,27 @@
 				
 				showValidationError(summaryError);
 				return false;
+			}
+
+			// Handle custom area input - set it to the area field before submission
+			// If custom area input is visible (either directly or via "Other"), use its value
+			if ($('#customAreaRow').is(':visible')) {
+				var customAreaValue = $('#customAreaInput').val() ? $('#customAreaInput').val().trim() : '';
+				if (customAreaValue) {
+					// Store the custom area value in the areaSelect for form submission
+					// If OTHER is selected, replace it with the actual custom value
+					if ($('#areaSelect').val() === 'OTHER') {
+						// Create a hidden option with the custom value
+						$('#areaSelect').html('<option value="' + customAreaValue + '" selected>' + customAreaValue + '</option>');
+					} else {
+						$('#areaSelect').val(customAreaValue);
+					}
+					// Ensure State is set to the custom area value
+					$('#stateInput').val(customAreaValue);
+				}
+			} else if ($('#areaSelect').val() && $('#areaSelect').val() !== 'OTHER') {
+				// If dropdown is visible and a remote area is selected, ensure State is set
+				$('#stateInput').val($('#areaSelect').val());
 			}
 
 			// Check if Geidea payment method is selected BEFORE preventing default
@@ -1110,6 +1229,12 @@
 			$(this).removeClass('is-invalid');
 			$(this).next('.validation-error-message').remove();
 		});
+		
+		// Remove validation errors on custom area input
+		$('#customAreaInput').on('input', function() {
+			$(this).removeClass('is-invalid');
+			$('#customAreaError').hide();
+		});
 
 		// Remove payment method error on selection
 		$('input[name="OrderHeader.PaymentMethod"]').on('change', function() {
@@ -1117,8 +1242,203 @@
 		});
 	});
 
+		var selectedCityId = null;
+		var cityDefaultCharge = 0;
+
+		// Handle city selection
+		$('#citySelect').on('change', function() {
+			var selectedOption = $(this).find('option:selected');
+			selectedCityId = selectedOption.data('city-id');
+			cityDefaultCharge = parseFloat(selectedOption.data('city-delivery-charge')) || 0;
+			
+			// Reset everything
+			$('#areaSelect').val('').html('<option value="">' + localizedSelectArea + '</option>');
+			$('#customAreaInput').val('').removeClass('is-invalid');
+			$('#customAreaError').hide();
+			$('#stateInput').val(''); // Reset State field
+			$('#areaRow').hide();
+			$('#customAreaRow').hide();
+			$('#deliveryChargeDisplay').hide();
+			$('#deliveryChargeSection').hide();
+			deliveryCharge = 0;
+			updateTotals();
+			
+			if (selectedCityId) {
+				// Load areas for this city - this will show appropriate input (dropdown or manual)
+				loadAreasForCity(selectedCityId);
+				// Check free delivery eligibility
+				checkFreeDeliveryEligibility(selectedCityId, null);
+			} else {
+				// No city selected - hide everything
+				$('#areaRow').hide();
+				$('#customAreaRow').hide();
+				deliveryCharge = 0;
+				updateDeliveryChargeDisplay();
+				updateTotals();
+			}
+		});
+
+		// Handle area selection
+		$('#areaSelect').on('change', function() {
+			var selectedValue = $(this).val();
+			var selectedOption = $(this).find('option:selected');
+			
+			if (selectedValue === 'OTHER') {
+				// Hide dropdown, show only custom area input
+				$('#areaRow').hide();
+				$('#customAreaRow').show();
+				$('#customAreaInput').prop('required', true).focus();
+				$('#areaSelect').prop('required', false);
+				// Clear and set delivery charge to city default
+				$('#areaSelect').val('OTHER'); // Keep OTHER selected for form submission
+				// State will be set when user types in custom input
+				$('#stateInput').val('');
+				// Check free delivery eligibility
+				checkFreeDeliveryEligibility(selectedCityId, 'OTHER');
+			} else if (selectedValue) {
+				// Remote area selected - show dropdown, hide custom input
+				$('#areaRow').show();
+				$('#customAreaRow').hide();
+				$('#customAreaInput').prop('required', false).val('');
+				$('#areaSelect').prop('required', true);
+				// Set State to the selected area value
+				$('#stateInput').val(selectedValue);
+				// Check free delivery eligibility with area name
+				checkFreeDeliveryEligibility(selectedCityId, selectedValue);
+			} else {
+				// No area selected
+				$('#customAreaRow').hide();
+				$('#customAreaInput').prop('required', false).val('');
+				$('#stateInput').val('');
+				deliveryCharge = 0;
+				$('#deliveryChargeDisplay').hide();
+				$('#deliveryChargeSection').hide();
+				updateTotals();
+			}
+		});
+
+		// Handle custom area input - only update delivery charge, don't touch dropdown
+		$('#customAreaInput').on('input', function() {
+			var customValue = $(this).val().trim();
+			// Set State to the custom area value
+			$('#stateInput').val(customValue);
+			// Check free delivery eligibility for custom area (treated as "OTHER")
+			if (selectedCityId) {
+				checkFreeDeliveryEligibility(selectedCityId, 'OTHER');
+			}
+		});
+
+		// Function to load areas for a city
+		function loadAreasForCity(cityId) {
+			$.ajax({
+				url: '@Url.Action("GetAreasByCity", "Cart")',
+				type: 'GET',
+				data: { cityId: cityId },
+				success: function(response) {
+					if (response.success) {
+						var $areaSelect = $('#areaSelect');
+						var $customAreaRow = $('#customAreaRow');
+						
+						// Store city default charge
+						cityDefaultCharge = response.cityDefaultCharge || 0;
+						
+						// Check if city has remote areas
+						if (response.hasRemoteAreas && response.areas && response.areas.length > 0) {
+							// City has remote areas - show dropdown with remote areas + Other option
+							$areaSelect.html('<option value="">' + localizedSelectArea + '</option>');
+							
+							// Add remote areas
+							response.areas.forEach(function(area) {
+								$areaSelect.append($('<option></option>')
+									.attr('value', area.name)
+									.attr('data-delivery-charge', area.deliveryCharge)
+									.text(area.name));
+							});
+							
+							// Add "Other" option - use the localized variable
+							var $otherOption = $('<option></option>')
+								.attr('value', 'OTHER');
+							$otherOption.text(localizedOther);
+							$areaSelect.append($otherOption);
+							
+							// Show dropdown initially, hide manual input
+							$('#areaRow').show();
+							$customAreaRow.hide();
+							$areaSelect.prop('required', true);
+							$('#customAreaInput').prop('required', false).val('');
+						} else {
+							// City has no remote areas - show manual input directly, hide dropdown
+							$('#areaRow').hide();
+							$customAreaRow.show();
+							$areaSelect.prop('required', false);
+							$('#customAreaInput').prop('required', true);
+							// Set a hidden value in areaSelect for form submission
+							$areaSelect.html('<option value="OTHER" selected style="display:none;">' + localizedOther + '</option>');
+							// Check free delivery eligibility
+							checkFreeDeliveryEligibility(cityId, 'OTHER');
+						}
+					}
+				},
+				error: function() {
+					console.error('Error loading areas');
+					// On error, show manual input as fallback
+					$('#areaRow').hide();
+					$('#customAreaRow').show();
+					$('#areaSelect').prop('required', false);
+					$('#customAreaInput').prop('required', true);
+				}
+			});
+		}
+
+		// Function to check free delivery eligibility
+		function checkFreeDeliveryEligibility(cityId, areaName) {
+			if (!cityId) {
+				deliveryCharge = 0;
+				updateDeliveryChargeDisplay();
+				updateTotals();
+				return;
+			}
+
+			$.ajax({
+				url: '@Url.Action("CheckFreeDeliveryEligibility", "Cart")',
+				type: 'GET',
+				data: { 
+					cityId: cityId,
+					areaName: areaName || null
+				},
+				success: function(response) {
+					if (response.success) {
+						deliveryCharge = response.deliveryCharge || 0;
+						updateDeliveryChargeDisplay();
+						updateTotals();
+					}
+				},
+				error: function() {
+					console.error('Error checking free delivery eligibility');
+					// Fallback to city default charge
+					updateDeliveryChargeDisplay();
+					updateTotals();
+				}
+			});
+		}
+
+		// Function to update delivery charge display
+		function updateDeliveryChargeDisplay() {
+			if (deliveryCharge > 0) {
+				$('#deliveryChargeDisplay').show();
+				$('#deliveryChargeSection').show();
+				$('#freeDeliveryMessage').hide();
+				$('#deliveryChargeAmount').text(formatCurrency(deliveryCharge));
+				$('#deliveryChargeTotal').text(formatCurrency(deliveryCharge));
+			} else {
+				$('#deliveryChargeDisplay').hide();
+				$('#deliveryChargeSection').hide();
+				$('#freeDeliveryMessage').show();
+			}
+		}
+
 		function updateTotals() {
-			var finalTotal = subtotal - currentDiscount;
+			var finalTotal = subtotal - currentDiscount + deliveryCharge;
 			$('#finalTotal').text(formatCurrency(finalTotal));
 		}
 

@@ -4,6 +4,7 @@ using IdealWeightNutrition.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IdealWeightNutrition.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260115165129_area")]
+    partial class area
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -832,9 +835,6 @@ namespace IdealWeightNutrition.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("AllowFreeDelivery")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Author")
                         .HasColumnType("nvarchar(max)");
 
@@ -861,9 +861,6 @@ namespace IdealWeightNutrition.DataAccess.Migrations
 
                     b.Property<DateTime?>("ExpiryDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<double>("FreeDeliveryMinimumAmount")
-                        .HasColumnType("float");
 
                     b.Property<string>("HealthNotes")
                         .HasColumnType("nvarchar(max)");

@@ -297,15 +297,17 @@ button.loading,
     position: relative;
 }
 
-button.loading i,
-.btn.loading i,
-.btn-add-cart-quick.loading i,
-.discounted-cart-btn.loading i,
-.best-seller-cart-btn.loading i,
-.new-arrival-cart-btn.loading i {
-    animation: spin 1s linear infinite;
-}
-
+    button.loading i,
+    .btn.loading i,
+    .btn-add-cart-quick.loading i,
+    .discounted-cart-btn.loading i,
+    .best-seller-cart-btn.loading i,
+    .new-arrival-cart-btn.loading i {
+        animation: spin 1s linear infinite;
+        margin-top: 60%;
+        margin-left: 50%;
+    }
+   
 .add-to-cart-btn.in-cart {
     background: var(--primary-color);
     color: var(--white);

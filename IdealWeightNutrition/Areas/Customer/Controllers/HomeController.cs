@@ -502,6 +502,27 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
                 ViewBag.FeaturedTestimonials = new List<Review>();
             }
             
+            // Set SEO based on page type
+            var requestCulture = Request.HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+            var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+            var baseUrl = _configuration["SiteSettings:BaseUrl"] ?? Request.Scheme + "://" + Request.Host;
+            
+            Models.ViewModels.SEOViewModel seo;
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                // Category page - use category-specific SEO
+                var selectedCategory = allCategories.FirstOrDefault(c => c.Id == categoryId.Value);
+                var categoryName = selectedCategory?.Name ?? "Products";
+                seo = SEOHelper.GetCategoryPageSEO(categoryName, baseUrl, currentCulture);
+            }
+            else
+            {
+                // Home page - use brand + commercial keywords
+                seo = SEOHelper.GetHomePageSEO(baseUrl, currentCulture);
+            }
+            
+            ViewData["SEO"] = seo;
+            
             return View(ProductList);
         }
 
@@ -2655,6 +2676,12 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 
         public IActionResult AboutUs()
         {
+            // Set SEO for About page - Brand trust keywords
+            var requestCulture = Request.HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+            var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+            var baseUrl = _configuration["SiteSettings:BaseUrl"] ?? Request.Scheme + "://" + Request.Host;
+            var seo = SEOHelper.GetAboutPageSEO(baseUrl, currentCulture);
+            ViewData["SEO"] = seo;
             return View();
         }
 

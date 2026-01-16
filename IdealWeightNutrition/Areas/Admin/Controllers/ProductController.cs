@@ -354,6 +354,9 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
                     existingProduct.ExpiryDate = productVM.product.ExpiryDate;
                     existingProduct.IsNew = productVM.product.IsNew;
                     existingProduct.IsTrending = productVM.product.IsTrending;
+                    existingProduct.AllowFreeDelivery = productVM.product.AllowFreeDelivery;
+                    existingProduct.FreeDeliveryMinimumAmount = productVM.product.FreeDeliveryMinimumAmount;
+
                     
                     // Update ImageUrl only if provided
                     if (!string.IsNullOrEmpty(productVM.product.ImageUrl))

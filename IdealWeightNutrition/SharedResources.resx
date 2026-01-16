@@ -3690,4 +3690,259 @@
   <data name="Admin_RefundOrder" xml:space="preserve">
     <value />
   </data>
+  <data name="Delivery" xml:space="preserve">
+    <value />
+  </data>
+  <data name="UseOrderIDAndEmailToTrackOrderStatus" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ShippingDate" xml:space="preserve">
+    <value />
+  </data>
+  <data name="OrderTracking" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EnterYourEmailAddress" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EnterOrderIDAndEmailToTrack" xml:space="preserve">
+    <value />
+  </data>
+  <data name="InvalidOrderID" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value />
+  </data>
+  <data name="RequestReturn" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequest" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequests" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestStatus" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NeedToReturn" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestDescription" xml:space="preserve">
+    <value />
+  </data>
+  <data name="SelectItemsToReturn" xml:space="preserve">
+    <value />
+  </data>
+  <data name="OrderedQty" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnQty" xml:space="preserve">
+    <value />
+  </data>
+  <data name="TotalRefundAmount" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnReason" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EnterReturnReason" xml:space="preserve">
+    <value />
+  </data>
+  <data name="AdditionalNotes" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EnterAdditionalNotes" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnPolicyItem1" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnPolicyItem2" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnPolicyItem3" xml:space="preserve">
+    <value />
+  </data>
+  <data name="SubmitReturnRequest" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnSummary" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EstimatedRefund" xml:space="preserve">
+    <value />
+  </data>
+  <data name="BackToOrderDetails" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ItemReason" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EnterReasonForThisItem" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ItemCondition" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Used" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Damaged" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Defective" xml:space="preserve">
+    <value />
+  </data>
+  <data name="RequestDate" xml:space="preserve">
+    <value />
+  </data>
+  <data name="RefundAmount" xml:space="preserve">
+    <value />
+  </data>
+  <data name="AdminNotes" xml:space="preserve">
+    <value />
+  </data>
+  <data name="RejectionReason" xml:space="preserve">
+    <value />
+  </data>
+  <data name="OrderNotEligibleForReturn" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestAlreadyExists" xml:space="preserve">
+    <value />
+  </data>
+  <data name="AtLeastOneItemRequiredForReturn" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestSubmittedSuccessfully" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestNotFound" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestCannotBeApproved" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestApproved" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestCannotBeRejected" xml:space="preserve">
+    <value />
+  </data>
+  <data name="RejectionReasonRequired" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestRejected" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnMarkedAsReceived" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestCannotBeMarkedAsReceived" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestCannotBeCompleted" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestCompleted" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestCannotBeCancelled" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestCancelled" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ManageReturnRequests" xml:space="preserve">
+    <value />
+  </data>
+  <data name="BackToReturnRequests" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnRequestInformation" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ItemsToReturn" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnShippingInformation" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ShippedDate" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReceivedDate" xml:space="preserve">
+    <value />
+  </data>
+  <data name="RefundTransaction" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ApproveReturnRequest" xml:space="preserve">
+    <value />
+  </data>
+  <data name="RejectReturnRequest" xml:space="preserve">
+    <value />
+  </data>
+  <data name="MarkAsReceived" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CompleteProcessRefund" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReturnTrackingNumber" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EnterTransactionID" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ThisWillMarkReturnAsCompleted" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ApprovedDate" xml:space="preserve">
+    <value />
+  </data>
+  <data name="RejectedDate" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CompletedDate" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ProcessedDate" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CompleteReturnRequest" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ConfirmCancelReturnRequest" xml:space="preserve">
+    <value />
+  </data>
+  <data name="SelectCity" xml:space="preserve">
+    <value />
+  </data>
+  <data name="DeliveryCharge" xml:space="preserve">
+    <value />
+  </data>
+  <data name="FreeDelivery" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Area" xml:space="preserve">
+    <value />
+  </data>
+  <data name="SelectArea" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EnterArea" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EnterAreaName" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CitiesDeliveryAreas" xml:space="preserve">
+    <value />
+  </data>
 </root>

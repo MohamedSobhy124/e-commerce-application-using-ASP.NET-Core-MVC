@@ -44,6 +44,7 @@ namespace IdealWeightNutrition.Models
         public string StreetAddress { get; set; } = default!;
         [Required]
         public string City { get; set; } = default!;
+        public string? Area { get; set; } // For remote areas or custom area entry
         [Required]
         public string State { get; set; } = default!;
         [Required]

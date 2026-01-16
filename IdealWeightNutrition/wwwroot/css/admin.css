@@ -486,3 +486,6 @@ table.dataTable thead > tr > th.sorting:before, table.dataTable thead > tr > th.
     line-height: 12px !important;
     
 }
+input#DeliveryCharge {
+    width: 70%;
+}

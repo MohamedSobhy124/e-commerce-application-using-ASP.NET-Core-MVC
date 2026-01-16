@@ -1,0 +1,277 @@
+@model IdealWeightNutrition.Models.City
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Model.Id == 0 ? Localizer["CreateCity"].Value : Localizer["EditCity"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var isEdit = Model.Id != 0;
+}
+
+<partial name="_Notifications" />
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-form-wrapper">
+            <div class="admin-form-header">
+                <h2 class="admin-form-title">
+                    <i class="bi bi-@(isEdit ? "pencil" : "plus-circle")-fill me-3"></i>
+                    @(isEdit ? Localizer["EditCity"] : Localizer["CreateCity"])
+                </h2>
+            </div>
+
+            <div class="admin-form-body">
+                <form asp-action="Upsert" method="post">
+                    <div asp-validation-summary="All" class="alert alert-danger"></div>
+                    <input asp-for="Id" hidden />
+
+                    <!-- City Information -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-info-circle me-2"></i>
+                                @Localizer["CityInformation"]
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="Name" class="admin-form-label">
+                                            <i class="bi bi-building me-2"></i>
+                                            @Localizer["CityNameEnglish"] <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="Name" class="admin-form-control" placeholder="e.g., Abu Dhabi" />
+                                        <span asp-validation-for="Name" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="NameAr" class="admin-form-label">
+                                            <i class="bi bi-building me-2"></i>
+                                            @Localizer["CityNameArabic"]
+                                        </label>
+                                        <input asp-for="NameAr" class="admin-form-control" dir="rtl" placeholder="أبوظبي" />
+                                        <span asp-validation-for="NameAr" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="Emirate" class="admin-form-label">
+                                            <i class="bi bi-map me-2"></i>
+                                            @Localizer["EmirateEnglish"] <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="Emirate" class="admin-form-control" placeholder="e.g., Abu Dhabi" />
+                                        <span asp-validation-for="Emirate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="EmirateAr" class="admin-form-label">
+                                            <i class="bi bi-map me-2"></i>
+                                            @Localizer["EmirateArabic"]
+                                        </label>
+                                        <input asp-for="EmirateAr" class="admin-form-control" dir="rtl" placeholder="أبوظبي" />
+                                        <span asp-validation-for="EmirateAr" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Settings -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-truck me-2"></i>
+                                @Localizer["DeliverySettings"]
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="DeliveryCharge" class="admin-form-label">
+                                            <i class="bi bi-currency-dollar me-2"></i>
+                                            @Localizer["DefaultDeliveryCharge"] <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">AED</span>
+                                            <input asp-for="DeliveryCharge" type="number" step="0.01" min="0" class="admin-form-control" placeholder="0.00" />
+                                        </div>
+                                        <small class="form-text text-muted mt-2">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            @Localizer["DefaultChargeForCity"]
+                                        </small>
+                                        <span asp-validation-for="DeliveryCharge" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="DisplayOrder" class="admin-form-label">
+                                            <i class="bi bi-sort-numeric-down me-2"></i>
+                                            @Localizer["DisplayOrder"]
+                                        </label>
+                                        <input asp-for="DisplayOrder" type="number" class="admin-form-control" placeholder="0" />
+                                        <small class="form-text text-muted mt-2">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            @Localizer["LowerNumbersAppearFirst"]
+                                        </small>
+                                        <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <div class="form-check form-switch">
+                                            <input asp-for="IsActive" class="form-check-input" type="checkbox" id="isActiveSwitch" />
+                                            <label class="form-check-label" for="isActiveSwitch">
+                                                <i class="bi bi-toggle-on me-2"></i>
+                                                @Localizer["ActiveCity"]
+                                            </label>
+                                        </div>
+                                        <small class="form-text text-muted mt-2">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            @Localizer["InactiveCitiesWontAppear"]
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (isEdit)
+                    {
+                        <!-- Remote Areas Section -->
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header bg-info text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-list-ul me-2"></i>
+                                        @Localizer["RemoteAreas"]
+                                    </h5>
+                                    <a asp-controller="RemoteArea" asp-action="Upsert" asp-route-cityId="@Model.Id" class="btn btn-light btn-sm">
+                                        <i class="bi bi-plus-circle me-1"></i>
+                                        @Localizer["AddRemoteArea"]
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                @{
+                                    var remoteAreas = ViewBag.RemoteAreas as IEnumerable<IdealWeightNutrition.Models.RemoteArea> ?? new List<IdealWeightNutrition.Models.RemoteArea>();
+                                }
+                                @if (remoteAreas.Any())
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>@Localizer["Name"]</th>
+                                                    <th>@Localizer["NameArabic"]</th>
+                                                    <th>@Localizer["DeliveryCharge"]</th>
+                                                    <th>@Localizer["DisplayOrder"]</th>
+                                                    <th>@Localizer["Status"]</th>
+                                                    <th>@Localizer["Actions"]</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var area in remoteAreas)
+                                                {
+                                                    <tr>
+                                                        <td><strong>@area.Name</strong></td>
+                                                        <td dir="rtl">@(area.NameAr ?? "-")</td>
+                                                        <td>
+                                                            <span class="badge bg-success">@area.DeliveryCharge.ToString("N2") AED</span>
+                                                        </td>
+                                                        <td>@area.DisplayOrder</td>
+                                                        <td>
+                                                            <span class="badge bg-@(area.IsActive ? "success" : "secondary")">
+                                                                @(area.IsActive ? Localizer["Active"] : Localizer["Inactive"])
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group" role="group">
+                                                                <a asp-controller="RemoteArea" asp-action="Upsert" asp-route-id="@area.Id" class="btn btn-sm btn-primary" title="@Localizer["Edit"]">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </a>
+                                                                <a asp-controller="RemoteArea" asp-action="Delete" asp-route-id="@area.Id" class="btn btn-sm btn-danger" title="@Localizer["Delete"]">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info text-center">
+                                        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                        <p class="mt-2 mb-0">@Localizer["NoRemoteAreasYet"]</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle me-2"></i>
+                            @(isEdit ? Localizer["Update"] : Localizer["Create"])
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary btn-lg">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            @Localizer["BackToList"]
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    @{
+        <partial name="_ValidationScriptsPartial"/>
+    }
+}
+
+<style>
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        padding: 1.5rem 0;
+        border-top: 2px solid #e9ecef;
+        margin-top: 2rem;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 12px;
+    }
+    
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+        font-weight: 600;
+    }
+    
+    .admin-form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+</style>

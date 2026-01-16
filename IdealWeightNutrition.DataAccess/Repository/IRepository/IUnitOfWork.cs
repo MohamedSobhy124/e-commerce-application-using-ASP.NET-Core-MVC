@@ -37,6 +37,8 @@ namespace IdealWeightNutrition.DataAccess.Repository.IRepository
         IBrandRepository Brand { get; }
         IReturnRequestRepository ReturnRequest { get; }
         IReturnRequestItemRepository ReturnRequestItem { get; }
+        ICityRepository City { get; }
+        IRemoteAreaRepository RemoteArea { get; }
         void save();
     }
 }

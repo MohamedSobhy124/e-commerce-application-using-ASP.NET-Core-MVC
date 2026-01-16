@@ -332,6 +332,45 @@
                                     </div>
                                 </div>
 
+                                <!-- Free Delivery Settings Section -->
+                                <div class="admin-form-section-title">
+                                    <h4>
+                                        <i class="bi bi-truck me-2"></i>@Localizer["FreeDeliverySettings"]
+                                    </h4>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" asp-for="product.AllowFreeDelivery" id="allowFreeDeliveryCheckbox" onchange="toggleFreeDeliveryMinimum()" />
+                                                <label class="form-check-label admin-form-label" for="allowFreeDeliveryCheckbox">
+                                                    <i class="bi bi-truck me-2"></i>@Localizer["AllowFreeDelivery"]
+                                                </label>
+                                            </div>
+                                            <small class="form-text text-muted">
+                                                <i class="bi bi-info-circle me-1"></i>@Localizer["AllowFreeDeliveryHelpText"]
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group" id="freeDeliveryMinimumGroup">
+                                            <label asp-for="product.FreeDeliveryMinimumAmount" class="admin-form-label">
+                                                <i class="bi bi-currency-dollar me-2"></i>@Localizer["FreeDeliveryMinimumAmount"] (AED)
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">AED</span>
+                                                <input asp-for="product.FreeDeliveryMinimumAmount" type="number" step="0.01" min="0" class="admin-form-control" placeholder="0.00" id="freeDeliveryMinimumInput" />
+                                            </div>
+                                            <small class="form-text text-muted">
+                                                <i class="bi bi-info-circle me-1"></i>@Localizer["FreeDeliveryMinimumAmountHelpText"]
+                                            </small>
+                                            <span asp-validation-for="product.FreeDeliveryMinimumAmount" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
 
@@ -3624,3 +3663,27 @@
         }
     }
 </style>
+
+<script>
+    // Toggle free delivery minimum amount field based on checkbox
+    function toggleFreeDeliveryMinimum() {
+        var allowFreeDelivery = document.getElementById('allowFreeDeliveryCheckbox').checked;
+        var minimumGroup = document.getElementById('freeDeliveryMinimumGroup');
+        var minimumInput = document.getElementById('freeDeliveryMinimumInput');
+        
+        if (allowFreeDelivery) {
+            minimumGroup.style.display = 'block';
+            if (minimumInput.value == 0) {
+                minimumInput.value = '';
+            }
+        } else {
+            minimumGroup.style.display = 'none';
+            minimumInput.value = '0';
+        }
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleFreeDeliveryMinimum();
+    });
+</script>

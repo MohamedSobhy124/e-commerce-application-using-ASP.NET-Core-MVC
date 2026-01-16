@@ -44,6 +44,8 @@ namespace IdealWeightNutrition.DataAccess.Repository
         public IBrandRepository Brand { get; private set; }
         public IReturnRequestRepository ReturnRequest { get; private set; }
         public IReturnRequestItemRepository ReturnRequestItem { get; private set; }
+        public ICityRepository City { get; private set; }
+        public IRemoteAreaRepository RemoteArea { get; private set; }
 
         public UnitOfWork(ApplicationDBContext db) 
         {
@@ -77,6 +79,8 @@ namespace IdealWeightNutrition.DataAccess.Repository
             Brand = new BrandRepository(_db);
             ReturnRequest = new ReturnRequestRepository(_db);
             ReturnRequestItem = new ReturnRequestItemRepository(_db);
+            City = new CityRepository(_db);
+            RemoteArea = new RemoteAreaRepository(_db);
 
         }
 

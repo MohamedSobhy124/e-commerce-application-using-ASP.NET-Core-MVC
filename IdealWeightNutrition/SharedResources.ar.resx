@@ -406,7 +406,7 @@
     <value>الإرجاع</value>
   </data>
   <data name="StreetAddress" xml:space="preserve">
-    <value>عنوان الشارع</value>
+    <value>تفاصيل العنوان</value>
   </data>
   <data name="StartProcessing" xml:space="preserve">
     <value>بدء المعالجة</value>
@@ -591,12 +591,6 @@
   <data name="EstimatedDays" xml:space="preserve">
     <value>متوقع 7-14 يوم</value>
   </data>
-  <data name="Delivery" xml:space="preserve">
-    <value>التوصيل</value>
-  </data>
-  <data name="UseOrderIDAndEmailToTrackOrderStatus" xml:space="preserve">
-    <value>استخدم رقم الطلب وعنوان بريدك الإلكتروني لتتبع حالة طلبك في أي وقت.</value>
-  </data>
   <data name="NeedHelp" xml:space="preserve">
     <value>تحتاج مساعدة؟</value>
   </data>
@@ -617,12 +611,6 @@
   </data>
   <data name="OrderDate" xml:space="preserve">
     <value>تاريخ الطلب</value>
-  </data>
-  <data name="ShippingDate" xml:space="preserve">
-    <value>تاريخ الشحن</value>
-  </data>
-  <data name="OrderTracking" xml:space="preserve">
-    <value>تتبع الطلب</value>
   </data>
   <data name="BackToOrdersList" xml:space="preserve">
     <value>العودة لقائمة الطلبات</value>
@@ -647,15 +635,6 @@
   </data>
   <data name="EnterYourEmail" xml:space="preserve">
     <value>أدخل عنوان بريدك الإلكتروني</value>
-  </data>
-  <data name="EnterYourEmailAddress" xml:space="preserve">
-    <value>أدخل عنوان بريدك الإلكتروني</value>
-  </data>
-  <data name="EnterOrderIDAndEmailToTrack" xml:space="preserve">
-    <value>أدخل رقم الطلب وعنوان بريدك الإلكتروني لتتبع حالة طلبك.</value>
-  </data>
-  <data name="InvalidOrderID" xml:space="preserve">
-    <value>رقم الطلب غير صحيح. يرجى التحقق والمحاولة مرة أخرى.</value>
   </data>
   <data name="BackToShopping" xml:space="preserve">
     <value>العودة للتسوق</value>
@@ -1042,9 +1021,6 @@
   </data>
   <data name="UsageHistory" xml:space="preserve">
     <value>سجل الاستخدام</value>
-  </data>
-  <data name="Order" xml:space="preserve">
-    <value>الطلب</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>المستخدم</value>
@@ -3596,8 +3572,9 @@
   <data name="Admin_PhoneNumber" xml:space="preserve">
     <value>رقم الهاتف</value>
   </data>
-  <data name="Admin_StreetAddress" xml:space="preserve">
-    <value>عنوان الشارع</value>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="Admin_StreetAddress" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
   </data>
   <data name="Admin_Carrier" xml:space="preserve">
     <value>شركة الشحن</value>
@@ -3716,6 +3693,30 @@
   <data name="Admin_RefundOrder" xml:space="preserve">
     <value>استرجاع المبلغ للعميل</value>
   </data>
+  <data name="Delivery" xml:space="preserve">
+    <value>التوصيل</value>
+  </data>
+  <data name="UseOrderIDAndEmailToTrackOrderStatus" xml:space="preserve">
+    <value>استخدم رقم الطلب وعنوان بريدك الإلكتروني لتتبع حالة طلبك في أي وقت.</value>
+  </data>
+  <data name="ShippingDate" xml:space="preserve">
+    <value>تاريخ الشحن</value>
+  </data>
+  <data name="OrderTracking" xml:space="preserve">
+    <value>تتبع الطلب</value>
+  </data>
+  <data name="EnterYourEmailAddress" xml:space="preserve">
+    <value>أدخل عنوان بريدك الإلكتروني</value>
+  </data>
+  <data name="EnterOrderIDAndEmailToTrack" xml:space="preserve">
+    <value>أدخل رقم الطلب وعنوان بريدك الإلكتروني لتتبع حالة طلبك.</value>
+  </data>
+  <data name="InvalidOrderID" xml:space="preserve">
+    <value>رقم الطلب غير صحيح. يرجى التحقق والمحاولة مرة أخرى.</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>الطلب</value>
+  </data>
   <data name="RequestReturn" xml:space="preserve">
     <value>طلب إرجاع</value>
   </data>
@@ -3755,14 +3756,8 @@
   <data name="AdditionalNotes" xml:space="preserve">
     <value>ملاحظات إضافية</value>
   </data>
-  <data name="Optional" xml:space="preserve">
-    <value>اختياري</value>
-  </data>
   <data name="EnterAdditionalNotes" xml:space="preserve">
     <value>أي معلومات إضافية ترغب في تقديمها...</value>
-  </data>
-  <data name="ReturnPolicy" xml:space="preserve">
-    <value>سياسة الإرجاع</value>
   </data>
   <data name="ReturnPolicyItem1" xml:space="preserve">
     <value>يجب إرجاع العناصر خلال 14 يوماً من تاريخ التسليم</value>
@@ -3793,9 +3788,6 @@
   </data>
   <data name="ItemCondition" xml:space="preserve">
     <value>حالة العنصر</value>
-  </data>
-  <data name="New" xml:space="preserve">
-    <value>جديد</value>
   </data>
   <data name="Used" xml:space="preserve">
     <value>مستعمل</value>
@@ -3881,12 +3873,6 @@
   <data name="ReturnShippingInformation" xml:space="preserve">
     <value>معلومات شحن الإرجاع</value>
   </data>
-  <data name="TrackingNumber" xml:space="preserve">
-    <value>رقم التتبع</value>
-  </data>
-  <data name="Carrier" xml:space="preserve">
-    <value>شركة الشحن</value>
-  </data>
   <data name="ShippedDate" xml:space="preserve">
     <value>تاريخ الشحن</value>
   </data>
@@ -3917,9 +3903,6 @@
   <data name="ThisWillMarkReturnAsCompleted" xml:space="preserve">
     <value>سيؤدي هذا إلى تحديد الإرجاع كمكتمل ومعالجة الاسترجاع.</value>
   </data>
-  <data name="Phone" xml:space="preserve">
-    <value>الهاتف</value>
-  </data>
   <data name="ApprovedDate" xml:space="preserve">
     <value>تاريخ الموافقة</value>
   </data>
@@ -3937,5 +3920,203 @@
   </data>
   <data name="ConfirmCancelReturnRequest" xml:space="preserve">
     <value>هل أنت متأكد من إلغاء طلب الإرجاع هذا؟</value>
+  </data>
+  <data name="SelectCity" xml:space="preserve">
+    <value>اختر المدينة</value>
+  </data>
+  <data name="DeliveryCharge" xml:space="preserve">
+    <value>رسوم التوصيل</value>
+  </data>
+  <data name="FreeDelivery" xml:space="preserve">
+    <value>توصيل مجاني</value>
+  </data>
+  <data name="Area" xml:space="preserve">
+    <value>المنطقة</value>
+  </data>
+  <data name="SelectArea" xml:space="preserve">
+    <value>اختر المنطقة</value>
+  </data>
+  <data name="EnterArea" xml:space="preserve">
+    <value>أدخل المنطقة</value>
+  </data>
+  <data name="EnterAreaName" xml:space="preserve">
+    <value>أدخل اسم المنطقة</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>أخرى</value>
+  </data>
+  <data name="CitiesDeliveryAreas" xml:space="preserve">
+    <value>ادارة المدن و مناطق التوصيل</value>
+  </data>
+  <data name="FreeDeliverySettings" xml:space="preserve">
+    <value>إعدادات التوصيل المجاني</value>
+  </data>
+  <data name="AllowFreeDelivery" xml:space="preserve">
+    <value>السماح بالتوصيل المجاني</value>
+  </data>
+  <data name="AllowFreeDeliveryHelpText" xml:space="preserve">
+    <value>تفعيل التوصيل المجاني لهذا المنتج عندما يصل الطلب إلى الحد الأدنى المطلوب.</value>
+  </data>
+  <data name="FreeDeliveryMinimumAmount" xml:space="preserve">
+    <value>الحد الأدنى للتوصيل المجاني</value>
+  </data>
+  <data name="FreeDeliveryMinimumAmountHelpText" xml:space="preserve">
+    <value>الحد الأدنى لمبلغ الطلب (درهم) المطلوب للتوصيل المجاني. يجب أن تسمح جميع المنتجات في السلة بالتوصيل المجاني ويجب أن يصل إجمالي الطلب إلى هذا المبلغ.</value>
+  </data>
+  <data name="FreeDeliveryAvailable" xml:space="preserve">
+    <value>التوصيل المجاني متاح</value>
+  </data>
+  <data name="FreeDeliveryMinimumAmountMessage" xml:space="preserve">
+    <value>توصيل مجاني للطلبات التي تزيد عن {0} درهم</value>
+  </data>
+  <data name="FreeDeliveryNoMinimumMessage" xml:space="preserve">
+    <value>التوصيل المجاني متاح لهذا المنتج</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>جاري التحميل...</value>
+  </data>
+  <data name="ErrorUpdatingCityStatus" xml:space="preserve">
+    <value>خطأ في تحديث حالة المدينة</value>
+  </data>
+  <data name="CitiesManagement" xml:space="preserve">
+    <value>إدارة المدن ومناطق التوصيل</value>
+  </data>
+  <data name="AddNewCity" xml:space="preserve">
+    <value>إضافة مدينة جديدة</value>
+  </data>
+  <data name="Cities" xml:space="preserve">
+    <value>المدن</value>
+  </data>
+  <data name="SearchCities" xml:space="preserve">
+    <value>البحث في المدن...</value>
+  </data>
+  <data name="NoCitiesYet" xml:space="preserve">
+    <value>لا توجد مدن بعد</value>
+  </data>
+  <data name="CreateCitiesToManageDelivery" xml:space="preserve">
+    <value>قم بإنشاء المدن لإدارة رسوم التوصيل والمناطق النائية</value>
+  </data>
+  <data name="CreateFirstCity" xml:space="preserve">
+    <value>إنشاء أول مدينة</value>
+  </data>
+  <data name="Emirate" xml:space="preserve">
+    <value>الإمارة</value>
+  </data>
+  <data name="RemoteAreas" xml:space="preserve">
+    <value>المناطق النائية</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>تعديل</value>
+  </data>
+  <data name="Areas" xml:space="preserve">
+    <value>المناطق</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="CreateCity" xml:space="preserve">
+    <value>إنشاء مدينة</value>
+  </data>
+  <data name="EditCity" xml:space="preserve">
+    <value>تعديل المدينة</value>
+  </data>
+  <data name="CityInformation" xml:space="preserve">
+    <value>معلومات المدينة</value>
+  </data>
+  <data name="CityNameEnglish" xml:space="preserve">
+    <value>اسم المدينة (إنجليزي)</value>
+  </data>
+  <data name="CityNameArabic" xml:space="preserve">
+    <value>اسم المدينة (عربي)</value>
+  </data>
+  <data name="EmirateEnglish" xml:space="preserve">
+    <value>الإمارة (إنجليزي)</value>
+  </data>
+  <data name="EmirateArabic" xml:space="preserve">
+    <value>الإمارة (عربي)</value>
+  </data>
+  <data name="DeliverySettings" xml:space="preserve">
+    <value>إعدادات التوصيل</value>
+  </data>
+  <data name="DefaultDeliveryCharge" xml:space="preserve">
+    <value>رسوم التوصيل الافتراضية (درهم)</value>
+  </data>
+  <data name="DefaultChargeForCity" xml:space="preserve">
+    <value>الرسوم الافتراضية لهذه المدينة. يمكن أن يكون للمناطق النائية رسوم مختلفة.</value>
+  </data>
+  <data name="DisplayOrder" xml:space="preserve">
+    <value>ترتيب العرض</value>
+  </data>
+  <data name="LowerNumbersAppearFirst" xml:space="preserve">
+    <value>الأرقام الأقل تظهر أولاً في القائمة المنسدلة.</value>
+  </data>
+  <data name="ActiveCity" xml:space="preserve">
+    <value>مدينة نشطة</value>
+  </data>
+  <data name="InactiveCitiesWontAppear" xml:space="preserve">
+    <value>المدن غير النشطة لن تظهر في قائمة العملاء.</value>
+  </data>
+  <data name="AddRemoteArea" xml:space="preserve">
+    <value>إضافة منطقة نائية</value>
+  </data>
+  <data name="NoRemoteAreasYet" xml:space="preserve">
+    <value>لا توجد مناطق نائية بعد. انقر على "إضافة منطقة نائية" لإنشاء واحدة.</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>تحديث</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>إنشاء</value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>العودة إلى القائمة</value>
+  </data>
+  <data name="ManageRemoteAreas" xml:space="preserve">
+    <value>إدارة المناطق النائية</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>نشط</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>غير نشط</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>الحالة</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>الإجراءات</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+  <data name="CityCreatedSuccessfully" xml:space="preserve">
+    <value>تم إنشاء المدينة بنجاح</value>
+  </data>
+  <data name="CityUpdatedSuccessfully" xml:space="preserve">
+    <value>تم تحديث المدينة بنجاح</value>
+  </data>
+  <data name="CityDeletedSuccessfully" xml:space="preserve">
+    <value>تم حذف المدينة بنجاح</value>
+  </data>
+  <data name="CannotDeleteCityHasRemoteAreas" xml:space="preserve">
+    <value>لا يمكن حذف المدينة. لديها مناطق نائية مرتبطة بها. يرجى حذف المناطق النائية أولاً.</value>
+  </data>
+  <data name="DeleteCity" xml:space="preserve">
+    <value>حذف المدينة</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>تحذير!</value>
+  </data>
+  <data name="AreYouSureDeleteCity" xml:space="preserve">
+    <value>هل أنت متأكد من حذف هذه المدينة؟ لا يمكن التراجع عن هذا الإجراء.</value>
+  </data>
+  <data name="CannotDeleteCity" xml:space="preserve">
+    <value>لا يمكن الحذف!</value>
+  </data>
+  <data name="CityHasRemoteAreas" xml:space="preserve">
+    <value>هذه المدينة لديها {0} منطقة نائية مرتبطة بها. يرجى حذف جميع المناطق النائية أولاً قبل حذف هذه المدينة.</value>
+  </data>
+  <data name="CityNotFound" xml:space="preserve">
+    <value>المدينة غير موجودة</value>
   </data>
 </root>

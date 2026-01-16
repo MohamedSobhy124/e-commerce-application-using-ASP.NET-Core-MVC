@@ -129,6 +129,14 @@ namespace IdealWeightNutrition.Models
         [Display(Name = "Is Trending Product")]
         public bool IsTrending { get; set; } = false;
         
+        // Free Delivery Settings
+        [Display(Name = "Allow Free Delivery")]
+        public bool AllowFreeDelivery { get; set; } = false;
+        
+        [Display(Name = "Free Delivery Minimum Amount (AED)")]
+        [Range(0, double.MaxValue, ErrorMessage = "Minimum amount must be 0 or greater")]
+        public double FreeDeliveryMinimumAmount { get; set; } = 0;
+        
         // Helper method to get slug based on language
         public string GetSlug()
         {
