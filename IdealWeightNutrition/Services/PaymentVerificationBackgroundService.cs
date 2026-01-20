@@ -206,7 +206,7 @@ namespace IdealWeightNutrition.Services
                 {
                     // Check if order is too old (more than 2 hours)
                     var timeSinceOrder = DateTimeHelper.Now - order.OrderDate;
-                    if (timeSinceOrder.TotalHours >= 1)
+                    if (timeSinceOrder.TotalMinutes > 20)
                     {
                         _logger.LogWarning("Order #{OrderId} payment NOT verified after {Hours} hours. Cancelling order. Status: {Status}, Message: {Message}", 
                             order.Id, timeSinceOrder.TotalHours, verificationStatus, verificationMessage);

@@ -48,9 +48,53 @@
                         <label asp-for="Input.Email">
                             <i class="bi bi-envelope me-2"></i>@Localizer["Email"]
                         </label>
-                        <input asp-for="Input.Email" class="form-control" autocomplete="username" 
+                        <input asp-for="Input.Email" id="registerEmailInput" class="form-control" autocomplete="username" 
                                placeholder="@Localizer["YourEmailAddress"]" />
                         <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        <div id="emailValidationMessage" class="text-danger small mt-1" style="display: none;"></div>
+                    </div>
+
+                    <!-- Email Verification OTP Section -->
+                    <div id="emailVerificationSection" class="col-md-12 form-group" style="display: none; margin-top: 15px; padding: 20px; background: #f0f9ff; border-radius: 8px; border: 2px solid #0ea5e9;">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-shield-check text-primary me-2" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <strong style="color: #0369a1;">@Localizer["VerifyYourEmail"]</strong>
+                                <p class="mb-0 text-muted small">@Localizer["VerifyEmailDescription"]</p>
+                            </div>
+                        </div>
+                        
+                        <div id="otpSendSection">
+                            <button type="button" id="sendOtpBtn" class="btn btn-primary btn-sm" style="border-radius: 6px;">
+                                <i class="bi bi-send me-2"></i>@Localizer["SendVerificationCode"]
+                            </button>
+                            <div id="otpSendMessage" class="mt-2 small" style="display: none;"></div>
+                        </div>
+                        
+                        <div id="otpVerifySection" style="display: none; margin-top: 15px;">
+                            <label class="form-label small">
+                                <i class="bi bi-key me-2"></i>@Localizer["EnterVerificationCode"] <span class="text-danger">*</span>
+                            </label>
+                            <div class="d-flex gap-2">
+                                <input type="text" id="otpInput" class="form-control" placeholder="000000" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 4px; font-weight: bold; font-family: monospace;" />
+                                <button type="button" id="verifyOtpBtn" class="btn btn-success btn-sm" style="border-radius: 6px; min-width: 100px;">
+                                    <i class="bi bi-check-circle me-1"></i>@Localizer["Verify"]
+                                </button>
+                            </div>
+                            <div id="otpVerifyMessage" class="mt-2 small" style="display: none;"></div>
+                            <div class="mt-2">
+                                <button type="button" id="resendOtpBtn" class="btn btn-link btn-sm p-0 text-primary" style="font-size: 0.85rem; text-decoration: none;">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>@Localizer["ResendCode"]
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="emailVerifiedSection" style="display: none; margin-top: 15px;">
+                            <div class="alert alert-success mb-0" style="border-radius: 6px;">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <strong>@Localizer["EmailVerified"]</strong>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-md-12 form-group">
@@ -156,6 +200,257 @@
                     $('#Input_CompanyId').show();
                 } else {
                     $('#Input_CompanyId').hide();
+                }
+            });
+
+            // OTP Verification functionality
+            var $emailField = $('#registerEmailInput');
+            var $verificationSection = $('#emailVerificationSection');
+            var $otpSendSection = $('#otpSendSection');
+            var $otpVerifySection = $('#otpVerifySection');
+            var $emailVerifiedSection = $('#emailVerifiedSection');
+            var $sendOtpBtn = $('#sendOtpBtn');
+            var $verifyOtpBtn = $('#verifyOtpBtn');
+            var $resendOtpBtn = $('#resendOtpBtn');
+            var $otpInput = $('#otpInput');
+            var $otpSendMessage = $('#otpSendMessage');
+            var $otpVerifyMessage = $('#otpVerifyMessage');
+            var $emailValidationMsg = $('#emailValidationMessage');
+            var isEmailVerified = false;
+            var resendCooldown = 60;
+            var resendTimer = null;
+            
+            // Enhanced email regex pattern
+            var emailRegex = new RegExp('^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\\.[a-zA-Z]{2,}$');
+            
+            // Show verification section when email is valid
+            $emailField.on('blur', function() {
+                var email = $(this).val() ? $(this).val().trim() : '';
+                if (email && emailRegex.test(email)) {
+                    // Check if email is already verified
+                    checkEmailVerified(email);
+                    $verificationSection.slideDown(300);
+                } else {
+                    $verificationSection.slideUp(300);
+                    resetOtpSection();
+                }
+            });
+            
+            // Check if email is already verified
+            function checkEmailVerified(email) {
+                $.ajax({
+                    url: window.location.pathname + '?handler=CheckEmailVerified',
+                    method: 'POST',
+                    data: { email: email },
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.verified) {
+                            showEmailVerified();
+                            isEmailVerified = true;
+                        } else {
+                            showOtpSendSection();
+                            isEmailVerified = false;
+                        }
+                    },
+                    error: function() {
+                        showOtpSendSection();
+                        isEmailVerified = false;
+                    }
+                });
+            }
+            
+            // Send OTP
+            $sendOtpBtn.on('click', function() {
+                var email = $emailField.val() ? $emailField.val().trim() : '';
+                if (!email || !emailRegex.test(email)) {
+                    $emailValidationMsg.html('<i class="bi bi-exclamation-circle me-1"></i>Please enter a valid email address').show();
+                    return;
+                }
+                
+                $sendOtpBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Sending...');
+                $otpSendMessage.hide();
+                
+                $.ajax({
+                    url: window.location.pathname + '?handler=SendOtp',
+                    method: 'POST',
+                    data: { email: email },
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $otpSendMessage.removeClass('text-danger').addClass('text-success').html('<i class="bi bi-check-circle me-1"></i>' + response.message).show();
+                            showOtpVerifySection();
+                            startResendCooldown();
+                        } else {
+                            $otpSendMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle me-1"></i>' + response.message).show();
+                            $sendOtpBtn.prop('disabled', false).html('<i class="bi bi-send me-2"></i>Send Verification Code');
+                        }
+                    },
+                    error: function() {
+                        $otpSendMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle me-1"></i>Error sending verification code. Please try again.').show();
+                        $sendOtpBtn.prop('disabled', false).html('<i class="bi bi-send me-2"></i>Send Verification Code');
+                    }
+                });
+            });
+            
+            // Verify OTP
+            $verifyOtpBtn.on('click', function() {
+                var email = $emailField.val() ? $emailField.val().trim() : '';
+                var otp = $otpInput.val() ? $otpInput.val().trim() : '';
+                
+                if (!otp || otp.length !== 6) {
+                    $otpVerifyMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle me-1"></i>Please enter a valid 6-digit code').show();
+                    return;
+                }
+                
+                $verifyOtpBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Verifying...');
+                $otpVerifyMessage.hide();
+                
+                $.ajax({
+                    url: window.location.pathname + '?handler=VerifyOtp',
+                    method: 'POST',
+                    data: { email: email, otp: otp },
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $otpVerifyMessage.removeClass('text-danger').addClass('text-success').html('<i class="bi bi-check-circle me-1"></i>' + response.message).show();
+                            showEmailVerified();
+                            isEmailVerified = true;
+                            clearResendTimer();
+                        } else {
+                            $otpVerifyMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle me-1"></i>' + response.message).show();
+                            $verifyOtpBtn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i>Verify');
+                            $otpInput.val('').focus();
+                        }
+                    },
+                    error: function() {
+                        $otpVerifyMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle me-1"></i>Error verifying code. Please try again.').show();
+                        $verifyOtpBtn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i>Verify');
+                    }
+                });
+            });
+            
+            // Resend OTP
+            $resendOtpBtn.on('click', function() {
+                if ($(this).hasClass('disabled')) return;
+                $sendOtpBtn.click();
+            });
+            
+            // Allow Enter key to verify OTP
+            $otpInput.on('keypress', function(e) {
+                if (e.which === 13) {
+                    $verifyOtpBtn.click();
+                }
+            });
+            
+            // Only allow numbers in OTP input
+            $otpInput.on('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            
+            function showOtpSendSection() {
+                $otpSendSection.show();
+                $otpVerifySection.hide();
+                $emailVerifiedSection.hide();
+                $sendOtpBtn.prop('disabled', false).html('<i class="bi bi-send me-2"></i>Send Verification Code');
+            }
+            
+            function showOtpVerifySection() {
+                $otpSendSection.hide();
+                $otpVerifySection.show();
+                $emailVerifiedSection.hide();
+                $otpInput.focus();
+                $verifyOtpBtn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i>Verify');
+            }
+            
+            function showEmailVerified() {
+                $otpSendSection.hide();
+                $otpVerifySection.hide();
+                $emailVerifiedSection.show();
+                clearResendTimer();
+            }
+            
+            function resetOtpSection() {
+                $otpSendSection.show();
+                $otpVerifySection.hide();
+                $emailVerifiedSection.hide();
+                $otpInput.val('');
+                $otpSendMessage.hide();
+                $otpVerifyMessage.hide();
+                $sendOtpBtn.prop('disabled', false).html('<i class="bi bi-send me-2"></i>Send Verification Code');
+                isEmailVerified = false;
+                clearResendTimer();
+            }
+            
+            function startResendCooldown() {
+                clearResendTimer();
+                $resendOtpBtn.addClass('disabled').prop('disabled', true);
+                var seconds = resendCooldown;
+                
+                resendTimer = setInterval(function() {
+                    seconds--;
+                    if (seconds > 0) {
+                        $resendOtpBtn.html('<i class="bi bi-arrow-clockwise me-1"></i>Resend Code (' + seconds + 's)');
+                    } else {
+                        clearResendTimer();
+                        $resendOtpBtn.removeClass('disabled').prop('disabled', false).html('<i class="bi bi-arrow-clockwise me-1"></i>Resend Code');
+                    }
+                }, 1000);
+            }
+            
+            function clearResendTimer() {
+                if (resendTimer) {
+                    clearInterval(resendTimer);
+                    resendTimer = null;
+                }
+                $resendOtpBtn.removeClass('disabled').prop('disabled', false).html('<i class="bi bi-arrow-clockwise me-1"></i>Resend Code');
+            }
+
+            // Form submission validation
+            $('#registerForm').on('submit', function(e) {
+                var email = $emailField.val() ? $emailField.val().trim() : '';
+                
+                if (email && emailRegex.test(email)) {
+                    if (!isEmailVerified) {
+                        e.preventDefault();
+                        
+                        // Check verification status on server
+                        $.ajax({
+                            url: window.location.pathname + '?handler=CheckEmailVerified',
+                            method: 'POST',
+                            data: { email: email },
+                            headers: {
+                                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                            },
+                            success: function(response) {
+                                if (response.verified) {
+                                    isEmailVerified = true;
+                                    $('#registerForm').off('submit').submit();
+                                } else {
+                                    $verificationSection.slideDown(300);
+                                    if ($verificationSection.find('.alert-danger').length === 0) {
+                                        $verificationSection.prepend('<div class="alert alert-danger mb-3"><i class="bi bi-exclamation-circle me-2"></i>Please verify your email address before registering.</div>');
+                                    }
+                                    $('html, body').animate({
+                                        scrollTop: $verificationSection.offset().top - 100
+                                    }, 500);
+                                }
+                            },
+                            error: function() {
+                                $verificationSection.slideDown(300);
+                                if ($verificationSection.find('.alert-danger').length === 0) {
+                                    $verificationSection.prepend('<div class="alert alert-danger mb-3"><i class="bi bi-exclamation-circle me-2"></i>Please verify your email address before registering.</div>');
+                                }
+                            }
+                        });
+                        
+                        return false;
+                    }
                 }
             });
         });

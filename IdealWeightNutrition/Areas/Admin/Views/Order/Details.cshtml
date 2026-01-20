@@ -478,7 +478,7 @@
                                 </div>
                                 <div class="timeline-content">
                                     <h4 class="timeline-title">@Localizer["Admin_Delivered"]</h4>
-                                    <p class="timeline-description">@Localizer["Admin_EstimatedDelivery"]: @IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(7).ToString("MMM dd") - @IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(14).ToString("MMM dd, yyyy")</p>
+                                    <p class="timeline-description">@Localizer["Admin_EstimatedDelivery"]: @IdealWeightNutrition.Utility.DateTimeHelper.GetEstimatedDeliveryRange()</p>
                                 </div>
                             </div>
                         }

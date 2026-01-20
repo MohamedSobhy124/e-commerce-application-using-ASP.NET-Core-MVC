@@ -60,6 +60,10 @@ namespace IdealWeightNutrition.Models
         [Range(0, 1000)]
         [Display(Name = "Price For 100+")]
         public   double? Price100 { get; set; }
+        [Range(0, 1000)]
+        [Display(Name = "Store Cost (Real Cost)")]
+        [Column(TypeName = "decimal(18,2)")]
+        public double? StoreCost { get; set; }
         [Required]
         public int CategryId { get; set; }
         [ForeignKey("CategryId")]

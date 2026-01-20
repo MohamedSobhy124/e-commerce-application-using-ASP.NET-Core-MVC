@@ -4113,7 +4113,76 @@
   <data name="CityHasRemoteAreas" xml:space="preserve">
     <value>This city has {0} remote area(s) associated with it. Please delete all remote areas first before deleting this city.</value>
   </data>
-  <data name="CityNotFound" xml:space="preserve">
-    <value>City not found</value>
+  <data name="CityNotFound" xml:space="preserve"> 
+    <value>City not found</value> 
+  </data> 
+  <data name="VATAmount" xml:space="preserve">
+    <value>VAT Amount</value>
+  </data>
+  <data name="ExportOrders" xml:space="preserve">
+    <value>Export Orders</value>
+  </data>
+  <data name="ExportProductProfits" xml:space="preserve">
+    <value>Export Product Profits</value>
+  </data>
+  <data name="StoreCost" xml:space="preserve">
+    <value>Store Cost</value>
+  </data>
+  <data name="StoreCostRealCost" xml:space="preserve">
+    <value>Store Cost (Real Cost)</value>
+  </data>
+  <data name="StoreCostHelpText" xml:space="preserve">
+    <value>The actual cost of the product to the store. Used to calculate profit.</value>
+  </data>
+  <data name="Profit" xml:space="preserve">
+    <value>Profit</value>
+  </data>
+  <data name="ExportProducts" xml:space="preserve">
+    <value>Export Products</value>
+  </data>
+  <data name="VerifyYourEmail" xml:space="preserve">
+    <value>Verify Your Email</value>
+  </data>
+  <data name="VerifyEmailDescription" xml:space="preserve">
+    <value>We need to verify your email address to complete your order. A verification code will be sent to your email.</value>
+  </data>
+  <data name="SendVerificationCode" xml:space="preserve">
+    <value>Send Verification Code</value>
+  </data>
+  <data name="EnterVerificationCode" xml:space="preserve">
+    <value>Enter Verification Code</value>
+  </data>
+  <data name="Verify" xml:space="preserve">
+    <value>Verify</value>
+  </data>
+  <data name="ResendCode" xml:space="preserve">
+    <value>Resend Code</value>
+  </data>
+  <data name="EmailVerified" xml:space="preserve">
+    <value>Email Verified</value>
+  </data>
+  <data name="EmailVerificationOTP" xml:space="preserve">
+    <value>Email Verification Code - Ideal Weight</value>
+  </data>
+  <data name="OTPSentSuccessfully" xml:space="preserve">
+    <value>Verification code sent to your email. Please check your inbox.</value>
+  </data>
+  <data name="ErrorSendingOTP" xml:space="preserve">
+    <value>Error sending verification code. Please try again.</value>
+  </data>
+  <data name="EmailAndOTPRequired" xml:space="preserve">
+    <value>Email and OTP are required</value>
+  </data>
+  <data name="EmailVerifiedSuccessfully" xml:space="preserve">
+    <value>Email verified successfully!</value>
+  </data>
+  <data name="ErrorVerifyingOTP" xml:space="preserve">
+    <value>Error verifying code. Please try again.</value>
+  </data>
+  <data name="PleaseEnterValidOTP" xml:space="preserve">
+    <value>Please enter a valid 6-digit code</value>
+  </data>
+  <data name="EmailNotVerified" xml:space="preserve">
+    <value>Please verify your email address before placing the order.</value>
   </data>
 </root>

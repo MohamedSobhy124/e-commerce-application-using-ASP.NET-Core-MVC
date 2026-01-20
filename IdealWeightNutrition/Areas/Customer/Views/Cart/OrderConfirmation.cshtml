@@ -78,7 +78,7 @@
                                     <i class="bi bi-truck text-primary me-3" style="font-size: 2rem;"></i>
                                     <div>
                                         <h6>@(Localizer["Delivery"]?.Value ?? "Delivery")</h6>
-                                        <small class="text-muted">@(Localizer["EstimatedDays"]?.Value ?? "Estimated 7-14 days")</small>
+                                        <small class="text-muted">@IdealWeightNutrition.Utility.DateTimeHelper.GetEstimatedDeliveryRange()</small>
                                     </div>
                                 </div>
                             </div>

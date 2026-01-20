@@ -77,6 +77,64 @@ namespace IdealWeightNutrition.Utility
             }
             return TimeZoneInfo.ConvertTime(uaeDateTime, _uaeTimeZone).ToUniversalTime();
         }
+
+        /// <summary>
+        /// Adds working days to a date, excluding weekends (Friday and Saturday in UAE)
+        /// </summary>
+        /// <param name="startDate">The starting date</param>
+        /// <param name="workingDays">Number of working days to add</param>
+        /// <returns>The date after adding the specified working days</returns>
+        public static DateTime AddWorkingDays(DateTime startDate, int workingDays)
+        {
+            if (workingDays == 0) return startDate;
+
+            var currentDate = startDate;
+            var daysToAdd = workingDays > 0 ? 1 : -1;
+            var remainingDays = Math.Abs(workingDays);
+
+            while (remainingDays > 0)
+            {
+                currentDate = currentDate.AddDays(daysToAdd);
+                
+                // Skip weekends (Friday = 5, Saturday = 6)
+                if (currentDate.DayOfWeek != DayOfWeek.Friday && currentDate.DayOfWeek != DayOfWeek.Saturday)
+                {
+                    remainingDays--;
+                }
+            }
+
+            return currentDate;
+        }
+
+        /// <summary>
+        /// Gets estimated delivery date range (2 working days from now)
+        /// </summary>
+        /// <returns>Formatted string with delivery date range</returns>
+        public static string GetEstimatedDeliveryRange()
+        {
+            var startDate = AddWorkingDays(Now, 2);
+            var endDate = AddWorkingDays(Now, 2);
+            return startDate.ToString("MMM dd, yyyy");
+        }
+
+        /// <summary>
+        /// Gets estimated delivery date range with start and end dates
+        /// </summary>
+        /// <param name="startWorkingDays">Number of working days for start date (default: 2)</param>
+        /// <param name="endWorkingDays">Number of working days for end date (default: 2)</param>
+        /// <returns>Formatted string with delivery date range</returns>
+        public static string GetEstimatedDeliveryRange(int startWorkingDays = 2, int endWorkingDays = 2)
+        {
+            var startDate = AddWorkingDays(Now, startWorkingDays);
+            var endDate = AddWorkingDays(Now, endWorkingDays);
+            
+            if (startDate.Date == endDate.Date)
+            {
+                return startDate.ToString("MMM dd, yyyy");
+            }
+            
+            return startDate.ToString("MMM dd, yyyy") + " - " + endDate.ToString("MMM dd, yyyy");
+        }
     }
 }
 

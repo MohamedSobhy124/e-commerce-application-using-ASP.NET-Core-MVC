@@ -1516,6 +1516,10 @@
                             <span class="btn-select-options-text">@Localizer["SelectOptions"]</span>
                         </a>
                     }
+                    else if (!shouldShowPrice && allVariantsOutOfStock)
+                    {
+                        <!-- Product out of stock - no add to cart button -->
+                    }
                     else
                     {
                         <button class="btn-add-cart-quick @(isInCart ? "in-cart" : "")" 
@@ -2356,63 +2360,7 @@
         </div>
     </section>
 }
-
-<!-- Newsletter Section - Only for Logged-in Users -->
-@if (User.Identity.IsAuthenticated)
-{
-    var isSubscribed = ViewBag.IsNewsletterSubscribed as bool? ?? false;
-    var userEmail = ViewBag.UserEmail as string ?? "";
-    
-    <section class="newsletter-section">
-        <div class="container">
-            <div class="newsletter-content">
-                <div class="newsletter-icon">
-                    <i class="bi bi-envelope-heart"></i>
-                </div>
-                
-                @if (isSubscribed)
-                {
-                    <h2 class="newsletter-title">@Localizer["NewsletterSubscription"]</h2>
-                    <p class="newsletter-subtitle">@Localizer["YouAreSubscribedToNewsletter"]</p>
-                    <div class="newsletter-subscribed-info">
-                        <p class="newsletter-email-display">
-                            <i class="bi bi-envelope-check me-2"></i>
-                            <strong>@userEmail</strong>
-                        </p>
-                        <button type="button" class="newsletter-unsubscribe-btn" id="unsubscribeBtn">
-                            <i class="bi bi-x-circle me-2"></i>
-                            @Localizer["Unsubscribe"]
-                        </button>
-                    </div>
-                }
-                else
-                {
-                    <h2 class="newsletter-title">@Localizer["SubscribeToNewsletter"]</h2>
-                    <p class="newsletter-subtitle">@Localizer["GetLatestOffersAndUpdates"]</p>
-                    <form class="newsletter-form" id="newsletterForm">
-                        <input type="email" 
-                               class="newsletter-input" 
-                               placeholder="@Localizer["EnterYourEmail"]" 
-                               value="@userEmail"
-                               required 
-                               id="newsletterEmail" />
-                        <button type="submit" class="newsletter-submit-btn">
-                            <i class="bi bi-send me-2"></i>
-                            @Localizer["Subscribe"]
-                        </button>
-                    </form>
-                }
-                
-                <p class="newsletter-privacy">
-                    <i class="bi bi-shield-check me-2"></i>
-                    @Localizer["WeRespectYourPrivacy"]
-                </p>
-            </div>
-        </div>
-    </section>
-}
-
-<!-- Statistics Section -->
+ 
 <section class="stats-section scroll-reveal">
     <div class="container">
         <div class="stats-grid">
@@ -3848,7 +3796,9 @@
                                         <i class="bi bi-list-check"></i>
                                         <span class="btn-select-options-text">${localizations.selectOptions}</span>
                                        </a>`
-                                    : `<button class="btn-add-cart-quick ${cartClass}" 
+                                    : (!shouldShowPrice && allVariantsOutOfStock)
+                                        ? `<!-- Product out of stock - no add to cart button -->`
+                                        : `<button class="btn-add-cart-quick ${cartClass}" 
                                         data-product-id="${product.id}"
                                         onclick="toggleCart(${product.id}, this); event.stopPropagation();" 
                                         title="${isInCart ? localizations.inCart : localizations.addToCart}">
@@ -5847,7 +5797,9 @@
                         <i class="bi bi-list-check"></i>
                         <span class="btn-select-options-text">@Localizer["SelectOptions"]</span>
                     </a>
-                ` : `
+                ` : (product.stockQuantity <= 0)
+                    ? `<!-- Product out of stock - no add to cart button -->`
+                    : `
                     <button class="btn-add-cart-quick ${product.isInCart ? 'in-cart' : ''}" 
                             data-product-id="${product.id}"
                             onclick="toggleCart(${product.id}, this); event.stopPropagation();" 

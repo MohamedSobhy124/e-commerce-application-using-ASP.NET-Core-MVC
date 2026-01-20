@@ -51,8 +51,52 @@
 										<label class="form-label-enhanced">
 											<i class="bi bi-envelope-fill me-2"></i>@Localizer["EmailAddress"] <span class="text-danger">*</span>
 										</label>
-										<input asp-for="OrderHeader.Email" type="email" class="form-control-enhanced" placeholder="@Localizer["EnterYourEmail"]" required />
+										<input asp-for="OrderHeader.Email" type="email" id="orderEmailInput" class="form-control-enhanced" placeholder="@Localizer["EnterYourEmail"]" required />
 										<span asp-validation-for="OrderHeader.Email" class="text-danger validation-message"></span>
+										<div id="emailValidationMessage" class="validation-error-message text-danger small mt-1" style="display: none;"></div>
+									</div>
+									
+									<!-- Email Verification OTP Section -->
+									<div id="emailVerificationSection" class="form-row-enhanced" style="display: none; margin-top: 15px; padding: 20px; background: #f0f9ff; border-radius: 8px; border: 2px solid #0ea5e9;">
+										<div class="d-flex align-items-center mb-3">
+											<i class="bi bi-shield-check text-primary me-2" style="font-size: 1.5rem;"></i>
+											<div>
+												<strong style="color: #0369a1;">@Localizer["VerifyYourEmail"]</strong>
+												<p class="mb-0 text-muted small">@Localizer["VerifyEmailDescription"]</p>
+											</div>
+										</div>
+										
+										<div id="otpSendSection">
+											<button type="button" id="sendOtpBtn" class="btn btn-primary btn-sm" style="border-radius: 6px;">
+												<i class="bi bi-send me-2"></i>@Localizer["SendVerificationCode"]
+											</button>
+											<div id="otpSendMessage" class="mt-2 small" style="display: none;"></div>
+										</div>
+										
+										<div id="otpVerifySection" style="display: none; margin-top: 15px;">
+											<label class="form-label-enhanced small">
+												<i class="bi bi-key me-2"></i>@Localizer["EnterVerificationCode"] <span class="text-danger">*</span>
+											</label>
+											<div class="d-flex gap-2">
+												<input type="text" id="otpInput" class="form-control-enhanced" placeholder="000000" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 4px; font-weight: bold; font-family: monospace;" />
+												<button type="button" id="verifyOtpBtn" class="btn btn-success btn-sm" style="border-radius: 6px; min-width: 100px;">
+													<i class="bi bi-check-circle me-1"></i>@Localizer["Verify"]
+												</button>
+											</div>
+											<div id="otpVerifyMessage" class="mt-2 small" style="display: none;"></div>
+											<div class="mt-2">
+												<button type="button" id="resendOtpBtn" class="btn btn-link btn-sm p-0 text-primary" style="font-size: 0.85rem; text-decoration: none;">
+													<i class="bi bi-arrow-clockwise me-1"></i>@Localizer["ResendCode"]
+												</button>
+											</div>
+										</div>
+										
+										<div id="emailVerifiedSection" style="display: none; margin-top: 15px;">
+											<div class="alert alert-success mb-0" style="border-radius: 6px;">
+												<i class="bi bi-check-circle-fill me-2"></i>
+												<strong>@Localizer["EmailVerified"]</strong>
+											</div>
+										</div>
 									</div>
 								}
 								
@@ -425,13 +469,17 @@
 							</div>
 							<div class="delivery-text">
 								<strong>@Localizer["EstimatedDelivery"]</strong>
-								<p class="mb-0">@IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(2).ToShortDateString() - @IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(4).ToShortDateString()</p>
+								<p class="mb-0">@IdealWeightNutrition.Utility.DateTimeHelper.GetEstimatedDeliveryRange()</p>
 							</div>
 						</div>
-						<button type="submit" class="place-order-btn-enhanced">
+						<button type="submit" class="place-order-btn-enhanced" id="placeOrderBtn">
 							<span class="btn-content">
 								<i class="bi bi-check-circle-fill me-2"></i>
-								<span>@Localizer["PlaceOrder"]</span>
+								<span class="btn-text">@Localizer["PlaceOrder"]</span>
+								<span class="btn-loader" style="display: none;">
+									<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+									<span>@Localizer["Processing"]...</span>
+								</span>
 							</span>
 							<span class="btn-shine"></span>
 						</button>
@@ -705,6 +753,25 @@
 			transform: translateY(0);
 		}
 	}
+
+	/* Button loader styles */
+	.place-order-btn-enhanced:disabled {
+		opacity: 0.7;
+		cursor: not-allowed;
+		pointer-events: none;
+	}
+
+	.place-order-btn-enhanced .btn-loader {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.place-order-btn-enhanced .btn-loader .spinner-border-sm {
+		width: 1rem;
+		height: 1rem;
+		border-width: 0.15em;
+	}
 </style>
 
 @section Scripts {
@@ -735,7 +802,14 @@
 			area: '@Html.Raw(Localizer["Area"].Value)',
 			state: '@Html.Raw(Localizer["State"].Value)',
 			postalCode: '@Html.Raw(Localizer["PostalCode"].Value)',
-			emailAddress: '@Html.Raw(Localizer["EmailAddress"].Value)'
+			emailAddress: '@Html.Raw(Localizer["EmailAddress"].Value)',
+			sendVerificationCode: '@Html.Raw(Localizer["SendVerificationCode"]?.Value ?? "Send Verification Code")',
+			verify: '@Html.Raw(Localizer["Verify"]?.Value ?? "Verify")',
+			resendCode: '@Html.Raw(Localizer["ResendCode"]?.Value ?? "Resend Code")',
+			errorSendingOTP: '@Html.Raw(Localizer["ErrorSendingOTP"]?.Value ?? "Error sending verification code. Please try again.")',
+			errorVerifyingOTP: '@Html.Raw(Localizer["ErrorVerifyingOTP"]?.Value ?? "Error verifying code. Please try again.")',
+			pleaseEnterValidOTP: '@Html.Raw(Localizer["PleaseEnterValidOTP"]?.Value ?? "Please enter a valid 6-digit code")',
+			emailNotVerified: '@Html.Raw(Localizer["EmailNotVerified"]?.Value ?? "Please verify your email address before placing the order.")'
 		};
 
 		$(document).ready(function() {
@@ -867,6 +941,320 @@
 			$(this).val($(this).val().toUpperCase());
 		});
 
+		// Real-time email validation for guest checkout
+		var isGuest = @((Model.OrderHeader.IsGuestOrder || !User.Identity.IsAuthenticated).ToString().ToLower());
+		var emailValidationTimeout;
+		var isEmailValidating = false;
+		
+		if (isGuest) {
+			var $emailField = $('#orderEmailInput');
+			var $emailValidationMsg = $('#emailValidationMessage');
+			
+			// Enhanced email regex pattern
+			var emailRegex = new RegExp('^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\\.[a-zA-Z]{2,}$');
+			
+			function validateEmailFormat(email) {
+				if (!email || email.trim() === '') {
+					return { valid: false, message: localizedMessages.emailAddress + ' ' + localizedMessages.isRequired };
+				}
+				
+				if (!emailRegex.test(email)) {
+					return { valid: false, message: localizedMessages.invalidEmailFormat || localizedMessages.pleaseEnterValidEmail || 'Please enter a valid email address' };
+				}
+				
+				var parts = email.split('@@');
+				if (parts.length !== 2) {
+					return { valid: false, message: localizedMessages.invalidEmailFormat || localizedMessages.pleaseEnterValidEmail || 'Please enter a valid email address' };
+				}
+				
+				var domain = parts[1].toLowerCase();
+				
+				// Check for invalid patterns
+				if (domain.includes('..') || domain.startsWith('.') || domain.endsWith('.') || domain.length < 4) {
+					return { valid: false, message: localizedMessages.invalidEmailFormat || localizedMessages.pleaseEnterValidEmail || 'Please enter a valid email address' };
+				}
+				
+				return { valid: true, message: '' };
+			}
+			
+			function showEmailError(message) {
+				$emailField.addClass('is-invalid');
+				$emailValidationMsg.html('<i class="bi bi-exclamation-circle me-1"></i>' + message).show();
+			}
+			
+			function showEmailValid() {
+				$emailField.removeClass('is-invalid');
+				$emailField.addClass('is-valid');
+				$emailValidationMsg.hide();
+			}
+			
+			function clearEmailValidation() {
+				$emailField.removeClass('is-invalid is-valid');
+				$emailValidationMsg.hide();
+			}
+			
+			// Real-time validation on input (with debounce)
+			$emailField.on('input blur', function() {
+				var email = $(this).val() ? $(this).val().trim() : '';
+				
+				// Clear previous timeout
+				clearTimeout(emailValidationTimeout);
+				
+				// Clear validation state
+				$emailField.removeClass('is-invalid is-valid');
+				$emailValidationMsg.hide();
+				
+				if (!email) {
+					return; // Don't validate empty field in real-time
+				}
+				
+				// First, do client-side format validation
+				var formatCheck = validateEmailFormat(email);
+				if (!formatCheck.valid) {
+					showEmailError(formatCheck.message);
+					return;
+				}
+				
+				// If format is valid, do async server-side validation
+				emailValidationTimeout = setTimeout(function() {
+					if (isEmailValidating) return; // Prevent multiple simultaneous requests
+					
+					isEmailValidating = true;
+					$emailField.addClass('validating');
+					
+					$.ajax({
+						url: '/Customer/Cart/ValidateEmail',
+						method: 'POST',
+						data: { email: email },
+						success: function(response) {
+							isEmailValidating = false;
+							$emailField.removeClass('validating');
+							
+							if (response.valid) {
+								showEmailValid();
+							} else {
+								showEmailError(response.message || localizedMessages.invalidEmailFormat || localizedMessages.pleaseEnterValidEmail || 'Please enter a valid email address');
+							}
+						},
+						error: function() {
+							isEmailValidating = false;
+							$emailField.removeClass('validating');
+							// On error, still show format validation result
+							var formatCheck = validateEmailFormat(email);
+							if (!formatCheck.valid) {
+								showEmailError(formatCheck.message);
+							} else {
+								// If format is valid but server check failed, still allow it
+								// (server might be down, but format is correct)
+								showEmailValid();
+							}
+						}
+					});
+				}, 800); // Wait 800ms after user stops typing
+			});
+			
+			// Clear validation on focus if field is empty
+			$emailField.on('focus', function() {
+				if (!$(this).val() || $(this).val().trim() === '') {
+					clearEmailValidation();
+				}
+			});
+			
+			// OTP Verification functionality
+			var $verificationSection = $('#emailVerificationSection');
+			var $otpSendSection = $('#otpSendSection');
+			var $otpVerifySection = $('#otpVerifySection');
+			var $emailVerifiedSection = $('#emailVerifiedSection');
+			var $sendOtpBtn = $('#sendOtpBtn');
+			var $verifyOtpBtn = $('#verifyOtpBtn');
+			var $resendOtpBtn = $('#resendOtpBtn');
+			var $otpInput = $('#otpInput');
+			var $otpSendMessage = $('#otpSendMessage');
+			var $otpVerifyMessage = $('#otpVerifyMessage');
+			var isEmailVerified = false;
+			var resendCooldown = 60; // 60 seconds cooldown for resend
+			var resendTimer = null;
+			
+			// Show verification section when email is valid
+			$emailField.on('blur', function() {
+				var email = $(this).val() ? $(this).val().trim() : '';
+				if (email && emailRegex.test(email) && !$emailField.hasClass('is-invalid')) {
+					// Check if email is already verified
+					checkEmailVerified(email);
+					$verificationSection.slideDown(300);
+				} else {
+					$verificationSection.slideUp(300);
+					resetOtpSection();
+				}
+			});
+			
+			// Check if email is already verified
+			function checkEmailVerified(email) {
+				$.ajax({
+					url: '/Customer/Cart/CheckEmailVerified',
+					method: 'POST',
+					data: { email: email },
+					success: function(response) {
+						if (response.verified) {
+							showEmailVerified();
+							isEmailVerified = true;
+						} else {
+							showOtpSendSection();
+							isEmailVerified = false;
+						}
+					},
+					error: function() {
+						showOtpSendSection();
+						isEmailVerified = false;
+					}
+				});
+			}
+			
+			// Send OTP
+			$sendOtpBtn.on('click', function() {
+				var email = $emailField.val() ? $emailField.val().trim() : '';
+				if (!email || !emailRegex.test(email)) {
+					showEmailError(localizedMessages.invalidEmailFormat || localizedMessages.pleaseEnterValidEmail || 'Please enter a valid email address');
+					return;
+				}
+				
+				$sendOtpBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Sending...');
+				$otpSendMessage.hide();
+				
+				$.ajax({
+					url: '/Customer/Cart/SendOtp',
+					method: 'POST',
+					data: { email: email },
+					success: function(response) {
+						if (response.success) {
+							$otpSendMessage.removeClass('text-danger').addClass('text-success').html('<i class="bi bi-check-circle me-1"></i>' + response.message).show();
+							showOtpVerifySection();
+							startResendCooldown();
+						} else {
+							$otpSendMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle me-1"></i>' + response.message).show();
+							$sendOtpBtn.prop('disabled', false).html('<i class="bi bi-send me-2"></i>' + (localizedMessages.sendVerificationCode || 'Send Verification Code'));
+						}
+					},
+					error: function() {
+						$otpSendMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle me-1"></i>' + (localizedMessages.errorSendingOTP || 'Error sending verification code. Please try again.')).show();
+						$sendOtpBtn.prop('disabled', false).html('<i class="bi bi-send me-2"></i>' + (localizedMessages.sendVerificationCode || 'Send Verification Code'));
+					}
+				});
+			});
+			
+			// Verify OTP
+			$verifyOtpBtn.on('click', function() {
+				var email = $emailField.val() ? $emailField.val().trim() : '';
+				var otp = $otpInput.val() ? $otpInput.val().trim() : '';
+				
+				if (!otp || otp.length !== 6) {
+					$otpVerifyMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle me-1"></i>' + (localizedMessages.pleaseEnterValidOTP || 'Please enter a valid 6-digit code')).show();
+					return;
+				}
+				
+				$verifyOtpBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Verifying...');
+				$otpVerifyMessage.hide();
+				
+				$.ajax({
+					url: '/Customer/Cart/VerifyOtp',
+					method: 'POST',
+					data: { email: email, otp: otp },
+					success: function(response) {
+						if (response.success) {
+							$otpVerifyMessage.removeClass('text-danger').addClass('text-success').html('<i class="bi bi-check-circle me-1"></i>' + response.message).show();
+							showEmailVerified();
+							isEmailVerified = true;
+							clearResendTimer();
+						} else {
+							$otpVerifyMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle me-1"></i>' + response.message).show();
+							$verifyOtpBtn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i>' + (localizedMessages.verify || 'Verify'));
+							$otpInput.val('').focus();
+						}
+					},
+					error: function() {
+						$otpVerifyMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle me-1"></i>' + (localizedMessages.errorVerifyingOTP || 'Error verifying code. Please try again.')).show();
+						$verifyOtpBtn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i>' + (localizedMessages.verify || 'Verify'));
+					}
+				});
+			});
+			
+			// Resend OTP
+			$resendOtpBtn.on('click', function() {
+				if ($(this).hasClass('disabled')) return;
+				$sendOtpBtn.click();
+			});
+			
+			// Allow Enter key to verify OTP
+			$otpInput.on('keypress', function(e) {
+				if (e.which === 13) { // Enter key
+					$verifyOtpBtn.click();
+				}
+			});
+			
+			// Only allow numbers in OTP input
+			$otpInput.on('input', function() {
+				this.value = this.value.replace(/[^0-9]/g, '');
+			});
+			
+			function showOtpSendSection() {
+				$otpSendSection.show();
+				$otpVerifySection.hide();
+				$emailVerifiedSection.hide();
+				$sendOtpBtn.prop('disabled', false).html('<i class="bi bi-send me-2"></i>' + (localizedMessages.sendVerificationCode || 'Send Verification Code'));
+			}
+			
+			function showOtpVerifySection() {
+				$otpSendSection.hide();
+				$otpVerifySection.show();
+				$emailVerifiedSection.hide();
+				$otpInput.focus();
+				$verifyOtpBtn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i>' + (localizedMessages.verify || 'Verify'));
+			}
+			
+			function showEmailVerified() {
+				$otpSendSection.hide();
+				$otpVerifySection.hide();
+				$emailVerifiedSection.show();
+				clearResendTimer();
+			}
+			
+			function resetOtpSection() {
+				$otpSendSection.show();
+				$otpVerifySection.hide();
+				$emailVerifiedSection.hide();
+				$otpInput.val('');
+				$otpSendMessage.hide();
+				$otpVerifyMessage.hide();
+				$sendOtpBtn.prop('disabled', false).html('<i class="bi bi-send me-2"></i>' + (localizedMessages.sendVerificationCode || 'Send Verification Code'));
+				isEmailVerified = false;
+				clearResendTimer();
+			}
+			
+			function startResendCooldown() {
+				clearResendTimer();
+				$resendOtpBtn.addClass('disabled').prop('disabled', true);
+				var seconds = resendCooldown;
+				
+				resendTimer = setInterval(function() {
+					seconds--;
+					if (seconds > 0) {
+						$resendOtpBtn.html('<i class="bi bi-arrow-clockwise me-1"></i>' + (localizedMessages.resendCode || 'Resend Code') + ' (' + seconds + 's)');
+					} else {
+						clearResendTimer();
+						$resendOtpBtn.removeClass('disabled').prop('disabled', false).html('<i class="bi bi-arrow-clockwise me-1"></i>' + (localizedMessages.resendCode || 'Resend Code'));
+					}
+				}, 1000);
+			}
+			
+			function clearResendTimer() {
+				if (resendTimer) {
+					clearInterval(resendTimer);
+					resendTimer = null;
+				}
+				$resendOtpBtn.removeClass('disabled').prop('disabled', false).html('<i class="bi bi-arrow-clockwise me-1"></i>' + (localizedMessages.resendCode || 'Resend Code'));
+			}
+		}
+
 		// Form validation before submission
 		$('#orderForm').on('submit', function(e) {
 			var isValid = true;
@@ -963,21 +1351,62 @@
 				}
 			}
 
-			// Validate email format if guest
+			// Validate email format and real email if guest
 			if (isGuest) {
 				var $emailField = $('input[name="OrderHeader.Email"]');
 				var email = $emailField.val() ? $emailField.val().trim() : '';
-				var emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
 				
-				if (email && !emailRegex.test(email)) {
+				// Enhanced email regex pattern
+				var emailRegex = new RegExp('^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\\.[a-zA-Z]{2,}$');
+				
+				if (!email) {
 					isValid = false;
 					$emailField.addClass('is-invalid');
-					var emailError = localizedMessages.invalidEmailFormat || localizedMessages.pleaseEnterValidEmail;
+					var emailError = localizedMessages.emailAddress + ' ' + localizedMessages.isRequired;
 					if ($emailField.next('.validation-error-message').length === 0) {
 						$emailField.after('<div class="validation-error-message text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>' + emailError + '</div>');
 					}
 					if (!firstInvalidField) {
 						firstInvalidField = $emailField;
+					}
+				} else if (!emailRegex.test(email)) {
+					isValid = false;
+					$emailField.addClass('is-invalid');
+					var emailError = localizedMessages.invalidEmailFormat || localizedMessages.pleaseEnterValidEmail || 'Please enter a valid email address';
+					if ($emailField.next('.validation-error-message').length === 0) {
+						$emailField.after('<div class="validation-error-message text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>' + emailError + '</div>');
+					}
+					if (!firstInvalidField) {
+						firstInvalidField = $emailField;
+					}
+				} else {
+					// Additional domain validation
+					var parts = email.split('@@');
+					if (parts.length !== 2) {
+						isValid = false;
+						$emailField.addClass('is-invalid');
+						var emailError = localizedMessages.invalidEmailFormat || localizedMessages.pleaseEnterValidEmail || 'Please enter a valid email address';
+						if ($emailField.next('.validation-error-message').length === 0) {
+							$emailField.after('<div class="validation-error-message text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>' + emailError + '</div>');
+						}
+						if (!firstInvalidField) {
+							firstInvalidField = $emailField;
+						}
+					} else {
+						var domain = parts[1].toLowerCase();
+						
+						// Check for invalid patterns
+						if (domain.includes('..') || domain.startsWith('.') || domain.endsWith('.') || domain.length < 4) {
+							isValid = false;
+							$emailField.addClass('is-invalid');
+							var emailError = localizedMessages.invalidEmailFormat || localizedMessages.pleaseEnterValidEmail || 'Please enter a valid email address';
+							if ($emailField.next('.validation-error-message').length === 0) {
+								$emailField.after('<div class="validation-error-message text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>' + emailError + '</div>');
+							}
+							if (!firstInvalidField) {
+								firstInvalidField = $emailField;
+							}
+						}
 					}
 				}
 			}
@@ -995,10 +1424,18 @@
 				}
 			}
 
-			// If validation fails, prevent submission
+			// If basic validation fails, prevent submission
 			if (!isValid) {
 				e.preventDefault();
 				e.stopPropagation();
+
+				// Ensure button is enabled if validation fails
+				var $submitBtn = $('#placeOrderBtn');
+				var $btnText = $submitBtn.find('.btn-text');
+				var $btnLoader = $submitBtn.find('.btn-loader');
+				$submitBtn.prop('disabled', false);
+				$btnLoader.hide();
+				$btnText.show();
 
 				// Scroll to first invalid field
 				if (firstInvalidField) {
@@ -1043,9 +1480,173 @@
 				$('#stateInput').val($('#areaSelect').val());
 			}
 
+			// Final email validation check (async) if guest and all other validations passed
+			if (isGuest && isValid) {
+				var $emailField = $('#orderEmailInput');
+				var email = $emailField.val() ? $emailField.val().trim() : '';
+				
+				// If email field has validation errors, prevent submission
+				if ($emailField.hasClass('is-invalid')) {
+					e.preventDefault();
+					e.stopPropagation();
+					
+					var $submitBtn = $('#placeOrderBtn');
+					var $btnText = $submitBtn.find('.btn-text');
+					var $btnLoader = $submitBtn.find('.btn-loader');
+					$submitBtn.prop('disabled', false);
+					$btnLoader.hide();
+					$btnText.show();
+					
+					$('html, body').animate({
+						scrollTop: $emailField.offset().top - 100
+					}, 500);
+					$emailField.focus();
+					
+					return false;
+				}
+				
+				// Check if email is verified via OTP
+				// Prevent submission and check verification status
+				if (typeof isEmailVerified === 'undefined' || !isEmailVerified) {
+					e.preventDefault();
+					e.stopPropagation();
+					
+					// Check verification status on server
+					$.ajax({
+						url: '/Customer/Cart/CheckEmailVerified',
+						method: 'POST',
+						data: { email: email },
+						success: function(response) {
+							if (response.verified) {
+								isEmailVerified = true;
+								// Re-submit form
+								$('#orderForm').off('submit').submit();
+							} else {
+								var $submitBtn = $('#placeOrderBtn');
+								var $btnText = $submitBtn.find('.btn-text');
+								var $btnLoader = $submitBtn.find('.btn-loader');
+								$submitBtn.prop('disabled', false);
+								$btnLoader.hide();
+								$btnText.show();
+								
+								// Show verification section if hidden
+								$('#emailVerificationSection').slideDown(300);
+								
+								// Show error message
+								var verifyError = localizedMessages.emailNotVerified || 'Please verify your email address before placing the order.';
+								if ($('#emailVerificationSection .alert-danger').length === 0) {
+									$('#emailVerificationSection').prepend('<div class="alert alert-danger mb-3"><i class="bi bi-exclamation-circle me-2"></i>' + verifyError + '</div>');
+								}
+								
+								$('html, body').animate({
+									scrollTop: $('#emailVerificationSection').offset().top - 100
+								}, 500);
+								
+								showValidationError(verifyError);
+							}
+						},
+						error: function() {
+							var $submitBtn = $('#placeOrderBtn');
+							var $btnText = $submitBtn.find('.btn-text');
+							var $btnLoader = $submitBtn.find('.btn-loader');
+							$submitBtn.prop('disabled', false);
+							$btnLoader.hide();
+							$btnText.show();
+							
+							var verifyError = localizedMessages.emailNotVerified || 'Please verify your email address before placing the order.';
+							$('#emailVerificationSection').slideDown(300);
+							if ($('#emailVerificationSection .alert-danger').length === 0) {
+								$('#emailVerificationSection').prepend('<div class="alert alert-danger mb-3"><i class="bi bi-exclamation-circle me-2"></i>' + verifyError + '</div>');
+							}
+							showValidationError(verifyError);
+						}
+					});
+					
+					return false;
+				}
+				
+				// If email is valid format but hasn't been server-validated yet, do it now
+				var emailRegex = new RegExp('^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\\.[a-zA-Z]{2,}$');
+				if (email && emailRegex.test(email) && !$emailField.hasClass('is-valid')) {
+					// Block submission and validate
+					e.preventDefault();
+					e.stopPropagation();
+					
+					var $submitBtn = $('#placeOrderBtn');
+					$submitBtn.prop('disabled', true);
+					
+					// Validate email on server
+					$.ajax({
+						url: '/Customer/Cart/ValidateEmail',
+						method: 'POST',
+						data: { email: email },
+						success: function(response) {
+							$submitBtn.prop('disabled', false);
+							
+							if (response.valid) {
+								$emailField.addClass('is-valid');
+								$emailField.removeClass('is-invalid');
+								$('#emailValidationMessage').hide();
+								// Re-submit form
+								$('#orderForm').off('submit').submit();
+							} else {
+								$emailField.addClass('is-invalid');
+								$emailField.removeClass('is-valid');
+								$('#emailValidationMessage').html('<i class="bi bi-exclamation-circle me-1"></i>' + (response.message || localizedMessages.invalidEmailFormat || localizedMessages.pleaseEnterValidEmail || 'Please enter a valid email address')).show();
+								
+								$('html, body').animate({
+									scrollTop: $emailField.offset().top - 100
+								}, 500);
+								$emailField.focus();
+							}
+						},
+						error: function() {
+							$submitBtn.prop('disabled', false);
+							// On error, allow submission if format is valid (server might be down)
+							var emailRegex = new RegExp('^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\\.[a-zA-Z]{2,}$');
+							var isValidFormat = emailRegex.test(email);
+							
+							if (isValidFormat) {
+								var parts = email.split('@@');
+								if (parts.length === 2) {
+									var domain = parts[1].toLowerCase();
+									if (!domain.includes('..') && !domain.startsWith('.') && !domain.endsWith('.') && domain.length >= 4) {
+										// Format is valid, allow submission
+										$('#orderForm').off('submit').submit();
+										return;
+									}
+								}
+							}
+							
+							// Format is invalid
+							$emailField.addClass('is-invalid');
+							$('#emailValidationMessage').html('<i class="bi bi-exclamation-circle me-1"></i>' + (localizedMessages.invalidEmailFormat || localizedMessages.pleaseEnterValidEmail || 'Please enter a valid email address')).show();
+							$('html, body').animate({
+								scrollTop: $emailField.offset().top - 100
+							}, 500);
+							$emailField.focus();
+						}
+					});
+					
+					return false;
+				}
+			}
+
 			// Check if Geidea payment method is selected BEFORE preventing default
 			var paymentMethod = $('input[name="OrderHeader.PaymentMethod"]:checked').val();
 			var geideaPaymentMethod = '@IdealWeightNutrition.Utility.SD.PaymentMethodGeidea';
+			
+			// Disable button and show loader immediately for all payment methods
+			var $submitBtn = $('#placeOrderBtn');
+			var $btnContent = $submitBtn.find('.btn-content');
+			var $btnText = $submitBtn.find('.btn-text');
+			var $btnLoader = $submitBtn.find('.btn-loader');
+			var originalText = $btnText.text();
+			
+			// Disable button and show loader
+			$submitBtn.prop('disabled', true);
+			$btnText.hide();
+			$btnLoader.show();
 			
 			// Only handle AJAX for Geidea if validation passed
 			if (paymentMethod === geideaPaymentMethod) {
@@ -1053,13 +1654,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 				
-				// If validation passes, submit form via AJAX for Geidea payment errors
-				var $submitBtn = $('.place-order-btn');
-				var originalText = $submitBtn.html();
 				// Submit via AJAX for Geidea to handle errors with SweetAlert
-				e.preventDefault();
-				$submitBtn.prop('disabled', true);
-				$submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>' + localizedMessages.processing + '...');
 				
 				var formData = $('#orderForm').serialize();
 				
@@ -1082,8 +1677,10 @@
 									confirmButtonText: 'OK',
 									confirmButtonColor: '#dc2626'
 								});
+								// Re-enable button and restore text
 								$submitBtn.prop('disabled', false);
-								$submitBtn.html(originalText);
+								$btnLoader.hide();
+								$btnText.text(originalText).show();
 							} else if (response.success === true) {
 								// Handle Geidea v2 HPP payment
 								if (response.paymentMethod === '@IdealWeightNutrition.Utility.SD.PaymentMethodGeidea' && response.sessionId) {
@@ -1095,8 +1692,10 @@
 											// Payment completed successfully, redirect to order confirmation
 											window.location.href = '@Url.Action("OrderConfirmation", "Cart")?id=' + orderId;
 										} else {
+											// Re-enable button and restore text
 											$submitBtn.prop('disabled', false);
-											$submitBtn.html(originalText);
+											$btnLoader.hide();
+											$btnText.text(originalText).show();
 										}
 									});
 								} else if (response.redirectUrl) {
@@ -1185,19 +1784,20 @@
 							confirmButtonText: 'OK',
 							confirmButtonColor: '#dc2626'
 						});
+						// Re-enable button and restore text
 						$submitBtn.prop('disabled', false);
-						$submitBtn.html(originalText);
+						$btnLoader.hide();
+						$btnText.text(originalText).show();
 					}
 				});
 			} else {
 				// For other payment methods, submit normally
-				$submitBtn.prop('disabled', true);
-				$submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>' + localizedMessages.processing + '...');
-				
+				// Button is already disabled and loader is shown above
 				// Re-enable after 10 seconds as safety (in case of error)
 				setTimeout(function() {
 					$submitBtn.prop('disabled', false);
-					$submitBtn.html(originalText);
+					$btnLoader.hide();
+					$btnText.text(originalText).show();
 				}, 10000);
 			}
 		});

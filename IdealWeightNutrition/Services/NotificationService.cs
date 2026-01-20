@@ -153,7 +153,7 @@ namespace IdealWeightNutrition.Services
      
             var orderDetails = _unitOfWork.OrderDetail.GetAll(
                 o => o.OrderHeaderId == orderHeader.Id,
-                includeProperties: "Product,ComboOffer"
+                includeProperties: "Product,FlashSaleItem,ProductVariant,ProductVariant.VariantOptionValues,ProductVariant.VariantOptionValues.OptionValue,ProductVariant.VariantOptionValues.OptionValue.ProductOption"
             ).ToList();
 
             // Generate PDF invoice
@@ -164,8 +164,7 @@ namespace IdealWeightNutrition.Services
             }
             catch (Exception ex)
             {
-                // Log error but continue with email sending
-                // In production, you might want to log this to a logging service
+                
             }
 
             var emailBody = GenerateCustomerEmailTemplate(orderHeader, orderDetails, null);
@@ -438,7 +437,7 @@ namespace IdealWeightNutrition.Services
                 ");
             }
 
-            var estimatedDelivery = IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(7).ToString("MMM dd, yyyy") + " - " + IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(14).ToString("MMM dd, yyyy");
+            var estimatedDelivery = IdealWeightNutrition.Utility.DateTimeHelper.GetEstimatedDeliveryRange();
 
             // Get email for tracking URL
             // Priority: customer.Email > orderHeader.Email > orderHeader.ApplicationUser.Email

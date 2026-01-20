@@ -4119,4 +4119,73 @@
   <data name="CityNotFound" xml:space="preserve">
     <value>المدينة غير موجودة</value>
   </data>
+  <data name="VATAmount" xml:space="preserve">
+    <value>مبلغ ضريبة القيمة المضافة</value>
+  </data>
+  <data name="ExportOrders" xml:space="preserve">
+    <value>تصدير الطلبات</value>
+  </data>
+  <data name="ExportProductProfits" xml:space="preserve">
+    <value>تصدير أرباح المنتجات</value>
+  </data>
+  <data name="StoreCost" xml:space="preserve">
+    <value>تكلفة المتجر</value>
+  </data>
+  <data name="StoreCostRealCost" xml:space="preserve">
+    <value>تكلفة المتجر (التكلفة الفعلية)</value>
+  </data>
+  <data name="StoreCostHelpText" xml:space="preserve">
+    <value>التكلفة الفعلية للمنتج على المتجر. تُستخدم لحساب الربح.</value>
+  </data>
+  <data name="Profit" xml:space="preserve">
+    <value>الربح</value>
+  </data>
+  <data name="ExportProducts" xml:space="preserve">
+    <value>تصدير المنتجات</value>
+  </data>
+  <data name="VerifyYourEmail" xml:space="preserve">
+    <value>التحقق من بريدك الإلكتروني</value>
+  </data>
+  <data name="VerifyEmailDescription" xml:space="preserve">
+    <value>نحتاج للتحقق من عنوان بريدك الإلكتروني لإكمال طلبك. سيتم إرسال رمز التحقق إلى بريدك الإلكتروني.</value>
+  </data>
+  <data name="SendVerificationCode" xml:space="preserve">
+    <value>إرسال رمز التحقق</value>
+  </data>
+  <data name="EnterVerificationCode" xml:space="preserve">
+    <value>أدخل رمز التحقق</value>
+  </data>
+  <data name="Verify" xml:space="preserve">
+    <value>التحقق</value>
+  </data>
+  <data name="ResendCode" xml:space="preserve">
+    <value>إعادة إرسال الرمز</value>
+  </data>
+  <data name="EmailVerified" xml:space="preserve">
+    <value>تم التحقق من البريد الإلكتروني</value>
+  </data>
+  <data name="EmailVerificationOTP" xml:space="preserve">
+    <value>رمز التحقق من البريد الإلكتروني - Ideal Weight</value>
+  </data>
+  <data name="OTPSentSuccessfully" xml:space="preserve">
+    <value>تم إرسال رمز التحقق إلى بريدك الإلكتروني. يرجى التحقق من صندوق الوارد.</value>
+  </data>
+  <data name="ErrorSendingOTP" xml:space="preserve">
+    <value>خطأ في إرسال رمز التحقق. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="EmailAndOTPRequired" xml:space="preserve">
+    <value>البريد الإلكتروني ورمز التحقق مطلوبان</value>
+  </data>
+  <data name="EmailVerifiedSuccessfully" xml:space="preserve">
+    <value>تم التحقق من البريد الإلكتروني بنجاح!</value>
+  </data>
+  <data name="ErrorVerifyingOTP" xml:space="preserve">
+    <value>خطأ في التحقق من الرمز. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="PleaseEnterValidOTP" xml:space="preserve">
+    <value>يرجى إدخال رمز صحيح مكون من 6 أرقام</value>
+  </data>
+  <data name="EmailNotVerified" xml:space="preserve">
+    <value>يرجى التحقق من عنوان بريدك الإلكتروني قبل تقديم الطلب.</value>
+  </data>
 </root>

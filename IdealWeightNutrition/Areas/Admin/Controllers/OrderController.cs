@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
+using System.Linq;
 using System.Security.Claims;
+using System.Text;
 
 namespace IdealWeightNutrition.Areas.Admin.Controllers
 {
@@ -1537,7 +1539,9 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
                     phoneNumber = o.PhoneNumber,
                     orderDate = o.OrderDate,
                     paymentMethod=o.PaymentMethod,
+                    orderSubtotal = o.OrderSubtotal ?? 0,
                     orderTotal = o.OrderTotal,
+                    vatAmount = CalculateVAT(o.OrderSubtotal, o.OrderTotal),
                     orderStatus = o.OrderStatus,
                     paymentStatus = o.PaymentStatus,
                     isGuestOrder = o.IsGuestOrder,
@@ -1623,6 +1627,255 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
             {
                 _logger.LogError(ex, "Error loading order statistics");
                 return Json(new { success = false, message = "Error loading statistics" });
+            }
+        }
+
+        /// <summary>
+        /// Calculate VAT amount (5% of subtotal)
+        /// If subtotal is not available, calculate from total (reverse calculation)
+        /// </summary>
+        private double CalculateVAT(double? orderSubtotal, double orderTotal)
+        {
+            const double vatRate = 0.05; // 5% VAT rate
+         
+            if (orderSubtotal.HasValue && orderSubtotal.Value > 0)
+            {
+                return (double)(orderSubtotal * (vatRate / (1 + vatRate)));
+            }
+            else
+            {
+                
+
+                return (double)(orderTotal * (vatRate / (1 + vatRate))); ;
+            }
+        }
+
+        [HttpGet]
+        [Authorize(Roles = SD.Role_Admin)]
+        public IActionResult Export(
+            string status,
+            string paymentStatus = "",
+            string paymentMethod = "",
+            string dateFrom = "",
+            string dateTo = "",
+            string searchValue = "")
+        {
+            try
+            {
+                // Start with base query (same as GetAll)
+                IQueryable<OrderHeader> query = _unitOfWork.OrderHeader.GetAll().AsQueryable();
+
+                // Apply order status filter
+                if (!string.IsNullOrEmpty(status) && status != "all")
+                {
+                    query = query.Where(o => o.OrderStatus == status);
+                }
+
+                // Apply payment status filter
+                if (!string.IsNullOrEmpty(paymentStatus))
+                {
+                    query = query.Where(o => o.PaymentStatus == paymentStatus);
+                }
+
+                // Apply payment method filter
+                if (!string.IsNullOrEmpty(paymentMethod))
+                {
+                    query = query.Where(o => o.PaymentMethod == paymentMethod);
+                }
+
+                // Apply date range filter
+                if (!string.IsNullOrEmpty(dateFrom))
+                {
+                    if (DateTime.TryParse(dateFrom, out var fromDate))
+                    {
+                        query = query.Where(o => o.OrderDate >= fromDate.Date);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(dateTo))
+                {
+                    if (DateTime.TryParse(dateTo, out var toDate))
+                    {
+                        query = query.Where(o => o.OrderDate <= toDate.Date.AddDays(1).AddTicks(-1));
+                    }
+                }
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(searchValue))
+                {
+                    searchValue = searchValue.ToLower();
+                    query = query.Where(o =>
+                        o.Id.ToString().Contains(searchValue) ||
+                        (o.Name != null && o.Name.ToLower().Contains(searchValue)) ||
+                        (o.Email != null && o.Email.ToLower().Contains(searchValue)) ||
+                        (o.PhoneNumber != null && o.PhoneNumber.Contains(searchValue)) ||
+                        (o.OrderStatus != null && o.OrderStatus.ToLower().Contains(searchValue)) ||
+                        (o.PaymentStatus != null && o.PaymentStatus.ToLower().Contains(searchValue)) ||
+                        (o.PaymentMethod != null && o.PaymentMethod.ToLower().Contains(searchValue)) ||
+                        o.OrderTotal.ToString().Contains(searchValue)
+                    );
+                }
+
+                // Get all orders (no pagination for export)
+                var orders = query.OrderByDescending(o => o.Id).ToList();
+
+                // Load ApplicationUser for non-guest orders
+                foreach (var order in orders)
+                {
+                    if (!order.IsGuestOrder && !string.IsNullOrEmpty(order.ApplicationUserId))
+                    {
+                        order.ApplicationUser = _unitOfWork.applicationUser.Get(u => u.Id == order.ApplicationUserId);
+                    }
+                }
+
+                // Generate CSV content
+                var csv = new StringBuilder();
+                csv.AppendLine("Order ID,Customer Name,Email,Phone,Order Date,Payment Method,Total Without VAT,VAT Amount,Total Inc VAT,Total(include delivery),Order Status,Payment Status");
+
+                foreach (var order in orders)
+                {
+                    var subtotal = order.OrderSubtotal ?? 0;
+                    var vatAmount = CalculateVAT(order.OrderSubtotal, order.OrderTotal);
+                    var totalWithoutVat = subtotal - vatAmount;
+                    
+                    csv.AppendLine($"{order.Id}," +
+                        $"\"{order.Name?.Replace("\"", "\"\"") ?? ""}\"," +
+                        $"\"{order.Email?.Replace("\"", "\"\"") ?? ""}\"," +
+                        $"\"{order.PhoneNumber?.Replace("\"", "\"\"") ?? ""}\"," +
+                        $"{order.OrderDate:yyyy-MM-dd HH:mm:ss}," +
+                        $"\"{order.PaymentMethod?.Replace("\"", "\"\"") ?? ""}\"," +
+                        $"{totalWithoutVat:F2}," +
+                        $"{vatAmount:F2}," +
+                        $"{subtotal:F2}," +
+                        $"{order.OrderTotal:F2}," +
+                        $"\"{order.OrderStatus?.Replace("\"", "\"\"") ?? ""}\"," +
+                        $"\"{order.PaymentStatus?.Replace("\"", "\"\"") ?? ""}\"");
+                }
+
+                var fileName = $"Orders_Export_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
+
+                return File(bytes, "text/csv", fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting orders");
+                TempData["error"] = "Error exporting orders";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        [HttpGet]
+        [Authorize(Roles = SD.Role_Admin)]
+        public IActionResult ExportProductProfits(
+            string dateFrom = "",
+            string dateTo = "")
+        {
+            try
+            {
+                // Get successful orders (Paid, Approved, or Authorized payment status)
+                IQueryable<OrderHeader> query = _unitOfWork.OrderHeader.GetAll()
+                    .Where(o => o.PaymentStatus == SD.PaymentStatusPaid || 
+                               o.PaymentStatus == SD.PaymentStatusDelayedPayment || 
+                               o.PaymentStatus == SD.PaymentStatusAuthorized)
+                    .AsQueryable();
+
+                // Apply date range filter
+                if (!string.IsNullOrEmpty(dateFrom))
+                {
+                    if (DateTime.TryParse(dateFrom, out var fromDate))
+                    {
+                        query = query.Where(o => o.OrderDate >= fromDate.Date);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(dateTo))
+                {
+                    if (DateTime.TryParse(dateTo, out var toDate))
+                    {
+                        query = query.Where(o => o.OrderDate <= toDate.Date.AddDays(1).AddTicks(-1));
+                    }
+                }
+
+                var successfulOrders = query.ToList();
+                var orderIds = successfulOrders.Select(o => o.Id).ToList();
+
+                // Get all order details for successful orders with product information
+                var orderDetails = _unitOfWork.OrderDetail.GetAll(
+                    od => orderIds.Contains(od.OrderHeaderId),
+                    includeProperties: "Product,OrderHeader"
+                ).ToList();
+
+                // Filter products that have StoreCost and group by Product
+                var productProfits = orderDetails
+                    .Where(od => od.Product != null && 
+                                od.Product.StoreCost.HasValue && 
+                                od.Product.StoreCost.Value > 0)
+                    .GroupBy(od => new
+                    {
+                        ProductId = od.ProductId,
+                        ProductTitle = od.Product.Title ?? "N/A",
+                        ProductTitleAr = od.Product.TitleAr ?? "N/A",
+                        StoreCost = od.Product.StoreCost.Value
+                    })
+                    .Select(g => new
+                    {
+                        ProductId = g.Key.ProductId,
+                        ProductTitle = g.Key.ProductTitle,
+                        ProductTitleAr = g.Key.ProductTitleAr,
+                        StoreCost = g.Key.StoreCost,
+                        TotalQuantitySold = g.Sum(od => od.Count),
+                        TotalRevenue = g.Sum(od => od.Price * od.Count),
+                        TotalCost = g.Sum(od => g.Key.StoreCost * od.Count),
+                        TotalProfit = g.Sum(od => (od.Price - g.Key.StoreCost) * od.Count),
+                        AverageSellingPrice = g.Average(od => od.Price),
+                        ProfitPerUnit = g.Average(od => od.Price - g.Key.StoreCost),
+                        ProfitPercentage = g.Average(od => od.Price > 0 ? ((od.Price - g.Key.StoreCost) / od.Price) * 100 : 0),
+                        OrderCount = g.Select(od => od.OrderHeaderId).Distinct().Count()
+                    })
+                    .OrderByDescending(p => p.TotalProfit)
+                    .ToList();
+
+                // Generate CSV content
+                var csv = new StringBuilder();
+                csv.AppendLine("Product ID,Product Title (EN),Product Title (AR),Store Cost,Total Quantity Sold,Total Revenue,Total Cost,Total Profit,Average Selling Price,Profit Per Unit,Profit %,Number of Orders");
+
+                foreach (var profit in productProfits)
+                {
+                    csv.AppendLine($"{profit.ProductId}," +
+                        $"\"{profit.ProductTitle?.Replace("\"", "\"\"") ?? ""}\"," +
+                        $"\"{profit.ProductTitleAr?.Replace("\"", "\"\"") ?? ""}\"," +
+                        $"{profit.StoreCost:F2}," +
+                        $"{profit.TotalQuantitySold}," +
+                        $"{profit.TotalRevenue:F2}," +
+                        $"{profit.TotalCost:F2}," +
+                        $"{profit.TotalProfit:F2}," +
+                        $"{profit.AverageSellingPrice:F2}," +
+                        $"{profit.ProfitPerUnit:F2}," +
+                        $"{profit.ProfitPercentage:F2}," +
+                        $"{profit.OrderCount}");
+                }
+
+                // Add summary row
+                csv.AppendLine();
+                csv.AppendLine("SUMMARY");
+                csv.AppendLine($"Total Products,{productProfits.Count}");
+                csv.AppendLine($"Total Quantity Sold,{productProfits.Sum(p => p.TotalQuantitySold)}");
+                csv.AppendLine($"Total Revenue,{productProfits.Sum(p => p.TotalRevenue):F2}");
+                csv.AppendLine($"Total Cost,{productProfits.Sum(p => p.TotalCost):F2}");
+                csv.AppendLine($"Total Profit,{productProfits.Sum(p => p.TotalProfit):F2}");
+                csv.AppendLine($"Total Orders,{successfulOrders.Count}");
+
+                var fileName = $"Product_Profits_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
+
+                return File(bytes, "text/csv", fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting product profits");
+                TempData["error"] = "Error exporting product profits";
+                return RedirectToAction(nameof(Index));
             }
         }
 

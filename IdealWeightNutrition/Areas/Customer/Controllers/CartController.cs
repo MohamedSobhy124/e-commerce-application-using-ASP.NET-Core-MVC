@@ -5,6 +5,8 @@ using IdealWeightNutrition.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
@@ -26,9 +28,11 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 		private readonly GeideaSettings _geideaSettings;
 		private readonly IStringLocalizer<SharedResources> _localizer;
 		private readonly ILogger<CartController> _logger;
+		private readonly IServiceScopeFactory _serviceScopeFactory;
+		private readonly IMemoryCache _memoryCache;
 		public ShoppingCartVM  ShoppingCartVM { get; set; }
 
-        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, IdealWeightNutrition.Services.INotificationService notificationService, IdealWeightNutrition.Services.IStockService stockService, IOptions<TappySettings> tappySettings, IOptions<TamaraSettings> tamaraSettings, IOptions<GeideaSettings> geideaSettings, IStringLocalizer<SharedResources> localizer, ILogger<CartController> logger) 
+        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, IdealWeightNutrition.Services.INotificationService notificationService, IdealWeightNutrition.Services.IStockService stockService, IOptions<TappySettings> tappySettings, IOptions<TamaraSettings> tamaraSettings, IOptions<GeideaSettings> geideaSettings, IStringLocalizer<SharedResources> localizer, ILogger<CartController> logger, IServiceScopeFactory serviceScopeFactory, IMemoryCache memoryCache) 
         {
          _unitOfWork = unitOfWork;
 			_emailSender = emailSender;
@@ -39,6 +43,8 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 			_geideaSettings = geideaSettings.Value;
 			_localizer = localizer;
 			_logger = logger;
+			_serviceScopeFactory = serviceScopeFactory;
+			_memoryCache = memoryCache;
         }
         public IActionResult Index()
         {
@@ -1464,6 +1470,205 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 			ViewData["TamaraOrderTotal"] = ShoppingCartVM.OrderHeader.OrderTotal;
 			
 			return View(ShoppingCartVM);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> SendOtp(string email)
+		{
+			if (string.IsNullOrWhiteSpace(email))
+			{
+				return Json(new { success = false, message = _localizer["EmailIsRequired"]?.Value ?? "Email is required" });
+			}
+
+			email = email.Trim().ToLowerInvariant();
+
+			// Validate email format first
+			var emailRegex = new System.Text.RegularExpressions.Regex(
+				@"^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\.[a-zA-Z]{2,}$",
+				System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+			if (!emailRegex.IsMatch(email))
+			{
+				return Json(new { success = false, message = _localizer["InvalidEmailFormat"]?.Value ?? "Please enter a valid email address" });
+			}
+
+			try
+			{
+				var otpHelper = new OtpHelper(_memoryCache);
+				var otp = otpHelper.GenerateOtp();
+				otpHelper.StoreOtp(email, otp);
+
+				// Send OTP email
+				var emailSubject = _localizer["EmailVerificationOTP"]?.Value ?? "Email Verification Code - Ideal Weight";
+				var emailBody = $@"
+					<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;'>
+						<div style='background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+							<h2 style='color: #059669; margin-top: 0;'>Email Verification</h2>
+							<p style='color: #374151; font-size: 16px; line-height: 1.6;'>
+								Thank you for placing an order with Ideal Weight Nutrition. To complete your order, please verify your email address using the code below:
+							</p>
+							<div style='background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 30px 0;'>
+								<div style='font-size: 36px; font-weight: bold; letter-spacing: 8px; font-family: monospace;'>{otp}</div>
+							</div>
+							<p style='color: #6b7280; font-size: 14px; margin-top: 20px;'>
+								<strong>Important:</strong> This code will expire in 10 minutes. If you didn't request this code, please ignore this email.
+							</p>
+							<hr style='border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;' />
+							<p style='color: #9ca3af; font-size: 12px; text-align: center; margin: 0;'>
+								© {DateTime.Now.Year} Ideal Weight Nutrition. All rights reserved.
+							</p>
+						</div>
+					</div>";
+
+				await _emailSender.SendEmailAsync(email, emailSubject, emailBody);
+
+				return Json(new 
+				{ 
+					success = true, 
+					message = _localizer["OTPSentSuccessfully"]?.Value ?? "Verification code sent to your email. Please check your inbox." 
+				});
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error sending OTP to {Email}", email);
+				return Json(new { success = false, message = _localizer["ErrorSendingOTP"]?.Value ?? "Error sending verification code. Please try again." });
+			}
+		}
+
+		[HttpPost]
+		public IActionResult VerifyOtp(string email, string otp)
+		{
+			if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(otp))
+			{
+				return Json(new { success = false, message = _localizer["EmailAndOTPRequired"]?.Value ?? "Email and OTP are required" });
+			}
+
+			email = email.Trim().ToLowerInvariant();
+			otp = otp.Trim();
+
+			try
+			{
+				var otpHelper = new OtpHelper(_memoryCache);
+				var result = otpHelper.VerifyOtp(email, otp);
+
+				if (result.IsValid)
+				{
+					return Json(new { success = true, message = _localizer["EmailVerifiedSuccessfully"]?.Value ?? "Email verified successfully!" });
+				}
+				else
+				{
+					return Json(new { success = false, message = result.Message });
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error verifying OTP for {Email}", email);
+				return Json(new { success = false, message = _localizer["ErrorVerifyingOTP"]?.Value ?? "Error verifying code. Please try again." });
+			}
+		}
+
+		[HttpPost]
+		public IActionResult CheckEmailVerified(string email)
+		{
+			if (string.IsNullOrWhiteSpace(email))
+			{
+				return Json(new { verified = false });
+			}
+
+			email = email.Trim().ToLowerInvariant();
+			var otpHelper = new OtpHelper(_memoryCache);
+			var isVerified = otpHelper.IsEmailVerified(email);
+
+			return Json(new { verified = isVerified });
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> ValidateEmail(string email)
+		{
+			if (string.IsNullOrWhiteSpace(email))
+			{
+				return Json(new { valid = false, message = _localizer["EmailIsRequired"]?.Value ?? "Email is required" });
+			}
+
+			email = email.Trim();
+
+			// Enhanced email regex pattern
+			var emailRegex = new System.Text.RegularExpressions.Regex(
+				@"^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\.[a-zA-Z]{2,}$",
+				System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+			// Check format
+			if (!emailRegex.IsMatch(email))
+			{
+				return Json(new { valid = false, message = _localizer["InvalidEmailFormat"]?.Value ?? "Please enter a valid email address" });
+			}
+
+			// Extract domain
+			var parts = email.Split('@');
+			if (parts.Length != 2)
+			{
+				return Json(new { valid = false, message = _localizer["InvalidEmailFormat"]?.Value ?? "Please enter a valid email address" });
+			}
+
+			var domain = parts[1].ToLower();
+
+			// Check for common invalid domains
+			var invalidDomains = new[] { "example.com", "test.com", "invalid.com", "domain.com" };
+			if (invalidDomains.Contains(domain))
+			{
+				return Json(new { valid = false, message = _localizer["InvalidEmailFormat"]?.Value ?? "Please enter a valid email address" });
+			}
+
+			// Check domain format (must have valid TLD)
+			var domainRegex = new System.Text.RegularExpressions.Regex(@"^[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\.[a-zA-Z]{2,}$");
+			if (!domainRegex.IsMatch(domain))
+			{
+				return Json(new { valid = false, message = _localizer["InvalidEmailFormat"]?.Value ?? "Please enter a valid email address" });
+			}
+
+			// Check for valid TLD (at least 2 characters, common TLDs)
+			var tldParts = domain.Split('.');
+			if (tldParts.Length < 2 || tldParts[tldParts.Length - 1].Length < 2)
+			{
+				return Json(new { valid = false, message = _localizer["InvalidEmailFormat"]?.Value ?? "Please enter a valid email address" });
+			}
+
+			// Try to verify domain has MX records (optional - can be slow, so we'll do basic check)
+			try
+			{
+				// Basic domain validation - check if it looks like a real domain
+				// For production, you might want to use a service like EmailListVerify or similar
+				// For now, we'll do format validation and basic checks
+				
+				// Additional checks: no consecutive dots, no leading/trailing dots in domain parts
+				if (domain.Contains("..") || domain.StartsWith(".") || domain.EndsWith("."))
+				{
+					return Json(new { valid = false, message = _localizer["InvalidEmailFormat"]?.Value ?? "Please enter a valid email address" });
+				}
+
+				// Check for valid common email providers or domain structure
+				var commonProviders = new[] { "gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "aol.com", "icloud.com", "mail.com", "protonmail.com" };
+				var isCommonProvider = commonProviders.Any(p => domain.Contains(p));
+
+				// If not a common provider, do additional format checks
+				if (!isCommonProvider)
+				{
+					// Domain should not be too short or too long
+					if (domain.Length < 4 || domain.Length > 255)
+					{
+						return Json(new { valid = false, message = _localizer["InvalidEmailFormat"]?.Value ?? "Please enter a valid email address" });
+					}
+				}
+
+				return Json(new { valid = true, message = "" });
+			}
+			catch (Exception ex)
+			{
+				_logger.LogWarning(ex, $"Error validating email domain: {email}");
+				// If validation fails, still allow the email but log it
+				// In production, you might want to be stricter
+				return Json(new { valid = true, message = "" });
+			}
 		}
 
 		[HttpGet]
@@ -3382,16 +3587,13 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 			{
 				if (orderHeader.PaymentMethod == SD.PaymentMethodGeidea)
 				{
-					// Only verify if payment status is not already paid
 					if (orderHeader.PaymentStatus != SD.PaymentStatusPaid)
 					{
 						var geideaHelper = new GeideaHelper(_geideaSettings);
-						// Use order ID (merchant reference ID) for verification, not session ID
 						var verificationResponse = await geideaHelper.VerifyPaymentAsync(orderHeader.Id.ToString());
 
 						if (verificationResponse.Success && verificationResponse.IsPaid)
 						{
-							// Update payment status directly on the tracked entity
 							orderHeader.PaymentStatus = SD.PaymentStatusPaid;
 							orderHeader.OrderStatus = SD.StatusPaid;
 							if (!string.IsNullOrEmpty(orderHeader.SessionId))
@@ -3407,54 +3609,87 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 				}
 			}
 
-			//  PROCESS STOCK DEDUCTION AFTER PAYMENT CONFIRMED
-			
-            try
+            // Capture session data before async operation
+            var isGuestOrder = orderHeader.IsGuestOrder;
+            var applicationUserId = orderHeader.ApplicationUserId;
+            var orderId = id;
+            var orderHeaderId = orderHeader.Id;
+            
+            // Clear guest cart synchronously before async operation
+            if (isGuestOrder)
             {
-                await _stockService.ProcessOrderStockDeduction(id);
+                IdealWeightNutrition.Utility.GuestCartHelper.ClearCart(HttpContext.Session);
             }
-            catch (Exception ex) { }
 
-            try
+            _ = Task.Run(async () =>
             {
-                await _notificationService.SendOrderNotificationToAdmins(orderHeader);
-            }
-            catch (Exception ex) { }
+                // Create a new scope for background work to avoid disposed context issues
+                using var scope = _serviceScopeFactory.CreateScope();
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                var stockService = scope.ServiceProvider.GetRequiredService<IdealWeightNutrition.Services.IStockService>();
+                var notificationService = scope.ServiceProvider.GetRequiredService<IdealWeightNutrition.Services.INotificationService>();
 
-
-			// Send order confirmation to customer
-			if (!orderHeader.IsGuestOrder && !string.IsNullOrEmpty(orderHeader.ApplicationUserId))
-			{
-				var customer = _unitOfWork.applicationUser.Get(u => u.Id == orderHeader.ApplicationUserId);
-				if (customer != null)
-				{
-                    try
-                    {
-                        await _notificationService.SendOrderConfirmationToCustomer(orderHeader, customer);
-
-                    }
-                    catch (Exception ex) { }
-
-                   
-				}
-
-				// Clear cart from database for authenticated users
-				List<ShoppingCart> shoppingCarts = _unitOfWork.shoppingCart
-					.GetAll(u => u.ApplicationUserId == orderHeader.ApplicationUserId).ToList();
-
-				_unitOfWork.shoppingCart.removeRage(shoppingCarts);
-				_unitOfWork.save();
-			}
-			else
-			{
-				IdealWeightNutrition.Utility.GuestCartHelper.ClearCart(HttpContext.Session);
                 try
                 {
-                    await _notificationService.SendOrderConfirmationToCustomerGuest(orderHeader);
-
+                    await stockService.ProcessOrderStockDeduction(orderId);
                 }
-                catch (Exception ex) { }
-            }
+                catch (Exception ex) 
+                {
+                    _logger?.LogError(ex, "Error processing stock deduction for order {OrderId}", orderId);
+                }
+
+                // Reload orderHeader in the new scope
+                var orderHeaderInScope = unitOfWork.OrderHeader.Get(u => u.Id == orderHeaderId);
+                if (orderHeaderInScope == null)
+                {
+                    _logger?.LogWarning("Order {OrderId} not found in background task", orderHeaderId);
+                    return;
+                }
+
+                try
+                {
+                    await notificationService.SendOrderNotificationToAdmins(orderHeaderInScope);
+                }
+                catch (Exception ex) 
+                {
+                    _logger?.LogError(ex, "Error sending order notification to admins for order {OrderId}", orderHeaderId);
+                }
+
+                if (!isGuestOrder && !string.IsNullOrEmpty(applicationUserId))
+                {
+                    var customer = unitOfWork.applicationUser.Get(u => u.Id == applicationUserId);
+                    if (customer != null)
+                    {
+                        try
+                        {
+                            await notificationService.SendOrderConfirmationToCustomer(orderHeaderInScope, customer);
+                        }
+                        catch (Exception ex) 
+                        {
+                            _logger?.LogError(ex, "Error sending order confirmation to customer for order {OrderId}", orderHeaderId);
+                        }
+                    }
+                    
+                    List<ShoppingCart> shoppingCarts = unitOfWork.shoppingCart
+                        .GetAll(u => u.ApplicationUserId == applicationUserId).ToList();
+
+                    unitOfWork.shoppingCart.removeRage(shoppingCarts);
+                    unitOfWork.save();
+                }
+                else
+                {
+                    try
+                    {
+                        await notificationService.SendOrderConfirmationToCustomerGuest(orderHeaderInScope);
+                    }
+                    catch (Exception ex) 
+                    {
+                        _logger?.LogError(ex, "Error sending order confirmation to guest for order {OrderId}", orderHeaderId);
+                    }
+                }
+            });
+
+      
 
 			return View(id);
 		}

@@ -19,7 +19,7 @@ namespace IdealWeightNutrition.Utility
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
-        public byte[] GenerateInvoicePdf(OrderHeader orderHeader, List<OrderDetail> orderDetails, ApplicationUser? customer)
+        public byte[] GenerateInvoicePdf(OrderHeader orderHeader, List<Models.OrderDetail> orderDetails, ApplicationUser? customer)
         {
             var document = Document.Create(container =>
             {
@@ -54,100 +54,185 @@ namespace IdealWeightNutrition.Utility
         {
             var businessName = _configuration["SiteSettings:Business:Name"] ?? "Ideal Weight Nutrition";
             var businessEmail = _configuration["SiteSettings:Business:Email"] ?? "info@idealweightnutrition.ae";
-            var businessPhone = _configuration["SiteSettings:Business:Phone"] ?? "+971-52-738-3841";
+            var businessPhone = _configuration["SiteSettings:Business:Phone"] ?? "+971 52 738 3841";
             var streetAddress = _configuration["SiteSettings:Business:Address:StreetAddress"] ?? "";
             var city = _configuration["SiteSettings:Business:Address:City"] ?? "";
-            var state = _configuration["SiteSettings:Business:Address:State"] ?? "";
-            var postalCode = _configuration["SiteSettings:Business:Address:PostalCode"] ?? "";
             var country = _configuration["SiteSettings:Business:Address:CountryName"] ?? "";
             var vatNumber = _configuration["SiteSettings:Business:VATRegistrationNumber"] ?? "";
 
-            container.Row(row =>
+            // Build address
+            var addressParts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(streetAddress)) addressParts.Add(streetAddress);
+            if (!string.IsNullOrWhiteSpace(city)) addressParts.Add(city);
+            if (!string.IsNullOrWhiteSpace(country)) addressParts.Add(country);
+
+            container.Column(column =>
             {
-                row.RelativeItem().Column(column =>
+                column.Item().Row(row =>
                 {
-                    column.Item().Text(businessName).FontSize(24).Bold().FontColor(Colors.Blue.Darken3);
-                    column.Item().Text("INVOICE").FontSize(18).Bold().FontColor(Colors.Grey.Darken2);
-                    
-                    // Build address string
-                    var addressParts = new List<string>();
-                    if (!string.IsNullOrWhiteSpace(streetAddress)) addressParts.Add(streetAddress);
-                    if (!string.IsNullOrWhiteSpace(city)) addressParts.Add(city);
-                    if (!string.IsNullOrWhiteSpace(state)) addressParts.Add(state);
-                    if (!string.IsNullOrWhiteSpace(postalCode)) addressParts.Add(postalCode);
-                    if (!string.IsNullOrWhiteSpace(country)) addressParts.Add(country);
-                    
-                    if (addressParts.Count > 0)
+                    row.RelativeItem().Column(left =>
                     {
-                        column.Item().Text(string.Join(", ", addressParts)).FontSize(9).FontColor(Colors.Grey.Darken1);
-                    }
-                    
-                    column.Item().Text($"Email: {businessEmail}").FontSize(9).FontColor(Colors.Grey.Darken1);
-                    column.Item().Text($"Phone: {businessPhone}").FontSize(9).FontColor(Colors.Grey.Darken1);
-                    
-                    if (!string.IsNullOrEmpty(vatNumber))
+                        left.Item()
+                            .Text(businessName)
+                            .FontSize(22)
+                            .Bold()
+                            .FontColor(Colors.Blue.Darken3);
+
+                        if (addressParts.Any())
+                        {
+                            left.Item()
+                                .PaddingTop(4)
+                                .Text(string.Join(", ", addressParts))
+                                .FontSize(9)
+                                .FontColor(Colors.Grey.Darken1);
+                        }
+
+                        left.Item()
+                            .PaddingTop(6)
+                            .Text(text =>
+                            {
+                                text.DefaultTextStyle(x =>
+                                    x.FontSize(9).FontColor(Colors.Grey.Darken1));
+
+                                text.Span("Email: ").SemiBold();
+                                text.Span(businessEmail);
+                            });
+
+                        left.Item()
+                            .Text(text =>
+                            {
+                                text.DefaultTextStyle(x =>
+                                    x.FontSize(9).FontColor(Colors.Grey.Darken1));
+
+                                text.Span("Phone: ").SemiBold();
+                                text.Span(businessPhone);
+                            });
+                    });
+
+                    row.ConstantItem(200).Column(right =>
                     {
-                        column.Item().PaddingTop(5).Text($"VAT Registration Number: {vatNumber}").FontSize(9).Bold().FontColor(Colors.Grey.Darken2);
-                    }
+                        right.Item()
+                            .AlignRight()
+                            .Text("Tax Invoice")
+                            .FontSize(20)
+                            .Bold()
+                            .FontColor(Colors.Grey.Darken3);
+
+                        if (!string.IsNullOrWhiteSpace(vatNumber))
+                        {
+                            right.Item()
+                                .PaddingTop(6)
+                                .AlignRight()
+                                .Text(text =>
+                                {
+                                    text.DefaultTextStyle(x =>
+                                        x.FontSize(9).FontColor(Colors.Grey.Darken2));
+
+                                    text.Span("TRN: ").SemiBold();
+                                    text.Span(vatNumber);
+                                });
+                        }
+                    });
                 });
 
-                row.ConstantItem(50);
+                column.Item()
+                    .PaddingVertical(10)
+                    .LineHorizontal(1)
+                    .LineColor(Colors.Grey.Lighten2);
             });
         }
 
-        private void ComposeContent(IContainer container, OrderHeader orderHeader, List<OrderDetail> orderDetails, ApplicationUser? customer)
+        private void ComposeContent(IContainer container,OrderHeader orderHeader, List<Models.OrderDetail> orderDetails,ApplicationUser? customer)
         {
             container.Column(column =>
             {
-                column.Spacing(20);
+                column.Spacing(25);
 
-                // Invoice Details Section
                 column.Item().Row(row =>
                 {
-                    row.RelativeItem().Column(col =>
+                    row.RelativeItem().Column(left =>
                     {
-                        col.Item().Text("Bill To:").FontSize(11).Bold().FontColor(Colors.Grey.Darken2);
-                        col.Item().Text(customer?.Name ?? orderHeader.Name).FontSize(10).Bold();
-                        col.Item().Text(orderHeader.StreetAddress).FontSize(9);
-                        col.Item().Text($"{orderHeader.City}, {orderHeader.State} {orderHeader.PostalCode}").FontSize(9);
-                        col.Item().Text($"Phone: {orderHeader.PhoneNumber}").FontSize(9);
-                        if (!string.IsNullOrEmpty(customer?.Email ?? orderHeader.Email))
+                        left.Item()
+                            .Text("Bill To")
+                            .FontSize(11)
+                            .Bold()
+                            .FontColor(Colors.Grey.Darken2);
+
+                        left.Item()
+                            .PaddingTop(4)
+                            .Text(customer?.Name ?? orderHeader.Name)
+                            .FontSize(10)
+                            .Bold();
+
+                        if (!string.IsNullOrWhiteSpace(orderHeader.StreetAddress))
+                            left.Item().Text(orderHeader.StreetAddress).FontSize(9);
+
+                        if (!string.IsNullOrWhiteSpace(orderHeader.City))
                         {
-                            col.Item().Text($"Email: {customer?.Email ?? orderHeader.Email}").FontSize(9);
+                            left.Item()
+                                .Text($"{orderHeader.City}, {orderHeader.State}")
+                                .FontSize(9);
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(orderHeader.PhoneNumber))
+                        {
+                            left.Item().Text(text =>
+                            {
+                                text.DefaultTextStyle(x => x.FontSize(9));
+                                text.Span("Phone: ").SemiBold();
+                                text.Span(orderHeader.PhoneNumber);
+                            });
+                        }
+
+                        var email = customer?.Email ?? orderHeader.Email;
+                        if (!string.IsNullOrWhiteSpace(email))
+                        {
+                            left.Item().Text(text =>
+                            {
+                                text.DefaultTextStyle(x => x.FontSize(9));
+                                text.Span("Email: ").SemiBold();
+                                text.Span(email);
+                            });
                         }
                     });
 
-                    row.RelativeItem().Column(col =>
+                    row.ConstantItem(220).Column(right =>
                     {
-                        col.Item().AlignRight().Text("Invoice Details").FontSize(11).Bold().FontColor(Colors.Grey.Darken2);
-                        col.Item().AlignRight().Row(r =>
+                        right.Item()
+                            .AlignRight()
+                            .Text("Invoice Details")
+                            .FontSize(11)
+                            .Bold()
+                            .FontColor(Colors.Grey.Darken2);
+
+                        right.Item().PaddingTop(4).AlignRight().Row(r =>
                         {
-                            r.AutoItem().Text("Invoice #: ").FontSize(9).FontColor(Colors.Grey.Darken1);
+                            r.AutoItem().Text("Invoice No: ").FontSize(9).FontColor(Colors.Grey.Darken1);
                             r.AutoItem().Text($"INV-{orderHeader.Id:D6}").FontSize(9).Bold();
                         });
-                        col.Item().AlignRight().Row(r =>
+
+                        right.Item().AlignRight().Row(r =>
                         {
                             r.AutoItem().Text("Order Date: ").FontSize(9).FontColor(Colors.Grey.Darken1);
                             r.AutoItem().Text(orderHeader.OrderDate.ToString("dd MMM yyyy")).FontSize(9);
                         });
-                        col.Item().AlignRight().Row(r =>
+
+                        right.Item().AlignRight().Row(r =>
                         {
                             r.AutoItem().Text("Payment Status: ").FontSize(9).FontColor(Colors.Grey.Darken1);
                             r.AutoItem().Text(orderHeader.PaymentStatus ?? "Pending").FontSize(9).Bold();
                         });
-                        col.Item().AlignRight().Row(r =>
-                        {
-                            r.AutoItem().Text("Order Status: ").FontSize(9).FontColor(Colors.Grey.Darken1);
-                            r.AutoItem().Text(orderHeader.OrderStatus ?? "Pending").FontSize(9);
-                        });
                     });
                 });
 
-                // Items Table
-                column.Item().Element(container => ComposeTable(container, orderHeader, orderDetails));
+                column.Item()
+                    .LineHorizontal(1)
+                    .LineColor(Colors.Grey.Lighten2);
+                column.Item()
+                    .Element(c => ComposeTable(c, orderHeader, orderDetails));
 
-                // Summary Section
-                column.Item().Element(container => ComposeSummary(container, orderHeader));
+                column.Item()
+                    .Element(c => ComposeSummary(c, orderHeader));
             });
         }
 
@@ -156,37 +241,60 @@ namespace IdealWeightNutrition.Utility
             container.Table(table =>
             {
                 table.ColumnsDefinition(columns =>
-                {
-                    columns.RelativeColumn(3);
-                    columns.ConstantColumn(80);
-                    columns.ConstantColumn(100);
-                    columns.ConstantColumn(100);
+                {  
+                   
+                    columns.RelativeColumn(3);      // Description
+                    columns.ConstantColumn(45);   // Qty
+                    columns.ConstantColumn(70);    // Price excl VAT
+                    columns.ConstantColumn(45);   // VAT rate
+                    columns.ConstantColumn(70);    // VAT amount
+                    columns.ConstantColumn(75);    // Price incl VAT
                 });
 
                 // Header
                 table.Header(header =>
                 {
-                    header.Cell().Element(CellStyle).Text("Item Description").Bold().FontSize(10);
-                    header.Cell().Element(CellStyle).AlignCenter().Text("Quantity").Bold().FontSize(10);
-                    header.Cell().Element(CellStyle).AlignRight().Text("Unit Price").Bold().FontSize(10);
-                    header.Cell().Element(CellStyle).AlignRight().Text("Total").Bold().FontSize(10);
+                    header.Cell().Element(CellStyle).Text("Description").Bold().FontSize(8);
+                    header.Cell().Element(CellStyle).AlignCenter().Text("Quantity").Bold().FontSize(8);
+                    header.Cell().Element(CellStyle).AlignCenter().Text("Price excl VAT (AED)").Bold().FontSize(8);
+                    header.Cell().Element(CellStyle).AlignCenter().Text("VAT rate").Bold().FontSize(8);
+                    header.Cell().Element(CellStyle).AlignRight().Text("VAT amount (AED)").Bold().FontSize(8);
+                    header.Cell().Element(CellStyle).AlignRight().Text("Price incl VAT (AED)").Bold().FontSize(8);
+                           
                 });
 
                 // Items
                 foreach (var item in orderDetails)
                 {
-                    var isComboOffer = item.ComboOfferId.HasValue && item.ComboOffer != null;
-                    var itemName = isComboOffer 
-                        ? item.ComboOffer?.Name ?? "Combo Offer"
-                        : item.Product?.Title ?? "Unknown Product";
-                    
-                    var unitPrice = (decimal)item.Price;
-                    var totalPrice = unitPrice * item.Count;
+                    var vatRate = 0.05m;
+                    var itemName = string.Empty;
 
-                table.Cell().Element(CellStyle).Text(itemName).FontSize(9);
-                table.Cell().Element(CellStyle).AlignCenter().Text(item.Count.ToString()).FontSize(9);
-                table.Cell().Element(CellStyle).AlignRight().Text($"AED {unitPrice:N2}").FontSize(9);
-                table.Cell().Element(CellStyle).AlignRight().Text($"AED {totalPrice:N2}").FontSize(9).Bold();
+                    if (item.IsFromComboOffer && item.ComboOfferId.HasValue)
+                    {
+                         itemName = item.ComboOffer?.Name ?? "Combo Offer";
+                    }
+                    else if (item.ProductVariantId.HasValue && item.ProductVariant != null)
+                    {
+                        itemName= item.Product.Title+" , "+item?.ProductVariant?.VariantName ?? item.Product.Title;
+                    }
+                    else
+                    {
+                        itemName = item.Product.Title;
+                    }
+                     
+
+                    var priceInclVat = (decimal)item.Price* item.Count;
+                    var vatAmountPerUnit = priceInclVat * (vatRate / (1 + vatRate));
+                    var priceExclVat = priceInclVat- vatAmountPerUnit;
+
+                    
+
+                    table.Cell().Element(CellStyle).Text(itemName).FontSize(7);
+                    table.Cell().Element(CellStyle).AlignCenter().Text(item.Count.ToString()).FontSize(7);
+                    table.Cell().Element(CellStyle).AlignCenter().Text($"AED {priceExclVat:N2}").FontSize(7);
+                    table.Cell().Element(CellStyle).AlignCenter().Text($"{vatRate * 100:F2}%").FontSize(9);
+                    table.Cell().Element(CellStyle).AlignCenter().Text($"AED {vatAmountPerUnit:N2}").FontSize(7);
+                    table.Cell().Element(CellStyle).AlignRight().Text($"AED {priceInclVat:N2}").FontSize(7); 
                 }
             });
         }
@@ -206,12 +314,21 @@ namespace IdealWeightNutrition.Utility
             {
                 column.Spacing(5);
 
-                // Subtotal
-                var subtotal = orderHeader.OrderSubtotal ?? orderHeader.OrderTotal;
+                var vatRate = 0.05m;
+
+                var subtotalInclVat = (orderHeader.OrderSubtotal ?? orderHeader.OrderTotal);
+                var discount = orderHeader?.DiscountAmount ?? 0;
+
+                var taxableAmountInclVat = subtotalInclVat -discount;
+
+                var vatAmount = (decimal)taxableAmountInclVat * vatRate / (1 + vatRate);
+                var subtotalExclVat = (decimal)taxableAmountInclVat - vatAmount;
+
+
                 column.Item().AlignRight().Row(row =>
                 {
                     row.ConstantItem(150).Text("Subtotal:").FontSize(10).FontColor(Colors.Grey.Darken1);
-                    row.ConstantItem(100).AlignRight().Text($"AED {subtotal:N2}").FontSize(10);
+                    row.ConstantItem(100).AlignRight().Text($"AED {subtotalExclVat:N2}").FontSize(10);
                 });
 
                 // Discount (if any)
@@ -233,11 +350,7 @@ namespace IdealWeightNutrition.Utility
                     }
                 }
 
-                // VAT Calculation (assuming 5% VAT in UAE)
-                var vatRate = 0.05m;
-                var taxableAmount = (decimal)subtotal - (decimal)(orderHeader.DiscountAmount ?? 0);
-                var vatAmount = taxableAmount * vatRate;
-                var total = taxableAmount + vatAmount;
+                
 
                 column.Item().AlignRight().Row(row =>
                 {
@@ -245,7 +358,20 @@ namespace IdealWeightNutrition.Utility
                     row.ConstantItem(100).AlignRight().Text($"AED {vatAmount:N2}").FontSize(10);
                 });
 
-                // Total
+                decimal? deliveryAmount = null;
+                if (orderHeader.OrderSubtotal.HasValue && orderHeader.OrderSubtotal.Value > 0)
+                {
+                    deliveryAmount = (decimal)orderHeader.OrderTotal - (decimal)orderHeader.OrderSubtotal.Value;
+                }
+                if (deliveryAmount.HasValue && deliveryAmount.Value > 0)
+                {
+
+                    column.Item().AlignRight().Row(row =>
+                    {
+                        row.ConstantItem(150).Text("Delivery:").FontSize(10).FontColor(Colors.Grey.Darken1);
+                        row.ConstantItem(100).AlignRight().Text($"AED {deliveryAmount:N2}").FontSize(10);
+                    });
+                }
                 column.Item().PaddingTop(10).AlignRight().Row(row =>
                 {
                     row.ConstantItem(150).Text("Total Amount:").FontSize(12).Bold().FontColor(Colors.Blue.Darken3);
@@ -253,14 +379,14 @@ namespace IdealWeightNutrition.Utility
                 });
 
                 // Payment Method
-                if (!string.IsNullOrEmpty(orderHeader.PaymentMethod))
-                {
-                    column.Item().PaddingTop(10).AlignRight().Row(row =>
-                    {
-                        row.ConstantItem(150).Text("Payment Method:").FontSize(9).FontColor(Colors.Grey.Darken1);
-                        row.ConstantItem(100).AlignRight().Text(orderHeader.PaymentMethod).FontSize(9);
-                    });
-                }
+                //if (!string.IsNullOrEmpty(orderHeader.PaymentMethod))
+                //{
+                //    column.Item().PaddingTop(10).AlignRight().Row(row =>
+                //    {
+                //        row.ConstantItem(150).Text("Payment Method:").FontSize(9).FontColor(Colors.Grey.Darken1);
+                //        row.ConstantItem(100).AlignRight().Text(orderHeader.PaymentMethod).FontSize(9);
+                //    });
+                //}
             });
         }
     }

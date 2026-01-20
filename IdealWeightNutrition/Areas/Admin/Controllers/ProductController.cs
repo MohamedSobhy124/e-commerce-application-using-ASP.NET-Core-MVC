@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Linq;
 using System.Security.Claims;
+using System.Text;
 
 namespace IdealWeightNutrition.Areas.Admin.Controllers
 {
@@ -356,6 +358,7 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
                     existingProduct.IsTrending = productVM.product.IsTrending;
                     existingProduct.AllowFreeDelivery = productVM.product.AllowFreeDelivery;
                     existingProduct.FreeDeliveryMinimumAmount = productVM.product.FreeDeliveryMinimumAmount;
+                    existingProduct.StoreCost = productVM.product.StoreCost;
 
                     
                     // Update ImageUrl only if provided
@@ -1629,6 +1632,9 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
                     isbn = p.ISBN ?? "",
                     price = p.Price,
                     listPrice = p.ListPrice,
+                    storeCost = p.StoreCost ?? 0,
+                    profit = CalculateProfit(p.Price, p.StoreCost),
+                    profitPercentage = CalculateProfitPercentage(p.Price, p.StoreCost),
                     author = p.Author ?? "",
                     category = p.categry != null ? p.categry.Name : "",
                     stockQuantity = p.StockQuantity,
@@ -1676,6 +1682,128 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Error loading statistics" });
+            }
+        }
+
+        /// <summary>
+        /// Calculate profit (Price - StoreCost)
+        /// </summary>
+        private double CalculateProfit(double price, double? storeCost)
+        {
+            if (!storeCost.HasValue || storeCost.Value <= 0)
+                return 0;
+            return price - storeCost.Value;
+        }
+
+        /// <summary>
+        /// Calculate profit percentage ((Profit / Price) * 100)
+        /// </summary>
+        private double CalculateProfitPercentage(double price, double? storeCost)
+        {
+            if (!storeCost.HasValue || storeCost.Value <= 0 || price <= 0)
+                return 0;
+            var profit = price - storeCost.Value;
+            return (profit / price) * 100;
+        }
+
+        [HttpGet]
+        [Authorize(Roles = SD.Role_Admin)]
+        public IActionResult Export(
+            string filter = "all",
+            string searchValue = "")
+        {
+            try
+            {
+                // Start with base query (same as GetAll)
+                IQueryable<Product> query = _dbContext.Products
+                    .Include(p => p.categry)
+                    .AsQueryable();
+
+                // Apply filter
+                if (!string.IsNullOrEmpty(filter) && filter != "all")
+                {
+                    switch (filter.ToLower())
+                    {
+                        case "active":
+                            query = query.Where(p => !p.IsDeleted);
+                            break;
+                        case "deleted":
+                            query = query.Where(p => p.IsDeleted);
+                            break;
+                        case "lowstock":
+                            query = query.Where(p => !p.IsDeleted && p.StockQuantity <= p.MinimumStockAlert);
+                            break;
+                        case "outofstock":
+                            query = query.Where(p => !p.IsDeleted && p.StockQuantity <= 0);
+                            break;
+                        case "instock":
+                            query = query.Where(p => !p.IsDeleted && p.StockQuantity > 0);
+                            break;
+                        case "new":
+                            query = query.Where(p => !p.IsDeleted && p.IsNew);
+                            break;
+                        case "trending":
+                            query = query.Where(p => !p.IsDeleted && p.IsTrending);
+                            break;
+                    }
+                }
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(searchValue))
+                {
+                    searchValue = searchValue.ToLower();
+                    query = query.Where(p =>
+                        p.Id.ToString().Contains(searchValue) ||
+                        (p.Title != null && p.Title.ToLower().Contains(searchValue)) ||
+                        (p.TitleAr != null && p.TitleAr.ToLower().Contains(searchValue)) ||
+                        (p.ISBN != null && p.ISBN.ToLower().Contains(searchValue)) ||
+                        (p.Author != null && p.Author.ToLower().Contains(searchValue)) ||
+                        (p.categry != null && p.categry.Name != null && p.categry.Name.ToLower().Contains(searchValue)) ||
+                        p.Price.ToString().Contains(searchValue)
+                    );
+                }
+
+                // Get all products (no pagination for export)
+                var products = query.OrderByDescending(p => p.Id).ToList();
+
+                // Generate CSV content
+                var csv = new StringBuilder();
+                csv.AppendLine("Product ID,Title (EN),Title (AR),Category,Price,List Price,Store Cost,Profit,Profit %,Stock Quantity,ISBN,Author,Is New,Is Trending,Is Deleted,Created Date");
+
+                foreach (var product in products)
+                {
+                    var storeCost = product.StoreCost ?? 0;
+                    var profit = CalculateProfit(product.Price, product.StoreCost);
+                    var profitPercentage = CalculateProfitPercentage(product.Price, product.StoreCost);
+                    var category = product.categry != null ? product.categry.Name : "";
+                    
+                    csv.AppendLine($"{product.Id}," +
+                        $"\"{product.Title?.Replace("\"", "\"\"") ?? ""}\"," +
+                        $"\"{product.TitleAr?.Replace("\"", "\"\"") ?? ""}\"," +
+                        $"\"{category.Replace("\"", "\"\"")}\"," +
+                        $"{product.Price:F2}," +
+                        $"{product.ListPrice:F2}," +
+                        $"{storeCost:F2}," +
+                        $"{profit:F2}," +
+                        $"{profitPercentage:F2}," +
+                        $"{product.StockQuantity}," +
+                        $"\"{product.ISBN?.Replace("\"", "\"\"") ?? ""}\"," +
+                        $"\"{product.Author?.Replace("\"", "\"\"") ?? ""}\"," +
+                        $"{(product.IsNew ? "Yes" : "No")}," +
+                        $"{(product.IsTrending ? "Yes" : "No")}," +
+                        $"{(product.IsDeleted ? "Yes" : "No")}," +
+                        $"{product.CreatedDate:yyyy-MM-dd HH:mm:ss}");
+                }
+
+                var fileName = $"Products_Export_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
+
+                return File(bytes, "text/csv", fileName);
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = "Error exporting products";
+                return RedirectToAction(nameof(Index));
             }
         }
         #endregion

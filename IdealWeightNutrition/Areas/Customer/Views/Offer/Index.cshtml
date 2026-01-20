@@ -51,23 +51,23 @@
     @if (tabCount > 1)
     {
         <ul class="nav nav-pills nav-justified mb-3" id="offersTab" role="tablist" style="background: white; padding: 0.5rem; border-radius: 15px; box-shadow: 0 3px 12px rgba(0,0,0,0.1); flex-wrap: wrap; gap: 0.4rem;">
-            @if (hasFlashSales)
-            {
-                <li class="nav-item" role="presentation" style="flex: 1; min-width: 110px;">
-                    <button class="nav-link active" id="flash-sales-tab" data-bs-toggle="tab" data-bs-target="#flash-sales" type="button" role="tab" style="border-radius: 12px; padding: 0.7rem 0.5rem; font-weight: 700; font-size: 0.8rem; transition: all 0.3s; border: 2px solid transparent; position: relative;">
-                        <i class="bi bi-lightning-charge-fill me-1"></i>
-                        <span class="d-none d-sm-inline">@Localizer["FlashSales"]</span>
-                        <span class="d-sm-none">@Localizer["FlashSales"]</span>
-                    </button>
-                </li>
-            }
             @if (hasDiscountedProducts)
             {
                 <li class="nav-item" role="presentation" style="flex: 1; min-width: 110px;">
-                    <button class="nav-link @(!hasFlashSales && !hasComboOffers ? "active" : "")" id="discounted-products-tab" data-bs-toggle="tab" data-bs-target="#discounted-products" type="button" role="tab" style="border-radius: 12px; padding: 0.7rem 0.5rem; font-weight: 700; font-size: 0.8rem; transition: all 0.3s; border: 2px solid transparent; position: relative;">
+                    <button class="nav-link active" id="discounted-products-tab" data-bs-toggle="tab" data-bs-target="#discounted-products" type="button" role="tab" style="border-radius: 12px; padding: 0.7rem 0.5rem; font-weight: 700; font-size: 0.8rem; transition: all 0.3s; border: 2px solid transparent; position: relative;">
                         <i class="bi bi-percent me-1"></i>
                         <span class="d-none d-sm-inline">@Localizer["DiscountedProducts"]</span>
                         <span class="d-sm-none">@Localizer["Discounted"]</span>
+                    </button>
+                </li>
+            }
+            @if (hasFlashSales)
+            {
+                <li class="nav-item" role="presentation" style="flex: 1; min-width: 110px;">
+                    <button class="nav-link @(!hasDiscountedProducts ? "active" : "")"  id="flash-sales-tab" data-bs-toggle="tab" data-bs-target="#flash-sales" type="button" role="tab" style="border-radius: 12px; padding: 0.7rem 0.5rem; font-weight: 700; font-size: 0.8rem; transition: all 0.3s; border: 2px solid transparent; position: relative;">
+                        <i class="bi bi-lightning-charge-fill me-1"></i>
+                        <span class="d-none d-sm-inline">@Localizer["FlashSales"]</span>
+                        <span class="d-sm-none">@Localizer["FlashSales"]</span>
                     </button>
                 </li>
             }
@@ -87,10 +87,143 @@
 
     <!-- Tab Content -->
     <div class="tab-content" id="offersTabContent">
-        <!-- Flash Sales Tab -->
+
+
+        <!-- Discounted Products Tab -->
+        @if (hasDiscountedProducts)
+        {
+            <div class="tab-pane fade @(hasDiscountedProducts ? "show active" : "")" id="discounted-products" role="tabpanel">
+                <div class="row g-2">
+                    @foreach (var product in discountedProducts)
+                    {
+                        var imageUrl = product.ProductImages?.FirstOrDefault()?.ImageUrl ?? "/images/default-product.jpg";
+                        var discountPercent = 0.0;
+                        var discountedPrice = product.Price;
+                        var listPrice = product.ListPrice;
+                        var isInCart = cartProductIds.Contains(product.Id);
+                        var hasVariants = product.ProductType == IdealWeightNutrition.Models.ProductType.Variable &&
+                        product.ProductVariants != null &&
+                        product.ProductVariants.Any(v => !v.IsDeleted);
+
+                        // Check for active flash sale for this product
+                        var now = IdealWeightNutrition.Utility.DateTimeHelper.Now;
+                        var activeFlashSaleItem = flashSales
+                        .SelectMany(fs => fs.FlashSaleItems ?? Enumerable.Empty<FlashSaleItem>())
+                        .FirstOrDefault(fsi => fsi.ProductId == product.Id
+                        && fsi.ProductVariantId == null
+                        && !fsi.IsDeleted
+                        && fsi.FlashSaleQuantity > 0
+                        && fsi.FlashSale != null
+                        && fsi.FlashSale.IsActive
+                        && now >= fsi.FlashSale.StartDate
+                        && now <= fsi.FlashSale.EndDate);
+
+                        if (listPrice > product.Price && listPrice > 0)
+                        {
+                            discountedPrice = product.Price;
+                            discountPercent = ((listPrice - product.Price) / listPrice) * 100;
+                        }
+                        else if (product.ProductVariants != null && product.ProductVariants.Any())
+                        {
+                            var variantWithDiscount = product.ProductVariants
+                            .Where(v => !v.IsDeleted && v.StockQuantity > 0 && v.ListPrice.HasValue && v.ListPrice > v.Price)
+                            .OrderByDescending(v => ((v.ListPrice.Value - v.Price) / v.ListPrice.Value) * 100)
+                            .FirstOrDefault();
+
+                            if (variantWithDiscount != null)
+                            {
+                                discountedPrice = (double)variantWithDiscount.Price;
+                                discountPercent = (double)((variantWithDiscount.ListPrice.Value - variantWithDiscount.Price) / variantWithDiscount.ListPrice.Value) * 100;
+                                listPrice = (double)variantWithDiscount.ListPrice.Value;
+                            }
+                        }
+
+                        // If product has active flash sale, compare prices and use the lower one
+                        if (activeFlashSaleItem != null)
+                        {
+                            var flashSalePrice = (double)activeFlashSaleItem.FlashSalePrice;
+                            // Use flash sale price if it's lower than discounted price
+                            if (flashSalePrice < discountedPrice)
+                            {
+                                discountedPrice = flashSalePrice;
+                                // Use original ListPrice for discount calculation (not product.Price)
+                                if (product.ListPrice > 0)
+                                {
+                                    listPrice = product.ListPrice;
+                                    discountPercent = ((listPrice - flashSalePrice) / listPrice) * 100;
+                                }
+                                else if (product.Price > 0)
+                                {
+                                    listPrice = product.Price;
+                                    discountPercent = ((product.Price - flashSalePrice) / product.Price) * 100;
+                                }
+                            }
+                        }
+
+                        if (discountPercent <= 0) continue;
+
+                        <div class="col-4 col-sm-3 col-md-2-4 col-lg-2 col-xl-2">
+                            <div class="offer-product-card" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; transition: all 0.3s; background: white; height: 100%; display: flex; flex-direction: column;">
+                                <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()" class="text-decoration-none text-dark" style="flex: 1; display: flex; flex-direction: column;">
+                                    <div style="position: relative; padding-top: 100%; overflow: hidden; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);">
+                                        @{
+                                            var productNameForAlt2 = currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title;
+                                        }
+                                        <img src="@imageUrl" alt="@productNameForAlt2" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s;">
+                                        <span class="badge" style="position: absolute; top: 0.4rem; right: 0.4rem; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); font-size: 0.7rem; padding: 0.3rem 0.5rem; font-weight: 800; box-shadow: 0 3px 8px rgba(220,53,69,0.5); border-radius: 8px; z-index: 2;">
+                                            -@discountPercent.ToString("F0")% @Localizer["Off"]
+                                        </span>
+                                        @if (product.StockQuantity <= 5 && product.StockQuantity > 0)
+                                        {
+                                            <span class="badge bg-warning" style="position: absolute; bottom: 0.4rem; left: 0.4rem; font-size: 0.65rem; padding: 0.25rem 0.4rem; font-weight: 700; border-radius: 6px; z-index: 2;">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>@Localizer["Only"] @product.StockQuantity
+                                            </span>
+                                        }
+                                    </div>
+                                    <div class="p-2" style="flex: 1; display: flex; flex-direction: column;">
+                                        <h6 class="mb-1" style="font-size: 0.8rem; line-height: 1.35; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.2rem; flex: 1; color: #1f2937;">
+                                            @(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)
+                                        </h6>
+                                        <div class="mt-auto">
+                                            <div class="text-muted" style="text-decoration: line-through; font-size: 0.7rem; margin-bottom: 0.25rem; color: #9ca3af;">@Html.Raw(currencySymbol)@listPrice.ToString("N2")</div>
+                                            <div class="fw-bold text-danger" style="font-size: 0.9rem; line-height: 1.2; font-weight: 800;">@Html.Raw(currencySymbol)@discountedPrice.ToString("N2")</div>
+                                        </div>
+                                    </div>
+                                </a>
+                                <div class="px-2 pb-2">
+                                    @if (hasVariants)
+                                    {
+                                        <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()"
+                                           class="btn w-100 btn-primary"
+                                           style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%) !important; transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3); text-decoration: none; display: flex; align-items: center; justify-content: center;"
+                                           title="@Localizer["ViewDetails"]">
+                                            <i class="bi bi-eye me-1"></i>
+                                            <span class="d-none d-md-inline">@Localizer["ViewDetails"]</span>
+                                            <span class="d-md-none">@Localizer["Details"]</span>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button onclick="event.stopPropagation(); toggleCart(@product.Id, this); return false;"
+                                                class="btn w-100 @(isInCart ? "in-cart btn-success" : "btn-primary")"
+                                                data-product-id="@product.Id"
+                                                style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: @(isInCart ? "linear-gradient(135deg, #7BC043 0%, #6ba836 100%)" : "linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%)") !important; transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3);"
+                                                title="@(isInCart ? Localizer["RemoveFromCart"] : Localizer["AddToCart"])">
+                                            <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart-plus") me-1"></i>
+                                            <span class="d-none d-md-inline">@(isInCart ? Localizer["InCart"] : Localizer["AddToCart"])</span>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    <!-- Flash Sales Tab -->
         @if (hasFlashSales)
         {
-            <div class="tab-pane fade @(hasFlashSales ? "show active" : "")" id="flash-sales" role="tabpanel">
+            <div class="tab-pane fade @(hasFlashSales && !hasDiscountedProducts ? "show active" : "")" id="flash-sales" role="tabpanel">
                 @foreach (var flashSale in flashSales)
                 {
                     var flashSaleItems = flashSale.FlashSaleItems?.Where(i => i.FlashSaleQuantity > 0 && i.Product != null).ToList() ?? new List<FlashSaleItem>();
@@ -214,7 +347,7 @@
         <!-- Combo Offers Tab - Enhanced Design -->
         @if (hasComboOffers)
         {
-            <div class="tab-pane fade @(!hasFlashSales && hasComboOffers ? "show active" : "")" id="combo-offers" role="tabpanel">
+            <div class="tab-pane fade @(!hasFlashSales && !hasDiscountedProducts && hasComboOffers ? "show active" : "")" id="combo-offers" role="tabpanel">
                 <div class="row g-3">
                     @foreach (var comboOffer in comboOffers)
                     {
@@ -283,137 +416,6 @@
             </div>
         }
 
-        <!-- Discounted Products Tab -->
-        @if (hasDiscountedProducts)
-        {
-            <div class="tab-pane fade @(!hasFlashSales && !hasComboOffers ? "show active" : "")" id="discounted-products" role="tabpanel">
-                <div class="row g-2">
-                    @foreach (var product in discountedProducts)
-                    {
-                        var imageUrl = product.ProductImages?.FirstOrDefault()?.ImageUrl ?? "/images/default-product.jpg";
-                        var discountPercent = 0.0;
-                        var discountedPrice = product.Price;
-                        var listPrice = product.ListPrice;
-                        var isInCart = cartProductIds.Contains(product.Id);
-                        var hasVariants = product.ProductType == IdealWeightNutrition.Models.ProductType.Variable && 
-                                          product.ProductVariants != null && 
-                                          product.ProductVariants.Any(v => !v.IsDeleted);
-
-                        // Check for active flash sale for this product
-                        var now = IdealWeightNutrition.Utility.DateTimeHelper.Now;
-                        var activeFlashSaleItem = flashSales
-                            .SelectMany(fs => fs.FlashSaleItems ?? Enumerable.Empty<FlashSaleItem>())
-                            .FirstOrDefault(fsi => fsi.ProductId == product.Id 
-                                && fsi.ProductVariantId == null 
-                                && !fsi.IsDeleted 
-                                && fsi.FlashSaleQuantity > 0
-                                && fsi.FlashSale != null
-                                && fsi.FlashSale.IsActive
-                                && now >= fsi.FlashSale.StartDate
-                                && now <= fsi.FlashSale.EndDate);
-
-                        if (listPrice > product.Price && listPrice > 0)
-                        {
-                            discountedPrice = product.Price;
-                            discountPercent = ((listPrice - product.Price) / listPrice) * 100;
-                        }
-                        else if (product.ProductVariants != null && product.ProductVariants.Any())
-                        {
-                            var variantWithDiscount = product.ProductVariants
-                                .Where(v => !v.IsDeleted && v.StockQuantity > 0 && v.ListPrice.HasValue && v.ListPrice > v.Price)
-                                .OrderByDescending(v => ((v.ListPrice.Value - v.Price) / v.ListPrice.Value) * 100)
-                                .FirstOrDefault();
-                            
-                            if (variantWithDiscount != null)
-                            {
-                                discountedPrice = (double)variantWithDiscount.Price;
-                                discountPercent = (double)((variantWithDiscount.ListPrice.Value - variantWithDiscount.Price) / variantWithDiscount.ListPrice.Value) * 100;
-                                listPrice = (double)variantWithDiscount.ListPrice.Value;
-                            }
-                        }
-
-                        // If product has active flash sale, compare prices and use the lower one
-                        if (activeFlashSaleItem != null)
-                        {
-                            var flashSalePrice = (double)activeFlashSaleItem.FlashSalePrice;
-                            // Use flash sale price if it's lower than discounted price
-                            if (flashSalePrice < discountedPrice)
-                            {
-                                discountedPrice = flashSalePrice;
-                                // Use original ListPrice for discount calculation (not product.Price)
-                                if (product.ListPrice > 0)
-                                {
-                                    listPrice = product.ListPrice;
-                                    discountPercent = ((listPrice - flashSalePrice) / listPrice) * 100;
-                                }
-                                else if (product.Price > 0)
-                                {
-                                    listPrice = product.Price;
-                                    discountPercent = ((product.Price - flashSalePrice) / product.Price) * 100;
-                                }
-                            }
-                        }
-
-                        if (discountPercent <= 0) continue;
-
-                        <div class="col-4 col-sm-3 col-md-2-4 col-lg-2 col-xl-2">
-                            <div class="offer-product-card" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; transition: all 0.3s; background: white; height: 100%; display: flex; flex-direction: column;">
-                                <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()" class="text-decoration-none text-dark" style="flex: 1; display: flex; flex-direction: column;">
-                                    <div style="position: relative; padding-top: 100%; overflow: hidden; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);">
-                                        @{
-                                            var productNameForAlt2 = currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title;
-                                        }
-                                        <img src="@imageUrl" alt="@productNameForAlt2" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s;">
-                                        <span class="badge" style="position: absolute; top: 0.4rem; right: 0.4rem; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); font-size: 0.7rem; padding: 0.3rem 0.5rem; font-weight: 800; box-shadow: 0 3px 8px rgba(220,53,69,0.5); border-radius: 8px; z-index: 2;">
-                                            -@discountPercent.ToString("F0")% @Localizer["Off"]
-                                        </span>
-                                        @if (product.StockQuantity <= 5 && product.StockQuantity > 0)
-                                        {
-                                            <span class="badge bg-warning" style="position: absolute; bottom: 0.4rem; left: 0.4rem; font-size: 0.65rem; padding: 0.25rem 0.4rem; font-weight: 700; border-radius: 6px; z-index: 2;">
-                                                <i class="bi bi-exclamation-triangle me-1"></i>@Localizer["Only"] @product.StockQuantity
-                                            </span>
-                                        }
-                                    </div>
-                                    <div class="p-2" style="flex: 1; display: flex; flex-direction: column;">
-                                        <h6 class="mb-1" style="font-size: 0.8rem; line-height: 1.35; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.2rem; flex: 1; color: #1f2937;">
-                                            @(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)
-                                        </h6>
-                                        <div class="mt-auto">
-                                            <div class="text-muted" style="text-decoration: line-through; font-size: 0.7rem; margin-bottom: 0.25rem; color: #9ca3af;">@Html.Raw(currencySymbol)@listPrice.ToString("N2")</div>
-                                            <div class="fw-bold text-danger" style="font-size: 0.9rem; line-height: 1.2; font-weight: 800;">@Html.Raw(currencySymbol)@discountedPrice.ToString("N2")</div>
-                                        </div>
-                                    </div>
-                                </a>
-                                <div class="px-2 pb-2">
-                                    @if (hasVariants)
-                                    {
-                                        <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-slug="@product.GetSlug()" 
-                                           class="btn w-100 btn-primary"
-                                           style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%) !important; transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3); text-decoration: none; display: flex; align-items: center; justify-content: center;"
-                                           title="@Localizer["ViewDetails"]">
-                                            <i class="bi bi-eye me-1"></i>
-                                            <span class="d-none d-md-inline">@Localizer["ViewDetails"]</span>
-                                            <span class="d-md-none">@Localizer["Details"]</span>
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <button onclick="event.stopPropagation(); toggleCart(@product.Id, this); return false;" 
-                                                class="btn w-100 @(isInCart ? "in-cart btn-success" : "btn-primary")" 
-                                                data-product-id="@product.Id"
-                                                style="font-size: 0.75rem; padding: 0.45rem; border-radius: 10px; font-weight: 700; border: none; background: @(isInCart ? "linear-gradient(135deg, #7BC043 0%, #6ba836 100%)" : "linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%)") !important; transition: all 0.3s; box-shadow: 0 2px 6px rgba(59,157,213,0.3);"
-                                                title="@(isInCart ? Localizer["RemoveFromCart"] : Localizer["AddToCart"])">
-                                            <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart-plus") me-1"></i>
-                                            <span class="d-none d-md-inline">@(isInCart ? Localizer["InCart"] : Localizer["AddToCart"])</span>
-                                        </button>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        }
     </div>
 
     <!-- Empty State -->
