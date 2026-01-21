@@ -97,6 +97,18 @@
     box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
 }
 
+.service-card-image-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    cursor: pointer;
+}
+
+.service-card-image-link:hover {
+    text-decoration: none;
+}
+
 .service-card-image-wrapper {
     position: relative;
     height: 220px;
@@ -125,6 +137,34 @@
 
 .service-card-home:hover .service-card-image {
     transform: scale(1.1);
+}
+
+.service-image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 5;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.service-image-overlay i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.service-card-image-link:hover .service-image-overlay {
+    opacity: 1;
 }
 
 .service-home-carousel .carousel-control-prev,

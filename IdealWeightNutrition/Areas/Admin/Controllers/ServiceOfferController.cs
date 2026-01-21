@@ -70,12 +70,12 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
         {
             if (offer.EndDate <= offer.StartDate)
             {
-                ModelState.AddModelError("EndDate", "End date must be after start date");
+                ModelState.AddModelError("EndDate", _localizer["EndDateMustBeAfterStartDate"]?.Value ?? "End date must be after start date");
             }
 
             if (offer.DiscountType == DiscountType.Percentage && offer.DiscountValue > 100)
             {
-                ModelState.AddModelError("DiscountValue", "Percentage discount cannot exceed 100%");
+                ModelState.AddModelError("DiscountValue", _localizer["PercentageDiscountCannotExceed100"]?.Value ?? "Percentage discount cannot exceed 100%");
             }
 
             if (ModelState.IsValid)
@@ -88,7 +88,7 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
                 _unitOfWork.ServiceOffers.Add(offer);
                 _unitOfWork.save();
 
-                TempData["success"] = "Service offer created successfully!";
+                TempData["success"] = _localizer["ServiceOfferCreatedSuccessfully"]?.Value ?? "Service offer created successfully!";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -152,12 +152,12 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
         {
             if (offer.EndDate <= offer.StartDate)
             {
-                ModelState.AddModelError("EndDate", "End date must be after start date");
+                ModelState.AddModelError("EndDate", _localizer["EndDateMustBeAfterStartDate"]?.Value ?? "End date must be after start date");
             }
 
             if (offer.DiscountType == DiscountType.Percentage && offer.DiscountValue > 100)
             {
-                ModelState.AddModelError("DiscountValue", "Percentage discount cannot exceed 100%");
+                ModelState.AddModelError("DiscountValue", _localizer["PercentageDiscountCannotExceed100"]?.Value ?? "Percentage discount cannot exceed 100%");
             }
 
             if (ModelState.IsValid)
@@ -165,7 +165,7 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
                 _unitOfWork.ServiceOffers.Update(offer);
                 _unitOfWork.save();
 
-                TempData["success"] = "Service offer updated successfully!";
+                TempData["success"] = _localizer["ServiceOfferUpdatedSuccessfully"]?.Value ?? "Service offer updated successfully!";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -221,7 +221,7 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
             _unitOfWork.ServiceOffers.Remove(offer);
             _unitOfWork.save();
 
-            TempData["success"] = "Service offer deleted successfully!";
+            TempData["success"] = _localizer["ServiceOfferDeletedSuccessfully"]?.Value ?? "Service offer deleted successfully!";
             return RedirectToAction(nameof(Index));
         }
     }

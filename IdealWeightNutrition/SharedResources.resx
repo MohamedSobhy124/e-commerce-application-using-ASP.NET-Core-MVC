@@ -3945,4 +3945,217 @@
   <data name="CitiesDeliveryAreas" xml:space="preserve">
     <value />
   </data>
+  <data name="FreeDeliverySettings" xml:space="preserve">
+    <value />
+  </data>
+  <data name="AllowFreeDelivery" xml:space="preserve">
+    <value />
+  </data>
+  <data name="AllowFreeDeliveryHelpText" xml:space="preserve">
+    <value />
+  </data>
+  <data name="FreeDeliveryMinimumAmount" xml:space="preserve">
+    <value />
+  </data>
+  <data name="FreeDeliveryMinimumAmountHelpText" xml:space="preserve">
+    <value />
+  </data>
+  <data name="FreeDeliveryAvailable" xml:space="preserve">
+    <value />
+  </data>
+  <data name="FreeDeliveryMinimumAmountMessage" xml:space="preserve">
+    <value />
+  </data>
+  <data name="FreeDeliveryNoMinimumMessage" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ErrorUpdatingCityStatus" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CitiesManagement" xml:space="preserve">
+    <value />
+  </data>
+  <data name="AddNewCity" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Cities" xml:space="preserve">
+    <value />
+  </data>
+  <data name="SearchCities" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NoCitiesYet" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CreateCitiesToManageDelivery" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CreateFirstCity" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Emirate" xml:space="preserve">
+    <value />
+  </data>
+  <data name="RemoteAreas" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Areas" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CreateCity" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EditCity" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CityInformation" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CityNameEnglish" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CityNameArabic" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EmirateEnglish" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EmirateArabic" xml:space="preserve">
+    <value />
+  </data>
+  <data name="DeliverySettings" xml:space="preserve">
+    <value />
+  </data>
+  <data name="DefaultDeliveryCharge" xml:space="preserve">
+    <value />
+  </data>
+  <data name="DefaultChargeForCity" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ActiveCity" xml:space="preserve">
+    <value />
+  </data>
+  <data name="InactiveCitiesWontAppear" xml:space="preserve">
+    <value />
+  </data>
+  <data name="AddRemoteArea" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NoRemoteAreasYet" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ManageRemoteAreas" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CityCreatedSuccessfully" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CityUpdatedSuccessfully" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CityDeletedSuccessfully" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CannotDeleteCityHasRemoteAreas" xml:space="preserve">
+    <value />
+  </data>
+  <data name="DeleteCity" xml:space="preserve">
+    <value />
+  </data>
+  <data name="AreYouSureDeleteCity" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CannotDeleteCity" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CityHasRemoteAreas" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CityNotFound" xml:space="preserve">
+    <value />
+  </data>
+  <data name="VATAmount" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ExportOrders" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ExportProductProfits" xml:space="preserve">
+    <value />
+  </data>
+  <data name="StoreCost" xml:space="preserve">
+    <value />
+  </data>
+  <data name="StoreCostRealCost" xml:space="preserve">
+    <value />
+  </data>
+  <data name="StoreCostHelpText" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Profit" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ExportProducts" xml:space="preserve">
+    <value />
+  </data>
+  <data name="VerifyYourEmail" xml:space="preserve">
+    <value />
+  </data>
+  <data name="VerifyEmailDescription" xml:space="preserve">
+    <value />
+  </data>
+  <data name="SendVerificationCode" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EnterVerificationCode" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Verify" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ResendCode" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EmailVerificationOTP" xml:space="preserve">
+    <value />
+  </data>
+  <data name="OTPSentSuccessfully" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ErrorSendingOTP" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EmailAndOTPRequired" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EmailVerifiedSuccessfully" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ErrorVerifyingOTP" xml:space="preserve">
+    <value />
+  </data>
+  <data name="PleaseEnterValidOTP" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CompletePaymentOnNextPage" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ServiceCheckout" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ProceedToPayment" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Sending" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Verifying" xml:space="preserve">
+    <value />
+  </data>
+  <data name="PleaseFixTheFollowingErrors" xml:space="preserve">
+    <value />
+  </data>
+  <data name="PayRemainingAtLocation" xml:space="preserve">
+    <value />
+  </data>
 </root>

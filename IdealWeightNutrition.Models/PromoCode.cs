@@ -68,6 +68,9 @@ namespace IdealWeightNutrition.Models
         [Display(Name = "Exclude Items with Existing Discounts")]
         public bool ExcludeDiscountedItems { get; set; } = false;
 
+        [Display(Name = "Exclude All Services")]
+        public bool ExcludeAllServices { get; set; } = true;
+
         // Navigation properties
         public ICollection<OrderHeader>? Orders { get; set; }
         
@@ -76,6 +79,9 @@ namespace IdealWeightNutrition.Models
         
         [ValidateNever]
         public ICollection<PromoCodeExcludedComboOffer>? ExcludedComboOffers { get; set; }
+        
+        [ValidateNever]
+        public ICollection<PromoCodeExcludedServiceSubscription>? ExcludedServiceSubscriptions { get; set; }
     }
 
     public enum DiscountType

@@ -30,6 +30,7 @@ namespace IdealWeightNutrition.DataAccess.Data
         public DbSet<PromoCodeUsage> PromoCodeUsages { get; set; }
         public DbSet<PromoCodeExcludedProduct> PromoCodeExcludedProducts { get; set; }
         public DbSet<PromoCodeExcludedComboOffer> PromoCodeExcludedComboOffers { get; set; }
+        public DbSet<PromoCodeExcludedServiceSubscription> PromoCodeExcludedServiceSubscriptions { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<ServiceOffer> ServiceOffers { get; set; }
         public DbSet<ServicePurchase> ServicePurchases { get; set; }

@@ -316,6 +316,92 @@
                             </div>
                         </div>
 
+                        <!-- Service Exclusion Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0">
+                                            <i class="bi bi-briefcase me-2"></i>@Localizer["ServiceExclusions"]
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Exclude All Services Radio Button -->
+                                        <div class="mb-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="ExcludeAllServices" id="excludeAllServices" value="true" @(Model.ExcludeAllServices ? "checked" : "")>
+                                                <label class="form-check-label" for="excludeAllServices">
+                                                    <strong>@Localizer["ExcludeAllServices"]</strong>
+                                                    <small class="text-muted d-block">@Localizer["ExcludeAllServicesDescription"]</small>
+                                                </label>
+                                            </div>
+                                            <div class="form-check mt-2">
+                                                <input class="form-check-input" type="radio" name="ExcludeAllServices" id="excludeSpecificServices" value="false" @(!Model.ExcludeAllServices ? "checked" : "")>
+                                                <label class="form-check-label" for="excludeSpecificServices">
+                                                    <strong>@Localizer["ExcludeSpecificServices"]</strong>
+                                                    <small class="text-muted d-block">@Localizer["ExcludeSpecificServicesDescription"]</small>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Service Selection (only shown when ExcludeSpecificServices is selected) -->
+                                        <div id="serviceExclusionSection" style="display: @(!Model.ExcludeAllServices ? "block" : "none");">
+                                            <p class="text-muted mb-3">
+                                                @Localizer["ServicesInThisListWillNotReceiveThePromoCodeDiscount"]
+                                            </p>
+                                            
+                                            <!-- Add Service Form -->
+                                            <div class="mb-3">
+                                                <div class="row g-2">
+                                                    <div class="col-md-8">
+                                                        <label for="serviceSelect" class="form-label">
+                                                            <i class="bi bi-briefcase me-1"></i>@Localizer["SelectService"]
+                                                        </label>
+                                                        <select id="serviceSelect" class="form-select">
+                                                            <option value="">-- @Localizer["SelectService"] --</option>
+                                                            @if (ViewBag.ServiceSubscriptions != null)
+                                                            {
+                                                                @foreach (var service in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.ServiceSubscriptions)
+                                                                {
+                                                                    <option value="@service.Value">@service.Text</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4 d-flex align-items-end">
+                                                        <button type="button" class="btn btn-info w-100" id="addServiceBtn" style="display: none;">
+                                                            <i class="bi bi-plus-circle me-1"></i>@Localizer["Add"]
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Excluded Services List -->
+                                            <div id="excludedServicesList">
+                                                @if (Model.ExcludedServiceSubscriptions != null && Model.ExcludedServiceSubscriptions.Any())
+                                                {
+                                                    @foreach (var excludedService in Model.ExcludedServiceSubscriptions)
+                                                    {
+                                                        var serviceTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(excludedService.ServiceSubscription?.TitleAr)) 
+                                                            ? excludedService.ServiceSubscription.TitleAr 
+                                                            : (excludedService.ServiceSubscription?.Title ?? Localizer["Unknown"].Value);
+                                                        <div class="badge bg-info text-white me-2 mb-2 p-2 excluded-service-item" data-excluded-id="@excludedService.Id" data-service-id="@excludedService.ServiceSubscriptionId">
+                                                            <span>@serviceTitle</span>
+                                                            <button type="button" class="btn-close btn-close-white ms-2 remove-excluded-service" aria-label="@Localizer["Remove"]"></button>
+                                                        </div>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <p class="text-muted">@Localizer["NoServicesExcluded"]</p>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <hr class="my-4" />
 
                         <!-- Action Buttons -->
@@ -819,6 +905,173 @@
                         // Show message if no combo offers left
                         if ($('.excluded-combo-offer-item').length === 0) {
                             $('#excludedComboOffersList').html('<p class="text-muted">@Html.Raw(Localizer["NoComboOffersExcluded"].Value)</p>');
+                        }
+
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    } else {
+                        if (typeof toastr !== 'undefined') {
+                            toastr.error(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    }
+                },
+                error: function() {
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error('@Html.Raw(Localizer["AnErrorOccurredPleaseTryAgain"].Value)');
+                    } else {
+                        alert('@Html.Raw(Localizer["AnErrorOccurredPleaseTryAgain"].Value)');
+                    }
+                }
+            });
+        });
+
+        // Handle ExcludeAllServices radio button changes
+        $('input[name="ExcludeAllServices"]').on('change', function() {
+            var excludeAll = $(this).val() === 'true';
+            if (excludeAll) {
+                $('#serviceExclusionSection').slideUp();
+            } else {
+                $('#serviceExclusionSection').slideDown();
+            }
+        });
+
+        // Service selection change handler
+        $('#serviceSelect').on('change', function() {
+            var serviceId = $(this).val();
+            if (serviceId) {
+                $('#addServiceBtn').show();
+            } else {
+                $('#addServiceBtn').hide();
+            }
+        });
+
+        // Add service to excluded list
+        $('#addServiceBtn').click(function() {
+            var serviceId = $('#serviceSelect').val();
+            if (!serviceId) {
+                return;
+            }
+
+            // Get selected service text (name)
+            var selectedOption = $('#serviceSelect option:selected');
+            var serviceName = selectedOption.text().split(' (')[0]; // Extract name before price info
+
+            // Check if already excluded
+            if ($('.excluded-service-item[data-service-id="' + serviceId + '"]').length > 0) {
+                if (typeof toastr !== 'undefined') {
+                    toastr.warning('@Html.Raw(Localizer["ServiceIsAlreadyExcluded"].Value)');
+                } else {
+                    alert('@Html.Raw(Localizer["ServiceIsAlreadyExcluded"].Value)');
+                }
+                return;
+            }
+
+            var btn = $(this);
+            var promoCodeId = @Model.Id;
+            btn.prop('disabled', true);
+
+            $.ajax({
+                url: '@Url.Action("AddExcludedServiceSubscription", "PromoCode", new { area = "Admin" })',
+                type: 'POST',
+                data: {
+                    promoCodeId: promoCodeId,
+                    serviceSubscriptionId: serviceId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Get localized service name from response
+                        var currentCulture = '@(Context.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>()?.RequestCulture.Culture.Name ?? "en")';
+                        var displayName = (currentCulture === 'ar' && response.serviceTitleAr) 
+                            ? response.serviceTitleAr 
+                            : (response.serviceTitle || serviceName);
+
+                        // Add to UI
+                        var badgeHtml = '<div class="badge bg-info text-white me-2 mb-2 p-2 excluded-service-item" data-excluded-id="' + response.excludedServiceSubscriptionId + '" data-service-id="' + serviceId + '">';
+                        badgeHtml += '<span>' + displayName + '</span>';
+                        badgeHtml += '<button type="button" class="btn-close btn-close-white ms-2 remove-excluded-service" aria-label="@Html.Raw(Localizer["Remove"].Value)"></button>';
+                        badgeHtml += '</div>';
+
+                        if ($('#excludedServicesList p.text-muted').length > 0) {
+                            $('#excludedServicesList').html(badgeHtml);
+                        } else {
+                            $('#excludedServicesList').append(badgeHtml);
+                        }
+
+                        // Remove from dropdown and reset selection
+                        selectedOption.remove();
+                        $('#serviceSelect').val('').trigger('change');
+                        $('#addServiceBtn').hide();
+
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    } else {
+                        if (typeof toastr !== 'undefined') {
+                            toastr.error(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    }
+                },
+                error: function() {
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error('@Html.Raw(Localizer["AnErrorOccurredPleaseTryAgain"].Value)');
+                    } else {
+                        alert('@Html.Raw(Localizer["AnErrorOccurredPleaseTryAgain"].Value)');
+                    }
+                },
+                complete: function() {
+                    btn.prop('disabled', false);
+                }
+            });
+        });
+
+        // Remove service from excluded list
+        $(document).on('click', '.remove-excluded-service', function(e) {
+            e.preventDefault();
+            var excludedItem = $(this).closest('.excluded-service-item');
+            var excludedId = excludedItem.data('excluded-id');
+            var serviceId = excludedItem.data('service-id');
+
+            if (!confirm('@Html.Raw(Localizer["AreYouSureYouWantToRemoveThisServiceFromExcludedList"].Value)')) {
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("RemoveExcludedServiceSubscription", "PromoCode", new { area = "Admin" })',
+                type: 'POST',
+                data: {
+                    excludedServiceSubscriptionId: excludedId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        excludedItem.remove();
+                        
+                        // Re-add service to dropdown
+                        $.ajax({
+                            url: '@Url.Action("GetServiceSubscriptionForDropdown", "PromoCode", new { area = "Admin" })',
+                            type: 'GET',
+                            data: { serviceSubscriptionId: serviceId },
+                            success: function(serviceData) {
+                                if (serviceData.success) {
+                                    var option = new Option(serviceData.text, serviceData.value, false, false);
+                                    $('#serviceSelect').append(option).trigger('change');
+                                }
+                            }
+                        });
+                        
+                        // Show message if no services left
+                        if ($('.excluded-service-item').length === 0) {
+                            $('#excludedServicesList').html('<p class="text-muted">@Html.Raw(Localizer["NoServicesExcluded"].Value)</p>');
                         }
 
                         if (typeof toastr !== 'undefined') {

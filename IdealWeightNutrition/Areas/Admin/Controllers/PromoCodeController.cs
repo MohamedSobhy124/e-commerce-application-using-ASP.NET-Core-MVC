@@ -39,7 +39,8 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
             {
                 StartDate = IdealWeightNutrition.Utility.DateTimeHelper.Now,
                 EndDate = IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(30),
-                IsActive = true
+                IsActive = true,
+                ExcludeAllServices = true // Default: exclude all services
             };
             return View(promoCode);
         }
@@ -95,7 +96,7 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var promoCode = _unitOfWork.PromoCode.Get(p => p.Id == id, includeProperties: "ExcludedProducts,ExcludedProducts.Product,ExcludedComboOffers,ExcludedComboOffers.ComboOffer");
+            var promoCode = _unitOfWork.PromoCode.Get(p => p.Id == id, includeProperties: "ExcludedProducts,ExcludedProducts.Product,ExcludedComboOffers,ExcludedComboOffers.ComboOffer,ExcludedServiceSubscriptions,ExcludedServiceSubscriptions.ServiceSubscription");
             
             if (promoCode == null)
             {
@@ -139,6 +140,23 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
                 .ToList();
             
             ViewBag.ComboOffers = allComboOffers;
+
+            // Get all service subscriptions for dropdown (excluding already excluded services)
+            var excludedServiceIds = promoCode.ExcludedServiceSubscriptions?.Select(ess => ess.ServiceSubscriptionId).ToList() ?? new List<int>();
+            
+            var allServices = _unitOfWork.ServiceSubscriptions.GetAll(s => s.IsActive)
+                .Where(s => !excludedServiceIds.Contains(s.Id))
+                .OrderBy(s => s.Title)
+                .Select(s => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Text = (currentCulture == "ar" && !string.IsNullOrEmpty(s.TitleAr)) 
+                        ? $"{s.TitleAr} ({_localizer["Price"].Value}: {IdealWeightNutrition.Utility.CurrencyHelper.GetCurrencySymbol(currentCulture)} {s.Price:N2})" 
+                        : $"{s.Title} ({_localizer["Price"].Value}: {IdealWeightNutrition.Utility.CurrencyHelper.GetCurrencySymbol(currentCulture)} {s.Price:N2})",
+                    Value = s.Id.ToString()
+                })
+                .ToList();
+            
+            ViewBag.ServiceSubscriptions = allServices;
 
             return View(promoCode);
         }
@@ -579,6 +597,124 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
             { 
                 success = true, 
                 value = comboOffer.Id.ToString(),
+                text = text
+            });
+        }
+
+        // POST: PromoCode/AddExcludedServiceSubscription
+        [HttpPost]
+        public IActionResult AddExcludedServiceSubscription(int promoCodeId, int serviceSubscriptionId)
+        {
+            try
+            {
+                // Check if promo code exists
+                var promoCode = _dbContext.PromoCodes.FirstOrDefault(p => p.Id == promoCodeId);
+                if (promoCode == null)
+                {
+                    return Json(new { success = false, message = _localizer["PromoCodeNotFound"].Value });
+                }
+
+                // Check if service subscription exists
+                var serviceSubscription = _unitOfWork.ServiceSubscriptions.Get(s => s.Id == serviceSubscriptionId && s.IsActive);
+                if (serviceSubscription == null)
+                {
+                    return Json(new { success = false, message = _localizer["ServiceSubscriptionNotFound"].Value });
+                }
+
+                // Check if already excluded
+                var existing = _dbContext.PromoCodeExcludedServiceSubscriptions
+                    .FirstOrDefault(ess => ess.PromoCodeId == promoCodeId && ess.ServiceSubscriptionId == serviceSubscriptionId);
+                
+                if (existing != null)
+                {
+                    return Json(new { success = false, message = _localizer["ServiceSubscriptionIsAlreadyExcluded"].Value });
+                }
+
+                // Add excluded service subscription
+                var excludedServiceSubscription = new PromoCodeExcludedServiceSubscription
+                {
+                    PromoCodeId = promoCodeId,
+                    ServiceSubscriptionId = serviceSubscriptionId
+                };
+
+                _dbContext.PromoCodeExcludedServiceSubscriptions.Add(excludedServiceSubscription);
+                _dbContext.SaveChanges();
+
+                // Get current culture for localization
+                var requestCulture = HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+                var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+                
+                var serviceTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(serviceSubscription.TitleAr)) 
+                    ? serviceSubscription.TitleAr 
+                    : serviceSubscription.Title;
+
+                return Json(new 
+                { 
+                    success = true, 
+                    message = _localizer["ServiceSubscriptionExcludedSuccessfully"].Value,
+                    excludedServiceSubscriptionId = excludedServiceSubscription.Id,
+                    serviceTitle = serviceTitle,
+                    serviceTitleAr = serviceSubscription.TitleAr ?? ""
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = string.Format(_localizer["AnErrorOccurredWithDetails"].Value, ex.Message) });
+            }
+        }
+
+        // POST: PromoCode/RemoveExcludedServiceSubscription
+        [HttpPost]
+        public IActionResult RemoveExcludedServiceSubscription(int excludedServiceSubscriptionId)
+        {
+            try
+            {
+                var excludedServiceSubscription = _dbContext.PromoCodeExcludedServiceSubscriptions
+                    .FirstOrDefault(ess => ess.Id == excludedServiceSubscriptionId);
+
+                if (excludedServiceSubscription == null)
+                {
+                    return Json(new { success = false, message = _localizer["ExcludedServiceSubscriptionNotFound"].Value });
+                }
+
+                _dbContext.PromoCodeExcludedServiceSubscriptions.Remove(excludedServiceSubscription);
+                _dbContext.SaveChanges();
+
+                return Json(new { success = true, message = _localizer["ServiceSubscriptionRemovedFromExcludedList"].Value });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = string.Format(_localizer["AnErrorOccurredWithDetails"].Value, ex.Message) });
+            }
+        }
+
+        // GET: PromoCode/GetServiceSubscriptionForDropdown
+        [HttpGet]
+        public IActionResult GetServiceSubscriptionForDropdown(int serviceSubscriptionId)
+        {
+            var serviceSubscription = _unitOfWork.ServiceSubscriptions.Get(s => s.Id == serviceSubscriptionId && s.IsActive);
+            
+            if (serviceSubscription == null)
+            {
+                return Json(new { success = false, message = _localizer["ServiceSubscriptionNotFound"].Value });
+            }
+
+            // Get current culture for localization
+            var requestCulture = HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+            var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+            
+            var serviceTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(serviceSubscription.TitleAr)) 
+                ? serviceSubscription.TitleAr 
+                : serviceSubscription.Title;
+            
+            var priceText = _localizer["Price"].Value;
+            var currencySymbol = IdealWeightNutrition.Utility.CurrencyHelper.GetCurrencySymbol(currentCulture);
+            var text = $"{serviceTitle} ({priceText}: {currencySymbol} {serviceSubscription.Price:N2})";
+
+            return Json(new 
+            { 
+                success = true, 
+                value = serviceSubscription.Id.ToString(),
                 text = text
             });
         }

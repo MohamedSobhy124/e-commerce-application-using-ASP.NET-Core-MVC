@@ -1,0 +1,1620 @@
+@model IdealWeightNutrition.Models.ViewModels.ServiceSummaryVM
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["ServiceCheckout"] ?? "Service Checkout";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var isRtl = currentCulture.StartsWith("ar");
+    Func<decimal, string> formatCurrency = (amount) => $"{currencySymbol} {amount.ToString("N2", System.Globalization.CultureInfo.InvariantCulture).Replace(".", ",")}";
+    
+    bool tamaraAvailable = ViewData["TamaraAvailable"] != null && (bool)ViewData["TamaraAvailable"];
+    string tamaraPublicKey = ViewData["TamaraPublicKey"]?.ToString() ?? "";
+    decimal tamaraOrderTotal = ViewData["TamaraOrderTotal"] != null ? (decimal)ViewData["TamaraOrderTotal"] : 0;
+    bool tabbyAvailable = ViewData["TabbyAvailable"] != null && (bool)ViewData["TabbyAvailable"];
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cart-summary-enhanced.css" asp-append-version="true" />
+}
+
+<form method="post" id="serviceOrderForm" novalidate>
+    <div class="order-summary-wrapper" dir="@(isRtl ? "rtl" : "ltr")">
+        <div class="container">
+            <div class="order-summary-card">
+                <div class="order-summary-header">
+                    <h5 class="order-summary-title">
+                        <i class="bi bi-briefcase @(isRtl ? "ms-2" : "me-2")"></i>
+                        @(Localizer["ServiceCheckout"] ?? "Service Checkout")
+                    </h5>
+                    <a asp-action="Details" asp-route-id="@Model.Service.Id" class="back-to-cart-btn">
+                        <i class="bi bi-arrow-@(isRtl ? "right" : "left") @(isRtl ? "ms-2" : "me-2")"></i>
+                        @(Localizer["Back"] ?? "Back")
+                    </a>
+                </div>
+
+                <div class="order-summary-body">
+                    <div class="row">
+                        <div class="col-12 col-lg-6 pb-4">
+                            <div class="shipping-details-section">
+                                <h4>
+                                    <i class="bi bi-person @(isRtl ? "ms-2" : "me-2")"></i>
+                                    @(Localizer["CustomerInformation"] ?? "Customer Information")
+                                </h4>
+                                
+                                @if (Model.IsGuest || !User.Identity.IsAuthenticated)
+                                {
+                                    <div class="alert alert-info-enhanced">
+                                        <div class="alert-icon">
+                                            <i class="bi bi-info-circle-fill"></i>
+                                        </div>
+                                        <div class="alert-content">
+                                            <strong>@(Localizer["GuestCheckout"] ?? "Guest Checkout")</strong>
+                                            <p class="mb-0">@(Localizer["GuestCheckoutInfo"] ?? "You can complete your purchase without creating an account")</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-row-enhanced">
+                                        <label class="form-label-enhanced">
+                                            <i class="bi bi-envelope-fill @(isRtl ? "ms-2" : "me-2")"></i>@(Localizer["EmailAddress"] ?? "Email Address") <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="GuestEmail" type="email" id="guestEmailInput" class="form-control-enhanced" placeholder="@(Localizer["EnterYourEmail"] ?? "Enter your email")" required />
+                                        <span asp-validation-for="GuestEmail" class="text-danger validation-message"></span>
+                                        <div id="emailValidationMessage" class="validation-error-message text-danger small mt-1" style="display: none;"></div>
+                                    </div>
+                                    
+                                    <!-- Email Verification OTP Section -->
+                                    <div id="emailVerificationSection" class="form-row-enhanced" style="display: none; margin-top: 15px; padding: 20px; background: #f0f9ff; border-radius: 8px; border: 2px solid #0ea5e9;">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="bi bi-shield-check text-primary @(isRtl ? "ms-2" : "me-2")" style="font-size: 1.5rem;"></i>
+                                            <div>
+                                                <strong style="color: #0369a1;">@(Localizer["VerifyYourEmail"] ?? "Verify Your Email")</strong>
+                                                <p class="mb-0 text-muted small">@(Localizer["VerifyEmailDescription"] ?? "We need to verify your email address to complete your order. A verification code will be sent to your email.")</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div id="otpSendSection">
+                                            <button type="button" id="sendOtpBtn" class="btn btn-primary btn-sm" style="border-radius: 6px;">
+                                                <i class="bi bi-send @(isRtl ? "ms-2" : "me-2")"></i>@(Localizer["SendVerificationCode"] ?? "Send Verification Code")
+                                            </button>
+                                            <div id="otpSendMessage" class="mt-2 small" style="display: none;"></div>
+                                        </div>
+                                        
+                                        <div id="otpVerifySection" style="display: none; margin-top: 15px;">
+                                            <label class="form-label-enhanced small">
+                                                <i class="bi bi-key @(isRtl ? "ms-2" : "me-2")"></i>@(Localizer["EnterVerificationCode"] ?? "Enter Verification Code") <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="d-flex gap-2">
+                                                <input type="text" id="otpInput" class="form-control-enhanced" placeholder="000000" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 4px; font-weight: bold; font-family: monospace;" />
+                                                <button type="button" id="verifyOtpBtn" class="btn btn-success btn-sm" style="border-radius: 6px; min-width: 100px;">
+                                                    <i class="bi bi-check-circle @(isRtl ? "ms-1" : "me-1")"></i>@(Localizer["Verify"] ?? "Verify")
+                                                </button>
+                                            </div>
+                                            <div id="otpVerifyMessage" class="mt-2 small" style="display: none;"></div>
+                                            <div class="mt-2">
+                                                <button type="button" id="resendOtpBtn" class="btn btn-link btn-sm p-0 text-primary" style="font-size: 0.85rem; text-decoration: none;">
+                                                    <i class="bi bi-arrow-clockwise @(isRtl ? "ms-1" : "me-1")"></i>@(Localizer["ResendCode"] ?? "Resend Code")
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div id="emailVerifiedSection" style="display: none; margin-top: 15px;">
+                                            <div class="alert alert-success mb-0" style="border-radius: 6px;">
+                                                <i class="bi bi-check-circle-fill @(isRtl ? "ms-2" : "me-2")"></i>
+                                                <strong>@(Localizer["EmailVerified"] ?? "Email Verified")</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                
+                                <div class="form-row-enhanced">
+                                    <label class="form-label-enhanced">
+                                        <i class="bi bi-person-fill me-2"></i>@(Localizer["Name"] ?? "Name") <span class="text-danger">*</span>
+                                    </label>
+                                    @if (Model.IsGuest)
+                                    {
+                                        <input asp-for="GuestName" class="form-control-enhanced" placeholder="@(Localizer["EnterYourName"] ?? "Enter your name")" required />
+                                        <span asp-validation-for="GuestName" class="text-danger validation-message"></span>
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control-enhanced" value="@(Model.User?.Name ?? "")" readonly />
+                                    }
+                                </div>
+
+                                <div class="form-row-enhanced">
+                                    <label class="form-label-enhanced">
+                                        <i class="bi bi-telephone-fill me-2"></i>@(Localizer["Phone"] ?? "Phone") <span class="text-danger">*</span>
+                                    </label>
+                                    @if (Model.IsGuest)
+                                    {
+                                        <input asp-for="GuestPhone" class="form-control-enhanced" placeholder="@(Localizer["EnterYourPhone"] ?? "Enter your phone")" />
+                                        <span asp-validation-for="GuestPhone" class="text-danger validation-message"></span>
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control-enhanced" value="@(Model.User?.PhoneNumber ?? "")" readonly />
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6">
+                            <div class="order-items-section">
+                                <h4>
+                                    <i class="bi bi-briefcase @(isRtl ? "ms-2" : "me-2")"></i>
+                                    @(Localizer["ServiceDetails"] ?? "Service Details")
+                                </h4>
+                                
+                                <div class="service-item-card">
+                                    @{
+                                        var serviceImage = Model.Service.ServiceImages?.FirstOrDefault()?.ImageUrl ?? Model.Service.ImageUrl;
+                                        var serviceTitle = currentCulture == "ar" && !string.IsNullOrEmpty(Model.Service.TitleAr) ? Model.Service.TitleAr : Model.Service.Title;
+                                        var serviceDescription = currentCulture == "ar" && !string.IsNullOrEmpty(Model.Service.DescriptionAr) ? Model.Service.DescriptionAr : Model.Service.Description;
+                                    }
+                                    @if (!string.IsNullOrEmpty(serviceImage))
+                                    {
+                                        <img src="@serviceImage" alt="@serviceTitle" class="service-summary-image" />
+                                    }
+                                    <div class="service-summary-content">
+                                        <h5>@serviceTitle</h5>
+                                        @if (!string.IsNullOrEmpty(serviceDescription))
+                                        {
+                                            <p class="text-muted small">@serviceDescription</p>
+                                        }
+                                        @if (Model.Service.ServiceType == IdealWeightNutrition.Models.ServiceType.Online)
+                                        {
+                                            <span class="badge bg-success">@(Localizer["OnlineService"] ?? "Online Service")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info">@(Localizer["OfflineService"] ?? "Offline Service")</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Pricing Summary -->
+                                <div class="pricing-summary mt-3">
+                                    <div class="price-row">
+                                        <span>@(Localizer["ServicePrice"] ?? "Service Price"):</span>
+                                        <span id="servicePriceDisplay">@formatCurrency(Model.Service.Price)</span>
+                                    </div>
+                                    <div class="price-row discount" style="display: @(Model.DiscountAmount > 0 ? "flex" : "none");">
+                                        <span>@(Localizer["Discount"] ?? "Discount"):</span>
+                                        <span class="text-success" id="discountAmountDisplay">-@formatCurrency(Model.DiscountAmount)</span>
+                                    </div>
+                                    <div class="price-row total">
+                                        <span>@(Localizer["TotalAmount"] ?? "Total Amount"):</span>
+                                        <strong class="text-primary" id="totalAmountDisplay">@formatCurrency(Model.TotalAmount)</strong>
+                                    </div>
+                                    @if (Model.Service.ServiceType == IdealWeightNutrition.Models.ServiceType.Offline && Model.MinAmountRequired > 0)
+                                    {
+                                        <div class="alert alert-warning mt-3">
+                                            <i class="bi bi-info-circle"></i>
+                                            @(Localizer["MinimumAmountToPayNow", Model.Service.OfflinePaymentPercent.Value] ?? $"Minimum Amount to Pay Now ({Model.Service.OfflinePaymentPercent.Value}%):") <strong>@formatCurrency(Model.MinAmountRequired)</strong>
+                                        </div>
+                                        <div class="form-row-enhanced mt-3 amount-input-section">
+                                            <label class="form-label-enhanced">
+                                                @(Localizer["AmountToPayNow"] ?? "Amount to Pay Now") *
+                                                <small class="text-muted d-block mt-1">(@(Localizer["Minimum"] ?? "Minimum"): @formatCurrency(Model.MinAmountRequired))</small>
+                                            </label>
+                                            <div class="input-group amount-input-group">
+                                                <span class="input-group-text">@currencySymbol</span>
+                                                <input asp-for="CustomAmount" type="number" id="CustomAmount" class="form-control form-control-enhanced" 
+                                                       step="0.01" 
+                                                       data-min-amount="@Model.MinAmountRequired.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" 
+                                                       data-max-amount="@Model.TotalAmount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)"
+                                                       data-min-formatted="@formatCurrency(Model.MinAmountRequired)"
+                                                       data-max-formatted="@formatCurrency(Model.TotalAmount)"
+                                                       value="@Model.MinAmountRequired.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" />
+                                            </div>
+                                            <span asp-validation-for="CustomAmount" class="text-danger validation-message"></span>
+                                            <div id="customAmountValidationMessage" class="validation-error-message text-danger small mt-1" style="display: none;"></div>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Promo Code Section -->
+                                <div class="promo-code-section mt-4">
+                                    <h4>
+                                        <i class="bi bi-tag @(isRtl ? "ms-2" : "me-2")"></i>
+                                        @(Localizer["PromoCode"] ?? "Promo Code")
+                                    </h4>
+                                    <div class="promo-code-input-group">
+                                        <input type="text" asp-for="PromoCode" class="form-control form-control-enhanced" placeholder="@(Localizer["EnterPromoCode"] ?? "Enter promo code")" />
+                                        <button type="button" id="applyPromoBtn" class="btn btn-primary promo-apply-btn">
+                                            <i class="bi bi-check-circle @(isRtl ? "ms-1" : "me-1")"></i> @(Localizer["Apply"] ?? "Apply")
+                                        </button>
+                                    </div>
+                                    <div id="promoCodeMessage" class="mt-2"></div>
+                                </div>
+
+                                @{
+                                    bool isFreeSubscription = Model.TotalAmount <= 0.01m;
+                                }
+                                
+                                @if (isFreeSubscription)
+                                {
+                                    <!-- Free Subscription Notice -->
+                                    <div class="alert alert-success mt-4" style="border-left: 4px solid #10b981; background: #f0fdf4;">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-gift-fill text-success @(isRtl ? "ms-2" : "me-2")" style="font-size: 1.5rem;"></i>
+                                            <div>
+                                                <strong>@(Localizer["FreeSubscription"] ?? "Free Subscription!")</strong>
+                                                <p class="mb-0">@(Localizer["FreeSubscriptionMessage"] ?? "This service is completely free. Click the button below to complete your subscription without payment.")</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="PaymentMethod" value="FREE" />
+                                }
+                                else
+                                {
+                                    <!-- Payment Method Selection -->
+                                    <div class="payment-method-section mt-4">
+                                        <h4>
+                                            <i class="bi bi-credit-card @(isRtl ? "ms-2" : "me-2")"></i>
+                                            @(Localizer["PaymentMethod"] ?? "Payment Method")
+                                        </h4>
+                                        <div class="payment-methods">
+                                            <div class="payment-method-option">
+                                                <input type="radio" id="paymentGeidea" name="PaymentMethod" value="Geidea" checked />
+                                                <label for="paymentGeidea" class="payment-method-label">
+                                                    <i class="bi bi-credit-card @(isRtl ? "ms-2" : "me-2")"></i>
+                                                    <span>Geidea</span>
+                                                    <small>@(Localizer["CreditDebitCard"] ?? "Credit/Debit Card")</small>
+                                                </label>
+                                            </div>
+                                            @if (tamaraAvailable)
+                                            {
+                                                <div class="payment-method-option">
+                                                    <input type="radio" id="paymentTamara" name="PaymentMethod" value="Tamara" />
+                                                    <label for="paymentTamara" class="payment-method-label">
+                                                        <i class="bi bi-calendar-check @(isRtl ? "ms-2" : "me-2")"></i>
+                                                        <span>Tamara</span>
+                                                        <small>@(Localizer["BuyNowPayLater"] ?? "Buy Now Pay Later")</small>
+                                                    </label>
+                                                </div>
+                                                @if (!string.IsNullOrEmpty(tamaraPublicKey) && tamaraOrderTotal > 0)
+                                                {
+                                                    <div id="tamara-widget-checkout-page" data-public-key="@tamaraPublicKey" 
+                                                         data-amount="@tamaraOrderTotal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" 
+                                                         data-currency="AED" data-country="AE" data-widget-type="checkout_page" 
+                                                         style="margin-top: 15px;"></div>
+                                                }
+                                            }
+                                            @if (tabbyAvailable)
+                                            {
+                                                <div class="payment-method-option">
+                                                    <input type="radio" id="paymentTabby" name="PaymentMethod" value="Tabby" />
+                                                    <label for="paymentTabby" class="payment-method-label">
+                                                        <i class="bi bi-calendar-check @(isRtl ? "ms-2" : "me-2")"></i>
+                                                        <span>Tabby</span>
+                                                        <small>@(Localizer["BuyNowPayLater"] ?? "Buy Now Pay Later")</small>
+                                                    </label>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-summary-footer-enhanced">
+                    <div class="footer-content-wrapper">
+                        @{
+                             isFreeSubscription = Model.TotalAmount <= 0.01m;
+                        }
+                        <button type="submit" class="place-order-btn-enhanced" id="placeOrderBtn">
+                            <span class="btn-content">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <span class="btn-text">@(isFreeSubscription ? (Localizer["CompleteSubscription"] ?? "Complete Subscription") : (Localizer["ProceedToPayment"] ?? "Proceed to Payment"))</span>
+                                <span class="btn-loader" style="display: none;">
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    <span>@(Localizer["Processing"] ?? "Processing")...</span>
+                                </span>
+                            </span>
+                            <span class="btn-shine"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <input type="hidden" asp-for="ServiceId" value="@Model.Service.Id" />
+    @if (ViewBag.OfferId != null)
+    {
+        <input type="hidden" asp-for="OfferId" value="@ViewBag.OfferId" />
+    }
+    @Html.AntiForgeryToken()
+</form>
+
+<style>
+    .service-item-card {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        margin-bottom: 1rem;
+    }
+    
+    .service-summary-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    
+    .service-summary-content {
+        flex: 1;
+    }
+    
+    .pricing-summary {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .price-row.discount {
+        color: #059669;
+    }
+    
+    .price-row.total {
+        border-top: 2px solid #e0e0e0;
+        margin-top: 0.5rem;
+        padding-top: 0.75rem;
+        font-size: 1.1rem;
+    }
+    
+    /* Validation error styles */
+    .is-invalid {
+        border-color: #dc2626 !important;
+        background-color: #fef2f2 !important;
+    }
+    
+    .is-invalid:focus {
+        border-color: #dc2626 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.25) !important;
+    }
+    
+    .validation-error-message {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #dc2626;
+    }
+    
+    .payment-method-section.border-danger {
+        border-color: #dc2626 !important;
+        background-color: #fef2f2 !important;
+    }
+    
+    [dir="rtl"] .validation-error-message {
+        text-align: right;
+    }
+    
+    /* Mobile responsive styles for amount input and promo code */
+    .amount-input-section {
+        margin-bottom: 1rem;
+    }
+    
+    .amount-input-group {
+        width: 100%;
+    }
+    
+    .amount-input-group .input-group-text {
+        min-width: 60px;
+        justify-content: center;
+        font-weight: 600;
+        background: #f8f9fa;
+        border: 2px solid #e5e7eb;
+        border-right: none;
+        border-radius: 12px 0 0 12px;
+    }
+    
+    [dir="rtl"] .amount-input-group .input-group-text {
+        border-right: 2px solid #e5e7eb;
+        border-left: none;
+        border-radius: 0 12px 12px 0;
+    }
+    
+    .amount-input-group .form-control {
+        border-left: none;
+        border-radius: 0 12px 12px 0;
+        border: 2px solid #e5e7eb;
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    
+    [dir="rtl"] .amount-input-group .form-control {
+        border-left: 2px solid #e5e7eb;
+        border-right: none;
+        border-radius: 12px 0 0 12px;
+    }
+    
+    .amount-input-group .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+    
+    .promo-code-input-group {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    .promo-code-input-group input {
+        flex: 1;
+        min-width: 150px;
+    }
+    
+    .promo-apply-btn {
+        white-space: nowrap;
+        min-width: 100px;
+    }
+    
+    /* Mobile responsive */
+    @@media (max-width: 768px) {
+        .amount-input-section .form-label-enhanced {
+            font-size: 0.95rem;
+        }
+        
+        .amount-input-section .form-label-enhanced small {
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 0.5rem;
+        }
+        
+        .amount-input-group {
+            flex-direction: column;
+        }
+        
+        .amount-input-group .input-group-text {
+            width: 100%;
+            border-radius: 12px 12px 0 0;
+            border-right: 2px solid #e5e7eb;
+            border-bottom: none;
+        }
+        
+        [dir="rtl"] .amount-input-group .input-group-text {
+            border-left: 2px solid #e5e7eb;
+            border-right: 2px solid #e5e7eb;
+        }
+        
+        .amount-input-group .form-control {
+            width: 100%;
+            border-radius: 0 0 12px 12px;
+            border-left: 2px solid #e5e7eb;
+            border-top: none;
+        }
+        
+        [dir="rtl"] .amount-input-group .form-control {
+            border-right: 2px solid #e5e7eb;
+            border-left: 2px solid #e5e7eb;
+        }
+        
+        .promo-code-section {
+            padding: 1rem !important;
+        }
+        
+        .promo-code-section h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .promo-code-input-group {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .promo-code-input-group input {
+            width: 100%;
+            min-width: 100%;
+        }
+        
+        .promo-apply-btn {
+            width: 100%;
+            min-width: 100%;
+        }
+        
+        .pricing-summary {
+            padding: 0.875rem;
+        }
+        
+        .price-row {
+            font-size: 0.95rem;
+            padding: 0.4rem 0;
+        }
+        
+        .price-row.total {
+            font-size: 1.1rem;
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .amount-input-section {
+            margin-bottom: 1.25rem;
+        }
+        
+        .promo-code-section {
+            padding: 0.875rem !important;
+            margin-top: 1rem !important;
+        }
+    }
+</style>
+
+@{
+    bool isOfflineService = Model.Service.ServiceType == IdealWeightNutrition.Models.ServiceType.Offline && Model.MinAmountRequired > 0;
+    string minAmountJs = isOfflineService ? Model.MinAmountRequired.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "0";
+    string maxAmountJs = isOfflineService ? Model.TotalAmount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "0";
+    string minAmountFormatted = isOfflineService ? formatCurrency(Model.MinAmountRequired) : "";
+    string maxAmountFormatted = isOfflineService ? formatCurrency(Model.TotalAmount) : "";
+    
+    // JavaScript translations
+    var jsTranslations = new
+    {
+        Error = Localizer["Error"] ?? "Error",
+        OK = Localizer["OK"] ?? "OK",
+        AnErrorOccurred = Localizer["AnErrorOccurredPleaseTryAgain"] ?? "An error occurred. Please try again.",
+        AnErrorOccurredProcessing = Localizer["AnErrorOccurredProcessingRequest"] ?? "An error occurred while processing your request. Please try again.",
+        AmountMustBeAtLeast = Localizer["AmountMustBeAtLeast"] ?? "Amount must be at least",
+        AmountCannotExceed = Localizer["AmountCannotExceed"] ?? "Amount cannot exceed",
+        PaymentError = Localizer["PaymentError"] ?? "Payment Error",
+        FailedToLoadPaymentLibrary = Localizer["FailedToLoadPaymentLibrary"] ?? "Failed to load payment library. Please try again.",
+        PaymentFailed = Localizer["PaymentFailed"] ?? "Payment Failed",
+        PaymentFailedPleaseTryAgain = Localizer["PaymentFailedPleaseTryAgain"] ?? "Payment failed. Please try again.",
+        ErrorDetails = Localizer["ErrorDetails"] ?? "Error Details",
+        ErrorCode = Localizer["ErrorCode"] ?? "Error Code",
+        Status = Localizer["Status"] ?? "Status",
+        StatusCode = Localizer["StatusCode"] ?? "Status Code",
+        ResponseCode = Localizer["ResponseCode"] ?? "Response Code",
+        DetailedResponseCode = Localizer["DetailedResponseCode"] ?? "Detailed Response Code",
+        Details = Localizer["Details"] ?? "Details",
+        Response = Localizer["Response"] ?? "Response",
+        PaymentCancelled = Localizer["PaymentCancelled"] ?? "Payment Cancelled",
+        PaymentWasCancelled = Localizer["PaymentWasCancelled"] ?? "Payment was cancelled. You can try again.",
+        FailedToStartPayment = Localizer["FailedToStartPayment"] ?? "Failed to start payment. Please try again.",
+        TechnicalDetailsLogged = Localizer["TechnicalDetailsLogged"] ?? "Technical details logged to console."
+    };
+}
+
+@section Scripts {
+    <!-- Load SweetAlert2 for payment notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" crossorigin="anonymous"></script>
+    
+    @if (tamaraAvailable && !string.IsNullOrEmpty(tamaraPublicKey))
+    {
+        <script src="https://cdn.tamara.co/widget-v2/tamara-widget.js"></script>
+    }
+    
+    <script>
+        // Translations for JavaScript
+        var translations = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(jsTranslations));
+        
+        $(document).ready(function() {
+            // Promo code input to uppercase
+            $('#PromoCode').on('input', function() {
+                $(this).val($(this).val().toUpperCase());
+            });
+            
+            // OTP handling for guest users
+            @if (Model.IsGuest || !User.Identity.IsAuthenticated)
+            {
+                <text>
+                var $emailField = $('#guestEmailInput');
+                var $emailValidationMsg = $('#emailValidationMessage');
+                var $emailVerificationSection = $('#emailVerificationSection');
+                var $otpSendSection = $('#otpSendSection');
+                var $otpVerifySection = $('#otpVerifySection');
+                var $emailVerifiedSection = $('#emailVerifiedSection');
+                var $sendOtpBtn = $('#sendOtpBtn');
+                var $verifyOtpBtn = $('#verifyOtpBtn');
+                var $resendOtpBtn = $('#resendOtpBtn');
+                var $otpInput = $('#otpInput');
+                var $otpSendMessage = $('#otpSendMessage');
+                var $otpVerifyMessage = $('#otpVerifyMessage');
+                var isEmailVerified = false;
+                var resendTimer = null;
+                var resendCooldown = 60; // 60 seconds cooldown
+                
+                // Enhanced email regex pattern
+                var emailRegex = new RegExp('^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\\.[a-zA-Z]{2,}$');
+                
+                function validateEmailFormat(email) {
+                    if (!email || email.trim() === '') {
+                        return { valid: false, message: '@(Localizer["EmailAddress"]?.Value ?? "Email Address") @(Localizer["IsRequired"]?.Value ?? "is required")' };
+                    }
+                    
+                    if (!emailRegex.test(email)) {
+                        return { valid: false, message: '@(Localizer["InvalidEmailFormat"]?.Value ?? "Please enter a valid email address")' };
+                    }
+                    
+                    var parts = email.split('@@');
+                    if (parts.length !== 2) {
+                        return { valid: false, message: '@(Localizer["InvalidEmailFormat"]?.Value ?? "Please enter a valid email address")' };
+                    }
+                    
+                    var domain = parts[1].toLowerCase();
+                    if (domain.includes('..') || domain.startsWith('.') || domain.endsWith('.') || domain.length < 4) {
+                        return { valid: false, message: '@(Localizer["InvalidEmailFormat"]?.Value ?? "Please enter a valid email address")' };
+                    }
+                    
+                    return { valid: true, message: '' };
+                }
+                
+                function showEmailError(message) {
+                    $emailField.addClass('is-invalid');
+                    $emailValidationMsg.html('<i class="bi bi-exclamation-circle @(isRtl ? "ms-1" : "me-1")"></i>' + message).show();
+                }
+                
+                function showEmailValid() {
+                    $emailField.removeClass('is-invalid');
+                    $emailField.addClass('is-valid');
+                    $emailValidationMsg.hide();
+                }
+                
+                function clearEmailValidation() {
+                    $emailField.removeClass('is-invalid is-valid');
+                    $emailValidationMsg.hide();
+                }
+                
+                // Real-time validation on input (with debounce)
+                var emailValidationTimeout;
+                $emailField.on('input blur', function() {
+                    var email = $(this).val() ? $(this).val().trim() : '';
+                    clearTimeout(emailValidationTimeout);
+                    
+                    if (email.length > 0) {
+                        emailValidationTimeout = setTimeout(function() {
+                            var validation = validateEmailFormat(email);
+                            if (!validation.valid) {
+                                showEmailError(validation.message);
+                                resetOtpSection();
+                            } else {
+                                showEmailValid();
+                                // Check if email is already verified
+                                $.ajax({
+                                    url: '/Customer/ServiceSubscription/CheckEmailVerified',
+                                    method: 'POST',
+                                    data: { email: email },
+                                    success: function(response) {
+                                        if (response.verified) {
+                                            showEmailVerified();
+                                            isEmailVerified = true;
+                                        } else {
+                                            showOtpSendSection();
+                                            isEmailVerified = false;
+                                        }
+                                    },
+                                    error: function() {
+                                        showOtpSendSection();
+                                        isEmailVerified = false;
+                                    }
+                                });
+                            }
+                        }, 500);
+                    } else {
+                        clearEmailValidation();
+                        resetOtpSection();
+                    }
+                });
+                
+                // Send OTP
+                $sendOtpBtn.on('click', function() {
+                    var email = $emailField.val() ? $emailField.val().trim() : '';
+                    if (!email || !emailRegex.test(email)) {
+                        showEmailError('@(Localizer["InvalidEmailFormat"]?.Value ?? "Please enter a valid email address")');
+                        return;
+                    }
+                    
+                    $sendOtpBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm @(isRtl ? "ms-2" : "me-2")"></span>@(Localizer["Sending"]?.Value ?? "Sending")...');
+                    $otpSendMessage.hide();
+                    
+                    $.ajax({
+                        url: '/Customer/ServiceSubscription/SendOtp',
+                        method: 'POST',
+                        data: { email: email },
+                        success: function(response) {
+                            if (response.success) {
+                                $otpSendMessage.removeClass('text-danger').addClass('text-success').html('<i class="bi bi-check-circle @(isRtl ? "ms-1" : "me-1")"></i>' + response.message).show();
+                                showOtpVerifySection();
+                                startResendCooldown();
+                            } else {
+                                $otpSendMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle @(isRtl ? "ms-1" : "me-1")"></i>' + response.message).show();
+                                $sendOtpBtn.prop('disabled', false).html('<i class="bi bi-send @(isRtl ? "ms-2" : "me-2")"></i>@(Localizer["SendVerificationCode"]?.Value ?? "Send Verification Code")');
+                            }
+                        },
+                        error: function() {
+                            $otpSendMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle @(isRtl ? "ms-1" : "me-1")"></i>@(Localizer["ErrorSendingOTP"]?.Value ?? "Error sending verification code. Please try again.")').show();
+                            $sendOtpBtn.prop('disabled', false).html('<i class="bi bi-send @(isRtl ? "ms-2" : "me-2")"></i>@(Localizer["SendVerificationCode"]?.Value ?? "Send Verification Code")');
+                        }
+                    });
+                });
+                
+                // Verify OTP
+                $verifyOtpBtn.on('click', function() {
+                    var email = $emailField.val() ? $emailField.val().trim() : '';
+                    var otp = $otpInput.val() ? $otpInput.val().trim() : '';
+                    
+                    if (!otp || otp.length !== 6) {
+                        $otpVerifyMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle @(isRtl ? "ms-1" : "me-1")"></i>@(Localizer["PleaseEnterValidOTP"]?.Value ?? "Please enter a valid 6-digit code")').show();
+                        return;
+                    }
+                    
+                    $verifyOtpBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm @(isRtl ? "ms-2" : "me-2")"></span>@(Localizer["Verifying"]?.Value ?? "Verifying")...');
+                    $otpVerifyMessage.hide();
+                    
+                    $.ajax({
+                        url: '/Customer/ServiceSubscription/VerifyOtp',
+                        method: 'POST',
+                        data: { email: email, otp: otp },
+                        success: function(response) {
+                            if (response.success) {
+                                $otpVerifyMessage.removeClass('text-danger').addClass('text-success').html('<i class="bi bi-check-circle @(isRtl ? "ms-1" : "me-1")"></i>' + response.message).show();
+                                showEmailVerified();
+                                isEmailVerified = true;
+                                clearResendTimer();
+                            } else {
+                                $otpVerifyMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle @(isRtl ? "ms-1" : "me-1")"></i>' + response.message).show();
+                                $verifyOtpBtn.prop('disabled', false).html('<i class="bi bi-check-circle @(isRtl ? "ms-1" : "me-1")"></i>@(Localizer["Verify"]?.Value ?? "Verify")');
+                                $otpInput.val('').focus();
+                            }
+                        },
+                        error: function() {
+                            $otpVerifyMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle @(isRtl ? "ms-1" : "me-1")"></i>@(Localizer["ErrorVerifyingOTP"]?.Value ?? "Error verifying code. Please try again.")').show();
+                            $verifyOtpBtn.prop('disabled', false).html('<i class="bi bi-check-circle @(isRtl ? "ms-1" : "me-1")"></i>@(Localizer["Verify"]?.Value ?? "Verify")');
+                        }
+                    });
+                });
+                
+                // Resend OTP
+                $resendOtpBtn.on('click', function() {
+                    if ($(this).hasClass('disabled')) return;
+                    $sendOtpBtn.click();
+                });
+                
+                // Allow Enter key to verify OTP
+                $otpInput.on('keypress', function(e) {
+                    if (e.which === 13) {
+                        $verifyOtpBtn.click();
+                    }
+                });
+                
+                // Only allow numbers in OTP input
+                $otpInput.on('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+                
+                function showOtpSendSection() {
+                    $emailVerificationSection.show();
+                    $otpSendSection.show();
+                    $otpVerifySection.hide();
+                    $emailVerifiedSection.hide();
+                    $sendOtpBtn.prop('disabled', false).html('<i class="bi bi-send @(isRtl ? "ms-2" : "me-2")"></i>@(Localizer["SendVerificationCode"]?.Value ?? "Send Verification Code")');
+                }
+                
+                function showOtpVerifySection() {
+                    $otpSendSection.hide();
+                    $otpVerifySection.show();
+                    $emailVerifiedSection.hide();
+                    $otpInput.focus();
+                    $verifyOtpBtn.prop('disabled', false).html('<i class="bi bi-check-circle @(isRtl ? "ms-1" : "me-1")"></i>@(Localizer["Verify"]?.Value ?? "Verify")');
+                }
+                
+                function showEmailVerified() {
+                    $otpSendSection.hide();
+                    $otpVerifySection.hide();
+                    $emailVerifiedSection.show();
+                    clearResendTimer();
+                }
+                
+                function resetOtpSection() {
+                    $emailVerificationSection.hide();
+                    $otpSendSection.show();
+                    $otpVerifySection.hide();
+                    $emailVerifiedSection.hide();
+                    $otpInput.val('');
+                    $otpSendMessage.hide();
+                    $otpVerifyMessage.hide();
+                    $sendOtpBtn.prop('disabled', false).html('<i class="bi bi-send @(isRtl ? "ms-2" : "me-2")"></i>@(Localizer["SendVerificationCode"]?.Value ?? "Send Verification Code")');
+                    isEmailVerified = false;
+                    clearResendTimer();
+                }
+                
+                function startResendCooldown() {
+                    clearResendTimer();
+                    $resendOtpBtn.addClass('disabled').prop('disabled', true);
+                    var seconds = resendCooldown;
+                    
+                    resendTimer = setInterval(function() {
+                        seconds--;
+                        if (seconds > 0) {
+                            $resendOtpBtn.html('<i class="bi bi-arrow-clockwise @(isRtl ? "ms-1" : "me-1")"></i>@(Localizer["ResendCode"]?.Value ?? "Resend Code") (' + seconds + 's)');
+                        } else {
+                            clearResendTimer();
+                            $resendOtpBtn.removeClass('disabled').prop('disabled', false).html('<i class="bi bi-arrow-clockwise @(isRtl ? "ms-1" : "me-1")"></i>@(Localizer["ResendCode"]?.Value ?? "Resend Code")');
+                        }
+                    }, 1000);
+                }
+                
+                function clearResendTimer() {
+                    if (resendTimer) {
+                        clearInterval(resendTimer);
+                        resendTimer = null;
+                    }
+                }
+                
+                // Show OTP section when email is valid
+                $emailField.on('blur', function() {
+                    var email = $(this).val() ? $(this).val().trim() : '';
+                    if (email && emailRegex.test(email)) {
+                        $emailVerificationSection.show();
+                    }
+                });
+                </text>
+            }
+            
+            @if (isOfflineService)
+            {
+                @:// Store translations in JavaScript variables to avoid encoding issues (defined early for use in validateForm)
+                @:var amountToPayNowText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["AmountToPayNow"]?.Value ?? "Amount to Pay Now"));
+                @:var isRequiredText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["IsRequired"]?.Value ?? "is required"));
+                @:var amountMustBeAtLeastText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["AmountMustBeAtLeast"]?.Value ?? "Amount must be at least"));
+                @:var amountCannotExceedText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["AmountCannotExceed"]?.Value ?? "Amount cannot exceed"));
+            }
+            
+            // Form validation function
+            function validateForm() {
+                var errors = [];
+                var isValid = true;
+                
+                @if (Model.IsGuest || !User.Identity.IsAuthenticated)
+                {
+                    <text>
+                    // Validate guest email
+                    var email = $('#guestEmailInput').val() ? $('#guestEmailInput').val().trim() : '';
+                    var emailValidation = null;
+                    if (!email) {
+                        errors.push('@(Localizer["EmailAddress"]?.Value ?? "Email Address") @(Localizer["IsRequired"]?.Value ?? "is required")');
+                        $('#guestEmailInput').addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        emailValidation = validateEmailFormat(email);
+                        if (!emailValidation.valid) {
+                            errors.push(emailValidation.message);
+                            $('#guestEmailInput').addClass('is-invalid');
+                            isValid = false;
+                        } else {
+                            $('#guestEmailInput').removeClass('is-invalid');
+                        }
+                    }
+                    
+                    // Check if email is verified for guest users
+                    if (email && emailValidation && emailValidation.valid && !isEmailVerified) {
+                        errors.push('@(Localizer["EmailNotVerified"]?.Value ?? "Please verify your email address before placing the order.")');
+                        isValid = false;
+                        // Scroll to email verification section
+                        setTimeout(function() {
+                            $('html, body').animate({
+                                scrollTop: $('#emailVerificationSection').offset().top - 100
+                            }, 500);
+                        }, 100);
+                    }
+                    
+                    // Validate guest name
+                    var name = $('#GuestName').val() ? $('#GuestName').val().trim() : '';
+                    if (!name) {
+                        errors.push('@(Localizer["Name"]?.Value ?? "Name") @(Localizer["IsRequired"]?.Value ?? "is required")');
+                        $('#GuestName').addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $('#GuestName').removeClass('is-invalid');
+                    }
+                    
+                    // Validate guest phone
+                    var phone = $('#GuestPhone').val() ? $('#GuestPhone').val().trim() : '';
+                    if (!phone) {
+                        errors.push('@(Localizer["Phone"]?.Value ?? "Phone") @(Localizer["IsRequired"]?.Value ?? "is required")');
+                        $('#GuestPhone').addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $('#GuestPhone').removeClass('is-invalid');
+                    }
+                    </text>
+                }
+                
+                // Validate payment method (skip for free subscriptions)
+                var isFreeSubscription = @(Model.TotalAmount <= 0.01m ? "true" : "false");
+                if (!isFreeSubscription) {
+                    var paymentMethod = $('input[name="PaymentMethod"]:checked').val();
+                    if (!paymentMethod) {
+                        errors.push('@(Localizer["PaymentMethod"]?.Value ?? "Payment Method") @(Localizer["IsRequired"]?.Value ?? "is required")');
+                        isValid = false;
+                        // Highlight payment method section
+                        $('.payment-method-section').addClass('border border-danger rounded p-2');
+                    } else {
+                        $('.payment-method-section').removeClass('border border-danger rounded p-2');
+                    }
+                }
+                
+                @if (isOfflineService)
+                {
+                    @:// Validate custom amount for offline services
+                    @:var customAmount = parseFloat($('#CustomAmount').val()) || 0;
+                    @:var minAmount = @minAmountJs;
+                    @:var maxAmount = @maxAmountJs;
+                    @:var minFormatted = '@minAmountFormatted';
+                    @:var maxFormatted = '@maxAmountFormatted';
+                    @:
+                    @:if (!customAmount || customAmount <= 0) {
+                    @:    errors.push((typeof amountToPayNowText !== 'undefined' ? amountToPayNowText : '@(Localizer["AmountToPayNow"]?.Value ?? "Amount to Pay Now")') + ' ' + (typeof isRequiredText !== 'undefined' ? isRequiredText : '@(Localizer["IsRequired"]?.Value ?? "is required")'));
+                    @:    $('#CustomAmount').addClass('is-invalid');
+                    @:    isValid = false;
+                    @:} else if (customAmount < minAmount) {
+                    @:    errors.push((typeof amountMustBeAtLeastText !== 'undefined' ? amountMustBeAtLeastText : '@(Localizer["AmountMustBeAtLeast"]?.Value ?? "Amount must be at least")') + ' ' + minFormatted);
+                    @:    $('#CustomAmount').addClass('is-invalid');
+                    @:    isValid = false;
+                    @:} else if (customAmount > maxAmount) {
+                    @:    errors.push((typeof amountCannotExceedText !== 'undefined' ? amountCannotExceedText : '@(Localizer["AmountCannotExceed"]?.Value ?? "Amount cannot exceed")') + ' ' + maxFormatted);
+                    @:    $('#CustomAmount').addClass('is-invalid');
+                    @:    isValid = false;
+                    @:} else {
+                    @:    $('#CustomAmount').removeClass('is-invalid');
+                    @:}
+                }
+                
+                return { isValid: isValid, errors: errors };
+            }
+            
+            // Real-time validation for form fields
+            @if (Model.IsGuest || !User.Identity.IsAuthenticated)
+            {
+                <text>
+                $('#GuestName').on('blur', function() {
+                    var name = $(this).val() ? $(this).val().trim() : '';
+                    if (!name) {
+                        $(this).addClass('is-invalid');
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+                
+                $('#GuestPhone').on('blur', function() {
+                    var phone = $(this).val() ? $(this).val().trim() : '';
+                    if (!phone) {
+                        $(this).addClass('is-invalid');
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+                </text>
+            }
+            
+            $('input[name="PaymentMethod"]').on('change', function() {
+                $('.payment-method-section').removeClass('border border-danger rounded p-2');
+            });
+            
+            // Promo code application
+            var appliedPromoCode = null;
+            var originalTotalAmount = @Model.TotalAmount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            var originalDiscountAmount = @Model.DiscountAmount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            
+            // Test if button exists and jQuery is working
+            console.log('jQuery version:', typeof jQuery !== 'undefined' ? jQuery.fn.jquery : 'NOT LOADED');
+            var testBtn = document.getElementById('applyPromoBtn');
+            console.log('Button element found:', testBtn !== null);
+            console.log('Button element:', testBtn);
+            
+            // Promo code apply button handler - use event delegation
+            $(document).on('click', '#applyPromoBtn', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                console.log('Apply promo button clicked');
+                
+                var promoCode = $('#PromoCode').val() ? $('#PromoCode').val().trim() : '';
+                console.log('Promo code:', promoCode);
+                
+                if (!promoCode) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '@(Localizer["ValidationError"]?.Value ?? "Validation Error")',
+                        text: '@(Localizer["PleaseEnterPromoCode"]?.Value ?? "Please enter a promo code")',
+                        confirmButtonText: translations.OK
+                    });
+                    return;
+                }
+                
+                var $btn = $(this);
+                var originalHtml = $btn.html();
+                $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm @(isRtl ? "ms-1" : "me-1")" role="status"></span>@(Localizer["Applying"]?.Value ?? "Applying")...');
+                
+                console.log('Sending AJAX request to validate promo code');
+                
+                $.ajax({
+                    url: '@Url.Action("ValidatePromoCode", "ServiceSubscription", new { area = "Customer" })',
+                    method: 'POST',
+                    data: {
+                        promoCode: promoCode,
+                        serviceId: @Model.Service.Id,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    beforeSend: function() {
+                        console.log('AJAX request started');
+                    },
+                    success: function(response) {
+                        console.log('AJAX response received:', response);
+                        if (response.success) {
+                            appliedPromoCode = promoCode;
+                            
+                            // Update pricing display
+                            var baseAmount = parseFloat(response.baseAmount) || originalTotalAmount;
+                            var discountAmount = parseFloat(response.discountAmount) || 0;
+                            var finalAmount = parseFloat(response.finalAmount) || originalTotalAmount;
+                            
+                            // Update discount row
+                            var discountRow = $('.pricing-summary .price-row.discount');
+                            $('#discountAmountDisplay').text('-' + formatCurrency(discountAmount));
+                            discountRow.show();
+                            
+                            // Update total amount
+                            $('#totalAmountDisplay').text(formatCurrency(finalAmount));
+                            
+                            // Update promo code message
+                            var promoCodeAppliedText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["PromoCodeApplied"]?.Value ?? "Promo Code Applied"));
+                            var removeText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["Remove"]?.Value ?? "Remove"));
+                            var iconMargin = '@(isRtl ? "ms-2" : "me-2")';
+                            var buttonMargin = '@(isRtl ? "ms-2" : "me-2")';
+                            
+                            $('#promoCodeMessage').html(
+                                '<div class="alert alert-success"><i class="bi bi-check-circle ' + iconMargin + '"></i>' +
+                                '<strong>' + promoCodeAppliedText + ':</strong> ' + 
+                                promoCode + ' - ' + response.discountText + 
+                                ' <button type="button" class="btn btn-sm btn-link p-0 ' + buttonMargin + '" id="removePromoBtn" style="text-decoration: none;">' +
+                                '<i class="bi bi-x-circle"></i> ' + removeText + '</button></div>'
+                            );
+                            
+                            // Update custom amount max if offline service
+                            @if (isOfflineService)
+                            {
+                                @:var newMaxAmount = finalAmount;
+                                @if (Model.Service.OfflinePaymentPercent.HasValue)
+                                {
+                                    @:var percentValue = @Model.Service.OfflinePaymentPercent.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                                    @:var newMinAmount = newMaxAmount * (percentValue / 100);
+                                }
+                                else
+                                {
+                                    @:var newMinAmount = @Model.MinAmountRequired.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                                }
+                                @:$('#CustomAmount').attr('data-max-amount', newMaxAmount);
+                                @:$('#CustomAmount').attr('data-max-formatted', formatCurrency(newMaxAmount));
+                                @:if (parseFloat($('#CustomAmount').val()) > newMaxAmount) {
+                                @:    $('#CustomAmount').val(newMaxAmount.toFixed(2));
+                                @:}
+                            }
+                            
+                            Swal.fire({
+                                icon: 'success',
+                                title: '@(Localizer["Success"]?.Value ?? "Success")',
+                                text: response.message,
+                                confirmButtonText: translations.OK,
+                                timer: 2000,
+                                timerProgressBar: true
+                            });
+                        } else {
+                            var errorIconMargin = '@(isRtl ? "ms-2" : "me-2")';
+                            var errorTitle = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["Error"]?.Value ?? "Error"));
+                            $('#promoCodeMessage').html(
+                                '<div class="alert alert-danger"><i class="bi bi-exclamation-circle ' + errorIconMargin + '"></i>' + response.message + '</div>'
+                            );
+                            
+                            Swal.fire({
+                                icon: 'error',
+                                title: errorTitle,
+                                text: response.message,
+                                confirmButtonText: translations.OK
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Promo code validation error:', error);
+                        var errorMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["AnErrorOccurredPleaseTryAgain"]?.Value ?? "An error occurred. Please try again."));
+                        var errorIconMargin = '@(isRtl ? "ms-2" : "me-2")';
+                        $('#promoCodeMessage').html(
+                            '<div class="alert alert-danger"><i class="bi bi-exclamation-circle ' + errorIconMargin + '"></i>' + errorMessage + '</div>'
+                        );
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: translations.Error,
+                            text: translations.AnErrorOccurredProcessing,
+                            confirmButtonText: translations.OK
+                        });
+                    },
+                    complete: function() {
+                        $btn.prop('disabled', false).html(originalHtml);
+                    }
+                });
+            });
+            
+            // Remove promo code
+            $(document).on('click', '#removePromoBtn', function() {
+                appliedPromoCode = null;
+                $('#PromoCode').val('');
+                
+                // Restore original pricing
+                var discountRow = $('.pricing-summary .price-row.discount');
+                discountRow.hide();
+                
+                $('#totalAmountDisplay').text(formatCurrency(originalTotalAmount));
+                
+                // Restore custom amount max if offline service
+                @if (isOfflineService)
+                {
+                    @:var originalMaxAmount = @Model.TotalAmount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                    @:$('#CustomAmount').attr('data-max-amount', originalMaxAmount);
+                    @:$('#CustomAmount').attr('data-max-formatted', '@formatCurrency(Model.TotalAmount)');
+                    @:if (parseFloat($('#CustomAmount').val()) > parseFloat(originalMaxAmount)) {
+                    @:    $('#CustomAmount').val(parseFloat(originalMaxAmount).toFixed(2));
+                    @:}
+                }
+                
+                $('#promoCodeMessage').html('');
+            });
+            
+            // Format currency helper function (matches server-side format)
+            function formatCurrency(amount) {
+                var currencySymbol = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(currencySymbol));
+                var formatted = parseFloat(amount).toFixed(2).replace('.', ',');
+                return currencySymbol + ' ' + formatted;
+            }
+            
+            @if (isOfflineService)
+            {
+                @:// Initialize with minimum amount on page load
+                @:$(document).ready(function() {
+                @:    var $amountInput = $('#CustomAmount');
+                @:    var minAmount = parseFloat($amountInput.data('min-amount')) || @minAmountJs;
+                @:    if (!$amountInput.val() || parseFloat($amountInput.val()) <= 0) {
+                @:        $amountInput.val(minAmount.toFixed(2));
+                @:    }
+                @:});
+                @:
+                @:// Prevent all browser validation alerts
+                @:$('#CustomAmount').on('invalid', function(e) {
+                @:    e.preventDefault();
+                @:    e.stopPropagation();
+                @:    return false;
+                @:});
+                @:
+                @:$('#CustomAmount').on('blur', function() {
+                @:    var $input = $(this);
+                @:    var amount = parseFloat($input.val()) || 0;
+                @:    var minAmount = parseFloat($input.data('min-amount')) || @minAmountJs;
+                @:    var maxAmount = parseFloat($input.data('max-amount')) || @maxAmountJs;
+                @:    var minFormatted = $input.data('min-formatted') || '@minAmountFormatted';
+                @:    var maxFormatted = $input.data('max-formatted') || '@maxAmountFormatted';
+                @:    var $validationMsg = $('#customAmountValidationMessage');
+                @:    var errorMessage = '';
+                @:    var showAlert = false;
+                @:    
+                @:    if (!amount || amount <= 0) {
+                @:        errorMessage = amountToPayNowText + ' ' + isRequiredText;
+                @:        $input.addClass('is-invalid');
+                @:        $validationMsg.text(errorMessage).show();
+                @:        showAlert = true;
+                @:    } else if (amount < minAmount) {
+                @:        errorMessage = amountMustBeAtLeastText + ' ' + minFormatted;
+                @:        $input.addClass('is-invalid');
+                @:        $validationMsg.text(errorMessage).show();
+                @:        showAlert = true;
+                @:    } else if (amount > maxAmount) {
+                @:        errorMessage = amountCannotExceedText + ' ' + maxFormatted;
+                @:        $input.addClass('is-invalid');
+                @:        $validationMsg.text(errorMessage).show();
+                @:        showAlert = true;
+                @:    } else {
+                @:        $input.removeClass('is-invalid');
+                @:        $validationMsg.hide();
+                @:    }
+                @:    
+                @:    // Show SweetAlert if there's an error
+                @:    if (showAlert && errorMessage) {
+                @:        Swal.fire({
+                @:            icon: 'error',
+                @:            title: translations.ValidationError || '@(Localizer["ValidationError"]?.Value ?? "Validation Error")',
+                @:            text: errorMessage,
+                @:            confirmButtonText: translations.OK,
+                @:            confirmButtonColor: '#dc2626',
+                @:            allowOutsideClick: true,
+                @:            allowEscapeKey: true
+                @:        });
+                @:    }
+                @:});
+                @:
+                @:// Clear validation on input
+                @:$('#CustomAmount').on('input', function() {
+                @:    var $input = $(this);
+                @:    var amount = parseFloat($input.val()) || 0;
+                @:    var minAmount = parseFloat($input.data('min-amount')) || @minAmountJs;
+                @:    var maxAmount = parseFloat($input.data('max-amount')) || @maxAmountJs;
+                @:    
+                @:    // Clear validation on input if valid
+                @:    if (amount > 0 && amount >= minAmount && amount <= maxAmount) {
+                @:        $input.removeClass('is-invalid');
+                @:        $('#customAmountValidationMessage').hide();
+                @:    }
+                @:});
+                @:
+                @:// Prevent HTML5 validation alerts
+                @:$('#CustomAmount').on('invalid', function(e) {
+                @:    e.preventDefault();
+                @:    var $input = $(this);
+                @:    var amount = parseFloat($input.val()) || 0;
+                @:    var minAmount = parseFloat($input.data('min-amount')) || @minAmountJs;
+                @:    var maxAmount = parseFloat($input.data('max-amount')) || @maxAmountJs;
+                @:    var minFormatted = $input.data('min-formatted') || '@minAmountFormatted';
+                @:    var maxFormatted = $input.data('max-formatted') || '@maxAmountFormatted';
+                @:    var errorMessage = '';
+                @:    
+                @:    if (!amount || amount <= 0) {
+                @:        errorMessage = amountToPayNowText + ' ' + isRequiredText;
+                @:    } else if (amount < minAmount) {
+                @:        errorMessage = amountMustBeAtLeastText + ' ' + minFormatted;
+                @:    } else if (amount > maxAmount) {
+                @:        errorMessage = amountCannotExceedText + ' ' + maxFormatted;
+                @:    }
+                @:    
+                @:    if (errorMessage) {
+                @:        Swal.fire({
+                @:            icon: 'error',
+                @:            title: translations.ValidationError || '@(Localizer["ValidationError"]?.Value ?? "Validation Error")',
+                @:            text: errorMessage,
+                @:            confirmButtonText: translations.OK,
+                @:            confirmButtonColor: '#dc2626'
+                @:        });
+                @:    }
+                @:});
+            }
+            
+            // Initialize CustomAmount with default value on page load
+            @if (isOfflineService)
+            {
+                @:var $amountInput = $('#CustomAmount');
+                @:if ($amountInput.length > 0) {
+                @:    var minAmount = parseFloat($amountInput.data('min-amount')) || @minAmountJs;
+                @:    var currentValue = parseFloat($amountInput.val());
+                @:    if (!currentValue || currentValue <= 0 || isNaN(currentValue)) {
+                @:        $amountInput.val(minAmount.toFixed(2));
+                @:    }
+                @:}
+            }
+            
+            // Prevent HTML5 validation alerts - disable browser's native validation
+            var $form = $('#serviceOrderForm');
+            $form[0].setAttribute('novalidate', 'novalidate');
+            $form[0].noValidate = true;
+            
+            // Prevent browser validation on all inputs
+            $form.find('input[type="number"], input[required]').each(function() {
+                $(this).on('invalid', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                });
+            });
+            
+            // Form submission via AJAX
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Validate form before submission
+                var validation = validateForm();
+                
+                if (!validation.isValid) {
+                    // Show validation errors
+                    var isRtl = '@(isRtl ? "true" : "false")' === 'true';
+                    var textAlign = isRtl ? 'right' : 'left';
+                    var paddingDir = isRtl ? 'padding-right' : 'padding-left';
+                    var errorMessage = '<div style="text-align: ' + textAlign + ';"><strong>@(Localizer["PleaseFixTheFollowingErrors"]?.Value ?? "Please fix the following errors:")</strong><ul style="margin-top: 10px; ' + paddingDir + ': 20px;">';
+                    validation.errors.forEach(function(error) {
+                        errorMessage += '<li>' + error + '</li>';
+                    });
+                    errorMessage += '</ul></div>';
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: '@(Localizer["ValidationError"]?.Value ?? "Validation Error")',
+                        html: errorMessage,
+                        confirmButtonText: translations.OK,
+                        confirmButtonColor: '#dc2626'
+                    });
+                    
+                    // Scroll to first error field
+                    var firstError = $('.is-invalid').first();
+                    if (firstError.length) {
+                        $('html, body').animate({
+                            scrollTop: firstError.offset().top - 100
+                        }, 500);
+                        firstError.focus();
+                    }
+                    
+                    return false;
+                }
+                
+                var $form = $(this);
+                var $btn = $('#placeOrderBtn');
+                var $btnText = $btn.find('.btn-text');
+                var $btnLoader = $btn.find('.btn-loader');
+                var originalText = $btnText.text();
+                
+                // Disable button and show loader
+                $btn.prop('disabled', true);
+                $btnText.hide();
+                $btnLoader.show();
+                
+                // Get form data
+                var formData = $form.serialize();
+                
+                // Submit via AJAX
+                $.ajax({
+                    url: $form.attr('action'),
+                    method: 'POST',
+                    data: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        if (response.success === true) {
+                            // Handle free subscription (100% discount)
+                            if (response.paymentMethod === 'FREE' && response.redirectUrl) {
+                                // Redirect to payment success page for free subscriptions
+                                window.location.href = response.redirectUrl;
+                                return;
+                            }
+                            
+                            // Handle Geidea v2 HPP payment
+                            if (response.paymentMethod === 'Geidea' && response.sessionId) {
+                                // Store purchaseId for redirect after payment
+                                var purchaseId = response.purchaseId;
+                                // Use Geidea v2 HPP JavaScript library
+                                initiateGeideaPayment(response.sessionId, purchaseId, function(success) {
+                                    if (success && purchaseId) {
+                                        // Payment completed successfully, redirect to payment success page
+                                        window.location.href = '@Url.Action("PaymentSuccess", "ServiceSubscription")?purchaseId=' + purchaseId;
+                                    } else {
+                                        // Re-enable button and restore text
+                                        $btn.prop('disabled', false);
+                                        $btnLoader.hide();
+                                        $btnText.text(originalText).show();
+                                    }
+                                });
+                            } else if (response.redirectUrl) {
+                                // Redirect to payment URL for payment methods that redirect (Tamara, Tabby)
+                                window.location.href = response.redirectUrl;
+                            } else {
+                                // Unexpected response format
+                                window.location.reload();
+                            }
+                        } else {
+                            // Error response
+                            Swal.fire({
+                                icon: 'error',
+                                title: translations.Error,
+                                text: response.error || translations.AnErrorOccurred,
+                                confirmButtonText: translations.OK
+                            });
+                            // Re-enable button and restore text
+                            $btn.prop('disabled', false);
+                            $btnLoader.hide();
+                            $btnText.text(originalText).show();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: translations.Error,
+                            text: translations.AnErrorOccurredProcessing,
+                            confirmButtonText: translations.OK
+                        });
+                        // Re-enable button and restore text
+                        $btn.prop('disabled', false);
+                        $btnLoader.hide();
+                        $btnText.text(originalText).show();
+                    }
+                });
+            });
+            
+            @if (isOfflineService)
+            {
+                @:// Validate custom amount for offline services
+                @:var minAmount = @minAmountJs;
+                @:var maxAmount = @maxAmountJs;
+                @:var minAmountFormatted = '@minAmountFormatted';
+                @:var maxAmountFormatted = '@maxAmountFormatted';
+                @:
+                @:$('#CustomAmount').on('blur', function() {
+                @:    var amount = parseFloat($(this).val()) || 0;
+                @:    if (amount < minAmount) {
+                @:        $(this).addClass('is-invalid');
+                // @:        alert(translations.AmountMustBeAtLeast + ' ' + minAmountFormatted);
+                @:    } else if (amount > maxAmount) {
+                @:        $(this).addClass('is-invalid');
+                // @:        alert(translations.AmountCannotExceed + ' ' + maxAmountFormatted);
+                @:    } else {
+                @:        $(this).removeClass('is-invalid');
+                @:    }
+                @:});
+            }
+            
+            @if (tamaraAvailable && !string.IsNullOrEmpty(tamaraPublicKey))
+            {
+                <text>
+                // Tamara widget initialization
+                if (typeof Tamara !== 'undefined') {
+                    Tamara.init();
+                }
+                </text>
+            }
+        });
+        
+        // Geidea v2 HPP Payment Integration
+        function initiateGeideaPayment(sessionId, purchaseId, callback) {
+            // Load Geidea HPP v2 library if not already loaded
+            if (typeof GeideaCheckout === 'undefined') {
+                var script = document.createElement('script');
+                script.src = 'https://payments.geidea.ae/hpp/geideaCheckout.min.js';
+                script.onload = function() {
+                    startGeideaPayment(sessionId, purchaseId, callback);
+                };
+                script.onerror = function() {
+                    console.log('initiateGeideaPayment');
+                    Swal.fire({
+                        icon: 'error',
+                        title: translations.PaymentError,
+                        text: translations.FailedToLoadPaymentLibrary,
+                        confirmButtonText: translations.OK
+                    });
+                    if (callback) callback(false);
+                };
+                document.head.appendChild(script);
+            } else {
+                startGeideaPayment(sessionId, purchaseId, callback);
+            }
+        }
+
+        function startGeideaPayment(sessionId, purchaseId, callback) {
+            try {
+                // Initialize GeideaCheckout with callback handlers
+                const payment = new GeideaCheckout(
+                    function onSuccess(data) {
+                        // Payment successful
+                        console.log('Geidea payment success', data);
+                        if (callback) callback(true);
+                    },
+                    function onError(error) {
+                        // Payment error - extract all available error information
+                        console.error('Geidea payment error', error);
+                        
+                        // Build detailed error message
+                        let errorMessage = translations.PaymentFailedPleaseTryAgain;
+                        let errorDetails = [];
+                        
+                        if (error) {
+                            // Extract error message
+                            if (error.message) {
+                                errorMessage = error.message;
+                            } else if (typeof error === 'string') {
+                                errorMessage = error;
+                            } else if (error.error) {
+                                errorMessage = error.error;
+                            } else if (error.errorMessage) {
+                                errorMessage = error.errorMessage;
+                            }
+                            
+                            // Extract additional error details
+                            if (error.code) {
+                                errorDetails.push(translations.ErrorCode + ': ' + error.code);
+                            }
+                            if (error.status) {
+                                errorDetails.push(translations.Status + ': ' + error.status);
+                            }
+                            if (error.statusCode) {
+                                errorDetails.push(translations.StatusCode + ': ' + error.statusCode);
+                            }
+                            if (error.responseCode) {
+                                errorDetails.push(translations.ResponseCode + ': ' + error.responseCode);
+                            }
+                            if (error.detailedResponseCode) {
+                                errorDetails.push(translations.DetailedResponseCode + ': ' + error.detailedResponseCode);
+                            }
+                            if (error.detailedResponseMessage) {
+                                errorDetails.push(translations.Details + ': ' + error.detailedResponseMessage);
+                            }
+                            if (error.responseMessage) {
+                                errorDetails.push(translations.Response + ': ' + error.responseMessage);
+                            }
+                            
+                            // Log full error object for debugging
+                            console.error('Full Geidea error object:', JSON.stringify(error, null, 2));
+                        }
+                        
+                        // Build HTML content for SweetAlert
+                        let htmlContent = '<div style="text-align: left;">' +
+                            '<p style="margin-bottom: 10px; font-weight: 600; color: #dc2626;">' + errorMessage + '</p>';
+                        
+                        if (errorDetails.length > 0) {
+                            htmlContent += '<div style="margin-top: 15px; padding: 10px; background-color: #fef2f2; border-radius: 6px; border-left: 3px solid #dc2626;">' +
+                                '<p style="margin: 0 0 8px 0; font-weight: 600; color: #991b1b; font-size: 0.875rem;">' + translations.ErrorDetails + ':</p>' +
+                                '<ul style="margin: 0; padding-left: 20px; color: #7f1d1d; font-size: 0.875rem;">';
+                            errorDetails.forEach(function(detail) {
+                                htmlContent += '<li style="margin-bottom: 4px;">' + detail + '</li>';
+                            });
+                            htmlContent += '</ul></div>';
+                        }
+                        htmlContent += '</div>';
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: translations.PaymentFailed,
+                            html: htmlContent,
+                            confirmButtonText: translations.OK,
+                            confirmButtonColor: '#dc2626',
+                            width: '500px'
+                        });
+                        if (callback) callback(false);
+                    },
+                    function onCancel() {
+                        // Payment cancelled
+                        console.log('Geidea payment cancelled');
+                        Swal.fire({
+                            icon: 'info',
+                            title: translations.PaymentCancelled,
+                            text: translations.PaymentWasCancelled,
+                            confirmButtonText: translations.OK
+                        });
+                        if (callback) callback(false);
+                    }
+                );
+
+                // Start payment with sessionId
+                payment.startPayment(sessionId);
+            } catch (error) {
+                console.error('Error initiating Geidea payment:', error);
+                let errorMessage = translations.FailedToStartPayment;
+                if (error && error.message) {
+                    errorMessage = error.message;
+                }
+                Swal.fire({
+                    icon: 'error',
+                    title: translations.PaymentError,
+                    html: '<div style="text-align: left;">' +
+                        '<p style="margin-bottom: 0;">' + errorMessage + '</p>' +
+                        (error && error.stack ? '<p style="margin-top: 10px; font-size: 0.75rem; color: #6b7280;">' + translations.TechnicalDetailsLogged + '</p>' : '') +
+                        '</div>',
+                    confirmButtonText: translations.OK,
+                    confirmButtonColor: '#dc2626'
+                });
+                if (callback) callback(false);
+            }
+        }
+    </script>
+}

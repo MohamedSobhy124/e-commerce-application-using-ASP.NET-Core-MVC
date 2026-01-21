@@ -4,22 +4,23 @@
 @inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
 
 @{
-    ViewData["Title"] = Localizer["ServiceSubscriptions"];
+    ViewData["Title"] = Localizer["ServiceSubscriptions"] ?? "Service Subscriptions";
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var isRtl = currentCulture.StartsWith("ar");
     
     // Format currency with language-specific symbol
     Func<decimal, string> formatCurrency = (amount) => $"{currencySymbol} {amount.ToString("N2", System.Globalization.CultureInfo.InvariantCulture).Replace(".", ",")}";
 }
 
-<div class="container py-5">
+<div class="container py-5" dir="@(isRtl ? "rtl" : "ltr")">
     <div class="row mb-5">
         <div class="col-12 text-center">
-            <h1 class="display-4 fw-bold mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                <i class="bi bi-briefcase-fill me-3"></i>@Localizer["OurServices"]
+            <h1 class="display-4 fw-bold mb-3 service-page-title">
+                <i class="bi bi-briefcase-fill @(isRtl ? "ms-3" : "me-3")"></i>@(Localizer["OurServices"] ?? "Our Services")
             </h1>
-            <p class="lead text-muted">@Localizer["ChoosePerfectServiceSubscription"]</p>
+            <p class="lead text-muted">@(Localizer["ChoosePerfectServiceSubscription"] ?? "Choose the perfect service subscription for you")</p>
         </div>
     </div>
 
@@ -27,8 +28,8 @@
     {
         <div class="row">
             <div class="col-12 text-center py-5">
-                <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
-                <p class="text-muted mt-3">@Localizer["NoServicesAvailable"]</p>
+                <i class="bi bi-inbox empty-state-icon"></i>
+                <p class="text-muted mt-3">@(Localizer["NoServicesAvailable"] ?? "No services available at the moment")</p>
             </div>
         </div>
     }
@@ -37,94 +38,163 @@
         <div class="row g-4">
             @foreach (var service in Model)
             {
+                var now = IdealWeightNutrition.Utility.DateTimeHelper.Now;
+                
+                // Try to get offers from ViewBag first
                 var activeOffers = ViewBag.Offers as IEnumerable<IdealWeightNutrition.Models.ServiceOffer> ?? Enumerable.Empty<IdealWeightNutrition.Models.ServiceOffer>();
-                var serviceOffers = activeOffers.Where(o => o.ServiceSubscriptionId == service.Id).ToList();
+                var serviceOffers = activeOffers.Where(o => 
+                    o.ServiceSubscriptionId == service.Id && 
+                    o.IsActive && 
+                    o.StartDate <= now && 
+                    o.EndDate >= now
+                ).ToList();
+                
+                // Fallback: if no offers from ViewBag, try service navigation property
+                if (!serviceOffers.Any() && service.ServiceOffers != null)
+                {
+                    serviceOffers = service.ServiceOffers.Where(o => 
+                        o.IsActive && 
+                        o.StartDate <= now && 
+                        o.EndDate >= now
+                    ).ToList();
+                }
+                
                 var hasOffer = serviceOffers.Any();
                 var bestOffer = serviceOffers.OrderByDescending(o => o.DiscountValue).FirstOrDefault();
 
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="service-card h-100">
-                        <div class="service-card-header">
-                            @{
-                                var serviceImages = service.ServiceImages != null && service.ServiceImages.Any() 
-                                    ? service.ServiceImages.OrderBy(si => si.DisplayOrder).Select(si => si.ImageUrl).ToList()
-                                    : new List<string>();
-                                
-                                // If no ServiceImages but has ImageUrl, use that
-                                if (!serviceImages.Any() && !string.IsNullOrEmpty(service.ImageUrl))
-                                {
-                                    serviceImages.Add(service.ImageUrl);
-                                }
-                            }
-                            
-                            @if (serviceImages.Count > 1)
-                            {
-                                <div id="serviceCarousel_@service.Id" class="carousel slide service-image-carousel" data-bs-ride="carousel">
-                                    <div class="carousel-inner">
-                                        @for (int i = 0; i < serviceImages.Count; i++)
-                                        {
-                                            <div class="carousel-item @(i == 0 ? "active" : "")">
-                                                <img src="@serviceImages[i]" class="service-image" alt="@service.Title - Image @(i+1)" />
-                                            </div>
-                                        }
-                                    </div>
-                                    <button class="carousel-control-prev" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="prev">
-                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">@Localizer["Previous"]</span>
-                                    </button>
-                                    <button class="carousel-control-next" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="next">
-                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">@Localizer["Next"]</span>
-                                    </button>
-                                    <div class="carousel-indicators">
-                                        @for (int i = 0; i < serviceImages.Count; i++)
-                                        {
-                                            <button type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-label="Slide @(i+1)"></button>
-                                        }
-                                    </div>
-                                </div>
-                            }
-                            else if (serviceImages.Count == 1)
-                            {
-                                <img src="@serviceImages[0]" class="service-image" alt="@service.Title" />
-                            }
-                            else
-                            {
-                                <div class="service-image-placeholder">
-                                    <i class="bi bi-briefcase" style="font-size: 3rem;"></i>
-                                </div>
-                            }
-                            @if (hasOffer && bestOffer != null)
-                            {
-                                <div class="offer-badge">
-                                    @if (bestOffer.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
+                        @{
+                            var serviceDetailsUrl = Url.Action("Details", "ServiceSubscription", new { area = "Customer", id = service.Id });
+                        }
+                        <a href="@serviceDetailsUrl" class="service-image-link">
+                            <div class="service-card-header">
+                                @{
+                                    var serviceImages = service.ServiceImages != null && service.ServiceImages.Any() 
+                                        ? service.ServiceImages.OrderBy(si => si.DisplayOrder).Select(si => si.ImageUrl).ToList()
+                                        : new List<string>();
+                                    
+                                    // If no ServiceImages but has ImageUrl, use that
+                                    if (!serviceImages.Any() && !string.IsNullOrEmpty(service.ImageUrl))
                                     {
-                                        <span>@bestOffer.DiscountValue% @Localizer["OFF"]</span>
+                                        serviceImages.Add(service.ImageUrl);
+                                    }
+                                }
+                                
+                                @if (serviceImages.Count > 1)
+                                {
+                                    <div id="serviceCarousel_@service.Id" class="carousel slide service-image-carousel" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            @{
+                                                var serviceTitleForAlt = currentCulture == "ar" && !string.IsNullOrEmpty(service.TitleAr) ? service.TitleAr : service.Title;
+                                            }
+                                            @for (int i = 0; i < serviceImages.Count; i++)
+                                            {
+                                                <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                    <img src="@serviceImages[i]" class="service-image" alt="@serviceTitleForAlt - @(Localizer["Image"] ?? "Image") @(i+1)" />
+                                                </div>
+                                            }
+                                        </div>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="prev" onclick="event.stopPropagation()">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">@(Localizer["Previous"] ?? "Previous")</span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="next" onclick="event.stopPropagation()">
+                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">@(Localizer["Next"] ?? "Next")</span>
+                                        </button>
+                                        <div class="carousel-indicators">
+                                            @for (int i = 0; i < serviceImages.Count; i++)
+                                            {
+                                                <button type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-label="@(Localizer["Slide"] ?? "Slide") @(i+1)" onclick="event.stopPropagation()"></button>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                else if (serviceImages.Count == 1)
+                                {
+                                    var serviceTitleForAlt = currentCulture == "ar" && !string.IsNullOrEmpty(service.TitleAr) ? service.TitleAr : service.Title;
+                                    <img src="@serviceImages[0]" class="service-image" alt="@serviceTitleForAlt" />
+                                }
+                                else
+                                {
+                                    <div class="service-image-placeholder">
+                                        <i class="bi bi-briefcase" style="font-size: 3rem;"></i>
+                                    </div>
+                                }
+                                
+                                <!-- Image Overlay on Hover -->
+                                <div class="service-image-overlay">
+                                    <i class="bi bi-eye-fill"></i>
+                                    <span>@(Localizer["ViewDetails"] ?? "View Details")</span>
+                                </div>
+                                
+                                @if (hasOffer && bestOffer != null)
+                                {
+                                    decimal originalPrice = service.Price;
+                                    decimal discount = 0;
+                                    if (bestOffer.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
+                                    {
+                                        discount = originalPrice * (bestOffer.DiscountValue / 100);
                                     }
                                     else
                                     {
-                                        <span>@formatCurrency(bestOffer.DiscountValue) @Localizer["OFF"]</span>
+                                        discount = bestOffer.DiscountValue;
                                     }
-                                </div>
-                            }
-                            @if (service.ServiceType == IdealWeightNutrition.Models.ServiceType.Online)
-                            {
-                                <div class="service-type-badge online">
-                                    <i class="bi bi-globe"></i> @Localizer["Online"]
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="service-type-badge offline">
-                                    <i class="bi bi-building"></i> @Localizer["Offline"]
-                                </div>
-                            }
-                        </div>
+                                    decimal finalPrice = originalPrice - discount;
+                                    decimal discountPercent = originalPrice > 0 ? (discount / originalPrice) * 100 : 0;
+                                    
+                                    <div class="offer-badge-enhanced">
+                                        <div class="offer-badge-content">
+                                            <div class="offer-badge-icon">
+                                                <i class="bi bi-tag-fill"></i>
+                                            </div>
+                                            <div class="offer-badge-text">
+                                                @if (bestOffer.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
+                                                {
+                                                    <span class="offer-percentage">@bestOffer.DiscountValue%</span>
+                                                    <span class="offer-label">@Localizer["OFF"]</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="offer-amount">@formatCurrency(bestOffer.DiscountValue)</span>
+                                                    <span class="offer-label">@Localizer["OFF"]</span>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="offer-badge-ribbon"></div>
+                                    </div>
+                                    
+                                    <!-- Discount Savings Badge -->
+                                    <div class="discount-savings-badge">
+                                        <i class="bi bi-piggy-bank-fill"></i>
+                                        <span>@Localizer["Save"] @formatCurrency(discount)</span>
+                                    </div>
+                                }
+                                
+                                @if (service.ServiceType == IdealWeightNutrition.Models.ServiceType.Online)
+                                {
+                                    <div class="service-type-badge online">
+                                        <i class="bi bi-globe"></i> @Localizer["Online"]
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="service-type-badge offline">
+                                        <i class="bi bi-building"></i> @Localizer["Offline"]
+                                    </div>
+                                }
+                            </div>
+                        </a>
                         <div class="service-card-body">
-                            <h3 class="service-title">@service.Title</h3>
-                            @if (!string.IsNullOrEmpty(service.Description))
+                            @{
+                                var serviceTitle = currentCulture == "ar" && !string.IsNullOrEmpty(service.TitleAr) ? service.TitleAr : service.Title;
+                                var serviceDescription = currentCulture == "ar" && !string.IsNullOrEmpty(service.DescriptionAr) ? service.DescriptionAr : service.Description;
+                            }
+                            <h3 class="service-title">@serviceTitle</h3>
+                            @if (!string.IsNullOrEmpty(serviceDescription))
                             {
-                                <p class="service-description">@(service.Description.Length > 100 ? service.Description.Substring(0, 100) + "..." : service.Description)</p>
+                                <p class="service-description">@(serviceDescription.Length > 100 ? serviceDescription.Substring(0, 100) + "..." : serviceDescription)</p>
                             }
                             <div class="service-pricing">
                                 @if (hasOffer && bestOffer != null)
@@ -141,8 +211,13 @@
                                     }
                                     decimal finalPrice = originalPrice - discount;
                                     
-                                    <div class="price-original">@formatCurrency(originalPrice)</div>
-                                    <div class="price-final">@formatCurrency(finalPrice)</div>
+                                    <div class="pricing-with-discount">
+                                        <div class="price-original-wrapper">
+                                            <span class="price-original">@formatCurrency(originalPrice)</span>
+                                            <span class="discount-tag">-@(bestOffer.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage ? bestOffer.DiscountValue + "%" : formatCurrency(bestOffer.DiscountValue))</span>
+                                        </div>
+                                        <div class="price-final">@formatCurrency(finalPrice)</div>
+                                    </div>
                                 }
                                 else
                                 {
@@ -161,7 +236,7 @@
                         </div>
                         <div class="service-card-footer">
                             <a asp-action="Details" asp-route-id="@service.Id" class="btn btn-primary w-100">
-                                <i class="bi bi-arrow-right me-2"></i>@Localizer["ViewDetails"]
+                                <i class="bi bi-arrow-@(isRtl ? "left" : "right") @(isRtl ? "ms-2" : "me-2")"></i>@(Localizer["ViewDetails"] ?? "View Details")
                             </a>
                         </div>
                     </div>
@@ -174,21 +249,35 @@
 <style>
     .service-card {
         background: #ffffff;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border-radius: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         overflow: hidden;
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         border: 1px solid #e5e7eb;
+        position: relative;
     }
 
     .service-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
+        border-color: #667eea;
+    }
+
+    .service-image-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .service-image-link:hover {
+        text-decoration: none;
     }
 
     .service-card-header {
         position: relative;
-        height: 200px;
+        height: 250px;
         overflow: hidden;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
@@ -209,6 +298,46 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .service-image-link:hover .service-image {
+        transform: scale(1.1);
+    }
+
+    .service-image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 10;
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    .service-image-overlay i {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        animation: bounce 2s infinite;
+    }
+
+    .service-image-link:hover .service-image-overlay {
+        opacity: 1;
+    }
+
+    @@keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-10px); }
+        60% { transform: translateY(-5px); }
     }
 
     .service-image-carousel .carousel-control-prev,
@@ -248,18 +377,138 @@
         color: white;
     }
 
-    .offer-badge {
+    .service-page-title {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        color: #ccc;
+    }
+
+    .offer-badge-enhanced {
         position: absolute;
         top: 15px;
         right: 15px;
-        background: #ef4444;
+        z-index: 15;
+        transform: rotate(5deg);
+        transition: transform 0.3s ease;
+    }
+
+    .service-card:hover .offer-badge-enhanced {
+        transform: rotate(0deg) scale(1.1);
+    }
+
+    .offer-badge-content {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         color: white;
-        padding: 8px 15px;
+        padding: 10px 16px;
+        border-radius: 12px;
+        font-weight: 800;
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .offer-badge-icon {
+        font-size: 1.2rem;
+        animation: spin 3s linear infinite;
+    }
+
+    @@keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .offer-badge-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
+
+    .offer-percentage {
+        font-size: 1.4rem;
+        font-weight: 900;
+        letter-spacing: -1px;
+    }
+
+    .offer-amount {
+        font-size: 1.1rem;
+        font-weight: 900;
+    }
+
+    .offer-label {
+        font-size: 0.75rem;
+        opacity: 0.95;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .offer-badge-ribbon {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        width: 0;
+        height: 0;
+        border-left: 15px solid transparent;
+        border-top: 15px solid #991b1b;
+        transform: rotate(45deg);
+    }
+
+    .discount-savings-badge {
+        position: absolute;
+        bottom: 15px;
+        left: 15px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 6px 12px;
         border-radius: 20px;
+        font-size: 0.85rem;
         font-weight: 700;
-        font-size: 0.9rem;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        animation: pulse 2s infinite;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        z-index: 15;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        animation: slideInLeft 0.5s ease;
+    }
+
+    .discount-savings-badge i {
+        font-size: 1rem;
+    }
+
+    @@keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    [dir="rtl"] .discount-savings-badge {
+        left: auto;
+        right: 15px;
+        animation: slideInRight 0.5s ease;
+    }
+
+    @@keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
     }
 
     .service-type-badge {
@@ -271,6 +520,17 @@
         font-size: 0.85rem;
         font-weight: 600;
         color: white;
+        z-index: 2;
+    }
+
+    [dir="rtl"] .offer-badge-enhanced {
+        right: auto;
+        left: 15px;
+    }
+
+    [dir="rtl"] .service-type-badge {
+        left: auto;
+        right: 15px;
     }
 
     .service-type-badge.online {
@@ -282,21 +542,34 @@
     }
 
     .service-card-body {
-        padding: 25px;
+        padding: 28px;
+        background: linear-gradient(to bottom, #ffffff 0%, #f9fafb 100%);
     }
 
     .service-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 15px;
+        font-size: 1.6rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 16px;
+        line-height: 1.3;
+        transition: all 0.3s ease;
+    }
+
+    .service-card:hover .service-title {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
     .service-description {
         color: #6b7280;
         font-size: 0.95rem;
-        line-height: 1.6;
-        margin-bottom: 20px;
+        line-height: 1.7;
+        margin-bottom: 22px;
         min-height: 60px;
     }
 
@@ -304,17 +577,45 @@
         margin-bottom: 15px;
     }
 
+    .pricing-with-discount {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .price-original-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
     .price-original {
-        font-size: 1rem;
+        font-size: 1.1rem;
         color: #9ca3af;
         text-decoration: line-through;
-        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .discount-tag {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border: 1px solid #fbbf24;
+        box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
     }
 
     .price-final {
-        font-size: 2rem;
-        font-weight: 800;
-        color: #059669;
+        font-size: 2.2rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.2;
     }
 
     .offline-payment-info {
@@ -325,26 +626,106 @@
         border-left: 3px solid #3b82f6;
     }
 
+    [dir="rtl"] .offline-payment-info {
+        border-left: none;
+        border-right: 3px solid #3b82f6;
+    }
+
     .service-card-footer {
-        padding: 20px 25px;
-        background: #f9fafb;
-        border-top: 1px solid #e5e7eb;
+        padding: 22px 28px;
+        background: linear-gradient(to bottom, #f9fafb 0%, #ffffff 100%);
+        border-top: 2px solid #e5e7eb;
     }
 
     .service-card-footer .btn {
-        padding: 12px;
-        font-weight: 600;
-        border-radius: 10px;
+        padding: 14px 24px;
+        font-weight: 700;
+        font-size: 1rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .service-card-footer .btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .service-card-footer .btn:hover::before {
+        width: 300px;
+        height: 300px;
     }
 
     .service-card-footer .btn:hover {
-        transform: scale(1.05);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .service-card-footer .btn:active {
+        transform: translateY(0);
     }
 
     @@keyframes pulse {
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.05); }
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 991px) {
+        .service-card-header {
+            height: 220px;
+        }
+        
+        .service-title {
+            font-size: 1.4rem;
+        }
+        
+        .price-final {
+            font-size: 1.9rem;
+        }
+    }
+
+    @@media (max-width: 767px) {
+        .service-card-header {
+            height: 200px;
+        }
+        
+        .service-card-body {
+            padding: 20px;
+        }
+        
+        .service-card-footer {
+            padding: 18px 20px;
+        }
+        
+        .service-title {
+            font-size: 1.3rem;
+        }
+        
+        .price-final {
+            font-size: 1.7rem;
+        }
+        
+        .offer-badge-content {
+            padding: 8px 12px;
+        }
+        
+        .offer-percentage {
+            font-size: 1.2rem;
+        }
     }
 </style>
 

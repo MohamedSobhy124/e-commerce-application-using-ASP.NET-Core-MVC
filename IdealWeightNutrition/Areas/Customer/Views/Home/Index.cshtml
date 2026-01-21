@@ -9,6 +9,7 @@
 @{
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var isRtl = currentCulture.StartsWith("ar");
     ViewData["Title"] = currentCulture == "ar" 
         ? " ايديال ويت للتغذية - حلول الوزن المثالي والتغذية المتميزة في الإمارات"
         : "Ideal Weight Nutrition - Ideal Weight Solutions & Premium Nutrition UAE";
@@ -487,8 +488,13 @@
                     var hasOffer = activeOffers.Any();
                     var bestOffer = activeOffers.OrderByDescending(o => o.DiscountValue).FirstOrDefault();
 
+                        var serviceTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(service.TitleAr)) ? service.TitleAr : service.Title;
+                        var serviceDescription = (currentCulture == "ar" && !string.IsNullOrEmpty(service.DescriptionAr)) ? service.DescriptionAr : service.Description;
+                        var serviceDetailsUrl = Url.Action("Details", "ServiceSubscription", new { area = "Customer", id = service.Id });
+                    
                     <div class="service-card-home">
-                        <div class="service-card-image-wrapper">
+                        <a href="@serviceDetailsUrl" class="service-card-image-link">
+                            <div class="service-card-image-wrapper">
                             @{
                                 var serviceImages = service.ServiceImages != null && service.ServiceImages.Any() 
                                     ? service.ServiceImages.OrderBy(si => si.DisplayOrder).Select(si => si.ImageUrl).ToList()
@@ -508,7 +514,7 @@
                                         @for (int i = 0; i < serviceImages.Count; i++)
                                         {
                                             <div class="carousel-item @(i == 0 ? "active" : "")">
-                                                <img src="@serviceImages[i]" class="service-card-image" alt="@service.Title - Image @(i+1)" loading="lazy" width="400" height="300" />
+                                                <img src="@serviceImages[i]" class="service-card-image" alt="@serviceTitle - Image @(i+1)" loading="lazy" width="400" height="300" />
                                             </div>
                                         }
                                     </div>
@@ -523,14 +529,14 @@
                                     <div class="carousel-indicators">
                                         @for (int i = 0; i < serviceImages.Count; i++)
                                         {
-                                            <button type="button" data-bs-target="#homeServiceCarousel_@service.Id" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-label="Slide @(i+1)"></button>
+                                            <button type="button" data-bs-target="#homeServiceCarousel_@service.Id" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-label="Slide @(i+1)" onclick="event.stopPropagation();"></button>
                                         }
                                     </div>
                                 </div>
                             }
                             else if (serviceImages.Count == 1)
                             {
-                                <img src="@serviceImages[0]" class="service-card-image" alt="@service.Title" loading="lazy" width="400" height="300" />
+                                <img src="@serviceImages[0]" class="service-card-image" alt="@serviceTitle" loading="lazy" width="400" height="300" />
                             }
                             else
                             {
@@ -551,25 +557,31 @@
                                     }
                                 </div>
                             }
-                            @if (service.ServiceType == IdealWeightNutrition.Models.ServiceType.Online)
-                            {
-                                <div class="service-type-badge-home online">
-                                    <i class="bi bi-globe"></i> @Localizer["Online"]
+                                @if (service.ServiceType == IdealWeightNutrition.Models.ServiceType.Online)
+                                {
+                                    <div class="service-type-badge-home online">
+                                        <i class="bi bi-globe"></i> @Localizer["Online"]
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="service-type-badge-home offline">
+                                        <i class="bi bi-building"></i> @Localizer["Offline"]
+                                    </div>
+                                }
+                                
+                                <div class="service-image-overlay">
+                                    <i class="bi bi-eye"></i>
+                                    <span>@Localizer["ViewDetails"]</span>
                                 </div>
-                            }
-                            else
-                            {
-                                <div class="service-type-badge-home offline">
-                                    <i class="bi bi-building"></i> @Localizer["Offline"]
-                                </div>
-                            }
-                        </div>
+                            </div>
+                        </a>
                         <div class="service-card-content">
-                            <h3 class="service-card-title">@service.Title</h3>
-                            @if (!string.IsNullOrEmpty(service.Description))
+                            <h3 class="service-card-title">@serviceTitle</h3>
+                            @if (!string.IsNullOrEmpty(serviceDescription))
                             {
                                 <p class="service-card-description">
-                                    @(service.Description.Length > 80 ? service.Description.Substring(0, 80) + "..." : service.Description)
+                                    @(serviceDescription.Length > 80 ? serviceDescription.Substring(0, 80) + "..." : serviceDescription)
                                 </p>
                             }
                             <div class="service-card-pricing">
@@ -604,9 +616,9 @@
                                     </small>
                                 </div>
                             }
-                            <a asp-area="Customer" asp-controller="ServiceSubscription" asp-action="Details" asp-route-id="@service.Id" class="service-card-btn">
-                                @Localizer["ViewDetails"]
-                                <i class="bi bi-arrow-right ms-2"></i>
+                            <a href="@serviceDetailsUrl" class="service-card-btn">
+                                @Localizer["LearnMore"]
+                                <i class="bi bi-arrow-@(isRtl ? "left" : "right") @(isRtl ? "me-2" : "ms-2")"></i>
                             </a>
                         </div>
                     </div>

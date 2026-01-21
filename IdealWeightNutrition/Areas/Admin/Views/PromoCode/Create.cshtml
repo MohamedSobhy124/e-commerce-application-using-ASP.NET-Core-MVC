@@ -158,6 +158,23 @@
                             </div>
                         </div>
 
+                        <!-- Exclude All Services -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-body">
+                                        <div class="form-check form-switch">
+                                            <input asp-for="ExcludeAllServices" class="form-check-input" type="checkbox" id="excludeAllServices" style="width: 3rem; height: 1.5rem;" checked />
+                                            <label class="form-check-label ms-2 fw-bold d-flex" for="excludeAllServices">
+                                                <i class="bi bi-briefcase text-info me-2"></i>@Localizer["ExcludeAllServices"]
+                                            </label>
+                                            <small class="form-text text-muted d-block ms-5 mt-2">@Localizer["ExcludeAllServicesDescription"]</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <hr class="my-4" />
 
                         <!-- Action Buttons -->

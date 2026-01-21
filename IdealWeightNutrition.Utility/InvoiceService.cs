@@ -389,5 +389,228 @@ namespace IdealWeightNutrition.Utility
                 //}
             });
         }
+
+        public byte[] GenerateServicePurchaseInvoicePdf(ServicePurchase servicePurchase, ApplicationUser? customer)
+        {
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(2, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(10));
+
+                    page.Header()
+                        .Element(ComposeHeader);
+
+                    page.Content()
+                        .Element(container => ComposeServicePurchaseContent(container, servicePurchase, customer));
+
+                    page.Footer()
+                        .AlignCenter()
+                        .Text(x =>
+                        {
+                            x.CurrentPageNumber();
+                            x.Span(" / ");
+                            x.TotalPages();
+                        });
+                });
+            });
+
+            return document.GeneratePdf();
+        }
+
+        private void ComposeServicePurchaseContent(IContainer container, ServicePurchase servicePurchase, ApplicationUser? customer)
+        {
+            container.Column(column =>
+            {
+                column.Spacing(25);
+
+                column.Item().Row(row =>
+                {
+                    row.RelativeItem().Column(left =>
+                    {
+                        left.Item()
+                            .Text("Bill To")
+                            .FontSize(11)
+                            .Bold()
+                            .FontColor(Colors.Grey.Darken2);
+
+                        var customerName = customer?.Name ?? servicePurchase.GuestName ?? "Customer";
+                        var customerEmail = customer?.Email ?? servicePurchase.GuestEmail ?? "";
+                        var customerPhone = customer?.PhoneNumber ?? servicePurchase.GuestPhone ?? "";
+
+                        left.Item()
+                            .PaddingTop(4)
+                            .Text(customerName)
+                            .FontSize(10)
+                            .Bold();
+
+                        if (!string.IsNullOrWhiteSpace(customerPhone))
+                        {
+                            left.Item().Text(text =>
+                            {
+                                text.DefaultTextStyle(x => x.FontSize(9));
+                                text.Span("Phone: ").SemiBold();
+                                text.Span(customerPhone);
+                            });
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(customerEmail))
+                        {
+                            left.Item().Text(text =>
+                            {
+                                text.DefaultTextStyle(x => x.FontSize(9));
+                                text.Span("Email: ").SemiBold();
+                                text.Span(customerEmail);
+                            });
+                        }
+                    });
+
+                    row.ConstantItem(220).Column(right =>
+                    {
+                        right.Item()
+                            .AlignRight()
+                            .Text("Invoice Details")
+                            .FontSize(11)
+                            .Bold()
+                            .FontColor(Colors.Grey.Darken2);
+
+                        right.Item().PaddingTop(4).AlignRight().Row(r =>
+                        {
+                            r.AutoItem().Text("Invoice No: ").FontSize(9).FontColor(Colors.Grey.Darken1);
+                            r.AutoItem().Text($"INV-SVC-{servicePurchase.Id:D6}").FontSize(9).Bold();
+                        });
+
+                        right.Item().AlignRight().Row(r =>
+                        {
+                            r.AutoItem().Text("Purchase Date: ").FontSize(9).FontColor(Colors.Grey.Darken1);
+                            r.AutoItem().Text(servicePurchase.PurchaseDate.ToString("dd MMM yyyy")).FontSize(9);
+                        });
+
+                        right.Item().AlignRight().Row(r =>
+                        {
+                            r.AutoItem().Text("Payment Status: ").FontSize(9).FontColor(Colors.Grey.Darken1);
+                            r.AutoItem().Text(servicePurchase.PaymentStatus ?? "Pending").FontSize(9).Bold();
+                        });
+                    });
+                });
+
+                column.Item()
+                    .LineHorizontal(1)
+                    .LineColor(Colors.Grey.Lighten2);
+                
+                column.Item()
+                    .Element(c => ComposeServicePurchaseTable(c, servicePurchase));
+
+                column.Item()
+                    .Element(c => ComposeServicePurchaseSummary(c, servicePurchase));
+            });
+        }
+
+        private void ComposeServicePurchaseTable(IContainer container, ServicePurchase servicePurchase)
+        {
+            container.Table(table =>
+            {
+                table.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn(3);      // Description
+                    columns.ConstantColumn(45);   // Qty
+                    columns.ConstantColumn(70);    // Price excl VAT
+                    columns.ConstantColumn(45);   // VAT rate
+                    columns.ConstantColumn(70);    // VAT amount
+                    columns.ConstantColumn(75);    // Price incl VAT
+                });
+
+                // Header
+                table.Header(header =>
+                {
+                    header.Cell().Element(CellStyle).Text("Description").Bold().FontSize(8);
+                    header.Cell().Element(CellStyle).AlignCenter().Text("Quantity").Bold().FontSize(8);
+                    header.Cell().Element(CellStyle).AlignCenter().Text("Price excl VAT (AED)").Bold().FontSize(8);
+                    header.Cell().Element(CellStyle).AlignCenter().Text("VAT rate").Bold().FontSize(8);
+                    header.Cell().Element(CellStyle).AlignRight().Text("VAT amount (AED)").Bold().FontSize(8);
+                    header.Cell().Element(CellStyle).AlignRight().Text("Price incl VAT (AED)").Bold().FontSize(8);
+                });
+
+                // Service item
+                var serviceName = servicePurchase.ServiceSubscription?.Title ?? "Service Subscription";
+                var vatRate = 0.05m;
+                var totalAmountInclVat = servicePurchase.TotalAmount;
+                var vatAmount = totalAmountInclVat * (vatRate / (1 + vatRate));
+                var priceExclVat = totalAmountInclVat - vatAmount;
+
+                table.Cell().Element(CellStyle).Text(serviceName).FontSize(7);
+                table.Cell().Element(CellStyle).AlignCenter().Text("1").FontSize(7);
+                table.Cell().Element(CellStyle).AlignCenter().Text($"AED {priceExclVat:N2}").FontSize(7);
+                table.Cell().Element(CellStyle).AlignCenter().Text($"{vatRate * 100:F2}%").FontSize(9);
+                table.Cell().Element(CellStyle).AlignCenter().Text($"AED {vatAmount:N2}").FontSize(7);
+                table.Cell().Element(CellStyle).AlignRight().Text($"AED {totalAmountInclVat:N2}").FontSize(7);
+            });
+        }
+
+        private void ComposeServicePurchaseSummary(IContainer container, ServicePurchase servicePurchase)
+        {
+            container.Column(column =>
+            {
+                column.Spacing(5);
+
+                var vatRate = 0.05m;
+                var totalAmountInclVat = servicePurchase.TotalAmount;
+                var discount = servicePurchase.DiscountAmount;
+                var taxableAmountInclVat = totalAmountInclVat - discount;
+                var vatAmount = taxableAmountInclVat * vatRate / (1 + vatRate);
+                var subtotalExclVat = taxableAmountInclVat - vatAmount;
+
+                column.Item().AlignRight().Row(row =>
+                {
+                    row.ConstantItem(150).Text("Subtotal:").FontSize(10).FontColor(Colors.Grey.Darken1);
+                    row.ConstantItem(100).AlignRight().Text($"AED {subtotalExclVat:N2}").FontSize(10);
+                });
+
+                // Discount (if any)
+                if (discount > 0)
+                {
+                    column.Item().AlignRight().Row(row =>
+                    {
+                        row.ConstantItem(150).Text("Discount:").FontSize(10).FontColor(Colors.Green.Darken2);
+                        row.ConstantItem(100).AlignRight().Text($"- AED {discount:N2}").FontSize(10).FontColor(Colors.Green.Darken2);
+                    });
+                }
+
+                column.Item().AlignRight().Row(row =>
+                {
+                    row.ConstantItem(150).Text($"VAT ({vatRate * 100}%):").FontSize(10).FontColor(Colors.Grey.Darken1);
+                    row.ConstantItem(100).AlignRight().Text($"AED {vatAmount:N2}").FontSize(10);
+                });
+
+                column.Item().PaddingTop(10).AlignRight().Row(row =>
+                {
+                    row.ConstantItem(150).Text("Total Amount:").FontSize(12).Bold().FontColor(Colors.Blue.Darken3);
+                    row.ConstantItem(100).AlignRight().Text($"AED {totalAmountInclVat:N2}").FontSize(12).Bold().FontColor(Colors.Blue.Darken3);
+                });
+
+                // Amount Paid (for offline services)
+                if (servicePurchase.ServiceSubscription?.ServiceType == ServiceType.Offline)
+                {
+                    column.Item().PaddingTop(10).AlignRight().Row(row =>
+                    {
+                        row.ConstantItem(150).Text("Amount Paid:").FontSize(10).FontColor(Colors.Grey.Darken1);
+                        row.ConstantItem(100).AlignRight().Text($"AED {servicePurchase.AmountPaid:N2}").FontSize(10).Bold();
+                    });
+
+                    var remainingAmount = totalAmountInclVat - servicePurchase.AmountPaid;
+                    if (remainingAmount > 0)
+                    {
+                        column.Item().AlignRight().Row(row =>
+                        {
+                            row.ConstantItem(150).Text("Remaining Amount:").FontSize(10).FontColor(Colors.Orange.Darken2);
+                            row.ConstantItem(100).AlignRight().Text($"AED {remainingAmount:N2}").FontSize(10).Bold().FontColor(Colors.Orange.Darken2);
+                        });
+                    }
+                }
+            });
+        }
     }
 }

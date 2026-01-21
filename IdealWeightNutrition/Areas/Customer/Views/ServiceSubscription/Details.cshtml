@@ -4,19 +4,20 @@
 @inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
 
 @{
-    ViewData["Title"] = Model.Title;
+    // ViewData["Title"] is set by controller based on current language
     var activeOffers = ViewBag.ActiveOffers as IEnumerable<IdealWeightNutrition.Models.ServiceOffer> ?? Enumerable.Empty<IdealWeightNutrition.Models.ServiceOffer>();
     var promoCodes = ViewBag.PromoCode as IEnumerable<IdealWeightNutrition.Models.PromoCode> ?? Enumerable.Empty<IdealWeightNutrition.Models.PromoCode>();
     bool isGuest = !User.Identity.IsAuthenticated;
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var isRtl = currentCulture.StartsWith("ar");
     
     // Format currency with language-specific symbol
     Func<decimal, string> formatCurrency = (amount) => $"{currencySymbol} {amount.ToString("N2", System.Globalization.CultureInfo.InvariantCulture).Replace(".", ",")}";
 }
 
-<div class="container py-5">
+<div class="container py-5" dir="@(isRtl ? "rtl" : "ltr")">
     <div class="row">
         <div class="col-lg-8">
             <div class="service-detail-card mb-4">
@@ -36,32 +37,38 @@
                 {
                     <div id="serviceDetailsCarousel" class="carousel slide service-details-carousel" data-bs-ride="carousel">
                         <div class="carousel-inner">
+                            @{
+                                var serviceTitleForAlt = currentCulture == "ar" && !string.IsNullOrEmpty(Model.TitleAr) ? Model.TitleAr : Model.Title;
+                            }
                             @for (int i = 0; i < serviceImages.Count; i++)
                             {
                                 <div class="carousel-item @(i == 0 ? "active" : "")">
-                                    <img src="@serviceImages[i]" class="service-detail-image" alt="@Model.Title - Image @(i+1)" />
+                                    <img src="@serviceImages[i]" class="service-detail-image" alt="@serviceTitleForAlt - @(Localizer["Image"] ?? "Image") @(i+1)" loading="@(i == 0 ? "eager" : "lazy")" />
                                 </div>
                             }
                         </div>
                         <button class="carousel-control-prev" type="button" data-bs-target="#serviceDetailsCarousel" data-bs-slide="prev">
                             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">@Localizer["Previous"]</span>
+                            <span class="visually-hidden">@(Localizer["Previous"] ?? "Previous")</span>
                         </button>
                         <button class="carousel-control-next" type="button" data-bs-target="#serviceDetailsCarousel" data-bs-slide="next">
                             <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">@Localizer["Next"]</span>
+                            <span class="visually-hidden">@(Localizer["Next"] ?? "Next")</span>
                         </button>
                         <div class="carousel-indicators">
                             @for (int i = 0; i < serviceImages.Count; i++)
                             {
-                                <button type="button" data-bs-target="#serviceDetailsCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-label="Slide @(i+1)"></button>
+                                <button type="button" data-bs-target="#serviceDetailsCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-label="@(Localizer["Slide"] ?? "Slide") @(i+1)"></button>
                             }
                         </div>
                     </div>
                 }
                 else if (serviceImages.Count == 1)
                 {
-                    <img src="@serviceImages[0]" class="service-detail-image" alt="@Model.Title" />
+                    var serviceTitleForAlt = currentCulture == "ar" && !string.IsNullOrEmpty(Model.TitleAr) ? Model.TitleAr : Model.Title;
+                    <div class="service-detail-image-wrapper">
+                        <img src="@serviceImages[0]" class="service-detail-image" alt="@serviceTitleForAlt" loading="lazy" />
+                    </div>
                 }
                 else
                 {
@@ -71,23 +78,27 @@
                 }
                 
                 <div class="service-detail-content">
-                    <div class="d-flex align-items-center mb-3">
-                        <h1 class="service-detail-title me-3">@Model.Title</h1>
+                    @{
+                        var serviceTitle = currentCulture == "ar" && !string.IsNullOrEmpty(Model.TitleAr) ? Model.TitleAr : Model.Title;
+                        var serviceDescription = currentCulture == "ar" && !string.IsNullOrEmpty(Model.DescriptionAr) ? Model.DescriptionAr : Model.Description;
+                    }
+                    <div class="d-flex align-items-center mb-3 flex-wrap">
+                        <h1 class="service-detail-title @(isRtl ? "ms-3" : "me-3")">@serviceTitle</h1>
                         @if (Model.ServiceType == IdealWeightNutrition.Models.ServiceType.Online)
                         {
-                            <span class="badge bg-success"><i class="bi bi-globe"></i> @Localizer["OnlineService"]</span>
+                            <span class="badge bg-success"><i class="bi bi-globe"></i> @(Localizer["OnlineService"] ?? "Online Service")</span>
                         }
                         else
                         {
-                            <span class="badge bg-info"><i class="bi bi-building"></i> @Localizer["OfflineService"]</span>
+                            <span class="badge bg-info"><i class="bi bi-building"></i> @(Localizer["OfflineService"] ?? "Offline Service")</span>
                         }
                     </div>
                     
-                    @if (!string.IsNullOrEmpty(Model.Description))
+                    @if (!string.IsNullOrEmpty(serviceDescription))
                     {
                         <div class="service-description-full">
-                            <h4>@Localizer["Description"]</h4>
-                            <p>@Model.Description</p>
+                            <h4>@(Localizer["Description"] ?? "Description")</h4>
+                            <p>@serviceDescription</p>
                         </div>
                     }
                 </div>
@@ -97,7 +108,7 @@
         <div class="col-lg-4">
             <div class="service-purchase-card">
                 <div class="purchase-card-header">
-                    <h3>@Localizer["SubscriptionDetails"]</h3>
+                    <h3>@(Localizer["SubscriptionDetails"] ?? "Subscription Details")</h3>
                 </div>
                 <div class="purchase-card-body">
                     @{
@@ -124,30 +135,30 @@
 
                     <div class="pricing-section">
                         <div class="price-row">
-                            <span>@Localizer["ServicePrice"]:</span>
+                            <span>@(Localizer["ServicePrice"] ?? "Service Price"):</span>
                             <span class="fw-bold">@formatCurrency(Model.Price)</span>
                         </div>
                         @if (discountAmount > 0)
                         {
                             <div class="price-row discount">
-                                <span>@Localizer["Discount"]:</span>
+                                <span>@(Localizer["Discount"] ?? "Discount"):</span>
                                 <span class="fw-bold text-success">-@formatCurrency(discountAmount)</span>
                             </div>
                         }
                         <div class="price-row total">
-                            <span>@Localizer["TotalAmount"]:</span>
+                            <span>@(Localizer["TotalAmount"] ?? "Total Amount"):</span>
                             <span class="fw-bold fs-4 text-primary">@formatCurrency(finalPrice)</span>
                         </div>
                         @if (Model.ServiceType == IdealWeightNutrition.Models.ServiceType.Offline && Model.OfflinePaymentPercent.HasValue)
                         {
                             decimal minAmountToPay = finalPrice * (Model.OfflinePaymentPercent.Value / 100);
                             <div class="price-row payment-amount">
-                                <span>@Localizer["MinimumAmountToPayNow", Model.OfflinePaymentPercent.Value]:</span>
+                                <span>@(Localizer["MinimumAmountToPayNow", Model.OfflinePaymentPercent.Value] ?? $"Minimum Amount to Pay Now ({Model.OfflinePaymentPercent.Value}%):"):</span>
                                 <span class="fw-bold fs-5 text-danger" id="minAmountDisplay">@formatCurrency(minAmountToPay)</span>
                             </div>
                             <div class="alert alert-info mt-3">
                                 <i class="bi bi-info-circle"></i> 
-                                @Localizer["OfflinePaymentInfo", Model.OfflinePaymentPercent.Value, formatCurrency(minAmountToPay)]
+                                @(Localizer["OfflinePaymentInfo", Model.OfflinePaymentPercent.Value, formatCurrency(minAmountToPay)] ?? $"For offline services, you need to pay at least {Model.OfflinePaymentPercent.Value}% ({formatCurrency(minAmountToPay)}) now. The remaining amount will be paid at the service location.")
                             </div>
                         }
                     </div>
@@ -155,98 +166,41 @@
                     @if (activeOffers.Any())
                     {
                         <div class="offers-section mt-4">
-                            <h5><i class="bi bi-tag-fill text-warning"></i> @Localizer["ActiveOffers"]</h5>
+                            <h5><i class="bi bi-tag-fill text-warning"></i> @(Localizer["ActiveOffers"] ?? "Active Offers")</h5>
                             @foreach (var offer in activeOffers)
                             {
                                 <div class="offer-item">
                                     @if (offer.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
                                     {
-                                        <strong>@offer.DiscountValue% @Localizer["OFF"]</strong>
+                                        <strong>@offer.DiscountValue% @(Localizer["OFF"] ?? "OFF")</strong>
                                     }
                                     else
                                     {
-                                        <strong>@formatCurrency(offer.DiscountValue) @Localizer["OFF"]</strong>
+                                        <strong>@formatCurrency(offer.DiscountValue) @(Localizer["OFF"] ?? "OFF")</strong>
                                     }
-                                    <small class="text-muted d-block">@Localizer["ValidUntil"] @offer.EndDate.ToString("MMM dd, yyyy")</small>
+                                    <small class="text-muted d-block">@(Localizer["ValidUntil"] ?? "Valid Until") @offer.EndDate.ToString("MMM dd, yyyy", System.Globalization.CultureInfo.GetCultureInfo(currentCulture))</small>
                                 </div>
                             }
                         </div>
                     }
 
-                    <form asp-action="Subscribe" method="post" class="mt-4" id="subscribeForm"
-                          data-service-type="@((int)Model.ServiceType)"
-                          data-offline-percent="@(Model.OfflinePaymentPercent ?? 0)"
-                          data-final-price="@finalPrice">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="serviceId" value="@Model.Id" />
-                        @if (selectedOfferId.HasValue)
-                        {
-                            <input type="hidden" name="offerId" value="@selectedOfferId.Value" />
-                        }
-
-                        @if (isGuest)
-                        {
-                            <div class="mb-3">
-                                <label class="form-label">@Localizer["FullName"] *</label>
-                                <input type="text" name="guestName" class="form-control" required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">@Localizer["Email"] *</label>
-                                <input type="email" name="guestEmail" class="form-control" required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">@Localizer["Phone"]</label>
-                                <input type="tel" name="guestPhone" class="form-control" />
-                            </div>
-                        }
-
-                        <div class="mb-3">
-                            <label class="form-label">@Localizer["PromoCodeOptional"]</label>
-                            <input type="text" name="promoCode" class="form-control" placeholder="@Localizer["EnterPromoCode"]" />
-                        </div>
-
-                        @if (Model.ServiceType == IdealWeightNutrition.Models.ServiceType.Offline && Model.OfflinePaymentPercent.HasValue)
-                        {
-                            decimal minAmountToPay = finalPrice * (Model.OfflinePaymentPercent.Value / 100);
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">
-                                    @Localizer["AmountToPayNow"] *
-                                    <small class="text-muted">(@Localizer["Minimum"]: @formatCurrency(minAmountToPay))</small>
-                                </label>
-                                <div class="input-group input-group-lg">
-                                    <span class="input-group-text">@currencySymbol</span>
-                                    <input type="number" 
-                                           name="customAmount" 
-                                           id="customAmount" 
-                                           class="form-control" 
-                                           step="0.01" 
-                                           min="@minAmountToPay" 
-                                           max="@finalPrice"
-                                           value="@minAmountToPay"
-                                           required />
-                                </div>
-                                <div class="invalid-feedback" id="amountError" style="display: none;">
-                                    @Localizer["AmountMustBeAtLeast", formatCurrency(minAmountToPay), Model.OfflinePaymentPercent.Value]
-                                </div>
-                                <small class="form-text text-muted">
-                                    <i class="bi bi-info-circle"></i> 
-                                    @Localizer["OfflinePaymentAmountInfo", formatCurrency(finalPrice)]
-                                </small>
-                            </div>
-                        }
-
-                        <button type="submit" class="btn btn-primary btn-lg w-100" id="submitBtn">
-                            <i class="bi bi-credit-card me-2"></i>
-                            @if (Model.ServiceType == IdealWeightNutrition.Models.ServiceType.Online)
+                    <div class="mt-4">
+                        @{
+                            var routeValues = new Dictionary<string, string> { { "id", Model.Id.ToString() } };
+                            if (selectedOfferId.HasValue)
                             {
-                                <span>@Localizer["SubscribeNow"] - @formatCurrency(finalPrice)</span>
+                                routeValues.Add("offerId", selectedOfferId.Value.ToString());
                             }
-                            else
-                            {
-                                <span id="submitBtnText">@Localizer["PayNow"]</span>
-                            }
-                        </button>
-                    </form>
+                        }
+                        <a asp-action="ServiceSummary" asp-all-route-data="routeValues" class="btn btn-primary btn-lg w-100" id="proceedToCheckoutBtn">
+                            <i class="bi bi-arrow-@(isRtl ? "left" : "right")-circle @(isRtl ? "ms-2" : "me-2")"></i>
+                            <span>@(Localizer["ProceedToCheckout"] ?? "Proceed to Checkout")</span>
+                        </a>
+                        <p class="text-muted small mt-2 text-center">
+                            <i class="bi bi-info-circle"></i> 
+                            @(Localizer["CompletePaymentOnNextPage"] ?? "You will complete payment on the next page")
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -258,11 +212,19 @@
         background: white;
         border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+        transition: box-shadow 0.3s ease;
+    }
+
+    .service-detail-card:hover {
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
     }
 
     .service-details-carousel {
-        height: 400px;
+        height: 600px;
+        background: #f8fafc;
+        border-radius: 20px 20px 0 0;
+        overflow: hidden;
     }
 
     .service-details-carousel .carousel-inner {
@@ -271,12 +233,45 @@
 
     .service-details-carousel .carousel-item {
         height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
     }
 
     .service-detail-image {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
+        max-height: 600px;
+        transition: transform 0.3s ease;
+    }
+
+    .service-detail-image:hover {
+        transform: scale(1.05);
+    }
+
+    /* Single image styling */
+    .service-detail-image-wrapper {
+        width: 100%;
+        height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        border-radius: 20px 20px 0 0;
+        overflow: hidden;
+    }
+
+    .service-detail-image-wrapper img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+
+    .service-detail-image-wrapper:hover img {
+        transform: scale(1.05);
     }
 
     .service-details-carousel .carousel-control-prev,
@@ -308,62 +303,116 @@
 
     .service-detail-image-placeholder {
         width: 100%;
-        height: 400px;
+        height: 600px;
         display: flex;
         align-items: center;
         justify-content: center;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
+        border-radius: 20px 20px 0 0;
     }
 
     .service-detail-content {
-        padding: 30px;
+        padding: 40px;
+        background: white;
     }
 
     .service-detail-title {
-        font-size: 2rem;
-        font-weight: 800;
+        font-size: 2.5rem;
+        font-weight: 900;
         color: #1f2937;
+        line-height: 1.2;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
     .service-description-full {
-        margin-top: 20px;
+        margin-top: 30px;
+        padding-top: 30px;
+        border-top: 2px solid #e5e7eb;
     }
 
     .service-description-full h4 {
-        color: #374151;
-        margin-bottom: 15px;
+        color: #1f2937;
+        margin-bottom: 20px;
+        font-weight: 700;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .service-description-full h4::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 2px;
+    }
+
+    [dir="rtl"] .service-description-full h4::before {
+        order: 1;
     }
 
     .service-description-full p {
-        color: #6b7280;
-        line-height: 1.8;
-        font-size: 1.05rem;
+        color: #4b5563;
+        line-height: 1.9;
+        font-size: 1.1rem;
+        text-align: justify;
     }
 
     .service-purchase-card {
         background: white;
         border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
         overflow: hidden;
         position: sticky;
         top: 20px;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .service-purchase-card:hover {
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
     }
 
     .purchase-card-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 20px;
+        padding: 25px;
         text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .purchase-card-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @@keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
 
     .purchase-card-header h3 {
         margin: 0;
-        font-weight: 700;
+        font-weight: 800;
+        font-size: 1.5rem;
+        position: relative;
+        z-index: 1;
     }
 
     .purchase-card-body {
-        padding: 25px;
+        padding: 30px;
     }
 
     .pricing-section {
@@ -374,8 +423,19 @@
     .price-row {
         display: flex;
         justify-content: space-between;
-        padding: 10px 0;
+        align-items: center;
+        padding: 15px 0;
         border-bottom: 1px solid #f3f4f6;
+        transition: background-color 0.2s ease;
+    }
+
+    .price-row:hover {
+        background-color: #f9fafb;
+        padding-left: 10px;
+        padding-right: 10px;
+        margin-left: -10px;
+        margin-right: -10px;
+        border-radius: 8px;
     }
 
     .price-row.discount {
@@ -383,10 +443,19 @@
     }
 
     .price-row.total {
-        border-top: 2px solid #e5e7eb;
-        margin-top: 10px;
-        padding-top: 15px;
-        font-size: 1.2rem;
+        border-top: 3px solid #e5e7eb;
+        margin-top: 15px;
+        padding-top: 20px;
+        font-size: 1.3rem;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        padding: 20px 15px;
+        border-radius: 12px;
+        margin-left: -15px;
+        margin-right: -15px;
+    }
+
+    .price-row.total:hover {
+        background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
     }
 
     .price-row.payment-amount {
@@ -404,6 +473,11 @@
         border-left: 4px solid #f59e0b;
     }
 
+    [dir="rtl"] .offers-section {
+        border-left: none;
+        border-right: 4px solid #f59e0b;
+    }
+
     .offer-item {
         padding: 10px;
         background: white;
@@ -412,81 +486,78 @@
     }
 
     .btn-lg {
-        padding: 15px;
-        font-size: 1.1rem;
+        padding: 18px 30px;
+        font-size: 1.15rem;
         font-weight: 700;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-lg:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Badge enhancements */
+    .badge {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-radius: 20px;
+    }
+
+    /* Responsive design */
+    @@media (max-width: 991px) {
+        .service-purchase-card {
+            position: static;
+            margin-top: 30px;
+        }
+
+        .service-details-carousel,
+        .service-detail-image-wrapper,
+        .service-detail-image-placeholder {
+            height: 400px;
+        }
+
+        .service-detail-content {
+            padding: 25px;
+        }
+
+        .service-detail-title {
+            font-size: 2rem;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .service-details-carousel,
+        .service-detail-image-wrapper,
+        .service-detail-image-placeholder {
+            height: 300px;
+        }
+
+        .service-detail-content {
+            padding: 20px;
+        }
+
+        .service-detail-title {
+            font-size: 1.75rem;
+        }
+
+        .purchase-card-body {
+            padding: 20px;
+        }
+    }
+
+    /* RTL Support */
+    [dir="rtl"] .price-row {
+        flex-direction: row-reverse;
+    }
+
+    [dir="rtl"] .price-row:hover {
+        padding-right: 10px;
+        padding-left: 10px;
+        margin-right: -10px;
+        margin-left: -10px;
     }
 </style>
-
-@section Scripts {
-    <script>
-        $(document).ready(function() {
-            var form = $('#subscribeForm');
-            var serviceType = parseInt(form.data('service-type'));
-            var offlinePercent = parseFloat(form.data('offline-percent'));
-            var finalPrice = parseFloat(form.data('final-price'));
-            
-            // Check if it's an offline service
-            if (serviceType == 2 && offlinePercent > 0) {
-                var minAmount = finalPrice * (offlinePercent / 100);
-                var maxAmount = finalPrice;
-                
-                // Update submit button text when amount changes
-                $('#customAmount').on('input', function() {
-                    var amount = parseFloat($(this).val()) || 0;
-                    if (amount >= minAmount && amount <= maxAmount) {
-                        $('#submitBtnText').text('Pay ' + amount.toLocaleString('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + '@currencySymbol' + ' Now');
-                        $('#amountError').hide();
-                        $(this).removeClass('is-invalid');
-                    } else if (amount > 0) {
-                        if (amount < minAmount) {
-                            $('#amountError').text('Amount must be at least ' + '@currencySymbol' + ' ' + minAmount.toFixed(2).replace('.', ',') + ' (' + offlinePercent + '% of total)');
-                            $('#amountError').show();
-                            $(this).addClass('is-invalid');
-                        } else if (amount > maxAmount) {
-                            $('#amountError').text('Amount cannot exceed the total amount of ' + '@currencySymbol' + ' ' + maxAmount.toFixed(2).replace('.', ','));
-                            $('#amountError').show();
-                            $(this).addClass('is-invalid');
-                        }
-                    }
-                });
-
-                // Validate amount on form submit
-                form.on('submit', function(e) {
-                    var amount = parseFloat($('#customAmount').val()) || 0;
-                    
-                    if (amount < minAmount) {
-                        e.preventDefault();
-                        $('#amountError').text('Amount must be at least ' + '@currencySymbol' + ' ' + minAmount.toFixed(2).replace('.', ',') + ' (' + offlinePercent + '% of total)');
-                        $('#amountError').show();
-                        $('#customAmount').addClass('is-invalid');
-                        $('#customAmount').focus();
-                        return false;
-                    }
-                    
-                    if (amount > maxAmount) {
-                        e.preventDefault();
-                        $('#amountError').text('Amount cannot exceed the total amount of ' + '@currencySymbol' + ' ' + maxAmount.toFixed(2).replace('.', ','));
-                        $('#amountError').show();
-                        $('#customAmount').addClass('is-invalid');
-                        $('#customAmount').focus();
-                        return false;
-                    }
-
-                    // If validation passes, disable button and show loading
-                    var btn = $(this).find('button[type="submit"]');
-                    btn.prop('disabled', true);
-                    btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Processing...');
-                });
-            } else {
-                // Online service - just show loading
-                form.on('submit', function(e) {
-                    var btn = $(this).find('button[type="submit"]');
-                    btn.prop('disabled', true);
-                    btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Processing...');
-                });
-            }
-        });
-    </script>
-}
-

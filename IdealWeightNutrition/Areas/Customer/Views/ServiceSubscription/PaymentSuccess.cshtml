@@ -4,48 +4,57 @@
 @inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
 
 @{
-    ViewData["Title"] = "Payment Success";
+    ViewData["Title"] = Localizer["PaymentSuccess"] ?? "Payment Success";
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var isRtl = currentCulture.StartsWith("ar");
     
     // Format currency with language-specific symbol
     Func<decimal, string> formatCurrency = (amount) => $"{currencySymbol} {amount.ToString("N2", System.Globalization.CultureInfo.InvariantCulture).Replace(".", ",")}";
+    
+    // Helper function to translate payment status
+    Func<string, string> translatePaymentStatus = (status) =>
+    {
+        if (string.IsNullOrEmpty(status)) return Localizer["Pending"]?.Value ?? "Pending";
+        var translated = Localizer[status]?.Value;
+        return translated ?? status;
+    };
 }
 
-<div class="container py-5">
+<div class="container py-5" dir="@(isRtl ? "rtl" : "ltr")">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="success-card text-center">
                 <div class="success-icon">
                     <i class="bi bi-check-circle-fill"></i>
                 </div>
-                <h1 class="success-title">Payment Successful!</h1>
-                <p class="success-message">Your service subscription has been confirmed.</p>
+                <h1 class="success-title">@(Localizer["PaymentSuccessful"] ?? "Payment Successful!")</h1>
+                <p class="success-message">@(Localizer["ServiceSubscriptionConfirmed"] ?? "Your service subscription has been confirmed.")</p>
 
                 <div class="purchase-details mt-5">
                     <div class="detail-card">
-                        <h3>Purchase Details</h3>
+                        <h3>@(Localizer["PurchaseDetails"] ?? "Purchase Details")</h3>
                         <div class="detail-row">
-                            <span>Purchase ID:</span>
+                            <span>@(Localizer["PurchaseID"] ?? "Purchase ID"):</span>
                             <strong>#@Model.Id</strong>
                         </div>
                         <div class="detail-row">
-                            <span>Service:</span>
-                            <strong>@Model.ServiceSubscription?.Title</strong>
+                            <span>@(Localizer["Service"] ?? "Service"):</span>
+                            <strong>@(Model.ServiceSubscription != null ? (currentCulture == "ar" && !string.IsNullOrEmpty(Model.ServiceSubscription.TitleAr) ? Model.ServiceSubscription.TitleAr : Model.ServiceSubscription.Title) : "")</strong>
                         </div>
                         <div class="detail-row">
-                            <span>Total Amount:</span>
+                            <span>@(Localizer["TotalAmount"] ?? "Total Amount"):</span>
                             <strong>@formatCurrency(Model.TotalAmount)</strong>
                         </div>
                         <div class="detail-row">
-                            <span>Amount Paid:</span>
+                            <span>@(Localizer["AmountPaid"] ?? "Amount Paid"):</span>
                             <strong class="text-success">@formatCurrency(Model.AmountPaid)</strong>
                         </div>
                         @if (Model.ServiceSubscription?.ServiceType == IdealWeightNutrition.Models.ServiceType.Offline)
                         {
                             <div class="detail-row">
-                                <span>Remaining Amount:</span>
+                                <span>@(Localizer["RemainingAmount"] ?? "Remaining Amount"):</span>
                                 <strong>@formatCurrency(Model.TotalAmount - Model.AmountPaid)</strong>
                             </div>
                             @if (Model.ServiceSubscription.OfflinePaymentPercent.HasValue)
@@ -55,32 +64,32 @@
                                 {
                                     <div class="alert alert-success mt-3">
                                         <i class="bi bi-check-circle"></i> 
-                                        You paid @formatCurrency(Model.AmountPaid - minRequired) more than the minimum required. Thank you!
+                                        @(string.Format(Localizer["PaidMoreThanMinimum"]?.Value ?? "You paid {0} more than the minimum required. Thank you!", formatCurrency(Model.AmountPaid - minRequired)))
                                     </div>
                                 }
                             }
                             <div class="alert alert-info mt-3">
                                 <i class="bi bi-info-circle"></i> 
-                                You will pay the remaining amount of @formatCurrency(Model.TotalAmount - Model.AmountPaid) at the service location.
+                                @(string.Format(Localizer["PayRemainingAtLocation"]?.Value ?? "You will pay the remaining amount of {0} at the service location.", formatCurrency(Model.TotalAmount - Model.AmountPaid)))
                             </div>
                         }
                         <div class="detail-row">
-                            <span>Purchase Date:</span>
-                            <strong>@Model.PurchaseDate.ToString("MMM dd, yyyy hh:mm tt")</strong>
+                            <span>@(Localizer["PurchaseDate"] ?? "Purchase Date"):</span>
+                            <strong>@Model.PurchaseDate.ToString("MMM dd, yyyy", System.Globalization.CultureInfo.GetCultureInfo(currentCulture)) @(Localizer["At"] ?? "at") @Model.PurchaseDate.ToString("HH:mm", System.Globalization.CultureInfo.GetCultureInfo(currentCulture))</strong>
                         </div>
                         <div class="detail-row">
-                            <span>Status:</span>
-                            <span class="badge bg-success">@Model.PaymentStatus</span>
+                            <span>@(Localizer["Status"] ?? "Status"):</span>
+                            <span class="badge bg-success">@translatePaymentStatus(Model.PaymentStatus)</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="action-buttons mt-5">
-                    <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg me-3">
-                        <i class="bi bi-house me-2"></i>Go to Home
+                    <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg @(isRtl ? "ms-3" : "me-3")">
+                        <i class="bi bi-house @(isRtl ? "ms-2" : "me-2")"></i>@(Localizer["GoToHome"] ?? "Go to Home")
                     </a>
                     <a asp-area="Customer" asp-controller="ServiceSubscription" asp-action="Index" class="btn btn-outline-primary btn-lg">
-                        <i class="bi bi-briefcase me-2"></i>View More Services
+                        <i class="bi bi-briefcase @(isRtl ? "ms-2" : "me-2")"></i>@(Localizer["ViewMoreServices"] ?? "View More Services")
                     </a>
                 </div>
             </div>
@@ -119,6 +128,10 @@
         text-align: left;
     }
 
+    [dir="rtl"] .purchase-details {
+        text-align: right;
+    }
+
     .detail-card {
         background: #f9fafb;
         border-radius: 15px;
@@ -153,5 +166,25 @@
         50% { transform: scale(1.2); }
         100% { transform: scale(1); }
     }
-</style>
 
+    @@media (max-width: 768px) {
+        .success-card {
+            padding: 30px 20px;
+        }
+
+        .success-title {
+            font-size: 2rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action-buttons .btn {
+            width: 100%;
+            margin: 0 !important;
+        }
+    }
+</style>
