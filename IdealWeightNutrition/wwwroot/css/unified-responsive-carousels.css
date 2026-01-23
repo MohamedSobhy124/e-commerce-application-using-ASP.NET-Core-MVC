@@ -1,10 +1,4 @@
-/* ==========================================
-   UNIFIED RESPONSIVE CAROUSELS
-   Fixes all carousels to be fully responsive
-   ========================================== */
-
-/* ===== ULTRA-SPECIFIC MOBILE OVERRIDE - LOADED LAST ===== */
-/* This must override Bootstrap's col-12 on mobile to show 2 items per slide */
+ 
 @media screen and (max-width: 767px) {
     /* Maximum specificity to override Bootstrap */
     div.offers-carousel.carousel.slide div.carousel-item div.row > div.col-12.col-sm-6.col-lg-3,
@@ -40,29 +34,7 @@
     }
 }
 
-/* ===== BASE CAROUSEL STYLES ===== */
-.carousel {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-    touch-action: pan-y pinch-zoom;
-}
-
-.carousel-inner {
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-}
-
-.carousel-item {
-    width: 100%;
-    position: relative;
-    display: none;
-    float: left;
-    margin-right: -100%;
-    backface-visibility: hidden;
-    transition: transform 0.6s ease-in-out;
-}
+ 
 
 .carousel-item.active,
 .carousel-item-next,
@@ -70,15 +42,7 @@
     display: block;
 }
 
-    .carousel-item-next:not(.carousel-item-start),
-    .active.carousel-item-end {
-        transform: none;
-    }
-
-    .carousel-item-prev:not(.carousel-item-end),
-    .active.carousel-item-start {
-        transform: none;
-    }
+  
 
 /* ===== RESPONSIVE PRODUCT CAROUSELS ===== */
 /* Applies to: Offers, Best Sellers, New Arrivals */
@@ -152,13 +116,11 @@
     .product-carousel,
     .offers-carousel {
         padding: 0.5rem 0 3.5rem;
-        overflow: hidden;
         position: relative;
     }
     
     .product-carousel .carousel-inner,
     .offers-carousel .carousel-inner {
-        overflow: hidden;
         padding: 1rem 0.5rem;
     }
     
@@ -192,11 +154,7 @@
         display: none !important;
     }
     
-    /* Enable smooth transitions */
-    .product-carousel .carousel-item,
-    .offers-carousel .carousel-item {
-        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+     
 }
 
 /* Small Mobile (< 576px): Show 2 items per slide */
@@ -204,13 +162,11 @@
     .product-carousel,
     .offers-carousel {
         padding: 0.5rem 0 3.5rem;
-        overflow: hidden;
         position: relative;
     }
     
     .product-carousel .carousel-inner,
     .offers-carousel .carousel-inner {
-        overflow: hidden;
         padding: 0.75rem 0.25rem;
     }
     
@@ -238,17 +194,8 @@
         padding-right: 0.5rem !important;
     }
     
-    /* Show only 2 items per slide */
-    .product-carousel .carousel-item .row > [class*="col-"]:nth-child(n+3),
-    .offers-carousel .carousel-item .row > [class*="col-"]:nth-child(n+3) {
-        display: none !important;
-    }
-    
-    /* Enable smooth transitions */
-    .product-carousel .carousel-item,
-    .offers-carousel .carousel-item {
-        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+  
+     
 }
 
 /* ===== CAROUSEL CONTROLS - RESPONSIVE ===== */
@@ -329,16 +276,7 @@
         background-size: 20px 20px;
     }
 }
-
-/* Hide side arrows on mobile */
-@media (max-width: 768px) {
-    .product-carousel .carousel-control-prev,
-    .product-carousel .carousel-control-next,
-    .offers-carousel .carousel-control-prev,
-    .offers-carousel .carousel-control-next {
-        display: none !important;
-    }
-}
+ 
 
 /* ===== CAROUSEL INDICATORS - RESPONSIVE ===== */
 .carousel-indicators {
@@ -370,7 +308,6 @@
 
 .carousel-indicators button:hover {
     background: #9ca3af;
-    transform: scale(1.2);
 }
 
 .carousel-indicators button.active {
@@ -388,7 +325,6 @@
         gap: 0.5rem;
         position: absolute;
         left: 50%;
-        transform: translateX(-50%);
     }
     
     .product-carousel .carousel-indicators button,
@@ -399,7 +335,6 @@
         background: #d1d5db;
         border: none;
         opacity: 1;
-        transition: all 0.3s ease;
         cursor: pointer;
         padding: 0;
         margin: 0;
@@ -408,7 +343,6 @@
     .product-carousel .carousel-indicators button:hover,
     .offers-carousel .carousel-indicators button:hover {
         background: #9ca3af;
-        transform: scale(1.2);
     }
     
     .product-carousel .carousel-indicators button.active,
@@ -517,11 +451,7 @@
     
 }
 
-/* ===== TOUCH/SWIPE SUPPORT ===== */
-.carousel {
-    touch-action: pan-y pinch-zoom;
-    -webkit-overflow-scrolling: touch;
-}
+ 
 
 /* Enhanced touch/swipe on mobile for smooth movement */
 @media (max-width: 768px) {
@@ -537,90 +467,13 @@
         position: absolute;
         bottom: -2rem;
         left: 50%;
-        transform: translateX(-50%);
         z-index: 15;
     }
     
-    .product-carousel,
-    .offers-carousel,
-    .category-carousel,
-    .testimonials-carousel,
-    .service-home-carousel {
-        touch-action: pan-x;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .product-carousel .carousel-inner,
-    .offers-carousel .carousel-inner,
-    .category-carousel .carousel-inner,
-    .testimonials-carousel .carousel-inner,
-    .service-home-carousel .carousel-inner {
-        touch-action: pan-x;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .product-carousel .carousel-item,
-    .offers-carousel .carousel-item,
-    .category-carousel .carousel-item,
-    .testimonials-carousel .carousel-item,
-    .service-home-carousel .carousel-item {
-        touch-action: pan-x;
-        -webkit-tap-highlight-color: transparent;
-    }
+ 
 }
 
-/* Prevent carousel from breaking on mobile */
-@media (max-width: 768px) {
-    .carousel-inner {
-        overflow: visible;
-    }
-    
-    .carousel-item {
-        width: 100% !important;
-        margin-right: 0 !important;
-    }
-    
-    /* Enhanced mobile carousel with peek effect */
-    .carousel-inner.enhanced-mobile {
-        overflow-x: auto;
-        overflow-y: visible;
-        scroll-behavior: smooth;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        display: flex;
-        flex-wrap: nowrap;
-        padding-left: 10%;
-        padding-right: 10%;
-    }
-    
-    .carousel-inner.enhanced-mobile::-webkit-scrollbar {
-        display: none;
-    }
-    
-    .carousel-inner.enhanced-mobile .carousel-item {
-        flex: 0 0 80%;
-        width: 80%;
-        min-width: 80%;
-        max-width: 80%;
-        scroll-snap-align: center;
-        scroll-snap-stop: always;
-        margin-right: 1rem;
-    }
-    
-    .carousel-inner.enhanced-mobile .carousel-item .row {
-        margin: 0;
-        width: 100%;
-    }
-    
-    .carousel-inner.enhanced-mobile .carousel-item .row > [class*="col-"] {
-        width: 100%;
-        max-width: 100%;
-        flex: 0 0 100%;
-    }
-}
-
+ 
 /* ===== PRODUCT CARDS IN CAROUSELS - RESPONSIVE ===== */
 .product-card-simple,
 .offer-card {
@@ -749,137 +602,7 @@
     }
 }
 
-@media (max-width: 576px) {
-    .service-card-image-wrapper {
-        height: 200px;
-    }
-    
-    .service-card-content {
-        padding: 1.25rem;
-    }
-}
-
-/* ===== FIX BOOTSTRAP CAROUSEL ISSUES ===== */
-.carousel-item.active {
-    display: block;
-}
-
-/* Let Bootstrap handle transitions - don't override */
-
-/* ===== MOBILE: PREVENT VERTICAL STACKING DURING TRANSITIONS ===== */
-@media (max-width: 767px) {
-    .carousel {
-        overflow-x: hidden;
-        overflow-y: hidden; /* Prevent vertical overflow during transitions */
-    }
-    
-    .carousel-inner {
-        overflow-x: hidden;
-        overflow-y: hidden; /* Prevent vertical overflow */
-        position: relative;
-        /* Ensure consistent height */
-        min-height: 400px;
-    }
-    
-    /* Force all carousel items to same vertical position */
-    .product-carousel .carousel-item,
-    .offers-carousel .carousel-item {
-        position: relative !important;
-        float: left !important;
-        width: 100% !important;
-        margin-right: -100% !important;
-        /* Force same vertical position - prevent stacking */
-        top: 0 !important;
-        left: 0 !important;
-        /* Only horizontal transforms allowed */
-        transform: translateX(0) translateY(0) !important;
-    }
-    
-    /* CRITICAL: Override Bootstrap col-12 to show 2 items per slide */
-    .product-carousel .carousel-item .row,
-    .offers-carousel .carousel-item .row {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        gap: 0.5rem !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-    
-    /* Target col-12 specifically and all column classes */
-    .product-carousel .carousel-item .row > .col-12,
-    .product-carousel .carousel-item .row > [class*="col-"],
-    .offers-carousel .carousel-item .row > .col-12,
-    .offers-carousel .carousel-item .row > [class*="col-"] {
-        flex: 0 0 calc(50% - 0.25rem) !important;
-        max-width: calc(50% - 0.25rem) !important;
-        width: calc(50% - 0.25rem) !important;
-        min-width: calc(50% - 0.25rem) !important;
-        padding-left: 0.5rem !important;
-        padding-right: 0.5rem !important;
-    }
-    
-    /* Hide 3rd item and beyond */
-    .product-carousel .carousel-item .row > [class*="col-"]:nth-child(n+3),
-    .offers-carousel .carousel-item .row > [class*="col-"]:nth-child(n+3) {
-        display: none !important;
-    }
-    
-    /* During active transition - prevent vertical offset */
-    .product-carousel .carousel-item.active,
-    .product-carousel .carousel-item.carousel-item-next,
-    .product-carousel .carousel-item.carousel-item-prev,
-    .product-carousel .carousel-item.active.carousel-item-start,
-    .product-carousel .carousel-item.active.carousel-item-end,
-    .offers-carousel .carousel-item.active,
-    .offers-carousel .carousel-item.carousel-item-next,
-    .offers-carousel .carousel-item.carousel-item-prev,
-    .offers-carousel .carousel-item.active.carousel-item-start,
-    .offers-carousel .carousel-item.active.carousel-item-end {
-        top: 0 !important;
-        /* Override Bootstrap transforms to prevent vertical movement */
-        transform-origin: center center !important;
-    }
-    
-    /* Hide non-transitioning items completely */
-    .product-carousel .carousel-item:not(.active):not(.carousel-item-next):not(.carousel-item-prev),
-    .offers-carousel .carousel-item:not(.active):not(.carousel-item-next):not(.carousel-item-prev) {
-        display: none !important;
-        visibility: hidden !important;
-    }
-    
-    /* CRITICAL: Force 2 items per slide on mobile - override ALL Bootstrap column classes */
-    .product-carousel .carousel-item .row,
-    .offers-carousel .carousel-item .row {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        gap: 0.5rem !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-    
-    /* Override col-12, col-sm-6, and ALL column classes to force 50% width */
-    .product-carousel .carousel-item .row > .col-12,
-    .product-carousel .carousel-item .row > .col-12.col-sm-6,
-    .product-carousel .carousel-item .row > .col-12.col-sm-6.col-lg-3,
-    .product-carousel .carousel-item .row > [class*="col-"],
-    .offers-carousel .carousel-item .row > .col-12,
-    .offers-carousel .carousel-item .row > .col-12.col-sm-6,
-    .offers-carousel .carousel-item .row > .col-12.col-sm-6.col-lg-3,
-    .offers-carousel .carousel-item .row > [class*="col-"] {
-        flex: 0 0 calc(50% - 0.25rem) !important;
-        max-width: calc(50% - 0.25rem) !important;
-        width: calc(50% - 0.25rem) !important;
-        min-width: calc(50% - 0.25rem) !important;
-        padding-left: 0.5rem !important;
-        padding-right: 0.5rem !important;
-    }
-    
-    /* Hide 3rd item and beyond */
-    .product-carousel .carousel-item .row > [class*="col-"]:nth-child(n+3),
-    .offers-carousel .carousel-item .row > [class*="col-"]:nth-child(n+3) {
-        display: none !important;
-    }
-}
+ 
 
 /* ===== ENSURE PROPER COLUMN WIDTHS ===== */
 /* Desktop: columns work normally */
@@ -973,18 +696,5 @@
     }
 }
 
-/* ===== ACCESSIBILITY & PERFORMANCE ===== */
-/* Let Bootstrap handle performance optimizations */
-
-/* Reduce motion for users who prefer it */
-@media (prefers-reduced-motion: reduce) {
-    .carousel-item {
-        transition: none;
-    }
-    
-    .carousel-control-prev,
-    .carousel-control-next {
-        transition: none;
-    }
-}
+ 
 

@@ -643,7 +643,12 @@
             }
             @if (selectedCategory.HasValue)
             {
-                var categoryName = categories.FirstOrDefault(c => c.Id == selectedCategory.Value)?.Name ?? "";
+                var selectedCategoryObj = categories.FirstOrDefault(c => c.Id == selectedCategory.Value);
+                var categoryName = selectedCategoryObj != null 
+                    ? (currentCulture == "ar" && !string.IsNullOrEmpty(selectedCategoryObj.NameAr) 
+                        ? selectedCategoryObj.NameAr 
+                        : selectedCategoryObj.Name) 
+                    : "";
                 <span class="modern-active-filter-tag">
                     @Localizer["Category"]: @categoryName
                     <button type="button" class="remove-btn" data-filter="categoryId">
@@ -773,8 +778,11 @@
                         <option value="">@Localizer["AllCategories"]</option>
                         @foreach (var category in categories)
                         {
+                            var categoryName = currentCulture == "ar" && !string.IsNullOrEmpty(category.NameAr) 
+                                ? category.NameAr 
+                                : category.Name;
                             <option value="@category.Id" selected="@(selectedCategory == category.Id)">
-                                @category.Name
+                                @categoryName
                             </option>
                         }
                     </select>

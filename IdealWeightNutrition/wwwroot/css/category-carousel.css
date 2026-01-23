@@ -2,9 +2,7 @@
 .category-section {
     width: 100%;
     margin: 2rem 0;
-    /* Allow vertical scrolling to pass through */
-    touch-action: pan-y pan-x;
-    overscroll-behavior-y: none;
+    
     position: relative;
 }
 
@@ -44,18 +42,10 @@
     position: relative;
     overflow: hidden; /* Keep hidden for gradient background */
     background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(249, 250, 251, 0.5), rgba(255, 255, 255, 0));
-    /* Allow vertical scrolling to pass through */
-    touch-action: pan-y pan-x !important; /* Allow both vertical and horizontal panning */
-    overscroll-behavior-y: none !important; /* Allow vertical scroll to pass through */
-    pointer-events: auto; /* Ensure touch events work */
+   
 }
 
-/* Ensure category section allows vertical scrolling */
-.category-section,
-.category-section * {
-    touch-action: pan-y pan-x !important;
-    overscroll-behavior-y: none !important;
-}
+ 
 
 .category-carousel-wrapper {
     position: relative;
@@ -70,29 +60,10 @@
     gap: 1.25rem;
     overflow-x: auto;
     overflow-y: hidden;
-    scroll-behavior: smooth;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
     padding: 1.5rem 0.5rem;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    cursor: grab;
 }
 
-/* Mobile: Ensure proper scroll snap and single item display */
-@media (max-width: 768px) {
-    .category-carousel {
-        justify-content: flex-start !important;
-        scroll-snap-type: x mandatory !important;
-        scroll-padding-left: 2.5rem;
-        scroll-padding-right: 2.5rem;
-    }
-    
-    .category-card {
-        scroll-snap-align: center !important;
-    }
-}
-
+ 
 .category-carousel:active {
     cursor: grabbing;
 }
@@ -105,7 +76,6 @@
 .category-card {
     flex: 0 0 auto;
     width: 16rem;
-    scroll-snap-align: start;
     text-decoration: none;
     color: inherit;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -133,10 +103,6 @@
         max-width: calc(100vw - 5rem) !important;
     }
     
-    .category-carousel {
-        scroll-snap-type: x mandatory;
-        scroll-padding: 0 2.5rem; /* Account for nav buttons */
-    }
 }
 
 .category-card:hover {
@@ -461,29 +427,9 @@
     z-index: 10;
 }
 
-/* Ensure all child elements inside category cards are clickable (clicks bubble to parent) */
-#categoryCarousel .category-card * {
-    pointer-events: auto !important;
-    cursor: inherit !important;
-}
-
-/* Prevent images and other elements from blocking clicks */
-#categoryCarousel .category-card img,
-#categoryCarousel .category-card i,
-#categoryCarousel .category-card svg {
-    pointer-events: none !important;
-    user-select: none;
-    -webkit-user-select: none;
-}
-
-/* Prevent carousel from intercepting clicks on category cards */
-#categoryCarousel .carousel-item.active .category-card,
-#categoryCarousel .carousel-item .category-card {
-    touch-action: auto !important;
-    -webkit-touch-callout: default;
-    -webkit-user-select: none;
-    user-select: none;
-}
+ 
+ 
+ 
 
 /* Ensure only active item shows active styling */
 .category-carousel .carousel-item.active .category-card {
@@ -554,15 +500,10 @@
     
     /* Ensure only one card is visible at a time on mobile */
     .category-carousel {
-        scroll-snap-type: x mandatory !important;
-        scroll-padding-left: 2.5rem;
-        scroll-padding-right: 2.5rem;
+       
         justify-content: flex-start !important;
     }
     
-    .category-card {
-        scroll-snap-align: center !important;
-    }
     
     .category-circle {
         width: 140px;

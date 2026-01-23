@@ -60,35 +60,14 @@
 
 /* Carousel Container */
 .offers-carousel {
-    touch-action: pan-y pan-x; /* Allow both vertical and horizontal scrolling naturally */
-    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
     position: relative;
     padding: 1rem 0 3.5rem;
     width: 100%;
     overflow: hidden;
-    will-change: transform; /* Optimize for carousel transitions */
-    overscroll-behavior-x: contain; /* Prevent scroll chaining to parent */
-    overscroll-behavior-y: none; /* Allow vertical scroll to pass through to page */
 }
+ 
 
-/* Allow vertical scrolling on carousel items */
-.offers-carousel .carousel-inner,
-.offers-carousel .carousel-item {
-    touch-action: pan-y pan-x; /* Allow both vertical and horizontal scrolling */
-}
-
-.offers-carousel .carousel-inner {
-    will-change: transform; /* Optimize for carousel transitions */
-    transform: translateZ(0); /* Force GPU acceleration */
-    -webkit-transform: translateZ(0);
-}
-
-.offers-carousel .carousel-item {
-    backface-visibility: hidden; /* Prevent flickering */
-    -webkit-backface-visibility: hidden;
-    transform: translateZ(0); /* Force GPU acceleration */
-    -webkit-transform: translateZ(0);
-}
+ 
 
 .offers-carousel .carousel-inner {
     padding: 1rem 0;

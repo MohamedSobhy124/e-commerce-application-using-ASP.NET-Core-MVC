@@ -10,31 +10,18 @@
     max-width: 100%;
     margin: 0 auto;
     padding: 0 3rem;
-    /* Allow vertical scrolling to pass through naturally */
-    touch-action: pan-y pan-x;
-    overscroll-behavior-y: none;
+ 
 }
 
 .flash-sale-carousel {
     display: flex;
     gap: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-behavior: smooth;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
+    
     padding: 1rem 0;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+   
     position: relative;
     cursor: grab;
-    touch-action: pan-y pan-x; /* Allow both vertical and horizontal scrolling naturally */
-    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
-    will-change: scroll-position; /* Optimize for scrolling */
-    transform: translateZ(0); /* Force GPU acceleration */
-    -webkit-transform: translateZ(0);
-    overscroll-behavior-x: contain; /* Prevent scroll chaining to parent */
-    overscroll-behavior-y: none; /* Allow vertical scroll to pass through to page */
+   
 }
 
 /* Disable smooth scroll on mobile for better performance */
@@ -52,8 +39,6 @@
     flex: 0 0 100%;
     width: 100%;
     min-width: 100%;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
     position: relative;
     border-radius: 16px;
     overflow: hidden;
@@ -61,11 +46,6 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     min-height: 400px;
-    will-change: transform; /* Optimize for transforms */
-    transform: translateZ(0); /* Force GPU acceleration */
-    -webkit-transform: translateZ(0);
-    backface-visibility: hidden; /* Prevent flickering */
-    -webkit-backface-visibility: hidden;
 }
 
 .flash-sale-slide:hover {
