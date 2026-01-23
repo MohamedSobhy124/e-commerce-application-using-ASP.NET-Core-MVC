@@ -20,6 +20,24 @@
                     
                     <h1 class="text-success mb-3">@(Localizer["OrderPlacedSuccessful"]?.Value ?? "Order Placed Successfully!")</h1>
                     
+                    @if (TempData["AccountLinkedMessage"] != null)
+                    {
+                        <div class="alert alert-success mt-4">
+                            <i class="bi bi-link-45deg me-2"></i>
+                            <strong>@(Localizer["AccountLinked"]?.Value ?? "Account Linked"):</strong>
+                            @TempData["AccountLinkedMessage"]
+                        </div>
+                    }
+                    
+                    @if (TempData["AccountCreatedMessage"] != null)
+                    {
+                        <div class="alert alert-success mt-4">
+                            <i class="bi bi-person-plus me-2"></i>
+                            <strong>@(Localizer["AccountCreated"]?.Value ?? "Account Created"):</strong>
+                            @TempData["AccountCreatedMessage"]
+                        </div>
+                    }
+                    
                     <div class="alert alert-info mt-4">
                         <h4 class="mb-3">
                             <i class="bi bi-receipt me-2"></i>

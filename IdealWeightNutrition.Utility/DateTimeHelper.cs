@@ -95,9 +95,9 @@ namespace IdealWeightNutrition.Utility
             while (remainingDays > 0)
             {
                 currentDate = currentDate.AddDays(daysToAdd);
-                
-                // Skip weekends (Friday = 5, Saturday = 6)
-                if (currentDate.DayOfWeek != DayOfWeek.Friday && currentDate.DayOfWeek != DayOfWeek.Saturday)
+
+                // Skip weekends (Sunday = 5, Saturday = 6)
+                if (currentDate.DayOfWeek != DayOfWeek.Sunday && currentDate.DayOfWeek != DayOfWeek.Saturday)
                 {
                     remainingDays--;
                 }

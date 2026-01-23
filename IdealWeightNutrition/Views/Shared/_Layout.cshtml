@@ -469,6 +469,7 @@
     <div style="padding-left: .5rem; padding-right: .5rem;">
         <main role="main" class="pb-3">
             @RenderBody()
+            @await Html.PartialAsync("_Notifications")
         </main>
     </div>
 

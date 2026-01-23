@@ -51,6 +51,22 @@
             </div>
         </div>
 
+        <!-- Subscriptions Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 account-card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; transition: transform 0.3s;">
+                <div class="card-body text-center p-4">
+                    <div class="account-icon-wrapper mb-3" style="background: rgba(123, 192, 67, 0.1);">
+                        <i class="bi bi-briefcase-fill" style="font-size: 3rem; color: #7BC043;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">@(Localizer["MySubscriptions"]?.Value ?? "Subscriptions")</h5>
+                    <p class="card-text text-muted small">@(Localizer["ViewYourServiceSubscriptions"]?.Value ?? "View your service subscriptions and purchase history")</p>
+                    <a asp-area="Customer" asp-controller="Account" asp-action="Subscriptions" class="btn btn-success w-100">
+                        <i class="bi bi-arrow-right me-2"></i>@(Localizer["ViewSubscriptions"]?.Value ?? "View Subscriptions")
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Logout Card -->
         <div class="col-md-6 col-lg-4">
             <div class="card h-100 account-card logout-card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; transition: all 0.3s; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">

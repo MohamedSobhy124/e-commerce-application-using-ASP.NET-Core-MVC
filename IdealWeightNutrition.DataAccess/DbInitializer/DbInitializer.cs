@@ -2,6 +2,7 @@
 using IdealWeightNutrition.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using IdealWeightNutrition.DataAccess.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,14 +12,14 @@ using System.Threading.Tasks;
 namespace IdealWeightNutrition.DataAccess.DbInitializer {
     public class DbInitializer : IDbInitializer {
 
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly ApplicationUser _db;
+        private readonly ApplicationDBContext _db;
 
         public DbInitializer(
-            UserManager<IdentityUser> userManager,
+            UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-			ApplicationUser db) {
+			ApplicationDBContext db) {
             _roleManager = roleManager;
             _userManager = userManager;
             _db = db;

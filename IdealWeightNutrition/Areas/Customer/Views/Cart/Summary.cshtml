@@ -98,6 +98,20 @@
 											</div>
 										</div>
 									</div>
+									
+									<!-- Create Account Checkbox -->
+									<div class="form-row-enhanced mt-3" id="createAccountSection" style="display: none;">
+										<div class="form-check">
+											<input class="form-check-input" type="checkbox" id="createAccountCheckbox" name="CreateAccount" value="true" />
+											<label class="form-check-label" for="createAccountCheckbox">
+												<i class="bi bi-person-plus me-2"></i>
+												@(Localizer["CreateAccountForFutureOrders"]?.Value ?? "Create an account for faster checkout on future orders")
+											</label>
+										</div>
+										<small class="text-muted d-block mt-2">
+											@(Localizer["CreateAccountDescription"]?.Value ?? "You'll be able to track your orders and save your information for next time.")
+										</small>
+									</div>
 								}
 								
 								<div class="form-row-enhanced">
@@ -809,7 +823,11 @@
 			errorSendingOTP: '@Html.Raw(Localizer["ErrorSendingOTP"]?.Value ?? "Error sending verification code. Please try again.")',
 			errorVerifyingOTP: '@Html.Raw(Localizer["ErrorVerifyingOTP"]?.Value ?? "Error verifying code. Please try again.")',
 			pleaseEnterValidOTP: '@Html.Raw(Localizer["PleaseEnterValidOTP"]?.Value ?? "Please enter a valid 6-digit code")',
-			emailNotVerified: '@Html.Raw(Localizer["EmailNotVerified"]?.Value ?? "Please verify your email address before placing the order.")'
+			emailNotVerified: '@Html.Raw(Localizer["EmailNotVerified"]?.Value ?? "Please verify your email address before placing the order.")',
+			sending: '@Html.Raw(Localizer["Sending"]?.Value ?? "Sending...")',
+			verifying: '@Html.Raw(Localizer["Verifying"]?.Value ?? "Verifying...")',
+			accountFound: '@Html.Raw(Localizer["AccountFound"]?.Value ?? "Account Found")',
+			orderWillBeLinked: '@Html.Raw(Localizer["OrderWillBeLinkedToAccount"]?.Value ?? "This order will be linked to your existing account.")'
 		};
 
 		$(document).ready(function() {
@@ -1098,6 +1116,8 @@
 						if (response.verified) {
 							showEmailVerified();
 							isEmailVerified = true;
+							// Check if email has account - if yes, show message that order will be linked
+							checkEmailHasAccount(email);
 						} else {
 							showOtpSendSection();
 							isEmailVerified = false;
@@ -1110,6 +1130,39 @@
 				});
 			}
 			
+			// Check if email has an account
+			function checkEmailHasAccount(email) {
+				$.ajax({
+					url: '/Customer/Cart/CheckEmailHasAccount',
+					method: 'POST',
+					data: { email: email },
+					success: function(response) {
+						if (response.hasAccount) {
+							// Email has account - show message and hide create account checkbox
+							$('#createAccountSection').hide();
+							// Remove any existing info message to prevent duplicates
+							$('#emailVerifiedSection .alert-info').remove();
+							$('#emailVerifiedSection').append(
+								'<div class="alert alert-info mt-2 mb-0" style="border-radius: 6px; font-size: 0.9rem;">' +
+								'<i class="bi bi-info-circle me-2"></i>' +
+								'<strong>' + localizedMessages.accountFound + ':</strong> ' +
+								localizedMessages.orderWillBeLinked +
+								'</div>'
+							);
+						} else {
+							// Email doesn't have account - show create account checkbox
+							$('#createAccountSection').show();
+							// Remove any existing info message
+							$('#emailVerifiedSection .alert-info').remove();
+						}
+					},
+					error: function() {
+						// On error, show create account checkbox as fallback
+						$('#createAccountSection').show();
+					}
+				});
+			}
+			
 			// Send OTP
 			$sendOtpBtn.on('click', function() {
 				var email = $emailField.val() ? $emailField.val().trim() : '';
@@ -1118,7 +1171,7 @@
 					return;
 				}
 				
-				$sendOtpBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Sending...');
+				$sendOtpBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>' + localizedMessages.sending);
 				$otpSendMessage.hide();
 				
 				$.ajax({
@@ -1152,7 +1205,7 @@
 					return;
 				}
 				
-				$verifyOtpBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Verifying...');
+				$verifyOtpBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>' + localizedMessages.verifying);
 				$otpVerifyMessage.hide();
 				
 				$.ajax({
@@ -1165,6 +1218,8 @@
 							showEmailVerified();
 							isEmailVerified = true;
 							clearResendTimer();
+							// Check if email has account after OTP verification
+							checkEmailHasAccount(email);
 						} else {
 							$otpVerifyMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle me-1"></i>' + response.message).show();
 							$verifyOtpBtn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i>' + (localizedMessages.verify || 'Verify'));
@@ -1215,6 +1270,7 @@
 				$otpSendSection.hide();
 				$otpVerifySection.hide();
 				$emailVerifiedSection.show();
+				$('#createAccountSection').show();
 				clearResendTimer();
 			}
 			
@@ -1222,6 +1278,8 @@
 				$otpSendSection.show();
 				$otpVerifySection.hide();
 				$emailVerifiedSection.hide();
+				$('#createAccountSection').hide();
+				$('#createAccountCheckbox').prop('checked', false);
 				$otpInput.val('');
 				$otpSendMessage.hide();
 				$otpVerifyMessage.hide();

@@ -15,15 +15,15 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IStringLocalizer<IdealWeightNutrition.SharedResources> _localizer;
         private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationService _notificationService;
 
         public AccountController(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             IStringLocalizer<IdealWeightNutrition.SharedResources> localizer,
             IUnitOfWork unitOfWork,
             INotificationService notificationService)
@@ -491,6 +491,32 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
             }
             
             return RedirectToAction(nameof(OrderDetails), new { id = returnRequestVM.OrderHeaderId });
+        }
+
+        // GET: User Service Subscriptions
+        public async Task<IActionResult> Subscriptions()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToPage("/Account/Login", new { area = "Identity" });
+            }
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Get all service purchases for the current user
+            var subscriptions = _unitOfWork.ServicePurchases.GetAll(
+                sp => sp.ApplicationUserId == userId,
+                includeProperties: "ServiceSubscription,ApplicationUser"
+            )
+            .OrderByDescending(sp => sp.PurchaseDate)
+            .ToList();
+
+            return View(subscriptions);
         }
     }
 }

@@ -4158,4 +4158,199 @@
   <data name="PayRemainingAtLocation" xml:space="preserve">
     <value />
   </data>
+  <data name="AccountFound" xml:space="preserve">
+    <value>Account Found</value>
+  </data>
+  <data name="OrderWillBeLinkedToAccount" xml:space="preserve">
+    <value>This order will be linked to your existing account.</value>
+  </data>
+  <data name="AccountCreatedSuccessfully" xml:space="preserve">
+    <value>Your account has been created successfully! A password setup email has been sent to your email address.</value>
+  </data>
+  <data name="OrderLinkedToAccount" xml:space="preserve">
+    <value>Your order has been linked to your account ({0}) because this email already has an account in the system.</value>
+  </data>
+  <data name="CreateAccountForFutureOrders" xml:space="preserve">
+    <value>Create an account for faster checkout on future orders</value>
+  </data>
+  <data name="CreateAccountDescription" xml:space="preserve">
+    <value>You'll be able to track your orders and save your information for next time.</value>
+  </data>
+  <data name="WelcomeToIdealWeight" xml:space="preserve">
+    <value>Welcome to Ideal Weight Nutrition!</value>
+  </data>
+  <data name="AccountCreatedThankYou" xml:space="preserve">
+    <value>Thank you for creating an account with us. Your account has been created successfully.</value>
+  </data>
+  <data name="SetPasswordInstructions" xml:space="preserve">
+    <value>To set your password and access your account, please click the link below:</value>
+  </data>
+  <data name="SetYourPassword" xml:space="preserve">
+    <value>Set Your Password</value>
+  </data>
+  <data name="ButtonNotWorkingInstructions" xml:space="preserve">
+    <value>If the button doesn't work, copy and paste this link into your browser:</value>
+  </data>
+  <data name="EmailAlreadyVerified" xml:space="preserve">
+    <value>Email already verified</value>
+  </data>
+  <data name="EmailVerified" xml:space="preserve">
+    <value>Email verified</value>
+  </data>
+  <data name="ForgotYourPassword" xml:space="preserve">
+    <value>Forgot your password?</value>
+  </data>
+  <data name="EnterYourEmail" xml:space="preserve">
+    <value>Enter your email address and we'll send you a link to reset your password.</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Reset Password</value>
+  </data>
+  <data name="ResetYourPassword" xml:space="preserve">
+    <value>Reset your password</value>
+  </data>
+  <data name="EnterNewPassword" xml:space="preserve">
+    <value>Please enter your new password below.</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>New Password</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Confirm Password</value>
+  </data>
+  <data name="PasswordPlaceholder" xml:space="preserve">
+    <value>Enter your password</value>
+  </data>
+  <data name="ConfirmPasswordPlaceholder" xml:space="preserve">
+    <value>Confirm your password</value>
+  </data>
+  <data name="ForgotPasswordConfirmation" xml:space="preserve">
+    <value>Forgot password confirmation</value>
+  </data>
+  <data name="CheckYourEmail" xml:space="preserve">
+    <value>Please check your email to reset your password.</value>
+  </data>
+  <data name="PasswordResetEmailSent" xml:space="preserve">
+    <value>We've sent a password reset link to your email address. Please check your inbox and follow the instructions to reset your password.</value>
+  </data>
+  <data name="BackToLogin" xml:space="preserve">
+    <value>Back to Login</value>
+  </data>
+  <data name="DidNotReceiveEmail" xml:space="preserve">
+    <value>Didn't receive the email? Check your spam folder or try again.</value>
+  </data>
+  <data name="ResetPasswordConfirmation" xml:space="preserve">
+    <value>Reset password confirmation</value>
+  </data>
+  <data name="PasswordResetSuccessfully" xml:space="preserve">
+    <value>Your password has been reset successfully!</value>
+  </data>
+  <data name="PasswordResetSuccessMessage" xml:space="preserve">
+    <value>You can now log in with your new password.</value>
+  </data>
+  <data name="ClickHereToLogIn" xml:space="preserve">
+    <value>Click here to log in</value>
+  </data>
+  <data name="AccountCreated" xml:space="preserve">
+    <value>Account Created</value>
+  </data>
+  <data name="AccountLinked" xml:space="preserve">
+    <value>Account Linked</value>
+  </data>
+  <data name="MySubscriptions" xml:space="preserve">
+    <value>My Subscriptions</value>
+  </data>
+  <data name="ViewYourServiceSubscriptions" xml:space="preserve">
+    <value>View your service subscriptions and purchase history</value>
+  </data>
+  <data name="NoSubscriptionsYet" xml:space="preserve">
+    <value>No Subscriptions Yet</value>
+  </data>
+  <data name="StartBrowsingServices" xml:space="preserve">
+    <value>Start browsing services to see your subscriptions here</value>
+  </data>
+  <data name="BrowseServices" xml:space="preserve">
+    <value>Browse Services</value>
+  </data>
+  <data name="PurchaseID" xml:space="preserve">
+    <value>Purchase ID</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>View Details</value>
+  </data>
+  <data name="ViewSubscriptions" xml:space="preserve">
+    <value>View Subscriptions</value>
+  </data>
+  <data name="AdminActions" xml:space="preserve">
+    <value>Admin Actions</value>
+  </data>
+  <data name="UpdatePaymentStatus" xml:space="preserve">
+    <value>Update Payment Status</value>
+  </data>
+  <data name="UpdateServiceStatus" xml:space="preserve">
+    <value>Update Service Status</value>
+  </data>
+  <data name="UpdateAmountPaid" xml:space="preserve">
+    <value>Update Amount Paid</value>
+  </data>
+  <data name="CurrentStatus" xml:space="preserve">
+    <value>Current Status</value>
+  </data>
+  <data name="NewAmountPaid" xml:space="preserve">
+    <value>New Amount Paid</value>
+  </data>
+  <data name="CurrentAmountPaid" xml:space="preserve">
+    <value>Current Amount Paid</value>
+  </data>
+  <data name="MaxAmount" xml:space="preserve">
+    <value>Maximum</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Expired" xml:space="preserve">
+    <value>Expired</value>
+  </data>
+  <data name="Suspended" xml:space="preserve">
+    <value>Suspended</value>
+  </data>
+  <data name="Updating" xml:space="preserve">
+    <value>Updating...</value>
+  </data>
+  <data name="AddAmount" xml:space="preserve">
+    <value>Add Amount</value>
+  </data>
+  <data name="AmountToAdd" xml:space="preserve">
+    <value>Amount to add to current payment</value>
+  </data>
+  <data name="PleaseEnterValidAmount" xml:space="preserve">
+    <value>Please enter a valid amount greater than 0.</value>
+  </data>
+  <data name="TotalPurchases" xml:space="preserve">
+    <value>Total Purchases</value>
+  </data>
+  <data name="ExportServicePurchases" xml:space="preserve">
+    <value>Export Service Purchases</value>
+  </data>
+  <data name="PaymentNotSuccessful" xml:space="preserve">
+    <value>Payment was not successful. Your subscription has been cancelled. Please try again or contact support if you have any questions.</value>
+  </data>
+  <data name="PaymentFailed" xml:space="preserve">
+    <value>Payment Failed</value>
+  </data>
+  <data name="PaymentCancelled" xml:space="preserve">
+    <value>Payment was cancelled. Please try again.</value>
+  </data>
+  <data name="PaymentProcessingError" xml:space="preserve">
+    <value>An error occurred while processing payment. Please contact support.</value>
+  </data>
+  <data name="InvalidOrderId" xml:space="preserve">
+    <value>Invalid order ID</value>
+  </data>
+  <data name="OrderNotFound" xml:space="preserve">
+    <value>Order not found</value>
+  </data>
+  <data name="PaymentSuccessful" xml:space="preserve">
+    <value>Payment successful!</value>
+  </data>
 </root>

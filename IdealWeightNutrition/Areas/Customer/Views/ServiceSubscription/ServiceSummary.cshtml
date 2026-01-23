@@ -19,6 +19,29 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/cart-summary-enhanced.css" asp-append-version="true" />
+    <style>
+        /* Hide Geidea error modals and show our SweetAlert instead */
+        [class*="geidea"] [class*="error"],
+        [id*="geidea"] [class*="error"],
+        [class*="Geidea"] [class*="error"],
+        [id*="Geidea"] [class*="error"],
+        [class*="geidea"] [class*="rejected"],
+        [id*="geidea"] [class*="rejected"],
+        [class*="Geidea"] [class*="rejected"],
+        [id*="Geidea"] [class*="rejected"] {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        
+        /* Ensure SweetAlert is always on top */
+        .swal2-container {
+            z-index: 99999 !important;
+        }
+        
+        .swal2-backdrop-show {
+            z-index: 99998 !important;
+        }
+    </style>
 }
 
 <form method="post" id="serviceOrderForm" novalidate>
@@ -105,6 +128,20 @@
                                                 <i class="bi bi-check-circle-fill @(isRtl ? "ms-2" : "me-2")"></i>
                                                 <strong>@(Localizer["EmailVerified"] ?? "Email Verified")</strong>
                                             </div>
+                                        </div>
+                                        
+                                        <!-- Create Account Checkbox -->
+                                        <div class="form-row-enhanced mt-3" id="createAccountSection" style="display: none;">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="createAccountCheckbox" name="CreateAccountForGuest" value="true" />
+                                                <label class="form-check-label" for="createAccountCheckbox">
+                                                    <i class="bi bi-person-plus @(isRtl ? "ms-2" : "me-2")"></i>
+                                                    @(Localizer["CreateAccountForFutureOrders"]?.Value ?? "Create an account for faster checkout on future orders")
+                                                </label>
+                                            </div>
+                                            <small class="text-muted d-block mt-2">
+                                                @(Localizer["CreateAccountDescription"]?.Value ?? "You'll be able to track your orders and save your information for next time.")
+                                            </small>
                                         </div>
                                     </div>
                                 }
@@ -602,6 +639,32 @@
     }
     
     <script>
+        // Prevent toastr from showing payment errors - use SweetAlert instead
+        if (typeof toastr !== 'undefined') {
+            var originalToastrError = toastr.error;
+            toastr.error = function(message, title, options) {
+                // Check if this is a payment-related error
+                var isPaymentError = (message && (
+                    message.toLowerCase().includes('payment') ||
+                    message.toLowerCase().includes('دفع') ||
+                    message.toLowerCase().includes('اشتراك') ||
+                    message.toLowerCase().includes('subscription')
+                )) || (title && (
+                    title.toLowerCase().includes('payment') ||
+                    title.toLowerCase().includes('دفع')
+                ));
+                
+                // If it's a payment error, don't show toastr - SweetAlert will handle it
+                if (isPaymentError) {
+                    console.log('Payment error detected - suppressing toastr, SweetAlert will handle it');
+                    return;
+                }
+                
+                // For non-payment errors, use original toastr
+                return originalToastrError.call(this, message, title, options);
+            };
+        }
+        
         // Translations for JavaScript
         var translations = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(jsTranslations));
         
@@ -695,6 +758,8 @@
                                         if (response.verified) {
                                             showEmailVerified();
                                             isEmailVerified = true;
+                                            // Check if email has account
+                                            checkEmailHasAccount(email);
                                         } else {
                                             showOtpSendSection();
                                             isEmailVerified = false;
@@ -768,6 +833,8 @@
                                 showEmailVerified();
                                 isEmailVerified = true;
                                 clearResendTimer();
+                                // Check if email has account after OTP verification
+                                checkEmailHasAccount(email);
                             } else {
                                 $otpVerifyMessage.removeClass('text-success').addClass('text-danger').html('<i class="bi bi-exclamation-circle @(isRtl ? "ms-1" : "me-1")"></i>' + response.message).show();
                                 $verifyOtpBtn.prop('disabled', false).html('<i class="bi bi-check-circle @(isRtl ? "ms-1" : "me-1")"></i>@(Localizer["Verify"]?.Value ?? "Verify")');
@@ -820,6 +887,45 @@
                     $otpVerifySection.hide();
                     $emailVerifiedSection.show();
                     clearResendTimer();
+                    
+                    // Check if email has account after verification
+                    var email = $emailField.val() ? $emailField.val().trim() : '';
+                    if (email) {
+                        checkEmailHasAccount(email);
+                    }
+                }
+                
+                // Check if email has an account
+                function checkEmailHasAccount(email) {
+                    $.ajax({
+                        url: '/Customer/ServiceSubscription/CheckEmailHasAccount',
+                        method: 'POST',
+                        data: { email: email },
+                        success: function(response) {
+                            if (response.hasAccount) {
+                                // Email has account - show message and hide create account checkbox
+                                $('#createAccountSection').hide();
+                                // Remove any existing info message to prevent duplicates
+                                $('#emailVerifiedSection .alert-info').remove();
+                                $('#emailVerifiedSection').append(
+                                    '<div class="alert alert-info mt-2 mb-0" style="border-radius: 6px; font-size: 0.9rem;">' +
+                                    '<i class="bi bi-info-circle @(isRtl ? "ms-2" : "me-2")"></i>' +
+                                    '<strong>@(Localizer["AccountFound"]?.Value ?? "Account Found"):</strong> ' +
+                                    '@(Localizer["OrderWillBeLinkedToAccount"]?.Value ?? "This order will be linked to your existing account.")' +
+                                    '</div>'
+                                );
+                            } else {
+                                // Email doesn't have account - show create account checkbox
+                                $('#createAccountSection').show();
+                                // Remove any existing info message
+                                $('#emailVerifiedSection .alert-info').remove();
+                            }
+                        },
+                        error: function() {
+                            // On error, show create account checkbox as fallback
+                            $('#createAccountSection').show();
+                        }
+                    });
                 }
                 
                 function resetOtpSection() {
@@ -827,6 +933,8 @@
                     $otpSendSection.show();
                     $otpVerifySection.hide();
                     $emailVerifiedSection.hide();
+                    $('#createAccountSection').hide();
+                    $('#createAccountCheckbox').prop('checked', false);
                     $otpInput.val('');
                     $otpSendMessage.hide();
                     $otpVerifyMessage.hide();
@@ -1503,83 +1611,578 @@
 
         function startGeideaPayment(sessionId, purchaseId, callback) {
             try {
+                // Set up a MutationObserver to detect Geidea error messages in their modal
+                var errorObserver = null;
+                var errorDetected = false;
+                
+                // Function to close Geidea modal - defined at function scope so it can be used everywhere
+                function closeGeideaModal() {
+                    try {
+                        // Remove all possible Geidea elements
+                        var allSelectors = [
+                            '*[class*="geidea"]',
+                            '*[id*="geidea"]',
+                            '*[class*="Geidea"]',
+                            '*[id*="Geidea"]',
+                            '*[class*="modal"]',
+                            '*[class*="overlay"]',
+                            '*[class*="popup"]',
+                            '*[class*="dialog"]',
+                            '*[class*="payment"]',
+                            '*[class*="checkout"]',
+                            'iframe'
+                        ];
+                        
+                        allSelectors.forEach(function(selector) {
+                            try {
+                                var elements = document.querySelectorAll(selector);
+                                elements.forEach(function(el) {
+                                    if (el) {
+                                        el.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
+                                        try {
+                                            if (el.parentNode) {
+                                                el.parentNode.removeChild(el);
+                                            }
+                                        } catch (e) {
+                                            // Ignore
+                                        }
+                                    }
+                                });
+                            } catch (e) {
+                                // Ignore
+                            }
+                        });
+                        
+                        // Restore body styles
+                        document.body.style.overflow = '';
+                        document.body.style.position = '';
+                        document.body.style.height = '';
+                        
+                        // Remove any fixed positioning that might block
+                        var fixedElements = document.querySelectorAll('[style*="position: fixed"], [style*="position:fixed"]');
+                        fixedElements.forEach(function(el) {
+                            if (el && el.style && (el.style.zIndex > 1000 || el.classList.toString().toLowerCase().includes('geidea'))) {
+                                el.style.display = 'none';
+                            }
+                        });
+                    } catch (e) {
+                        console.error('Error closing Geidea modal:', e);
+                    }
+                }
+                
+                // Function to detect and show Geidea errors in SweetAlert
+                function detectGeideaModalError() {
+                    if (errorDetected) return; // Prevent multiple alerts
+                    
+                    // Search in all possible locations including iframes
+                    function searchInElement(element) {
+                        var errorTexts = [];
+                        var errorKeywords = [
+                            'payer authentication rejected',
+                            'authentication rejected',
+                            'payment rejected',
+                            'transaction declined',
+                            'card declined',
+                            'رفض',
+                            'فشل',
+                            'declined',
+                            'rejected',
+                            'failed',
+                            'error'
+                        ];
+                        
+                        // Get all text content
+                        var allText = '';
+                        try {
+                            allText = (element.textContent || element.innerText || element.value || '').toLowerCase();
+                        } catch (e) {
+                            return [];
+                        }
+                        
+                        // Check for error keywords
+                        errorKeywords.forEach(function(keyword) {
+                            if (allText.includes(keyword.toLowerCase())) {
+                                // Find the element containing this text
+                                var walker = document.createTreeWalker(
+                                    element,
+                                    NodeFilter.SHOW_TEXT,
+                                    null,
+                                    false
+                                );
+                                
+                                var node;
+                                while (node = walker.nextNode()) {
+                                    var text = node.textContent || '';
+                                    if (text.toLowerCase().includes(keyword.toLowerCase())) {
+                                        // Get parent element to get full context
+                                        var parent = node.parentElement;
+                                        if (parent) {
+                                            var fullText = parent.textContent || parent.innerText || text;
+                                            if (fullText.trim().length > 0 && fullText.trim().length < 500) {
+                                                errorTexts.push(fullText.trim());
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        
+                        return errorTexts;
+                    }
+                    
+                    // Search in main document
+                    var mainErrors = searchInElement(document.body);
+                    
+                    // Search in all iframes (Geidea might use iframe)
+                    var iframes = document.querySelectorAll('iframe');
+                    iframes.forEach(function(iframe) {
+                        try {
+                            var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                            if (iframeDoc && iframeDoc.body) {
+                                var iframeErrors = searchInElement(iframeDoc.body);
+                                mainErrors = mainErrors.concat(iframeErrors);
+                            }
+                        } catch (e) {
+                            // Cross-origin iframe, can't access
+                            console.log('Cannot access iframe content (cross-origin):', e);
+                        }
+                    });
+                    
+                    // Also search by looking for common error patterns in visible text
+                    var allElements = document.querySelectorAll('*');
+                    allElements.forEach(function(el) {
+                        try {
+                            var text = (el.textContent || el.innerText || '').toLowerCase();
+                            if (text && (
+                                text.includes('payer authentication rejected') ||
+                                text.includes('authentication rejected') ||
+                                (text.includes('rejected') && (text.includes('payer') || text.includes('payment') || text.includes('authentication')))
+                            )) {
+                                var fullText = (el.textContent || el.innerText || '').trim();
+                                if (fullText.length > 0 && fullText.length < 500 && !mainErrors.includes(fullText)) {
+                                    mainErrors.push(fullText);
+                                }
+                            }
+                        } catch (e) {
+                            // Ignore errors
+                        }
+                    });
+                    
+                    if (mainErrors.length > 0 && !errorDetected) {
+                        errorDetected = true;
+                        // Use the first meaningful error message
+                        var errorMessage = mainErrors[0];
+                        
+                        // Clean up the error message - remove extra whitespace
+                        errorMessage = errorMessage.replace(/\s+/g, ' ').trim();
+                        
+                        // Close Geidea modal/overlay - more aggressive approach
+                        try {
+                            // Try multiple methods to close Geidea modal
+                            var selectors = [
+                                '[class*="geidea"]',
+                                '[id*="geidea"]',
+                                '[class*="Geidea"]',
+                                '[id*="Geidea"]',
+                                '[class*="modal"]',
+                                '[class*="overlay"]',
+                                '[class*="popup"]',
+                                '[class*="dialog"]',
+                                '[class*="payment"]',
+                                '[class*="checkout"]'
+                            ];
+                            
+                            selectors.forEach(function(selector) {
+                                try {
+                                    var elements = document.querySelectorAll(selector);
+                                    elements.forEach(function(el) {
+                                        if (el.style) {
+                                            el.style.display = 'none !important';
+                                            el.style.visibility = 'hidden !important';
+                                            el.style.opacity = '0 !important';
+                                            el.style.pointerEvents = 'none !important';
+                                            el.style.zIndex = '-1 !important';
+                                        }
+                                        // Also try to remove from DOM
+                                        try {
+                                            if (el.parentNode) {
+                                                el.parentNode.removeChild(el);
+                                            }
+                                        } catch (e) {
+                                            // Ignore removal errors
+                                        }
+                                    });
+                                } catch (e) {
+                                    // Ignore
+                                }
+                            });
+                            
+                            // Remove all iframes that might be Geidea's payment iframe
+                            var iframes = document.querySelectorAll('iframe');
+                            iframes.forEach(function(iframe) {
+                                try {
+                                    iframe.style.display = 'none';
+                                    iframe.style.visibility = 'hidden';
+                                    if (iframe.parentNode) {
+                                        iframe.parentNode.removeChild(iframe);
+                                    }
+                                } catch (e) {
+                                    // Ignore
+                                }
+                            });
+                            
+                            // Remove backdrop/overlay elements
+                            var backdrops = document.querySelectorAll('[class*="backdrop"], [class*="Backdrop"], [class*="mask"], [class*="Mask"]');
+                            backdrops.forEach(function(backdrop) {
+                                try {
+                                    backdrop.style.display = 'none';
+                                    backdrop.style.visibility = 'hidden';
+                                    if (backdrop.parentNode) {
+                                        backdrop.parentNode.removeChild(backdrop);
+                                    }
+                                } catch (e) {
+                                    // Ignore
+                                }
+                            });
+                            
+                            // Also try to close any open modals by clicking outside or escape
+                            document.body.style.overflow = ''; // Restore scroll
+                            document.body.style.position = ''; // Restore position
+                            
+                            // Try pressing Escape key programmatically
+                            var escEvent = new KeyboardEvent('keydown', {
+                                key: 'Escape',
+                                code: 'Escape',
+                                keyCode: 27,
+                                which: 27,
+                                bubbles: true,
+                                cancelable: true
+                            });
+                            document.dispatchEvent(escEvent);
+                        } catch (e) {
+                            console.log('Could not close Geidea modal:', e);
+                        }
+                        
+                        // Show SweetAlert - force it to appear on top
+                        setTimeout(function() {
+                            // Ensure no other modals are blocking
+                            var existingModals = document.querySelectorAll('.swal2-container, .modal, [class*="modal"]');
+                            existingModals.forEach(function(modal) {
+                                try {
+                                    if (modal.style) {
+                                        modal.style.zIndex = '9999';
+                                    }
+                                } catch (e) {
+                                    // Ignore
+                                }
+                            });
+                            
+                            Swal.fire({
+                                icon: 'error',
+                                title: translations.PaymentFailed,
+                                html: '<div style="text-align: ' + (translations.IsRtl === 'true' ? 'right' : 'left') + ';">' +
+                                    '<p style="margin-bottom: 10px; font-weight: 600; color: #dc2626; font-size: 1.1rem;">' + 
+                                    errorMessage.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</p>' +
+                                    '</div>',
+                                confirmButtonText: translations.OK,
+                                confirmButtonColor: '#dc2626',
+                                width: '500px',
+                                allowOutsideClick: true,
+                                allowEscapeKey: true,
+                                backdrop: true,
+                                zIndex: 99999, // Very high z-index to ensure it's on top
+                                didOpen: function() {
+                                    // Ensure body scroll is restored
+                                    document.body.style.overflow = '';
+                                    document.body.style.position = '';
+                                    
+                                    // Force the SweetAlert container to be on top
+                                    var swalContainer = document.querySelector('.swal2-container');
+                                    if (swalContainer && swalContainer.style) {
+                                        swalContainer.style.zIndex = '99999';
+                                    }
+                                    
+                                    // Hide any remaining Geidea elements
+                                    var geideaElements = document.querySelectorAll('[class*="geidea"], [id*="geidea"], [class*="Geidea"], [id*="Geidea"]');
+                                    geideaElements.forEach(function(el) {
+                                        if (el.style) {
+                                            el.style.display = 'none';
+                                            el.style.visibility = 'hidden';
+                                            el.style.opacity = '0';
+                                            el.style.pointerEvents = 'none';
+                                            el.style.zIndex = '-1';
+                                        }
+                                    });
+                                }
+                            }).then(function() {
+                                // Re-enable button
+                                var $btn = $('#placeOrderBtn');
+                                if ($btn.length) {
+                                    $btn.prop('disabled', false);
+                                    var $btnText = $btn.find('.btn-text');
+                                    var $btnLoader = $btn.find('.btn-loader');
+                                    if ($btnText.length) $btnText.show();
+                                    if ($btnLoader.length) $btnLoader.hide();
+                                }
+                                errorDetected = false; // Reset for next attempt
+                            });
+                        }, 500); // Increased delay to ensure Geidea modal is closed
+                    }
+                }
+                
+                // Set up MutationObserver to watch for error messages
+                if (typeof MutationObserver !== 'undefined') {
+                    errorObserver = new MutationObserver(function(mutations) {
+                        detectGeideaModalError();
+                    });
+                    
+                    // Start observing the document body for changes
+                    errorObserver.observe(document.body, {
+                        childList: true,
+                        subtree: true,
+                        characterData: true,
+                        attributes: true,
+                        attributeOldValue: false
+                    });
+                    
+                    // Also check periodically (more frequent for better detection)
+                    var errorCheckInterval = setInterval(function() {
+                        detectGeideaModalError();
+                    }, 300); // Check every 300ms
+                    
+                    // Clear interval after 60 seconds (payment should complete or fail by then)
+                    setTimeout(function() {
+                        clearInterval(errorCheckInterval);
+                        if (errorObserver) {
+                            errorObserver.disconnect();
+                        }
+                    }, 60000);
+                } else {
+                    // Fallback if MutationObserver not available - check more frequently
+                    var errorCheckInterval = setInterval(function() {
+                        detectGeideaModalError();
+                    }, 200);
+                    setTimeout(function() {
+                        clearInterval(errorCheckInterval);
+                    }, 60000);
+                }
+                
+                // Also listen for window messages (Geidea might post messages)
+                window.addEventListener('message', function(event) {
+                    try {
+                        var message = event.data;
+                        if (message && typeof message === 'object') {
+                            var messageStr = JSON.stringify(message).toLowerCase();
+                            if (messageStr.includes('error') || 
+                                messageStr.includes('rejected') || 
+                                messageStr.includes('failed') ||
+                                messageStr.includes('declined')) {
+                                detectGeideaModalError();
+                            }
+                        } else if (typeof message === 'string') {
+                            var msgLower = message.toLowerCase();
+                            if (msgLower.includes('error') || 
+                                msgLower.includes('rejected') || 
+                                msgLower.includes('failed') ||
+                                msgLower.includes('declined')) {
+                                detectGeideaModalError();
+                            }
+                        }
+                    } catch (e) {
+                        // Ignore
+                    }
+                });
+                
+                // Override console.error to catch Geidea errors
+                var originalConsoleError = console.error;
+                console.error = function() {
+                    var args = Array.prototype.slice.call(arguments);
+                    var errorStr = args.join(' ').toLowerCase();
+                    
+                    // Check if this is a payment error
+                    if (errorStr.includes('payer authentication rejected') ||
+                        errorStr.includes('authentication rejected') ||
+                        errorStr.includes('payment rejected') ||
+                        errorStr.includes('rejected')) {
+                        setTimeout(function() {
+                            detectGeideaModalError();
+                        }, 100);
+                    }
+                    
+                    // Call original console.error
+                    originalConsoleError.apply(console, args);
+                };
+                
                 // Initialize GeideaCheckout with callback handlers
                 const payment = new GeideaCheckout(
                     function onSuccess(data) {
+                        // Restore console.error
+                        console.error = originalConsoleError;
+                        
                         // Payment successful
                         console.log('Geidea payment success', data);
                         if (callback) callback(true);
                     },
                     function onError(error) {
+                        // Restore console.error
+                        console.error = originalConsoleError;
+                        
+                        // Mark that we've detected an error to prevent duplicate alerts
+                        errorDetected = true;
+                        
                         // Payment error - extract all available error information
-                        console.error('Geidea payment error', error);
+                        console.error('Geidea payment error callback triggered', error);
+                        console.error('Error type:', typeof error);
+                        console.error('Error stringified:', JSON.stringify(error, null, 2));
                         
                         // Build detailed error message
                         let errorMessage = translations.PaymentFailedPleaseTryAgain;
                         let errorDetails = [];
                         
+                        // Try to extract error message from all possible sources
                         if (error) {
-                            // Extract error message
-                            if (error.message) {
-                                errorMessage = error.message;
-                            } else if (typeof error === 'string') {
+                            // If error is a string, use it directly
+                            if (typeof error === 'string') {
                                 errorMessage = error;
-                            } else if (error.error) {
-                                errorMessage = error.error;
-                            } else if (error.errorMessage) {
-                                errorMessage = error.errorMessage;
+                            } 
+                            // If error is an object, check all possible properties
+                            else if (typeof error === 'object') {
+                                // Try to get message from various properties
+                                var possibleMessages = [
+                                    error.message,
+                                    error.error,
+                                    error.errorMessage,
+                                    error.detailedResponseMessage,
+                                    error.responseMessage,
+                                    error.reason,
+                                    error.description,
+                                    error.text,
+                                    error.title,
+                                    error.msg
+                                ];
+                                
+                                for (var i = 0; i < possibleMessages.length; i++) {
+                                    if (possibleMessages[i] && typeof possibleMessages[i] === 'string' && possibleMessages[i].trim().length > 0) {
+                                        errorMessage = possibleMessages[i].trim();
+                                        break;
+                                    }
+                                }
+                                
+                                // If still no message, try to stringify and parse
+                                if (errorMessage === translations.PaymentFailedPleaseTryAgain) {
+                                    try {
+                                        var errorStr = JSON.stringify(error);
+                                        if (errorStr && errorStr.length > 0 && errorStr !== '{}') {
+                                            errorMessage = 'Payment Error: ' + errorStr;
+                                        }
+                                    } catch (e) {
+                                        // Ignore
+                                    }
+                                }
+                                
+                                // Extract additional error details
+                                if (error.code) {
+                                    errorDetails.push(translations.ErrorCode + ': ' + error.code);
+                                }
+                                if (error.status) {
+                                    errorDetails.push(translations.Status + ': ' + error.status);
+                                }
+                                if (error.statusCode) {
+                                    errorDetails.push(translations.StatusCode + ': ' + error.statusCode);
+                                }
+                                if (error.responseCode) {
+                                    errorDetails.push(translations.ResponseCode + ': ' + error.responseCode);
+                                }
+                                if (error.detailedResponseCode) {
+                                    errorDetails.push(translations.DetailedResponseCode + ': ' + error.detailedResponseCode);
+                                }
+                                if (error.detailedResponseMessage && error.detailedResponseMessage !== errorMessage) {
+                                    errorDetails.push(translations.Details + ': ' + error.detailedResponseMessage);
+                                }
+                                if (error.responseMessage && error.responseMessage !== errorMessage) {
+                                    errorDetails.push(translations.Response + ': ' + error.responseMessage);
+                                }
                             }
-                            
-                            // Extract additional error details
-                            if (error.code) {
-                                errorDetails.push(translations.ErrorCode + ': ' + error.code);
-                            }
-                            if (error.status) {
-                                errorDetails.push(translations.Status + ': ' + error.status);
-                            }
-                            if (error.statusCode) {
-                                errorDetails.push(translations.StatusCode + ': ' + error.statusCode);
-                            }
-                            if (error.responseCode) {
-                                errorDetails.push(translations.ResponseCode + ': ' + error.responseCode);
-                            }
-                            if (error.detailedResponseCode) {
-                                errorDetails.push(translations.DetailedResponseCode + ': ' + error.detailedResponseCode);
-                            }
-                            if (error.detailedResponseMessage) {
-                                errorDetails.push(translations.Details + ': ' + error.detailedResponseMessage);
-                            }
-                            if (error.responseMessage) {
-                                errorDetails.push(translations.Response + ': ' + error.responseMessage);
-                            }
-                            
-                            // Log full error object for debugging
-                            console.error('Full Geidea error object:', JSON.stringify(error, null, 2));
                         }
                         
+                        // If we still don't have a specific message, use a generic one but still show the alert
+                        if (!errorMessage || errorMessage === translations.PaymentFailedPleaseTryAgain) {
+                            errorMessage = translations.PaymentFailedPleaseTryAgain || 'Payment was not successful. Please try again.';
+                        }
+                        
+                        // Close modal immediately
+                        closeGeideaModal();
+                        
                         // Build HTML content for SweetAlert
-                        let htmlContent = '<div style="text-align: left;">' +
-                            '<p style="margin-bottom: 10px; font-weight: 600; color: #dc2626;">' + errorMessage + '</p>';
+                        let htmlContent = '<div style="text-align: ' + (translations.IsRtl === 'true' ? 'right' : 'left') + ';">' +
+                            '<p style="margin-bottom: 10px; font-weight: 600; color: #dc2626; font-size: 1.1rem;">' + 
+                            (errorMessage || translations.PaymentFailedPleaseTryAgain).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</p>';
                         
                         if (errorDetails.length > 0) {
                             htmlContent += '<div style="margin-top: 15px; padding: 10px; background-color: #fef2f2; border-radius: 6px; border-left: 3px solid #dc2626;">' +
                                 '<p style="margin: 0 0 8px 0; font-weight: 600; color: #991b1b; font-size: 0.875rem;">' + translations.ErrorDetails + ':</p>' +
                                 '<ul style="margin: 0; padding-left: 20px; color: #7f1d1d; font-size: 0.875rem;">';
                             errorDetails.forEach(function(detail) {
-                                htmlContent += '<li style="margin-bottom: 4px;">' + detail + '</li>';
+                                htmlContent += '<li style="margin-bottom: 4px;">' + detail.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</li>';
                             });
                             htmlContent += '</ul></div>';
                         }
                         htmlContent += '</div>';
                         
-                        Swal.fire({
-                            icon: 'error',
-                            title: translations.PaymentFailed,
-                            html: htmlContent,
-                            confirmButtonText: translations.OK,
-                            confirmButtonColor: '#dc2626',
-                            width: '500px'
+                        // Show SweetAlert immediately - don't wait
+                        // Use requestAnimationFrame to ensure it renders after modal is closed
+                        requestAnimationFrame(function() {
+                            closeGeideaModal(); // Close again to be sure
+                            
+                            setTimeout(function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: translations.PaymentFailed || 'Payment Failed',
+                                    html: htmlContent,
+                                    confirmButtonText: translations.OK || 'OK',
+                                    confirmButtonColor: '#dc2626',
+                                    width: '500px',
+                                    allowOutsideClick: true,
+                                    allowEscapeKey: true,
+                                    backdrop: true,
+                                    zIndex: 99999,
+                                    customClass: {
+                                        container: 'geidea-error-alert'
+                                    },
+                                    didOpen: function() {
+                                        // Close modal again when SweetAlert opens
+                                        closeGeideaModal();
+                                        
+                                        // Ensure SweetAlert is on top
+                                        var swalContainer = document.querySelector('.swal2-container');
+                                        if (swalContainer) {
+                                            swalContainer.style.zIndex = '99999';
+                                            swalContainer.style.position = 'fixed';
+                                        }
+                                        
+                                        // Hide any remaining overlays
+                                        var overlays = document.querySelectorAll('.swal2-backdrop-show, [class*="backdrop"], [class*="overlay"]');
+                                        overlays.forEach(function(overlay) {
+                                            if (overlay && !overlay.classList.contains('swal2-backdrop-show')) {
+                                                overlay.style.display = 'none';
+                                            }
+                                        });
+                                    }
+                                }).then(function() {
+                                    // Re-enable button after user closes the alert
+                                    var $btn = $('#placeOrderBtn');
+                                    if ($btn.length) {
+                                        $btn.prop('disabled', false);
+                                        var $btnText = $btn.find('.btn-text');
+                                        var $btnLoader = $btn.find('.btn-loader');
+                                        if ($btnText.length) $btnText.show();
+                                        if ($btnLoader.length) $btnLoader.hide();
+                                    }
+                                    errorDetected = false; // Reset for next attempt
+                                });
+                            }, 100);
                         });
+                        
                         if (callback) callback(false);
                     },
                     function onCancel() {
@@ -1595,6 +2198,63 @@
                     }
                 );
 
+                // Add a global error handler that will catch any errors
+                var globalErrorHandler = function(event) {
+                    var errorText = '';
+                    if (event && event.target) {
+                        errorText = (event.target.textContent || event.target.innerText || '').toLowerCase();
+                    }
+                    
+                    if (errorText && (
+                        errorText.includes('payer authentication rejected') ||
+                        errorText.includes('authentication rejected') ||
+                        errorText.includes('payment rejected') ||
+                        errorText.includes('rejected')
+                    )) {
+                        if (!errorDetected) {
+                            errorDetected = true;
+                            var fullText = (event.target.textContent || event.target.innerText || '').trim();
+                            
+                            // Close Geidea modal
+                            closeGeideaModal();
+                            
+                            // Show SweetAlert
+                            setTimeout(function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: translations.PaymentFailed || 'Payment Failed',
+                                    html: '<div style="text-align: ' + (translations.IsRtl === 'true' ? 'right' : 'left') + ';">' +
+                                        '<p style="margin-bottom: 10px; font-weight: 600; color: #dc2626; font-size: 1.1rem;">' + 
+                                        fullText.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</p>' +
+                                        '</div>',
+                                    confirmButtonText: translations.OK || 'OK',
+                                    confirmButtonColor: '#dc2626',
+                                    width: '500px',
+                                    zIndex: 99999
+                                }).then(function() {
+                                    var $btn = $('#placeOrderBtn');
+                                    if ($btn.length) {
+                                        $btn.prop('disabled', false);
+                                        var $btnText = $btn.find('.btn-text');
+                                        var $btnLoader = $btn.find('.btn-loader');
+                                        if ($btnText.length) $btnText.show();
+                                        if ($btnLoader.length) $btnLoader.hide();
+                                    }
+                                    errorDetected = false;
+                                });
+                            }, 200);
+                        }
+                    }
+                };
+                
+                // Listen for clicks on error elements
+                document.addEventListener('click', globalErrorHandler, true);
+                document.addEventListener('DOMNodeInserted', function(e) {
+                    if (e.target && e.target.textContent) {
+                        globalErrorHandler({ target: e.target });
+                    }
+                }, true);
+                
                 // Start payment with sessionId
                 payment.startPayment(sessionId);
             } catch (error) {

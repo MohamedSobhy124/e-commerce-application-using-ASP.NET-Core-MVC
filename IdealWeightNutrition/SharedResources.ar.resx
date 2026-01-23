@@ -4340,4 +4340,199 @@
   <data name="Save" xml:space="preserve">
     <value>وفر</value>
   </data>
+  <data name="AccountFound" xml:space="preserve">
+    <value>تم العثور على حساب</value>
+  </data>
+  <data name="OrderWillBeLinkedToAccount" xml:space="preserve">
+    <value>سيتم ربط هذا الطلب بحسابك الموجود.</value>
+  </data>
+  <data name="AccountCreatedSuccessfully" xml:space="preserve">
+    <value>تم إنشاء حسابك بنجاح! تم إرسال بريد إلكتروني لإعداد كلمة المرور إلى عنوان بريدك الإلكتروني.</value>
+  </data>
+  <data name="OrderLinkedToAccount" xml:space="preserve">
+    <value>تم ربط طلبك بحسابك ({0}) لأن هذا البريد الإلكتروني لديه بالفعل حساب في النظام.</value>
+  </data>
+  <data name="CreateAccountForFutureOrders" xml:space="preserve">
+    <value>إنشاء حساب للدفع السريع في الطلبات المستقبلية</value>
+  </data>
+  <data name="CreateAccountDescription" xml:space="preserve">
+    <value>ستتمكن من تتبع طلباتك وحفظ معلوماتك للمرة القادمة.</value>
+  </data>
+  <data name="WelcomeToIdealWeight" xml:space="preserve">
+    <value>مرحباً بك في Ideal Weight Nutrition!</value>
+  </data>
+  <data name="AccountCreatedThankYou" xml:space="preserve">
+    <value>شكراً لك على إنشاء حساب معنا. تم إنشاء حسابك بنجاح.</value>
+  </data>
+  <data name="SetPasswordInstructions" xml:space="preserve">
+    <value>لتعيين كلمة المرور الخاصة بك والوصول إلى حسابك، يرجى النقر على الرابط أدناه:</value>
+  </data>
+  <data name="SetYourPassword" xml:space="preserve">
+    <value>تعيين كلمة المرور</value>
+  </data>
+  <data name="ButtonNotWorkingInstructions" xml:space="preserve">
+    <value>إذا لم يعمل الزر، انسخ والصق هذا الرابط في المتصفح:</value>
+  </data>
+  <data name="EmailAlreadyVerified" xml:space="preserve">
+    <value>تم التحقق من البريد الإلكتروني مسبقاً</value>
+  </data>
+  <data name="EmailVerified" xml:space="preserve">
+    <value>تم التحقق من البريد الإلكتروني</value>
+  </data>
+  <data name="ForgotYourPassword" xml:space="preserve">
+    <value>نسيت كلمة المرور؟</value>
+  </data>
+  <data name="EnterYourEmail" xml:space="preserve">
+    <value>أدخل عنوان بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>إعادة تعيين كلمة المرور</value>
+  </data>
+  <data name="ResetYourPassword" xml:space="preserve">
+    <value>إعادة تعيين كلمة المرور</value>
+  </data>
+  <data name="EnterNewPassword" xml:space="preserve">
+    <value>يرجى إدخال كلمة المرور الجديدة أدناه.</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>كلمة المرور الجديدة</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>تأكيد كلمة المرور</value>
+  </data>
+  <data name="PasswordPlaceholder" xml:space="preserve">
+    <value>أدخل كلمة المرور</value>
+  </data>
+  <data name="ConfirmPasswordPlaceholder" xml:space="preserve">
+    <value>أكد كلمة المرور</value>
+  </data>
+  <data name="ForgotPasswordConfirmation" xml:space="preserve">
+    <value>تأكيد نسيان كلمة المرور</value>
+  </data>
+  <data name="CheckYourEmail" xml:space="preserve">
+    <value>يرجى التحقق من بريدك الإلكتروني لإعادة تعيين كلمة المرور.</value>
+  </data>
+  <data name="PasswordResetEmailSent" xml:space="preserve">
+    <value>لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى عنوان بريدك الإلكتروني. يرجى التحقق من صندوق الوارد واتباع التعليمات لإعادة تعيين كلمة المرور.</value>
+  </data>
+  <data name="BackToLogin" xml:space="preserve">
+    <value>العودة إلى تسجيل الدخول</value>
+  </data>
+  <data name="DidNotReceiveEmail" xml:space="preserve">
+    <value>لم تستلم البريد الإلكتروني؟ تحقق من مجلد الرسائل غير المرغوب فيها أو حاول مرة أخرى.</value>
+  </data>
+  <data name="ResetPasswordConfirmation" xml:space="preserve">
+    <value>تأكيد إعادة تعيين كلمة المرور</value>
+  </data>
+  <data name="PasswordResetSuccessfully" xml:space="preserve">
+    <value>تم إعادة تعيين كلمة المرور بنجاح!</value>
+  </data>
+  <data name="PasswordResetSuccessMessage" xml:space="preserve">
+    <value>يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة.</value>
+  </data>
+  <data name="ClickHereToLogIn" xml:space="preserve">
+    <value>انقر هنا لتسجيل الدخول</value>
+  </data>
+  <data name="AccountCreated" xml:space="preserve">
+    <value>تم إنشاء الحساب</value>
+  </data>
+  <data name="AccountLinked" xml:space="preserve">
+    <value>تم ربط الحساب</value>
+  </data>
+  <data name="MySubscriptions" xml:space="preserve">
+    <value>اشتراكاتي</value>
+  </data>
+  <data name="ViewYourServiceSubscriptions" xml:space="preserve">
+    <value>عرض اشتراكات الخدمات الخاصة بك وسجل المشتريات</value>
+  </data>
+  <data name="NoSubscriptionsYet" xml:space="preserve">
+    <value>لا توجد اشتراكات حتى الآن</value>
+  </data>
+  <data name="StartBrowsingServices" xml:space="preserve">
+    <value>ابدأ في تصفح الخدمات لرؤية اشتراكاتك هنا</value>
+  </data>
+  <data name="BrowseServices" xml:space="preserve">
+    <value>تصفح الخدمات</value>
+  </data>
+  <data name="PurchaseID" xml:space="preserve">
+    <value>رقم الشراء</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>عرض التفاصيل</value>
+  </data>
+  <data name="ViewSubscriptions" xml:space="preserve">
+    <value>عرض الاشتراكات</value>
+  </data>
+  <data name="AdminActions" xml:space="preserve">
+    <value>إجراءات المسؤول</value>
+  </data>
+  <data name="UpdatePaymentStatus" xml:space="preserve">
+    <value>تحديث حالة الدفع</value>
+  </data>
+  <data name="UpdateServiceStatus" xml:space="preserve">
+    <value>تحديث حالة الخدمة</value>
+  </data>
+  <data name="UpdateAmountPaid" xml:space="preserve">
+    <value>تحديث المبلغ المدفوع</value>
+  </data>
+  <data name="CurrentStatus" xml:space="preserve">
+    <value>الحالة الحالية</value>
+  </data>
+  <data name="NewAmountPaid" xml:space="preserve">
+    <value>المبلغ المدفوع الجديد</value>
+  </data>
+  <data name="CurrentAmountPaid" xml:space="preserve">
+    <value>المبلغ المدفوع الحالي</value>
+  </data>
+  <data name="MaxAmount" xml:space="preserve">
+    <value>الحد الأقصى</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>نشط</value>
+  </data>
+  <data name="Expired" xml:space="preserve">
+    <value>منتهي</value>
+  </data>
+  <data name="Suspended" xml:space="preserve">
+    <value>معلق</value>
+  </data>
+  <data name="Updating" xml:space="preserve">
+    <value>جاري التحديث...</value>
+  </data>
+  <data name="AddAmount" xml:space="preserve">
+    <value>إضافة مبلغ</value>
+  </data>
+  <data name="AmountToAdd" xml:space="preserve">
+    <value>المبلغ المراد إضافته للدفعة الحالية</value>
+  </data>
+  <data name="PleaseEnterValidAmount" xml:space="preserve">
+    <value>يرجى إدخال مبلغ صحيح أكبر من 0.</value>
+  </data>
+  <data name="TotalPurchases" xml:space="preserve">
+    <value>إجمالي المشتريات</value>
+  </data>
+  <data name="ExportServicePurchases" xml:space="preserve">
+    <value>تصدير مشتريات الخدمات</value>
+  </data>
+  <data name="PaymentNotSuccessful" xml:space="preserve">
+    <value>لم يتم الدفع بنجاح. تم إلغاء اشتراكك. يرجى المحاولة مرة أخرى أو الاتصال بالدعم إذا كان لديك أي أسئلة.</value>
+  </data>
+  <data name="PaymentFailed" xml:space="preserve">
+    <value>فشل الدفع</value>
+  </data>
+  <data name="PaymentCancelled" xml:space="preserve">
+    <value>تم إلغاء الدفع. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="PaymentProcessingError" xml:space="preserve">
+    <value>حدث خطأ أثناء معالجة الدفع. يرجى الاتصال بالدعم.</value>
+  </data>
+  <data name="InvalidOrderId" xml:space="preserve">
+    <value>معرف الطلب غير صحيح</value>
+  </data>
+  <data name="OrderNotFound" xml:space="preserve">
+    <value>الطلب غير موجود</value>
+  </data>
+  <data name="PaymentSuccessful" xml:space="preserve">
+    <value>تم الدفع بنجاح!</value>
+  </data>
 </root>

@@ -19,6 +19,9 @@
     bool isOffersActive = controller.Equals("Offer", StringComparison.OrdinalIgnoreCase) && 
                          area.Equals("Customer", StringComparison.OrdinalIgnoreCase);
     
+    bool isServicesActive = controller.Equals("ServiceSubscription", StringComparison.OrdinalIgnoreCase) && 
+                           area.Equals("Customer", StringComparison.OrdinalIgnoreCase);
+    
     bool isAccountActive = controller.Equals("Account", StringComparison.OrdinalIgnoreCase) && 
                           area.Equals("Customer", StringComparison.OrdinalIgnoreCase);
     
@@ -48,6 +51,14 @@
            title="@Localizer["Offers"]">
             <i class="bi bi-tag-fill nav-icon"></i>
             <span class="nav-label">@Localizer["Offers"]</span>
+        </a>
+
+        <!-- Services -->
+        <a href="@Url.Action("Index", "ServiceSubscription", new { area = "Customer" })" 
+           class="nav-item @(isServicesActive ? "active" : "")"
+           title="@(currentCulture == "ar" ? "الخدمات" : "Services")">
+            <i class="bi bi-briefcase-fill nav-icon"></i>
+            <span class="nav-label">@(currentCulture == "ar" ? "الخدمات" : "Services")</span>
         </a>
 
         <!-- Cart -->

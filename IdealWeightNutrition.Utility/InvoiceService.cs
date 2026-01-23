@@ -372,6 +372,14 @@ namespace IdealWeightNutrition.Utility
                         row.ConstantItem(100).AlignRight().Text($"AED {deliveryAmount:N2}").FontSize(10);
                     });
                 }
+                else
+                {
+                    column.Item().AlignRight().Row(row =>
+                    {
+                        row.ConstantItem(150).Text("Delivery:").FontSize(10).FontColor(Colors.Grey.Darken1);
+                        row.ConstantItem(100).AlignRight().Text("Free").FontSize(10);
+                    });
+                }
                 column.Item().PaddingTop(10).AlignRight().Row(row =>
                 {
                     row.ConstantItem(150).Text("Total Amount:").FontSize(12).Bold().FontColor(Colors.Blue.Darken3);

@@ -3,6 +3,7 @@ using IdealWeightNutrition.Models;
 using IdealWeightNutrition.Models.ViewModels;
 using IdealWeightNutrition.Utility;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -30,9 +31,10 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 		private readonly ILogger<CartController> _logger;
 		private readonly IServiceScopeFactory _serviceScopeFactory;
 		private readonly IMemoryCache _memoryCache;
+		private readonly UserManager<ApplicationUser> _userManager;
 		public ShoppingCartVM  ShoppingCartVM { get; set; }
 
-        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, IdealWeightNutrition.Services.INotificationService notificationService, IdealWeightNutrition.Services.IStockService stockService, IOptions<TappySettings> tappySettings, IOptions<TamaraSettings> tamaraSettings, IOptions<GeideaSettings> geideaSettings, IStringLocalizer<SharedResources> localizer, ILogger<CartController> logger, IServiceScopeFactory serviceScopeFactory, IMemoryCache memoryCache) 
+        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, IdealWeightNutrition.Services.INotificationService notificationService, IdealWeightNutrition.Services.IStockService stockService, IOptions<TappySettings> tappySettings, IOptions<TamaraSettings> tamaraSettings, IOptions<GeideaSettings> geideaSettings, IStringLocalizer<SharedResources> localizer, ILogger<CartController> logger, IServiceScopeFactory serviceScopeFactory, IMemoryCache memoryCache, UserManager<ApplicationUser> userManager) 
         {
          _unitOfWork = unitOfWork;
 			_emailSender = emailSender;
@@ -45,6 +47,7 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 			_logger = logger;
 			_serviceScopeFactory = serviceScopeFactory;
 			_memoryCache = memoryCache;
+			_userManager = userManager;
         }
         public IActionResult Index()
         {
@@ -135,7 +138,12 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
                 // Load variant option values for each cart item
                 foreach (var cart in cartItems)
                 {
-                    cart.product.ProductImages=cart.product.ProductImages.Where(_ => _.ImageInfo is null).ToList();
+                    // Filter out images with ImageInfo for authenticated user cart items
+                    if (cart.product != null && cart.product.ProductImages != null)
+                    {
+                        cart.product.ProductImages = cart.product.ProductImages.Where(_ => _.ImageInfo == null).ToList();
+                    }
+                    
                     if (cart.ProductVariantId.HasValue && cart.ProductVariant != null)
                     {
                         // Ensure variant option values are loaded
@@ -179,104 +187,128 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
             var requestCulture = HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
             var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
             
-            var items = cartItems.Select(cart => {
-                // Check if this is a combo offer
-                bool isComboOffer = cart.ComboOfferId.HasValue && cart.ComboOffer != null;
-                
-                // Get display name - use combo name if it's a combo, otherwise use product name
-                string displayTitle = isComboOffer 
-                    ? (currentCulture == "ar" && !string.IsNullOrEmpty(cart.ComboOffer.NameAr) 
-                        ? cart.ComboOffer.NameAr 
-                        : cart.ComboOffer.Name)
-                    : (cart.product != null 
-                        ? (currentCulture == "ar" && !string.IsNullOrEmpty(cart.product.TitleAr) 
-                            ? cart.product.TitleAr 
-                            : cart.product.Title ?? "Product")
-                        : "Product");
-                
-                // Get image - use combo image if it's a combo, otherwise use product image
-                string imageUrl = isComboOffer && !string.IsNullOrEmpty(cart.ComboOffer.ImageUrl)
-                    ? cart.ComboOffer.ImageUrl
-                    : GetProductImageUrl(cart.product);
-                
-                // Build variant name if variant exists (localized based on current culture)
-                string variantName = "";
-                if (cart.ProductVariantId.HasValue && cart.ProductVariant != null)
+            var items = cartItems.Where(cart => cart != null).Select(cart => {
+                try
                 {
-                    if (cart.ProductVariant.VariantOptionValues != null && cart.ProductVariant.VariantOptionValues.Any())
+                    // Check if this is a combo offer
+                    bool isComboOffer = cart.ComboOfferId.HasValue && cart.ComboOffer != null;
+                    
+                    // Get display name - use combo name if it's a combo, otherwise use product name
+                    string displayTitle = isComboOffer 
+                        ? (currentCulture == "ar" && !string.IsNullOrEmpty(cart.ComboOffer?.NameAr) 
+                            ? cart.ComboOffer.NameAr 
+                            : cart.ComboOffer?.Name ?? "Combo Offer")
+                        : (cart.product != null 
+                            ? (currentCulture == "ar" && !string.IsNullOrEmpty(cart.product.TitleAr) 
+                                ? cart.product.TitleAr 
+                                : cart.product.Title ?? "Product")
+                            : "Product");
+                    
+                    // Get image - use combo image if it's a combo, otherwise use product image
+                    string imageUrl = isComboOffer && !string.IsNullOrEmpty(cart.ComboOffer?.ImageUrl)
+                        ? cart.ComboOffer.ImageUrl
+                        : GetProductImageUrl(cart.product);
+                    
+                    // Build variant name if variant exists (localized based on current culture)
+                    string variantName = "";
+                    if (cart.ProductVariantId.HasValue && cart.ProductVariant != null)
                     {
-                        var optionValues = cart.ProductVariant.VariantOptionValues
-                            .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
-                            .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
-                            .Select(vov => {
-                                var optionName = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ProductOption?.NameAr)) 
-                                    ? vov.OptionValue.ProductOption.NameAr 
-                                    : vov.OptionValue?.ProductOption?.Name;
-                                
-                                var optionValue = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ValueAr)) 
-                                    ? vov.OptionValue.ValueAr 
-                                    : vov.OptionValue?.Value;
-                                
-                                return $"{optionName}: {optionValue}";
-                            })
-                            .Where(s => !string.IsNullOrEmpty(s))
-                            .ToList();
-                        
-                        if (optionValues.Any())
+                        if (cart.ProductVariant.VariantOptionValues != null && cart.ProductVariant.VariantOptionValues.Any())
                         {
-                            variantName = string.Join(" / ", optionValues);
+                            var optionValues = cart.ProductVariant.VariantOptionValues
+                                .OrderBy(vov => vov.OptionValue?.ProductOption?.DisplayOrder ?? 0)
+                                .ThenBy(vov => vov.OptionValue?.DisplayOrder ?? 0)
+                                .Select(vov => {
+                                    var optionName = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ProductOption?.NameAr)) 
+                                        ? vov.OptionValue.ProductOption.NameAr 
+                                        : vov.OptionValue?.ProductOption?.Name;
+                                    
+                                    var optionValue = (currentCulture == "ar" && !string.IsNullOrEmpty(vov.OptionValue?.ValueAr)) 
+                                        ? vov.OptionValue.ValueAr 
+                                        : vov.OptionValue?.Value;
+                                    
+                                    return $"{optionName}: {optionValue}";
+                                })
+                                .Where(s => !string.IsNullOrEmpty(s))
+                                .ToList();
+                            
+                            if (optionValues.Any())
+                            {
+                                variantName = string.Join(" / ", optionValues);
+                            }
+                        }
+                        else if (!string.IsNullOrEmpty(cart.ProductVariant.VariantName))
+                        {
+                            variantName = cart.ProductVariant.VariantName;
                         }
                     }
-                    else if (!string.IsNullOrEmpty(cart.ProductVariant.VariantName))
+                    
+                    // Get stock information for validation
+                    int availableStock = 0;
+                    int? flashSaleQuantity = null;
+                    
+                    if (cart.FlashSaleItemId.HasValue && cart.FlashSaleItem != null)
                     {
-                        variantName = cart.ProductVariant.VariantName;
+                        // Flash sale item - use flash sale quantity
+                        flashSaleQuantity = cart.FlashSaleItem.FlashSaleQuantity;
+                        availableStock = cart.FlashSaleItem.FlashSaleQuantity;
                     }
+                    else if (cart.ProductVariantId.HasValue && cart.ProductVariant != null)
+                    {
+                        // Variant product - use variant stock
+                        availableStock = cart.ProductVariant.StockQuantity;
+                    }
+                    else if (cart.product != null)
+                    {
+                        // Regular product - use product stock
+                        availableStock = cart.product.StockQuantity;
+                    }
+                    
+                    // Get product slug for details page link
+                    string productSlug = null;
+                    if (cart.product != null && !isComboOffer)
+                    {
+                        productSlug = cart.product.GetSlug();
+                    }
+                    
+                    return new
+                    {
+                        productId = cart.ProductId, // Always use ProductId (never 0 for valid items)
+                        title = displayTitle,
+                        imageUrl = imageUrl,
+                        price = GetCartItemPrice(cart), // 🔥 Use new method that checks flash sale price
+                        count = cart.Count,
+                        cartId = cart.Id > 0 ? cart.Id : (int?)null, // Use null for guest cart items (Id = 0)
+                        isFlashSale = cart.FlashSaleItemId.HasValue, // 🔥 Indicate if it's a flash sale item
+                        isComboOffer = isComboOffer, // 🔥 Indicate if it's a combo offer
+                        variantName = variantName, // 🔥 Include variant name if exists
+                        availableStock = availableStock, // 🔥 Stock available for this item
+                        flashSaleQuantity = flashSaleQuantity, // 🔥 Flash sale quantity if applicable
+                        flashSaleItemId = cart.FlashSaleItemId, // 🔥 Flash sale item ID if applicable
+                        productSlug = productSlug // 🔥 Product slug for details page link
+                    };
                 }
-                
-                // Get stock information for validation
-                int availableStock = 0;
-                int? flashSaleQuantity = null;
-                
-                if (cart.FlashSaleItemId.HasValue && cart.FlashSaleItem != null)
+                catch (Exception ex)
                 {
-                    // Flash sale item - use flash sale quantity
-                    flashSaleQuantity = cart.FlashSaleItem.FlashSaleQuantity;
-                    availableStock = cart.FlashSaleItem.FlashSaleQuantity;
+                    _logger?.LogError(ex, $"Error processing cart item with ProductId: {cart?.ProductId}, CartId: {cart?.Id}");
+                    // Return a safe default object for this cart item
+                    return new
+                    {
+                        productId = cart?.ProductId ?? 0,
+                        title = "Product",
+                        imageUrl = "/images/no-image.png",
+                        price = 0.0,
+                        count = cart?.Count ?? 0,
+                        cartId = cart?.Id > 0 ? cart.Id : (int?)null,
+                        isFlashSale = false,
+                        isComboOffer = false,
+                        variantName = "",
+                        availableStock = 0,
+                        flashSaleQuantity = (int?)null,
+                        flashSaleItemId = (int?)null,
+                        productSlug = (string)null
+                    };
                 }
-                else if (cart.ProductVariantId.HasValue && cart.ProductVariant != null)
-                {
-                    // Variant product - use variant stock
-                    availableStock = cart.ProductVariant.StockQuantity;
-                }
-                else if (cart.product != null)
-                {
-                    // Regular product - use product stock
-                    availableStock = cart.product.StockQuantity;
-                }
-                
-                // Get product slug for details page link
-                string productSlug = null;
-                if (cart.product != null && !isComboOffer)
-                {
-                    productSlug = cart.product.GetSlug();
-                }
-                
-                return new
-                {
-                    productId = cart.ProductId, // Always use ProductId (never 0 for valid items)
-                    title = displayTitle,
-                    imageUrl = imageUrl,
-                    price = GetCartItemPrice(cart), // 🔥 Use new method that checks flash sale price
-                    count = cart.Count,
-                    cartId = cart.Id > 0 ? cart.Id : (int?)null, // Use null for guest cart items (Id = 0)
-                    isFlashSale = cart.FlashSaleItemId.HasValue, // 🔥 Indicate if it's a flash sale item
-                    isComboOffer = isComboOffer, // 🔥 Indicate if it's a combo offer
-                    variantName = variantName, // 🔥 Include variant name if exists
-                    availableStock = availableStock, // 🔥 Stock available for this item
-                    flashSaleQuantity = flashSaleQuantity, // 🔥 Flash sale quantity if applicable
-                    flashSaleItemId = cart.FlashSaleItemId, // 🔥 Flash sale item ID if applicable
-                    productSlug = productSlug // 🔥 Product slug for details page link
-                };
             }).ToList();
 
             var subtotal = cartItems.Sum(cart => GetCartItemPrice(cart) * cart.Count);
@@ -1568,6 +1600,29 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 		}
 
 		[HttpPost]
+		public IActionResult CheckEmailHasAccount(string email)
+		{
+			if (string.IsNullOrWhiteSpace(email))
+			{
+				return Json(new { hasAccount = false });
+			}
+
+			email = email.Trim().ToLowerInvariant();
+			
+			// Check if email belongs to an ApplicationUser
+			var user = _unitOfWork.applicationUser.GetAll(
+				u => u.Email != null && u.Email.ToLower() == email
+			).FirstOrDefault();
+			
+			if (user != null)
+			{
+				return Json(new { hasAccount = true });
+			}
+			
+			return Json(new { hasAccount = false });
+		}
+
+		[HttpPost]
 		public IActionResult CheckEmailVerified(string email)
 		{
 			if (string.IsNullOrWhiteSpace(email))
@@ -1576,10 +1631,67 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 			}
 
 			email = email.Trim().ToLowerInvariant();
+			
+			// Check if email was verified via OTP
 			var otpHelper = new OtpHelper(_memoryCache);
-			var isVerified = otpHelper.IsEmailVerified(email);
-
-			return Json(new { verified = isVerified });
+			var isOtpVerified = otpHelper.IsEmailVerified(email);
+			
+			if (isOtpVerified)
+			{
+				return Json(new { verified = true });
+			}
+			
+			// Check if email has any guest orders
+			var hasGuestOrders = _unitOfWork.OrderHeader.GetAll(
+				o => o.Email != null && o.Email.ToLower() == email
+			).Any();
+			
+			if (hasGuestOrders)
+			{
+				return Json(new { verified = true, message = _localizer["EmailVerified"]?.Value ?? "Email verified" });
+			}
+			
+			// Check if email belongs to an authenticated user who has orders
+			var user = _unitOfWork.applicationUser.GetAll(
+				u => u.Email != null && u.Email.ToLower() == email
+			).FirstOrDefault();
+			
+			if (user != null)
+			{
+				var hasUserOrders = _unitOfWork.OrderHeader.GetAll(
+					o => o.ApplicationUserId == user.Id && !o.IsGuestOrder
+				).Any();
+				
+				if (hasUserOrders)
+				{
+					return Json(new { verified = true, message = _localizer["EmailVerified"]?.Value ?? "Email verified" });
+				}
+			}
+			
+			// Check if email has any guest service purchases
+			var hasGuestServicePurchases = _unitOfWork.ServicePurchases.GetAll(
+				sp => sp.GuestEmail != null && sp.GuestEmail.ToLower() == email
+			).Any();
+			
+			if (hasGuestServicePurchases)
+			{
+				return Json(new { verified = true, message = _localizer["EmailVerified"]?.Value ?? "Email verified" });
+			}
+			
+			// Check if email belongs to an authenticated user who has service purchases
+			if (user != null)
+			{
+				var hasUserServicePurchases = _unitOfWork.ServicePurchases.GetAll(
+					sp => sp.ApplicationUserId == user.Id
+				).Any();
+				
+				if (hasUserServicePurchases)
+				{
+					return Json(new { verified = true, message = _localizer["EmailVerified"]?.Value ?? "Email verified" });
+				}
+			}
+			
+			return Json(new { verified = false });
 		}
 
 		[HttpPost]
@@ -1997,7 +2109,132 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 				if (isGuest)
 				{
 					ShoppingCartVM.OrderHeader.IsGuestOrder = true;
-					ShoppingCartVM.OrderHeader.ApplicationUserId = null;
+					
+					// Check if email has an existing account
+					if (!string.IsNullOrWhiteSpace(ShoppingCartVM.OrderHeader.Email))
+					{
+						var emailLower = ShoppingCartVM.OrderHeader.Email.Trim().ToLowerInvariant();
+						var existingUser = _unitOfWork.applicationUser.GetAll(
+							u => u.Email != null && u.Email.ToLower() == emailLower
+						).FirstOrDefault();
+						
+						if (existingUser != null)
+						{
+							// Email has account - link order to this account
+							ShoppingCartVM.OrderHeader.ApplicationUserId = existingUser.Id;
+							ShoppingCartVM.OrderHeader.IsGuestOrder = false; // Link to account, so not a guest order
+							userId = existingUser.Id;
+							
+							// Store message for display after order creation
+							TempData["AccountLinkedMessage"] = string.Format(
+								_localizer["OrderLinkedToAccount"]?.Value ?? "Your order has been linked to your account ({0}) because this email already has an account in the system.",
+								ShoppingCartVM.OrderHeader.Email
+							);
+						}
+						else
+						{
+							// Check if user wants to create account
+							var createAccount = Request.Form["CreateAccount"].ToString() == "true";
+							
+							if (createAccount)
+							{
+								// Create new account
+								try
+								{
+									var newUser = new ApplicationUser
+									{
+										UserName = ShoppingCartVM.OrderHeader.Email,
+										Email = ShoppingCartVM.OrderHeader.Email,
+										Name = ShoppingCartVM.OrderHeader.Name,
+										PhoneNumber = ShoppingCartVM.OrderHeader.PhoneNumber,
+										StreetAddress = ShoppingCartVM.OrderHeader.StreetAddress,
+										City = ShoppingCartVM.OrderHeader.City,
+										State = ShoppingCartVM.OrderHeader.State,
+										PostalCode = ShoppingCartVM.OrderHeader.PostalCode
+									};
+									
+									// Generate a random password (user can reset it later)
+									var password = System.Guid.NewGuid().ToString("N").Substring(0, 12) + "A1!";
+									var result = await _userManager.CreateAsync(newUser, password);
+									
+									if (result.Succeeded)
+									{
+										// Assign customer role
+										await _userManager.AddToRoleAsync(newUser, SD.Role_Customer);
+										
+										// Link order to new account
+										ShoppingCartVM.OrderHeader.ApplicationUserId = newUser.Id;
+										ShoppingCartVM.OrderHeader.IsGuestOrder = false;
+										userId = newUser.Id;
+										
+										// Send welcome email with password reset link
+										var token = await _userManager.GeneratePasswordResetTokenAsync(newUser);
+										var resetLink = Url.Action("ResetPassword", "Account", new { area = "Identity", code = token, email = newUser.Email }, Request.Scheme);
+										
+										var welcomeTitle = _localizer["WelcomeToIdealWeight"]?.Value ?? "Welcome to Ideal Weight Nutrition!";
+										var thankYouMessage = _localizer["AccountCreatedThankYou"]?.Value ?? "Thank you for creating an account with us. Your account has been created successfully.";
+										var setPasswordInstructions = _localizer["SetPasswordInstructions"]?.Value ?? "To set your password and access your account, please click the link below:";
+										var setPasswordButton = _localizer["SetYourPassword"]?.Value ?? "Set Your Password";
+										var buttonNotWorking = _localizer["ButtonNotWorkingInstructions"]?.Value ?? "If the button doesn't work, copy and paste this link into your browser:";
+										
+										var welcomeEmailBody = $@"
+											<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;'>
+												<div style='background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+													<h2 style='color: #059669; margin-top: 0;'>{welcomeTitle}</h2>
+													<p style='color: #374151; font-size: 16px; line-height: 1.6;'>
+														{thankYouMessage}
+													</p>
+													<p style='color: #374151; font-size: 16px; line-height: 1.6;'>
+														{setPasswordInstructions}
+													</p>
+													<div style='text-align: center; margin: 30px 0;'>
+														<a href='{resetLink}' style='display: inline-block; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600;'>{setPasswordButton}</a>
+													</div>
+													<p style='color: #6b7280; font-size: 14px; margin-top: 20px;'>
+														{buttonNotWorking}<br/>
+														<a href='{resetLink}' style='color: #059669;'>{resetLink}</a>
+													</p>
+													<hr style='border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;' />
+													<p style='color: #9ca3af; font-size: 12px; text-align: center; margin: 0;'>
+														© {DateTime.Now.Year} Ideal Weight Nutrition. All rights reserved.
+													</p>
+												</div>
+											</div>";
+										
+										var emailSubject = $"{welcomeTitle} - {setPasswordButton}";
+										await _emailSender.SendEmailAsync(newUser.Email, emailSubject, welcomeEmailBody);
+										
+										// Store message for display
+										TempData["AccountCreatedMessage"] = _localizer["AccountCreatedSuccessfully"]?.Value ?? 
+											$"An account has been created for {ShoppingCartVM.OrderHeader.Email}. A password setup link has been sent to your email.";
+									}
+									else
+									{
+										// Account creation failed - continue as guest
+										_logger.LogWarning("Failed to create account for {Email}: {Errors}", 
+											ShoppingCartVM.OrderHeader.Email, 
+											string.Join(", ", result.Errors.Select(e => e.Description)));
+										ShoppingCartVM.OrderHeader.ApplicationUserId = null;
+									}
+								}
+								catch (Exception ex)
+								{
+									_logger.LogError(ex, "Error creating account for {Email}", ShoppingCartVM.OrderHeader.Email);
+									// Continue as guest if account creation fails
+									ShoppingCartVM.OrderHeader.ApplicationUserId = null;
+								}
+							}
+							else
+							{
+								// No account creation requested - continue as guest
+								ShoppingCartVM.OrderHeader.ApplicationUserId = null;
+							}
+						}
+					}
+					else
+					{
+						ShoppingCartVM.OrderHeader.ApplicationUserId = null;
+					}
 				}
 				else
 				{
@@ -2140,7 +2377,14 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 				// Add delivery charge to order total (after promo code discount)
 				ShoppingCartVM.OrderHeader.OrderTotal += deliveryCharge;
 
-				if (isGuest || applicationUser.CompanyId.GetValueOrDefault() == 0)
+				// Check if order is linked to an account (might have been linked from guest)
+				var orderIsLinkedToAccount = !string.IsNullOrEmpty(ShoppingCartVM.OrderHeader.ApplicationUserId);
+				if (orderIsLinkedToAccount)
+				{
+					applicationUser = _unitOfWork.applicationUser.Get(u => u.Id == ShoppingCartVM.OrderHeader.ApplicationUserId);
+				}
+				
+				if (!orderIsLinkedToAccount || (applicationUser != null && applicationUser.CompanyId.GetValueOrDefault() == 0))
 				{
 					//it is a guest or regular customer 
 					ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
@@ -2155,12 +2399,12 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 				_unitOfWork.OrderHeader.add(ShoppingCartVM.OrderHeader);
 				_unitOfWork.save();
 				
-				// Record promo code usage if applied
-				if (ShoppingCartVM.OrderHeader.PromoCodeId.HasValue && !isGuest)
+				// Record promo code usage if applied (check if order is linked to account, not just isGuest)
+				if (ShoppingCartVM.OrderHeader.PromoCodeId.HasValue && !string.IsNullOrEmpty(ShoppingCartVM.OrderHeader.ApplicationUserId))
 				{
 					_unitOfWork.PromoCodeUsage.RecordUsage(
 						ShoppingCartVM.OrderHeader.PromoCodeId.Value, 
-						userId, 
+						ShoppingCartVM.OrderHeader.ApplicationUserId, 
 						ShoppingCartVM.OrderHeader.Id);
 					_unitOfWork.PromoCode.IncrementUsage(ShoppingCartVM.OrderHeader.PromoCodeId.Value);
 					_unitOfWork.save();
@@ -2212,7 +2456,14 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 					_unitOfWork.save();
 				}
 
-				if (isGuest || applicationUser.CompanyId.GetValueOrDefault() == 0)
+				// Check if order is linked to an account (might have been linked from guest) - reuse variable from above
+				orderIsLinkedToAccount = !string.IsNullOrEmpty(ShoppingCartVM.OrderHeader.ApplicationUserId);
+				if (orderIsLinkedToAccount)
+				{
+					applicationUser = _unitOfWork.applicationUser.Get(u => u.Id == ShoppingCartVM.OrderHeader.ApplicationUserId);
+				}
+				
+				if (!orderIsLinkedToAccount || (applicationUser != null && applicationUser.CompanyId.GetValueOrDefault() == 0))
 				{
 					//it is a guest or regular customer account and we need to capture payment
 					var domain = Request.Scheme + "://" + Request.Host.Value + "/";
@@ -3616,10 +3867,9 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
             var orderHeaderId = orderHeader.Id;
             
             // Clear guest cart synchronously before async operation
-            if (isGuestOrder)
-            {
+           
                 IdealWeightNutrition.Utility.GuestCartHelper.ClearCart(HttpContext.Session);
-            }
+            
 
             _ = Task.Run(async () =>
             {
@@ -4155,6 +4405,169 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
             IdealWeightNutrition.Utility.GuestCartHelper.ClearCart(session);
 
             return mergedCount;
+        }
+
+        /// <summary>
+        /// Handles Geidea payment callback/webhook
+        /// According to Geidea documentation: Only proceed if responseCode is "000" and responseMessage is "Success"
+        /// </summary>
+        [HttpPost]
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GeideaCallback(string? orderId = null)
+        {
+            try
+            {
+                _logger.LogInformation("GeideaCallback called with orderId: {OrderId}", orderId);
+
+                // Get orderId from query string or form data
+                if (string.IsNullOrEmpty(orderId))
+                {
+                    orderId = Request.Query["orderId"].ToString();
+                    if (string.IsNullOrEmpty(orderId))
+                    {
+                        orderId = Request.Form["orderId"].ToString();
+                    }
+                }
+
+                // Get merchantReferenceId from Geidea callback (this is our order ID)
+                var merchantReferenceId = Request.Query["merchantReferenceId"].ToString();
+                if (string.IsNullOrEmpty(merchantReferenceId))
+                {
+                    merchantReferenceId = Request.Form["merchantReferenceId"].ToString();
+                }
+
+                // Use merchantReferenceId if orderId is not provided
+                if (string.IsNullOrEmpty(orderId) && !string.IsNullOrEmpty(merchantReferenceId))
+                {
+                    orderId = merchantReferenceId;
+                }
+
+                if (string.IsNullOrEmpty(orderId) || !int.TryParse(orderId, out int orderIdInt))
+                {
+                    _logger.LogWarning("GeideaCallback: Invalid or missing orderId");
+                    TempData["error"] = _localizer["InvalidOrderId"]?.Value ?? "Invalid order ID";
+                    return RedirectToAction("Index");
+                }
+
+                // Get the order
+                var order = _unitOfWork.OrderHeader.Get(o => o.Id == orderIdInt);
+                if (order == null)
+                {
+                    _logger.LogWarning("GeideaCallback: Order {OrderId} not found", orderIdInt);
+                    TempData["error"] = _localizer["OrderNotFound"]?.Value ?? "Order not found";
+                    return RedirectToAction("Index");
+                }
+
+                // Get callback parameters from Geidea
+                var responseCode = Request.Query["responseCode"].ToString();
+                if (string.IsNullOrEmpty(responseCode))
+                {
+                    responseCode = Request.Form["responseCode"].ToString();
+                }
+
+                var responseMessage = Request.Query["responseMessage"].ToString();
+                if (string.IsNullOrEmpty(responseMessage))
+                {
+                    responseMessage = Request.Form["responseMessage"].ToString();
+                }
+
+                var detailedResponseCode = Request.Query["detailedResponseCode"].ToString();
+                if (string.IsNullOrEmpty(detailedResponseCode))
+                {
+                    detailedResponseCode = Request.Form["detailedResponseCode"].ToString();
+                }
+
+                var detailedResponseMessage = Request.Query["detailedResponseMessage"].ToString();
+                if (string.IsNullOrEmpty(detailedResponseMessage))
+                {
+                    detailedResponseMessage = Request.Form["detailedResponseMessage"].ToString();
+                }
+
+                var status = Request.Query["status"].ToString();
+                if (string.IsNullOrEmpty(status))
+                {
+                    status = Request.Form["status"].ToString();
+                }
+
+                var orderIdFromGeidea = Request.Query["orderId"].ToString();
+                if (string.IsNullOrEmpty(orderIdFromGeidea))
+                {
+                    orderIdFromGeidea = Request.Form["orderId"].ToString();
+                }
+
+                _logger.LogInformation("GeideaCallback - OrderId: {OrderId}, ResponseCode: {ResponseCode}, ResponseMessage: {ResponseMessage}, Status: {Status}",
+                    orderIdInt, responseCode, responseMessage, status);
+
+                // According to Geidea documentation:
+                // Only proceed if responseCode is "000", responseMessage is "Success", 
+                // detailedResponseCode is "000", and detailedResponseMessage is "The operation was successful."
+                bool isPaymentSuccessful = responseCode == "000" && 
+                                          (responseMessage?.Equals("Success", StringComparison.OrdinalIgnoreCase) == true ||
+                                           detailedResponseCode == "000");
+
+                if (isPaymentSuccessful)
+                {
+                    // Payment successful
+                    _logger.LogInformation("GeideaCallback: Payment successful for Order {OrderId}", orderIdInt);
+
+                    // Update order status
+                    order.PaymentStatus = SD.StatusApproved;
+                    order.OrderStatus = SD.StatusApproved;
+                    order.PaymentDate = IdealWeightNutrition.Utility.DateTimeHelper.Now;
+
+                    // Store Geidea order ID if provided
+                    if (!string.IsNullOrEmpty(orderIdFromGeidea))
+                    {
+                        order.PaymentIntentId = orderIdFromGeidea;
+                    }
+
+                    _unitOfWork.OrderHeader.Update(order);
+                    _unitOfWork.save();
+
+                    // Redirect to order confirmation
+                    TempData["success"] = _localizer["PaymentSuccessful"]?.Value ?? "Payment successful!";
+                    return RedirectToAction("OrderConfirmation", new { id = orderIdInt });
+                }
+                else
+                {
+                    // Payment failed or cancelled
+                    _logger.LogWarning("GeideaCallback: Payment failed/cancelled for Order {OrderId}. ResponseCode: {ResponseCode}, ResponseMessage: {ResponseMessage}",
+                        orderIdInt, responseCode, responseMessage);
+
+                    // Check if payment was cancelled by user
+                    bool isCancelled = detailedResponseMessage?.Contains("Cancelled By User", StringComparison.OrdinalIgnoreCase) == true ||
+                                      responseMessage?.Contains("Cancelled", StringComparison.OrdinalIgnoreCase) == true ||
+                                      status?.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) == true;
+
+                    // Update order status
+                    if (isCancelled)
+                    {
+                        order.PaymentStatus = SD.PaymentStatusCancelled;
+                        order.OrderStatus = SD.StatusCancelled;
+                        TempData["error"] = _localizer["PaymentCancelled"]?.Value ?? "Payment was cancelled. Please try again.";
+                    }
+                    else
+                    {
+                        order.PaymentStatus = SD.PaymentStatusRejected;
+                        order.OrderStatus = SD.StatusCancelled;
+                        var errorMsg = detailedResponseMessage ?? responseMessage ?? "Payment failed";
+                        TempData["error"] = _localizer["PaymentFailed"]?.Value ?? $"Payment failed: {errorMsg}";
+                    }
+
+                    _unitOfWork.OrderHeader.Update(order);
+                    _unitOfWork.save();
+
+                    // Redirect back to cart or summary
+                    return RedirectToAction("Summary");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing Geidea callback");
+                TempData["error"] = _localizer["PaymentProcessingError"]?.Value ?? "An error occurred while processing payment. Please contact support.";
+                return RedirectToAction("Index");
+            }
         }
     }
 

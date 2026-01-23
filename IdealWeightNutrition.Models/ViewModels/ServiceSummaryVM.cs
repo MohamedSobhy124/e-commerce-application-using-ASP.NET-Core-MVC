@@ -20,5 +20,6 @@ namespace IdealWeightNutrition.Models.ViewModels
         public string? GuestPhone { get; set; }
         public decimal? CustomAmount { get; set; }
         public string? PaymentMethod { get; set; }
+        public bool CreateAccountForGuest { get; set; }
     }
 }

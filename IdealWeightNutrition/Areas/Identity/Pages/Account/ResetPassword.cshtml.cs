@@ -11,16 +11,20 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
+using IdealWeightNutrition.Models;
 
 namespace IdealWeightNutrition.Areas.Identity.Pages.Account
 {
     public class ResetPasswordModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<ResetPasswordModel> _logger;
 
-        public ResetPasswordModel(UserManager<IdentityUser> userManager)
+        public ResetPasswordModel(UserManager<ApplicationUser> userManager, ILogger<ResetPasswordModel> logger)
         {
             _userManager = userManager;
+            _logger = logger;
         }
 
         /// <summary>
@@ -94,7 +98,26 @@ namespace IdealWeightNutrition.Areas.Identity.Pages.Account
                 return Page();
             }
 
-            var user = await _userManager.FindByEmailAsync(Input.Email);
+            ApplicationUser user = null;
+            try
+            {
+                user = await _userManager.FindByEmailAsync(Input.Email);
+            }
+            catch (Exception ex)
+            {
+                // Handle potential database schema issues (e.g., NULL values in integer columns)
+                // This can happen if existing users in the database have incorrect discriminator values
+                // or NULL values in columns that EF Core expects to be non-null.
+                // 
+                // To fix this, run the SQL script: Migrations/FixExistingUsersDiscriminator.sql
+                // This will update all existing users to have the correct discriminator value.
+                _logger.LogError(ex, "Error finding user by email {Email}. This may be due to database schema issues. Run FixExistingUsersDiscriminator.sql to fix existing users.", Input.Email);
+                
+                // Don't reveal to user that the account doesn't exist or that there was an error
+                // Return success page to prevent user enumeration
+                return RedirectToPage("./ResetPasswordConfirmation");
+            }
+            
             if (user == null)
             {
                 // Don't reveal that the user does not exist

@@ -12,6 +12,7 @@ using System.Globalization;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,19 +100,28 @@ builder.Services.Configure<TappySettings>(builder.Configuration.GetSection("Tapp
 builder.Services.Configure<TamaraSettings>(builder.Configuration.GetSection("Tamara"));
 builder.Services.Configure<WhatsAppSettings>(builder.Configuration.GetSection("WhatsApp"));
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDBContext>().AddDefaultTokenProviders();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDBContext>().AddDefaultTokenProviders();
 builder.Services.ConfigureApplicationCookie(option =>
 {
 	option.AccessDeniedPath = $"/Identity/Account/AccessDenied";
 	option.LogoutPath = $"/Identity/Account/Logout";
 	option.LoginPath = $"/Identity/Account/Login";
-
+	option.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+	option.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
 });
 
 builder.Services.AddAuthentication().AddGoogle(googleOptions =>
 {
     googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
     googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    
+    // Configure cookie settings to prevent correlation failures
+    googleOptions.CorrelationCookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+    googleOptions.CorrelationCookie.HttpOnly = true;
+    googleOptions.CorrelationCookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
+    
+    // Save tokens for later use (if needed)
+    googleOptions.SaveTokens = true;
 });
 
 builder.Services.AddRazorPages();
@@ -138,11 +148,25 @@ builder.Services.AddSingleton<IdealWeightNutrition.SharedResources>();
 
 builder.Services.AddSignalR(); 
 
+// Configure Data Protection to persist keys (prevents correlation failures on app restart)
+// In production, consider using a shared key storage (Azure Key Vault, Redis, etc.)
+var dataProtectionKeysPath = Path.Combine(builder.Environment.ContentRootPath, "DataProtection-Keys");
+if (!Directory.Exists(dataProtectionKeysPath))
+{
+    Directory.CreateDirectory(dataProtectionKeysPath);
+}
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new System.IO.DirectoryInfo(dataProtectionKeysPath))
+    .SetApplicationName("IdealWeightNutrition")
+    .SetDefaultKeyLifetime(TimeSpan.FromDays(90));
+
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options => {
 	options.IdleTimeout = TimeSpan.FromMinutes(100);
 	options.Cookie.HttpOnly = true;
 	options.Cookie.IsEssential = true;
+	options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+	options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
 });
 
 builder.Services.AddHostedService<IdealWeightNutrition.Services.PaymentVerificationBackgroundService>();
@@ -174,6 +198,22 @@ var staticFileOptions = new StaticFileOptions
     {
         var path = ctx.File.Name.ToLower();
         var extension = System.IO.Path.GetExtension(path).ToLower();
+        var filePath = ctx.File.PhysicalPath?.ToLower() ?? "";
+        
+        // Handle .well-known folder files (e.g., Apple Pay domain association)
+        if (filePath.Contains("\\.well-known\\") || filePath.Contains("/.well-known/"))
+        {
+            // Set content type to text/plain for domain association files
+            if (path.Contains("apple-developer-merchantid-domain-association"))
+            {
+                ctx.Context.Response.ContentType = "text/plain";
+            }
+            // Minimal caching for .well-known files to ensure Apple can verify them
+            ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=3600"); // 1 hour
+            var etagGidea = ctx.File.Name + ctx.File.LastModified.Ticks.ToString();
+            ctx.Context.Response.Headers.Append("ETag", $"\"{etagGidea}\"");
+            return;
+        }
         
         if (extension == ".css" || extension == ".js")
         {

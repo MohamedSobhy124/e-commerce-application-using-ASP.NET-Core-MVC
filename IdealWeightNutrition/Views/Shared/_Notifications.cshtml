@@ -1,4 +1,7 @@
-﻿@if (TempData["success"] != null)
+﻿@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+
+@if (TempData["success"] != null)
 {
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
@@ -9,9 +12,41 @@
 }
 @if (TempData["error"] != null)
 {
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-    <script type="text/javascript">
-        toastr.error('@TempData["error"]');
-    </script>
+        var errorMessage = TempData["error"].ToString();
+        var isPaymentError = errorMessage.Contains("Payment") || errorMessage.Contains("payment") || 
+                            errorMessage.Contains("PaymentNotSuccessful") || 
+                            errorMessage.Contains("لم يتم الدفع") || 
+                            errorMessage.Contains("اشتراكك") ||
+                            errorMessage.Contains("payment failed") ||
+                            errorMessage.Contains("فشل الدفع") ||
+                            Context.Request.Path.Value.Contains("ServiceSubscription") ||
+                            Context.Request.Path.Value.Contains("PaymentSuccess");
+    
+    @if (isPaymentError)
+    {
+        <!-- Use SweetAlert2 for payment errors -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" crossorigin="anonymous"></script>
+        <script type="text/javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: '@(Localizer["PaymentFailed"]?.Value ?? "Payment Failed")',
+                    text: '@Html.Raw(errorMessage)',
+                    confirmButtonText: '@(Localizer["OK"]?.Value ?? "OK")',
+                    confirmButtonColor: '#dc2626',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                });
+            });
+        </script>
+    }
+    else
+    {
+        <!-- Use toastr for other errors -->
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+        <script type="text/javascript">
+            toastr.error('@Html.Raw(errorMessage)');
+        </script>
+    }
 }

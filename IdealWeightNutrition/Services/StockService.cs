@@ -14,14 +14,14 @@ namespace IdealWeightNutrition.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailSender _emailSender;
         private readonly IHubContext<NotificationHub> _hubContext;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
 
         public StockService(
             IUnitOfWork unitOfWork,
             IEmailSender emailSender,
             IHubContext<NotificationHub> hubContext,
-            UserManager<IdentityUser> userManager,
+            UserManager<ApplicationUser> userManager,
             IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;

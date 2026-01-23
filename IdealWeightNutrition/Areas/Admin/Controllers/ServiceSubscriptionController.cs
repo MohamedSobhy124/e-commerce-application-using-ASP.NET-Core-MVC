@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace IdealWeightNutrition.Areas.Admin.Controllers
 {
@@ -22,17 +24,23 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
         private readonly IStringLocalizer<SharedResources> _localizer;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ApplicationDBContext _dbContext;
+        private readonly IEmailSender _emailSender;
+        private readonly InvoiceService _invoiceService;
 
         public ServiceSubscriptionController(
             IUnitOfWork unitOfWork, 
             IStringLocalizer<SharedResources> localizer,
             IWebHostEnvironment webHostEnvironment,
-            ApplicationDBContext dbContext)
+            ApplicationDBContext dbContext,
+            IEmailSender emailSender,
+            InvoiceService invoiceService)
         {
             _unitOfWork = unitOfWork;
             _localizer = localizer;
             _webHostEnvironment = webHostEnvironment;
             _dbContext = dbContext;
+            _emailSender = emailSender;
+            _invoiceService = invoiceService;
         }
 
         // GET: ServiceSubscription/Index
@@ -62,28 +70,266 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
             return Json(new { data = serviceList });
         }
 
-        // GET: ServiceSubscription/GetAllPurchases (API for DataTable)
+        // GET: ServiceSubscription/GetAllPurchases (API for Tabulator with filtering)
         [HttpGet]
-        public IActionResult GetAllPurchases()
+        public IActionResult GetAllPurchases(
+            string paymentStatus = "",
+            string serviceStatus = "",
+            string dateFrom = "",
+            string dateTo = "",
+            string searchValue = "",
+            int start = 0,
+            int length = 10,
+            string sortColumn = "Id",
+            string sortDirection = "desc")
         {
-            var purchases = _unitOfWork.ServicePurchases.GetAll(
-                includeProperties: "ServiceSubscription,ApplicationUser"
-            );
-            
-            var purchaseList = purchases.Select(p => new
+            try
             {
-                id = p.Id,
-                serviceTitle = p.ServiceSubscription?.Title ?? "N/A",
-                customerName = p.ApplicationUser != null ? p.ApplicationUser.Name : p.GuestName,
-                email = p.ApplicationUser != null ? p.ApplicationUser.Email : p.GuestEmail,
-                phone = p.ApplicationUser != null ? p.ApplicationUser.PhoneNumber : p.GuestPhone,
-                totalAmount = p.TotalAmount,
-                amountPaid = p.AmountPaid,
-                paymentStatus = p.PaymentStatus,
-                purchaseDate = p.PurchaseDate
-            }).OrderByDescending(p => p.purchaseDate).ToList();
+                // Start with base query
+                IQueryable<ServicePurchase> query = _unitOfWork.ServicePurchases.GetAll(
+                    includeProperties: "ServiceSubscription,ApplicationUser"
+                ).AsQueryable();
 
-            return Json(new { data = purchaseList });
+                // Apply payment status filter
+                if (!string.IsNullOrEmpty(paymentStatus))
+                {
+                    query = query.Where(p => p.PaymentStatus == paymentStatus);
+                }
+
+                // Apply service status filter
+                if (!string.IsNullOrEmpty(serviceStatus))
+                {
+                    query = query.Where(p => p.Status == serviceStatus);
+                }
+
+                // Apply date range filter
+                if (!string.IsNullOrEmpty(dateFrom))
+                {
+                    if (DateTime.TryParse(dateFrom, out var fromDate))
+                    {
+                        query = query.Where(p => p.PurchaseDate >= fromDate.Date);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(dateTo))
+                {
+                    if (DateTime.TryParse(dateTo, out var toDate))
+                    {
+                        query = query.Where(p => p.PurchaseDate <= toDate.Date.AddDays(1).AddTicks(-1));
+                    }
+                }
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(searchValue))
+                {
+                    searchValue = searchValue.ToLower();
+                    query = query.Where(p =>
+                        p.Id.ToString().Contains(searchValue) ||
+                        (p.ServiceSubscription != null && p.ServiceSubscription.Title != null && p.ServiceSubscription.Title.ToLower().Contains(searchValue)) ||
+                        (p.ApplicationUser != null && p.ApplicationUser.Name != null && p.ApplicationUser.Name.ToLower().Contains(searchValue)) ||
+                        (p.GuestName != null && p.GuestName.ToLower().Contains(searchValue)) ||
+                        (p.ApplicationUser != null && p.ApplicationUser.Email != null && p.ApplicationUser.Email.ToLower().Contains(searchValue)) ||
+                        (p.GuestEmail != null && p.GuestEmail.ToLower().Contains(searchValue)) ||
+                        (p.ApplicationUser != null && p.ApplicationUser.PhoneNumber != null && p.ApplicationUser.PhoneNumber.Contains(searchValue)) ||
+                        (p.GuestPhone != null && p.GuestPhone.Contains(searchValue)) ||
+                        (p.PaymentStatus != null && p.PaymentStatus.ToLower().Contains(searchValue)) ||
+                        (p.Status != null && p.Status.ToLower().Contains(searchValue)) ||
+                        p.TotalAmount.ToString().Contains(searchValue) ||
+                        p.AmountPaid.ToString().Contains(searchValue)
+                    );
+                }
+
+                // Get total count before pagination
+                var totalRecords = query.Count();
+
+                // Apply sorting
+                if (sortColumn.ToLower() == "id")
+                {
+                    query = sortDirection.ToLower() == "asc" ? query.OrderBy(p => p.Id) : query.OrderByDescending(p => p.Id);
+                }
+                else if (sortColumn.ToLower() == "purchasedate")
+                {
+                    query = sortDirection.ToLower() == "asc" ? query.OrderBy(p => p.PurchaseDate) : query.OrderByDescending(p => p.PurchaseDate);
+                }
+                else if (sortColumn.ToLower() == "totalamount")
+                {
+                    query = sortDirection.ToLower() == "asc" ? query.OrderBy(p => p.TotalAmount) : query.OrderByDescending(p => p.TotalAmount);
+                }
+                else
+                {
+                    query = query.OrderByDescending(p => p.Id);
+                }
+
+                // Apply pagination
+                var purchases = query.Skip(start).Take(length).ToList();
+
+                // Map to lowercase properties for Tabulator
+                var purchaseData = purchases.Select(p => new
+                {
+                    id = p.Id,
+                    serviceTitle = p.ServiceSubscription?.Title ?? "N/A",
+                    customerName = p.ApplicationUser != null ? p.ApplicationUser.Name : p.GuestName,
+                    email = p.ApplicationUser != null ? p.ApplicationUser.Email : p.GuestEmail,
+                    phone = p.ApplicationUser != null ? p.ApplicationUser.PhoneNumber : p.GuestPhone,
+                    totalAmount = p.TotalAmount,
+                    amountPaid = p.AmountPaid,
+                    discountAmount = p.DiscountAmount,
+                    vatAmount = CalculateServiceVAT(p.TotalAmount, p.DiscountAmount),
+                    paymentStatus = p.PaymentStatus,
+                    serviceStatus = p.Status,
+                    purchaseDate = p.PurchaseDate
+                }).ToList();
+
+                // Return data in Tabulator format
+                return Json(new
+                {
+                    last_page = (int)Math.Ceiling((double)totalRecords / length),
+                    data = purchaseData
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = "Error loading service purchases" });
+            }
+        }
+
+        /// <summary>
+        /// Calculate VAT amount (5% of total amount after discount)
+        /// </summary>
+        private decimal CalculateServiceVAT(decimal totalAmount, decimal discountAmount)
+        {
+            const decimal vatRate = 0.05m; // 5% VAT rate
+            var taxableAmount = totalAmount - discountAmount;
+            return taxableAmount * (vatRate / (1 + vatRate));
+        }
+
+        // GET: ServiceSubscription/GetServicePurchaseStatistics
+        [HttpGet]
+        public IActionResult GetServicePurchaseStatistics()
+        {
+            try
+            {
+                var allPurchases = _unitOfWork.ServicePurchases.GetAll().ToList();
+
+                var stats = new
+                {
+                    all = allPurchases.Count,
+                    pending = allPurchases.Count(p => p.PaymentStatus == "Pending"),
+                    approved = allPurchases.Count(p => p.PaymentStatus == "Approved"),
+                    rejected = allPurchases.Count(p => p.PaymentStatus == "Rejected")
+                };
+
+                return Json(new { success = true, stats });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error loading statistics" });
+            }
+        }
+
+        // GET: ServiceSubscription/ExportServicePurchases
+        [HttpGet]
+        [Authorize(Roles = SD.Role_Admin)]
+        public IActionResult ExportServicePurchases(
+            string paymentStatus = "",
+            string serviceStatus = "",
+            string dateFrom = "",
+            string dateTo = "",
+            string searchValue = "")
+        {
+            try
+            {
+                // Start with base query (same as GetAllPurchases)
+                IQueryable<ServicePurchase> query = _unitOfWork.ServicePurchases.GetAll(
+                    includeProperties: "ServiceSubscription,ApplicationUser"
+                ).AsQueryable();
+
+                // Apply payment status filter
+                if (!string.IsNullOrEmpty(paymentStatus))
+                {
+                    query = query.Where(p => p.PaymentStatus == paymentStatus);
+                }
+
+                // Apply service status filter
+                if (!string.IsNullOrEmpty(serviceStatus))
+                {
+                    query = query.Where(p => p.Status == serviceStatus);
+                }
+
+                // Apply date range filter
+                if (!string.IsNullOrEmpty(dateFrom))
+                {
+                    if (DateTime.TryParse(dateFrom, out var fromDate))
+                    {
+                        query = query.Where(p => p.PurchaseDate >= fromDate.Date);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(dateTo))
+                {
+                    if (DateTime.TryParse(dateTo, out var toDate))
+                    {
+                        query = query.Where(p => p.PurchaseDate <= toDate.Date.AddDays(1).AddTicks(-1));
+                    }
+                }
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(searchValue))
+                {
+                    searchValue = searchValue.ToLower();
+                    query = query.Where(p =>
+                        p.Id.ToString().Contains(searchValue) ||
+                        (p.ServiceSubscription != null && p.ServiceSubscription.Title != null && p.ServiceSubscription.Title.ToLower().Contains(searchValue)) ||
+                        (p.ApplicationUser != null && p.ApplicationUser.Name != null && p.ApplicationUser.Name.ToLower().Contains(searchValue)) ||
+                        (p.GuestName != null && p.GuestName.ToLower().Contains(searchValue)) ||
+                        (p.ApplicationUser != null && p.ApplicationUser.Email != null && p.ApplicationUser.Email.ToLower().Contains(searchValue)) ||
+                        (p.GuestEmail != null && p.GuestEmail.ToLower().Contains(searchValue)) ||
+                        (p.PaymentStatus != null && p.PaymentStatus.ToLower().Contains(searchValue)) ||
+                        (p.Status != null && p.Status.ToLower().Contains(searchValue)) ||
+                        p.TotalAmount.ToString().Contains(searchValue) ||
+                        p.AmountPaid.ToString().Contains(searchValue)
+                    );
+                }
+
+                // Get all purchases (no pagination for export)
+                var purchases = query.OrderByDescending(p => p.Id).ToList();
+
+                // Generate CSV content
+                var csv = new StringBuilder();
+                csv.AppendLine("Purchase ID,Service Title,Customer Name,Email,Phone,Purchase Date,Total Without VAT,VAT Amount,Total Inc VAT,Discount Amount,Amount Paid,Remaining Amount,Payment Status,Service Status");
+
+                foreach (var purchase in purchases)
+                {
+                    var vatAmount = CalculateServiceVAT(purchase.TotalAmount, purchase.DiscountAmount);
+                    var totalWithoutVat = purchase.TotalAmount - purchase.DiscountAmount - vatAmount;
+                    var remainingAmount = purchase.TotalAmount - purchase.AmountPaid;
+                    
+                    csv.AppendLine($"{purchase.Id}," +
+                        $"\"{(purchase.ServiceSubscription?.Title ?? "N/A").Replace("\"", "\"\"")}\"," +
+                        $"\"{(purchase.ApplicationUser?.Name ?? purchase.GuestName ?? "").Replace("\"", "\"\"")}\"," +
+                        $"\"{(purchase.ApplicationUser?.Email ?? purchase.GuestEmail ?? "").Replace("\"", "\"\"")}\"," +
+                        $"\"{(purchase.ApplicationUser?.PhoneNumber ?? purchase.GuestPhone ?? "").Replace("\"", "\"\"")}\"," +
+                        $"{purchase.PurchaseDate:yyyy-MM-dd HH:mm:ss}," +
+                        $"{totalWithoutVat:F2}," +
+                        $"{vatAmount:F2}," +
+                        $"{(purchase.TotalAmount - purchase.DiscountAmount):F2}," +
+                        $"{purchase.DiscountAmount:F2}," +
+                        $"{purchase.AmountPaid:F2}," +
+                        $"{remainingAmount:F2}," +
+                        $"\"{(purchase.PaymentStatus ?? "").Replace("\"", "\"\"")}\"," +
+                        $"\"{(purchase.Status ?? "").Replace("\"", "\"\"")}\"");
+                }
+
+                var fileName = $"ServicePurchases_Export_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
+
+                return File(bytes, "text/csv", fileName);
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = "Error exporting service purchases";
+                return RedirectToAction(nameof(Purchases));
+            }
         }
 
         // GET: ServiceSubscription/Create
@@ -499,6 +745,200 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
             }
 
             return View(purchase);
+        }
+
+        // POST: ServiceSubscription/UpdatePaymentStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdatePaymentStatus(int id, string paymentStatus)
+        {
+            var purchase = _unitOfWork.ServicePurchases.Get(p => p.Id == id);
+            
+            if (purchase == null)
+            {
+                return Json(new { success = false, message = "Purchase not found" });
+            }
+
+            var oldStatus = purchase.PaymentStatus;
+            purchase.PaymentStatus = paymentStatus;
+            _unitOfWork.ServicePurchases.Update(purchase);
+            _unitOfWork.save();
+
+            return Json(new { 
+                success = true, 
+                message = $"Payment status updated from {oldStatus} to {paymentStatus}",
+                oldStatus = oldStatus,
+                newStatus = paymentStatus
+            });
+        }
+
+        // POST: ServiceSubscription/UpdateServiceStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateServiceStatus(int id, string status)
+        {
+            var purchase = _unitOfWork.ServicePurchases.Get(p => p.Id == id);
+            
+            if (purchase == null)
+            {
+                return Json(new { success = false, message = "Purchase not found" });
+            }
+
+            var oldStatus = purchase.Status;
+            purchase.Status = status;
+            _unitOfWork.ServicePurchases.Update(purchase);
+            _unitOfWork.save();
+
+            return Json(new { 
+                success = true, 
+                message = $"Service status updated from {oldStatus} to {status}",
+                oldStatus = oldStatus,
+                newStatus = status
+            });
+        }
+
+        // POST: ServiceSubscription/UpdateAmountPaid
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateAmountPaid(int id, decimal amountPaid)
+        {
+            var purchase = _unitOfWork.ServicePurchases.Get(
+                p => p.Id == id,
+                includeProperties: "ServiceSubscription,ApplicationUser"
+            );
+            
+            if (purchase == null)
+            {
+                return Json(new { success = false, message = "Purchase not found" });
+            }
+
+            if (amountPaid < 0)
+            {
+                return Json(new { success = false, message = "Amount paid cannot be negative" });
+            }
+
+            var newTotalAmount = amountPaid + purchase.AmountPaid;
+            if (newTotalAmount > purchase.TotalAmount)
+            {
+                return Json(new { 
+                    success = false, 
+                    message = $"Total amount paid ({newTotalAmount:C}) cannot exceed total amount ({purchase.TotalAmount:C})" 
+                });
+            }
+
+            var oldAmount = purchase.AmountPaid;
+            purchase.AmountPaid = newTotalAmount;
+            
+            // Auto-update payment status if fully paid
+            if (purchase.AmountPaid >= purchase.TotalAmount && (purchase.PaymentStatus == "Pending" || purchase.PaymentStatus == "Rejected"))
+            {
+                purchase.PaymentStatus = "Approved";
+            }
+            
+            _unitOfWork.ServicePurchases.Update(purchase);
+            _unitOfWork.save();
+
+            // Send email with invoice PDF to customer
+            try
+            {
+                var customerEmail = purchase.ApplicationUser?.Email ?? purchase.GuestEmail;
+                if (!string.IsNullOrWhiteSpace(customerEmail))
+                {
+                    // Generate PDF invoice
+                    byte[] invoicePdf = _invoiceService.GenerateServicePurchaseInvoicePdf(purchase, purchase.ApplicationUser);
+                    
+                    // Generate email body
+                    var customerName = purchase.ApplicationUser?.Name ?? purchase.GuestName ?? "Customer";
+                    var serviceName = purchase.ServiceSubscription?.Title ?? "Service Subscription";
+                    var emailSubject = $"Payment Update - Service Purchase #{purchase.Id} - Ideal Weight Nutrition";
+                    
+                    var emailBody = $@"
+                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;'>
+                            <div style='background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+                                <h2 style='color: #059669; margin-top: 0;'>Payment Update Notification</h2>
+                                <p style='color: #374151; font-size: 16px; line-height: 1.6;'>
+                                    Dear {customerName},
+                                </p>
+                                <p style='color: #374151; font-size: 16px; line-height: 1.6;'>
+                                    This email is to confirm that your payment for <strong>{serviceName}</strong> has been updated.
+                                </p>
+                                <div style='background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                                    <h3 style='color: #1f2937; margin-top: 0;'>Payment Details</h3>
+                                    <table style='width: 100%; border-collapse: collapse;'>
+                                        <tr>
+                                            <td style='padding: 8px 0; color: #6b7280;'>Previous Amount Paid:</td>
+                                            <td style='padding: 8px 0; text-align: right; font-weight: 600; color: #1f2937;'>{oldAmount:C}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style='padding: 8px 0; color: #6b7280;'>Amount Added:</td>
+                                            <td style='padding: 8px 0; text-align: right; font-weight: 600; color: #059669;'>+{amountPaid:C}</td>
+                                        </tr>
+                                        <tr style='border-top: 2px solid #e5e7eb;'>
+                                            <td style='padding: 8px 0; color: #1f2937; font-weight: 600;'>New Total Amount Paid:</td>
+                                            <td style='padding: 8px 0; text-align: right; font-weight: 700; color: #059669; font-size: 18px;'>{purchase.AmountPaid:C}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style='padding: 8px 0; color: #6b7280;'>Total Amount:</td>
+                                            <td style='padding: 8px 0; text-align: right; font-weight: 600; color: #1f2937;'>{purchase.TotalAmount:C}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style='padding: 8px 0; color: #6b7280;'>Remaining Amount:</td>
+                                            <td style='padding: 8px 0; text-align: right; font-weight: 600; color: #f59e0b;'>{(purchase.TotalAmount - purchase.AmountPaid):C}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style='padding: 8px 0; color: #6b7280;'>Payment Status:</td>
+                                            <td style='padding: 8px 0; text-align: right;'>
+                                                <span style='background-color: {(purchase.PaymentStatus == "Approved" ? "#10b981" : "#f59e0b")}; color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;'>{purchase.PaymentStatus}</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <p style='color: #374151; font-size: 16px; line-height: 1.6;'>
+                                    Please find attached the updated invoice for your records.
+                                </p>
+                                <p style='color: #374151; font-size: 16px; line-height: 1.6;'>
+                                    If you have any questions or concerns, please don't hesitate to contact us.
+                                </p>
+                                <hr style='border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;' />
+                                <p style='color: #9ca3af; font-size: 12px; text-align: center; margin: 0;'>
+                                    © {DateTime.Now.Year} Ideal Weight Nutrition. All rights reserved.
+                                </p>
+                            </div>
+                        </div>";
+
+                    // Send email with PDF attachment
+                    if (_emailSender is EmailSender customEmailSender)
+                    {
+                        await customEmailSender.SendEmailWithAttachmentAsync(
+                            customerEmail,
+                            emailSubject,
+                            emailBody,
+                            invoicePdf,
+                            $"Invoice-SVC-{purchase.Id}.pdf"
+                        );
+                    }
+                    else
+                    {
+                        // Fallback: send email without attachment
+                        await _emailSender.SendEmailAsync(customerEmail, emailSubject, emailBody);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail the request
+                // The amount has already been updated successfully
+                // In production, you might want to log this to a logging service
+                System.Diagnostics.Debug.WriteLine($"Error sending invoice email: {ex.Message}");
+            }
+
+            return Json(new { 
+                success = true, 
+                message = $"Amount paid updated from {oldAmount:C} to {purchase.AmountPaid:C}. Invoice email sent to customer.",
+                oldAmount = oldAmount,
+                newAmount = purchase.AmountPaid,
+                paymentStatus = purchase.PaymentStatus
+            });
         }
     }
 }

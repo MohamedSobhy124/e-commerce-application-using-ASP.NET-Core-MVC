@@ -1,0 +1,185 @@
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+@using IdealWeightNutrition.Models
+@model IEnumerable<ServicePurchase>
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["MySubscriptions"]?.Value ?? "My Subscriptions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var subscriptions = Model ?? Enumerable.Empty<ServicePurchase>();
+    var hasSubscriptions = subscriptions.Any();
+    
+    // Helper function to translate status values
+    Func<string, string> translateStatus = (status) =>
+    {
+        if (string.IsNullOrEmpty(status)) return Localizer["Pending"]?.Value ?? "Pending";
+        var translated = Localizer[status]?.Value;
+        return translated ?? status;
+    };
+    
+    // Helper function to format currency
+    Func<decimal, string> formatCurrency = (amount) => $"{currencySymbol} {amount.ToString("N2", System.Globalization.CultureInfo.InvariantCulture).Replace(".", ",")}";
+}
+
+<div class="container py-4" style="margin-top: 1rem;">
+    <!-- Page Header -->
+    <div class="text-center mb-4">
+        <h1 class="display-5 fw-bold mb-2" style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            <i class="bi bi-briefcase-fill me-2"></i>@(Localizer["MySubscriptions"]?.Value ?? "My Subscriptions")
+        </h1>
+        <p class="text-muted">@(Localizer["ViewYourServiceSubscriptions"]?.Value ?? "View your service subscriptions and purchase history")</p>
+    </div>
+
+    @if (!hasSubscriptions)
+    {
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <div class="empty-subscriptions-icon mb-4" style="width: 150px; height: 150px; margin: 0 auto; background: linear-gradient(135deg, rgba(59, 157, 213, 0.1) 0%, rgba(123, 192, 67, 0.1) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-briefcase-x" style="font-size: 5rem; color: #3B9DD5;"></i>
+            </div>
+            <h3 class="fw-bold mb-2" style="color: #1f2937;">@(Localizer["NoSubscriptionsYet"]?.Value ?? "No Subscriptions Yet")</h3>
+            <p class="text-muted mb-4">@(Localizer["StartBrowsingServices"]?.Value ?? "Start browsing services to see your subscriptions here")</p>
+            <a asp-area="Customer" asp-controller="ServiceSubscription" asp-action="Index" class="btn btn-primary" style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); border: none; padding: 0.75rem 2rem; border-radius: 25px; font-weight: 700;">
+                <i class="bi bi-briefcase me-2"></i>@(Localizer["BrowseServices"]?.Value ?? "Browse Services")
+            </a>
+        </div>
+    }
+    else
+    {
+        <!-- Subscriptions List -->
+        <div class="row">
+            @foreach (var subscription in subscriptions)
+            {
+                var service = subscription.ServiceSubscription;
+                var serviceTitle = currentCulture == "ar" && !string.IsNullOrEmpty(service?.TitleAr) ? service.TitleAr : service?.Title ?? "";
+                var serviceDescription = currentCulture == "ar" && !string.IsNullOrEmpty(service?.DescriptionAr) ? service.DescriptionAr : service?.Description ?? "";
+                
+                <div class="col-12 col-md-6 col-lg-4 mb-4">
+                    <div class="subscription-card h-100" style="background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                        <!-- Service Image/Icon Header -->
+                        <div class="subscription-header" style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); padding: 2rem; text-align: center; color: white;">
+                            <i class="bi bi-briefcase-fill" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <h4 class="fw-bold mb-0" style="color: white;">@serviceTitle</h4>
+                        </div>
+                        
+                        <!-- Subscription Details -->
+                        <div class="subscription-body p-4">
+                            <div class="subscription-info mb-3">
+                                <div class="info-row d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">
+                                        <i class="bi bi-hash me-1"></i>@(Localizer["PurchaseID"]?.Value ?? "Purchase ID"):
+                                    </span>
+                                    <strong>#@subscription.Id</strong>
+                                </div>
+                                
+                                <div class="info-row d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">
+                                        <i class="bi bi-calendar-check me-1"></i>@(Localizer["PurchaseDate"]?.Value ?? "Purchase Date"):
+                                    </span>
+                                    <span>@subscription.PurchaseDate.ToString("MMM dd, yyyy", System.Globalization.CultureInfo.GetCultureInfo(currentCulture))</span>
+                                </div>
+                                
+                                <div class="info-row d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">
+                                        <i class="bi bi-currency-dollar me-1"></i>@(Localizer["TotalAmount"]?.Value ?? "Total Amount"):
+                                    </span>
+                                    <strong style="color: #3B9DD5;">@formatCurrency(subscription.TotalAmount)</strong>
+                                </div>
+                                
+                                @if (subscription.DiscountAmount > 0)
+                                {
+                                    <div class="info-row d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted">
+                                            <i class="bi bi-tag me-1"></i>@(Localizer["Discount"]?.Value ?? "Discount"):
+                                        </span>
+                                        <span class="text-success">-@formatCurrency(subscription.DiscountAmount)</span>
+                                    </div>
+                                }
+                                
+                                <div class="info-row d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">
+                                        <i class="bi bi-wallet2 me-1"></i>@(Localizer["AmountPaid"]?.Value ?? "Amount Paid"):
+                                    </span>
+                                    <strong style="color: #7BC043;">@formatCurrency(subscription.AmountPaid)</strong>
+                                </div>
+                                
+                                @if (service?.ServiceType == ServiceType.Offline && subscription.TotalAmount > subscription.AmountPaid)
+                                {
+                                    <div class="info-row d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted">
+                                            <i class="bi bi-arrow-left-right me-1"></i>@(Localizer["RemainingAmount"]?.Value ?? "Remaining Amount"):
+                                        </span>
+                                        <strong style="color: #f59e0b;">@formatCurrency(subscription.TotalAmount - subscription.AmountPaid)</strong>
+                                    </div>
+                                }
+                                
+                                <div class="info-row d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">
+                                        <i class="bi bi-check-circle me-1"></i>@(Localizer["Status"]?.Value ?? "Status"):
+                                    </span>
+                                    <span class="badge @(subscription.Status == "Active" ? "bg-success" : subscription.Status == "Expired" ? "bg-danger" : "bg-warning")">
+                                        @translateStatus(subscription.Status ?? "Pending")
+                                    </span>
+                                </div>
+                                
+                                <div class="info-row d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">
+                                        <i class="bi bi-credit-card me-1"></i>@(Localizer["PaymentStatus"]?.Value ?? "Payment Status"):
+                                    </span>
+                                    <span class="badge @(subscription.PaymentStatus == "Approved" ? "bg-success" : subscription.PaymentStatus == "Pending" ? "bg-warning" : "bg-danger")">
+                                        @translateStatus(subscription.PaymentStatus ?? "Pending")
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            @if (!string.IsNullOrEmpty(serviceDescription))
+                            {
+                                <div class="service-description mt-3 pt-3" style="border-top: 1px solid #e5e7eb;">
+                                    <p class="text-muted small mb-0" style="line-height: 1.6;">
+                                        @(serviceDescription.Length > 100 ? serviceDescription.Substring(0, 100) + "..." : serviceDescription)
+                                    </p>
+                                </div>
+                            }
+                            
+                            <!-- Action Buttons -->
+                            <div class="subscription-actions mt-3 pt-3" style="border-top: 1px solid #e5e7eb;">
+                                <a asp-area="Customer" asp-controller="ServiceSubscription" asp-action="Details" asp-route-id="@service?.Id" class="btn btn-outline-primary btn-sm w-100">
+                                    <i class="bi bi-eye me-1"></i>@(Localizer["ViewDetails"]?.Value ?? "View Details")
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .subscription-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+    }
+    
+    .info-row {
+        font-size: 0.9rem;
+    }
+    
+    .subscription-header {
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    @@media (max-width: 768px) {
+        .subscription-card {
+            margin-bottom: 1.5rem;
+        }
+    }
+</style>

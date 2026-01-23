@@ -6,6 +6,7 @@ using IdealWeightNutrition.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
@@ -31,6 +32,7 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
         private readonly IMemoryCache _memoryCache;
         private readonly InvoiceService _invoiceService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public ServiceSubscriptionController(
             IUnitOfWork unitOfWork,
@@ -45,7 +47,8 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
             IEmailSender emailSender,
             IMemoryCache memoryCache,
             InvoiceService invoiceService,
-            IServiceScopeFactory serviceScopeFactory)
+            IServiceScopeFactory serviceScopeFactory,
+            UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _localizer = localizer;
@@ -60,6 +63,7 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
             _memoryCache = memoryCache;
             _invoiceService = invoiceService;
             _serviceScopeFactory = serviceScopeFactory;
+            _userManager = userManager;
         }
 
         // GET: ServiceSubscription/Index
@@ -412,6 +416,107 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
             else if (isFreeSubscription)
             {
                 amountToPay = 0;
+            }
+
+            // Handle account creation/linking for guest users
+            if (isGuest && !string.IsNullOrWhiteSpace(model.GuestEmail))
+            {
+                try
+                {
+                    var guestEmail = model.GuestEmail.Trim().ToLowerInvariant();
+                    var existingUser = await _userManager.FindByEmailAsync(guestEmail);
+                    
+                    if (existingUser != null)
+                    {
+                        // Email already has an account - link the purchase to this account automatically
+                        userId = existingUser.Id;
+                        user = existingUser;
+                        isGuest = false;
+                        
+                        TempData["AccountLinkedMessage"] = _localizer["OrderLinkedToAccount"]?.Value ?? 
+                            $"Your service purchase has been linked to your account ({guestEmail}) because this email already has an account in the system.";
+                    }
+                    else if (model.CreateAccountForGuest)
+                    {
+                        // Email doesn't have account and user wants to create one
+                        var newUser = new ApplicationUser
+                        {
+                            UserName = guestEmail,
+                            Email = guestEmail,
+                            Name = model.GuestName ?? "",
+                            PhoneNumber = model.GuestPhone,
+                            EmailConfirmed = true // Auto-confirm since email was verified via OTP
+                        };
+                        
+                        var result = await _userManager.CreateAsync(newUser);
+                        if (result.Succeeded)
+                        {
+                            // Assign customer role
+                            await _userManager.AddToRoleAsync(newUser, SD.Role_Customer);
+                            
+                            userId = newUser.Id;
+                            user = newUser;
+                            isGuest = false;
+                            
+                            // Generate password reset token and send welcome email
+                            var token = await _userManager.GeneratePasswordResetTokenAsync(newUser);
+                            var resetLink = Url.Action(
+                                "ResetPassword",
+                                "Account",
+                                new { area = "Identity", code = Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(System.Text.Encoding.UTF8.GetBytes(token)), email = guestEmail },
+                                protocol: Request.Scheme
+                            );
+                            
+                            var welcomeTitle = _localizer["WelcomeToIdealWeight"]?.Value ?? "Welcome to Ideal Weight Nutrition!";
+                            var setPasswordButton = _localizer["SetYourPassword"]?.Value ?? "Set Your Password";
+                            var accountCreatedThankYou = _localizer["AccountCreatedThankYou"]?.Value ?? "Thank you for creating an account with us. Your account has been created successfully.";
+                            var setPasswordInstructions = _localizer["SetPasswordInstructions"]?.Value ?? "To set your password and access your account, please click the link below:";
+                            var buttonNotWorkingInstructions = _localizer["ButtonNotWorkingInstructions"]?.Value ?? "If the button doesn't work, copy and paste this link into your browser:";
+                            
+                            var welcomeEmailBody = $@"
+                                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;'>
+                                    <div style='background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+                                        <h2 style='color: #059669; margin-top: 0;'>{welcomeTitle}</h2>
+                                        <p style='color: #374151; font-size: 16px; line-height: 1.6;'>
+                                            {accountCreatedThankYou}
+                                        </p>
+                                        <p style='color: #374151; font-size: 16px; line-height: 1.6;'>
+                                            {setPasswordInstructions}
+                                        </p>
+                                        <div style='text-align: center; margin: 30px 0;'>
+                                            <a href='{resetLink}' style='display: inline-block; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600;'>{setPasswordButton}</a>
+                                        </div>
+                                        <p style='color: #6b7280; font-size: 14px; margin-top: 20px;'>
+                                            {buttonNotWorkingInstructions}<br/>
+                                            <a href='{resetLink}' style='color: #059669;'>{resetLink}</a>
+                                        </p>
+                                        <hr style='border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;' />
+                                        <p style='color: #9ca3af; font-size: 12px; text-align: center; margin: 0;'>
+                                            © {DateTime.Now.Year} Ideal Weight Nutrition. All rights reserved.
+                                        </p>
+                                    </div>
+                                </div>";
+                            
+                            var emailSubject = $"{welcomeTitle} - {setPasswordButton}";
+                            await _emailSender.SendEmailAsync(newUser.Email, emailSubject, welcomeEmailBody);
+                            
+                            TempData["AccountCreatedMessage"] = _localizer["AccountCreatedSuccessfully"]?.Value ?? 
+                                $"An account has been created for {model.GuestEmail}. A password setup link has been sent to your email.";
+                        }
+                        else
+                        {
+                            // Account creation failed - continue as guest
+                            _logger.LogWarning("Failed to create account for {Email}: {Errors}", 
+                                model.GuestEmail, 
+                                string.Join(", ", result.Errors.Select(e => e.Description)));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error creating/linking account for {Email}", model.GuestEmail);
+                    // Continue as guest if account creation/linking fails
+                }
             }
 
             // Validate payment method only if amount is greater than 0
@@ -787,6 +892,17 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
                     if (!tamaraResponse.Success)
                     {
                         _logger.LogError($"Tamara payment creation failed for purchase {purchase.Id}. Error: {tamaraResponse.Message}");
+                        
+                        bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+                        if (isAjax)
+                        {
+                            return Json(new 
+                            { 
+                                success = false, 
+                                error = "Failed to create payment: " + tamaraResponse.Message
+                            });
+                        }
+                        
                         TempData["error"] = "Failed to create Tamara payment: " + tamaraResponse.Message;
                         return RedirectToAction(nameof(ServiceSummary), new { id = model.ServiceId, offerId = model.OfferId, promoCode = model.PromoCode });
                     }
@@ -797,8 +913,26 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
                     _unitOfWork.save();
 
                     _logger.LogInformation($"Tamara payment created successfully for purchase {purchase.Id}. Redirecting to: {tamaraResponse.CheckoutUrl}");
-                    Response.Headers.Add("Location", tamaraResponse.CheckoutUrl);
-                    return new StatusCodeResult(303);
+                    
+                    // Check if this is an AJAX request
+                    bool isAjaxRequest = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+                    if (isAjaxRequest)
+                    {
+                        // Return JSON with redirect URL for AJAX requests
+                        // The JavaScript will handle the redirect in the browser window (not via AJAX)
+                        return Json(new 
+                        { 
+                            success = true, 
+                            paymentMethod = "Tamara",
+                            redirectUrl = tamaraResponse.CheckoutUrl
+                        });
+                    }
+                    else
+                    {
+                        // For non-AJAX requests, use server-side redirect
+                        Response.Headers.Add("Location", tamaraResponse.CheckoutUrl);
+                        return new StatusCodeResult(303);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -807,6 +941,17 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
                     {
                         _logger.LogError($"Inner Exception: {ex.InnerException.Message}, StackTrace: {ex.InnerException.StackTrace}");
                     }
+                    
+                    bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+                    if (isAjax)
+                    {
+                        return Json(new 
+                        { 
+                            success = false, 
+                            error = "An error occurred while creating payment. Please try again."
+                        });
+                    }
+                    
                     TempData["error"] = "An error occurred while creating payment. Please try again.";
                     return RedirectToAction(nameof(ServiceSummary), new { id = model.ServiceId, offerId = model.OfferId, promoCode = model.PromoCode });
                 }
@@ -1165,6 +1310,8 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
                 return NotFound();
             }
 
+            bool paymentSuccessful = false;
+
 			// Verify payment with Geidea
 			if (!string.IsNullOrEmpty(purchase.SessionId))
 			{
@@ -1204,21 +1351,59 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
                     await SendServicePurchaseConfirmationEmail(purchase);
                     });
                     TempData["success"] = "Payment successful! Your service subscription has been confirmed.";
+                    paymentSuccessful = true;
                 }
                 else
                 {
-                    TempData["error"] = "Payment verification failed. Please contact support.";
+                    // Payment verification failed - cancel the subscription
+                    _logger.LogWarning($"Payment verification failed for service purchase {purchaseId}. Verification response: Success={verificationResponse.Success}, IsPaid={verificationResponse.IsPaid}");
+                    
+                    purchase.PaymentStatus = SD.PaymentStatusRejected;
+                    purchase.Status = "Cancelled";
+                    _unitOfWork.ServicePurchases.Update(purchase);
+                    _unitOfWork.save();
+                    
+                    TempData["error"] = _localizer["PaymentNotSuccessful"]?.Value ?? "Payment was not successful. Your subscription has been cancelled. Please try again or contact support if you have any questions.";
+                    return RedirectToAction(nameof(Index));
                 }
             }
             else if (purchase.PaymentStatus == "Approved" || purchase.PaymentStatus == "Paid")
             {
+                paymentSuccessful = true;
                 _ = Task.Run(async () =>
                 {
                     await SendServicePurchaseConfirmationEmail(purchase);
                 });
             }
+            else
+            {
+                // Payment status is not approved/paid and no session ID - payment likely failed
+                _logger.LogWarning($"Service purchase {purchaseId} accessed PaymentSuccess but payment status is {purchase.PaymentStatus} and no SessionId");
+                
+                // If payment status is already rejected/cancelled, don't change it
+                if (purchase.PaymentStatus != SD.PaymentStatusRejected && 
+                    purchase.PaymentStatus != SD.PaymentStatusCancelled)
+                {
+                    purchase.PaymentStatus = SD.PaymentStatusRejected;
+                    purchase.Status = "Cancelled";
+                    _unitOfWork.ServicePurchases.Update(purchase);
+                    _unitOfWork.save();
+                }
+                
+                TempData["error"] = _localizer["PaymentNotSuccessful"]?.Value ?? "Payment was not successful. Your subscription has been cancelled. Please try again or contact support if you have any questions.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            return View(purchase);
+            // Only show success view if payment was successful
+            if (paymentSuccessful)
+            {
+                return View(purchase);
+            }
+            else
+            {
+                TempData["error"] = _localizer["PaymentNotSuccessful"]?.Value ?? "Payment was not successful. Your subscription has been cancelled. Please try again or contact support if you have any questions.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         private async Task SendServicePurchaseConfirmationEmail(ServicePurchase purchase)
@@ -1421,6 +1606,29 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 </html>";
         }
 
+        [HttpPost]
+        public IActionResult CheckEmailHasAccount(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return Json(new { hasAccount = false });
+            }
+
+            email = email.Trim().ToLowerInvariant();
+            
+            // Check if email belongs to an ApplicationUser
+            var user = _unitOfWork.applicationUser.GetAll(
+                u => u.Email != null && u.Email.ToLower() == email
+            ).FirstOrDefault();
+            
+            if (user != null)
+            {
+                return Json(new { hasAccount = true });
+            }
+            
+            return Json(new { hasAccount = false });
+        }
+
         // POST: ServiceSubscription/ValidatePromoCode
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -1618,7 +1826,7 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
                 }
 
                 // Send push notifications to all admins
-                var userManager = HttpContext.RequestServices.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<Microsoft.AspNetCore.Identity.IdentityUser>>();
+                var userManager = HttpContext.RequestServices.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<ApplicationUser>>();
                 var adminUsers = await userManager.GetUsersInRoleAsync(SD.Role_Admin);
                 
                 foreach (var admin in adminUsers)
@@ -1805,18 +2013,67 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
             }
 
             email = email.Trim().ToLowerInvariant();
-
-            try
+            
+            // Check if email was verified via OTP
+            var otpHelper = new OtpHelper(_memoryCache);
+            var isOtpVerified = otpHelper.IsEmailVerified(email);
+            
+            if (isOtpVerified)
             {
-                var otpHelper = new OtpHelper(_memoryCache);
-                var verified = otpHelper.IsEmailVerified(email);
-                return Json(new { verified = verified });
+                return Json(new { verified = true });
             }
-            catch (Exception ex)
+            
+            // Check if email has any guest orders
+            var hasGuestOrders = _unitOfWork.OrderHeader.GetAll(
+                o => o.Email != null && o.Email.ToLower() == email
+            ).Any();
+            
+            if (hasGuestOrders)
             {
-                _logger.LogError(ex, "Error checking email verification status for {Email}", email);
-                return Json(new { verified = false });
+                return Json(new { verified = true, message = _localizer["EmailVerified"]?.Value ?? "Email verified" });
             }
+            
+            // Check if email belongs to an authenticated user who has orders
+            var user = _unitOfWork.applicationUser.GetAll(
+                u => u.Email != null && u.Email.ToLower() == email
+            ).FirstOrDefault();
+            
+            if (user != null)
+            {
+                var hasUserOrders = _unitOfWork.OrderHeader.GetAll(
+                    o => o.ApplicationUserId == user.Id && !o.IsGuestOrder
+                ).Any();
+                
+                if (hasUserOrders)
+                {
+                    return Json(new { verified = true, message = _localizer["EmailVerified"]?.Value ?? "Email verified" });
+                }
+            }
+            
+            // Check if email has any guest service purchases
+            var hasGuestServicePurchases = _unitOfWork.ServicePurchases.GetAll(
+                sp => sp.GuestEmail != null && sp.GuestEmail.ToLower() == email
+            ).Any();
+            
+            if (hasGuestServicePurchases)
+            {
+                return Json(new { verified = true, message = _localizer["EmailVerified"]?.Value ?? "Email verified" });
+            }
+            
+            // Check if email belongs to an authenticated user who has service purchases
+            if (user != null)
+            {
+                var hasUserServicePurchases = _unitOfWork.ServicePurchases.GetAll(
+                    sp => sp.ApplicationUserId == user.Id
+                ).Any();
+                
+                if (hasUserServicePurchases)
+                {
+                    return Json(new { verified = true, message = _localizer["EmailVerified"]?.Value ?? "Email verified" });
+                }
+            }
+            
+            return Json(new { verified = false });
         }
 
         private string GetBaseUrl()

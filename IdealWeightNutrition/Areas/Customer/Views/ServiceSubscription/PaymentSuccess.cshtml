@@ -32,6 +32,24 @@
                 <h1 class="success-title">@(Localizer["PaymentSuccessful"] ?? "Payment Successful!")</h1>
                 <p class="success-message">@(Localizer["ServiceSubscriptionConfirmed"] ?? "Your service subscription has been confirmed.")</p>
 
+                @if (TempData["AccountCreatedMessage"] != null)
+                {
+                    <div class="alert alert-success mt-4" style="border-radius: 10px; padding: 20px; text-align: left;">
+                        <i class="bi bi-check-circle-fill @(isRtl ? "ms-2" : "me-2")"></i>
+                        <strong>@(Localizer["AccountCreated"] ?? "Account Created")</strong>
+                        <p class="mb-0 mt-2">@TempData["AccountCreatedMessage"]</p>
+                    </div>
+                }
+
+                @if (TempData["AccountLinkedMessage"] != null)
+                {
+                    <div class="alert alert-info mt-4" style="border-radius: 10px; padding: 20px; text-align: left;">
+                        <i class="bi bi-info-circle-fill @(isRtl ? "ms-2" : "me-2")"></i>
+                        <strong>@(Localizer["AccountLinked"] ?? "Account Linked")</strong>
+                        <p class="mb-0 mt-2">@TempData["AccountLinkedMessage"]</p>
+                    </div>
+                }
+
                 <div class="purchase-details mt-5">
                     <div class="detail-card">
                         <h3>@(Localizer["PurchaseDetails"] ?? "Purchase Details")</h3>

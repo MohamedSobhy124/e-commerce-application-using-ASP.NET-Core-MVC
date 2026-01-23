@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace IdealWeightNutrition.DataAccess.Data
 {
-    public class ApplicationDBContext:IdentityDbContext<IdentityUser>
+    public class ApplicationDBContext:IdentityDbContext<ApplicationUser>
     {
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options):base(options)
         {
@@ -55,14 +55,20 @@ namespace IdealWeightNutrition.DataAccess.Data
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-
 			base.OnModelCreating(modelBuilder);
-
-			// ==========================================
-			// PERFORMANCE OPTIMIZATION: Database Indexes
-			// ==========================================
 			
-			// Index on IsDeleted for all BaseEntity tables (CRITICAL for performance)
+			modelBuilder.Entity<ApplicationUser>()
+				.HasDiscriminator<string>("Discriminator")
+				.HasValue<ApplicationUser>("ApplicationUser");
+			
+			modelBuilder.Entity<ApplicationUser>()
+				.Property(u => u.Name)
+				.IsRequired(false); // Allow NULL in database for backward compatibility
+			
+			modelBuilder.Entity<ApplicationUser>()
+				.Property(u => u.CompanyId)
+				.IsRequired(false);
+			
 			modelBuilder.Entity<Product>().HasIndex(p => p.IsDeleted);
 			modelBuilder.Entity<Product>().HasIndex(p => new { p.IsDeleted, p.CategryId }); // Composite index
 			modelBuilder.Entity<Product>().HasIndex(p => new { p.IsDeleted, p.StockQuantity }); // For stock queries

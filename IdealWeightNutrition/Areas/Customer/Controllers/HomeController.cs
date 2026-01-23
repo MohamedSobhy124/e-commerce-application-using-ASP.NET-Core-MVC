@@ -24,12 +24,12 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
         private readonly IStringLocalizer<IdealWeightNutrition.SharedResources> _localizer;
         private readonly ApplicationDBContext _dbContext;
         private readonly IConfiguration _configuration;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly TamaraSettings _tamaraSettings;
         private readonly IMemoryCache _memoryCache;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IStringLocalizer<IdealWeightNutrition.SharedResources> localizer, ApplicationDBContext dbContext, IConfiguration configuration, UserManager<IdentityUser> userManager, IWebHostEnvironment webHostEnvironment, IOptions<TamaraSettings> tamaraSettings, IMemoryCache memoryCache)
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IStringLocalizer<IdealWeightNutrition.SharedResources> localizer, ApplicationDBContext dbContext, IConfiguration configuration, UserManager<ApplicationUser> userManager, IWebHostEnvironment webHostEnvironment, IOptions<TamaraSettings> tamaraSettings, IMemoryCache memoryCache)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;

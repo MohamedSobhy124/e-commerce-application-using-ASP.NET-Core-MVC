@@ -22,6 +22,26 @@
             </div>
 
             <div class="admin-card-body">
+                <!-- Tabs Navigation -->
+                <ul class="nav nav-tabs mb-4" id="ordersTabs" role="tablist" style="border-bottom: 2px solid #e5e7eb; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 12px 12px 0 0; padding: 0.5rem;">
+                    <li class="nav-item" role="presentation">
+                        <button class="active" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab" aria-controls="orders" aria-selected="true" onclick="setActiveTab('orders')" style="border: none; border-radius: 10px 10px 0 0; padding: 1rem 2rem; font-weight: 700; color: #6b7280; transition: all 0.3s ease; background: transparent; position: relative; overflow: hidden;">
+                            <i class="bi bi-receipt me-2"></i>@Localizer["Orders"]
+                            <span class="tab-indicator" style="position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transform: scaleX(1); transition: transform 0.3s ease;"></span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="" id="service-purchases-tab" data-bs-toggle="tab" data-bs-target="#service-purchases" type="button" role="tab" aria-controls="service-purchases" aria-selected="false" onclick="setActiveTab('service-purchases')" style="border: none; border-radius: 10px 10px 0 0; padding: 1rem 2rem; font-weight: 700; color: #6b7280; transition: all 0.3s ease; background: transparent; position: relative; overflow: hidden;">
+                            <i class="bi bi-cart-check me-2"></i>@(Localizer["ServicePurchases"]?.Value ?? "Service Purchases")
+                            <span class="tab-indicator" style="position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); transform: scaleX(0); transition: transform 0.3s ease;"></span>
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="ordersTabsContent">
+                    <!-- Orders Tab -->
+                    <div class="tab-pane fade show active" id="orders" role="tabpanel" aria-labelledby="orders-tab">
                 <!-- Order Statistics Cards -->
                 <div class="order-stats-container" id="orderStatsContainer">
                     <div class="order-stat-card all">
@@ -189,21 +209,223 @@
                         </div>
                     </div>
                 </div>
-                <!-- Order Table -->
-                <div class="order-table-wrapper">
-                    <div id="orderTable" style="min-height: 400px; background: white; border-radius: 12px;">
-                        <div style="text-align: center; padding: 3rem; color: #667eea;">
-                            <i class="bi bi-arrow-repeat" style="font-size: 3rem; animation: spin 1s linear infinite;"></i>
-                            <p style="margin-top: 1rem; font-size: 1.2rem; font-weight: 600;">Loading Orders...</p>
-                            <p style="font-size: 0.9rem; color: #6c757d;">If this message persists, check browser console (F12)</p>
+                        <!-- Order Table -->
+                        <div class="order-table-wrapper">
+                            <div id="orderTable" style="min-height: 400px; background: white; border-radius: 12px;">
+                                <div style="text-align: center; padding: 3rem; color: #667eea;">
+                                    <i class="bi bi-arrow-repeat" style="font-size: 3rem; animation: spin 1s linear infinite;"></i>
+                                    <p style="margin-top: 1rem; font-size: 1.2rem; font-weight: 600;">Loading Orders...</p>
+                                    <p style="font-size: 0.9rem; color: #6c757d;">If this message persists, check browser console (F12)</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    <!-- End Orders Tab -->
+
+                    <!-- Service Purchases Tab -->
+                    <div class="tab-pane fade" id="service-purchases" role="tabpanel" aria-labelledby="service-purchases-tab">
+                        <!-- Service Purchase Statistics Cards -->
+                        <div class="order-stats-container" id="servicePurchaseStatsContainer">
+                            <div class="order-stat-card all">
+                                <div class="order-stat-icon">
+                                    <i class="bi bi-list-ul"></i>
+                                </div>
+                                <div class="order-stat-label">@(Localizer["TotalPurchases"]?.Value ?? "Total Purchases")</div>
+                                <div class="order-stat-value" id="serviceStatAll">0</div>
+                            </div>
+                            <div class="order-stat-card pending">
+                                <div class="order-stat-icon">
+                                    <i class="bi bi-clock"></i>
+                                </div>
+                                <div class="order-stat-label">@Localizer["Pending"]</div>
+                                <div class="order-stat-value" id="serviceStatPending">0</div>
+                            </div>
+                            <div class="order-stat-card approved">
+                                <div class="order-stat-icon">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div class="order-stat-label">@Localizer["Approved"]</div>
+                                <div class="order-stat-value" id="serviceStatApproved">0</div>
+                            </div>
+                        </div>
+
+                        <!-- Compact Advanced Filters for Service Purchases -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="filters-container" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 16px; padding: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #e9ecef;">
+                                    <!-- Header with Toggle -->
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <button class="btn btn-sm btn-link p-0 text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#serviceAdvancedFilters" aria-expanded="false" aria-controls="serviceAdvancedFilters" style="color: #10b981;">
+                                                <i class="bi bi-funnel-fill me-1"></i>
+                                                <span class="fw-semibold">Filters</span>
+                                                <i class="bi bi-chevron-down ms-1" id="serviceFilterToggleIcon"></i>
+                                            </button>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <button class="btn btn-sm btn-success" onclick="exportServicePurchases()" style="border-radius: 8px; padding: 0.25rem 0.75rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">
+                                                <i class="bi bi-download me-1"></i>@(Localizer["ExportServicePurchases"]?.Value ?? "Export Service Purchases")
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="clearAllServiceFilters()" style="border-radius: 8px; padding: 0.25rem 0.75rem;">
+                                                <i class="bi bi-x-circle me-1"></i>Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Always Visible: Payment Status Tabs & Search -->
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                        <!-- Payment Status Filter Tabs (Compact) -->
+                                        <div class="order-filter-tabs-compact">
+                                            <button class="filter-tab-compact active" onclick="filterServicePurchases('all')" data-filter-type="status" data-filter-value="all" title="All Purchases">
+                                                <i class="bi bi-list-ul"></i> All
+                                            </button>
+                                            <button class="filter-tab-compact" onclick="filterServicePurchases('Pending')" data-filter-type="status" data-filter-value="Pending" title="Pending">
+                                                <i class="bi bi-clock"></i> Pending
+                                            </button>
+                                            <button class="filter-tab-compact" onclick="filterServicePurchases('Approved')" data-filter-type="status" data-filter-value="Approved" title="Approved">
+                                                <i class="bi bi-check-circle"></i> Approved
+                                            </button>
+                                            <button class="filter-tab-compact" onclick="filterServicePurchases('Rejected')" data-filter-type="status" data-filter-value="Rejected" title="Rejected">
+                                                <i class="bi bi-x-circle"></i> Rejected
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Search Box (Compact) -->
+                                        <div class="search-box-compact ms-auto">
+                                            <div class="input-group" style="max-width: 320px;">
+                                                <span class="input-group-text">
+                                                    <i class="bi bi-search"></i>
+                                                </span>
+                                                <input type="text"
+                                                       id="servicePurchaseSearchInput"
+                                                       class="form-control"
+                                                       placeholder="Search purchases..."
+                                                       style="border-left: none; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+                                                <button class="btn btn-outline-secondary btn-sm" onclick="clearServiceSearch()" style="border-left: none; padding: 0.5rem 0.75rem;">
+                                                    <i class="bi bi-x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Collapsible Advanced Filters -->
+                                    <div class="collapse" id="serviceAdvancedFilters">
+                                        <div class="border-top pt-3 mt-2">
+                                            <div class="row g-2">
+                                                <div class="col-md-3">
+                                                    <label class="form-label small fw-semibold text-muted mb-1">
+                                                        <i class="bi bi-credit-card me-1"></i>Payment Status
+                                                    </label>
+                                                    <select id="servicePaymentStatusFilter" class="form-select form-select-sm" onchange="applyServiceFilters()" style="border-radius: 8px;">
+                                                        <option value="">All</option>
+                                                        <option value="Approved">Approved</option>
+                                                        <option value="Pending">Pending</option>
+                                                        <option value="Rejected">Rejected</option>
+                                                        <option value="Cancelled">Cancelled</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label small fw-semibold text-muted mb-1">
+                                                        <i class="bi bi-briefcase me-1"></i>Service Status
+                                                    </label>
+                                                    <select id="serviceStatusFilter" class="form-select form-select-sm" onchange="applyServiceFilters()" style="border-radius: 8px;">
+                                                        <option value="">All</option>
+                                                        <option value="Active">Active</option>
+                                                        <option value="Expired">Expired</option>
+                                                        <option value="Cancelled">Cancelled</option>
+                                                        <option value="Suspended">Suspended</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label small fw-semibold text-muted mb-1">
+                                                        <i class="bi bi-calendar-event me-1"></i>From Date
+                                                    </label>
+                                                    <input type="date" id="serviceDateFromFilter" class="form-control form-control-sm" onchange="applyServiceFilters()" style="border-radius: 8px;">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label small fw-semibold text-muted mb-1">
+                                                        <i class="bi bi-calendar-check me-1"></i>To Date
+                                                    </label>
+                                                    <input type="date" id="serviceDateToFilter" class="form-control form-control-sm" onchange="applyServiceFilters()" style="border-radius: 8px;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Service Purchase Table -->
+                        <div class="order-table-wrapper">
+                            <div id="servicePurchaseTable" style="min-height: 400px; background: white; border-radius: 12px;">
+                                <div style="text-align: center; padding: 3rem; color: #10b981;">
+                                    <i class="bi bi-arrow-repeat" style="font-size: 3rem; animation: spin 1s linear infinite;"></i>
+                                    <p style="margin-top: 1rem; font-size: 1.2rem; font-weight: 600;">Loading Service Purchases...</p>
+                                    <p style="font-size: 0.9rem; color: #6c757d;">If this message persists, check browser console (F12)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Service Purchases Tab -->
                 </div>
-                </div>
+                <!-- End Tab Content -->
                 
                 <style>
                     @@keyframes spin {
                         from { transform: rotate(0deg); }
                         to { transform: rotate(360deg); }
+                    }
+
+                    /* Tab Styling - Cool Colors */
+                    #ordersTabs {
+                        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+                        border-radius: 12px 12px 0 0;
+                        padding: 0.5rem;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                    }
+
+                    #ordersTabs .nav-link {
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        position: relative;
+                        margin-right: 0.5rem;
+                            COLOR: rgb(107, 114, 128) !IMPORTANT;
+                    }
+
+                    #ordersTabs .nav-link:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    }
+
+                    #ordersTabs .nav-link#orders-tab:hover {
+                        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%) !important;
+                        color: #667eea !important;
+                    }
+
+                    #ordersTabs .nav-link#service-purchases-tab:hover {
+                        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%) !important;
+                        color: #10b981 !important;
+                    }
+
+                    #ordersTabs .nav-link.active {
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                    }
+
+                    #ordersTabs .nav-link#orders-tab.active {
+                        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
+                        color: #667eea !important;
+                    }
+
+                    #ordersTabs .nav-link#service-purchases-tab.active {
+                        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+                        color: #10b981 !important;
+                    }
+
+                    .tab-pane {
+                        padding-top: 1rem;
+                    }
+
+                    .tab-indicator {
+                        border-radius: 3px 3px 0 0;
                     }
                     
                     /* Enhanced Tabulator Styling */
@@ -1168,6 +1390,559 @@
                         filterToggleIcon.style.transition = 'transform 0.3s ease';
                     }, 10);
                 });
+            }
+        });
+
+        // ========== TAB SWITCHING WITH RELOAD ==========
+        
+        // Store current tab and reload page for clean state
+        window.setActiveTab = function(tabName) {
+            var currentUrl = window.location.pathname;
+            var urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('tab', tabName);
+            // Reload page to ensure clean state
+            window.location.href = currentUrl + '?' + urlParams.toString();
+        };
+
+        // Restore active tab on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var tabParam = urlParams.get('tab');
+            if (tabParam === 'service-purchases') {
+                // Switch to service purchases tab after DOM is ready
+                setTimeout(function() {
+                    var serviceTab = document.getElementById('service-purchases-tab');
+                    var servicePane = document.getElementById('service-purchases');
+                    if (serviceTab && servicePane) {
+                        // Show the tab pane first
+                        servicePane.classList.add('show', 'active');
+                        serviceTab.classList.add('active');
+                        serviceTab.setAttribute('aria-selected', 'true');
+                        
+                        // Hide orders tab
+                        var ordersTab = document.getElementById('orders-tab');
+                        var ordersPane = document.getElementById('orders');
+                        if (ordersTab && ordersPane) {
+                            ordersPane.classList.remove('show', 'active');
+                            ordersTab.classList.remove('active');
+                            ordersTab.setAttribute('aria-selected', 'false');
+                        }
+                        
+                        // Update tab styling
+                        if (ordersTab) {
+                            ordersTab.style.background = 'transparent';
+                            ordersTab.style.color = '#6b7280';
+                            var ordersIndicator = ordersTab.querySelector('.tab-indicator');
+                            if (ordersIndicator) ordersIndicator.style.transform = 'scaleX(0)';
+                        }
+                        serviceTab.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)';
+                        serviceTab.style.color = '#10b981';
+                        var serviceIndicator = serviceTab.querySelector('.tab-indicator');
+                        if (serviceIndicator) {
+                            serviceIndicator.style.transform = 'scaleX(1)';
+                        }
+                        
+                        // Initialize table after tab is visible
+                        setTimeout(function() {
+                            window.initializeServicePurchaseTable();
+                        }, 800);
+                    }
+                }, 200);
+            }
+        });
+
+        // ========== SERVICE PURCHASES TAB FUNCTIONALITY ==========
+        
+        // Load Service Purchase Statistics
+        window.loadServicePurchaseStatistics = function() {
+            var statAll = document.getElementById('serviceStatAll');
+            var statPending = document.getElementById('serviceStatPending');
+            var statApproved = document.getElementById('serviceStatApproved');
+            
+            if (!statAll || !statPending || !statApproved) {
+                // Elements not in DOM yet, skip
+                return;
+            }
+            
+            fetch('/Admin/ServiceSubscription/GetServicePurchaseStatistics')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.stats) {
+                        if (statAll) statAll.textContent = data.stats.all || 0;
+                        if (statPending) statPending.textContent = data.stats.pending || 0;
+                        if (statApproved) statApproved.textContent = data.stats.approved || 0;
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load service purchase statistics:', error);
+                });
+        };
+
+        // Global filter variables for Service Purchases
+        window.currentServiceFilter = 'all';
+        window.currentServicePaymentStatus = '';
+        window.currentServiceStatus = '';
+        window.currentServiceDateFrom = '';
+        window.currentServiceDateTo = '';
+
+        // Initialize Service Purchase Table when tab is shown
+        window.servicePurchaseTableInitialized = false;
+        
+        // Function to initialize service purchase table
+        window.initializeServicePurchaseTable = function() {
+            var tableElement = document.getElementById('servicePurchaseTable');
+            if (!tableElement) {
+                console.warn('Service purchase table element not found, will retry...');
+                // Check if tab is actually visible
+                var servicePane = document.getElementById('service-purchases');
+                if (!servicePane || !servicePane.classList.contains('show')) {
+                    console.warn('Service purchases tab is not visible yet');
+                    return;
+                }
+                // Retry after a short delay (max 3 retries)
+                if (!window.servicePurchaseRetryCount) window.servicePurchaseRetryCount = 0;
+                if (window.servicePurchaseRetryCount < 3) {
+                    window.servicePurchaseRetryCount++;
+                    setTimeout(function() {
+                        window.initializeServicePurchaseTable();
+                    }, 500);
+                } else {
+                    console.error('Failed to find service purchase table after multiple retries');
+                }
+                return;
+            }
+            
+            // Reset retry count on success
+            window.servicePurchaseRetryCount = 0;
+            
+            if (window.servicePurchaseTableInitialized) {
+                // Already initialized, just reload data
+                if (window.servicePurchaseTable) {
+                    window.servicePurchaseTable.setData();
+                }
+                window.loadServicePurchaseStatistics();
+                return;
+            }
+            
+            if (typeof Tabulator === 'undefined') {
+                console.error('❌ Tabulator NOT LOADED');
+                tableElement.innerHTML = '<div style="padding:2rem;text-align:center;color:red;"><h3>⚠️ Tabulator Library Failed to Load</h3><p>Please check your internet connection or try refreshing the page.</p></div>';
+                return;
+            }
+
+            window.servicePurchaseTable = new Tabulator("#servicePurchaseTable", {
+                        height: "800px",
+                        layout: "fitDataFill",
+                        responsiveLayout: false,
+                        placeholder: "No service purchases found",
+                        pagination: true,
+                        paginationMode: "remote",
+                        paginationSize: 10,
+                        paginationSizeSelector: [10, 25, 50, 100],
+                        paginationCounter: "rows",
+                        ajaxURL: "/Admin/ServiceSubscription/GetAllPurchases",
+                        ajaxParams: function() {
+                            return {
+                                paymentStatus: window.currentServicePaymentStatus,
+                                serviceStatus: window.currentServiceStatus,
+                                dateFrom: window.currentServiceDateFrom,
+                                dateTo: window.currentServiceDateTo,
+                                searchValue: document.getElementById('servicePurchaseSearchInput')?.value || '',
+                                sortColumn: 'Id',
+                                sortDirection: 'desc'
+                            };
+                        },
+                        ajaxRequestFunc: function(url, config, params) {
+                            var queryParams = [];
+                            var page = params.page || 1;
+                            var size = params.size || 10;
+                            queryParams.push(`start=${(page - 1) * size}`);
+                            queryParams.push(`length=${size}`);
+                            
+                            if (params.sort && params.sort.length > 0) {
+                                queryParams.push(`sortColumn=${params.sort[0].field}`);
+                                queryParams.push(`sortDirection=${params.sort[0].dir}`);
+                            }
+                            
+                            queryParams.push(`paymentStatus=${window.currentServicePaymentStatus || ''}`);
+                            queryParams.push(`serviceStatus=${window.currentServiceStatus || ''}`);
+                            queryParams.push(`dateFrom=${window.currentServiceDateFrom || ''}`);
+                            queryParams.push(`dateTo=${window.currentServiceDateTo || ''}`);
+                            
+                            var searchValue = document.getElementById('servicePurchaseSearchInput')?.value || '';
+                            if (searchValue) {
+                                queryParams.push(`searchValue=${encodeURIComponent(searchValue)}`);
+                            }
+                            
+                            var finalUrl = url + '?' + queryParams.join('&');
+                            return fetch(finalUrl, config).then(response => response.json());
+                        },
+                        ajaxResponse: function(url, params, response) {
+                            return {
+                                last_page: response.last_page || 1,
+                                data: response.data || []
+                            };
+                        },
+                        columns: [
+                            {
+                                title: "@Localizer["PurchaseID"]",
+                                field: "id",
+                                widthGrow: 1,
+                                minWidth: 100,
+                                sorter: "number",
+                                headerSort: true,
+                                formatter: function(cell) {
+                                    var purchaseId = cell.getValue();
+                                    return '<a href="/Admin/ServiceSubscription/PurchaseDetails/' + purchaseId + '" class="order-id-link" onclick="event.stopPropagation();" style="display:inline-block;padding:0.5rem 1rem;border-radius:8px;font-weight:600;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;color:white;text-decoration:none;transition:all 0.2s;">#' + purchaseId + '</a>';
+                                }
+                            },
+                            {
+                                title: "@Localizer["Service"]",
+                                field: "serviceTitle",
+                                widthGrow: 2,
+                                minWidth: 150,
+                                sorter: "string",
+                                headerSort: true
+                            },
+                            {
+                                title: "@Localizer["Customer"]",
+                                field: "customerName",
+                                widthGrow: 2,
+                                minWidth: 120,
+                                sorter: "string",
+                                headerSort: true
+                            },
+                            {
+                                title: "@Localizer["Email"]",
+                                field: "email",
+                                widthGrow: 2,
+                                minWidth: 150,
+                                sorter: "string",
+                                headerSort: false,
+                                formatter: function(cell) {
+                                    var value = cell.getValue() || 'N/A';
+                                    return '<small style="color:#6c757d">' + value + '</small>';
+                                }
+                            },
+                            {
+                                title: "@Localizer["Phone"]",
+                                field: "phone",
+                                widthGrow: 1.5,
+                                minWidth: 100,
+                                sorter: "string",
+                                headerSort: false,
+                                formatter: function(cell) {
+                                    var value = cell.getValue() || 'N/A';
+                                    return '<small style="color:#6c757d">' + value + '</small>';
+                                }
+                            },
+                            {
+                                title: "@Localizer["TotalAmount"]",
+                                field: "totalAmount",
+                                widthGrow: 1.5,
+                                minWidth: 100,
+                                sorter: "number",
+                                headerSort: true,
+                                hozAlign: "right",
+                                formatter: function(cell) {
+                                    return '<strong style="color:#059669;font-size:1.1rem">@currencySymbol ' + parseFloat(cell.getValue()).toFixed(2) + '</strong>';
+                                }
+                            },
+                            {
+                                title: "@Localizer["VATAmount"]",
+                                field: "vatAmount",
+                                widthGrow: 1.2,
+                                minWidth: 90,
+                                sorter: "number",
+                                headerSort: true,
+                                hozAlign: "right",
+                                formatter: function(cell) {
+                                    return '<span style="color:#7c3aed;font-size:0.95rem;font-weight:600">@currencySymbol ' + parseFloat(cell.getValue()).toFixed(2) + '</span>';
+                                }
+                            },
+                            {
+                                title: "@Localizer["AmountPaid"]",
+                                field: "amountPaid",
+                                widthGrow: 1.5,
+                                minWidth: 100,
+                                sorter: "number",
+                                headerSort: true,
+                                hozAlign: "right",
+                                formatter: function(cell) {
+                                    return '<span style="color:#10b981;font-size:0.95rem;font-weight:600">@currencySymbol ' + parseFloat(cell.getValue()).toFixed(2) + '</span>';
+                                }
+                            },
+                            {
+                                title: "@Localizer["PaymentStatus"]",
+                                field: "paymentStatus",
+                                widthGrow: 2,
+                                minWidth: 130,
+                                formatter: function(cell) {
+                                    var status = (cell.getValue() || '').toLowerCase();
+                                    var badgeStyle = 'background:#fef3c7;color:#92400e;border:2px solid #f59e0b';
+                                    var icon = 'bi-clock';
+                                    
+                                    if (status.includes('approved')) {
+                                        badgeStyle = 'background:#d1fae5;color:#065f46;border:2px solid #10b981';
+                                        icon = 'bi-check-circle-fill';
+                                    } else if (status.includes('reject')) {
+                                        badgeStyle = 'background:#fee2e2;color:#991b1b;border:2px solid #ef4444';
+                                        icon = 'bi-x-circle';
+                                    }
+                                    
+                                    return '<span style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.375rem 0.75rem;border-radius:20px;font-size:0.875rem;font-weight:600;' + badgeStyle + '"><i class="bi ' + icon + '"></i>' + cell.getValue() + '</span>';
+                                }
+                            },
+                            {
+                                title: "@Localizer["PurchaseDate"]",
+                                field: "purchaseDate",
+                                widthGrow: 1.5,
+                                minWidth: 150,
+                                sorter: "date",
+                                headerSort: true,
+                                formatter: function(cell) {
+                                    var date = new Date(cell.getValue());
+                                    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                                }
+                            },
+                            {
+                                title: "@Localizer["Actions"]",
+                                field: "actions",
+                                widthGrow: 1,
+                                minWidth: 100,
+                                headerSort: false,
+                                hozAlign: "center",
+                                formatter: function(cell) {
+                                    var purchaseId = cell.getRow().getData().id;
+                                    return '<a href="/Admin/ServiceSubscription/PurchaseDetails/' + purchaseId + '" class="btn btn-sm btn-primary" onclick="event.stopPropagation();" style="padding:0.5rem 1rem;border-radius:8px;font-weight:600;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;transition:all 0.2s;"><i class="bi bi-eye me-1"></i>@Localizer["Details"]</a>';
+                                }
+                            }
+                        ],
+                        initialSort: [
+                            {column: "id", dir: "desc"}
+                        ],
+                        rowFormatter: function(row){
+                            row.getElement().style.cursor = "pointer";
+                        }
+                    });
+
+            window.servicePurchaseTableInitialized = true;
+            window.loadServicePurchaseStatistics();
+        };
+
+        window.filterServicePurchases = function(status) {
+            window.currentServiceFilter = status;
+            
+            // Update active tab
+            document.querySelectorAll('#service-purchases .filter-tab-compact').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            const tabs = document.querySelectorAll('#service-purchases .filter-tab-compact');
+            tabs.forEach(tab => {
+                const filterValue = tab.getAttribute('data-filter-value');
+                if (filterValue === status) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Update payment status filter based on tab selection
+            if (status === 'all') {
+                window.currentServicePaymentStatus = '';
+            } else {
+                window.currentServicePaymentStatus = status;
+            }
+            
+            // Reload table data with new filter
+            applyServiceFilters();
+        };
+        
+        window.applyServiceFilters = function() {
+            // Update filter values from UI
+            window.currentServicePaymentStatus = document.getElementById('servicePaymentStatusFilter') ? document.getElementById('servicePaymentStatusFilter').value : '';
+            window.currentServiceStatus = document.getElementById('serviceStatusFilter') ? document.getElementById('serviceStatusFilter').value : '';
+            window.currentServiceDateFrom = document.getElementById('serviceDateFromFilter') ? document.getElementById('serviceDateFromFilter').value : '';
+            window.currentServiceDateTo = document.getElementById('serviceDateToFilter') ? document.getElementById('serviceDateToFilter').value : '';
+            
+            // Reload table data with all filters
+            if (window.servicePurchaseTable) {
+                window.servicePurchaseTable.setPage(1).then(function(){
+                    window.servicePurchaseTable.setData();
+                });
+            }
+        };
+        
+        window.clearAllServiceFilters = function() {
+            // Reset all filters
+            window.currentServiceFilter = 'all';
+            window.currentServicePaymentStatus = '';
+            window.currentServiceStatus = '';
+            window.currentServiceDateFrom = '';
+            window.currentServiceDateTo = '';
+            
+            // Reset UI
+            document.querySelectorAll('#service-purchases .filter-tab-compact').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector('#service-purchases .filter-tab-compact[data-filter-value="all"]')?.classList.add('active');
+            
+            if (document.getElementById('servicePaymentStatusFilter')) {
+                document.getElementById('servicePaymentStatusFilter').value = '';
+            }
+            if (document.getElementById('serviceStatusFilter')) {
+                document.getElementById('serviceStatusFilter').value = '';
+            }
+            if (document.getElementById('serviceDateFromFilter')) {
+                document.getElementById('serviceDateFromFilter').value = '';
+            }
+            if (document.getElementById('serviceDateToFilter')) {
+                document.getElementById('serviceDateToFilter').value = '';
+            }
+            if (document.getElementById('servicePurchaseSearchInput')) {
+                document.getElementById('servicePurchaseSearchInput').value = '';
+            }
+            
+            // Reload table
+            applyServiceFilters();
+        };
+        
+        // Search function for Service Purchases
+        window.searchServicePurchases = function() {
+            var searchValue = document.getElementById('servicePurchaseSearchInput').value;
+            
+            if (window.servicePurchaseTable) {
+                window.servicePurchaseTable.setPage(1).then(function(){
+                    window.servicePurchaseTable.setData();
+                });
+            }
+        };
+        
+        // Clear search for Service Purchases
+        window.clearServiceSearch = function() {
+            document.getElementById('servicePurchaseSearchInput').value = '';
+            window.searchServicePurchases();
+        };
+        
+        // Export Service Purchases with current filters
+        window.exportServicePurchases = function() {
+            var paymentStatus = window.currentServicePaymentStatus || '';
+            var serviceStatus = window.currentServiceStatus || '';
+            var dateFrom = window.currentServiceDateFrom || '';
+            var dateTo = window.currentServiceDateTo || '';
+            var searchValue = document.getElementById('servicePurchaseSearchInput') ? document.getElementById('servicePurchaseSearchInput').value : '';
+            
+            // Build query string
+            var params = new URLSearchParams();
+            if (paymentStatus) params.append('paymentStatus', paymentStatus);
+            if (serviceStatus) params.append('serviceStatus', serviceStatus);
+            if (dateFrom) params.append('dateFrom', dateFrom);
+            if (dateTo) params.append('dateTo', dateTo);
+            if (searchValue) params.append('searchValue', searchValue);
+            
+            // Create download link
+            var url = '/Admin/ServiceSubscription/ExportServicePurchases?' + params.toString();
+            window.location.href = url;
+        };
+
+        // Add event listener for service purchase search input (with debounce)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup Service Purchases tab event listener
+            var servicePurchaseTabElement = document.getElementById('service-purchases-tab');
+            var servicePurchasePane = document.getElementById('service-purchases');
+            
+            if (servicePurchaseTabElement && servicePurchasePane) {
+                // Check if service purchases tab is active
+                if (servicePurchasePane.classList.contains('active') && servicePurchasePane.classList.contains('show')) {
+                    // Tab is already active, initialize after a delay to ensure DOM is ready
+                    setTimeout(function() {
+                        window.initializeServicePurchaseTable();
+                    }, 800);
+                } else {
+                    // Tab is not active, wait for it to be shown
+                    servicePurchaseTabElement.addEventListener('shown.bs.tab', function() {
+                        // Wait a bit to ensure tab content is fully visible and rendered
+                        setTimeout(function() {
+                            window.initializeServicePurchaseTable();
+                        }, 500);
+                    });
+                }
+            }
+            
+            var serviceSearchInput = document.getElementById('servicePurchaseSearchInput');
+            if (serviceSearchInput) {
+                var serviceSearchTimeout;
+                serviceSearchInput.addEventListener('input', function() {
+                    clearTimeout(serviceSearchTimeout);
+                    serviceSearchTimeout = setTimeout(function() {
+                        window.searchServicePurchases();
+                    }, 500);
+                });
+                
+                serviceSearchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        clearTimeout(serviceSearchTimeout);
+                        window.searchServicePurchases();
+                    }
+                });
+            }
+            
+            // Toggle icon rotation for service filters collapse
+            var serviceFilterToggle = document.querySelector('[data-bs-toggle="collapse"][data-bs-target="#serviceAdvancedFilters"]');
+            var serviceFilterToggleIcon = document.getElementById('serviceFilterToggleIcon');
+            if (serviceFilterToggle && serviceFilterToggleIcon) {
+                serviceFilterToggle.addEventListener('click', function() {
+                    setTimeout(function() {
+                        var isExpanded = serviceFilterToggle.getAttribute('aria-expanded') === 'true';
+                        serviceFilterToggleIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+                        serviceFilterToggleIcon.style.transition = 'transform 0.3s ease';
+                    }, 10);
+                });
+            }
+
+            // Tab styling with cool colors
+            var navTabs = document.querySelectorAll('#ordersTabs .nav-link');
+            navTabs.forEach(function(tab) {
+                tab.addEventListener('shown.bs.tab', function(e) {
+                    navTabs.forEach(function(t) {
+                        var indicator = t.querySelector('.tab-indicator');
+                        t.style.background = 'transparent';
+                        t.style.color = '#6b7280';
+                        if (indicator) {
+                            indicator.style.transform = 'scaleX(0)';
+                        }
+                    });
+                    
+                    // Active tab styling
+                    var activeIndicator = e.target.querySelector('.tab-indicator');
+                    if (e.target.id === 'orders-tab') {
+                        e.target.style.background = 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)';
+                        e.target.style.color = '#667eea';
+                        if (activeIndicator) {
+                            activeIndicator.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                            activeIndicator.style.transform = 'scaleX(1)';
+                        }
+                    } else if (e.target.id === 'service-purchases-tab') {
+                        e.target.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)';
+                        e.target.style.color = '#10b981';
+                        if (activeIndicator) {
+                            activeIndicator.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                            activeIndicator.style.transform = 'scaleX(1)';
+                        }
+                    }
+                });
+            });
+            
+            // Set initial active tab style
+            var activeTab = document.querySelector('#ordersTabs .nav-link.active');
+            if (activeTab) {
+                if (activeTab.id === 'orders-tab') {
+                    activeTab.style.background = 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)';
+                    activeTab.style.color = '#667eea';
+                    var indicator = activeTab.querySelector('.tab-indicator');
+                    if (indicator) {
+                        indicator.style.transform = 'scaleX(1)';
+                    }
+                }
             }
         });
         
