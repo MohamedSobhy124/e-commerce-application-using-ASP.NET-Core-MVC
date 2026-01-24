@@ -2,12 +2,13 @@
 .flash-offers-marquee {
     position: relative;
     width: 100%;
-    background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
     color: white;
     padding: 12px 0;
     z-index: 999;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    border-bottom: 3px solid #ff4757;
+    box-shadow: 0 4px 25px rgba(48, 43, 99, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, #ff6b9d, #c44569, #ff6b9d) 1;
     overflow: hidden;
     cursor: pointer;
     display: block;
@@ -15,53 +16,89 @@
     opacity: 1;
 }
 
+.flash-offers-marquee::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255, 107, 157, 0.15) 0%, transparent 60%);
+    pointer-events: none;
+}
+
     .flash-offers-marquee:hover {
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 8px 30px rgba(48, 43, 99, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     }
 
 .marquee-header {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 71, 87, 0.15);
-    padding: 8px 15px;
+    background: linear-gradient(90deg, rgba(255, 107, 157, 0.15) 0%, rgba(196, 69, 105, 0.2) 50%, rgba(255, 107, 157, 0.15) 100%);
+    padding: 10px 15px;
     margin-bottom: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
+    position: relative;
 }
 
     .marquee-header .badge {
-        background: linear-gradient(45deg, #ff4757, #ff6b81);
+        background: linear-gradient(135deg, #ff6b9d 0%, #c44569 50%, #a0356a 100%);
         color: white;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-weight: bold;
+        padding: 6px 16px;
+        border-radius: 25px;
+        font-weight: 700;
         font-size: 14px;
         display: flex;
         align-items: center;
-        box-shadow: 0 3px 8px rgba(255, 71, 87, 0.3);
+        box-shadow: 0 4px 15px rgba(196, 69, 105, 0.5), inset 0 -2px 0 rgba(0, 0, 0, 0.15);
         white-space: nowrap;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        animation: badge-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badge-pulse {
+        0%, 100% { box-shadow: 0 4px 15px rgba(196, 69, 105, 0.5); }
+        50% { box-shadow: 0 4px 25px rgba(255, 107, 157, 0.8); }
     }
 
         .marquee-header .badge i {
-            margin-right: 6px;
+            margin-right: 8px;
+            animation: flash-icon 1s ease-in-out infinite;
         }
 
+    @keyframes flash-icon {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.2); }
+    }
+
     .marquee-header .timer {
-        background: rgba(0, 0, 0, 0.3);
-        padding: 5px 15px;
-        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(48, 43, 99, 0.6) 100%);
+        padding: 6px 18px;
+        border-radius: 25px;
         font-size: 14px;
+        font-weight: 600;
         display: flex;
         align-items: center;
         white-space: nowrap;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(5px);
     }
 
         .marquee-header .timer i {
             margin-right: 8px;
-            color: #ffdd59;
+            color: #ffd700;
+            animation: timer-pulse 1s ease-in-out infinite;
+            filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.6));
         }
+
+    @keyframes timer-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+    }
 
 /* Marquee content - BASE STYLES */
 .marquee-content {
@@ -97,20 +134,30 @@
     display: flex;
     align-items: center;
     white-space: nowrap;
-    padding: 0 40px;
-    font-size: 16px;
-    font-weight: 500;
+    padding: 0 45px;
+    font-size: 15px;
+    font-weight: 600;
     position: relative;
     color: #fff;
     flex-shrink: 0;
     box-sizing: border-box;
     margin: 0;
     height: 100%;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.marquee-item:hover {
+    color: #ff6b9d;
+    text-shadow: 0 0 15px rgba(255, 107, 157, 0.6);
 }
 
 .marquee-text {
     display: inline-block;
-    line-height: 1.4;
+    line-height: 1.5;
+    background: linear-gradient(180deg, #ffffff 0%, #e8e8ff 100%);
+    -webkit-background-clip: text; 
+    background-clip: text;
 }
 
 /* English styling */
@@ -130,9 +177,17 @@
 }
 
 .marquee-item i {
-    font-size: 18px;
+    font-size: 20px;
     flex-shrink: 0;
-    min-width: 24px;
+    min-width: 26px;
+    color: #ff6b9d;
+    filter: drop-shadow(0 0 6px rgba(255, 107, 157, 0.5));
+    animation: icon-glow 2s ease-in-out infinite;
+}
+
+@keyframes icon-glow {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 107, 157, 0.4)); }
+    50% { filter: drop-shadow(0 0 10px rgba(255, 107, 157, 0.8)); }
 }
 
 /* Icon positioning for different directions */
@@ -147,14 +202,31 @@
 }
 
 .marquee-item::after {
-    content: '';
+    content: '✦';
     position: absolute;
     right: 0;
     top: 50%;
     transform: translateY(-50%);
-    height: 20px;
+    font-size: 10px;
+    color: #c44569;
+    text-shadow: 0 0 8px rgba(196, 69, 105, 0.6);
+    animation: star-twinkle 1.5s ease-in-out infinite;
+}
+
+@keyframes star-twinkle {
+    0%, 100% { opacity: 0.5; transform: translateY(-50%) scale(1); }
+    50% { opacity: 1; transform: translateY(-50%) scale(1.3); }
+}
+
+.marquee-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 24px;
     width: 1px;
-    background: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(180deg, transparent, rgba(255, 107, 157, 0.4), transparent);
     pointer-events: none;
 }
 

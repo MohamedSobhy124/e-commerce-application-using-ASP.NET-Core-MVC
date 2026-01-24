@@ -554,9 +554,13 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
             {
                 _logger.LogInformation($"Free subscription detected - TotalAmount: {totalAmount}, AmountPaid: {amountToPay}. Skipping payment processing.");
                 
-                // Send confirmation email asynchronously
+                // Send notifications asynchronously (both admin and customer)
                 _ = Task.Run(async () =>
                 {
+                    // Send notification to admin about new subscription
+                    await SendServicePurchaseNotifications(purchase);
+                    
+                    // Send confirmation email to customer
                     await SendServicePurchaseConfirmationEmail(purchase);
                 });
                 
@@ -1372,6 +1376,10 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
                 paymentSuccessful = true;
                 _ = Task.Run(async () =>
                 {
+                    // Send notification to admin about new subscription
+                    await SendServicePurchaseNotifications(purchase);
+                    
+                    // Send confirmation email to customer
                     await SendServicePurchaseConfirmationEmail(purchase);
                 });
             }

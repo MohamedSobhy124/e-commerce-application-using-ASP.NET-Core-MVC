@@ -1,6 +1,7 @@
 using IdealWeightNutrition.DataAccess.Repository.IRepository;
 using IdealWeightNutrition.Models;
 using IdealWeightNutrition.Models.ViewModels;
+using IdealWeightNutrition.Services;
 using IdealWeightNutrition.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace IdealWeightNutrition.Areas.Admin.Controllers
 {
@@ -21,6 +23,7 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
         private readonly GeideaSettings _geideaSettings;
         private readonly TappySettings _tappySettings;
         private readonly ILogger<OrderController> _logger;
+        private readonly INotificationService _notificationService;
 
         [BindProperty]
         public OrderVM OrderVM { get; set; }
@@ -30,13 +33,15 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
             IOptions<TamaraSettings> tamaraSettings, 
             IOptions<GeideaSettings> geideaSettings,
             IOptions<TappySettings> tappySettings,
-            ILogger<OrderController> logger)
+            ILogger<OrderController> logger,
+            INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _tamaraSettings = tamaraSettings.Value;
             _geideaSettings = geideaSettings.Value;
             _tappySettings = tappySettings.Value;
             _logger = logger;
+            _notificationService = notificationService;
         }
 
         public IActionResult Index()
@@ -302,7 +307,7 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
 
         [HttpPost]
         [Authorize(Roles = SD.Role_Admin)]
-        public IActionResult MarkAsDelivered(int id)
+        public async Task<IActionResult> MarkAsDelivered(int id)
         {
             var orderHeader = _unitOfWork.OrderHeader.Get(u => u.Id == id);
             
@@ -322,6 +327,19 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
             orderHeader.OrderStatus = SD.StatusDelivered;
             _unitOfWork.OrderHeader.Update(orderHeader);
             _unitOfWork.save();
+            
+            // Send delivery confirmation email to customer
+            try
+            {
+                await _notificationService.SendOrderDeliveredNotification(orderHeader);
+                _logger.LogInformation("Delivery notification sent for order {OrderId}", id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send delivery notification for order {OrderId}", id);
+                // Don't fail the action if email fails - order is still delivered
+            }
+            
             LogAuditAction(id, "OrderMarkedasDelivered",
             $"Order Marked as Delivered. Status changed from {SD.StatusShipped} to {SD.StatusDelivered}",
             SD.StatusShipped, SD.StatusDelivered);

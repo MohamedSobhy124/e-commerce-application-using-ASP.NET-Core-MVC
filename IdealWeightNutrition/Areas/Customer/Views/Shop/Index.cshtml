@@ -1,0 +1,474 @@
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+@model IEnumerable<IdealWeightNutrition.Models.Product>
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var isRtl = currentCulture.StartsWith("ar");
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    
+    var categories = ViewBag.Categories as IEnumerable<IdealWeightNutrition.Models.Categry> ?? Enumerable.Empty<IdealWeightNutrition.Models.Categry>();
+    var selectedCategoryId = ViewBag.SelectedCategoryId as int?;
+    var selectedCategory = ViewBag.SelectedCategory as IdealWeightNutrition.Models.Categry;
+    var sortBy = ViewBag.SortBy as string ?? "";
+    var availability = ViewBag.Availability as string ?? "";
+    var cartProductIds = ViewBag.CartProductIds as HashSet<int> ?? new HashSet<int>();
+    var wishlistProductIds = ViewBag.WishlistProductIds as HashSet<int> ?? new HashSet<int>();
+    var minPrices = ViewBag.MinPrices as Dictionary<int, double> ?? new Dictionary<int, double>();
+    var showPriceFlags = ViewBag.ShowPriceFlags as Dictionary<int, bool> ?? new Dictionary<int, bool>();
+    var allVariantsOutOfStockFlags = ViewBag.AllVariantsOutOfStockFlags as Dictionary<int, bool> ?? new Dictionary<int, bool>();
+    var activeFlashSales = ViewBag.ActiveFlashSales as IEnumerable<IdealWeightNutrition.Models.FlashSale> ?? Enumerable.Empty<IdealWeightNutrition.Models.FlashSale>();
+    var totalProducts = ViewBag.TotalProducts as int? ?? 0;
+    
+    var pageTitle = selectedCategory != null 
+        ? (currentCulture == "ar" && !string.IsNullOrEmpty(selectedCategory.NameAr) ? selectedCategory.NameAr : selectedCategory.Name)
+        : (currentCulture == "ar" ? "تسوق المنتجات" : "Shop Products");
+    
+    ViewData["Title"] = pageTitle;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/shop-page.css" asp-append-version="true" />
+}
+
+@Html.AntiForgeryToken()
+
+<div class="shop-page" dir="@(isRtl ? "rtl" : "ltr")">
+    <!-- Shop Header -->
+    <div class="shop-header">
+        <div class="container">
+            <div class="shop-header-content">
+                <div class="shop-title-section">
+                    <h1 class="shop-title text-white">
+                        <i class="bi bi-shop "></i>
+                        @if (selectedCategory != null)
+                        {
+                            var catName = currentCulture == "ar" && !string.IsNullOrEmpty(selectedCategory.NameAr) 
+                                ? selectedCategory.NameAr 
+                                : selectedCategory.Name;
+                            @catName
+                        }
+                        else
+                        {
+                            @Localizer["ShopAllProducts"]
+                        }
+                    </h1>
+                    <p class="shop-subtitle">
+                        <span class="product-count">@totalProducts</span> @Localizer["ProductsFound"]
+                    </p>
+                </div>
+                
+                <!-- Sort & Filter Controls -->
+                <div class="shop-controls">
+                    <div class="sort-control">
+                        <label for="sortSelect"><i class="bi bi-sort-down"></i></label>
+                        <select id="sortSelect" class="form-select" onchange="applyFilters()">
+                            @if (string.IsNullOrEmpty(sortBy)) { <option value="" selected>@Localizer["SortBy"]</option> } else { <option value="">@Localizer["SortBy"]</option> }
+                            @if (sortBy == "newest") { <option value="newest" selected>@Localizer["Newest"]</option> } else { <option value="newest">@Localizer["Newest"]</option> }
+                            @if (sortBy == "price_low") { <option value="price_low" selected>@Localizer["PriceLowToHigh"]</option> } else { <option value="price_low">@Localizer["PriceLowToHigh"]</option> }
+                            @if (sortBy == "price_high") { <option value="price_high" selected>@Localizer["PriceHighToLow"]</option> } else { <option value="price_high">@Localizer["PriceHighToLow"]</option> }
+                            @if (sortBy == "name") { <option value="name" selected>@Localizer["Name"]</option> } else { <option value="name">@Localizer["Name"]</option> }
+                            @if (sortBy == "discount") { <option value="discount" selected>@Localizer["BiggestDiscount"]</option> } else { <option value="discount">@Localizer["BiggestDiscount"]</option> }
+                        </select>
+                    </div>
+                    
+                    <div class="availability-control">
+                        <label for="availabilitySelect"><i class="bi bi-box-seam"></i></label>
+                        <select id="availabilitySelect" class="form-select" onchange="applyFilters()">
+                            @if (string.IsNullOrEmpty(availability)) { <option value="" selected>@Localizer["AllProducts"]</option> } else { <option value="">@Localizer["AllProducts"]</option> }
+                            @if (availability == "instock") { <option value="instock" selected>@Localizer["InStock"]</option> } else { <option value="instock">@Localizer["InStock"]</option> }
+                            @if (availability == "outofstock") { <option value="outofstock" selected>@Localizer["OutOfStock"]</option> } else { <option value="outofstock">@Localizer["OutOfStock"]</option> }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Category Tabs -->
+    <div class="category-tabs-container">
+        <div class="container">
+            <div class="category-tabs-wrapper">
+                <div class="category-tabs" id="categoryTabs">
+                    <!-- All Categories Tab -->
+                    <a href="@Url.Action("Index", "Shop", new { area = "Customer" })" 
+                       class="category-tab @(!selectedCategoryId.HasValue ? "active" : "")">
+                        <i class="bi bi-grid-3x3-gap-fill"></i>
+                        <span>@Localizer["AllCategories"]</span>
+                    </a>
+                    
+                    @foreach (var category in categories)
+                    {
+                        var catName = currentCulture == "ar" && !string.IsNullOrEmpty(category.NameAr) 
+                            ? category.NameAr 
+                            : category.Name;
+                        var isActive = selectedCategoryId.HasValue && selectedCategoryId.Value == category.Id;
+                        
+                        <a href="@Url.Action("Index", "Shop", new { area = "Customer", categoryId = category.Id })" 
+                           class="category-tab @(isActive ? "active" : "")">
+                            @if (!string.IsNullOrEmpty(category.ImageUrl))
+                            {
+                                <img src="@category.ImageUrl" alt="@catName" class="category-tab-img" loading="lazy" />
+                            }
+                            else
+                            {
+                                <i class="bi bi-box-seam"></i>
+                            }
+                            <span>@catName</span>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Products Grid -->
+    <div class="shop-products-section">
+        <div class="container">
+            @if (Model.Any())
+            {
+                <div class="products-grid" id="productsGrid">
+                    @foreach (var product in Model)
+                    {
+                        var productName = currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) 
+                            ? product.TitleAr 
+                            : product.Title;
+                        
+                        var productImages = product.ProductImages?.OrderBy(pi => pi.DisplayOrder).Select(pi => pi.ImageUrl).ToList() 
+                            ?? new List<string>();
+                        if (!productImages.Any() && !string.IsNullOrEmpty(product.ImageUrl))
+                        {
+                            productImages.Add(product.ImageUrl);
+                        }
+                        var productImage = productImages.FirstOrDefault() ?? "/images/no-image.png";
+                        
+                        var isInCart = cartProductIds.Contains(product.Id);
+                        var isInWishlist = wishlistProductIds.Contains(product.Id);
+                        var hasVariants = product.ProductType == IdealWeightNutrition.Models.ProductType.Variable;
+                        var shouldShowPrice = showPriceFlags.ContainsKey(product.Id) ? showPriceFlags[product.Id] : (product.StockQuantity > 0);
+                        var allVariantsOutOfStock = allVariantsOutOfStockFlags.ContainsKey(product.Id) && allVariantsOutOfStockFlags[product.Id];
+                        
+                        // Calculate prices
+                        var displayPrice = hasVariants && minPrices.ContainsKey(product.Id) ? minPrices[product.Id] : product.Price;
+                        var displayListPrice = product.ListPrice;
+                        
+                        // Check for flash sale
+                        var now = DateTimeHelper.Now;
+                        var flashSaleItem = activeFlashSales
+                            .SelectMany(fs => fs.FlashSaleItems ?? Enumerable.Empty<IdealWeightNutrition.Models.FlashSaleItem>())
+                            .FirstOrDefault(fsi => fsi.ProductId == product.Id 
+                                && fsi.ProductVariantId == null 
+                                && !fsi.IsDeleted 
+                                && fsi.FlashSaleQuantity > 0);
+                        
+                        if (flashSaleItem != null && (double)flashSaleItem.FlashSalePrice < displayPrice)
+                        {
+                            displayListPrice = displayPrice > 0 ? displayPrice : displayListPrice;
+                            displayPrice = (double)flashSaleItem.FlashSalePrice;
+                        }
+                        
+                        var discountPercent = displayListPrice > 0 && displayListPrice > displayPrice
+                            ? (int)((displayListPrice - displayPrice) / displayListPrice * 100)
+                            : 0;
+                        
+                        var isOutOfStock = !hasVariants ? product.StockQuantity <= 0 : allVariantsOutOfStock;
+                        
+                        <div class="shop-product-card @(isOutOfStock ? "out-of-stock" : "")" 
+                             data-product-id="@product.Id"
+                             onclick="window.location.href='@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })'">
+                            
+                            <!-- Product Image -->
+                            <div class="shop-product-image">
+                                <img src="@productImage" alt="@productName" loading="lazy" />
+                                
+                                @if (product.IsTrending)
+                                {
+                                    <div class="product-badge trending">
+                                        <i class="bi bi-graph-up-arrow"></i>
+                                        @Localizer["Trending"]
+                                    </div>
+                                }
+                                else if (product.IsNew)
+                                {
+                                    <div class="product-badge new">
+                                        <i class="bi bi-sparkles"></i>
+                                        @Localizer["New"]
+                                    </div>
+                                }
+                                
+                                @if (discountPercent > 0)
+                                {
+                                    <div class="discount-badge">-@discountPercent%</div>
+                                }
+                                
+                                @if (isOutOfStock)
+                                {
+                                    <div class="out-of-stock-overlay">
+                                        <span>@Localizer["OutOfStock"]</span>
+                                    </div>
+                                }
+                                
+                                <!-- Quick Actions -->
+                                <div class="product-quick-actions" onclick="event.stopPropagation();">
+                                    @if (User.Identity?.IsAuthenticated == true)
+                                    {
+                                        <button class="quick-action-btn wishlist-btn @(isInWishlist ? "active" : "")" 
+                                                onclick="toggleWishlist(@product.Id, this); event.stopPropagation();"
+                                                title="@(isInWishlist ? Localizer["RemoveFromWishlist"] : Localizer["AddToWishlist"])">
+                                            <i class="bi @(isInWishlist ? "bi-heart-fill" : "bi-heart")"></i>
+                                        </button>
+                                    }
+                                    <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" 
+                                       class="quick-action-btn view-btn" 
+                                       title="@Localizer["ViewDetails"]"
+                                       onclick="event.stopPropagation();">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Product Info -->
+                            <div class="shop-product-info">
+                                @if (product.categry != null)
+                                {
+                                    var catName = currentCulture == "ar" && !string.IsNullOrEmpty(product.categry.NameAr)
+                                    ? product.categry.NameAr
+                                    : product.categry.Name;
+                                    <span class="product-category">@catName</span>
+                                }
+                                
+                                <h3 class="shop-product-title">@productName</h3>
+                                
+                                <!-- Price -->
+                                <div class="shop-product-price">
+                                    @if (shouldShowPrice || !hasVariants)
+                                    {
+                                        @if (hasVariants)
+                                        {
+                                            <span class="price-from">@Localizer["From"]</span>
+                                        }
+                                        
+                                        @if (discountPercent > 0)
+                                        {
+                                            <span class="old-price">@Html.Raw(currencySymbol)@displayListPrice.ToString("N2")</span>
+                                        }
+                                        <span class="current-price">@Html.Raw(currencySymbol)@displayPrice.ToString("N2")</span>
+                                    }
+                                    else if (allVariantsOutOfStock)
+                                    {
+                                        <span class="out-of-stock-text">@Localizer["OutOfStock"]</span>
+                                    }
+                                </div>
+                                
+                                <!-- Add to Cart Button -->
+                                <div class="shop-product-actions" onclick="event.stopPropagation();">
+                                    @if (hasVariants)
+                                    {
+                                        <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" 
+                                           class="btn-shop-action btn-view-options">
+                                            <i class="bi bi-eye"></i>
+                                            <span>@Localizer["ViewOptions"]</span>
+                                        </a>
+                                    }
+                                    else if (!isOutOfStock)
+                                    {
+                                        <button class="btn-shop-action btn-add-cart @(isInCart ? "in-cart" : "")" 
+                                                data-product-id="@product.Id"
+                                                onclick="toggleCart(@product.Id, this); event.stopPropagation();">
+                                            <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart-plus")"></i>
+                                            <span>@(isInCart ? Localizer["InCart"] : Localizer["AddToCart"])</span>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn-shop-action btn-notify" disabled>
+                                            <i class="bi bi-bell"></i>
+                                            <span>@Localizer["NotifyMe"]</span>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                <!-- Load More Button -->
+                <div class="load-more-container" id="loadMoreContainer">
+                    <button class="btn-load-more" id="loadMoreBtn" onclick="loadMoreProducts()">
+                        <i class="bi bi-arrow-down-circle"></i>
+                        <span>@Localizer["LoadMore"]</span>
+                    </button>
+                </div>
+            }
+            else
+            {
+                <!-- Empty State -->
+                <div class="shop-empty-state">
+                    <div class="empty-icon">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <h2>@Localizer["NoProductsFound"]</h2>
+                    <p>@Localizer["TryDifferentFilters"]</p>
+                    <a href="@Url.Action("Index", "Shop", new { area = "Customer" })" class="btn-browse-all">
+                        <i class="bi bi-grid-3x3-gap-fill"></i>
+                        @Localizer["BrowseAllProducts"]
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const currentCulture = '@currentCulture';
+    const currencySymbol = '@Html.Raw(currencySymbol)';
+    let currentPage = 1;
+    let isLoading = false;
+    let hasMore = true;
+    
+    // Localizations for JavaScript
+    window.localizations = {
+        addToCart: '@Html.Raw(Localizer["AddToCart"])',
+        inCart: '@Html.Raw(Localizer["InCart"])',
+        removeFromCart: '@Html.Raw(Localizer["RemoveFromCart"])',
+        failedToUpdateCart: '@Html.Raw(Localizer["FailedToUpdateCart"])'
+    };
+    
+    // Apply filters
+    function applyFilters() {
+        const sortBy = document.getElementById('sortSelect').value;
+        const availability = document.getElementById('availabilitySelect').value;
+        const categoryId = @(selectedCategoryId.HasValue ? selectedCategoryId.Value.ToString() : "null");
+        
+        let url = '@Url.Action("Index", "Shop", new { area = "Customer" })';
+        const params = new URLSearchParams();
+        
+        if (categoryId) params.append('categoryId', categoryId);
+        if (sortBy) params.append('sortBy', sortBy);
+        if (availability) params.append('availability', availability);
+        
+        if (params.toString()) {
+            url += '?' + params.toString();
+        }
+        
+        window.location.href = url;
+    }
+    
+    // Load more products
+    async function loadMoreProducts() {
+        if (isLoading || !hasMore) return;
+        
+        isLoading = true;
+        currentPage++;
+        
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        loadMoreBtn.classList.add('loading');
+        loadMoreBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> <span>@Localizer["Loading"]...</span>';
+        
+        const sortBy = document.getElementById('sortSelect').value;
+        const availability = document.getElementById('availabilitySelect').value;
+        const categoryId = @(selectedCategoryId.HasValue ? selectedCategoryId.Value.ToString() : "null");
+        
+        const params = new URLSearchParams();
+        params.append('page', currentPage);
+        params.append('pageSize', 20);
+        if (categoryId) params.append('categoryId', categoryId);
+        if (sortBy) params.append('sortBy', sortBy);
+        if (availability) params.append('availability', availability);
+        
+        try {
+            const response = await fetch('@Url.Action("GetProducts", "Shop", new { area = "Customer" })?' + params.toString());
+            const data = await response.json();
+            
+            if (data.products && data.products.length > 0) {
+                const grid = document.getElementById('productsGrid');
+                data.products.forEach(product => {
+                    grid.insertAdjacentHTML('beforeend', createProductCard(product));
+                });
+            }
+            
+            hasMore = data.hasMore;
+            if (!hasMore) {
+                document.getElementById('loadMoreContainer').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error loading products:', error);
+        }
+        
+        isLoading = false;
+        loadMoreBtn.classList.remove('loading');
+        loadMoreBtn.innerHTML = '<i class="bi bi-arrow-down-circle"></i> <span>@Localizer["LoadMore"]</span>';
+    }
+    
+    // Create product card HTML
+    function createProductCard(product) {
+        const productName = currentCulture === 'ar' && product.titleAr ? product.titleAr : product.title;
+        const categoryName = currentCulture === 'ar' && product.categoryNameAr ? product.categoryNameAr : product.categoryName;
+        const isOutOfStock = product.stockQuantity <= 0 && !product.hasVariants;
+        
+        let badgeHtml = '';
+        if (product.isTrending) {
+            badgeHtml = `<div class="product-badge trending"><i class="bi bi-graph-up-arrow"></i> @Localizer["Trending"]</div>`;
+        } else if (product.isNew) {
+            badgeHtml = `<div class="product-badge new"><i class="bi bi-sparkles"></i> @Localizer["New"]</div>`;
+        }
+        
+        const discountBadge = product.discountPercent > 0 
+            ? `<div class="discount-badge">-${product.discountPercent}%</div>` 
+            : '';
+        
+        const outOfStockOverlay = isOutOfStock 
+            ? `<div class="out-of-stock-overlay"><span>@Localizer["OutOfStock"]</span></div>` 
+            : '';
+        
+        let priceHtml = '';
+        if (product.hasVariants) {
+            priceHtml = `<span class="price-from">@Localizer["From"]</span>`;
+        }
+        if (product.discountPercent > 0) {
+            priceHtml += `<span class="old-price">${currencySymbol}${product.listPrice.toFixed(2)}</span>`;
+        }
+        priceHtml += `<span class="current-price">${currencySymbol}${product.price.toFixed(2)}</span>`;
+        
+        let actionBtn = '';
+        if (product.hasVariants) {
+            actionBtn = `<a href="/Customer/Home/Details/${product.slug}" class="btn-shop-action btn-view-options" onclick="event.stopPropagation();"><i class="bi bi-eye"></i><span>@Localizer["ViewOptions"]</span></a>`;
+        } else if (!isOutOfStock) {
+            actionBtn = `<button class="btn-shop-action btn-add-cart ${product.isInCart ? 'in-cart' : ''}" data-product-id="${product.id}" onclick="toggleCart(${product.id}, this); event.stopPropagation();"><i class="bi ${product.isInCart ? 'bi-check-lg' : 'bi-cart-plus'}"></i><span>${product.isInCart ? '@Localizer["InCart"]' : '@Localizer["AddToCart"]'}</span></button>`;
+        } else {
+            actionBtn = `<button class="btn-shop-action btn-notify" disabled><i class="bi bi-bell"></i><span>@Localizer["NotifyMe"]</span></button>`;
+        }
+        
+        return `
+            <div class="shop-product-card ${isOutOfStock ? 'out-of-stock' : ''}" data-product-id="${product.id}" onclick="window.location.href='/Customer/Home/Details/${product.slug}'">
+                <div class="shop-product-image">
+                    <img src="${product.imageUrl}" alt="${productName}" loading="lazy" />
+                    ${badgeHtml}
+                    ${discountBadge}
+                    ${outOfStockOverlay}
+                    <div class="product-quick-actions" onclick="event.stopPropagation();">
+                        <a href="/Customer/Home/Details/${product.slug}" class="quick-action-btn view-btn" title="@Localizer["ViewDetails"]" onclick="event.stopPropagation();"><i class="bi bi-eye"></i></a>
+                    </div>
+                </div>
+                <div class="shop-product-info">
+                    ${categoryName ? `<span class="product-category">${categoryName}</span>` : ''}
+                    <h3 class="shop-product-title">${productName}</h3>
+                    <div class="shop-product-price">${priceHtml}</div>
+                    <div class="shop-product-actions" onclick="event.stopPropagation();">${actionBtn}</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Scroll category tabs to active item
+    document.addEventListener('DOMContentLoaded', function() {
+        const activeTab = document.querySelector('.category-tab.active');
+        if (activeTab) {
+            activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+    });
+</script>
+}

@@ -930,8 +930,7 @@ if (typeof window.toggleCart === 'undefined') {
             // Disable button and show loading state ONLY in button
             button.disabled = true;
             button.classList.add('loading');
-            button.style.opacity = '0.7';
-            button.style.cursor = 'wait';
+            button.style.pointerEvents = 'none';
             
             const icon = button.querySelector('i');
             if (icon) {
@@ -957,8 +956,7 @@ if (typeof window.toggleCart === 'undefined') {
                 // Remove loading state from button only
                 button.disabled = false;
                 button.classList.remove('loading');
-                button.style.opacity = '';
-                button.style.cursor = '';
+                button.style.pointerEvents = '';
                 const icon = button.querySelector('i');
                 if (icon) {
                     icon.style.animation = '';
@@ -967,12 +965,20 @@ if (typeof window.toggleCart === 'undefined') {
                 if (data.isAdded) {
                     // Product was added
                     button.classList.add('in-cart');
+                    button.classList.add('adding');
+                    setTimeout(() => button.classList.remove('adding'), 400);
+                    
                     if (icon) {
                         icon.className = 'bi bi-check-lg';
                     }
                     
-                    // Get localizations from window or use defaults
+                    // Update button text if span exists
+                    const textSpan = button.querySelector('span');
                     const localizations = window.localizations || {};
+                    if (textSpan) {
+                        textSpan.textContent = localizations.inCart || 'In Cart';
+                    }
+                    
                     button.title = localizations.removeFromCart || 'Remove from Cart';
                     
                     // Update cart product IDs if available
@@ -1026,10 +1032,16 @@ if (typeof window.toggleCart === 'undefined') {
                     // Product was removed
                     button.classList.remove('in-cart');
                     if (icon) {
-                        icon.className = 'bi bi-plus-lg';
+                        icon.className = 'bi bi-cart-plus';
                     }
                     
+                    // Update button text if span exists
+                    const textSpan = button.querySelector('span');
                     const localizations = window.localizations || {};
+                    if (textSpan) {
+                        textSpan.textContent = localizations.addToCart || 'Add to Cart';
+                    }
+                    
                     button.title = localizations.addToCart || 'Add to Cart';
                     
                     // Update cart product IDs if available
@@ -1077,8 +1089,7 @@ if (typeof window.toggleCart === 'undefined') {
                 // Remove loading state from button only
                 button.disabled = false;
                 button.classList.remove('loading');
-                button.style.opacity = '';
-                button.style.cursor = '';
+                button.style.pointerEvents = '';
                 const icon = button.querySelector('i');
                 if (icon) {
                     icon.className = originalIcon;

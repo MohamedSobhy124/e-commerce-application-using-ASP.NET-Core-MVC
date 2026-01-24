@@ -298,10 +298,7 @@
         padding-top: 0.5rem !important;
     }
 
-    .products-grid-container .product-image-wrapper .carousel-item img,
-    .modern-products-grid .product-image-wrapper .carousel-item img {
-        max-height: 50% !important;
-    }
+    
 }
 
 .products-grid-container .price-wrapper,

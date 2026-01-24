@@ -3,9 +3,23 @@
    =================================== */
 
 /* Hide main navbar logo when sticky header is visible (home page) */
-body:has(#heroSearchBoxSticky) .navbar-brand,
-body:has(#heroSearchBoxSticky) .navbar-brand img {
-    display: none !important;
+/* Hide navbar logo on desktop when sticky header exists (has its own logo) */
+@media (min-width: 992px) {
+    body:has(#heroSearchBoxSticky) .navbar-brand,
+    body:has(#heroSearchBoxSticky) .navbar-brand img {
+        display: none !important;
+    }
+}
+
+/* Show navbar logo on mobile even with sticky header */
+@media (max-width: 991px) {
+    body:has(#heroSearchBoxSticky) .navbar-brand {
+        display: flex !important;
+    }
+    
+    body:has(#heroSearchBoxSticky) .navbar-brand img {
+        display: block !important;
+    }
 }
 
 /* Sticky Header Container - Glassmorphism Effect */

@@ -61,7 +61,8 @@
     <partial name="_FlashOffersMarquee" />
 }
 
-
+<!-- Category Filter Navigation Bar -->
+<partial name="_CategoryFilterNav" />
 
 <!-- Sticky Hero Search Box Header - At Top -->
 <header class="hero-search-box-sticky" id="heroSearchBoxSticky">
@@ -4637,6 +4638,14 @@
         // ==========================================
         // WISHLIST FUNCTIONS
         // ==========================================
+        
+        // Define stub functions for guests (will be overridden for authenticated users)
+        window.openWishlistSidebar = window.openWishlistSidebar || function() { 
+            console.log('Please log in to access wishlist'); 
+        };
+        window.closeWishlistSidebar = window.closeWishlistSidebar || function() {};
+        window.addToCartFromWishlist = window.addToCartFromWishlist || function() {};
+        window.removeFromWishlist = window.removeFromWishlist || function() {};
         
         @if (User.Identity.IsAuthenticated)
         {

@@ -74,7 +74,10 @@ builder.Logging.AddFileLogger(logDirectory);
             options.FallBackToParentCultures = true;
             options.FallBackToParentUICultures = true;
             
-            options.RequestCultureProviders.Insert(0, new CookieRequestCultureProvider());
+            // Clear default providers and add in order of priority
+            options.RequestCultureProviders.Clear();
+            options.RequestCultureProviders.Add(new QueryStringRequestCultureProvider()); // URL ?culture=en
+            options.RequestCultureProviders.Add(new CookieRequestCultureProvider()); // Cookie fallback
         });
         
         builder.Services.AddDbContext<ApplicationDBContext>(option => 

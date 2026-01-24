@@ -192,6 +192,169 @@ namespace IdealWeightNutrition.Services
         
         }
 
+        public async Task SendOrderDeliveredNotification(OrderHeader orderHeader)
+        {
+            // Get customer email - works for both registered users and guests
+            var customerEmail = orderHeader.Email;
+            
+            if (string.IsNullOrEmpty(customerEmail) && !orderHeader.IsGuestOrder && !string.IsNullOrEmpty(orderHeader.ApplicationUserId))
+            {
+                var customer = _unitOfWork.applicationUser.Get(u => u.Id == orderHeader.ApplicationUserId);
+                customerEmail = customer?.Email;
+            }
+
+            if (string.IsNullOrEmpty(customerEmail))
+            {
+                return; // Cannot send email without an email address
+            }
+
+            // Get order details for the email
+            var orderDetails = _unitOfWork.OrderDetail.GetAll(
+                o => o.OrderHeaderId == orderHeader.Id,
+                includeProperties: "Product,ComboOffer"
+            ).ToList();
+
+            var emailBody = GenerateDeliveryEmailTemplate(orderHeader, orderDetails);
+            
+            await _emailSender.SendEmailAsync(
+                customerEmail,
+                $"Your Order #{orderHeader.Id} Has Been Delivered! - Ideal Weight",
+                emailBody
+            );
+
+            // Log notification for registered users
+            if (!orderHeader.IsGuestOrder && !string.IsNullOrEmpty(orderHeader.ApplicationUserId))
+            {
+                await LogNotification(
+                    orderHeader.ApplicationUserId,
+                    "Order Delivered",
+                    $"Your order #{orderHeader.Id} has been delivered successfully!",
+                    "Order",
+                    orderHeader.Id
+                );
+
+                // Send real-time notification
+                await _hubContext.Clients.User(orderHeader.ApplicationUserId).SendAsync(
+                    "ReceiveNotification",
+                    new
+                    {
+                        title = "Order Delivered",
+                        message = $"Your order #{orderHeader.Id} has been delivered!",
+                        orderId = orderHeader.Id,
+                        timestamp = IdealWeightNutrition.Utility.DateTimeHelper.Now
+                    }
+                );
+            }
+        }
+
+        private string GenerateDeliveryEmailTemplate(OrderHeader orderHeader, List<OrderDetail> orderDetails)
+        {
+            var itemsHtml = new StringBuilder();
+            
+            Func<object, string> formatCurrency = (amount) => 
+            {
+                decimal value = amount is decimal d ? d : (amount is double db ? (decimal)db : Convert.ToDecimal(amount));
+                return $"AED {value.ToString("N2", System.Globalization.CultureInfo.InvariantCulture).Replace(".", ",")}";
+            };
+            
+            foreach (var item in orderDetails)
+            {
+                bool isComboOffer = item.ComboOfferId.HasValue && item.ComboOffer != null;
+                var displayTitle = isComboOffer 
+                    ? item.ComboOffer.Name 
+                    : (item.Product?.Title ?? "Unknown Product");
+                
+                itemsHtml.AppendLine($@"
+                    <tr>
+                        <td style='padding: 10px; border-bottom: 1px solid #e5e7eb;'>
+                            <strong style='color: #1f2937;'>{displayTitle}</strong>
+                        </td>
+                        <td style='padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center;'>{item.Count}</td>
+                    </tr>
+                ");
+            }
+
+            var customerName = orderHeader.Name ?? "Valued Customer";
+            var deliveryDate = IdealWeightNutrition.Utility.DateTimeHelper.Now.ToString("MMMM dd, yyyy");
+            var baseUrl = _configuration["SiteSettings:BaseUrl"] ?? "https://idealweightnutrition.ae";
+
+            return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+</head>
+<body style='margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, ""Helvetica Neue"", Arial, sans-serif; background-color: #f3f4f6;'>
+    <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
+        <div style='background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: 16px 16px 0 0; padding: 30px; text-align: center;'>
+            <div style='font-size: 60px; margin-bottom: 15px;'>🎉</div>
+            <h1 style='color: white; margin: 0; font-size: 28px; font-weight: 700;'>Order Delivered!</h1>
+            <p style='color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;'>Your order has arrived</p>
+        </div>
+        
+        <div style='background: white; padding: 30px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);'>
+            <p style='color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;'>
+                Dear <strong>{customerName}</strong>,
+            </p>
+            
+            <p style='color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;'>
+                Great news! Your order <strong>#{orderHeader.Id}</strong> has been successfully delivered on <strong>{deliveryDate}</strong>.
+            </p>
+
+            <div style='background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; margin: 25px 0;'>
+                <h3 style='color: #059669; margin: 0 0 15px 0; font-size: 16px;'>
+                    <span style='margin-right: 8px;'>📦</span> Delivered Items
+                </h3>
+                <table style='width: 100%; border-collapse: collapse;'>
+                    <thead>
+                        <tr style='background: #dcfce7;'>
+                            <th style='padding: 10px; text-align: left; color: #166534; font-weight: 600;'>Product</th>
+                            <th style='padding: 10px; text-align: center; color: #166534; font-weight: 600;'>Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {itemsHtml}
+                    </tbody>
+                </table>
+            </div>
+
+            <div style='background: #fef3c7; border: 1px solid #fcd34d; border-radius: 12px; padding: 20px; margin: 25px 0;'>
+                <h3 style='color: #92400e; margin: 0 0 10px 0; font-size: 16px;'>
+                    <span style='margin-right: 8px;'>⭐</span> We'd Love Your Feedback!
+                </h3>
+                <p style='color: #78350f; margin: 0 0 15px 0; font-size: 14px;'>
+                    Your opinion matters! Please take a moment to review your purchase and help other customers.
+                </p>
+                 
+            </div>
+
+            <div style='text-align: center; margin: 30px 0 20px 0;'>
+                <p style='color: #6b7280; font-size: 14px; margin: 0 0 15px 0;'>
+                    Thank you for shopping with us! We hope you enjoy your purchase.
+                </p>
+                <a href='{baseUrl}' 
+                   style='display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); color: white; text-decoration: none; padding: 14px 30px; border-radius: 8px; font-weight: 600; font-size: 15px;'>
+                    Continue Shopping
+                </a>
+            </div>
+
+            <hr style='border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;' />
+            
+            <div style='text-align: center;'>
+                <p style='color: #9ca3af; font-size: 12px; margin: 0 0 10px 0;'>
+                    Need help? Contact us at <a href='mailto:info@idealweightnutrition.ae' style='color: #7c3aed;'>info@idealweightnutrition.ae</a>
+                </p>
+                <p style='color: #9ca3af; margin: 0; font-size: 12px;'>
+                    © {DateTime.Now.Year} Ideal Weight Nutrition. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>";
+        }
+
         public async Task LogNotification(string userId, string title, string message, string type, int? orderId = null, int? returnRequestId = null)
         {
             string link = null;

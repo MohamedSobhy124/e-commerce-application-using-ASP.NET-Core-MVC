@@ -4341,4 +4341,97 @@
   <data name="Save" xml:space="preserve">
     <value>Save</value>
   </data>
+  <data name="AllCategories" xml:space="preserve">
+    <value>All Categories</value>
+  </data>
+  <data name="OffersAndDiscounts" xml:space="preserve">
+    <value>Offers</value>
+  </data>
+  <data name="StackAndCombo" xml:space="preserve">
+    <value>Combo</value>
+  </data>
+  <data name="Subscriptions" xml:space="preserve">
+    <value>Subscriptions</value>
+  </data>
+  <data name="Blog" xml:space="preserve">
+    <value>Blog</value>
+  </data>
+  <data name="IdealWeightCalculator" xml:space="preserve">
+    <value>Ideal Weight Calculator</value>
+  </data>
+  <data name="BookAppointment" xml:space="preserve">
+    <value>Book Appointment</value>
+  </data>
+  <data name="Recipes" xml:space="preserve">
+    <value>Recipes</value>
+  </data>
+  <data name="BeautyAndCare" xml:space="preserve">
+    <value>Beauty &amp; Care</value>
+  </data>
+  <data name="ShopAllProducts" xml:space="preserve">
+    <value>Shop All Products</value>
+  </data>
+  <data name="ProductsFound" xml:space="preserve">
+    <value>Products Found</value>
+  </data>
+  <data name="SortBy" xml:space="preserve">
+    <value>Sort By</value>
+  </data>
+  <data name="Newest" xml:space="preserve">
+    <value>Newest</value>
+  </data>
+  <data name="PriceLowToHigh" xml:space="preserve">
+    <value>Price: Low to High</value>
+  </data>
+  <data name="PriceHighToLow" xml:space="preserve">
+    <value>Price: High to Low</value>
+  </data>
+  <data name="BiggestDiscount" xml:space="preserve">
+    <value>Biggest Discount</value>
+  </data>
+  <data name="AllProducts" xml:space="preserve">
+    <value>All Products</value>
+  </data>
+  <data name="InStock" xml:space="preserve">
+    <value>In Stock</value>
+  </data>
+  <data name="Trending" xml:space="preserve">
+    <value>Trending</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="ViewOptions" xml:space="preserve">
+    <value>View Options</value>
+  </data>
+  <data name="NotifyMe" xml:space="preserve">
+    <value>Notify Me</value>
+  </data>
+  <data name="LoadMore" xml:space="preserve">
+    <value>Load More</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading</value>
+  </data>
+  <data name="NoProductsFound" xml:space="preserve">
+    <value>No Products Found</value>
+  </data>
+  <data name="TryDifferentFilters" xml:space="preserve">
+    <value>Try adjusting your filters or browse all products</value>
+  </data>
+  <data name="BrowseAllProducts" xml:space="preserve">
+    <value>Browse All Products</value>
+  </data>
+  <data name="RemoveFromWishlist" xml:space="preserve">
+    <value>Remove from Wishlist</value>
+  </data>
+  <data name="AddToWishlist" xml:space="preserve">
+    <value>Add to Wishlist</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>View Details</value>
+  </data>
 </root>

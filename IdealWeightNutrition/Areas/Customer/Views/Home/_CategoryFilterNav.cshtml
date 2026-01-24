@@ -1,0 +1,218 @@
+@using Microsoft.AspNetCore.Localization
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var isRtl = currentCulture.StartsWith("ar");
+    var categories = ViewBag.Categories as IEnumerable<IdealWeightNutrition.Models.Categry> ?? Enumerable.Empty<IdealWeightNutrition.Models.Categry>();
+    var currentPath = Context.Request.Path.ToString().ToLowerInvariant();
+}
+
+<!-- Category Filter Navigation Bar -->
+<nav class="category-filter-nav" id="categoryFilterNav" dir="@(isRtl ? "rtl" : "ltr")">
+    <div class="category-filter-container">
+        <!-- All Categories Button (with dropdown) -->
+        <div class="all-categories-wrapper">
+            <button class="all-categories-btn" id="allCategoriesBtn" aria-expanded="false" aria-controls="categoriesDropdown">
+                <i class="bi bi-grid-3x3-gap-fill"></i>
+                <span>@Localizer["AllCategories"]</span>
+                <i class="bi bi-chevron-down dropdown-arrow"></i>
+            </button>
+            
+            <!-- Categories Dropdown -->
+            <div class="categories-dropdown" id="categoriesDropdown">
+                <div class="categories-dropdown-content">
+                    @foreach (var category in categories)
+                    {
+                        var categoryName = currentCulture == "ar" && !string.IsNullOrEmpty(category.NameAr) 
+                            ? category.NameAr 
+                            : category.Name;
+                        
+                        <a href="@Url.Action("Index", "Shop", new { area = "Customer", categoryId = category.Id })" class="category-dropdown-item">
+                            @if (!string.IsNullOrEmpty(category.ImageUrl))
+                            {
+                                <img src="@category.ImageUrl" alt="@categoryName" class="category-dropdown-img" loading="lazy" />
+                            }
+                            else
+                            {
+                                <i class="bi bi-box-seam"></i>
+                            }
+                            <span>@categoryName</span>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scrollable Navigation Items -->
+        <div class="category-filter-scroll-wrapper">
+            <button class="category-nav-arrow category-nav-prev" id="categoryNavPrev" aria-label="Previous">
+                <i class="bi bi-chevron-@(isRtl ? "right" : "left")"></i>
+            </button>
+            
+            <div class="category-filter-items" id="categoryFilterItems">
+                <!-- Home -->
+                <a href="@Url.Action("Index", "Home", new { area = "Customer" })" 
+                   class="category-filter-item @(currentPath == "/" || currentPath.Contains("/customer/home") ? "active" : "")">
+                    <i class="bi bi-house-door-fill"></i>
+                    <span>@Localizer["Home"]</span>
+                </a>
+                
+                <!-- Offers & Discounts -->
+                <a href="@Url.Action("Index", "Offer", new { area = "Customer" })" 
+                   class="category-filter-item offers-item @(currentPath.Contains("/offer") ? "active" : "")">
+					<i class="bi bi-percent"></i>
+                    <span>@Localizer["OffersAndDiscounts"]</span>
+                    <span class="hot-badge">🔥</span>
+                </a>
+                
+                <!-- Stack & Combo -->
+                <a href="@Url.Action("Index", "ComboOffer", new { area = "Customer" })" 
+                   class="category-filter-item @(currentPath.Contains("/combooffer") ? "active" : "")">
+                    <i class="bi bi-box-seam-fill"></i>
+                    <span>@Localizer["StackAndCombo"]</span>
+                </a>
+                
+                <!-- Subscriptions / Services -->
+                <a href="@Url.Action("Index", "ServiceSubscription", new { area = "Customer" })" 
+                   class="category-filter-item @(currentPath.Contains("/servicesubscription") ? "active" : "")">
+                    <i class="bi bi-calendar-check-fill"></i>
+                    <span>@Localizer["Subscriptions"]</span>
+                </a>
+                
+                <!-- Blog -->
+                <a href="@Url.Action("Index", "Blog", new { area = "Customer" })" 
+                   class="category-filter-item @(currentPath.Contains("/blog") ? "active" : "")">
+                    <i class="bi bi-journal-text"></i>
+                    <span>@Localizer["Blog"]</span>
+                </a>
+                
+                <!-- Top Categories (Hidden on Mobile) -->
+                @foreach (var category in categories.Take(3))
+                {
+                    var categoryName = currentCulture == "ar" && !string.IsNullOrEmpty(category.NameAr) 
+                        ? category.NameAr 
+                        : category.Name;
+                    var isActive = currentPath.Contains("/shop") && Context.Request.Query["categoryId"].ToString() == category.Id.ToString();
+                    
+                    <a href="@Url.Action("Index", "Shop", new { area = "Customer", categoryId = category.Id })" 
+                       class="category-filter-item desktop-only-category @(isActive ? "active" : "")">
+                        @if (!string.IsNullOrEmpty(category.ImageUrl))
+                        {
+                            <img src="@category.ImageUrl" alt="@categoryName" class="category-nav-icon" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-box-seam"></i>
+                        }
+                        <span>@categoryName</span>
+                    </a>
+                }
+                
+                <!-- All Categories Link (Mobile Only) -->
+                <a href="@Url.Action("Index", "Shop", new { area = "Customer" })" 
+                   class="category-filter-item mobile-all-categories @(currentPath.Contains("/shop") && !Context.Request.Query.ContainsKey("categoryId") ? "active" : "")">
+                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                    <span>@Localizer["AllCategories"]</span>
+                </a>
+                 
+            </div>
+            
+            <button class="category-nav-arrow category-nav-next" id="categoryNavNext" aria-label="Next">
+                <i class="bi bi-chevron-@(isRtl ? "left" : "right")"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const allCategoriesBtn = document.getElementById('allCategoriesBtn');
+    const categoriesDropdown = document.getElementById('categoriesDropdown');
+    const filterItems = document.getElementById('categoryFilterItems');
+    const prevBtn = document.getElementById('categoryNavPrev');
+    const nextBtn = document.getElementById('categoryNavNext');
+    const isRtl = document.documentElement.dir === 'rtl' || document.querySelector('.category-filter-nav')?.dir === 'rtl';
+    
+    // Toggle dropdown
+    const categoryFilterNav = document.getElementById('categoryFilterNav');
+    
+    if (allCategoriesBtn && categoriesDropdown && categoryFilterNav) {
+        const stickyHeader = document.getElementById('heroSearchBoxSticky');
+        
+        allCategoriesBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', !isExpanded);
+            categoriesDropdown.classList.toggle('show');
+            
+            // Set higher z-index when dropdown is open to appear above sticky header (999)
+            if (categoriesDropdown.classList.contains('show')) {
+                categoryFilterNav.style.zIndex = '1050';
+                categoriesDropdown.style.zIndex = '1051';
+                // Lower sticky header z-index temporarily
+                if (stickyHeader) {
+                    stickyHeader.style.zIndex = '50';
+                }
+            } else {
+                categoryFilterNav.style.zIndex = '';
+                categoriesDropdown.style.zIndex = '';
+                if (stickyHeader) {
+                    stickyHeader.style.zIndex = '';
+                }
+            }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!allCategoriesBtn.contains(e.target) && !categoriesDropdown.contains(e.target)) {
+                allCategoriesBtn.setAttribute('aria-expanded', 'false');
+                categoriesDropdown.classList.remove('show');
+                categoryFilterNav.style.zIndex = '';
+                categoriesDropdown.style.zIndex = '';
+                if (stickyHeader) {
+                    stickyHeader.style.zIndex = '';
+                }
+            }
+        });
+    }
+    
+    // Navigation arrows functionality
+    function updateArrowVisibility() {
+        if (!filterItems) return;
+        
+        const scrollLeft = filterItems.scrollLeft;
+        const scrollWidth = filterItems.scrollWidth;
+        const clientWidth = filterItems.clientWidth;
+        
+        if (isRtl) {
+            // RTL: scrollLeft is negative
+            const maxScroll = scrollWidth - clientWidth;
+            prevBtn.style.opacity = Math.abs(scrollLeft) < maxScroll - 5 ? '1' : '0.3';
+            nextBtn.style.opacity = Math.abs(scrollLeft) > 5 ? '1' : '0.3';
+        } else {
+            prevBtn.style.opacity = scrollLeft > 5 ? '1' : '0.3';
+            nextBtn.style.opacity = scrollLeft < scrollWidth - clientWidth - 5 ? '1' : '0.3';
+        }
+    }
+    
+    if (prevBtn && nextBtn && filterItems) {
+        const scrollAmount = 200;
+        
+        prevBtn.addEventListener('click', function() {
+            filterItems.scrollBy({ left: isRtl ? scrollAmount : -scrollAmount, behavior: 'smooth' });
+        });
+        
+        nextBtn.addEventListener('click', function() {
+            filterItems.scrollBy({ left: isRtl ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+        });
+        
+        filterItems.addEventListener('scroll', updateArrowVisibility);
+        window.addEventListener('resize', updateArrowVisibility);
+        
+        // Initial check
+        setTimeout(updateArrowVisibility, 100);
+    }
+});
+</script>
