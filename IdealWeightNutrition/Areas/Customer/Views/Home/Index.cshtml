@@ -51,7 +51,17 @@
     var totalProducts = ViewBag.TotalProducts as int? ?? 0;
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
     var brands = ViewBag.Brands as IEnumerable<IdealWeightNutrition.Models.Brand> ?? Enumerable.Empty<IdealWeightNutrition.Models.Brand>();
+    
+    // Marquee banner - Always show (no DB calls)
+    var hasAnyOffers = true;
 }
+
+@if (hasAnyOffers)
+{
+    <partial name="_FlashOffersMarquee" />
+}
+
+
 
 <!-- Sticky Hero Search Box Header - At Top -->
 <header class="hero-search-box-sticky" id="heroSearchBoxSticky">
@@ -5884,6 +5894,65 @@
             if (paginationContainer) {
             }
         });
+        
+        // Start marquee animation immediately after page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const marqueeWrapper = document.getElementById('marqueeWrapper');
+            if (marqueeWrapper) {
+                // Ensure animation starts immediately
+                requestAnimationFrame(function() {
+                    marqueeWrapper.style.animationPlayState = 'running';
+                });
+            }
+        });
+
+        // Marquee Countdown Timer
+        (function() {
+            const countdownElement = document.getElementById('marqueeCountdown');
+            if (countdownElement) {
+                let totalSeconds = 24 * 60 * 60; // 24 hours in seconds
+                
+                function updateCountdown() {
+                    totalSeconds--;
+                    
+                    if (totalSeconds < 0) {
+                        totalSeconds = 24 * 60 * 60; // Reset to 24 hours
+                    }
+                    
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+                    
+                    countdownElement.textContent = 
+                        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }
+                
+                // Update immediately
+                updateCountdown();
+                
+                // Update every second
+                setInterval(updateCountdown, 1000);
+            }
+        })();
+
+        // Marquee Controls
+        (function() {
+            const marqueeWrapper = document.getElementById('marqueeWrapper');
+            const pauseBtn = document.getElementById('marqueePauseBtn');
+            const playBtn = document.getElementById('marqueePlayBtn');
+            
+            if (pauseBtn && playBtn && marqueeWrapper) {
+                pauseBtn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevent navigation
+                    marqueeWrapper.style.animationPlayState = 'paused';
+                });
+                
+                playBtn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevent navigation
+                    marqueeWrapper.style.animationPlayState = 'running';
+                });
+            }
+        })();
     </script>
 }
 

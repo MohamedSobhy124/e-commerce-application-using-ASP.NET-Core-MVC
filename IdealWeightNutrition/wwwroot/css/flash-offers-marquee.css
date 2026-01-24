@@ -1,0 +1,317 @@
+﻿/* Flash Offers Marquee Banner - Enhanced Style */
+.flash-offers-marquee {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    padding: 12px 0;
+    z-index: 999;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border-bottom: 3px solid #ff4757;
+    overflow: hidden;
+    cursor: pointer;
+    display: block;
+    visibility: visible;
+    opacity: 1;
+}
+
+    .flash-offers-marquee:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+.marquee-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 71, 87, 0.15);
+    padding: 8px 15px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+    .marquee-header .badge {
+        background: linear-gradient(45deg, #ff4757, #ff6b81);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 3px 8px rgba(255, 71, 87, 0.3);
+        white-space: nowrap;
+    }
+
+        .marquee-header .badge i {
+            margin-right: 6px;
+        }
+
+    .marquee-header .timer {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+
+        .marquee-header .timer i {
+            margin-right: 8px;
+            color: #ffdd59;
+        }
+
+/* Marquee content - BASE STYLES */
+.marquee-content {
+    display: flex;
+    width: fit-content;
+    animation-play-state: running;
+    will-change: transform;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+    .marquee-content:hover {
+        animation-play-state: paused;
+    }
+
+    /* English/LTR Animation */
+    .marquee-content:not(.rtl-direction) {
+        animation: marquee-scroll-ltr 600s linear infinite;
+    }
+
+    /* Arabic/RTL Animation */
+    .marquee-content.rtl-direction {
+        animation: marquee-scroll-rtl 600s linear infinite;
+        direction: rtl;
+        unicode-bidi: plaintext;
+    }
+
+.marquee-item {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    padding: 0 40px;
+    font-size: 16px;
+    font-weight: 500;
+    position: relative;
+    color: #fff;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    margin: 0;
+    height: 100%;
+}
+
+.marquee-text {
+    display: inline-block;
+    line-height: 1.4;
+}
+
+/* English styling */
+.marquee-item:not(.ar) .marquee-text {
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    direction: ltr;
+    text-align: left;
+}
+
+/* Arabic styling - FIXED */
+.marquee-item.ar .marquee-text {
+    font-family: 'Cairo', 'Tajawal', 'Segoe UI', Tahoma, Arial, sans-serif;
+    direction: rtl;
+    text-align: right;
+    unicode-bidi: plaintext;
+    letter-spacing: 0;
+}
+
+.marquee-item i {
+    font-size: 18px;
+    flex-shrink: 0;
+    min-width: 24px;
+}
+
+/* Icon positioning for different directions */
+.marquee-item:not(.ar) i {
+    margin-right: 12px;
+    margin-left: 0;
+}
+
+.marquee-item.ar i {
+    margin-left: 12px;
+    margin-right: 0;
+}
+
+.marquee-item::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 20px;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    pointer-events: none;
+}
+
+.marquee-item .highlight {
+    background: rgba(255, 71, 87, 0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin: 0 5px;
+    font-weight: 600;
+    display: inline-block;
+    line-height: inherit;
+}
+
+.marquee-item .arrow {
+    color: #ffdd59;
+    display: inline-block;
+    line-height: inherit;
+    vertical-align: baseline;
+}
+
+/* Different arrow animations for RTL vs LTR */
+.marquee-item:not(.ar) .arrow {
+    animation: bounce-arrow-ltr 1s infinite alternate;
+}
+
+.marquee-item.ar .arrow {
+    animation: bounce-arrow-rtl 1s infinite alternate;
+}
+
+.marquee-controls {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+    .marquee-controls button {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        font-size: 12px;
+        pointer-events: auto;
+    }
+
+        .marquee-controls button:hover {
+            background: rgba(255, 71, 87, 0.7);
+        }
+
+/* ANIMATIONS */
+/* LTR Animation (English) */
+@keyframes marquee-scroll-ltr {
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* RTL Animation (Arabic) - FIXED */
+@keyframes marquee-scroll-rtl {
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(50%);
+    }
+}
+
+/* Arrow animations */
+@keyframes bounce-arrow-ltr {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(5px);
+    }
+}
+
+@keyframes bounce-arrow-rtl {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-5px);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .marquee-header {
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px 10px;
+    }
+
+        .marquee-header .badge,
+        .marquee-header .timer {
+            width: 100%;
+            justify-content: center;
+        }
+
+    .marquee-item {
+        font-size: 14px;
+        padding: 0 25px;
+    }
+
+    .marquee-controls {
+        position: relative;
+        top: auto;
+        right: auto;
+        transform: none;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .flash-offers-marquee {
+        padding-bottom: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .marquee-item {
+        font-size: 13px;
+        padding: 0 15px;
+    }
+
+    .marquee-header .badge,
+    .marquee-header .timer {
+        font-size: 12px;
+        padding: 4px 10px;
+    }
+}
+
+/* Prevent text selection */
+.flash-offers-marquee {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Import Arabic fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap');

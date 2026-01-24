@@ -1,0 +1,65 @@
+@using Microsoft.AspNetCore.Localization
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var isRtl = currentCulture.StartsWith("ar");
+}
+
+<!-- Flash Offers Marquee Banner -->
+<div class="flash-offers-marquee" onclick="window.location.href='@Url.Action("Index", "Offer", new { area = "Customer" })'"
+     data-direction="@(isRtl ? "rtl" : "ltr")">
+
+   
+
+    <div class="marquee-content @(isRtl ? "rtl-direction" : "")" id="marqueeContent">
+        @{
+            var marqueeItems = new[]
+            {
+        new {
+        Icon = "bi-clock-fill",
+        Text = currentCulture == "ar"
+        ? "⏰ عروض لفترة محدودة! وفر حتى 50% على <span class='highlight'>أفضل منتجات التغذية</span> 💪 | <span class='highlight'>عروض كومبو حصرية</span> 🎁 <span class='arrow'>←</span>"
+        : "⏰ Limited Time Offers! Save Up to 50% on <span class='highlight'>Premium Nutrition Products</span> 💪 | <span class='highlight'>Exclusive Combo Deals</span> 🎁 <span class='arrow'>→</span>"
+        },
+        new {
+        Icon = "bi-percent",
+        Text = currentCulture == "ar"
+        ? "💰 خصومات ضخمة لفترة محدودة! <span class='highlight'>منتجات أصلية 100%</span> بأسعار لا تقاوم |  لا تفوت هذه الفرصة الذهبية <span class='arrow'>←</span>"
+        : "💰 Massive Discounts for Limited Time! <span class='highlight'>100% Authentic Products</span> at Unbeatable Prices | Don't Miss This Golden Opportunity <span class='arrow'>→</span>"
+        },
+        new {
+        Icon = "bi-gift-fill",
+        Text = currentCulture == "ar"
+        ? "🎁 عروض حصرية اليوم فقط! <span class='highlight'>أفضل العلامات العالمية</span> بأسعار مميزة | ابدأ رحلتك نحو الصحة المثالية الآن | اضغط للاستكشاف <span class='arrow'>←</span>"
+        : "🎁 Exclusive Offers Today Only! <span class='highlight'>Top International Brands</span> at Amazing Prices | Start Your Journey to Optimal Health Now | Click to Explore <span class='arrow'>→</span>"
+        },
+        new {
+        Icon = "bi-star-fill",
+        Text = currentCulture == "ar"
+        ? "⭐ عروض خاصة على <span class='highlight'>المكملات الغذائية الأكثر مبيعاً</span> | وفر المال واحصل على أفضل جودة | تسوق الآن  <span class='arrow'>←</span>"
+        : "⭐ Special Offers on <span class='highlight'>Best-Selling Supplements</span> | Save Money & Get Premium Quality | Shop Now  <span class='arrow'>→</span>"
+        }
+        };
+        }
+
+        @* Duplicate items for seamless loop *@
+        @for (int set = 0; set < 20; set++)
+        {
+            @foreach (var item in marqueeItems)
+            {
+                <div class="marquee-item @(currentCulture == "ar" ? "ar" : "")"
+                     lang="@currentCulture"
+                     dir="@(currentCulture == "ar" ? "rtl" : "ltr")">
+                    <i class="bi @item.Icon"></i>
+                    <span class="marquee-text">@Html.Raw(item.Text)</span>
+                </div>
+            }
+        }
+    </div>
+
+  
+</div>
+
+ 
