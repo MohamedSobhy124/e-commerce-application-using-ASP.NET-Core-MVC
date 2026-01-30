@@ -10,6 +10,10 @@ namespace IdealWeightNutrition.Utility
 		public bool UseSandbox { get; set; } = true;
 		public string CountryCode { get; set; } = "AE";
 		public string Currency { get; set; } = "AED";
+		/// <summary>
+		/// Minimum order amount required to show Tamara payment option. Default is 0 (no minimum).
+		/// </summary>
+		public decimal MinimumOrderAmount { get; set; } = 0;
 	}
 }
 

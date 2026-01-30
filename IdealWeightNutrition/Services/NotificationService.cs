@@ -600,7 +600,8 @@ namespace IdealWeightNutrition.Services
                 ");
             }
 
-            var estimatedDelivery = IdealWeightNutrition.Utility.DateTimeHelper.GetEstimatedDeliveryRange();
+            // Get estimated delivery message (within 48 hours in working days)
+            var estimatedDelivery = "Within 48 hours (working days)";
 
             // Get email for tracking URL
             // Priority: customer.Email > orderHeader.Email > orderHeader.ApplicationUser.Email

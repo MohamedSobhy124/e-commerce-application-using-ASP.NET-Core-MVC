@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -3693,6 +3693,9 @@
   <data name="Delivery" xml:space="preserve">
     <value />
   </data>
+  <data name="Within48HoursWorkingDays" xml:space="preserve">
+    <value>Within 48 hours (working days)</value>
+  </data>
   <data name="UseOrderIDAndEmailToTrackOrderStatus" xml:space="preserve">
     <value />
   </data>
@@ -4352,5 +4355,116 @@
   </data>
   <data name="PaymentSuccessful" xml:space="preserve">
     <value>Payment successful!</value>
+  </data>
+  <data name="PremiumServices" xml:space="preserve">
+    <value>Premium Services</value>
+  </data>
+  <data name="TransformYourHealth" xml:space="preserve">
+    <value>Transform Your Health Journey</value>
+  </data>
+  <data name="HappyClients" xml:space="preserve">
+    <value>Happy Clients</value>
+  </data>
+  <data name="YearsExperience" xml:space="preserve">
+    <value>Years Experience</value>
+  </data>
+  <data name="Rating" xml:space="preserve">
+    <value>Rating</value>
+  </data>
+  <data name="NoServicesYet" xml:space="preserve">
+    <value>No Services Available Yet</value>
+  </data>
+  <data name="BackToHome" xml:space="preserve">
+    <value>Back to Home</value>
+  </data>
+  <data name="QuickView" xml:space="preserve">
+    <value>Quick View</value>
+  </data>
+  <data name="HealthService" xml:space="preserve">
+    <value>Health Service</value>
+  </data>
+  <data name="PersonalizedPlan" xml:space="preserve">
+    <value>Personalized Plan</value>
+  </data>
+  <data name="ExpertGuidance" xml:space="preserve">
+    <value>Expert Guidance</value>
+  </data>
+  <data name="StartingFrom" xml:space="preserve">
+    <value>Starting from</value>
+  </data>
+  <data name="SeeDetails" xml:space="preserve">
+    <value>See Details</value>
+  </data>
+  <data name="Services" xml:space="preserve">
+    <value>Services</value>
+  </data>
+  <data name="CertifiedExperts" xml:space="preserve">
+    <value>Certified Experts</value>
+  </data>
+  <data name="ProfessionalTeam" xml:space="preserve">
+    <value>Professional Team</value>
+  </data>
+  <data name="FlexibleSchedule" xml:space="preserve">
+    <value>Flexible Schedule</value>
+  </data>
+  <data name="BookAnytime" xml:space="preserve">
+    <value>Book Anytime</value>
+  </data>
+  <data name="Guaranteed" xml:space="preserve">
+    <value>Guaranteed</value>
+  </data>
+  <data name="QualityService" xml:space="preserve">
+    <value>Quality Service</value>
+  </data>
+  <data name="AlwaysAvailable" xml:space="preserve">
+    <value>Always Available</value>
+  </data>
+  <data name="AboutThisService" xml:space="preserve">
+    <value>About This Service</value>
+  </data>
+  <data name="WhatsIncluded" xml:space="preserve">
+    <value>What's Included</value>
+  </data>
+  <data name="ProgressTracking" xml:space="preserve">
+    <value>Progress Tracking</value>
+  </data>
+  <data name="OngoingSupport" xml:space="preserve">
+    <value>Ongoing Support</value>
+  </data>
+  <data name="SecureCheckout" xml:space="preserve">
+    <value>Secure &amp; Easy Checkout</value>
+  </data>
+  <data name="MinimumPaymentRequired" xml:space="preserve">
+    <value>Minimum Payment Required</value>
+  </data>
+  <data name="OfflinePaymentNote" xml:space="preserve">
+    <value>Pay the remaining amount at the service location</value>
+  </data>
+  <data name="SecurePayment" xml:space="preserve">
+    <value>Secure Payment</value>
+  </data>
+  <data name="EasyRefund" xml:space="preserve">
+    <value>Easy Refund</value>
+  </data>
+  <data name="Thumbnail" xml:space="preserve">
+    <value>Thumbnail</value>
+  </data>
+  <data name="SecurePaymentMethods" xml:space="preserve">
+    <value>Secure Payment Methods</value>
+  </data>
+  <data name="AcceptedPaymentMethods" xml:space="preserve">
+    <value>Accepted Payment Methods: Visa, MasterCard, Apple Pay, American Express, Mada, KNet</value>
+  </data>
+  <data name="Recommended" xml:space="preserve">
+    <value>Recommended</value>
+  </data>
+  <data name="OrPayWith" xml:space="preserve">
+    <value>Or pay with</value>
+  </data>
+  <data name="PayIn4Installments" xml:space="preserve">
+    <value>Pay in 4 installments</value>
+  </data>
+  <data name="MinimumOrderForPayment" xml:space="preserve">
+    <value>Add {0} AED more to unlock {1}</value>
   </data>
 </root>

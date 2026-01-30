@@ -14,28 +14,87 @@
     Func<decimal, string> formatCurrency = (amount) => $"{currencySymbol} {amount.ToString("N2", System.Globalization.CultureInfo.InvariantCulture).Replace(".", ",")}";
 }
 
-<div class="container py-5" dir="@(isRtl ? "rtl" : "ltr")">
-    <div class="row mb-5">
-        <div class="col-12 text-center">
-            <h1 class="display-4 fw-bold mb-3 service-page-title">
-                <i class="bi bi-briefcase-fill @(isRtl ? "ms-3" : "me-3")"></i>@(Localizer["OurServices"] ?? "Our Services")
-            </h1>
-            <p class="lead text-muted">@(Localizer["ChoosePerfectServiceSubscription"] ?? "Choose the perfect service subscription for you")</p>
+<!-- Hero Section -->
+<section class="services-hero-section" dir="@(isRtl ? "rtl" : "ltr")">
+    <div class="hero-background">
+        <div class="hero-shape shape-1"></div>
+        <div class="hero-shape shape-2"></div>
+        <div class="hero-shape shape-3"></div>
+        <div class="floating-icon icon-1"><i class="bi bi-heart-pulse"></i></div>
+        <div class="floating-icon icon-2"><i class="bi bi-clipboard2-pulse"></i></div>
+        <div class="floating-icon icon-3"><i class="bi bi-person-check"></i></div>
+    </div>
+    <div class="container position-relative">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <div class="hero-badge animate-fade-in">
+                    <i class="bi bi-stars"></i>
+                    <span>@(Localizer["PremiumServices"] ?? "Premium Services")</span>
+                </div>
+                <h1 class="hero-title animate-slide-up">
+                    @if (currentCulture == "ar")
+                    {
+                        <text>خدمات التغذية والاستشارات الصحية في الإمارات |ايديال ويت للتغذية</text>
+                    }
+                    else
+                    {
+                        <text>Nutrition Services & Health Consultations UAE | Ideal Weight Nutrition</text>
+                    }
+                </h1>
+                <p class="hero-subtitle animate-slide-up-delay">
+                    @(Localizer["ChoosePerfectServiceSubscription"] ?? "Choose the perfect service subscription tailored for your wellness goals")
+                </p>
+                <div class="hero-stats animate-fade-in-delay">
+                    <div class="stat-item">
+                        <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-number">1000+</span>
+                            <span class="stat-label">@(Localizer["HappyClients"] ?? "Happy Clients")</span>
+                        </div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <div class="stat-icon"><i class="bi bi-award-fill"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-number">5+</span>
+                            <span class="stat-label">@(Localizer["YearsExperience"] ?? "Years Experience")</span>
+                        </div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <div class="stat-icon"><i class="bi bi-star-fill"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-number">4.9</span>
+                            <span class="stat-label">@(Localizer["Rating"] ?? "Rating")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+</section>
 
+<div class="container services-container py-5" dir="@(isRtl ? "rtl" : "ltr")">
     @if (Model == null || !Model.Any())
     {
-        <div class="row">
-            <div class="col-12 text-center py-5">
-                <i class="bi bi-inbox empty-state-icon"></i>
-                <p class="text-muted mt-3">@(Localizer["NoServicesAvailable"] ?? "No services available at the moment")</p>
+        <div class="empty-state-container">
+            <div class="empty-state-card">
+                <div class="empty-state-icon-wrapper">
+                    <i class="bi bi-inbox"></i>
+                </div>
+                <h3>@(Localizer["NoServicesYet"] ?? "No Services Available Yet")</h3>
+                <p>@(Localizer["NoServicesAvailable"] ?? "We're preparing something amazing for you. Check back soon!")</p>
+                <a href="/" class="btn btn-back-home">
+                    <i class="bi bi-house-door @(isRtl ? "ms-2" : "me-2")"></i>
+                    @(Localizer["BackToHome"] ?? "Back to Home")
+                </a>
             </div>
         </div>
     }
     else
     {
-        <div class="row g-4">
+        <div class="row g-4 g-lg-5">
+            @{ var index = 0; }
             @foreach (var service in Model)
             {
                 var now = IdealWeightNutrition.Utility.DateTimeHelper.Now;
@@ -62,28 +121,29 @@
                 var hasOffer = serviceOffers.Any();
                 var bestOffer = serviceOffers.OrderByDescending(o => o.DiscountValue).FirstOrDefault();
 
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="service-card h-100">
+                <div class="col-lg-4 col-md-6" style="animation-delay: @(index * 0.1)s;">
+                    <div class="service-card-modern h-100">
+                        <!-- Card Glow Effect -->
+                        <div class="card-glow"></div>
+                        
                         @{
                             var serviceDetailsUrl = Url.Action("Details", "ServiceSubscription", new { area = "Customer", id = service.Id });
+                            var serviceImages = service.ServiceImages != null && service.ServiceImages.Any() 
+                                ? service.ServiceImages.OrderBy(si => si.DisplayOrder).Select(si => si.ImageUrl).ToList()
+                                : new List<string>();
+                            
+                            if (!serviceImages.Any() && !string.IsNullOrEmpty(service.ImageUrl))
+                            {
+                                serviceImages.Add(service.ImageUrl);
+                            }
                         }
-                        <a href="@serviceDetailsUrl" class="service-image-link">
-                            <div class="service-card-header">
-                                @{
-                                    var serviceImages = service.ServiceImages != null && service.ServiceImages.Any() 
-                                        ? service.ServiceImages.OrderBy(si => si.DisplayOrder).Select(si => si.ImageUrl).ToList()
-                                        : new List<string>();
-                                    
-                                    // If no ServiceImages but has ImageUrl, use that
-                                    if (!serviceImages.Any() && !string.IsNullOrEmpty(service.ImageUrl))
-                                    {
-                                        serviceImages.Add(service.ImageUrl);
-                                    }
-                                }
-                                
+                        
+                        <!-- Image Section -->
+                        <div class="card-image-section">
+                            <a href="@serviceDetailsUrl" class="image-link">
                                 @if (serviceImages.Count > 1)
                                 {
-                                    <div id="serviceCarousel_@service.Id" class="carousel slide service-image-carousel" data-bs-ride="carousel">
+                                    <div id="serviceCarousel_@service.Id" class="carousel slide" data-bs-ride="carousel">
                                         <div class="carousel-inner">
                                             @{
                                                 var serviceTitleForAlt = currentCulture == "ar" && !string.IsNullOrEmpty(service.TitleAr) ? service.TitleAr : service.Title;
@@ -91,22 +151,20 @@
                                             @for (int i = 0; i < serviceImages.Count; i++)
                                             {
                                                 <div class="carousel-item @(i == 0 ? "active" : "")">
-                                                    <img src="@serviceImages[i]" class="service-image" alt="@serviceTitleForAlt - @(Localizer["Image"] ?? "Image") @(i+1)" />
+                                                    <img src="@serviceImages[i]" class="card-image" alt="@serviceTitleForAlt - @(Localizer["Image"] ?? "Image") @(i+1)" />
                                                 </div>
                                             }
                                         </div>
-                                        <button class="carousel-control-prev" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="prev" onclick="event.stopPropagation()">
-                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                            <span class="visually-hidden">@(Localizer["Previous"] ?? "Previous")</span>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="prev" onclick="event.stopPropagation(); event.preventDefault();">
+                                            <span class="carousel-nav-icon"><i class="bi bi-chevron-left"></i></span>
                                         </button>
-                                        <button class="carousel-control-next" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="next" onclick="event.stopPropagation()">
-                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                            <span class="visually-hidden">@(Localizer["Next"] ?? "Next")</span>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="next" onclick="event.stopPropagation(); event.preventDefault();">
+                                            <span class="carousel-nav-icon"><i class="bi bi-chevron-right"></i></span>
                                         </button>
-                                        <div class="carousel-indicators">
+                                        <div class="carousel-indicators custom-indicators">
                                             @for (int i = 0; i < serviceImages.Count; i++)
                                             {
-                                                <button type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-label="@(Localizer["Slide"] ?? "Slide") @(i+1)" onclick="event.stopPropagation()"></button>
+                                                <button type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" onclick="event.stopPropagation();"></button>
                                             }
                                         </div>
                                     </div>
@@ -114,89 +172,102 @@
                                 else if (serviceImages.Count == 1)
                                 {
                                     var serviceTitleForAlt = currentCulture == "ar" && !string.IsNullOrEmpty(service.TitleAr) ? service.TitleAr : service.Title;
-                                    <img src="@serviceImages[0]" class="service-image" alt="@serviceTitleForAlt" />
+                                    <img src="@serviceImages[0]" class="card-image" alt="@serviceTitleForAlt" />
                                 }
                                 else
                                 {
-                                    <div class="service-image-placeholder">
-                                        <i class="bi bi-briefcase" style="font-size: 3rem;"></i>
-                                    </div>
-                                }
-                                
-                                <!-- Image Overlay on Hover -->
-                                <div class="service-image-overlay">
-                                    <i class="bi bi-eye-fill"></i>
-                                    <span>@(Localizer["ViewDetails"] ?? "View Details")</span>
-                                </div>
-                                
-                                @if (hasOffer && bestOffer != null)
-                                {
-                                    decimal originalPrice = service.Price;
-                                    decimal discount = 0;
-                                    if (bestOffer.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
-                                    {
-                                        discount = originalPrice * (bestOffer.DiscountValue / 100);
-                                    }
-                                    else
-                                    {
-                                        discount = bestOffer.DiscountValue;
-                                    }
-                                    decimal finalPrice = originalPrice - discount;
-                                    decimal discountPercent = originalPrice > 0 ? (discount / originalPrice) * 100 : 0;
-                                    
-                                    <div class="offer-badge-enhanced">
-                                        <div class="offer-badge-content">
-                                            <div class="offer-badge-icon">
-                                                <i class="bi bi-tag-fill"></i>
-                                            </div>
-                                            <div class="offer-badge-text">
-                                                @if (bestOffer.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
-                                                {
-                                                    <span class="offer-percentage">@bestOffer.DiscountValue%</span>
-                                                    <span class="offer-label">@Localizer["OFF"]</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="offer-amount">@formatCurrency(bestOffer.DiscountValue)</span>
-                                                    <span class="offer-label">@Localizer["OFF"]</span>
-                                                }
-                                            </div>
+                                    <div class="image-placeholder">
+                                        <div class="placeholder-icon">
+                                            <i class="bi bi-heart-pulse"></i>
                                         </div>
-                                        <div class="offer-badge-ribbon"></div>
-                                    </div>
-                                    
-                                    <!-- Discount Savings Badge -->
-                                    <div class="discount-savings-badge">
-                                        <i class="bi bi-piggy-bank-fill"></i>
-                                        <span>@Localizer["Save"] @formatCurrency(discount)</span>
+                                        <span>@(Localizer["HealthService"] ?? "Health Service")</span>
                                     </div>
                                 }
                                 
+                                <!-- Hover Overlay -->
+                                <div class="image-overlay">
+                                    <div class="overlay-content">
+                                        <div class="overlay-icon">
+                                            <i class="bi bi-eye"></i>
+                                        </div>
+                                        <span>@(Localizer["QuickView"] ?? "Quick View")</span>
+                                    </div>
+                                </div>
+                            </a>
+                            
+                            <!-- Badges Container -->
+                            <div class="badges-container">
+                                <!-- Service Type Badge -->
                                 @if (service.ServiceType == IdealWeightNutrition.Models.ServiceType.Online)
                                 {
-                                    <div class="service-type-badge online">
-                                        <i class="bi bi-globe"></i> @Localizer["Online"]
+                                    <div class="type-badge online">
+                                        <i class="bi bi-wifi"></i>
+                                        <span>@Localizer["Online"]</span>
                                     </div>
                                 }
                                 else
                                 {
-                                    <div class="service-type-badge offline">
-                                        <i class="bi bi-building"></i> @Localizer["Offline"]
+                                    <div class="type-badge offline">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                        <span>@Localizer["Offline"]</span>
                                     </div>
                                 }
                             </div>
-                        </a>
-                        <div class="service-card-body">
+                            
+                            <!-- Offer Badge -->
+                            @if (hasOffer && bestOffer != null)
+                            {
+                                <div class="offer-ribbon">
+                                    <div class="ribbon-content">
+                                        @if (bestOffer.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
+                                        {
+                                            <span class="ribbon-percent">@bestOffer.DiscountValue%</span>
+                                            <span class="ribbon-text">@Localizer["OFF"]</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="ribbon-amount">@formatCurrency(bestOffer.DiscountValue)</span>
+                                            <span class="ribbon-text">@Localizer["OFF"]</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        
+                        <!-- Content Section -->
+                        <div class="card-content-section">
                             @{
                                 var serviceTitle = currentCulture == "ar" && !string.IsNullOrEmpty(service.TitleAr) ? service.TitleAr : service.Title;
                                 var serviceDescription = currentCulture == "ar" && !string.IsNullOrEmpty(service.DescriptionAr) ? service.DescriptionAr : service.Description;
                             }
-                            <h3 class="service-title">@serviceTitle</h3>
+                            
+                            <div class="content-header">
+                                <h3 class="service-title-modern">
+                                    <a href="@serviceDetailsUrl">@serviceTitle</a>
+                                </h3>
+                            </div>
+                            
                             @if (!string.IsNullOrEmpty(serviceDescription))
                             {
-                                <p class="service-description">@(serviceDescription.Length > 100 ? serviceDescription.Substring(0, 100) + "..." : serviceDescription)</p>
+                                <p class="service-excerpt">
+                                    @(serviceDescription.Length > 90 ? serviceDescription.Substring(0, 90) + "..." : serviceDescription)
+                                </p>
                             }
-                            <div class="service-pricing">
+                            
+                            <!-- Features List -->
+                            <div class="service-features">
+                                <div class="feature-item">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>@(Localizer["PersonalizedPlan"] ?? "Personalized Plan")</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>@(Localizer["ExpertGuidance"] ?? "Expert Guidance")</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Pricing Section -->
+                            <div class="pricing-section-modern">
                                 @if (hasOffer && bestOffer != null)
                                 {
                                     decimal originalPrice = service.Price;
@@ -211,521 +282,992 @@
                                     }
                                     decimal finalPrice = originalPrice - discount;
                                     
-                                    <div class="pricing-with-discount">
-                                        <div class="price-original-wrapper">
-                                            <span class="price-original">@formatCurrency(originalPrice)</span>
-                                            <span class="discount-tag">-@(bestOffer.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage ? bestOffer.DiscountValue + "%" : formatCurrency(bestOffer.DiscountValue))</span>
+                                    <div class="price-with-offer">
+                                        <div class="original-price">
+                                            <span class="strike-price">@formatCurrency(originalPrice)</span>
+                                            <span class="save-badge">
+                                                <i class="bi bi-piggy-bank"></i>
+                                                @(Localizer["Save"] ?? "Save") @formatCurrency(discount)
+                                            </span>
                                         </div>
-                                        <div class="price-final">@formatCurrency(finalPrice)</div>
+                                        <div class="final-price">@formatCurrency(finalPrice)</div>
                                     </div>
                                 }
                                 else
                                 {
-                                    <div class="price-final">@formatCurrency(service.Price)</div>
+                                    <div class="regular-price">
+                                        <span class="price-label">@(Localizer["StartingFrom"] ?? "Starting from")</span>
+                                        <div class="final-price">@formatCurrency(service.Price)</div>
+                                    </div>
                                 }
                             </div>
+                            
                             @if (service.ServiceType == IdealWeightNutrition.Models.ServiceType.Offline && service.OfflinePaymentPercent.HasValue)
                             {
-                                <div class="offline-payment-info">
-                                    <small class="text-muted">
-                                        <i class="bi bi-info-circle"></i> 
-                                        @Localizer["PayPercentNow", service.OfflinePaymentPercent.Value, formatCurrency(service.Price * service.OfflinePaymentPercent.Value / 100)]
-                                    </small>
+                                <div class="offline-info-badge">
+                                    <i class="bi bi-info-circle"></i>
+                                    <span>@Localizer["PayPercentNow", service.OfflinePaymentPercent.Value, formatCurrency(service.Price * service.OfflinePaymentPercent.Value / 100)]</span>
                                 </div>
                             }
                         </div>
-                        <div class="service-card-footer">
-                            <a asp-action="Details" asp-route-id="@service.Id" class="btn btn-primary w-100">
-                                <i class="bi bi-arrow-@(isRtl ? "left" : "right") @(isRtl ? "ms-2" : "me-2")"></i>@(Localizer["ViewDetails"] ?? "View Details")
+                        
+                        <!-- Action Section -->
+                        <div class="card-action-section">
+                            <a asp-action="Details" asp-route-id="@service.Id" class="btn-view-details">
+                                <span class="btn-text">@(Localizer["SeeDetails"] ?? "See Details")</span>
+                                <span class="btn-icon">
+                                    <i class="bi bi-arrow-@(isRtl ? "left" : "right")"></i>
+                                </span>
                             </a>
                         </div>
                     </div>
                 </div>
+                index++;
             }
         </div>
     }
 </div>
 
 <style>
-    .service-card {
-        background: #ffffff;
-        border-radius: 24px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    /* ========================================
+       HERO SECTION STYLES
+       ======================================== */
+    .services-hero-section {
+        position: relative;
+        padding: 80px 0 60px;
+        background: linear-gradient(135deg, #f8fdf6 0%, #e8f5e1 50%, #d4edda 100%);
         overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        border: 1px solid #e5e7eb;
-        position: relative;
     }
 
-    .service-card:hover {
-        transform: translateY(-12px) scale(1.02);
-        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
-        border-color: #667eea;
-    }
-
-    .service-image-link {
-        display: block;
-        text-decoration: none;
-        color: inherit;
-        position: relative;
-        cursor: pointer;
-    }
-
-    .service-image-link:hover {
-        text-decoration: none;
-    }
-
-    .service-card-header {
-        position: relative;
-        height: 250px;
-        overflow: hidden;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .service-image-carousel {
-        height: 100%;
-    }
-
-    .service-image-carousel .carousel-inner {
-        height: 100%;
-    }
-
-    .service-image-carousel .carousel-item {
-        height: 100%;
-    }
-
-    .service-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s ease;
-    }
-
-    .service-image-link:hover .service-image {
-        transform: scale(1.1);
-    }
-
-    .service-image-overlay {
+    .hero-background {
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.6);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        z-index: 10;
-        color: white;
-        font-weight: 600;
-        font-size: 1.2rem;
-    }
-
-    .service-image-overlay i {
-        font-size: 2.5rem;
-        margin-bottom: 0.75rem;
-        animation: bounce 2s infinite;
-    }
-
-    .service-image-link:hover .service-image-overlay {
-        opacity: 1;
-    }
-
-    @@keyframes bounce {
-        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-        40% { transform: translateY(-10px); }
-        60% { transform: translateY(-5px); }
-    }
-
-    .service-image-carousel .carousel-control-prev,
-    .service-image-carousel .carousel-control-next {
-        opacity: 0.7;
-        width: 10%;
-    }
-
-    .service-image-carousel .carousel-control-prev:hover,
-    .service-image-carousel .carousel-control-next:hover {
-        opacity: 1;
-    }
-
-    .service-image-carousel .carousel-indicators {
-        margin-bottom: 10px;
-    }
-
-    .service-image-carousel .carousel-indicators button {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background-color: rgba(255, 255, 255, 0.5);
-        border: none;
-    }
-
-    .service-image-carousel .carousel-indicators button.active {
-        background-color: white;
-    }
-
-    .service-image-placeholder {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .service-page-title {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .empty-state-icon {
-        font-size: 4rem;
-        color: #ccc;
-    }
-
-    .offer-badge-enhanced {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        z-index: 15;
-        transform: rotate(5deg);
-        transition: transform 0.3s ease;
-    }
-
-    .service-card:hover .offer-badge-enhanced {
-        transform: rotate(0deg) scale(1.1);
-    }
-
-    .offer-badge-content {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        color: white;
-        padding: 10px 16px;
-        border-radius: 12px;
-        font-weight: 800;
-        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        position: relative;
         overflow: hidden;
     }
 
-    .offer-badge-icon {
-        font-size: 1.2rem;
-        animation: spin 3s linear infinite;
+    .hero-shape {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.15;
     }
 
-    @@keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+    .hero-shape.shape-1 {
+        width: 400px;
+        height: 400px;
+        background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+        top: -150px;
+        right: -100px;
+        animation: float 8s ease-in-out infinite;
     }
 
-    .offer-badge-text {
-        display: flex;
-        flex-direction: column;
-        line-height: 1.2;
+    .hero-shape.shape-2 {
+        width: 300px;
+        height: 300px;
+        background: linear-gradient(135deg, #5a9c32 0%, #7BC043 100%);
+        bottom: -100px;
+        left: -80px;
+        animation: float 10s ease-in-out infinite reverse;
     }
 
-    .offer-percentage {
-        font-size: 1.4rem;
+    .hero-shape.shape-3 {
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, #7BC043 0%, #8fd455 100%);
+        top: 40%;
+        left: 15%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .floating-icon {
+        position: absolute;
+        font-size: 2rem;
+        color: #7BC043;
+        opacity: 0.2;
+        animation: floatIcon 4s ease-in-out infinite;
+    }
+
+    .floating-icon.icon-1 {
+        top: 20%;
+        right: 15%;
+        animation-delay: 0s;
+    }
+
+    .floating-icon.icon-2 {
+        top: 60%;
+        right: 25%;
+        animation-delay: 1s;
+    }
+
+    .floating-icon.icon-3 {
+        top: 40%;
+        left: 10%;
+        animation-delay: 2s;
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    @@keyframes floatIcon {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-15px) scale(1.1); }
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+        color: white;
+        padding: 10px 24px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 20px rgba(123, 192, 67, 0.3);
+    }
+
+    .hero-badge i {
+        font-size: 1.1rem;
+    }
+
+    .hero-title {
+        font-size: 3.2rem;
         font-weight: 900;
+        color: #1a2e05;
+        margin-bottom: 20px;
+        line-height: 1.2;
         letter-spacing: -1px;
     }
 
-    .offer-amount {
-        font-size: 1.1rem;
-        font-weight: 900;
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: #4a6332;
+        max-width: 600px;
+        margin: 0 auto 40px;
+        line-height: 1.7;
     }
 
-    .offer-label {
-        font-size: 0.75rem;
-        opacity: 0.95;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .offer-badge-ribbon {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        width: 0;
-        height: 0;
-        border-left: 15px solid transparent;
-        border-top: 15px solid #991b1b;
-        transform: rotate(45deg);
-    }
-
-    .discount-savings-badge {
-        position: absolute;
-        bottom: 15px;
-        left: 15px;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-        padding: 6px 12px;
+    .hero-stats {
+        display: inline-flex;
+        align-items: center;
+        gap: 30px;
+        background: white;
+        padding: 20px 40px;
         border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        z-index: 15;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat-item {
         display: flex;
         align-items: center;
-        gap: 6px;
-        animation: slideInLeft 0.5s ease;
+        gap: 12px;
     }
 
-    .discount-savings-badge i {
-        font-size: 1rem;
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #e8f5e1 0%, #d4edda 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #7BC043;
+        font-size: 1.3rem;
     }
 
-    @@keyframes slideInLeft {
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1a2e05;
+        line-height: 1.2;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: #6b8a50;
+    }
+
+    .stat-divider {
+        width: 1px;
+        height: 40px;
+        background: #e5e7eb;
+    }
+
+    /* Animations */
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.8s ease-out forwards;
+    }
+
+    .animate-slide-up-delay {
+        animation: slideUp 0.8s ease-out 0.2s forwards;
+        opacity: 0;
+    }
+
+    .animate-fade-in-delay {
+        animation: fadeIn 0.8s ease-out 0.4s forwards;
+        opacity: 0;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @@keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========================================
+       SERVICES CONTAINER
+       ======================================== */
+    .services-container {
+        position: relative;
+    }
+
+    /* ========================================
+       EMPTY STATE
+       ======================================== */
+    .empty-state-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 400px;
+        padding: 40px 20px;
+    }
+
+    .empty-state-card {
+        text-align: center;
+        background: white;
+        padding: 60px 40px;
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        max-width: 400px;
+    }
+
+    .empty-state-icon-wrapper {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+    }
+
+    .empty-state-icon-wrapper i {
+        font-size: 3rem;
+        color: #9ca3af;
+    }
+
+    .empty-state-card h3 {
+        color: #374151;
+        margin-bottom: 12px;
+        font-weight: 700;
+    }
+
+    .empty-state-card p {
+        color: #6b7280;
+        margin-bottom: 24px;
+    }
+
+    .btn-back-home {
+        background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+        color: white;
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back-home:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(123, 192, 67, 0.35);
+    }
+
+    /* ========================================
+       SERVICE CARD MODERN
+       ======================================== */
+    .service-card-modern {
+        position: relative;
+        background: #ffffff;
+        border-radius: 24px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid rgba(123, 192, 67, 0.15);
+        display: flex;
+        flex-direction: column;
+        animation: cardFadeIn 0.6s ease-out forwards;
+        opacity: 0;
+    }
+
+    @@keyframes cardFadeIn {
         from {
             opacity: 0;
-            transform: translateX(-20px);
+            transform: translateY(30px);
         }
         to {
             opacity: 1;
-            transform: translateX(0);
+            transform: translateY(0);
         }
     }
 
-    [dir="rtl"] .discount-savings-badge {
-        left: auto;
-        right: 15px;
-        animation: slideInRight 0.5s ease;
+    .service-card-modern:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 25px 60px rgba(123, 192, 67, 0.2);
+        border-color: #7BC043;
     }
 
-    @@keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
+    .card-glow {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s ease;
     }
 
-    .service-type-badge {
+    .service-card-modern:hover .card-glow {
+        transform: scaleX(1);
+    }
+
+    /* ========================================
+       IMAGE SECTION
+       ======================================== */
+    .card-image-section {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #e8f5e1 0%, #d4edda 100%);
+    }
+
+    .image-link {
+        display: block;
+        height: 100%;
+        text-decoration: none;
+    }
+
+    .card-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    .service-card-modern:hover .card-image {
+        transform: scale(1.08);
+    }
+
+    .carousel-inner,
+    .carousel-item {
+        height: 100%;
+    }
+
+    .carousel-nav-icon {
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #374151;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .carousel-control-prev:hover .carousel-nav-icon,
+    .carousel-control-next:hover .carousel-nav-icon {
+        background: #7BC043;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 15%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .service-card-modern:hover .carousel-control-prev,
+    .service-card-modern:hover .carousel-control-next {
+        opacity: 1;
+    }
+
+    .custom-indicators {
+        margin-bottom: 12px;
+    }
+
+    .custom-indicators button {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.6);
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        margin: 0 4px;
+    }
+
+    .custom-indicators button.active {
+        background: #7BC043;
+        transform: scale(1.3);
+    }
+
+    .image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: linear-gradient(135deg, #e8f5e1 0%, #d4edda 100%);
+    }
+
+    .placeholder-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2.5rem;
+        box-shadow: 0 8px 25px rgba(123, 192, 67, 0.3);
+    }
+
+    .image-placeholder span {
+        color: #4a6332;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    /* Image Overlay */
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(123, 192, 67, 0.9) 0%, rgba(107, 168, 54, 0.9) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .service-card-modern:hover .image-overlay {
+        opacity: 1;
+    }
+
+    .overlay-content {
+        text-align: center;
+        color: white;
+        transform: translateY(20px);
+        transition: transform 0.4s ease;
+    }
+
+    .service-card-modern:hover .overlay-content {
+        transform: translateY(0);
+    }
+
+    .overlay-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 12px;
+        font-size: 1.8rem;
+        backdrop-filter: blur(4px);
+    }
+
+    .overlay-content span {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    /* Badges */
+    .badges-container {
         position: absolute;
         top: 15px;
         left: 15px;
-        padding: 6px 12px;
-        border-radius: 15px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: white;
-        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 10;
     }
 
-    [dir="rtl"] .offer-badge-enhanced {
+    [dir="rtl"] .badges-container {
+        left: auto;
+        right: 15px;
+    }
+
+    .type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: white;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .type-badge.online {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 0.95) 100%);
+    }
+
+    .type-badge.offline {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.95) 0%, rgba(37, 99, 235, 0.95) 100%);
+    }
+
+    /* Offer Ribbon */
+    .offer-ribbon {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 10;
+        animation: pulseRibbon 2s ease-in-out infinite;
+    }
+
+    [dir="rtl"] .offer-ribbon {
         right: auto;
         left: 15px;
     }
 
-    [dir="rtl"] .service-type-badge {
-        left: auto;
-        right: 15px;
+    @@keyframes pulseRibbon {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
     }
 
-    .service-type-badge.online {
-        background: rgba(16, 185, 129, 0.9);
+    .ribbon-content {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        padding: 10px 18px;
+        border-radius: 14px;
+        text-align: center;
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        position: relative;
+        overflow: hidden;
     }
 
-    .service-type-badge.offline {
-        background: rgba(59, 130, 246, 0.9);
+    .ribbon-content::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+        animation: shine 3s infinite;
     }
 
-    .service-card-body {
-        padding: 28px;
-        background: linear-gradient(to bottom, #ffffff 0%, #f9fafb 100%);
+    @@keyframes shine {
+        0% { transform: translateX(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) rotate(45deg); }
     }
 
-    .service-title {
-        font-size: 1.6rem;
+    .ribbon-percent {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 900;
+        line-height: 1.1;
+    }
+
+    .ribbon-amount {
+        display: block;
+        font-size: 1.1rem;
+        font-weight: 900;
+        line-height: 1.1;
+    }
+
+    .ribbon-text {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.9;
+    }
+
+    /* ========================================
+       CONTENT SECTION
+       ======================================== */
+    .card-content-section {
+        padding: 24px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .content-header {
+        margin-bottom: 12px;
+    }
+
+    .service-title-modern {
+        font-size: 1.35rem;
         font-weight: 800;
-        background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 16px;
-        line-height: 1.3;
-        transition: all 0.3s ease;
+        line-height: 1.4;
+        margin: 0;
     }
 
-    .service-card:hover .service-title {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+    .service-title-modern a {
+        color: #1f2937;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        display: block;
     }
 
-    .service-description {
+    .service-title-modern a:hover {
+        color: #7BC043;
+    }
+
+    .service-excerpt {
         color: #6b7280;
-        font-size: 0.95rem;
-        line-height: 1.7;
-        margin-bottom: 22px;
-        min-height: 60px;
+        font-size: 0.92rem;
+        line-height: 1.6;
+        margin-bottom: 16px;
     }
 
-    .service-pricing {
-        margin-bottom: 15px;
-    }
-
-    .pricing-with-discount {
+    /* Features */
+    .service-features {
         display: flex;
         flex-direction: column;
         gap: 8px;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px dashed #e5e7eb;
     }
 
-    .price-original-wrapper {
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.85rem;
+        color: #4b5563;
+    }
+
+    .feature-item i {
+        color: #7BC043;
+        font-size: 1rem;
+    }
+
+    /* Pricing */
+    .pricing-section-modern {
+        margin-top: auto;
+    }
+
+    .price-with-offer {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .original-price {
         display: flex;
         align-items: center;
         gap: 10px;
         flex-wrap: wrap;
     }
 
-    .price-original {
-        font-size: 1.1rem;
+    .strike-price {
         color: #9ca3af;
         text-decoration: line-through;
+        font-size: 1rem;
         font-weight: 500;
     }
 
-    .discount-tag {
+    .save-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
         background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
         color: #92400e;
         padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 0.85rem;
+        border-radius: 20px;
+        font-size: 0.78rem;
         font-weight: 700;
-        border: 1px solid #fbbf24;
-        box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
     }
 
-    .price-final {
-        font-size: 2.2rem;
+    .regular-price {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .price-label {
+        color: #9ca3af;
+        font-size: 0.85rem;
+    }
+
+    .final-price {
+        font-size: 1.9rem;
         font-weight: 900;
-        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        background: linear-gradient(135deg, #7BC043 0%, #5a9c32 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         line-height: 1.2;
     }
 
-    .offline-payment-info {
-        margin-top: 10px;
-        padding: 10px;
+    .offline-info-badge {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-top: 12px;
+        padding: 10px 12px;
         background: #f0f9ff;
-        border-radius: 8px;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        color: #1e40af;
         border-left: 3px solid #3b82f6;
     }
 
-    [dir="rtl"] .offline-payment-info {
+    [dir="rtl"] .offline-info-badge {
         border-left: none;
         border-right: 3px solid #3b82f6;
     }
 
-    .service-card-footer {
-        padding: 22px 28px;
-        background: linear-gradient(to bottom, #f9fafb 0%, #ffffff 100%);
-        border-top: 2px solid #e5e7eb;
+    .offline-info-badge i {
+        margin-top: 2px;
+        flex-shrink: 0;
     }
 
-    .service-card-footer .btn {
-        padding: 14px 24px;
-        font-weight: 700;
-        font-size: 1rem;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
+    /* ========================================
+       ACTION SECTION
+       ======================================== */
+    .card-action-section {
+        padding: 0 24px 24px;
+    }
+
+    .btn-view-details {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        padding: 16px 28px;
+        background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
         color: white;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        border: none;
+        border-radius: 14px;
+        font-size: 1rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         position: relative;
         overflow: hidden;
+        box-shadow: 0 4px 15px rgba(123, 192, 67, 0.3);
     }
 
-    .service-card-footer .btn::before {
+    .btn-view-details::before {
         content: '';
         position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-view-details:hover::before {
+        left: 100%;
+    }
+
+    .btn-view-details:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(123, 192, 67, 0.45);
+        color: white;
+    }
+
+    .btn-view-details:active {
+        transform: translateY(-1px);
+    }
+
+    .btn-text {
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-icon {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background: rgba(255, 255, 255, 0.2);
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
+        transition: transform 0.3s ease, background 0.3s ease;
     }
 
-    .service-card-footer .btn:hover::before {
-        width: 300px;
-        height: 300px;
+    .btn-view-details:hover .btn-icon {
+        background: rgba(255, 255, 255, 0.35);
+        transform: translateX(4px);
     }
 
-    .service-card-footer .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    [dir="rtl"] .btn-view-details:hover .btn-icon {
+        transform: translateX(-4px);
     }
 
-    .service-card-footer .btn:active {
-        transform: translateY(0);
+    /* ========================================
+       RESPONSIVE DESIGN
+       ======================================== */
+    @@media (max-width: 1199px) {
+        .hero-title {
+            font-size: 2.8rem;
+        }
     }
 
-    @@keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-    }
-
-    /* Responsive Design */
     @@media (max-width: 991px) {
-        .service-card-header {
-            height: 220px;
+        .services-hero-section {
+            padding: 60px 0 50px;
         }
-        
-        .service-title {
-            font-size: 1.4rem;
+
+        .hero-title {
+            font-size: 2.4rem;
         }
-        
-        .price-final {
-            font-size: 1.9rem;
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+
+        .hero-stats {
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px 30px;
+        }
+
+        .stat-divider {
+            display: none;
+        }
+
+        .card-image-section {
+            height: 200px;
+        }
+
+        .service-title-modern {
+            font-size: 1.25rem;
+        }
+
+        .final-price {
+            font-size: 1.7rem;
         }
     }
 
     @@media (max-width: 767px) {
-        .service-card-header {
-            height: 200px;
+        .services-hero-section {
+            padding: 50px 0 40px;
         }
-        
-        .service-card-body {
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+        }
+
+        .hero-stats {
+            flex-direction: column;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .stat-item {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .card-image-section {
+            height: 180px;
+        }
+
+        .card-content-section {
             padding: 20px;
         }
-        
-        .service-card-footer {
-            padding: 18px 20px;
+
+        .card-action-section {
+            padding: 0 20px 20px;
         }
-        
-        .service-title {
-            font-size: 1.3rem;
+
+        .service-title-modern {
+            font-size: 1.15rem;
         }
-        
-        .price-final {
-            font-size: 1.7rem;
+
+        .final-price {
+            font-size: 1.5rem;
         }
-        
-        .offer-badge-content {
-            padding: 8px 12px;
+
+        .btn-view-details {
+            padding: 14px 24px;
+            font-size: 0.95rem;
         }
-        
-        .offer-percentage {
-            font-size: 1.2rem;
+
+        .service-features {
+            display: none;
         }
+    }
+
+    @@media (max-width: 576px) {
+        .hero-title {
+            font-size: 1.75rem;
+        }
+
+        .floating-icon {
+            display: none;
+        }
+    }
+
+    /* ========================================
+       RTL SPECIFIC STYLES
+       ======================================== */
+    [dir="rtl"] .hero-badge,
+    [dir="rtl"] .type-badge,
+    [dir="rtl"] .save-badge,
+    [dir="rtl"] .feature-item {
+        flex-direction: row-reverse;
+    }
+
+    [dir="rtl"] .stat-item {
+        flex-direction: row-reverse;
+    }
+
+    [dir="rtl"] .btn-view-details {
+        flex-direction: row-reverse;
     }
 </style>
 

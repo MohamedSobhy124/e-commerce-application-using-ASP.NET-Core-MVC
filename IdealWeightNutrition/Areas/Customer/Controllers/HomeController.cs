@@ -1,4 +1,4 @@
-﻿using IdealWeightNutrition.DataAccess.Repository.IRepository;
+using IdealWeightNutrition.DataAccess.Repository.IRepository;
 using IdealWeightNutrition.DataAccess.Data;
 using IdealWeightNutrition.Models;
 using IdealWeightNutrition.Utility;
@@ -1287,6 +1287,10 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
                         break;
                     case "trending":
                         query = query.Where(p => p.IsTrending);
+                        break;
+                    case "discounted":
+                        // Filter products that have a discount (ListPrice > Price and ListPrice > 0)
+                        query = query.Where(p => p.ListPrice > 0 && p.ListPrice > p.Price);
                         break;
                 }
             }

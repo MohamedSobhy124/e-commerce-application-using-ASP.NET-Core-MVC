@@ -3692,6 +3692,9 @@
   <data name="Delivery" xml:space="preserve">
     <value>التوصيل</value>
   </data>
+  <data name="Within48HoursWorkingDays" xml:space="preserve">
+    <value>خلال 48 ساعة (أيام العمل)</value>
+  </data>
   <data name="UseOrderIDAndEmailToTrackOrderStatus" xml:space="preserve">
     <value>استخدم رقم الطلب وعنوان بريدك الإلكتروني لتتبع حالة طلبك في أي وقت.</value>
   </data>
@@ -4628,4 +4631,115 @@
   <data name="ViewDetails" xml:space="preserve">
     <value>عرض التفاصيل</value>
   </data>
+  <data name="PremiumServices" xml:space="preserve">
+    <value>خدمات مميزة</value>
+  </data>
+  <data name="TransformYourHealth" xml:space="preserve">
+    <value>غيّر رحلتك الصحية</value>
+  </data>
+  <data name="HappyClients" xml:space="preserve">
+    <value>عميل سعيد</value>
+  </data>
+  <data name="YearsExperience" xml:space="preserve">
+    <value>سنوات خبرة</value>
+  </data>
+  <data name="Rating" xml:space="preserve">
+    <value>التقييم</value>
+  </data>
+  <data name="NoServicesYet" xml:space="preserve">
+    <value>لا توجد خدمات متاحة حالياً</value>
+  </data>
+  <data name="BackToHome" xml:space="preserve">
+    <value>العودة للرئيسية</value>
+  </data>
+  <data name="QuickView" xml:space="preserve">
+    <value>معاينة سريعة</value>
+  </data>
+  <data name="HealthService" xml:space="preserve">
+    <value>خدمة صحية</value>
+  </data>
+  <data name="PersonalizedPlan" xml:space="preserve">
+    <value>خطة مخصصة</value>
+  </data>
+  <data name="ExpertGuidance" xml:space="preserve">
+    <value>إرشاد متخصص</value>
+  </data>
+  <data name="StartingFrom" xml:space="preserve">
+    <value>يبدأ من</value>
+  </data>
+  <data name="SeeDetails" xml:space="preserve">
+    <value>عرض التفاصيل</value>
+  </data>
+  <data name="Services" xml:space="preserve">
+    <value>الخدمات</value>
+  </data>
+  <data name="CertifiedExperts" xml:space="preserve">
+    <value>خبراء معتمدون</value>
+  </data>
+  <data name="ProfessionalTeam" xml:space="preserve">
+    <value>فريق محترف</value>
+  </data>
+  <data name="FlexibleSchedule" xml:space="preserve">
+    <value>جدول مرن</value>
+  </data>
+  <data name="BookAnytime" xml:space="preserve">
+    <value>احجز في أي وقت</value>
+  </data>
+  <data name="Guaranteed" xml:space="preserve">
+    <value>مضمون</value>
+  </data>
+  <data name="QualityService" xml:space="preserve">
+    <value>خدمة عالية الجودة</value>
+  </data>
+  <data name="AlwaysAvailable" xml:space="preserve">
+    <value>متاح دائماً</value>
+  </data>
+  <data name="AboutThisService" xml:space="preserve">
+    <value>عن هذه الخدمة</value>
+  </data>
+  <data name="WhatsIncluded" xml:space="preserve">
+    <value>ما يتضمنه</value>
+  </data>
+  <data name="ProgressTracking" xml:space="preserve">
+    <value>تتبع التقدم</value>
+  </data>
+  <data name="OngoingSupport" xml:space="preserve">
+    <value>دعم مستمر</value>
+  </data>
+  <data name="SecureCheckout" xml:space="preserve">
+    <value>دفع آمن وسهل</value>
+  </data>
+  <data name="MinimumPaymentRequired" xml:space="preserve">
+    <value>الحد الأدنى للدفع المطلوب</value>
+  </data>
+  <data name="OfflinePaymentNote" xml:space="preserve">
+    <value>ادفع المبلغ المتبقي في موقع الخدمة</value>
+  </data>
+  <data name="SecurePayment" xml:space="preserve">
+    <value>دفع آمن</value>
+  </data>
+  <data name="EasyRefund" xml:space="preserve">
+    <value>استرداد سهل</value>
+  </data>
+  <data name="Thumbnail" xml:space="preserve">
+    <value>صورة مصغرة</value>
+  </data>
+  <data name="SecurePaymentMethods" xml:space="preserve">
+    <value>طرق دفع آمنة</value>
+  </data>
+  <data name="AcceptedPaymentMethods" xml:space="preserve">
+    <value>طرق الدفع المقبولة: فيزا، ماستركارد، أبل باي، أمريكان إكسبريس، مدى، كي نت</value>
+  </data>
+  <data name="Recommended" xml:space="preserve">
+    <value>موصى به</value>
+  </data>
+  <data name="OrPayWith" xml:space="preserve">
+    <value>أو ادفع عبر</value>
+  </data>
+  <data name="PayIn4Installments" xml:space="preserve">
+    <value>ادفع على 4 أقساط</value>
+  </data>
+	<data name="MinimumOrderForPayment" xml:space="preserve">
+  <value>تبقّى {0} درهم للحصول على {1} 🎉</value>
+</data>
 </root>

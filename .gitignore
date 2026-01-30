@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 # Data Protection Keys (contains encryption keys - do not commit)
 DataProtection-Keys/
+/PERFORMANCE_OPTIMIZATIONS.md

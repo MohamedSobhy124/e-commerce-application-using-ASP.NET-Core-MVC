@@ -107,33 +107,39 @@ namespace IdealWeightNutrition.Utility
         }
 
         /// <summary>
-        /// Gets estimated delivery date range (2 working days from now)
+        /// Gets estimated delivery message (within 48 hours in working days)
         /// </summary>
-        /// <returns>Formatted string with delivery date range</returns>
+        /// <returns>Formatted string with delivery timeframe</returns>
         public static string GetEstimatedDeliveryRange()
         {
-            var startDate = AddWorkingDays(Now, 2);
-            var endDate = AddWorkingDays(Now, 2);
-            return startDate.ToString("MMM dd, yyyy");
+            return "Within 48 hours (working days)";
         }
 
         /// <summary>
-        /// Gets estimated delivery date range with start and end dates
+        /// Gets estimated delivery message with language support
+        /// </summary>
+        /// <param name="cultureCode">Culture code (e.g., "ar" for Arabic, "en" for English)</param>
+        /// <returns>Localized delivery message</returns>
+        public static string GetEstimatedDeliveryRange(string cultureCode)
+        {
+            if (!string.IsNullOrEmpty(cultureCode) && cultureCode.StartsWith("ar", StringComparison.OrdinalIgnoreCase))
+            {
+                return "خلال 48 ساعة (أيام العمل)";
+            }
+            return "Within 48 hours (working days)";
+        }
+
+        /// <summary>
+        /// Gets estimated delivery date range with start and end dates (legacy support)
         /// </summary>
         /// <param name="startWorkingDays">Number of working days for start date (default: 2)</param>
         /// <param name="endWorkingDays">Number of working days for end date (default: 2)</param>
-        /// <returns>Formatted string with delivery date range</returns>
+        /// <returns>Formatted string with delivery timeframe</returns>
         public static string GetEstimatedDeliveryRange(int startWorkingDays = 2, int endWorkingDays = 2)
         {
-            var startDate = AddWorkingDays(Now, startWorkingDays);
-            var endDate = AddWorkingDays(Now, endWorkingDays);
-            
-            if (startDate.Date == endDate.Date)
-            {
-                return startDate.ToString("MMM dd, yyyy");
-            }
-            
-            return startDate.ToString("MMM dd, yyyy") + " - " + endDate.ToString("MMM dd, yyyy");
+            // Return the standard 48 hours message regardless of parameters
+            // to avoid showing specific dates
+            return "Within 48 hours (working days)";
         }
     }
 }

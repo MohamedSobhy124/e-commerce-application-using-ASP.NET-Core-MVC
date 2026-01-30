@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Localization
 @using IdealWeightNutrition.Utility
 @model ShoppingCartVM
 @{
@@ -426,50 +426,97 @@
 							</div>
 
 							<!-- Payment Method Selection -->
+							@{
+								bool tappyEnabled = ViewData["TappyEnabled"] != null && (bool)ViewData["TappyEnabled"];
+								bool tamaraEnabled = ViewData["TamaraEnabled"] != null && (bool)ViewData["TamaraEnabled"];
+								bool tappyAvailable = ViewData["TappyAvailable"] != null && (bool)ViewData["TappyAvailable"];
+								bool tamaraAvailable = ViewData["TamaraAvailable"] != null && (bool)ViewData["TamaraAvailable"];
+								string tamaraPublicKey = ViewData["TamaraPublicKey"]?.ToString() ?? "";
+								double tamaraOrderTotal = ViewData["TamaraOrderTotal"] != null ? (double)ViewData["TamaraOrderTotal"] : 0;
+								// Show alternative section if any payment method is enabled (might become available with delivery charges)
+								bool hasAlternativePayments = tappyEnabled || tamaraEnabled;
+							}
 							<div class="payment-method-section mt-4">
 								<h4>
 									<i class="bi bi-credit-card me-2"></i>
 									@Localizer["PaymentMethod"]
 								</h4>
-								<div class="payment-methods">
-									<div class="payment-method-option">
+								
+								<!-- Primary Payment Method - Geidea -->
+								<div class="payment-methods-primary">
+									<div class="payment-method-option payment-method-primary">
 										<input type="radio" id="paymentGeidea" name="OrderHeader.PaymentMethod" value="@IdealWeightNutrition.Utility.SD.PaymentMethodGeidea" checked />
-										<label for="paymentGeidea" class="payment-method-label">
-											<i class="bi bi-credit-card me-2"></i>
-											<span>Geidea</span>
-											<small>@Localizer["CreditDebitCard"]</small>
+										<label for="paymentGeidea" class="payment-method-label-primary">
+
+											<div class="payment-primary-icon">
+												<i class="bi bi-credit-card-fill"></i>
+											</div>
+											<div class="payment-primary-content">
+												<span class="payment-primary-title">@Localizer["CreditDebitCard"]</span>
+												<small class="payment-primary-desc">Visa, Mastercard, Apple Pay, Google Pay</small>
+											</div>
+											<div class="payment-primary-logos">
+												<img src="~/Images/payment-methods.png" alt="Payment Methods" class="payment-logos-img" />
+											</div>
+											<div class="payment-check-indicator">
+												<i class="bi bi-check-lg"></i>
+											</div>
 										</label>
 									</div>
-									<div class="payment-method-option">
-										<input type="radio" id="paymentTappy" name="OrderHeader.PaymentMethod" value="@IdealWeightNutrition.Utility.SD.PaymentMethodTappy" />
-										<label for="paymentTappy" class="payment-method-label">
-											<i class="bi bi-wallet2 me-2"></i>
-											<span>Tabby</span>
-											<small>@Localizer["DigitalWallet"]</small>
-										</label>
+								</div>
+								
+								<!-- Alternative Payment Methods - Tabby & Tamara -->
+								<div class="payment-methods-alternative" id="alternativePayments" style="@(hasAlternativePayments ? "" : "display: none;")">
+									<div class="alternative-payments-divider">
+										<span>@Localizer["OrPayWith"]</span>
 									</div>
-									@{
-										bool tamaraAvailable = ViewData["TamaraAvailable"] != null && (bool)ViewData["TamaraAvailable"];
-										string tamaraPublicKey = ViewData["TamaraPublicKey"]?.ToString() ?? "";
-										double tamaraOrderTotal = ViewData["TamaraOrderTotal"] != null ? (double)ViewData["TamaraOrderTotal"] : 0;
-									}
-									@if (tamaraAvailable)
-									{
-										<div class="payment-method-option">
-											<input type="radio" id="paymentTamara" name="OrderHeader.PaymentMethod" value="@IdealWeightNutrition.Utility.SD.PaymentMethodTamara" />
-											<label for="paymentTamara" class="payment-method-label">
-												<i class="bi bi-calendar-check me-2"></i>
-												<span>Tamara</span>
-												<small>@Localizer["BuyNowPayLater"]</small>
+									<div class="payment-alternatives-grid">
+										<!-- Tabby Payment -->
+										<div class="payment-method-option payment-method-alt" id="tabbyPaymentOption" data-initial-available="@tappyAvailable.ToString().ToLower()" style="@(tappyAvailable ? "" : "display: none;")">
+											<input type="radio" id="paymentTappy" name="OrderHeader.PaymentMethod" value="@IdealWeightNutrition.Utility.SD.PaymentMethodTappy" />
+											<label for="paymentTappy" class="payment-method-label-alt">
+												<div class="payment-alt-logo">
+													<img src="~/Images/tappy.png" alt="Tabby" class="payment-logo-img" />
+												</div>
+												<div class="payment-alt-content">
+													<span class="payment-alt-title">Tabby</span>
+													<small class="payment-alt-desc">@Localizer["PayIn4Installments"]</small>
+												</div>
+												<div class="payment-alt-check">
+													<i class="bi bi-check-lg"></i>
+												</div>
 											</label>
 										</div>
-										@if (!string.IsNullOrEmpty(tamaraPublicKey) && tamaraOrderTotal > 0)
-										{
-											<!-- Tamara Widget V2 - Checkout Page -->
-											<div id="tamara-widget-checkout-page" data-public-key="@tamaraPublicKey" data-amount="@tamaraOrderTotal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" data-currency="AED" data-country="AE" data-widget-type="checkout_page" style="margin-top: 15px;"></div>
-										}
+										
+										<!-- Tamara Payment -->
+										<div class="payment-method-option payment-method-alt" id="tamaraPaymentOption" data-initial-available="@tamaraAvailable.ToString().ToLower()" style="@(tamaraAvailable ? "" : "display: none;")">
+											<input type="radio" id="paymentTamara" name="OrderHeader.PaymentMethod" value="@IdealWeightNutrition.Utility.SD.PaymentMethodTamara" />
+											<label for="paymentTamara" class="payment-method-label-alt">
+												<div class="payment-alt-logo">
+													<img src="~/Images/tamara.png" alt="Tamara" class="payment-logo-img" />
+												</div>
+												<div class="payment-alt-content">
+													<span class="payment-alt-title">Tamara</span>
+													<small class="payment-alt-desc">@Localizer["BuyNowPayLater"]</small>
+												</div>
+												<div class="payment-alt-check">
+													<i class="bi bi-check-lg"></i>
+												</div>
+											</label>
+										</div>
+									</div>
+									@if (!string.IsNullOrEmpty(tamaraPublicKey) && tamaraOrderTotal > 0)
+									{
+										<!-- Tamara Widget V2 - Checkout Page -->
+										<div id="tamara-widget-checkout-page" data-public-key="@tamaraPublicKey" data-amount="@tamaraOrderTotal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" data-currency="AED" data-country="AE" data-widget-type="checkout_page" style="margin-top: 15px;"></div>
 									}
 								</div>
+
+								<div class="payment-minimum-notice" id="paymentMinimumNotice" style="display: none;">
+				<i class="bi bi-info-circle me-2"></i>
+				<span id="paymentMinimumNoticeText"></span>
+</div>
+							 
 							</div>
 						</div>
 					</div>
@@ -483,7 +530,7 @@
 							</div>
 							<div class="delivery-text">
 								<strong>@Localizer["EstimatedDelivery"]</strong>
-								<p class="mb-0">@IdealWeightNutrition.Utility.DateTimeHelper.GetEstimatedDeliveryRange()</p>
+								<p class="mb-0">@(Localizer["Within48HoursWorkingDays"]?.Value ?? "Within 48 hours (working days)")</p>
 							</div>
 						</div>
 						<button type="submit" class="place-order-btn-enhanced" id="placeOrderBtn">
@@ -505,27 +552,34 @@
 </form>
 
 <style>
+	/* ===== Payment Method Section - Modern Design ===== */
 	.payment-method-section {
 		margin-top: 2rem;
 		padding: 1.5rem;
-		background: #f8f9fa;
-		border-radius: 12px;
-		border: 2px solid #e0e0e0;
+		background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+		border-radius: 16px;
+		border: 1px solid #e2e8f0;
 	}
 
 	.payment-method-section h4 {
-		color: #1976D2;
+		color: #1e40af;
 		font-weight: 700;
-		margin-bottom: 1.5rem;
-		font-size: 1.25rem;
+		margin-bottom: 1.25rem;
+		font-size: 1.15rem;
+		display: flex;
+		align-items: center;
 	}
 
-	.payment-methods {
-		display: grid;
-		gap: 1rem;
+	.payment-method-section h4 i {
+		color: #3b82f6;
 	}
 
-	.payment-method-option {
+	/* Primary Payment Method - Geidea */
+	.payment-methods-primary {
+		margin-bottom: 0;
+	}
+
+	.payment-method-primary {
 		position: relative;
 	}
 
@@ -536,83 +590,345 @@
 		height: 0;
 	}
 
-	.payment-method-label {
+	.payment-method-label-primary {
 		display: flex;
 		align-items: center;
 		gap: 1rem;
 		padding: 1.25rem 1.5rem;
-		background: white;
-		border: 2px solid #e0e0e0;
-		border-radius: 10px;
+		background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+		border: 2px solid #e2e8f0;
+		border-radius: 14px;
 		cursor: pointer;
-		transition: all 0.3s ease;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		position: relative;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 	}
 
-	.payment-method-label i {
-		font-size: 2rem;
-		color: #7BC043;
-	}
-
-	.payment-method-label span {
-		font-weight: 700;
-		color: #333;
-		font-size: 1.1rem;
-	}
-
-	.payment-method-label small {
-		display: block;
-		color: #666;
-		font-size: 0.875rem;
-		margin-top: 0.25rem;
-	}
-
-	.payment-method-option input[type="radio"]:checked + .payment-method-label {
-		border-color: #3B9DD5;
-		background: linear-gradient(135deg, #E3F2FD 0%, #F1F8E9 100%);
-		box-shadow: 0 4px 12px rgba(59, 157, 213, 0.2);
-	}
-
-	.payment-method-option input[type="radio"]:checked + .payment-method-label::after {
-		content: '✓';
+	.payment-primary-badge {
 		position: absolute;
-		right: 1.5rem;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 30px;
-		height: 30px;
-		background: #3B9DD5;
+		top: -10px;
+		left: 20px;
+		background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 		color: white;
-		border-radius: 50%;
+		font-size: 0.7rem;
+		font-weight: 700;
+		padding: 4px 12px;
+		border-radius: 20px;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+	}
+
+	.payment-primary-icon {
+		width: 50px;
+		height: 50px;
+		background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+		border-radius: 12px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.payment-primary-icon i {
+		font-size: 1.5rem;
+		color: white;
+	}
+
+	.payment-primary-content {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.payment-primary-title {
 		font-weight: 700;
-		font-size: 1.2rem;
+		color: #1e293b;
+		font-size: 1.1rem;
+		display: block;
 	}
 
-	.payment-method-label:hover {
-		border-color: #3B9DD5;
+	.payment-primary-desc {
+		color: #64748b;
+		font-size: 0.8rem;
+		display: block;
+		margin-top: 2px;
+	}
+
+	.payment-primary-logos {
+		flex-shrink: 0;
+	}
+
+	.payment-logos-img {
+		height: 28px;
+		width: auto;
+		opacity: 0.85;
+	}
+
+	.payment-check-indicator {
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		border: 2px solid #cbd5e1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.3s ease;
+		flex-shrink: 0;
+	}
+
+	.payment-check-indicator i {
+		font-size: 0.9rem;
+		color: transparent;
+		font-weight: 700;
+	}
+
+	.payment-method-option input[type="radio"]:checked + .payment-method-label-primary {
+		border-color: #3b82f6;
+		background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+		box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+	}
+
+	.payment-method-option input[type="radio"]:checked + .payment-method-label-primary .payment-check-indicator {
+		background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+		border-color: #3b82f6;
+	}
+
+	.payment-method-option input[type="radio"]:checked + .payment-method-label-primary .payment-check-indicator i {
+		color: white;
+	}
+
+	.payment-method-label-primary:hover {
+		border-color: #93c5fd;
+		box-shadow: 0 4px 16px rgba(59, 130, 246, 0.12);
+		transform: translateY(-1px);
+	}
+
+	/* Alternative Payments Divider */
+	.alternative-payments-divider {
+		display: flex;
+		align-items: center;
+		margin: 1.25rem 0;
+		gap: 1rem;
+	}
+
+	.alternative-payments-divider::before,
+	.alternative-payments-divider::after {
+		content: '';
+		flex: 1;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, #cbd5e1, transparent);
+	}
+
+	.alternative-payments-divider span {
+		color: #64748b;
+		font-size: 0.8rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		white-space: nowrap;
+	}
+
+	/* Alternative Payment Methods Grid */
+	.payment-alternatives-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 0.75rem;
+	}
+
+	.payment-method-alt {
+		position: relative;
+	}
+
+	.payment-method-label-alt {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		padding: 1rem 1.25rem;
+		background: white;
+		border: 2px solid #e2e8f0;
+		border-radius: 12px;
+		cursor: pointer;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		position: relative;
+		gap: 0.75rem;
+		min-height: 70px;
+	}
+
+	.payment-alt-logo {
+		width: 70px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.payment-logo-img {
+		max-width: 100%;
+		max-height: 100%;
+		object-fit: contain;
+	}
+
+	.payment-alt-content {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.payment-alt-title {
+		font-weight: 700;
+		color: #1e293b;
+		font-size: 0.95rem;
+		display: block;
+	}
+
+	.payment-alt-desc {
+		color: #64748b;
+		font-size: 0.75rem;
+		display: block;
+		margin-top: 2px;
+		line-height: 1.3;
+	}
+
+	.payment-alt-check {
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		border: 2px solid #cbd5e1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.3s ease;
+		flex-shrink: 0;
+	}
+
+	.payment-alt-check i {
+		font-size: 0.8rem;
+		color: transparent;
+		font-weight: 700;
+	}
+
+	/* Consistent Hover Effect for Alternative Payment Options */
+	.payment-method-label-alt:hover {
+		border-color: #3b82f6;
+		box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
 		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 	}
 
+	.payment-method-label-alt:hover .payment-alt-logo img {
+		transform: scale(1.05);
+		transition: transform 0.3s ease;
+	}
+
+	/* Consistent Selected State for Alternative Payment Options */
+	.payment-method-option input[type="radio"]:checked + .payment-method-label-alt {
+		border-color: #3b82f6;
+		background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+		box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+	}
+
+	.payment-method-option input[type="radio"]:checked + .payment-method-label-alt .payment-alt-check {
+		background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+		border-color: #3b82f6;
+	}
+
+	.payment-method-option input[type="radio"]:checked + .payment-method-label-alt .payment-alt-check i {
+		color: white;
+	}
+
+	/* Minimum Amount Notice */
+	.payment-minimum-notice {
+		margin-top: 1rem;
+		padding: 0.75rem 1rem;
+		background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+		border: 1px solid #f59e0b;
+		border-radius: 10px;
+		color: #92400e;
+		font-size: 0.85rem;
+		display: flex;
+		align-items: center;
+	}
+
+	.payment-minimum-notice i {
+		color: #f59e0b;
+		font-size: 1rem;
+	}
+
+	/* Responsive Design */
 	@@media (max-width: 768px) {
 		.payment-method-section {
 			padding: 1rem;
 		}
 
-		.payment-method-label {
+		.payment-method-label-primary {
+			flex-wrap: wrap;
+			gap: 0.75rem;
 			padding: 1rem;
 		}
 
-		.payment-method-label i {
-			font-size: 1.5rem;
+		.payment-primary-badge {
+			font-size: 0.65rem;
+			padding: 3px 10px;
+			top: -8px;
+			left: 12px;
 		}
 
-		.payment-method-label span {
+		.payment-primary-icon {
+			width: 42px;
+			height: 42px;
+		}
+
+		.payment-primary-icon i {
+			font-size: 1.25rem;
+		}
+
+		.payment-primary-title {
 			font-size: 1rem;
 		}
+
+		.payment-primary-desc {
+			font-size: 0.75rem;
+		}
+
+		.payment-primary-logos {
+			display: none;
+		}
+
+		.payment-alternatives-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.payment-method-label-alt {
+			padding: 0.75rem 1rem;
+			min-height: auto;
+		}
+
+		.payment-alt-logo {
+			width: 55px;
+			height: 32px;
+		}
+
+		.payment-alt-title {
+			font-size: 0.9rem;
+		}
+
+		.payment-alt-desc {
+			font-size: 0.7rem;
+		}
+
+		.payment-alt-check {
+			width: 22px;
+			height: 22px;
+		}
+	}
+
+	/* Animation for showing/hiding */
+	.payment-method-alt {
+		transition: opacity 0.3s ease, transform 0.3s ease;
+	}
+
+	.payment-method-alt.hiding {
+		opacity: 0;
+		transform: scale(0.95);
 	}
 
 	/* Promo Code Section Styles */
@@ -795,9 +1111,17 @@
 		var currentPromoCodeId = null;
 		var deliveryCharge = 0;
 		
+		// Payment method minimum order amounts from configuration
+		var tappyMinimumOrderAmount = @(((decimal)(ViewData["TappyMinimumAmount"] ?? 400m)).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+		var tamaraMinimumOrderAmount = @(((decimal)(ViewData["TamaraMinimumAmount"] ?? 400m)).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+		// Use "Enabled" flag - indicates if payment method is enabled in settings (regardless of amount)
+		var tappyEnabled = @((ViewData["TappyEnabled"] != null && (bool)ViewData["TappyEnabled"]).ToString().ToLower());
+		var tamaraEnabled = @((ViewData["TamaraEnabled"] != null && (bool)ViewData["TamaraEnabled"]).ToString().ToLower());
+		
 		// Store localized strings for JavaScript
 		var localizedOther = '@Html.Raw(Localizer["Other"].Value)';
 		var localizedSelectArea = '@Html.Raw(Localizer["SelectArea"].Value)';
+		var localizedMinimumOrderMessage = '@Html.Raw(Localizer["MinimumOrderForPayment"]?.Value ?? "Minimum order of {0} AED required for {1}")';
 
 		// Localized messages for validation
 		var localizedMessages = {
@@ -831,6 +1155,10 @@
 		};
 
 		$(document).ready(function() {
+			// Initialize payment methods visibility on page load
+			var initialTotal = subtotal - currentDiscount + deliveryCharge;
+			updatePaymentMethodsVisibility(initialTotal);
+			
 			// Apply promo code
 			$('#applyPromoBtn').click(function() {
 				var promoCode = $('#promoCodeInput').val().trim().toUpperCase();
@@ -2098,6 +2426,77 @@
 		function updateTotals() {
 			var finalTotal = subtotal - currentDiscount + deliveryCharge;
 			$('#finalTotal').text(formatCurrency(finalTotal));
+			
+			// Update payment method visibility based on final total
+			updatePaymentMethodsVisibility(finalTotal);
+		}
+		
+		// Function to update payment methods visibility based on order total
+		function updatePaymentMethodsVisibility(finalTotal) {
+			var $tabbyOption = $('#tabbyPaymentOption');
+			var $tamaraOption = $('#tamaraPaymentOption');
+			var $alternativePayments = $('#alternativePayments');
+			var $minimumNotice = $('#paymentMinimumNotice');
+			
+			// Check Tabby availability - use "enabled" flag (from settings) and check against minimum amount
+			var tabbyVisible = tappyEnabled && finalTotal >= tappyMinimumOrderAmount;
+			// Check Tamara availability  
+			var tamaraVisible = tamaraEnabled && finalTotal >= tamaraMinimumOrderAmount;
+			
+			// Update Tabby visibility with animation
+			if (tabbyVisible) {
+				$tabbyOption.removeClass('hiding').css('display', '').fadeIn(300);
+			} else {
+				$tabbyOption.addClass('hiding').fadeOut(300, function() {
+					$(this).css('display', 'none');
+				});
+				// If Tabby was selected and is now hidden, switch to Geidea
+				if ($('#paymentTappy').is(':checked')) {
+					$('#paymentGeidea').prop('checked', true);
+				}
+			}
+			
+			// Update Tamara visibility with animation
+			if (tamaraVisible) {
+				$tamaraOption.removeClass('hiding').css('display', '').fadeIn(300);
+			} else {
+				$tamaraOption.addClass('hiding').fadeOut(300, function() {
+					$(this).css('display', 'none');
+				});
+				// If Tamara was selected and is now hidden, switch to Geidea
+				if ($('#paymentTamara').is(':checked')) {
+					$('#paymentGeidea').prop('checked', true);
+				}
+			}
+			
+			// Show/hide alternative payments section
+			if (tabbyVisible || tamaraVisible) {
+				$alternativePayments.css('display', '').slideDown(300);
+			} else {
+				$alternativePayments.slideUp(300);
+			}
+			
+			// Show minimum amount notice if neither alternative is available but they could be
+			var showNotice = false;
+			var noticePayments = [];
+			
+			if (tappyEnabled && !tabbyVisible && finalTotal < tappyMinimumOrderAmount) {
+				noticePayments.push('Tabby');
+			}
+			if (tamaraEnabled && !tamaraVisible && finalTotal < tamaraMinimumOrderAmount) {
+				noticePayments.push('Tamara');
+			}
+			
+			if (noticePayments.length > 0) {
+				var minAmount = Math.max(tappyMinimumOrderAmount, tamaraMinimumOrderAmount);
+				var amountNeeded = (minAmount - finalTotal).toFixed(0);
+				var paymentNames = noticePayments.join(' & ');
+				var noticeText = localizedMinimumOrderMessage.replace('{0}', amountNeeded).replace('{1}', paymentNames);
+				$('#paymentMinimumNoticeText').text(noticeText);
+				$minimumNotice.slideDown(300);
+			} else {
+				$minimumNotice.slideUp(300);
+			}
 		}
 
 		function showPromoMessage(message, type) {

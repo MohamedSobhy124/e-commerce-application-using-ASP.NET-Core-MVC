@@ -41,18 +41,34 @@
         <div class="container">
             <div class="shop-header-content">
                 <div class="shop-title-section">
-                    <h1 class="shop-title text-white">
+                    <h1 class="shop-title">
                         <i class="bi bi-shop "></i>
                         @if (selectedCategory != null)
                         {
                             var catName = currentCulture == "ar" && !string.IsNullOrEmpty(selectedCategory.NameAr) 
                                 ? selectedCategory.NameAr 
                                 : selectedCategory.Name;
-                            @catName
+                            
+                            // SEO-enhanced category title
+                            if (currentCulture == "ar")
+                            {
+                                @($"{catName} - شراء أونلاين الإمارات")
+                            }
+                            else
+                            {
+                                @($"Buy {catName} Online UAE | Authentic & Original")
+                            }
                         }
                         else
                         {
-                            @Localizer["ShopAllProducts"]
+                            if (currentCulture == "ar")
+                            {
+                                <text>تسوق مكملات غذائية أصلية </text>
+                            }
+                            else
+                            {
+                                <text>Shop Authentic Supplements UAE </text>
+                            }
                         }
                     </h1>
                     <p class="shop-subtitle">
@@ -87,16 +103,34 @@
         </div>
     </div>
     
-    <!-- Category Tabs -->
-    <div class="category-tabs-container">
+    <!-- Category Section - Modern Horizontal Scroll -->
+    <section class="shop-category-section">
         <div class="container">
-            <div class="category-tabs-wrapper">
-                <div class="category-tabs" id="categoryTabs">
-                    <!-- All Categories Tab -->
+            <div class="shop-category-header">
+                <h2 class="shop-category-title">
+                    <span class="title-accent"></span>
+                    @Localizer["ShopByCategory"]
+                </h2>
+                <div class="shop-category-nav">
+                    <button class="shop-cat-scroll-btn prev" id="shopCatScrollPrev" aria-label="@Localizer["Previous"]">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="shop-cat-scroll-btn next" id="shopCatScrollNext" aria-label="@Localizer["Next"]">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="shop-category-scroll-wrapper">
+                <div class="shop-category-scroll" id="shopCategoryScroll">
+                    <!-- All Categories Card -->
                     <a href="@Url.Action("Index", "Shop", new { area = "Customer" })" 
-                       class="category-tab @(!selectedCategoryId.HasValue ? "active" : "")">
-                        <i class="bi bi-grid-3x3-gap-fill"></i>
-                        <span>@Localizer["AllCategories"]</span>
+                       class="shop-category-card @(!selectedCategoryId.HasValue ? "active" : "")">
+                        <div class="shop-cat-icon all-categories">
+                            <i class="bi bi-grid-3x3-gap-fill"></i>
+                        </div>
+                        <span class="shop-cat-label">@Localizer["AllCategories"]</span>
+                        <div class="shop-cat-glow"></div>
                     </a>
                     
                     @foreach (var category in categories)
@@ -107,22 +141,34 @@
                         var isActive = selectedCategoryId.HasValue && selectedCategoryId.Value == category.Id;
                         
                         <a href="@Url.Action("Index", "Shop", new { area = "Customer", categoryId = category.Id })" 
-                           class="category-tab @(isActive ? "active" : "")">
+                           class="shop-category-card @(isActive ? "active" : "")">
                             @if (!string.IsNullOrEmpty(category.ImageUrl))
                             {
-                                <img src="@category.ImageUrl" alt="@catName" class="category-tab-img" loading="lazy" />
+                                <div class="shop-cat-icon has-image">
+                                    <img src="@category.ImageUrl" alt="@catName" loading="lazy" />
+                                </div>
                             }
                             else
                             {
-                                <i class="bi bi-box-seam"></i>
+                                <div class="shop-cat-icon">
+                                    <i class="bi bi-box-seam"></i>
+                                </div>
                             }
-                            <span>@catName</span>
+                            <span class="shop-cat-label">@catName</span>
+                            <div class="shop-cat-glow"></div>
                         </a>
                     }
                 </div>
             </div>
+            
+            <!-- Progress Bar -->
+            <div class="shop-category-progress">
+                <div class="shop-cat-progress-track">
+                    <div class="shop-cat-progress-thumb" id="shopCatProgressThumb"></div>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
     
     <!-- Products Grid -->
     <div class="shop-products-section">
@@ -268,7 +314,7 @@
                                     {
                                         <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" 
                                            class="btn-shop-action btn-view-options">
-                                            <i class="bi bi-eye"></i>
+                                            <i class="bi bi-list-check"></i>
                                             <span>@Localizer["ViewOptions"]</span>
                                         </a>
                                     }
@@ -435,7 +481,7 @@
         
         let actionBtn = '';
         if (product.hasVariants) {
-            actionBtn = `<a href="/Customer/Home/Details/${product.slug}" class="btn-shop-action btn-view-options" onclick="event.stopPropagation();"><i class="bi bi-eye"></i><span>@Localizer["ViewOptions"]</span></a>`;
+                actionBtn = `<a href="/Customer/Home/Details/${product.slug}" class="btn-shop-action btn-view-options" onclick="event.stopPropagation();"><i class="bi bi-list-check"></i><span>@Localizer["ViewOptions"]</span></a>`;
         } else if (!isOutOfStock) {
             actionBtn = `<button class="btn-shop-action btn-add-cart ${product.isInCart ? 'in-cart' : ''}" data-product-id="${product.id}" onclick="toggleCart(${product.id}, this); event.stopPropagation();"><i class="bi ${product.isInCart ? 'bi-check-lg' : 'bi-cart-plus'}"></i><span>${product.isInCart ? '@Localizer["InCart"]' : '@Localizer["AddToCart"]'}</span></button>`;
         } else {
@@ -463,12 +509,111 @@
         `;
     }
     
-    // Scroll category tabs to active item
-    document.addEventListener('DOMContentLoaded', function() {
-        const activeTab = document.querySelector('.category-tab.active');
-        if (activeTab) {
-            activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    // Category scroll functionality
+    (function() {
+        const container = document.getElementById('shopCategoryScroll');
+        const prevBtn = document.getElementById('shopCatScrollPrev');
+        const nextBtn = document.getElementById('shopCatScrollNext');
+        const progressThumb = document.getElementById('shopCatProgressThumb');
+        
+        if (!container) return;
+        
+        const isRtl = document.documentElement.dir === 'rtl';
+        
+        function getScrollAmount() {
+            const card = container.querySelector('.shop-category-card');
+            if (!card) return 150;
+            return card.offsetWidth + 12;
         }
-    });
+        
+        function updateProgress() {
+            if (!progressThumb) return;
+            const scrollWidth = container.scrollWidth - container.clientWidth;
+            if (scrollWidth <= 0) {
+                progressThumb.style.width = '100%';
+                return;
+            }
+            const scrollPos = isRtl ? Math.abs(container.scrollLeft) : container.scrollLeft;
+            const progress = (scrollPos / scrollWidth) * 100;
+            const thumbWidth = Math.max(20, (container.clientWidth / container.scrollWidth) * 100);
+            progressThumb.style.width = thumbWidth + '%';
+            progressThumb.style.left = (progress * (100 - thumbWidth) / 100) + '%';
+        }
+        
+        function updateButtons() {
+            if (!prevBtn || !nextBtn) return;
+            const scrollPos = isRtl ? Math.abs(container.scrollLeft) : container.scrollLeft;
+            const maxScroll = container.scrollWidth - container.clientWidth;
+            
+            if (isRtl) {
+                prevBtn.disabled = scrollPos >= maxScroll - 5;
+                nextBtn.disabled = scrollPos <= 5;
+            } else {
+                prevBtn.disabled = scrollPos <= 5;
+                nextBtn.disabled = scrollPos >= maxScroll - 5;
+            }
+        }
+        
+        function scroll(direction) {
+            const amount = getScrollAmount() * 2;
+            const scrollValue = direction * amount * (isRtl ? -1 : 1);
+            container.scrollBy({ left: scrollValue, behavior: 'smooth' });
+        }
+        
+        if (prevBtn) prevBtn.addEventListener('click', () => scroll(-1));
+        if (nextBtn) nextBtn.addEventListener('click', () => scroll(1));
+        
+        container.addEventListener('scroll', () => {
+            updateProgress();
+            updateButtons();
+        }, { passive: true });
+        
+        // Mouse drag support
+        let isMouseDown = false;
+        let startX = 0;
+        let scrollLeft = 0;
+        
+        container.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            container.classList.add('grabbing');
+            startX = e.pageX - container.offsetLeft;
+            scrollLeft = container.scrollLeft;
+        });
+        
+        container.addEventListener('mouseleave', () => {
+            isMouseDown = false;
+            container.classList.remove('grabbing');
+        });
+        
+        container.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            container.classList.remove('grabbing');
+        });
+        
+        container.addEventListener('mousemove', (e) => {
+            if (!isMouseDown) return;
+            e.preventDefault();
+            const x = e.pageX - container.offsetLeft;
+            const walk = (x - startX) * 1.5;
+            container.scrollLeft = scrollLeft - walk;
+        });
+        
+        // Initial state
+        updateProgress();
+        updateButtons();
+        
+        // Scroll to active category
+        const activeCard = container.querySelector('.shop-category-card.active');
+        if (activeCard) {
+            setTimeout(() => {
+                activeCard.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }, 100);
+        }
+        
+        window.addEventListener('resize', () => {
+            updateProgress();
+            updateButtons();
+        }, { passive: true });
+    })();
 </script>
 }

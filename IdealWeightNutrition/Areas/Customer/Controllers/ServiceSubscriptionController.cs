@@ -264,10 +264,32 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
                 }
             }
 
+            // Check if Tabby (Tappy) payment is available for this order amount
+            bool tabbyEnabled = _tappySettings.Enabled;
+            bool tabbyAvailable = false;
+            if (tabbyEnabled && totalAmount > 0)
+            {
+                // Check if order total meets the minimum order amount requirement
+                if (totalAmount >= _tappySettings.MinimumOrderAmount)
+                {
+                    tabbyAvailable = true;
+                }
+            }
+            
+            // Check minimum order amount for Tamara as well
+            if (tamaraAvailable && totalAmount < _tamaraSettings.MinimumOrderAmount)
+            {
+                tamaraAvailable = false;
+            }
+            
+            ViewBag.TamaraEnabled = _tamaraSettings.Enabled;
             ViewBag.TamaraAvailable = tamaraAvailable;
             ViewBag.TamaraPublicKey = _tamaraSettings.PublicKey;
             ViewBag.TamaraOrderTotal = totalAmount;
-            ViewBag.TabbyAvailable = _tappySettings.Enabled && totalAmount > 0;
+            ViewBag.TamaraMinimumAmount = _tamaraSettings.MinimumOrderAmount;
+            ViewBag.TabbyEnabled = tabbyEnabled;
+            ViewBag.TabbyAvailable = tabbyAvailable;
+            ViewBag.TabbyMinimumAmount = _tappySettings.MinimumOrderAmount;
             ViewBag.OfferId = offerId;
             ViewBag.PromoCode = promoCode;
 

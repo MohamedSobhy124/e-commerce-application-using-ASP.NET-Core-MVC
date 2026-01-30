@@ -413,7 +413,7 @@
 }
 
 .btn-add-cart-quick {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
     color: white;
     border: none;
     width: 38px;
@@ -430,13 +430,13 @@
 }
 
 .btn-add-cart-quick:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    background: linear-gradient(135deg, #6ba836 0%, #5a9030 100%);
     transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 2px 6px rgba(123, 192, 67, 0.3);
 }
 
 .btn-add-cart-quick.in-cart {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
 }
 
 .btn-add-cart-quick.in-cart i {

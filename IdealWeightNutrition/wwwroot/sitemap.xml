@@ -8,7 +8,7 @@
     <!-- Home Page -->
     <url>
         <loc>https://idealweightnutrition.ae/Customer/Home</loc>
-        <lastmod>2024-12-19</lastmod>
+        <lastmod>2026-01-28</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
         <xhtml:link rel="alternate" hreflang="ar" href="https://idealweightnutrition.ae/Customer/Home?culture=ar" />
@@ -18,11 +18,21 @@
     <!-- Static Pages -->
     <url>
         <loc>https://idealweightnutrition.ae/Customer/Home/AboutUs</loc>
-        <lastmod>2024-12-19</lastmod>
+        <lastmod>2026-01-28</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
         <xhtml:link rel="alternate" hreflang="ar" href="https://idealweightnutrition.ae/Customer/Home/AboutUs?culture=ar" />
         <xhtml:link rel="alternate" hreflang="en" href="https://idealweightnutrition.ae/Customer/Home/AboutUs?culture=en" />
+    </url>
+    
+    <!-- Shop/Products Page - Important for SEO -->
+    <url>
+        <loc>https://idealweightnutrition.ae/Customer/Shop</loc>
+        <lastmod>2026-01-28</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+        <xhtml:link rel="alternate" hreflang="ar" href="https://idealweightnutrition.ae/Customer/Shop?culture=ar" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://idealweightnutrition.ae/Customer/Shop?culture=en" />
     </url>
     
     <url>

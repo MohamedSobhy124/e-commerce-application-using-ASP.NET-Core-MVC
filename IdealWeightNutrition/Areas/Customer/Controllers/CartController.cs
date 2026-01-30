@@ -1479,16 +1479,37 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 				.ToList();
 			ViewData["Cities"] = cities;
 			
+			// Check if Tabby (Tappy) payment is available for this order amount
+			bool tappyEnabled = _tappySettings.Enabled;
+			bool tappyAvailable = false;
+			if (tappyEnabled && ShoppingCartVM.OrderHeader.OrderTotal > 0)
+			{
+				// Check if order total meets the minimum order amount requirement
+				decimal orderAmount = (decimal)ShoppingCartVM.OrderHeader.OrderTotal;
+				if (orderAmount >= _tappySettings.MinimumOrderAmount)
+				{
+					tappyAvailable = true;
+				}
+			}
+			ViewData["TappyEnabled"] = tappyEnabled; // Whether Tabby is enabled in settings (for dynamic JS checks)
+			ViewData["TappyAvailable"] = tappyAvailable; // Whether it's available for initial amount
+			ViewData["TappyMinimumAmount"] = _tappySettings.MinimumOrderAmount;
+			
 			// Check if Tamara payment is available for this order amount
+			bool tamaraEnabled = _tamaraSettings.Enabled;
 			bool tamaraAvailable = false;
-			if (_tamaraSettings.Enabled && ShoppingCartVM.OrderHeader.OrderTotal > 0)
+			if (tamaraEnabled && ShoppingCartVM.OrderHeader.OrderTotal > 0)
 			{
 				try
 				{
-					var tamaraHelper = new TamaraHelper(_tamaraSettings);
-					// For AED, the range is typically similar (100-2500 AED)
 					decimal orderAmount = (decimal)ShoppingCartVM.OrderHeader.OrderTotal;
-					tamaraAvailable = await tamaraHelper.IsPaymentAvailableAsync(orderAmount, _tamaraSettings.CountryCode ?? "AE");
+					// Check minimum order amount requirement first
+					if (orderAmount >= _tamaraSettings.MinimumOrderAmount)
+					{
+						var tamaraHelper = new TamaraHelper(_tamaraSettings);
+						// For AED, the range is typically similar (100-2500 AED)
+						tamaraAvailable = await tamaraHelper.IsPaymentAvailableAsync(orderAmount, _tamaraSettings.CountryCode ?? "AE");
+					}
 				}
 				catch (Exception ex)
 				{
@@ -1497,9 +1518,11 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 				}
 			}
 			
+			ViewData["TamaraEnabled"] = tamaraEnabled; // Whether Tamara is enabled in settings (for dynamic JS checks)
 			ViewData["TamaraAvailable"] = tamaraAvailable;
 			ViewData["TamaraPublicKey"] = _tamaraSettings.PublicKey;
 			ViewData["TamaraOrderTotal"] = ShoppingCartVM.OrderHeader.OrderTotal;
+			ViewData["TamaraMinimumAmount"] = _tamaraSettings.MinimumOrderAmount;
 			
 			return View(ShoppingCartVM);
 		}

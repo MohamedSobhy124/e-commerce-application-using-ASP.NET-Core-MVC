@@ -264,12 +264,31 @@ a:hover {
 }
 
 /* Forms */
+/* Prevent iOS zoom on input focus - Minimum 16px font-size */
+@supports (-webkit-touch-callout: none) {
+    /* iOS Safari specific */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="password"],
+    input[type="search"],
+    input[type="url"],
+    textarea,
+    select,
+    .form-control,
+    .form-select,
+    .form-control-enhanced {
+        font-size: 16px !important;
+    }
+}
+
 .form-control,
 .form-select {
     display: block;
     width: 100%;
     padding: 0.625rem 1rem;
-    font-size: 1rem;
+    font-size: 16px; /* Minimum 16px to prevent iOS zoom */
     line-height: 1.5;
     color: var(--gray-900);
     background-color: var(--white);
@@ -404,4 +423,128 @@ label {
 /* Print Styles */
 @media print {
     .no-print { display: none; }
+}
+
+/* ==========================================
+   TOUCH DEVICE OPTIMIZATIONS
+   Fix double-tap issue on iOS/mobile devices
+   ========================================== */
+
+/* Remove hover transform effects on touch devices to prevent double-tap issue */
+@media (hover: none) and (pointer: coarse) {
+    /* Disable tap highlight color */
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Add to Cart Buttons - Remove transform on hover */
+    .btn-add-cart:hover,
+    .btn-add-cart.in-cart:hover,
+    .btn-add-cart-quick:hover,
+    .btn-add-cart-mini:hover,
+    .add-to-cart-button:hover,
+    .add-to-cart-btn:hover,
+    .flash-sale-add-to-cart-btn:hover,
+    .btn-add-cart-from-wishlist:hover,
+    .discounted-cart-btn:hover,
+    .best-seller-cart-btn:hover,
+    .new-arrival-cart-btn:hover,
+    .bestseller-cart-btn:hover,
+    .newarrival-cart-btn:hover,
+    .offer-btn-add:hover {
+        transform: none !important;
+    }
+
+    /* General button hover fixes */
+    .btn:hover,
+    .btn-primary:hover,
+    .btn-secondary:hover,
+    .btn-select-options:hover,
+    .btn-view-options:hover,
+    .btn-show-details:hover,
+    .btn-view-details:hover,
+    .btn-view-details-mini:hover,
+    .wishlist-btn:hover,
+    .quick-action-btn:hover {
+        transform: none !important;
+    }
+
+    /* Product card hover fixes */
+    .product-card:hover,
+    .shop-product-card:hover,
+    .product-card-simple:hover,
+    .offer-card:hover,
+    .service-card-home:hover {
+        transform: none !important;
+    }
+
+    /* Ensure active state provides visual feedback instead */
+    .btn-add-cart:active,
+    .btn-add-cart-quick:active,
+    .btn-add-cart-mini:active,
+    .add-to-cart-button:active,
+    .add-to-cart-btn:active,
+    .flash-sale-add-to-cart-btn:active {
+        transform: scale(0.95) !important;
+        opacity: 0.9;
+    }
+
+    /* Remove ::before hover effects that can cause issues */
+    .btn-primary:hover::before,
+    .add-to-cart-button:hover::before {
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+ 
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+    /* Prevent text selection on buttons during tap */
+    button,
+    .btn,
+    .btn-add-cart,
+    .btn-add-cart-quick,
+    .add-to-cart-button {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    /* Ensure buttons respond immediately to touch */
+    button,
+    a,
+    .btn {
+        touch-action: manipulation;
+    }
+}
+
+/* Additional touch-device class targeting (set by JavaScript) */
+body.touch-device .btn-add-cart:hover,
+body.touch-device .btn-add-cart-quick:hover,
+body.touch-device .btn-add-cart-mini:hover,
+body.touch-device .add-to-cart-button:hover,
+body.touch-device .add-to-cart-btn:hover,
+body.touch-device .flash-sale-add-to-cart-btn:hover,
+body.touch-device .offer-btn-add:hover,
+body.touch-device .wishlist-btn:hover,
+body.touch-device .quick-action-btn:hover,
+body.touch-device .btn-primary:hover,
+body.touch-device .btn-select-options:hover,
+body.touch-device .btn-view-options:hover {
+    transform: none !important;
+}
+
+body.touch-device .btn-primary:hover::before,
+body.touch-device .add-to-cart-button:hover::before {
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* Ensure buttons have proper touch-action */
+body.touch-device button,
+body.touch-device .btn,
+body.touch-device [onclick] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }

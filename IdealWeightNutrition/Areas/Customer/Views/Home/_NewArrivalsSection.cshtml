@@ -146,58 +146,55 @@
                                         var productImage = productImages.FirstOrDefault() ?? "/images/no-image.png";
                                         
                                         <div class="col-12 col-sm-6 col-lg-3">
-                                            <div class="product-card-simple h-100">
-                                                <!-- Product Status Badges (NEW/TRENDING) based on database flags -->
-                                                @if (product.IsTrending)
-                                                {
-                                                    <div class="badge-trending">
-                                                        <i class="bi bi-graph-up-arrow me-1"></i>
-                                                        @Localizer["TrendingProducts"]
-                                                    </div>
-                                                }
-                                                else if (product.IsNew)
-                                                {
-                                                    <div class="badge-new">
-                                                        <i class="bi bi-sparkles me-1"></i>
-                                                        @Localizer["NewProducts"]
-                                                    </div>
-                                                }
-                                                
-                                                @if (discount > 0)
-                                                {
-                                                    <div class="product-badge-discount">-@discount%</div>
-                                                }
-                                                <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="product-card-link">
-                                                    <div class="product-card-image">
-                                                        <img src="@productImage" alt="@productName" class="img-fluid" loading="lazy" />
-                                                    </div>
-                                                    <div class="product-card-content">
-                                                        <h3 class="product-card-title">@productName</h3>
-                                                        <div class="product-card-price">
-                                                            @if (discount > 0 && displayListPrice > 0)
-                                                            {
-                                                                <span class="product-price-old">@Html.Raw(currencySymbol)@displayListPrice.ToString("N2")</span>
-                                                            }
-                                                            <span class="product-price-current">@Html.Raw(currencySymbol)@displayPrice.ToString("N2")</span>
+                                            <div class="offer-card-simple h-100">
+                                                <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="offer-card-link-simple">
+                                                    @if (discount > 0)
+                                                    {
+                                                        <div class="offer-discount-badge">@discount%<br/><small>@Localizer["Discount"]</small></div>
+                                                    }
+                                                    @if (product.IsNew)
+                                                    {
+                                                        <div class="offer-badge-new">
+                                                            <i class="bi bi-sparkles"></i>
                                                         </div>
+                                                    }
+                                                    
+                                                    <div class="offer-image-simple">
+                                                        <img src="@productImage" alt="@productName" loading="lazy" />
+                                                    </div>
+                                                    
+                                                    <div class="offer-content-simple">
+                                                        <h3 class="offer-title-simple">@productName</h3>
                                                     </div>
                                                 </a>
-                                                <div class="product-card-actions" onclick="event.stopPropagation();">
-                                                    @if (product.ProductType == IdealWeightNutrition.Models.ProductType.Variable)
-                                                    {
-                                                        <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="btn btn-show-details">
-                                                                <i class="bi bi-eye me-1"></i>@Localizer["View"]
-                                                        </a>
-                                                    }
-                                                    else
-                                                    {
-                                                        <button class="btn btn-add-cart-quick newarrival-cart-btn" 
-                                                                data-product-id="@product.Id"
-                                                                onclick="toggleCart(@product.Id, this); event.stopPropagation();" 
-                                                                title="@Localizer["AddToCart"]">
-                                                            <i class="bi bi-cart-plus"></i>@Localizer["AddToCart"]
-                                                        </button>
-                                                    }
+                                                
+                                                <div class="offer-footer-simple" onclick="event.stopPropagation();">
+                                                    <div class="offer-price-simple">
+                                                        @if (discount > 0 && displayListPrice > 0)
+                                                        {
+                                                            <span class="offer-old-price">@currencySymbol @displayListPrice.ToString("N2")</span>
+                                                        }
+                                                        <span class="offer-new-price">@currencySymbol @displayPrice.ToString("N2")</span>
+                                                    </div>
+                                                    
+                                                    <div class="offer-actions-simple">
+                                                        @if (product.ProductType == IdealWeightNutrition.Models.ProductType.Variable)
+                                                        {
+                                                            <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="offer-btn-view">
+                                                                <i class="bi bi-list-check"></i>
+                                                                <span>@Localizer["SelectOptions"]</span>
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <button class="offer-btn-add" 
+                                                                    data-product-id="@product.Id"
+                                                                    onclick="toggleCart(@product.Id, this); event.stopPropagation();">
+                                                                <i class="bi bi-cart-plus"></i>
+                                                                <span>@Localizer["Add"]</span>
+                                                            </button>
+                                                        }
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

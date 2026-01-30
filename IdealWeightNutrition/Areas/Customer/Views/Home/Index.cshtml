@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Localization
 @using IdealWeightNutrition.Utility
 @using System
 @using System.Text.Json
@@ -60,6 +60,18 @@
 {
     <partial name="_FlashOffersMarquee" />
 }
+
+<!-- SEO H1 Tag - Hidden visually but important for SEO -->
+<h1 class="seo-h1 visually-hidden-seo" style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;">
+    @if (currentCulture == "ar")
+    {
+        <text>مكملات غذائية في الإمارات - شراء بروتين، فيتامينات أونلاين | Ideal Weight Nutrition</text>
+    }
+    else
+    {
+        <text>Buy Supplements Online UAE | Protein, Vitamins, Weight Loss | Ideal Weight Nutrition Dubai</text>
+    }
+</h1>
 
 <!-- Category Filter Navigation Bar -->
 <partial name="_CategoryFilterNav" />
@@ -385,49 +397,47 @@
                                         }
                                         
                                         <div class="col-12 col-sm-6 col-lg-3">
-                                            <div class="offer-card h-100">
-                                                <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="offer-card-link">
-                                                    <!-- Product Status Badges (NEW/TRENDING) -->
-                                                    @if (product.IsTrending)
-                                                    {
-                                                        <div class="badge-trending">
-                                                            <i class="bi bi-graph-up-arrow me-1"></i>
-                                                            @Localizer["TrendingProducts"]
-                                                        </div>
-                                                    }
-                                                    else if (product.IsNew)
-                                                    {
-                                                        <div class="badge-new">
-                                                            <i class="bi bi-sparkles me-1"></i>
-                                                            @Localizer["NewProducts"]
-                                                        </div>
-                                                    }
-                                                    
+                                            <div class="offer-card-simple h-100">
+                                                <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="offer-card-link-simple">
                                                     @if (discountPercent > 0)
                                                     {
-                                                        <div class="offer-badge">-@discountPercent%</div>
+                                                        <div class="offer-discount-badge">@discountPercent%<br/><small>@Localizer["Discount"]</small></div>
                                                     }
                                                     
-                                                    <div class="offer-card-image">
-                                                        <img src="@productImage" alt="@productName" class="img-fluid" loading="@(isLcpImage ? "eager" : "lazy")" width="300" height="300" fetchpriority="@(isLcpImage ? "high" : "low")" />
+                                                    <div class="offer-image-simple">
+                                                        <img src="@productImage" alt="@productName" loading="@(isLcpImage ? "eager" : "lazy")" width="300" height="300" fetchpriority="@(isLcpImage ? "high" : "low")" />
                                                     </div>
                                                     
-                                                    <div class="offer-card-content">
-                                                        <h3 class="offer-card-title">@productName</h3>
-                                                        
-                                                        <div class="offer-card-price">
-                                                            <span class="offer-price-old">@Html.Raw(currencySymbol)@displayListPrice.ToString("N2")</span>
-                                                            <span class="offer-price-new">@Html.Raw(currencySymbol)@displayPrice.ToString("N2")</span>
-                                                        </div>
-                                                        
-                                                        @if (discountPercent > 0)
-                                                        {
-                                                            <div class="offer-save">
-                                                                @Localizer["Save"] @Html.Raw(currencySymbol)@((displayListPrice - displayPrice).ToString("N2"))
-                                                            </div>
-                                                        }
+                                                    <div class="offer-content-simple">
+                                                        <h3 class="offer-title-simple">@productName</h3>
                                                     </div>
                                                 </a>
+                                                
+                                                <div class="offer-footer-simple">
+                                                    <div class="offer-price-simple">
+                                                        <span class="offer-old-price">@currencySymbol @displayListPrice.ToString("N2")</span>
+                                                        <span class="offer-new-price">@currencySymbol @displayPrice.ToString("N2")</span>
+                                                    </div>
+                                                    
+                                                    <div class="offer-actions-simple">
+                                                        @if (product.ProductType == IdealWeightNutrition.Models.ProductType.Variable)
+                                                        {
+                                                            <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="offer-btn-view">
+                                                                <i class="bi bi-list-check"></i>
+                                                                <span>@Localizer["SelectOptions"]</span>
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <button class="offer-btn-add" 
+                                                                    data-product-id="@product.Id"
+                                                                    onclick="toggleCart(@product.Id, this); event.stopPropagation();">
+                                                                <i class="bi bi-cart-plus"></i>
+                                                                <span>@Localizer["Add"]</span>
+                                                            </button>
+                                                        }
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     }
@@ -1107,189 +1117,43 @@
         };
         
         
-        // Also ensure loadProductsWithFilters is available on window load
-        window.addEventListener('load', function() {
-        });
-        
-        // Enhanced Mobile Swipe for Category Carousel
-        function initCategoryCarouselSwipe() {
-            const carousel = document.getElementById('categoryCarousel');
-            const container = document.getElementById('categoryCarouselContainer');
-            
-            if (!carousel || !container) {
-                // Wait a bit if elements not ready yet
-                setTimeout(initCategoryCarouselSwipe, 100);
-                return;
-            }
-            
-            // Update scroll indicators (fade edges)
-            function updateScrollIndicators() {
-                const scrollLeft = carousel.scrollLeft;
-                const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
-                
-                // Remove existing classes
-                container.classList.remove('scroll-start', 'scroll-end');
-                
-                // Add appropriate classes
-                if (scrollLeft <= 10) {
-                    container.classList.add('scroll-start');
-                }
-                if (scrollLeft >= maxScrollLeft - 10) {
-                    container.classList.add('scroll-end');
-                }
-            }
-            
-            // Initial check
-            updateScrollIndicators();
-            
-            // Update on scroll
-            let scrollTimeout;
-            carousel.addEventListener('scroll', function() {
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(updateScrollIndicators, 10);
-            }, { passive: true });
-            
-            // Enhanced touch/swipe for mobile
-            let touchStartX = 0;
-            let touchStartY = 0;
-            let touchStartTime = 0;
-            let isScrolling = false;
-            
-            carousel.addEventListener('touchstart', function(e) {
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-                touchStartTime = Date.now();
-                isScrolling = false;
-            }, { passive: true });
-            
-            carousel.addEventListener('touchmove', function(e) {
-                if (!touchStartX) return;
-                
-                const touchX = e.touches[0].clientX;
-                const touchY = e.touches[0].clientY;
-                const deltaX = Math.abs(touchX - touchStartX);
-                const deltaY = Math.abs(touchY - touchStartY);
-                
-                // If horizontal movement is greater than vertical, it's a swipe
-                if (deltaX > deltaY && deltaX > 10) {
-                    isScrolling = true;
-                    // Prevent vertical scroll during horizontal swipe
-                    if (deltaX > 20) {
-                        e.preventDefault();
-                    }
-                }
-            }, { passive: false });
-            
-            carousel.addEventListener('touchend', function(e) {
-                if (!touchStartX || !isScrolling) {
-                    touchStartX = 0;
-                    return;
-                }
-                
-                const touchEndX = e.changedTouches[0].clientX;
-                const deltaX = touchEndX - touchStartX;
-                const deltaTime = Date.now() - touchStartTime;
-                
-                // Snap to nearest card if significant swipe
-                if (Math.abs(deltaX) > 30 || (Math.abs(deltaX) > 10 && deltaTime < 300)) {
-                    const cardWidth = carousel.querySelector('.category-card')?.offsetWidth || 140;
-                    const scrollAmount = Math.round(deltaX / cardWidth);
-                    const currentScroll = carousel.scrollLeft;
-                    const newScroll = currentScroll + (scrollAmount * cardWidth);
-                    
-                    carousel.scrollTo({
-                        left: newScroll,
-                        behavior: 'smooth'
-                    });
-                }
-                
-                touchStartX = 0;
-                isScrolling = false;
-            }, { passive: true });
-            
-            // Smooth scroll snap on resize
-            window.addEventListener('resize', function() {
-                updateScrollIndicators();
-            }, { passive: true });
-        }
-        
-        // Initialize when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initCategoryCarouselSwipe);
-        } else {
-            initCategoryCarouselSwipe();
-        }
     </script>
     
     @if (displayCategories.Any())
     {
-        <section class="category-section">
-            <div class="category-section-title">
-                <h2>@Localizer["ShopByCategory"]</h2>
+        var categoriesList = displayCategories.ToList();
+        <section class="category-section-modern">
+            <div class="category-section-header">
+                <h2 class="category-section-title-modern">@Localizer["ShopByCategory"]</h2>
+                <div class="category-nav-arrows">
+                    <button class="category-scroll-btn prev" id="categoryScrollPrev" aria-label="@Localizer["Previous"]">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="category-scroll-btn next" id="categoryScrollNext" aria-label="@Localizer["Next"]">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
             </div>
-            <div class="category-carousel-container" id="categoryCarouselContainer">
-                <div id="categoryCarousel" class="carousel slide category-carousel" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover" data-bs-touch="false">
-                    <div class="carousel-inner">
-                    @{
-                        var categoriesList = displayCategories.ToList();
-                            
-                            // Responsive items per slide: mobile=1, tablet=2, desktop=4
-                            var itemsPerSlideMobile = 1;
-                            var itemsPerSlideTablet = 2;
-                            var itemsPerSlideDesktop = 4;
-                            
-                            // Calculate total slides for desktop (most slides) - add 1 for "All Categories"
-                            var totalSlidesDesktop = (int)Math.Ceiling((categoriesList.Count + 1) / (double)itemsPerSlideDesktop);
-                            
-                            // First, render "All Categories" in the first slide
-                            var firstSlideHasAllCategories = true;
-                            var categoriesToShow = categoriesList.ToList();
-                            
-                            for (int slideIndex = 0; slideIndex < totalSlidesDesktop; slideIndex++)
-                            {
-                                var slideCategories = new List<IdealWeightNutrition.Models.Categry>();
-                                
-                                // First slide: add "All Categories" first, then regular categories
-                                if (slideIndex == 0)
-                                {
-                                    // Add remaining categories for first slide (skip 1 slot for "All Categories")
-                                    var remainingSlots = itemsPerSlideDesktop - 1;
-                                    slideCategories = categoriesToShow.Take(remainingSlots).ToList();
-                                }
-                                else
-                                {
-                                    // For other slides, skip the "All Categories" slot
-                                    var skipCount = (slideIndex * itemsPerSlideDesktop) - 1;
-                                    slideCategories = categoriesToShow.Skip(skipCount).Take(itemsPerSlideDesktop).ToList();
-                    }
-                    
-                                <div class="carousel-item @(slideIndex == 0 ? "active" : "")">
-                                    <div class="row g-3 g-md-4">
-                                        @if (slideIndex == 0)
-                                        {
-                                            // Render "All Categories" as first item in first slide
-                                            <div class="col-12 col-sm-6 col-lg-3">
-                    <div class="category-card @(selectedCategory == null ? "active" : "")"
+            
+            <div class="category-scroll-wrapper">
+                <div class="category-scroll-container" id="categoryScrollContainer">
+                    <!-- All Categories Card -->
+                    <div class="category-scroll-card @(selectedCategory == null ? "active" : "")"
                          data-category-id="0"
                          data-all-categories="true"
                          role="button"
                          tabindex="0"
-                         onclick="window.handleCategoryCardClickDirect(this, event); return false;"
-                                                     onmousedown="event.stopPropagation();"
-                                                     ontouchstart="event.stopPropagation();"
-                         style="cursor: pointer; position: relative; z-index: 10;"
-                         onkeydown="if(event.key === 'Enter' || event.key === ' ') { window.handleCategoryCardClickDirect(this, event); return false; }">
-                        <div class="category-circle">
-                            <div class="category-image-wrapper">
-                                <i class="bi bi-grid-3x3-gap-fill" style="font-size: 2rem; color: #3B9DD5;"></i>
+                         onclick="window.handleCategoryCardClickDirect(this, event); return false;">
+                        <div class="category-card-inner">
+                            <div class="category-icon-wrapper all-categories">
+                                <i class="bi bi-grid-3x3-gap-fill"></i>
                             </div>
+                            <span class="category-card-label">@Localizer["AllCategories"]</span>
                         </div>
-                        <div class="category-label">@Localizer["AllCategories"]</div>
+                        <div class="category-card-glow"></div>
                     </div>
-                                            </div>
-                                        }
                     
-                                        @foreach (var category in slideCategories)
+                    @foreach (var category in categoriesList)
                     {
                         if (category == null) continue;
                         
@@ -1301,22 +1165,17 @@
                             ? category.NameAr 
                             : category.Name;
                         
-                                            <div class="col-12 col-sm-6 col-lg-3">
-                        <div class="category-card @(selectedCategory == category.Id ? "active" : "")"
+                        <div class="category-scroll-card @(selectedCategory == category.Id ? "active" : "")"
                              data-category-index="@categoryIndex"
                              data-category-id="@category.Id"
                              role="button"
                              tabindex="0"
-                             onclick="window.handleCategoryCardClickDirect(this, event); return false;"
-                                                     onmousedown="event.stopPropagation();"
-                                                     ontouchstart="event.stopPropagation();"
-                             style="cursor: pointer; position: relative; z-index: 10;"
-                             onkeydown="if(event.key === 'Enter' || event.key === ' ') { window.handleCategoryCardClickDirect(this, event); return false; }">
-                            <div class="category-circle">
+                             onclick="window.handleCategoryCardClickDirect(this, event); return false;">
+                            <div class="category-card-inner">
                                 @if (!string.IsNullOrEmpty(category.ImageUrl))
                                 {
-                                    <div class="category-image-wrapper">
-                                        <img src="@category.ImageUrl" alt="@categoryName" class="category-image" loading="lazy" width="200" height="200" />
+                                    <div class="category-icon-wrapper has-image">
+                                        <img src="@category.ImageUrl" alt="@categoryName" class="category-card-image" loading="lazy" />
                                     </div>
                                 }
                                 else
@@ -1333,61 +1192,170 @@
                                 
                                     @if (productsToShow.Any())
                                     {
-                                        <div class="category-products-grid">
-                                            @foreach (var product in productsToShow)
-                                            {
-                                                var productImage = product.ProductImages?.FirstOrDefault(pi => pi.ImageInfo == null)?.ImageUrl 
-                                                    ?? product.ProductImages?.FirstOrDefault()?.ImageUrl 
-                                                    ?? product.ImageUrl;
-                                                
-                                                if (!string.IsNullOrEmpty(productImage))
+                                        <div class="category-icon-wrapper has-products">
+                                            <div class="category-mini-grid">
+                                                @foreach (var product in productsToShow)
                                                 {
-                                                    <img src="@productImage" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)" class="category-product-mini" loading="lazy" width="100" height="100" />
+                                                    var productImage = product.ProductImages?.FirstOrDefault(pi => pi.ImageInfo == null)?.ImageUrl 
+                                                        ?? product.ProductImages?.FirstOrDefault()?.ImageUrl 
+                                                        ?? product.ImageUrl;
+                                                    
+                                                    if (!string.IsNullOrEmpty(productImage))
+                                                    {
+                                                        <img src="@productImage" alt="" class="category-mini-img" loading="lazy" />
+                                                    }
                                                 }
-                                            }
+                                            </div>
                                         </div>
                                     }
                                     else
                                     {
-                                        <div class="category-image-wrapper">
-                                            <i class="bi bi-box-seam" style="font-size: 2rem; color: #3B9DD5;"></i>
+                                        <div class="category-icon-wrapper">
+                                            <i class="bi bi-box-seam"></i>
                                         </div>
                                     }
                                 }
+                                <span class="category-card-label">@categoryName</span>
                             </div>
-                            <div class="category-label">@categoryName</div>
-                        </div>
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
-                            }
-                        }
-                    </div>
-                    
-                    <!-- Carousel Controls -->
-                    <button class="carousel-control-prev category-carousel-control carousel-nav prev" type="button" data-bs-target="#categoryCarousel" data-bs-slide="prev">
-                        <i class="bi bi-chevron-left"></i>
-                        <span class="visually-hidden">@Localizer["Previous"]</span>
-                    </button>
-                    <button class="carousel-control-next category-carousel-control carousel-nav next" type="button" data-bs-target="#categoryCarousel" data-bs-slide="next">
-                        <i class="bi bi-chevron-right"></i>
-                        <span class="visually-hidden">@Localizer["Next"]</span>
-                    </button>
-                    
-                    <!-- Carousel Indicators -->
-                    @if (totalSlidesDesktop > 1)
-                    {
-                        <div class="carousel-indicators category-carousel-indicators">
-                            @for (int i = 0; i < totalSlidesDesktop; i++)
-                            {
-                                <button type="button" data-bs-target="#categoryCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
-                            }
+                            <div class="category-card-glow"></div>
                         </div>
                     }
                 </div>
             </div>
+            
+            <!-- Progress indicator -->
+            <div class="category-scroll-progress">
+                <div class="category-progress-track">
+                    <div class="category-progress-thumb" id="categoryProgressThumb"></div>
+                </div>
+            </div>
         </section>
+        
+        <script>
+        (function() {
+            const container = document.getElementById('categoryScrollContainer');
+            const prevBtn = document.getElementById('categoryScrollPrev');
+            const nextBtn = document.getElementById('categoryScrollNext');
+            const progressThumb = document.getElementById('categoryProgressThumb');
+            
+            if (!container) return;
+            
+            const isRtl = document.documentElement.dir === 'rtl';
+            
+            // Get card width for scrolling
+            function getScrollAmount() {
+                const card = container.querySelector('.category-scroll-card');
+                if (!card) return 200;
+                return card.offsetWidth + 16; // card width + gap
+            }
+            
+            // Update progress bar
+            function updateProgress() {
+                if (!progressThumb) return;
+                const scrollWidth = container.scrollWidth - container.clientWidth;
+                if (scrollWidth <= 0) {
+                    progressThumb.style.width = '100%';
+                    return;
+                }
+                const scrollPos = isRtl ? Math.abs(container.scrollLeft) : container.scrollLeft;
+                const progress = (scrollPos / scrollWidth) * 100;
+                const thumbWidth = Math.max(20, (container.clientWidth / container.scrollWidth) * 100);
+                progressThumb.style.width = thumbWidth + '%';
+                progressThumb.style.left = (progress * (100 - thumbWidth) / 100) + '%';
+            }
+            
+            // Update button states
+            function updateButtons() {
+                if (!prevBtn || !nextBtn) return;
+                const scrollPos = isRtl ? Math.abs(container.scrollLeft) : container.scrollLeft;
+                const maxScroll = container.scrollWidth - container.clientWidth;
+                
+                if (isRtl) {
+                    prevBtn.disabled = scrollPos >= maxScroll - 5;
+                    nextBtn.disabled = scrollPos <= 5;
+                } else {
+                    prevBtn.disabled = scrollPos <= 5;
+                    nextBtn.disabled = scrollPos >= maxScroll - 5;
+                }
+            }
+            
+            // Scroll function
+            function scroll(direction) {
+                const amount = getScrollAmount() * 2;
+                const scrollValue = direction * amount * (isRtl ? -1 : 1);
+                container.scrollBy({ left: scrollValue, behavior: 'smooth' });
+            }
+            
+            // Button click handlers
+            if (prevBtn) prevBtn.addEventListener('click', () => scroll(-1));
+            if (nextBtn) nextBtn.addEventListener('click', () => scroll(1));
+            
+            // Update on scroll
+            container.addEventListener('scroll', () => {
+                updateProgress();
+                updateButtons();
+            }, { passive: true });
+            
+            // Touch/swipe support
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let isSwiping = false;
+            
+            container.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                isSwiping = false;
+            }, { passive: true });
+            
+            container.addEventListener('touchmove', (e) => {
+                const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+                const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+                if (deltaX > deltaY && deltaX > 10) {
+                    isSwiping = true;
+                }
+            }, { passive: true });
+            
+            // Mouse drag support
+            let isMouseDown = false;
+            let startX = 0;
+            let scrollLeft = 0;
+            
+            container.addEventListener('mousedown', (e) => {
+                isMouseDown = true;
+                container.classList.add('grabbing');
+                startX = e.pageX - container.offsetLeft;
+                scrollLeft = container.scrollLeft;
+            });
+            
+            container.addEventListener('mouseleave', () => {
+                isMouseDown = false;
+                container.classList.remove('grabbing');
+            });
+            
+            container.addEventListener('mouseup', () => {
+                isMouseDown = false;
+                container.classList.remove('grabbing');
+            });
+            
+            container.addEventListener('mousemove', (e) => {
+                if (!isMouseDown) return;
+                e.preventDefault();
+                const x = e.pageX - container.offsetLeft;
+                const walk = (x - startX) * 1.5;
+                container.scrollLeft = scrollLeft - walk;
+            });
+            
+            // Initial state
+            updateProgress();
+            updateButtons();
+            
+            // Update on resize
+            window.addEventListener('resize', () => {
+                updateProgress();
+                updateButtons();
+            }, { passive: true });
+        })();
+        </script>
     }
     <!-- Product Grid - Modern Design -->
     <div class="modern-products-container" id="productsSection">
@@ -4914,87 +4882,144 @@
             
             // Function to load a section via AJAX with culture parameter
             function loadSection(url, placeholderId) {
-                const placeholder = document.getElementById(placeholderId);
-                if (!placeholder) return;
+                return new Promise((resolve, reject) => {
+                    const placeholder = document.getElementById(placeholderId);
+                    if (!placeholder) {
+                        resolve(null);
+                        return;
+                    }
 
-                // Add culture parameter to URL to ensure cache varies by language
-                const separator = url.includes('?') ? '&' : '?';
-                const urlWithCulture = `${url}${separator}culture=${currentCulture}`;
+                    // Add culture parameter to URL to ensure cache varies by language
+                    const separator = url.includes('?') ? '&' : '?';
+                    const urlWithCulture = `${url}${separator}culture=${currentCulture}`;
 
-                fetch(urlWithCulture)
-                    .then(response => {
-                        if (!response.ok) {
-                            // If 500 error or other error, hide the placeholder
-                            if (response.status >= 500) {
-                                console.warn(`Server error loading ${placeholderId}, hiding section`);
-                                placeholder.style.display = 'none';
-                                return '';
+                    fetch(urlWithCulture, {
+                        // Use priority hint for critical sections
+                        priority: placeholderId.includes('FlashSales') || placeholderId.includes('Discounted') ? 'high' : 'auto'
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                // If 500 error or other error, hide the placeholder
+                                if (response.status >= 500) {
+                                    console.warn(`Server error loading ${placeholderId}, hiding section`);
+                                    placeholder.style.display = 'none';
+                                    resolve(null);
+                                    return '';
+                                }
+                                throw new Error(`HTTP error! status: ${response.status}`);
                             }
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.text();
-                    })
-                    .then(html => {
-                        if (html && html.trim().length > 0) {
-                            placeholder.outerHTML = html;
-                            
-                            // Wait a bit for DOM to update before initializing
-                            setTimeout(() => {
-                                // Reinitialize any scripts/event handlers after content loads
-                                if (typeof initializeFlashSaleCarousel === 'function') {
-                                    initializeFlashSaleCarousel();
-                                }
-                                if (typeof initializeProductCarousels === 'function') {
-                                    initializeProductCarousels();
-                                }
+                            return response.text();
+                        })
+                        .then(html => {
+                            if (html && html.trim().length > 0) {
+                                placeholder.outerHTML = html;
                                 
-                                // Initialize Bootstrap carousels if they exist with touch support and RTL support
-                                // Use the global function to ensure RTL support
-                                // Add a small delay to ensure DOM is fully updated
+                                // Wait a bit for DOM to update before initializing
                                 setTimeout(() => {
-                                    if (typeof initializeCarouselsWithRTL === 'function') {
-                                        initializeCarouselsWithRTL();
-                                    } else if (typeof window.initializeCarouselsWithRTL === 'function') {
-                                        window.initializeCarouselsWithRTL();
+                                    // Reinitialize any scripts/event handlers after content loads
+                                    if (typeof initializeFlashSaleCarousel === 'function') {
+                                        initializeFlashSaleCarousel();
                                     }
-                                }, 100);
-                                
-                                // Enhance carousels for mobile if needed
-                                if (window.innerWidth <= 767 && typeof enhanceCarouselsForMobile === 'function') {
-                                    setTimeout(function() {
-                                        enhanceCarouselsForMobile();
-                                    }, 100);
-                                }
-                                
-                                // Also enhance carousels for mobile if needed
-                                if (typeof window.enhanceCarouselsForMobile === 'function' && window.innerWidth <= 767) {
+                                    if (typeof initializeProductCarousels === 'function') {
+                                        initializeProductCarousels();
+                                    }
+                                    
+                                    // Initialize Bootstrap carousels if they exist with touch support and RTL support
+                                    // Use the global function to ensure RTL support
+                                    // Add a small delay to ensure DOM is fully updated
                                     setTimeout(() => {
-                                        window.enhanceCarouselsForMobile();
+                                        if (typeof initializeCarouselsWithRTL === 'function') {
+                                            initializeCarouselsWithRTL();
+                                        } else if (typeof window.initializeCarouselsWithRTL === 'function') {
+                                            window.initializeCarouselsWithRTL();
+                                        }
                                     }, 100);
-                                }
-                            }, 50);
-                        } else {
-                            // Hide placeholder if no content
+                                    
+                                    // Enhance carousels for mobile if needed
+                                    if (window.innerWidth <= 767 && typeof enhanceCarouselsForMobile === 'function') {
+                                        setTimeout(function() {
+                                            enhanceCarouselsForMobile();
+                                        }, 100);
+                                    }
+                                    
+                                    // Also enhance carousels for mobile if needed
+                                    if (typeof window.enhanceCarouselsForMobile === 'function' && window.innerWidth <= 767) {
+                                        setTimeout(() => {
+                                            window.enhanceCarouselsForMobile();
+                                        }, 100);
+                                    }
+                                }, 50);
+                                resolve(html);
+                            } else {
+                                // Hide placeholder if no content
+                                placeholder.style.display = 'none';
+                                resolve(null);
+                            }
+                        })
+                        .catch(error => {
+                            console.error(`Error loading section ${placeholderId}:`, error);
+                            // Hide on error instead of showing error message for better UX
                             placeholder.style.display = 'none';
-                        }
-                    })
-                    .catch(error => {
-                        console.error(`Error loading section ${placeholderId}:`, error);
-                        // Hide on error instead of showing error message for better UX
-                        placeholder.style.display = 'none';
-                    });
+                            reject(error);
+                        });
+                });
             }
 
-            // Load sections in sequence with small delays to avoid overwhelming the server
-            // Priority order: Flash Sales -> Discounted Products -> Services -> Category Products -> Best Sellers -> New Arrivals
-            
-            setTimeout(() => loadSection('/Customer/Home/LoadFlashSalesSection', 'flashSalesSectionPlaceholder'), 100);
-            setTimeout(() => loadSection('/Customer/Home/LoadDiscountedProductsSection', 'discountedProductsSectionPlaceholder'), 300);
-            setTimeout(() => loadSection('/Customer/Home/LoadServicesSection', 'servicesSectionPlaceholder'), 500);
-            setTimeout(() => loadSection('/Customer/Home/LoadCategoryProductsSection', 'categoryProductsSectionPlaceholder'), 700);
-            setTimeout(() => loadSection('/Customer/Home/LoadBestSellersSection', 'bestSellersSectionPlaceholder'), 900);
-            setTimeout(() => loadSection('/Customer/Home/LoadNewArrivalsSection', 'newArrivalsSectionPlaceholder'), 1100);
-            setTimeout(() => loadSection('/Customer/Home/LoadComboOffersSection', 'comboOffersSectionPlaceholder'), 1300);
+            // OPTIMIZED: Load all sections in parallel for maximum speed
+            // Critical sections load immediately, others use Intersection Observer for lazy loading
+            const criticalSections = [
+                { url: '/Customer/Home/LoadFlashSalesSection', id: 'flashSalesSectionPlaceholder' },
+                { url: '/Customer/Home/LoadDiscountedProductsSection', id: 'discountedProductsSectionPlaceholder' }
+            ];
+
+            const otherSections = [
+                { url: '/Customer/Home/LoadServicesSection', id: 'servicesSectionPlaceholder' },
+                { url: '/Customer/Home/LoadCategoryProductsSection', id: 'categoryProductsSectionPlaceholder' },
+                { url: '/Customer/Home/LoadBestSellersSection', id: 'bestSellersSectionPlaceholder' },
+                { url: '/Customer/Home/LoadNewArrivalsSection', id: 'newArrivalsSectionPlaceholder' },
+                { url: '/Customer/Home/LoadComboOffersSection', id: 'comboOffersSectionPlaceholder' }
+            ];
+
+            // Load critical sections immediately in parallel
+            Promise.all(criticalSections.map(section => loadSection(section.url, section.id)))
+                .catch(err => console.warn('Error loading critical sections:', err));
+
+            // Use Intersection Observer for lazy loading of other sections (only load when visible)
+            if ('IntersectionObserver' in window) {
+                const observerOptions = {
+                    rootMargin: '100px', // Start loading 100px before section is visible
+                    threshold: 0.01
+                };
+
+                const sectionObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const placeholderId = entry.target.id;
+                            const section = otherSections.find(s => s.id === placeholderId);
+                            if (section) {
+                                loadSection(section.url, section.id)
+                                    .catch(err => console.warn(`Error loading ${placeholderId}:`, err));
+                                // Unobserve after loading to prevent duplicate loads
+                                sectionObserver.unobserve(entry.target);
+                            }
+                        }
+                    });
+                }, observerOptions);
+
+                // Observe all other section placeholders
+                otherSections.forEach(section => {
+                    const placeholder = document.getElementById(section.id);
+                    if (placeholder) {
+                        sectionObserver.observe(placeholder);
+                    }
+                });
+            } else {
+                // Fallback for browsers without Intersection Observer: load all in parallel after a short delay
+                setTimeout(() => {
+                    Promise.all(otherSections.map(section => loadSection(section.url, section.id)))
+                        .catch(err => console.warn('Error loading other sections:', err));
+                }, 200);
+            }
         });
 
         // Initialize carousels with RTL support on page load

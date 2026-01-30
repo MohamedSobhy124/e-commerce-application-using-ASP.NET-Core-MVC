@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Localization
 @using IdealWeightNutrition.Utility
 @using IdealWeightNutrition.Helpers
 @model int
@@ -96,7 +96,7 @@
                                     <i class="bi bi-truck text-primary me-3" style="font-size: 2rem;"></i>
                                     <div>
                                         <h6>@(Localizer["Delivery"]?.Value ?? "Delivery")</h6>
-                                        <small class="text-muted">@IdealWeightNutrition.Utility.DateTimeHelper.GetEstimatedDeliveryRange()</small>
+                                        <small class="text-muted">@(Localizer["Within48HoursWorkingDays"]?.Value ?? "Within 48 hours (working days)")</small>
                                     </div>
                                 </div>
                             </div>
