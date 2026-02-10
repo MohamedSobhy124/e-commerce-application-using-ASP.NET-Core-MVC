@@ -17,7 +17,6 @@ $(document).ready(function () {
                 if (typeof Swal !== 'undefined') {
                     window.Swal = Swal;
                 }
-                console.log('✅ SweetAlert2 loaded successfully');
             } else if (waitAttempts < maxWaitAttempts) {
                 waitAttempts++;
                 setTimeout(waitForSweetAlert, 100);
@@ -32,7 +31,6 @@ $(document).ready(function () {
         if (typeof Swal !== 'undefined') {
             window.Swal = Swal;
         }
-        console.log('✅ SweetAlert2 is available');
     }
     // Sync with localStorage after cart operations
     function syncCartToLocalStorage(response) {
@@ -83,7 +81,6 @@ $(document).ready(function () {
                 __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
             },
             success: function (response) {
-                console.log('✅ Plus response received:', response);
                 
                 if (response.success) {
                     // Update quantity input
@@ -94,14 +91,7 @@ $(document).ready(function () {
                     if (response.unitPrice !== undefined) {
                         const cartCard = btn.closest('.cart-item-card');
                         const priceWrapper = cartCard.find('.cart-item-price-wrapper');
-                        
-                        console.log('🔍 Price update check:', {
-                            unitPrice: response.unitPrice,
-                            count: response.count,
-                            originalPrice: response.originalPrice,
-                            priceWrapperFound: priceWrapper.length > 0,
-                            cartCardFound: cartCard.length > 0
-                        });
+                   
                         
                         if (priceWrapper.length > 0) {
                             updatePriceDisplay(priceWrapper, response.unitPrice, response.count, response.originalPrice);
@@ -110,7 +100,6 @@ $(document).ready(function () {
                             // Try alternative selector
                             const altPriceWrapper = cartCard.find('.cart-item-price-col .cart-item-price-wrapper');
                             if (altPriceWrapper.length > 0) {
-                                console.log('✅ Found price wrapper with alternative selector');
                                 updatePriceDisplay(altPriceWrapper, response.unitPrice, response.count, response.originalPrice);
                             } else {
                                 // Reload page to get correct structure
@@ -229,10 +218,8 @@ $(document).ready(function () {
                         
                         // Show SweetAlert for stock limit errors
                         function showStockError() {
-                            console.log('🔍 Attempting to show stock error. Swal type:', typeof Swal, 'Swal.fire type:', typeof (Swal && Swal.fire));
                             
                             if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
-                                console.log('✅ Showing SweetAlert error for stock limit');
                                 const isArabic = typeof getCurrentLanguage === 'function' && getCurrentLanguage() === 'ar';
                                 try {
                                     SwalToUse.fire({
@@ -246,7 +233,6 @@ $(document).ready(function () {
                                         showConfirmButton: true,
                                         showCloseButton: true
                                     }).then((result) => {
-                                        console.log('SweetAlert closed:', result);
                                     }).catch((error) => {
                                         console.error('SweetAlert error:', error);
                                         showToast('error', errorMessage);
@@ -266,15 +252,12 @@ $(document).ready(function () {
                             showStockError();
                         } else {
                             // Wait for SweetAlert to load
-                            console.log('⏳ Waiting for SweetAlert to load for stock error...');
                             let attempts = 0;
                             const maxAttempts = 30; // Wait up to 3 seconds (30 * 100ms)
                             const checkInterval = setInterval(function() {
                                 attempts++;
-                                console.log(`Checking for SweetAlert (attempt ${attempts}/${maxAttempts})...`);
                                 if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
                                     clearInterval(checkInterval);
-                                    console.log('✅ SweetAlert loaded after', attempts * 100, 'ms');
                                     showStockError();
                                 } else if (attempts >= maxAttempts) {
                                     clearInterval(checkInterval);
@@ -432,13 +415,7 @@ $(document).ready(function () {
                         if (response.unitPrice !== undefined && response.unitPrice !== null) {
                             const cartCard = btn.closest('.cart-item-card');
                             const priceWrapper = cartCard.find('.cart-item-price-wrapper');
-                            
-                            console.log('🔍 Minus price update check:', {
-                                unitPrice: response.unitPrice,
-                                count: response.count,
-                                originalPrice: response.originalPrice,
-                                priceWrapperFound: priceWrapper.length > 0
-                            });
+                      
                             
                             if (priceWrapper.length > 0) {
                                 updatePriceDisplay(priceWrapper, response.unitPrice, response.count, response.originalPrice);
@@ -592,7 +569,6 @@ function removeCartItemFromCartPage(cartId, productId, btn, cartCard) {
             __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
         },
         success: function (response) {
-            console.log('Remove response:', response);
             if (response.success) {
                 const cartItem = btn.closest('.cart-item-card');
                 
@@ -631,7 +607,6 @@ function removeCartItemFromCartPage(cartId, productId, btn, cartCard) {
                     } else {
                         // Force update cart sidebar if open (reload items)
                         setTimeout(() => {
-                            console.log('Updating cart sidebar...');
                             if (typeof window.loadCartItems === 'function') {
                                 window.loadCartItems();
                             } else if (typeof loadCartItems === 'function') {
@@ -742,14 +717,6 @@ function updatePriceDisplay(priceWrapper, unitPrice, quantity, originalPrice) {
     const safeQuantity = (quantity === null || quantity === undefined || isNaN(quantity)) ? 0 : parseInt(quantity);
     const safeOriginalPrice = (originalPrice === null || originalPrice === undefined || isNaN(originalPrice)) ? 0 : parseFloat(originalPrice);
     
-    console.log('🔄 Updating price display:', {
-        unitPrice: safeUnitPrice,
-        quantity: safeQuantity,
-        originalPrice: safeOriginalPrice,
-        currencySymbol: currencySymbol,
-        currentHTML: priceWrapper.html()
-    });
-    
     // Clear existing content
     priceWrapper.empty();
     
@@ -772,14 +739,7 @@ function updatePriceDisplay(priceWrapper, unitPrice, quantity, originalPrice) {
     
     // Update the wrapper
     priceWrapper.html(priceHtml);
-    
-    console.log('✅ Price updated successfully:', {
-        unitPrice: safeUnitPrice,
-        quantity: safeQuantity,
-        totalPrice: totalPrice,
-        originalPrice: safeOriginalPrice,
-        newHTML: priceWrapper.html()
-    });
+ 
     
     // Force a visual update by triggering a reflow
     if (priceWrapper[0]) {
@@ -792,12 +752,7 @@ function updateCartTotal(orderTotal) {
     // Handle null/undefined - treat as 0
     const safeOrderTotal = (orderTotal === null || orderTotal === undefined) ? 0 : parseFloat(orderTotal);
     const formattedTotal = `${currencySymbol} ${safeOrderTotal.toFixed(2)}`;
-    
-    console.log('🔄 Updating cart total:', {
-        orderTotal: safeOrderTotal,
-        formattedTotal: formattedTotal
-    });
-    
+ 
     const totalElement = $('.cart-total-amount');
     
     if (totalElement.length > 0) {

@@ -152,7 +152,7 @@ function initializeNotifications() {
             // Join admin group if user is admin
             if (isUserAdmin()) {
                 notificationConnection.invoke("JoinAdminGroup")
-                    .then(() => console.log('Joined admin group'))
+                    .then(() => console.log(' '))
                     .catch(err => console.error('Error joining admin group:', err));
             }
         })
@@ -203,7 +203,7 @@ function updateNotificationBell() {
 function playNotificationSound() {
     try {
         const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUKfk77RgGgU7k9nzzn0pBSh+zPLaizsKGGS56+mnUhQKQ5zd8sFuJAUthM/z2Yk3CBppu+zn');
-        audio.play().catch(e => console.log('Could not play sound:', e));
+        audio.play().catch(e => console.log( '', e));
     } catch (e) {
     }
 }

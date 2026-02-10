@@ -416,6 +416,84 @@
     </div>
 </div>
 
+<!-- Service Reviews Section -->
+<div class="service-details-page" dir="@(isRtl ? "rtl" : "ltr")" style="background: #f8f9fa; padding: 3rem 0;">
+    <div class="container">
+        <div class="service-reviews-section">
+            <div class="reviews-header">
+                <h2 class="reviews-title">
+                    <i class="bi bi-star-fill"></i>
+                    @Localizer["Reviews"]
+                </h2>
+                <div class="reviews-rating-summary">
+                    <div class="rating-stars" id="averageServiceRating">
+                        <i class="bi bi-star"></i>
+                        <i class="bi bi-star"></i>
+                        <i class="bi bi-star"></i>
+                        <i class="bi bi-star"></i>
+                        <i class="bi bi-star"></i>
+                    </div>
+                    <span class="rating-average" id="averageServiceRatingText">0.0</span>
+                    <span class="rating-count">(<span id="serviceReviewCount">0</span> @Localizer["Reviews"])</span>
+                </div>
+            </div>
+
+            <!-- Write Review Form (Only for authenticated users) -->
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="review-form-section">
+                    <h3 class="review-form-title">@Localizer["WriteYourReview"]</h3>
+                    <form asp-controller="Review" asp-action="SubmitServiceReview" method="post" class="review-form">
+                        <input type="hidden" name="serviceId" value="@Model.Id" />
+                        <div class="form-group">
+                            <label class="form-label">@Localizer["YourRating"] *</label>
+                            <div class="star-rating-input">
+                                <input type="radio" name="rating" value="5" id="serviceStar5" required />
+                                <label for="serviceStar5"><i class="bi bi-star-fill"></i></label>
+                                
+                                <input type="radio" name="rating" value="4" id="serviceStar4" />
+                                <label for="serviceStar4"><i class="bi bi-star-fill"></i></label>
+                                
+                                <input type="radio" name="rating" value="3" id="serviceStar3" />
+                                <label for="serviceStar3"><i class="bi bi-star-fill"></i></label>
+                                
+                                <input type="radio" name="rating" value="2" id="serviceStar2" />
+                                <label for="serviceStar2"><i class="bi bi-star-fill"></i></label>
+                                
+                                <input type="radio" name="rating" value="1" id="serviceStar1" />
+                                <label for="serviceStar1"><i class="bi bi-star-fill"></i></label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">@Localizer["YourReview"] *</label>
+                            <textarea name="comment" class="form-control review-textarea" rows="4" 
+                                      minlength="3" maxlength="1000" required
+                                      placeholder="@Localizer["ShareYourExperienceWithThisService"]"></textarea>
+                            <small class="form-text text-muted">@Localizer["MinimumCharacters"]: 3</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-submit-review">
+                            <i class="bi bi-send"></i>
+                            @Localizer["SubmitReview"]
+                        </button>
+                    </form>
+                </div>
+            }
+ 
+
+            <!-- Reviews List -->
+            <div class="reviews-list" id="serviceReviewsList">
+                <div class="reviews-loading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">@Localizer["Loading"]...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
     /* ========================================
        BASE STYLES
@@ -1419,7 +1497,264 @@
     [dir="rtl"] .checkout-note {
         flex-direction: row-reverse;
     }
+
+    .service-reviews-section {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .reviews-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #f3f4f6;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .reviews-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .reviews-title i {
+        color: #FFB800;
+        font-size: 1.5rem;
+    }
+
+    .reviews-rating-summary {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .rating-stars {
+        color: #FFB800;
+        font-size: 1.5rem;
+        display: flex;
+        gap: 4px;
+    }
+
+    .rating-average {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #F57C00;
+    }
+
+    .rating-count {
+        color: #6b7280;
+        font-size: 1rem;
+    }
+
+    .review-form-section {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .review-form-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+    }
+
+    .review-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .review-form .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .star-rating-input {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        font-size: 2rem;
+    }
+
+    .star-rating-input input[type="radio"] {
+        display: none;
+    }
+
+    .star-rating-input label {
+        cursor: pointer;
+        color: #d1d5db;
+        transition: all 0.2s;
+        margin: 0;
+    }
+
+    .star-rating-input label:hover,
+    .star-rating-input label:hover ~ label,
+    .star-rating-input input[type="radio"]:checked ~ label {
+        color: #FFB800;
+    }
+
+    .review-textarea {
+        border-radius: 10px;
+        border: 2px solid #e5e7eb;
+        padding: 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+    }
+
+    .review-textarea:focus {
+        border-color: #7BC043;
+        box-shadow: 0 0 0 3px rgba(123, 192, 67, 0.1);
+    }
+
+    .btn-submit-review {
+        background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+        border: none;
+        padding: 0.875rem 2rem;
+        font-weight: 600;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+
+    .btn-submit-review:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(123, 192, 67, 0.3);
+    }
+
+    .review-login-prompt {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 3rem;
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .review-login-prompt i {
+        font-size: 3rem;
+        color: #7BC043;
+        margin-bottom: 1rem;
+    }
+
+    .review-login-prompt p {
+        font-size: 1.1rem;
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+    }
+
+    .reviews-list {
+        margin-top: 2rem;
+    }
+
+    .reviews-loading {
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .review-item {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 1.75rem;
+        margin-bottom: 1.25rem;
+        transition: all 0.3s;
+    }
+
+    .review-item:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .review-user {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 1.05rem;
+    }
+
+    .review-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    .review-rating {
+        color: #FFB800;
+        font-size: 1.1rem;
+    }
+
+    .review-comment {
+        color: #4b5563;
+        line-height: 1.7;
+        font-size: 0.95rem;
+    }
+
+    .verified-badge {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .reviews-empty {
+        text-align: center;
+        padding: 3rem;
+        color: #9ca3af;
+    }
+
+    .reviews-empty i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    @@media (max-width: 767px) {
+        .service-reviews-section {
+            padding: 1.5rem;
+        }
+
+        .reviews-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .review-form-section {
+            padding: 1.25rem;
+        }
+
+        .star-rating-input {
+            font-size: 1.5rem;
+        }
+    }
 </style>
+
+<!-- Service Ratings Script -->
+<script src="~/js/service-ratings.js"></script>
+<!-- Reviews CSS from reviews.css -->
+<link rel="stylesheet" href="~/css/reviews.css" />
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -1441,5 +1776,83 @@
                 });
             });
         }
+
+        // Load service reviews
+        const serviceId = @Model.Id;
+        loadServiceRating(serviceId);
+        loadServiceReviews(serviceId);
     });
+
+    function loadServiceRating(serviceId) {
+        fetch(`/Customer/Review/GetServiceRating?serviceId=${serviceId}`)
+            .then(response => response.json())
+            .then(data => {
+                $('#averageServiceRatingText').text(data.averageRating.toFixed(1));
+                $('#serviceReviewCount').text(data.reviewCount);
+                displayStars(data.averageRating, '#averageServiceRating');
+            })
+            .catch(error => {
+            });
+    }
+
+    function loadServiceReviews(serviceId) {
+        fetch(`/Customer/Review/GetServiceReviews?serviceId=${serviceId}`)
+            .then(response => response.json())
+            .then(data => {
+                const reviewsList = $('#serviceReviewsList');
+                
+                if (data.reviews && data.reviews.length > 0) {
+                    let html = '';
+                    data.reviews.forEach(review => {
+                        const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                        const verifiedBadge = review.isVerifiedPurchase 
+                            ? `<span class="verified-badge"><i class="bi bi-check-circle-fill"></i> @Localizer["VerifiedPurchase"]</span>` 
+                            : '';
+                        
+                        html += `
+                            <div class="review-item">
+                                <div class="review-header">
+                                    <div class="review-user">
+                                        <i class="bi bi-person-circle me-2"></i>${review.userName}
+                                        ${verifiedBadge}
+                                    </div>
+                                    <div class="review-meta">
+                                        <span class="review-rating">${stars}</span>
+                                        <span class="review-date">${review.date}</span>
+                                    </div>
+                                </div>
+                                <div class="review-comment">
+                                    ${review.comment}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    reviewsList.html(html);
+                } else {
+                    reviewsList.html('<div class="reviews-empty"><i class="bi bi-star"></i><p>@Localizer["NoReviewsYet"]</p></div>');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading service reviews:', error);
+                $('#serviceReviewsList').html('<p class="text-muted text-center">@Localizer["NoReviewsYet"]</p>');
+            });
+    }
+
+    function displayStars(rating, selector) {
+        const fullStars = Math.floor(rating);
+        const hasHalf = (rating % 1) >= 0.5;
+        let html = '';
+        
+        for (let i = 0; i < fullStars; i++) {
+            html += '<i class="bi bi-star-fill"></i>';
+        }
+        if (hasHalf) {
+            html += '<i class="bi bi-star-half"></i>';
+        }
+        for (let i = fullStars + (hasHalf ? 1 : 0); i < 5; i++) {
+            html += '<i class="bi bi-star"></i>';
+        }
+        
+        $(selector).html(html);
+    }
 </script>

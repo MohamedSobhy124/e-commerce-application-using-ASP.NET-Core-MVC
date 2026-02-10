@@ -2526,7 +2526,6 @@
 					startGeideaPayment(sessionId, orderId, callback);
 				};
 				script.onerror = function() {
-							console.log('initiateGeideaPayment');
 					Swal.fire({
 						icon: 'error',
 						title: 'Payment Error',
@@ -2547,7 +2546,6 @@
 				const payment = new GeideaCheckout(
 					function onSuccess(data) {
 						// Payment successful
-						console.log('Geidea payment success', data);
 						if (callback) callback(true);
 					},
 					function onError(error) {
@@ -2625,7 +2623,6 @@
 					},
 					function onCancel() {
 						// Payment cancelled
-						console.log('Geidea payment cancelled');
 						Swal.fire({
 							icon: 'info',
 							title: 'Payment Cancelled',

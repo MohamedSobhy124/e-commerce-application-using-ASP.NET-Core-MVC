@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -117,6 +117,10 @@ namespace IdealWeightNutrition.Models
         
         [ValidateNever]
         public ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
+        
+        // Reviews navigation property
+        [ValidateNever]
+        public virtual ICollection<Review>? Reviews { get; set; }
         
         // Helper property to check if product has variants
         [NotMapped]

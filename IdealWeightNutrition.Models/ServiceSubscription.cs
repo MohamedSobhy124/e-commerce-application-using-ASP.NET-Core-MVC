@@ -47,6 +47,7 @@ namespace IdealWeightNutrition.Models
         public virtual ICollection<ServiceOffer>? ServiceOffers { get; set; }
         public virtual ICollection<ServicePurchase>? ServicePurchases { get; set; }
         public virtual ICollection<ServiceImage>? ServiceImages { get; set; }
+        public virtual ICollection<Review>? Reviews { get; set; }
     }
     
     public enum ServiceType

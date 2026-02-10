@@ -184,6 +184,22 @@
                                         <h6 class="mb-1" style="font-size: 0.8rem; line-height: 1.35; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.2rem; flex: 1; color: #1f2937;">
                                             @(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)
                                         </h6>
+                                        
+                                        <!-- Star Rating -->
+                                        <div class="product-card-rating" data-product-id="@product.Id" style="margin: 0.25rem 0 0.5rem 0;">
+                                            <div class="rating-container" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">
+                                                <div class="product-card-stars" style="font-size: 0.65rem;">
+                                                    <i class="bi bi-star-fill"></i>
+                                                    <i class="bi bi-star-fill"></i>
+                                                    <i class="bi bi-star-fill"></i>
+                                                    <i class="bi bi-star-fill"></i>
+                                                    <i class="bi bi-star-fill"></i>
+                                                </div>
+                                                <span class="product-card-rating-number">0.0</span>
+                                                <span class="product-card-rating-text" style="font-size: 0.65rem;">(0)</span>
+                                            </div>
+                                        </div>
+                                        
                                         <div class="mt-auto">
                                             <div class="text-muted" style="text-decoration: line-through; font-size: 0.7rem; margin-bottom: 0.25rem; color: #9ca3af;">@Html.Raw(currencySymbol)@listPrice.ToString("N2")</div>
                                             <div class="fw-bold text-danger" style="font-size: 0.9rem; line-height: 1.2; font-weight: 800;">@Html.Raw(currencySymbol)@discountedPrice.ToString("N2")</div>
@@ -294,6 +310,22 @@
                                                     <h6 class="mb-1" style="font-size: 0.8rem; line-height: 1.35; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.2rem; flex: 1; color: #1f2937;">
                                                         @(currentCulture == "ar" && !string.IsNullOrEmpty(product.TitleAr) ? product.TitleAr : product.Title)
                                                     </h6>
+                                                    
+                                                    <!-- Star Rating -->
+                                                    <div class="product-card-rating" data-product-id="@product.Id" style="margin: 0.25rem 0 0.5rem 0;">
+                                                        <div class="rating-container" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">
+                                                            <div class="product-card-stars" style="font-size: 0.65rem;">
+                                                                <i class="bi bi-star-fill"></i>
+                                                                <i class="bi bi-star-fill"></i>
+                                                                <i class="bi bi-star-fill"></i>
+                                                                <i class="bi bi-star-fill"></i>
+                                                                <i class="bi bi-star-fill"></i>
+                                                            </div>
+                                                            <span class="product-card-rating-number">0.0</span>
+                                                            <span class="product-card-rating-text" style="font-size: 0.65rem;">(0)</span>
+                                                        </div>
+                                                    </div>
+                                                    
                                                     <div class="mt-auto">
                                                         <div class="text-muted" style="text-decoration: line-through; font-size: 0.7rem; margin-bottom: 0.25rem; color: #9ca3af;">@Html.Raw(currencySymbol)@originalPrice.ToString("N2")</div>
                                                         <div class="fw-bold text-danger" style="font-size: 0.9rem; line-height: 1.2; font-weight: 800;">@Html.Raw(currencySymbol)@item.FlashSalePrice.ToString("N2")</div>
@@ -575,6 +607,9 @@
 </style>
 
 @section Scripts {
+    <!-- Product Ratings Script -->
+    <script src="~/js/product-ratings.js"></script>
+    
     <script>
         // Authentication status
         const isAuthenticated = @Json.Serialize(User.Identity.IsAuthenticated);

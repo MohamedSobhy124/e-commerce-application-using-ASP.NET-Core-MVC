@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Localization
 @using IdealWeightNutrition.Utility
 @using IdealWeightNutrition.Models.ViewModels
 @inject IConfiguration Configuration
@@ -28,7 +28,7 @@
     double tamaraProductPrice = ViewData["TamaraProductPrice"] != null ? (double)ViewData["TamaraProductPrice"] : Model.product.Price;
 }
   
-<form method="post">
+<form method="post" id="addToCartForm">
     <input hidden asp-for="ProductId" />
     <div class="product-details-wrapper">
 
@@ -685,8 +685,8 @@
                                     <label class="form-label">@Localizer["YourReview"] *</label>
                                     <textarea name="comment" class="form-control" rows="4" 
                                               placeholder="@Localizer["ShareYourExperience"]" 
-                                              minlength="10" maxlength="1000" required></textarea>
-                                    <small class="text-muted">@Localizer["MinimumCharacters"]: 10</small>
+                                              minlength="3" maxlength="1000" required></textarea>
+                                    <small class="text-muted">@Localizer["MinimumCharacters"]: 3</small>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary">
@@ -1452,7 +1452,7 @@
         }
         
         // Update form submission to include variant ID and validate quantity - CONVERT TO AJAX
-        $('form').on('submit', function(e) {
+        $('#addToCartForm').on('submit', function(e) {
             e.preventDefault(); // Prevent default form submission
             
             // Validate quantity before submission

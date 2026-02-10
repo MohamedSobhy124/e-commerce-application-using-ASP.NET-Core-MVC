@@ -9,11 +9,17 @@ namespace IdealWeightNutrition.Models
         [Key]
         public int Id { get; set; }
 
-        [Required]
-        public int ProductId { get; set; }
+        // Make ProductId nullable to support service reviews
+        public int? ProductId { get; set; }
         
         [ForeignKey("ProductId")]
-        public Product Product { get; set; }
+        public Product? Product { get; set; }
+
+        // Add ServiceSubscriptionId for service reviews
+        public int? ServiceSubscriptionId { get; set; }
+        
+        [ForeignKey("ServiceSubscriptionId")]
+        public ServiceSubscription? ServiceSubscription { get; set; }
 
         [Required]
         public string UserId { get; set; }
@@ -33,10 +39,17 @@ namespace IdealWeightNutrition.Models
 
         public bool IsApproved { get; set; } = false; // Admin moderation
 
-        public bool IsVerifiedPurchase { get; set; } = false; // Bought the product
+        public bool IsVerifiedPurchase { get; set; } = false; // Bought the product/service
 
         // Helpful votes (optional for future)
         public int HelpfulCount { get; set; } = 0;
+        
+        // Helper property to determine review type
+        [NotMapped]
+        public bool IsProductReview => ProductId.HasValue;
+        
+        [NotMapped]
+        public bool IsServiceReview => ServiceSubscriptionId.HasValue;
     }
 }
 

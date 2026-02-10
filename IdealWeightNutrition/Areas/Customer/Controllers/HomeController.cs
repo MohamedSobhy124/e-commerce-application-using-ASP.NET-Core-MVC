@@ -466,41 +466,41 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
             }
             
             // Load featured testimonials for homepage carousel
-            try
-            {
-                var featuredTestimonials = _unitOfWork.review.GetFeaturedTestimonials(12).ToList();
+            //try
+            //{
+            //    var featuredTestimonials = _unitOfWork.review.GetFeaturedTestimonials(12).ToList();
                 
-                // Load users separately because Include doesn't work well with Identity
-                if (featuredTestimonials.Any())
-                {
-                    var userIds = featuredTestimonials.Select(r => r.UserId).Distinct().Where(id => !string.IsNullOrEmpty(id)).ToList();
+            //    // Load users separately because Include doesn't work well with Identity
+            //    if (featuredTestimonials.Any())
+            //    {
+            //        var userIds = featuredTestimonials.Select(r => r.UserId).Distinct().Where(id => !string.IsNullOrEmpty(id)).ToList();
                     
-                    if (userIds.Any())
-                    {
-                        // Load users using ApplicationUser repository
-                        var users = _dbContext.Set<ApplicationUser>()
-                            .Where(u => userIds.Contains(u.Id))
-                            .ToList()
-                            .ToDictionary(u => u.Id, u => u);
+            //        if (userIds.Any())
+            //        {
+            //            // Load users using ApplicationUser repository
+            //            var users = _dbContext.Set<ApplicationUser>()
+            //                .Where(u => userIds.Contains(u.Id))
+            //                .ToList()
+            //                .ToDictionary(u => u.Id, u => u);
                         
-                        // Attach users to reviews
-                        foreach (var testimonial in featuredTestimonials)
-                        {
-                            if (!string.IsNullOrEmpty(testimonial.UserId) && users.ContainsKey(testimonial.UserId))
-                            {
-                                testimonial.User = users[testimonial.UserId];
-                            }
-                        }
-                    }
-                }
+            //            // Attach users to reviews
+            //            foreach (var testimonial in featuredTestimonials)
+            //            {
+            //                if (!string.IsNullOrEmpty(testimonial.UserId) && users.ContainsKey(testimonial.UserId))
+            //                {
+            //                    testimonial.User = users[testimonial.UserId];
+            //                }
+            //            }
+            //        }
+            //    }
                 
-                ViewBag.FeaturedTestimonials = featuredTestimonials;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading featured testimonials");
+            //    ViewBag.FeaturedTestimonials = featuredTestimonials;
+            //}
+            //catch (Exception ex)
+            //{
+            //    _logger.LogError(ex, "Error loading featured testimonials");
                 ViewBag.FeaturedTestimonials = new List<Review>();
-            }
+            //}
             
             // Set SEO based on page type
             var requestCulture = Request.HttpContext.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
@@ -2041,10 +2041,11 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
                 {
                     var claimsIdentity = (ClaimsIdentity)User.Identity;
                     var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    var enableReviewWithoutOrder = bool.Parse(_configuration["SiteSettings:EnableReviewWithoutOrder"] ?? "false");
                     if (!string.IsNullOrEmpty(userId))
                     {
                         // PERFORMANCE: Direct query instead of loading all OrderDetails
-                        hasPurchased = await _dbContext.orderDetails
+                        hasPurchased = enableReviewWithoutOrder ? true : await _dbContext.orderDetails
                             .AsNoTracking()
                             .AnyAsync(od => od.ProductId == productId 
                                 && od.OrderHeader != null 

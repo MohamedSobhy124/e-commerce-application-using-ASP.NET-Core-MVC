@@ -693,7 +693,6 @@ window.removeCartItem = removeCartItemFromSidebar;
         const productId = removeBtn.getAttribute('data-product-id') || removeBtn.dataset?.productId;
         const cartId = removeBtn.getAttribute('data-cart-id') || removeBtn.dataset?.cartId;
         
-        console.log('Remove button clicked:', { productId, cartId, btn: removeBtn });
         
         // Validate productId
         if (!productId || productId === '' || productId === 'null' || productId === '0') {
@@ -726,7 +725,6 @@ window.removeCartItem = removeCartItemFromSidebar;
             return;
         }
         
-        console.log('Calling removeCartItemFromSidebar with:', { parsedProductId, parsedCartId });
         // Call removeCartItemFromSidebar with correct parameters
         removeCartItemFromSidebar(parsedProductId, parsedCartId);
     }

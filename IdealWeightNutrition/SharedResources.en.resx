@@ -4548,5 +4548,101 @@
 	<data name="MinimumOrderForPayment" xml:space="preserve">
   <value>Only {0} AED left to get {1} 🎉</value>
 </data>
+  <data name="ProductNotFound" xml:space="preserve">
+    <value>Product not found</value>
+  </data>
+  <data name="PleaseProvideValidRatingAndComment" xml:space="preserve">
+    <value>Please provide a valid rating and comment</value>
+  </data>
+  <data name="YouHaveAlreadyReviewedThisProduct" xml:space="preserve">
+    <value>You have already reviewed this product</value>
+  </data>
+  <data name="ReviewSubmittedSuccessfully" xml:space="preserve">
+    <value>Your review has been submitted successfully!</value>
+  </data>
+  <data name="ErrorSubmittingReview" xml:space="preserve">
+    <value>Error submitting review</value>
+  </data>
+  <data name="ServiceNotFound" xml:space="preserve">
+    <value>Service not found</value>
+  </data>
+  <data name="YouHaveAlreadyReviewedThisService" xml:space="preserve">
+    <value>You have already reviewed this service</value>
+  </data>
+  <data name="WriteYourReview" xml:space="preserve">
+    <value>Write Your Review</value>
+  </data>
+  <data name="ShareYourExperienceWithThisService" xml:space="preserve">
+    <value>Share your experience with this service...</value>
+  </data>
+  <data name="PleaseLoginToWriteReview" xml:space="preserve">
+    <value>Please login to write a review</value>
+  </data>
+  <data name="YourServiceReview" xml:space="preserve">
+    <value>Your Service Review</value>
+  </data>
+  <data name="YourRating" xml:space="preserve">
+    <value>Your Rating</value>
+  </data>
+  <data name="YourReview" xml:space="preserve">
+    <value>Your Review</value>
+  </data>
+  <data name="MinimumCharacters" xml:space="preserve">
+    <value>Minimum characters</value>
+  </data>
+  <data name="SubmitReview" xml:space="preserve">
+    <value>Submit Review</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading</value>
+  </data>
+  <data name="NoReviewsYet" xml:space="preserve">
+    <value>No reviews yet. Be the first to review!</value>
+  </data>
+  <data name="VerifiedPurchase" xml:space="preserve">
+    <value>Verified Purchase</value>
+  </data>
+  <data name="TotalReviews" xml:space="preserve">
+    <value>Total Reviews</value>
+  </data>
+  <data name="PendingApproval" xml:space="preserve">
+    <value>Pending Approval</value>
+  </data>
+  <data name="Approved" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="VerifiedReviews" xml:space="preserve">
+    <value>Verified Reviews</value>
+  </data>
+  <data name="VerifiedPurchases" xml:space="preserve">
+    <value>Verified Purchases</value>
+  </data>
+  <data name="FilterByStatus" xml:space="preserve">
+    <value>Filter By Status</value>
+  </data>
+  <data name="FilterByType" xml:space="preserve">
+    <value>Filter By Type</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Item" xml:space="preserve">
+    <value>Item</value>
+  </data>
+  <data name="Products" xml:space="preserve">
+    <value>Products</value>
+  </data>
+  <data name="Services" xml:space="preserve">
+    <value>Services</value>
+  </data>
+  <data name="ExportReviews" xml:space="preserve">
+    <value>Export Reviews</value>
+  </data>
+  <data name="DesignedBy" xml:space="preserve">
+    <value>Designed by</value>
+  </data>
+  <data name="ContactDesigner" xml:space="preserve">
+    <value>Contact the designer</value>
+  </data>
 
 </root>

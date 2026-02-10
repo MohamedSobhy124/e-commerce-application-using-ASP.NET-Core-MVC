@@ -270,7 +270,6 @@
             
             function checkSweetAlert() {
                 if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
-                    console.log('✅ SweetAlert2 is loaded and ready');
                     // Make sure it's globally available
                     window.Swal = Swal;
                 } else if (attempts < maxAttempts) {

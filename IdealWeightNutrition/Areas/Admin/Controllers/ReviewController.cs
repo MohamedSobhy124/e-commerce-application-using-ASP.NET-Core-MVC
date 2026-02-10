@@ -26,7 +26,7 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult GetAll(string status = "all")
         {
-            var reviews = _unitOfWork.review.GetAll(includeProperties: "Product,User");
+            var reviews = _unitOfWork.review.GetAll(includeProperties: "Product,ServiceSubscription,User");
 
             // Filter by approval status
             if (status == "pending")
@@ -38,18 +38,26 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
                 reviews = reviews.Where(r => r.IsApproved);
             }
 
-            var reviewData = reviews.OrderByDescending(r => r.CreatedAt).Select(r => new
+            // Order by CreatedAt descending and materialize the query
+            var orderedReviews = reviews.OrderByDescending(r => r.CreatedAt).ToList();
+
+            var reviewData = orderedReviews.Select(r => new
             {
                 id = r.Id,
-                productName = r.Product.Title,
-                userName = r.User.Name,
+                productName = r.Product != null ? r.Product.Title : null,
+                serviceName = r.ServiceSubscription != null ? r.ServiceSubscription.Title : null,
+                itemName = r.Product != null ? r.Product.Title : (r.ServiceSubscription != null ? r.ServiceSubscription.Title : "N/A"),
+                reviewType = r.Product != null ? "Product" : "Service",
+                userName = r.User?.Name ?? "Anonymous",
                 rating = r.Rating,
                 comment = r.Comment.Length > 100 ? r.Comment.Substring(0, 100) + "..." : r.Comment,
                 fullComment = r.Comment,
                 createdAt = r.CreatedAt.ToString("MMM dd, yyyy HH:mm"),
+                createdAtTimestamp = new DateTimeOffset(r.CreatedAt).ToUnixTimeSeconds(), // Unix timestamp for sorting
+                createdAtRaw = r.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"), // ISO format for debugging
                 isApproved = r.IsApproved,
                 isVerifiedPurchase = r.IsVerifiedPurchase
-            });
+            }).ToList();
 
             return Json(new { data = reviewData });
         }

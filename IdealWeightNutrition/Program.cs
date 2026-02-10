@@ -197,6 +197,8 @@ var app = builder.Build();
 
 var staticFileOptions = new StaticFileOptions
 {
+    ServeUnknownFileTypes = true, // Enable serving files without extensions
+    DefaultContentType = "application/octet-stream",
     OnPrepareResponse = ctx =>
     {
         var path = ctx.File.Name.ToLower();

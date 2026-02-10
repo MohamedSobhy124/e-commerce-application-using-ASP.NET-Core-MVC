@@ -245,6 +245,21 @@
                                 <h3 class="service-title-modern">
                                     <a href="@serviceDetailsUrl">@serviceTitle</a>
                                 </h3>
+                                
+                                <!-- Service Rating -->
+                                <div class="service-card-rating" data-service-id="@service.Id" style="margin: 0.75rem 0;">
+                                    <div class="rating-container" style="padding: 0.3rem 0.7rem; font-size: 0.9rem;">
+                                        <div class="service-card-stars" style="font-size: 0.8rem;">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                        </div>
+                                        <span class="service-card-rating-number">0.0</span>
+                                        <span class="service-card-rating-text" style="font-size: 0.75rem;">(0)</span>
+                                    </div>
+                                </div>
                             </div>
                             
                             @if (!string.IsNullOrEmpty(serviceDescription))
@@ -287,7 +302,7 @@
                                             <span class="strike-price">@formatCurrency(originalPrice)</span>
                                             <span class="save-badge">
                                                 <i class="bi bi-piggy-bank"></i>
-                                                @(Localizer["Save"] ?? "Save") @formatCurrency(discount)
+                                                @(Localizer["OFF"] ?? "OFF") @formatCurrency(discount)
                                             </span>
                                         </div>
                                         <div class="final-price">@formatCurrency(finalPrice)</div>
@@ -1271,3 +1286,5 @@
     }
 </style>
 
+<!-- Service Ratings Script -->
+<script src="~/js/service-ratings.js"></script>

@@ -599,6 +599,22 @@
                         </a>
                         <div class="service-card-content">
                             <h3 class="service-card-title">@serviceTitle</h3>
+                            
+                            <!-- Service Rating -->
+                            <div class="service-card-rating" data-service-id="@service.Id" style="margin: 0.5rem 0;">
+                                <div class="rating-container" style="padding: 0.25rem 0.6rem; font-size: 0.85rem;">
+                                    <div class="service-card-stars" style="font-size: 0.75rem;">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                    </div>
+                                    <span class="service-card-rating-number">0.0</span>
+                                    <span class="service-card-rating-text" style="font-size: 0.7rem;">(0)</span>
+                                </div>
+                            </div>
+                            
                             @if (!string.IsNullOrEmpty(serviceDescription))
                             {
                                 <p class="service-card-description">
@@ -1460,14 +1476,17 @@
             
             <!-- Star Rating with Discount -->
             <div class="product-card-rating" data-product-id="@Product.Id">
-                <div class="product-card-stars">
-                    <i class="bi bi-star"></i>
-                    <i class="bi bi-star"></i>
-                    <i class="bi bi-star"></i>
-                    <i class="bi bi-star"></i>
-                    <i class="bi bi-star"></i>
+                <div class="rating-container">
+                    <div class="product-card-stars">
+                        <i class="bi bi-star"></i>
+                        <i class="bi bi-star"></i>
+                        <i class="bi bi-star"></i>
+                        <i class="bi bi-star"></i>
+                        <i class="bi bi-star"></i>
+                    </div>
+                    <span class="product-card-rating-number">0.0</span>
+                    <span class="product-card-rating-text">(0)</span>
                 </div>
-                <span class="product-card-rating-text">(0)</span>
                 @if (discount > 0)
                 {
                     <span class="discount-badge-rating">@discount% @(currentCulture == "ar" ? "خصم" : "OFF")</span>
@@ -3777,14 +3796,17 @@
                     <div class="product-content">
                         <h3 class="product-title">${(currentCulture === 'ar' && product.titleAr) ? product.titleAr : product.title}</h3>
                         <div class="product-card-rating" data-product-id="${product.id}">
-                            <div class="product-card-stars">
-                                <i class="bi bi-star"></i>
-                                <i class="bi bi-star"></i>
-                                <i class="bi bi-star"></i>
-                                <i class="bi bi-star"></i>
-                                <i class="bi bi-star"></i>
+                            <div class="rating-container">
+                                <div class="product-card-stars">
+                                    <i class="bi bi-star"></i>
+                                    <i class="bi bi-star"></i>
+                                    <i class="bi bi-star"></i>
+                                    <i class="bi bi-star"></i>
+                                    <i class="bi bi-star"></i>
+                                </div>
+                                <span class="product-card-rating-number">0.0</span>
+                                <span class="product-card-rating-text">(0)</span>
                             </div>
-                            <span class="product-card-rating-text">(0)</span>
                             ${discount > 0 ? `<span class="discount-badge-rating">${discount}% ${discountText}</span>` : ''}
                         </div>
                         <div class="price-actions-row" onclick="event.stopPropagation();">
@@ -4505,8 +4527,13 @@
         }
 
         // Load ratings for all products and check for load more button
-        document.addEventListener('DOMContentLoaded', function() {
-            loadAllProductRatings();
+        function initializeRatingsAndCategories() {
+            
+            if (typeof loadAllProductRatings === 'function') {
+                loadAllProductRatings();
+            } else {
+                console.error('loadAllProductRatings function not found!');
+            }
 
             // Initialize active category from URL parameter
             const urlParams = new URLSearchParams(window.location.search);
@@ -4522,13 +4549,23 @@
                     activeCard.classList.add('active');
                 }
             }
-        });
+        }
+        
+        // Call immediately if DOM is already loaded, otherwise wait for DOMContentLoaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeRatingsAndCategories);
+        } else {
+            // DOM already loaded, call immediately
+            initializeRatingsAndCategories();
+        }
         
         // Load More functionality removed - using pagination instead!
 
         function loadAllProductRatings() {
             const ratingElements = document.querySelectorAll('.product-card-rating');
-            if (ratingElements.length === 0) return;
+            if (ratingElements.length === 0) {
+                return;
+            }
 
             // Collect all product IDs
             const productIds = Array.from(ratingElements)
@@ -4538,7 +4575,9 @@
                 })
                 .filter(id => id !== null);
 
-            if (productIds.length === 0) return;
+            if (productIds.length === 0) {
+                return;
+            }
 
             // Make a single batch API call for all products
             fetch('/Customer/Review/GetBatchProductRatings', {
@@ -4548,7 +4587,14 @@
                 },
                 body: JSON.stringify(productIds)
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.ratings) {
                         // Update each product card with its rating
@@ -4559,13 +4605,19 @@
                                 if (rating.reviewCount > 0) {
                                     const starsHtml = getStarsHTML(rating.averageRating);
                                     const starsElement = element.querySelector('.product-card-stars');
+                                    const numberElement = element.querySelector('.product-card-rating-number');
                                     const textElement = element.querySelector('.product-card-rating-text');
+                                    
                                     if (starsElement) starsElement.innerHTML = starsHtml;
+                                    if (numberElement) {
+                                        numberElement.textContent = rating.averageRating.toFixed(1);
+                                        numberElement.style.display = 'inline-block';
+                                    }
                                     if (textElement) textElement.textContent = `(${rating.reviewCount})`;
                                 }
                             }
                         });
-                    }
+                    }  
                 })
                 .catch(error => console.error('Error loading ratings:', error));
         }
@@ -4602,6 +4654,10 @@
             
             return html;
         }
+        
+        // Make functions globally accessible - DO THIS IMMEDIATELY
+        window.loadAllProductRatings = loadAllProductRatings;
+        window.getStarsHTML = getStarsHTML;
 
         // ==========================================
         // WISHLIST FUNCTIONS
@@ -4609,11 +4665,11 @@
         
         // Define stub functions for guests (will be overridden for authenticated users)
         window.openWishlistSidebar = window.openWishlistSidebar || function() { 
-            console.log('Please log in to access wishlist'); 
         };
         window.closeWishlistSidebar = window.closeWishlistSidebar || function() {};
         window.addToCartFromWishlist = window.addToCartFromWishlist || function() {};
         window.removeFromWishlist = window.removeFromWishlist || function() {};
+        
         
         @if (User.Identity.IsAuthenticated)
         {
@@ -4854,8 +4910,23 @@
             //         })
             //         .catch(error => console.error('Error loading wishlist count:', error));
             // });
-            </text>
+</text>
         }
+        
+        } // TEMPORARY: Close any unclosed block to fix syntax error
+        
+        // CRITICAL: Call rating loader immediately after all functions are defined
+        setTimeout(function() {
+            if (typeof window.loadAllProductRatings === 'function') {
+                window.loadAllProductRatings();
+            } else {
+                console.error('loadAllProductRatings not available on window! Type:', typeof window.loadAllProductRatings);
+                // Try calling directly without window
+                if (typeof loadAllProductRatings !== 'undefined') {
+                    loadAllProductRatings();
+                }
+            }
+        }, 100);
     </script>
 
     <!-- PERFORMANCE: Lazy loading for sections - Load independently via AJAX -->
@@ -4947,6 +5018,20 @@
                                         setTimeout(() => {
                                             window.enhanceCarouselsForMobile();
                                         }, 100);
+                                    }
+                                    
+                                    // Load ratings for newly added products
+                                    if (typeof window.loadAllProductRatings === 'function') {
+                                        setTimeout(() => {
+                                            window.loadAllProductRatings();
+                                        }, 200);
+                                    }
+                                    
+                                    // Load ratings for newly added services
+                                    if (typeof window.loadAllServiceRatings === 'function') {
+                                        setTimeout(() => {
+                                            window.loadAllServiceRatings();
+                                        }, 200);
                                     }
                                 }, 50);
                                 resolve(html);
@@ -5897,10 +5982,13 @@
                         <div class="product-content">
                             <h3 class="product-title">${productName}</h3>
                             <div class="product-card-rating" data-product-id="${product.id}">
-                                <div class="product-card-stars">
-                                    <i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i>
+                                <div class="rating-container">
+                                    <div class="product-card-stars">
+                                        <i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i>
+                                    </div>
+                                    <span class="product-card-rating-number">0.0</span>
+                                    <span class="product-card-rating-text">(0)</span>
                                 </div>
-                                <span class="product-card-rating-text">(0)</span>
                                 ${discount > 0 ? `<span class="discount-badge-rating">${discount}% ${currentCulture === 'ar' ? 'خصم' : 'OFF'}</span>` : ''}
                             </div>
                             <div class="price-actions-row" onclick="event.stopPropagation();">
@@ -5988,6 +6076,12 @@
             }
         })();
     </script>
+    
+    <!-- PRODUCT RATINGS LOADER - Shared script file -->
+    <script src="~/js/product-ratings.js"></script>
+    
+    <!-- SERVICE RATINGS LOADER - Shared script file -->
+    <script src="~/js/service-ratings.js"></script>
 }
 
 @section StructuredData {

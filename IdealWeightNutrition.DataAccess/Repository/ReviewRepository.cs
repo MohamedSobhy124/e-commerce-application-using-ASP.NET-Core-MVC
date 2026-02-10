@@ -57,8 +57,8 @@ namespace IdealWeightNutrition.DataAccess.Repository
 
             // Get all reviews for the products in one query
             var reviews = _db.Reviews
-                .Where(r => uniqueProductIds.Contains(r.ProductId) && r.IsApproved)
-                .GroupBy(r => r.ProductId)
+                .Where(r => r.ProductId.HasValue && uniqueProductIds.Contains(r.ProductId.Value) && r.IsApproved)
+                .GroupBy(r => r.ProductId.Value)
                 .Select(g => new
                 {
                     ProductId = g.Key,
@@ -94,6 +94,63 @@ namespace IdealWeightNutrition.DataAccess.Repository
                 .ThenByDescending(r => r.CreatedAt) // Most recent next
                 .Take(count)
                 .ToList();
+        }
+
+        // Service Review Methods
+        public double GetAverageServiceRating(int serviceId)
+        {
+            var average = _db.Reviews
+                .Where(r => r.ServiceSubscriptionId == serviceId && r.IsApproved)
+                .Select(r => (double?)r.Rating)
+                .Average();
+
+            return average.HasValue ? Math.Round(average.Value, 1) : 0;
+        }
+
+        public int GetServiceReviewCount(int serviceId)
+        {
+            return _db.Reviews
+                .Count(r => r.ServiceSubscriptionId == serviceId && r.IsApproved);
+        }
+
+        public IEnumerable<Review> GetApprovedReviewsByService(int serviceId)
+        {
+            return _db.Reviews
+                .Where(r => r.ServiceSubscriptionId == serviceId && r.IsApproved)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToList();
+        }
+
+        public Dictionary<int, (double averageRating, int reviewCount)> GetBatchServiceRatings(List<int> serviceIds)
+        {
+            if (serviceIds == null || !serviceIds.Any())
+                return new Dictionary<int, (double, int)>();
+
+            var uniqueServiceIds = serviceIds.Distinct().ToList();
+
+            var reviews = _db.Reviews
+                .Where(r => r.ServiceSubscriptionId.HasValue && uniqueServiceIds.Contains(r.ServiceSubscriptionId.Value) && r.IsApproved)
+                .GroupBy(r => r.ServiceSubscriptionId.Value)
+                .Select(g => new
+                {
+                    ServiceId = g.Key,
+                    AverageRating = Math.Round(g.Average(r => r.Rating), 1),
+                    ReviewCount = g.Count()
+                })
+                .ToList();
+
+            var result = uniqueServiceIds.ToDictionary(
+                id => id,
+                id =>
+                {
+                    var review = reviews.FirstOrDefault(r => r.ServiceId == id);
+                    return review != null
+                        ? (review.AverageRating, review.ReviewCount)
+                        : (0.0, 0);
+                }
+            );
+
+            return result;
         }
     }
 }

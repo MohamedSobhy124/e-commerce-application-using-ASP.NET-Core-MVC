@@ -293,6 +293,13 @@
                             }
                         }
                     });
+                    
+                    // Load ratings for flash sale products
+                    if (typeof window.loadAllProductRatings === 'function') {
+                        setTimeout(() => {
+                            window.loadAllProductRatings();
+                        }, 200);
+                    }
                 }, 100);
             })
             .catch(error => {

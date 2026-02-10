@@ -4742,4 +4742,100 @@
 	<data name="MinimumOrderForPayment" xml:space="preserve">
   <value>تبقّى {0} درهم للحصول على {1} 🎉</value>
 </data>
+  <data name="ProductNotFound" xml:space="preserve">
+    <value>المنتج غير موجود</value>
+  </data>
+  <data name="PleaseProvideValidRatingAndComment" xml:space="preserve">
+    <value>يرجى تقديم تقييم وتعليق صحيح</value>
+  </data>
+  <data name="YouHaveAlreadyReviewedThisProduct" xml:space="preserve">
+    <value>لقد قمت بمراجعة هذا المنتج بالفعل</value>
+  </data>
+  <data name="ReviewSubmittedSuccessfully" xml:space="preserve">
+    <value>تم إرسال مراجعتك بنجاح!</value>
+  </data>
+  <data name="ErrorSubmittingReview" xml:space="preserve">
+    <value>خطأ في إرسال المراجعة</value>
+  </data>
+  <data name="ServiceNotFound" xml:space="preserve">
+    <value>الخدمة غير موجودة</value>
+  </data>
+  <data name="YouHaveAlreadyReviewedThisService" xml:space="preserve">
+    <value>لقد قمت بتقييم هذه الخدمة مسبقاً</value>
+  </data>
+  <data name="WriteYourReview" xml:space="preserve">
+    <value>اكتب تقييمك</value>
+  </data>
+  <data name="ShareYourExperienceWithThisService" xml:space="preserve">
+    <value>شارك تجربتك مع هذه الخدمة...</value>
+  </data>
+  <data name="PleaseLoginToWriteReview" xml:space="preserve">
+    <value>يرجى تسجيل الدخول لكتابة تقييم</value>
+  </data>
+  <data name="YourServiceReview" xml:space="preserve">
+    <value>تقييمك للخدمة</value>
+  </data>
+  <data name="YourRating" xml:space="preserve">
+    <value>تقييمك</value>
+  </data>
+  <data name="YourReview" xml:space="preserve">
+    <value>مراجعتك</value>
+  </data>
+  <data name="MinimumCharacters" xml:space="preserve">
+    <value>الحد الأدنى من الأحرف</value>
+  </data>
+  <data name="SubmitReview" xml:space="preserve">
+    <value>إرسال التقييم</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>جاري التحميل</value>
+  </data>
+  <data name="NoReviewsYet" xml:space="preserve">
+    <value>لا توجد تقييمات بعد. كن أول من يقيّم!</value>
+  </data>
+  <data name="VerifiedPurchase" xml:space="preserve">
+    <value>عملية شراء موثقة</value>
+  </data>
+  <data name="TotalReviews" xml:space="preserve">
+    <value>إجمالي التقييمات</value>
+  </data>
+  <data name="PendingApproval" xml:space="preserve">
+    <value>في انتظار الموافقة</value>
+  </data>
+  <data name="Approved" xml:space="preserve">
+    <value>معتمد</value>
+  </data>
+  <data name="VerifiedReviews" xml:space="preserve">
+    <value>التقييمات الموثقة</value>
+  </data>
+  <data name="VerifiedPurchases" xml:space="preserve">
+    <value>مشتريات موثقة</value>
+  </data>
+  <data name="FilterByStatus" xml:space="preserve">
+    <value>تصفية حسب الحالة</value>
+  </data>
+  <data name="FilterByType" xml:space="preserve">
+    <value>تصفية حسب النوع</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>النوع</value>
+  </data>
+  <data name="Item" xml:space="preserve">
+    <value>العنصر</value>
+  </data>
+  <data name="Products" xml:space="preserve">
+    <value>المنتجات</value>
+  </data>
+  <data name="Services" xml:space="preserve">
+    <value>الخدمات</value>
+  </data>
+  <data name="ExportReviews" xml:space="preserve">
+    <value>تصدير التقييمات</value>
+  </data>
+  <data name="DesignedBy" xml:space="preserve">
+    <value>تصميم وتطوير</value>
+  </data>
+  <data name="ContactDesigner" xml:space="preserve">
+    <value>التواصل مع المصمم</value>
+  </data>
 </root>

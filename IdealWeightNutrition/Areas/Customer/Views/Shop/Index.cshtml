@@ -287,6 +287,21 @@
                                 
                                 <h3 class="shop-product-title">@productName</h3>
                                 
+                                <!-- Star Rating -->
+                                <div class="product-card-rating" data-product-id="@product.Id" style="margin: 0.5rem 0;">
+                                    <div class="rating-container" style="padding: 0.25rem 0.6rem; font-size: 0.85rem;">
+                                        <div class="product-card-stars" style="font-size: 0.75rem;">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                        </div>
+                                        <span class="product-card-rating-number">0.0</span>
+                                        <span class="product-card-rating-text" style="font-size: 0.7rem;">(0)</span>
+                                    </div>
+                                </div>
+                                
                                 <!-- Price -->
                                 <div class="shop-product-price">
                                     @if (shouldShowPrice || !hasVariants)
@@ -368,6 +383,9 @@
 </div>
 
 @section Scripts {
+<!-- Product Ratings Script -->
+<script src="~/js/product-ratings.js"></script>
+
 <script>
     const currentCulture = '@currentCulture';
     const currencySymbol = '@Html.Raw(currencySymbol)';
@@ -434,6 +452,13 @@
                 data.products.forEach(product => {
                     grid.insertAdjacentHTML('beforeend', createProductCard(product));
                 });
+                
+                // Load ratings for newly added products
+                if (typeof window.loadAllProductRatings === 'function') {
+                    setTimeout(() => {
+                        window.loadAllProductRatings();
+                    }, 200);
+                }
             }
             
             hasMore = data.hasMore;
@@ -502,6 +527,22 @@
                 <div class="shop-product-info">
                     ${categoryName ? `<span class="product-category">${categoryName}</span>` : ''}
                     <h3 class="shop-product-title">${productName}</h3>
+                    
+                    <!-- Star Rating -->
+                    <div class="product-card-rating" data-product-id="${product.id}" style="margin: 0.5rem 0;">
+                        <div class="rating-container" style="padding: 0.25rem 0.6rem; font-size: 0.85rem;">
+                            <div class="product-card-stars" style="font-size: 0.75rem;">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                            <span class="product-card-rating-number">0.0</span>
+                            <span class="product-card-rating-text" style="font-size: 0.7rem;">(0)</span>
+                        </div>
+                    </div>
+                    
                     <div class="shop-product-price">${priceHtml}</div>
                     <div class="shop-product-actions" onclick="event.stopPropagation();">${actionBtn}</div>
                 </div>

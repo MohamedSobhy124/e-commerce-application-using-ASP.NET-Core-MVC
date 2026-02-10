@@ -228,6 +228,24 @@
     line-height: 1.3;
 }
 
+/* Rating in flash sale product cards */
+.flash-sale-product-info .product-card-rating {
+    margin: 0.5rem 0 0.75rem 0;
+}
+
+.flash-sale-product-info .rating-container {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.85rem;
+}
+
+.flash-sale-product-info .product-card-stars {
+    font-size: 0.8rem;
+}
+
+.flash-sale-product-info .product-card-rating-text {
+    font-size: 0.75rem;
+}
+
 /* Price Section */
 .flash-sale-price-section {
     display: flex;

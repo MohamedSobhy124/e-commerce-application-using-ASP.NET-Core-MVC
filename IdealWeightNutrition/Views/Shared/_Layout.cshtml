@@ -653,7 +653,15 @@
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2025 <strong>Ideal Weight </strong>. @Localizer["AllRightsReserved"]</p>
+                <div class="footer-bottom-content">
+                    <p style="    color: rgba(255, 255, 255, 0.6);">&copy; @DateTime.Now.Year <strong>Ideal Weight</strong>. @Localizer["AllRightsReserved"]</p>
+                  @*   <p class="footer-credit" style="color: #374151 !important;">
+                        @Localizer["DesignedBy"] 
+                        <a href="mailto:smosobhy@gmail.com" class="designer-link" style="color: #374151 !important;" title="@Localizer["ContactDesigner"]">
+                            Mohamed Sobhy
+                        </a>
+                    </p> *@
+                </div>
                 <button id="backToTopBtn" class="back-to-top-btn" title="@Localizer["BackToTop"]">
                     <i class="bi bi-arrow-up"></i>
                 </button>

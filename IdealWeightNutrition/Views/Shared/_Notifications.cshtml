@@ -1,4 +1,4 @@
-﻿@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Localization
 @inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
 
 @if (TempData["success"] != null)
@@ -13,14 +13,22 @@
 @if (TempData["error"] != null)
 {
         var errorMessage = TempData["error"].ToString();
-        var isPaymentError = errorMessage.Contains("Payment") || errorMessage.Contains("payment") || 
+        
+        // More specific payment error detection - only treat as payment error if:
+        // 1. The message explicitly mentions payment
+        // 2. OR the path is PaymentSuccess/PaymentCallback AND not a review-related message
+        var isReviewError = errorMessage.Contains("review", StringComparison.OrdinalIgnoreCase) || 
+                           errorMessage.Contains("تقييم") || 
+                           errorMessage.Contains("مراجعة");
+        
+        var isPaymentError = !isReviewError && (
+                            errorMessage.Contains("Payment", StringComparison.OrdinalIgnoreCase) || 
                             errorMessage.Contains("PaymentNotSuccessful") || 
                             errorMessage.Contains("لم يتم الدفع") || 
                             errorMessage.Contains("اشتراكك") ||
-                            errorMessage.Contains("payment failed") ||
                             errorMessage.Contains("فشل الدفع") ||
-                            Context.Request.Path.Value.Contains("ServiceSubscription") ||
-                            Context.Request.Path.Value.Contains("PaymentSuccess");
+                            Context.Request.Path.Value.Contains("PaymentSuccess") ||
+                            Context.Request.Path.Value.Contains("PaymentCallback"));
     
     @if (isPaymentError)
     {

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using IdealWeightNutrition.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
@@ -90,6 +90,22 @@ namespace IdealWeightNutrition.DataAccess.Data
 			modelBuilder.Entity<OrderDetail>().HasIndex(od => new { od.OrderHeaderId, od.ProductId });
 			modelBuilder.Entity<ProductImage>().HasIndex(pi => pi.ProductId);
 			modelBuilder.Entity<Review>().HasIndex(r => new { r.ProductId, r.UserId });
+		modelBuilder.Entity<Review>().HasIndex(r => new { r.ServiceSubscriptionId, r.UserId }); // For service review uniqueness
+		
+		// Configure Review to support both Product and Service reviews
+		modelBuilder.Entity<Review>()
+			.HasOne(r => r.Product)
+			.WithMany(p => p.Reviews)
+			.HasForeignKey(r => r.ProductId)
+			.OnDelete(DeleteBehavior.Cascade)
+			.IsRequired(false);
+			
+		modelBuilder.Entity<Review>()
+			.HasOne(r => r.ServiceSubscription)
+			.WithMany(s => s.Reviews)
+			.HasForeignKey(r => r.ServiceSubscriptionId)
+			.OnDelete(DeleteBehavior.Cascade)
+			.IsRequired(false);
 			modelBuilder.Entity<Wishlist>().HasIndex(w => new { w.ApplicationUserId, w.ProductId });
 			modelBuilder.Entity<ProductVariantOptionValue>().HasIndex(vov => new { vov.ProductVariantId, vov.ProductOptionValueId });
 			
@@ -106,11 +122,14 @@ namespace IdealWeightNutrition.DataAccess.Data
 			modelBuilder.Entity<FlashSale>().HasIndex(f => new { f.IsActive, f.StartDate, f.EndDate });
 			modelBuilder.Entity<FlashSaleItem>().HasIndex(i => new { i.IsDeleted, i.FlashSaleQuantity }); // For flash sale item filtering
 			
-			// Reviews indexes - CRITICAL for performance
-			modelBuilder.Entity<Review>().HasIndex(r => new { r.ProductId, r.IsApproved }); // Most common query pattern
-			modelBuilder.Entity<Review>().HasIndex(r => r.IsApproved); // For filtering approved reviews
-			modelBuilder.Entity<Review>().HasIndex(r => new { r.ProductId, r.IsApproved, r.CreatedAt }); // For ordered review queries
-			modelBuilder.Entity<Review>().HasIndex(r => r.UserId); // For user review queries
+		// Reviews indexes - CRITICAL for performance
+		modelBuilder.Entity<Review>().HasIndex(r => new { r.ProductId, r.IsApproved }); // Most common query pattern
+		modelBuilder.Entity<Review>().HasIndex(r => r.IsApproved); // For filtering approved reviews
+		modelBuilder.Entity<Review>().HasIndex(r => new { r.ProductId, r.IsApproved, r.CreatedAt }); // For ordered review queries
+		modelBuilder.Entity<Review>().HasIndex(r => r.UserId); // For user review queries
+		// Service reviews indexes
+		modelBuilder.Entity<Review>().HasIndex(r => new { r.ServiceSubscriptionId, r.IsApproved }); // For service reviews
+		modelBuilder.Entity<Review>().HasIndex(r => new { r.ServiceSubscriptionId, r.IsApproved, r.CreatedAt }); // For ordered service reviews
 			
 			// OrderHeader indexes - CRITICAL for order queries
 			modelBuilder.Entity<OrderHeader>().HasIndex(o => o.ApplicationUserId); // For user orders
