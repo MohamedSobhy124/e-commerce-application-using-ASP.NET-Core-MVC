@@ -290,41 +290,17 @@ namespace IdealWeightNutrition.Controllers
         {
             try
             {
-                var urls = new List<XElement>();
-                
-                // Blog post slugs (matching BlogController)
-                var blogPosts = new[]
-                {
-                    new { Slug = "10-essential-weight-management-tips", DaysAgo = 5 },
-                    new { Slug = "ultimate-guide-healthy-meal-planning", DaysAgo = 8 },
-                    new { Slug = "understanding-body-nutritional-needs", DaysAgo = 12 },
-                    new { Slug = "best-supplements-health-wellness", DaysAgo = 15 },
-                    new { Slug = "build-sustainable-exercise-routine", DaysAgo = 18 },
-                    new { Slug = "science-intermittent-fasting", DaysAgo = 20 },
-                    new { Slug = "hydration-key-optimal-health", DaysAgo = 22 },
-                    new { Slug = "sleep-impact-weight-management", DaysAgo = 25 },
-                    new { Slug = "reading-nutrition-labels-guide", DaysAgo = 28 },
-                    new { Slug = "stress-management-techniques", DaysAgo = 30 },
-                    new { Slug = "probiotics-gut-health-guide", DaysAgo = 32 },
-                    new { Slug = "realistic-health-goals", DaysAgo = 35 },
-                    new { Slug = "strength-training-benefits-women", DaysAgo = 38 },
-                    new { Slug = "healthy-snacking-weight-control", DaysAgo = 40 },
-                    new { Slug = "shop-healthy-products-guide", DaysAgo = 42 },
-                    new { Slug = "building-healthy-habits-psychology", DaysAgo = 45 }
-                };
-                
-                foreach (var post in blogPosts)
-                {
-                    urls.Add(CreateUrlElementWithHreflang(
-                        baseUrl + $"/Customer/Blog/Details/{post.Slug}",
-                        IdealWeightNutrition.Utility.DateTimeHelper.Now.AddDays(-post.DaysAgo),
-                        "monthly",
-                        0.7,
-                        baseUrl
-                    ));
-                }
+                var blogPosts = _unitOfWork.BlogPost.GetAll()
+                    .OrderByDescending(b => b.PublishedDate)
+                    .ToList();
 
-                return urls;
+                return blogPosts.Select(post => CreateUrlElementWithHreflang(
+                    baseUrl + $"/Customer/Blog/Details/{post.Slug}",
+                    post.PublishedDate,
+                    "monthly",
+                    0.7,
+                    baseUrl
+                ));
             }
             catch (Exception ex)
             {

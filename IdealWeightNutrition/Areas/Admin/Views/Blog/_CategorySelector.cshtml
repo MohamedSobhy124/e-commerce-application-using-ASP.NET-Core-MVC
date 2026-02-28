@@ -1,0 +1,53 @@
+@* Category selector: dropdown with existing + add new. Pass FieldName, Value, Categories, Placeholder, Dir *@
+@{
+    var fieldName = ViewData["FieldName"]?.ToString() ?? "Category";
+    var value = ViewData["Value"]?.ToString() ?? "";
+    var categories = ViewData["Categories"] as IEnumerable<string> ?? Enumerable.Empty<string>();
+    var placeholder = ViewData["Placeholder"]?.ToString() ?? "Choose or type new category...";
+    var addNewLabel = ViewData["AddNewLabel"]?.ToString() ?? "Add new category";
+    var dir = ViewData["Dir"]?.ToString() ?? "";
+    var listId = $"category-datalist-{fieldName}";
+    var wrapperId = $"category-wrapper-{fieldName}";
+}
+
+<div class="category-selector-wrapper" id="@wrapperId" data-field="@fieldName" @(string.IsNullOrEmpty(dir) ? "" : "dir=\"rtl\"")>
+    <div class="category-selector-input-group">
+        <input type="text"
+               name="@fieldName"
+               id="@fieldName"
+               class="form-control category-selector-input"
+               list="@listId"
+               value="@value"
+               placeholder="@placeholder"
+               autocomplete="off"
+               @(string.IsNullOrEmpty(dir) ? "" : $"dir=\"{dir}\"") />
+        <button type="button" class="category-dropdown-btn" title="Show categories" aria-label="Show categories">
+            <i class="bi bi-chevron-down"></i>
+        </button>
+    </div>
+    <datalist id="@listId">
+        @foreach (var cat in categories)
+        {
+            <option value="@cat"></option>
+        }
+    </datalist>
+    <div class="category-suggestions-panel" style="display: none;">
+        <div class="category-suggestions-list">
+            @if (categories.Any())
+            {
+                @foreach (var cat in categories)
+                {
+                    <button type="button" class="category-suggestion-item" data-value="@cat">@cat</button>
+                }
+            }
+            else
+            {
+                <div class="category-empty-msg text-muted small px-3 py-2">@Localizer["NoCategoriesYet"]</div>
+            }
+        </div>
+        <div class="category-add-new">
+            <i class="bi bi-plus-circle"></i>
+            <span>@addNewLabel</span>
+        </div>
+    </div>
+</div>

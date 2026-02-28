@@ -153,7 +153,7 @@ function initializeNotifications() {
             if (isUserAdmin()) {
                 notificationConnection.invoke("JoinAdminGroup")
                     .then(() => console.log(' '))
-                    .catch(err => console.error('Error joining admin group:', err));
+                    .catch(err => console.error('', err));
             }
         })
         .catch(function (err) {

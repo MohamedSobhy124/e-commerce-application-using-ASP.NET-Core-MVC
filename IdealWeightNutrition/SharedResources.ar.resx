@@ -4838,4 +4838,97 @@
   <data name="ContactDesigner" xml:space="preserve">
     <value>التواصل مع المصمم</value>
   </data>
+  <data name="BlogManagement" xml:space="preserve">
+    <value>إدارة المدونة</value>
+  </data>
+  <data name="BlogPostsCount" xml:space="preserve">
+    <value>{0} مقال/مقالات</value>
+  </data>
+  <data name="AddNewBlog" xml:space="preserve">
+    <value>إضافة مقال جديد</value>
+  </data>
+  <data name="NoBlogsYet" xml:space="preserve">
+    <value>لا توجد مقالات بعد</value>
+  </data>
+  <data name="CreateFirstBlog" xml:space="preserve">
+    <value>أنشئ أول مقال لك للبدء.</value>
+  </data>
+  <data name="AddFirstBlog" xml:space="preserve">
+    <value>إضافة أول مقال</value>
+  </data>
+  <data name="Published" xml:space="preserve">
+    <value>تاريخ النشر</value>
+  </data>
+  <data name="Visible" xml:space="preserve">
+    <value>مرئي</value>
+  </data>
+  <data name="Hidden" xml:space="preserve">
+    <value>مخفي</value>
+  </data>
+  <data name="CreateNewBlogPost" xml:space="preserve">
+    <value>إنشاء مقال جديد</value>
+  </data>
+  <data name="EditBlogPost" xml:space="preserve">
+    <value>تعديل المقال</value>
+  </data>
+  <data name="EnglishContent" xml:space="preserve">
+    <value>المحتوى بالإنجليزي</value>
+  </data>
+  <data name="ArabicContent" xml:space="preserve">
+    <value>المحتوى بالعربي</value>
+  </data>
+  <data name="ExcerptShortSummary" xml:space="preserve">
+    <value>الملخص</value>
+  </data>
+  <data name="MetaDescription" xml:space="preserve">
+    <value>وصف الميتا (SEO)</value>
+  </data>
+  <data name="MetaKeywords" xml:space="preserve">
+    <value>كلمات الميتا (SEO)</value>
+  </data>
+  <data name="ImageAndSettings" xml:space="preserve">
+    <value>الصورة والإعدادات</value>
+  </data>
+  <data name="CoverImage" xml:space="preserve">
+    <value>صورة الغلاف</value>
+  </data>
+  <data name="ImageUrlOrUpload" xml:space="preserve">
+    <value>أو استخدم رابط الصورة أدناه للصور الخارجية</value>
+  </data>
+  <data name="ImageUrlPlaceholder" xml:space="preserve">
+    <value>رابط الصورة (إن لم ترفع)</value>
+  </data>
+  <data name="PublishedDate" xml:space="preserve">
+    <value>تاريخ النشر</value>
+  </data>
+  <data name="ReadTimeMinutes" xml:space="preserve">
+    <value>وقت القراءة (دقائق)</value>
+  </data>
+  <data name="CreateBlog" xml:space="preserve">
+    <value>إنشاء المقال</value>
+  </data>
+  <data name="ChooseOrTypeNew" xml:space="preserve">
+    <value>اختر أو اكتب جديد...</value>
+  </data>
+  <data name="AddNewCategory" xml:space="preserve">
+    <value>إضافة فئة جديدة</value>
+  </data>
+  <data name="NoCategoriesYet" xml:space="preserve">
+    <value>لا توجد فئات بعد. أضف أول فئة أدناه!</value>
+  </data>
+  <data name="UploadNewImageOptional" xml:space="preserve">
+    <value>رفع صورة جديدة (اختياري)</value>
+  </data>
+  <data name="LeaveEmptyKeepCurrent" xml:space="preserve">
+    <value>اتركه فارغاً للاحتفاظ بالصورة الحالية</value>
+  </data>
+  <data name="CurrentImage" xml:space="preserve">
+    <value>الصورة الحالية</value>
+  </data>
+  <data name="ConfirmRestoreBlog" xml:space="preserve">
+    <value>استعادة هذا المقال؟</value>
+  </data>
+  <data name="ConfirmHideBlog" xml:space="preserve">
+    <value>إخفاء هذا المقال عن العملاء؟</value>
+  </data>
 </root>

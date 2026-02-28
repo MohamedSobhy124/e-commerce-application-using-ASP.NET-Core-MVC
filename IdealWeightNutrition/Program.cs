@@ -135,6 +135,7 @@ builder.Services.AddHsts(options =>
     options.MaxAge = TimeSpan.FromDays(365); // 1 year
 });
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.AddScoped<IEmailSender,EmailSender>();
 builder.Services.AddScoped<InvoiceService>();
 builder.Services.AddScoped<IdealWeightNutrition.Services.INotificationService, IdealWeightNutrition.Services.NotificationService>();
@@ -177,6 +178,13 @@ builder.Services.AddHostedService<IdealWeightNutrition.Services.PaymentVerificat
 builder.Services.AddHostedService<IdealWeightNutrition.Services.ExpiringProductsBackgroundService>();
 
 var app = builder.Build();
+
+    // Run database initializer (roles, admin user, blog seed)
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        dbInitializer.Initialize();
+    }
 
     if (!app.Environment.IsDevelopment())
     {

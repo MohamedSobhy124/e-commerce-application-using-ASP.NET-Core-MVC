@@ -4644,5 +4644,116 @@
   <data name="ContactDesigner" xml:space="preserve">
     <value>Contact the designer</value>
   </data>
+  <data name="BlogManagement" xml:space="preserve">
+    <value>Blog Management</value>
+  </data>
+  <data name="BlogPostsCount" xml:space="preserve">
+    <value>{0} blog post(s)</value>
+  </data>
+  <data name="AddNewBlog" xml:space="preserve">
+    <value>Add New Blog</value>
+  </data>
+  <data name="NoBlogsYet" xml:space="preserve">
+    <value>No blogs yet</value>
+  </data>
+  <data name="CreateFirstBlog" xml:space="preserve">
+    <value>Create your first blog post to get started.</value>
+  </data>
+  <data name="AddFirstBlog" xml:space="preserve">
+    <value>Add First Blog</value>
+  </data>
+  <data name="Published" xml:space="preserve">
+    <value>Published</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Visible" xml:space="preserve">
+    <value>Visible</value>
+  </data>
+  <data name="Hidden" xml:space="preserve">
+    <value>Hidden</value>
+  </data>
+  <data name="Restore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="Hide" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="CreateNewBlogPost" xml:space="preserve">
+    <value>Create New Blog Post</value>
+  </data>
+  <data name="EditBlogPost" xml:space="preserve">
+    <value>Edit Blog Post</value>
+  </data>
+  <data name="EnglishContent" xml:space="preserve">
+    <value>English Content</value>
+  </data>
+  <data name="ArabicContent" xml:space="preserve">
+    <value>Arabic Content</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="ExcerptShortSummary" xml:space="preserve">
+    <value>Excerpt (short summary)</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>Content</value>
+  </data>
+  <data name="MetaDescription" xml:space="preserve">
+    <value>Meta Description (SEO)</value>
+  </data>
+  <data name="MetaKeywords" xml:space="preserve">
+    <value>Meta Keywords (SEO)</value>
+  </data>
+  <data name="ImageAndSettings" xml:space="preserve">
+    <value>Image &amp; Settings</value>
+  </data>
+  <data name="CoverImage" xml:space="preserve">
+    <value>Cover Image</value>
+  </data>
+  <data name="ImageUrlOrUpload" xml:space="preserve">
+    <value>Or use Image URL below for external images</value>
+  </data>
+  <data name="ImageUrlPlaceholder" xml:space="preserve">
+    <value>Image URL (if not uploading)</value>
+  </data>
+  <data name="PublishedDate" xml:space="preserve">
+    <value>Published Date</value>
+  </data>
+  <data name="ReadTimeMinutes" xml:space="preserve">
+    <value>Read Time (minutes)</value>
+  </data>
+  <data name="CreateBlog" xml:space="preserve">
+    <value>Create Blog</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Save Changes</value>
+  </data>
+  <data name="ChooseOrTypeNew" xml:space="preserve">
+    <value>Choose or type new...</value>
+  </data>
+  <data name="AddNewCategory" xml:space="preserve">
+    <value>Add new category</value>
+  </data>
+  <data name="NoCategoriesYet" xml:space="preserve">
+    <value>No categories yet. Add your first one below!</value>
+  </data>
+  <data name="UploadNewImageOptional" xml:space="preserve">
+    <value>Upload New Image (optional)</value>
+  </data>
+  <data name="LeaveEmptyKeepCurrent" xml:space="preserve">
+    <value>Leave empty to keep current image</value>
+  </data>
+  <data name="CurrentImage" xml:space="preserve">
+    <value>Current Image</value>
+  </data>
+  <data name="ConfirmRestoreBlog" xml:space="preserve">
+    <value>Restore this blog?</value>
+  </data>
+  <data name="ConfirmHideBlog" xml:space="preserve">
+    <value>Hide this blog from customers?</value>
+  </data>
 
 </root>

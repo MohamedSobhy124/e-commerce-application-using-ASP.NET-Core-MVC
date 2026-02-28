@@ -140,6 +140,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/hero-welcome.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/lazy-loading.css" asp-append-version="true" />
     @if (isRtl)
     {
         <link rel="stylesheet" href="~/css/rtl.css" asp-append-version="true" />
@@ -357,6 +358,11 @@
                                     <li>
                                         <a class="dropdown-item" asp-area="Admin" asp-controller="ComboOffer" asp-action="Index">
                                             <i class="bi bi-box-seam me-2"></i>@Localizer["ComboOffers"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Blog" asp-action="Index">
+                                            <i class="bi bi-journal-text me-2"></i>@Localizer["Blog"]
                                         </a>
                                     </li>
                                     <li>
@@ -692,6 +698,7 @@
     <script src="~/js/wishlist-helper.js" asp-append-version="true" defer></script>
     <script src="~/js/flash-sale-customer-fixed.js" asp-append-version="true" defer></script>
     <script src="~/js/site.js" asp-append-version="true" defer></script>
+    <script src="~/js/image-lazy-loading.js" asp-append-version="true" defer></script>
 
     <!-- Global Authentication State -->
     <script>

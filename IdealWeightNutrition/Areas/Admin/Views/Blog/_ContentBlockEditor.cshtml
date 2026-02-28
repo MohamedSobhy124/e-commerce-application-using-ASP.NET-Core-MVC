@@ -1,0 +1,25 @@
+@* Block-based content editor: Add Header or Paragraph. Outputs HTML to hidden input. *@
+@{
+    var fieldName = ViewData["FieldName"]?.ToString() ?? "Content";
+    var value = ViewData["Value"]?.ToString() ?? "";
+    var dir = ViewData["Dir"]?.ToString() ?? "";
+    var containerId = $"content-blocks-{fieldName}";
+    var hiddenId = $"content-hidden-{fieldName}";
+}
+
+<div class="content-block-editor" data-field="@fieldName" data-dir="@dir">
+    <div class="content-editor-toolbar">
+        <button type="button" class="content-add-btn content-add-header add-block-btn" data-type="header">
+            <i class="bi bi-type-h1"></i>
+            <span>Add Header</span>
+        </button>
+        <button type="button" class="content-add-btn content-add-paragraph add-block-btn" data-type="paragraph">
+            <i class="bi bi-paragraph"></i>
+            <span>Add Paragraph</span>
+        </button>
+    </div>
+    <div id="@containerId" class="content-blocks-container">
+        @* Blocks rendered by JavaScript *@
+    </div>
+    <input type="hidden" id="@hiddenId" name="@fieldName" value="@value" />
+</div>

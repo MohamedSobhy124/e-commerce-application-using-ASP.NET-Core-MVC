@@ -1,4 +1,4 @@
-﻿using IdealWeightNutrition.Models;
+using IdealWeightNutrition.Models;
 using IdealWeightNutrition.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -28,16 +28,15 @@ namespace IdealWeightNutrition.DataAccess.DbInitializer {
 
         public void Initialize() {
 
-
-            //migrations if they are not applied
-            //try {
-            //    if (_db.Database.GetPendingMigrations().Count() > 0) {
-            //        _db.Database.Migrate();
-            //    }
-            //}
-            //catch(Exception ex) { }
-
-
+            // Apply pending migrations so BlogPosts table exists before seeding
+            try {
+                if (_db.Database.GetPendingMigrations().Any()) {
+                    _db.Database.Migrate();
+                }
+            }
+            catch (Exception ex) {
+                System.Diagnostics.Debug.WriteLine($"Migration skipped or failed: {ex.Message}");
+            }
 
             //create roles if they are not created
             if (!_roleManager.RoleExistsAsync(SD.Role_Customer).GetAwaiter().GetResult()) {
@@ -63,6 +62,17 @@ namespace IdealWeightNutrition.DataAccess.DbInitializer {
                 //ApplicationUser user = _db.app.FirstOrDefault(u => u.Email == "admin@dotnetmastery.com");
                 //_userManager.AddToRoleAsync(user, SD.Role_Admin).GetAwaiter().GetResult();
 
+            }
+
+            // Seed blog posts if table is empty
+            try
+            {
+                BlogPostSeed.Seed(_db);
+            }
+            catch (Exception ex)
+            {
+                // Log but don't fail - blog table might not exist yet before migration
+                System.Diagnostics.Debug.WriteLine($"Blog seed skipped or failed: {ex.Message}");
             }
 
             return;

@@ -1,5 +1,5 @@
-@using IdealWeightNutrition.Areas.Customer.Controllers
-@model BlogPost
+@using IdealWeightNutrition.Models.ViewModels
+@model BlogPostDisplayViewModel
 @inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResources> Localizer
 
 @{
@@ -7,7 +7,7 @@
     var requestCulture = Context.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
     var isRtl = currentCulture == "ar";
-    var relatedBlogs = ViewBag.RelatedBlogs as List<BlogPost> ?? new List<BlogPost>();
+    var relatedBlogs = ViewBag.RelatedBlogs as List<BlogPostDisplayViewModel> ?? new List<BlogPostDisplayViewModel>();
 }
 
 @section Head {
@@ -17,7 +17,7 @@
     <meta property="og:description" content="@Model.MetaDescription" />
     <meta property="og:type" content="article" />
     <meta property="og:url" content="@(Context.Request.Scheme)://@(Context.Request.Host)@(Context.Request.Path)" />
-    <meta property="og:image" content="@(Context.Request.Scheme)://@(Context.Request.Host)@Model.ImageUrl" />
+    <meta property="og:image" content="@(Model.ImageUrl?.StartsWith("http") == true ? Model.ImageUrl : Context.Request.Scheme + "://" + Context.Request.Host + (Model.ImageUrl ?? ""))" />
     <meta property="article:published_time" content="@Model.PublishedDate.ToString("yyyy-MM-ddTHH:mm:ssZ")" />
     <meta property="article:author" content="@Model.Author" />
     <meta property="article:section" content="@Model.Category" />

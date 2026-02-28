@@ -1,0 +1,204 @@
+@model IdealWeightNutrition.Models.BlogPost
+
+@{
+    ViewData["Title"] = Localizer["CreateNewBlogPost"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="admin-wrapper blog-admin">
+    <div class="container">
+        <a asp-action="Index" class="blog-quick-back">
+            <i class="bi bi-arrow-left"></i>
+            @Localizer["BackToList"]
+        </a>
+        <div class="admin-form-wrapper">
+            <div class="admin-form-header">
+                <h2 class="admin-form-title">
+                    <i class="bi bi-journal-plus me-3"></i>
+                    @Localizer["CreateNewBlogPost"]
+                </h2>
+            </div>
+
+            <div class="admin-form-body">
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="Slug" id="Slug" />
+                    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+                    <div class="card mb-4 content-section-card">
+                        <div class="card-header english">
+                            <h5 class="mb-0"><i class="bi bi-translate me-2"></i>@Localizer["EnglishContent"]</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="Title" class="admin-form-label">@Localizer["Title"] <span class="text-danger">*</span></label>
+                                        <input asp-for="Title" class="form-control" />
+                                        <span asp-validation-for="Title" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="Category" class="admin-form-label">@Localizer["Category"] <span class="text-danger">*</span></label>
+                                        <partial name="_CategorySelector" view-data='@new ViewDataDictionary(ViewData) { { "FieldName", "Category" }, { "Value", Model.Category }, { "Categories", ViewBag.CategoriesEn }, { "Placeholder", Localizer["ChooseOrTypeNew"].Value }, { "AddNewLabel", Localizer["AddNewCategory"].Value }, { "Dir", "" } }' />
+                                        <span asp-validation-for="Category" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="admin-form-group">
+                                <label asp-for="Author" class="admin-form-label">@Localizer["Author"] <span class="text-danger">*</span></label>
+                                <input asp-for="Author" class="form-control" />
+                                <span asp-validation-for="Author" class="text-danger"></span>
+                            </div>
+                            <div class="admin-form-group">
+                                <label asp-for="Excerpt" class="admin-form-label">@Localizer["ExcerptShortSummary"] <span class="text-danger">*</span></label>
+                                <textarea asp-for="Excerpt" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Excerpt" class="text-danger"></span>
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">@Localizer["Content"] <span class="text-danger">*</span></label>
+                                <partial name="_ContentBlockEditor" view-data='@new ViewDataDictionary(ViewData) { { "FieldName", "Content" }, { "Value", Model.Content }, { "Dir", "" } }' />
+                                <span asp-validation-for="Content" class="text-danger"></span>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="MetaDescription" class="admin-form-label">@Localizer["MetaDescription"]</label>
+                                        <textarea asp-for="MetaDescription" class="form-control" rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="MetaKeywords" class="admin-form-label">@Localizer["MetaKeywords"]</label>
+                                        <input asp-for="MetaKeywords" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4 content-section-card">
+                        <div class="card-header arabic">
+                            <h5 class="mb-0"><i class="bi bi-translate me-2"></i>@Localizer["ArabicContent"]</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="TitleAr" class="admin-form-label">@Localizer["Title"] <span class="text-danger">*</span></label>
+                                        <input asp-for="TitleAr" class="form-control" dir="rtl" />
+                                        <span asp-validation-for="TitleAr" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="CategoryAr" class="admin-form-label">@Localizer["Category"] <span class="text-danger">*</span></label>
+                                        <partial name="_CategorySelector" view-data='@new ViewDataDictionary(ViewData) { { "FieldName", "CategoryAr" }, { "Value", Model.CategoryAr }, { "Categories", ViewBag.CategoriesAr }, { "Placeholder", Localizer["ChooseOrTypeNew"].Value }, { "AddNewLabel", Localizer["AddNewCategory"].Value }, { "Dir", "rtl" } }' />
+                                        <span asp-validation-for="CategoryAr" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="admin-form-group">
+                                <label asp-for="AuthorAr" class="admin-form-label">@Localizer["Author"] <span class="text-danger">*</span></label>
+                                <input asp-for="AuthorAr" class="form-control" dir="rtl" />
+                                <span asp-validation-for="AuthorAr" class="text-danger"></span>
+                            </div>
+                            <div class="admin-form-group">
+                                <label asp-for="ExcerptAr" class="admin-form-label">@Localizer["ExcerptShortSummary"] <span class="text-danger">*</span></label>
+                                <textarea asp-for="ExcerptAr" class="form-control" rows="3" dir="rtl"></textarea>
+                                <span asp-validation-for="ExcerptAr" class="text-danger"></span>
+                            </div>
+                            <div class="admin-form-group" dir="rtl">
+                                <label class="admin-form-label">@Localizer["Content"] <span class="text-danger">*</span></label>
+                                <partial name="_ContentBlockEditor" view-data='@new ViewDataDictionary(ViewData) { { "FieldName", "ContentAr" }, { "Value", Model.ContentAr }, { "Dir", "rtl" } }' />
+                                <span asp-validation-for="ContentAr" class="text-danger"></span>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="MetaDescriptionAr" class="admin-form-label">@Localizer["MetaDescription"]</label>
+                                        <textarea asp-for="MetaDescriptionAr" class="form-control" rows="2" dir="rtl"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="MetaKeywordsAr" class="admin-form-label">@Localizer["MetaKeywords"]</label>
+                                        <input asp-for="MetaKeywordsAr" class="form-control" dir="rtl" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4 content-section-card">
+                        <div class="card-header settings">
+                            <h5 class="mb-0"><i class="bi bi-image me-2"></i>@Localizer["ImageAndSettings"]</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="ImageFile" class="admin-form-label">@Localizer["CoverImage"]</label>
+                                        <input type="file" asp-for="ImageFile" class="form-control" accept="image/*" />
+                                        <small class="text-muted">@Localizer["ImageUrlOrUpload"]</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="ImageUrl" class="admin-form-label">@Localizer["ImageUrlPlaceholder"]</label>
+                                        <input asp-for="ImageUrl" class="form-control" placeholder="https://..." />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="admin-form-group">
+                                        <label asp-for="PublishedDate" class="admin-form-label">@Localizer["PublishedDate"] <span class="text-danger">*</span></label>
+                                        <input asp-for="PublishedDate" class="form-control" type="datetime-local" />
+                                        <span asp-validation-for="PublishedDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="admin-form-group">
+                                        <label asp-for="ReadTime" class="admin-form-label">@Localizer["ReadTimeMinutes"]</label>
+                                        <input asp-for="ReadTime" class="form-control" type="number" min="1" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle me-2"></i>@Localizer["CreateBlog"]
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary btn-lg">
+                            <i class="bi bi-arrow-left me-2"></i>@Localizer["BackToList"]
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Head {
+    <link rel="stylesheet" href="~/css/blog-category-selector.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/blog-admin.css" asp-append-version="true" />
+}
+@section scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/blog-content-editor.js" asp-append-version="true"></script>
+    <script src="~/js/blog-category-selector.js" asp-append-version="true"></script>
+    <script>
+        document.getElementById('Title').addEventListener('input', function() {
+            const slug = this.value.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+            document.getElementById('Slug').value = slug;
+        });
+    </script>
+}
+

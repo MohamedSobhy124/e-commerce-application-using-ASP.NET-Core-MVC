@@ -1,4 +1,4 @@
-﻿    using System;
+    using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,6 +39,7 @@ namespace IdealWeightNutrition.DataAccess.Repository.IRepository
         IReturnRequestItemRepository ReturnRequestItem { get; }
         ICityRepository City { get; }
         IRemoteAreaRepository RemoteArea { get; }
+        IBlogPostRepository BlogPost { get; }
         void save();
     }
 }

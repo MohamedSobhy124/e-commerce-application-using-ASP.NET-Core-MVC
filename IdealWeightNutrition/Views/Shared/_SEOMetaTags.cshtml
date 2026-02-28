@@ -45,11 +45,15 @@
 <meta name="topic" content="@(currentCulture == "ar" ? "التغذية والوزن المثالي" : "Nutrition and Ideal Weight")" />
 <meta name="classification" content="@(currentCulture == "ar" ? "متجر التغذية والوزن المثالي" : "Nutrition and Ideal Weight Store")" />
 <meta name="author" content="@siteName" />
-<meta name="robots" content="index, follow" />
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+<meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+<meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 <meta name="language" content="@currentCulture" />
 <meta name="revisit-after" content="7 days" />
 <meta name="distribution" content="global" />
 <meta name="rating" content="general" />
+<meta name="referrer" content="no-referrer-when-downgrade" />
+<meta name="format-detection" content="telephone=yes, date=no, email=no, address=no" />
 
 <!-- Open Graph / Facebook - Enhanced for Google Search Logo Display -->
 <meta property="og:type" content="@(seo?.PageType ?? "website")" />
@@ -255,4 +259,65 @@ else
 <meta property="business:contact_data:region" content="Dubai" />
 <meta property="business:contact_data:postal_code" content="" />
 <meta property="business:contact_data:country_name" content="United Arab Emirates" />
+<meta property="business:contact_data:phone_number" content="+971-50-770-0559" />
+<meta property="business:contact_data:email" content="info@idealweightnutrition.ae" />
+<meta property="business:contact_data:website" content="@baseUrl" />
+
+<!-- Pinterest Meta Tags -->
+<meta name="pinterest-rich-pin" content="true" />
+<meta property="og:see_also" content="@baseUrl" />
+
+<!-- Article Meta Tags (for blog posts) -->
+@if (seo?.PageType == "article")
+{
+    var publishedDate = seo.PublishedDate ?? DateTime.Now;
+    var modifiedDate = seo.ModifiedDate ?? publishedDate;
+    <meta property="article:published_time" content="@publishedDate.ToString("yyyy-MM-ddTHH:mm:ssZ")" />
+    <meta property="article:modified_time" content="@modifiedDate.ToString("yyyy-MM-ddTHH:mm:ssZ")" />
+    <meta property="article:author" content="@(seo.Author ?? "Ideal Weight Nutrition")" />
+    <meta property="article:section" content="@(seo.Category ?? "Health & Wellness")" />
+    <meta property="article:tag" content="@pageKeywords" />
+    <meta property="og:updated_time" content="@modifiedDate.ToString("yyyy-MM-ddTHH:mm:ssZ")" />
+}
+
+<!-- Telegram/WhatsApp Sharing -->
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="telegram:channel" content="@@idealweightnutrition" />
+
+<!-- Additional Schema.org microdata -->
+<meta itemprop="name" content="@(pageTitle) - @siteName" />
+<meta itemprop="description" content="@pageDescription" />
+@if (seo?.PageType == "product" && seo.Price.HasValue)
+{
+    <meta itemprop="price" content="@seo.Price.Value.ToString("F2")" />
+    <meta itemprop="priceCurrency" content="AED" />
+    <meta itemprop="availability" content="@(seo.InStock ? "InStock" : "OutOfStock")" />
+}
+
+<!-- Payment & Currency -->
+<meta name="price-currency" content="AED" />
+<meta name="price-range" content="$$" />
+<meta name="payment-methods" content="Cash, Credit Card, Debit Card, Apple Pay, Google Pay" />
+
+<!-- Store/Business Type -->
+<meta name="business-type" content="E-commerce" />
+<meta name="industry" content="Health & Fitness, Nutrition Supplements" />
+
+<!-- Trust & Safety -->
+<meta name="secure-checkout" content="true" />
+<meta name="ssl-enabled" content="true" />
+<meta name="returns-policy" content="7-day return policy" />
+<meta name="shipping-info" content="Free delivery across UAE" />
+
+<!-- Mobile App Related (if you have one in future) -->
+<meta name="apple-mobile-web-app-title" content="Ideal Weight Nutrition" />
+<meta name="application-name" content="Ideal Weight Nutrition UAE" />
+
+<!-- Verification for other platforms -->
+<!-- Add these when you set up accounts -->
+<!-- <meta name="facebook-domain-verification" content="your-code-here" /> -->
+<!-- <meta name="pinterest-domain-verify" content="your-code-here" /> -->
+<!-- <meta name="yandex-verification" content="your-code-here" /> -->
+<!-- <meta name="msvalidate.01" content="your-bing-code-here" /> -->
 

@@ -1,0 +1,130 @@
+@model IEnumerable<IdealWeightNutrition.Models.BlogPost>
+@using Microsoft.AspNetCore.Localization
+@{
+    ViewData["Title"] = Localizer["BlogManagement"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var culture = requestCulture?.RequestCulture.Culture ?? System.Globalization.CultureInfo.CurrentCulture;
+    var dateFormat = culture.Name == "ar" ? "dd/MM/yyyy" : "MMM dd, yyyy";
+}
+
+<partial name="_Notifications" />
+
+<div class="admin-wrapper blog-admin">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">
+                    <i class="bi bi-journal-text me-3"></i>
+                    @Localizer["BlogManagement"]
+                </h2>
+            </div>
+
+            <div class="admin-card-body">
+                <div class="blog-stats-bar">
+                    <div class="stats-count">
+                        <i class="bi bi-info-circle"></i>
+                        <span>@string.Format(Localizer["BlogPostsCount"].Value, Model.Count())</span>
+                    </div>
+                    <a asp-action="Create" class="create-new-btn">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        @Localizer["AddNewBlog"]
+                    </a>
+                </div>
+
+                @if (!Model.Any())
+                {
+                    <div class="blog-empty-state">
+                        <i class="bi bi-journal-plus blog-empty-icon"></i>
+                        <h4>@Localizer["NoBlogsYet"]</h4>
+                        <p>@Localizer["CreateFirstBlog"]</p>
+                        <a asp-action="Create" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            @Localizer["AddFirstBlog"]
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="admin-table-wrapper">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">@Localizer["Image"]</th>
+                                    <th>@Localizer["Title"]</th>
+                                    <th>@Localizer["Category"]</th>
+                                    <th>@Localizer["Author"]</th>
+                                    <th>@Localizer["Published"]</th>
+                                    <th>@Localizer["Status"]</th>
+                                    <th style="width: 180px;" class="text-center">@Localizer["Actions"]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr class="@(item.IsDeleted ? "table-secondary" : "")">
+                                        <td class="text-center">
+                                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                            {
+                                                <img src="@(item.ImageUrl.StartsWith("http") ? item.ImageUrl : Url.Content("~" + item.ImageUrl))" alt="@item.Title" class="blog-thumb" />
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-image text-muted" style="font-size: 1.5rem;"></i>
+                                            }
+                                        </td>
+                                        <td>
+                                            <strong>@(item.Title?.Length > 50 ? item.Title.Substring(0, 50) + "..." : item.Title)</strong>
+                                        </td>
+                                        <td>@item.Category</td>
+                                        <td>@item.Author</td>
+                                        <td>@item.PublishedDate.ToString(dateFormat)</td>
+                                        <td>
+                                            @if (item.IsDeleted)
+                                            {
+                                                <span class="badge badge-hidden">@Localizer["Hidden"]</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-visible">@Localizer["Visible"]</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-action-group" role="group">
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary" title="@Localizer["Edit"]">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                @if (item.IsDeleted)
+                                                {
+                                                    <form asp-action="Restore" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit='return confirm(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["ConfirmRestoreBlog"].Value)));'>
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-sm btn-success" title="@Localizer["Restore"]">
+                                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <form asp-action="Hide" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit='return confirm(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["ConfirmHideBlog"].Value)));'>
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-sm btn-warning" title="@Localizer["Hide"]">
+                                                            <i class="bi bi-eye-slash"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Head {
+    <link rel="stylesheet" href="~/css/blog-admin.css" asp-append-version="true" />
+}

@@ -1,4 +1,4 @@
-﻿using IdealWeightNutrition.DataAccess.Data;
+using IdealWeightNutrition.DataAccess.Data;
 using IdealWeightNutrition.DataAccess.Repository.IRepository;
 using IdealWeightNutrition.Models;
 using System;
@@ -46,6 +46,7 @@ namespace IdealWeightNutrition.DataAccess.Repository
         public IReturnRequestItemRepository ReturnRequestItem { get; private set; }
         public ICityRepository City { get; private set; }
         public IRemoteAreaRepository RemoteArea { get; private set; }
+        public IBlogPostRepository BlogPost { get; private set; }
 
         public UnitOfWork(ApplicationDBContext db) 
         {
@@ -81,6 +82,7 @@ namespace IdealWeightNutrition.DataAccess.Repository
             ReturnRequestItem = new ReturnRequestItemRepository(_db);
             City = new CityRepository(_db);
             RemoteArea = new RemoteAreaRepository(_db);
+            BlogPost = new BlogPostRepository(_db);
 
         }
 

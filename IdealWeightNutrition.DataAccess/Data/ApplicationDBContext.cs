@@ -50,6 +50,7 @@ namespace IdealWeightNutrition.DataAccess.Data
         public DbSet<ReturnRequestItem> ReturnRequestItems { get; set; }
         public DbSet<City> Cities { get; set; }
         public DbSet<RemoteArea> RemoteAreas { get; set; }
+        public DbSet<BlogPost> BlogPosts { get; set; }
 
 
 
@@ -229,6 +230,10 @@ namespace IdealWeightNutrition.DataAccess.Data
 			modelBuilder.Entity<FlashSaleItem>().HasIndex(i => i.ProductId).HasDatabaseName("IX_FlashSaleItems_ProductId");
 			modelBuilder.Entity<FlashSaleItem>().HasIndex(i => i.ProductVariantId).HasDatabaseName("IX_FlashSaleItems_ProductVariantId")
 				.HasFilter("[ProductVariantId] IS NOT NULL");
+
+			// BlogPost indexes
+			modelBuilder.Entity<BlogPost>().HasIndex(b => b.Slug).IsUnique();
+			modelBuilder.Entity<BlogPost>().HasIndex(b => new { b.IsDeleted, b.PublishedDate });
 
 			//modelBuilder.Entity<Company>().HasData(
 			//	new Company

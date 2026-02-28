@@ -19,11 +19,9 @@
                 return serviceId ? parseInt(serviceId) : null;
             })
             .filter((id, index, self) => id !== null && self.indexOf(id) === index); // Remove duplicates and nulls
+         
         
-        console.log('📋 Service IDs to fetch:', serviceIds);
-        
-        if (serviceIds.length === 0) {
-            console.warn('⚠️ No valid service IDs found');
+        if (serviceIds.length === 0) { 
             return;
         }
         

@@ -1,0 +1,115 @@
+/* Blog Category Selector - Cool combobox style */
+.category-selector-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.category-selector-input-group {
+    display: flex;
+    align-items: stretch;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #ced4da;
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.category-selector-input-group:focus-within {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.category-selector-input {
+    flex: 1;
+    border: none !important;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+}
+
+.category-selector-input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.category-dropdown-btn {
+    background: #f8f9fa;
+    border: none;
+    padding: 0 0.75rem;
+    color: #6c757d;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.category-dropdown-btn:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.category-suggestions-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1050;
+    max-height: 220px;
+    overflow-y: auto;
+    animation: categoryPanelFadeIn 0.2s ease;
+}
+
+@keyframes categoryPanelFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.category-suggestions-list {
+    padding: 0.5rem 0;
+    max-height: 160px;
+    overflow-y: auto;
+}
+
+.category-suggestion-item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 0.95rem;
+    color: #212529;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.category-suggestion-item:hover {
+    background: #e7f1ff;
+}
+
+.category-suggestion-item:active {
+    background: #cfe2ff;
+}
+
+.category-add-new {
+    padding: 0.6rem 1rem;
+    border-top: 1px solid #eee;
+    color: #0d6efd;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.15s;
+}
+
+.category-add-new:hover {
+    background: #e7f1ff;
+}
+
+[dir="rtl"] .category-suggestion-item,
+[dir="rtl"] .category-add-new {
+    text-align: right;
+}
