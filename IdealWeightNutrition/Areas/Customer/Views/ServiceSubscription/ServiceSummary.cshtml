@@ -1221,7 +1221,7 @@
                     }
                     
                     var domain = parts[1].toLowerCase();
-                    if (domain.includes('..') || domain.startsWith('.') || domain.endsWith('.') || domain.length < 4) {
+                    if (domain.includes('..') || domain.startsWith('.') || domain.endsWith('.') || domain.length &lt; 4) {
                         return { valid: false, message: '@(Localizer["InvalidEmailFormat"]?.Value ?? "Please enter a valid email address")' };
                     }
                     
