@@ -368,6 +368,9 @@ namespace IdealWeightNutrition.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("AllowFreeDelivery")
+                        .HasColumnType("bit");
+
                     b.Property<decimal>("ComboPrice")
                         .HasColumnType("decimal(18,2)");
 
@@ -393,6 +396,9 @@ namespace IdealWeightNutrition.DataAccess.Migrations
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<double>("FreeDeliveryMinimumAmount")
+                        .HasColumnType("float");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()

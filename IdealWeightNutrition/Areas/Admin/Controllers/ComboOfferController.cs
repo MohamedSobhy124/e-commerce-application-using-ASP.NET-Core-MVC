@@ -509,6 +509,8 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
                     existingComboOffer.MinimumQuantity = comboOffer.MinimumQuantity;
                     existingComboOffer.MaximumQuantity = comboOffer.MaximumQuantity;
                     existingComboOffer.DisplayOrder = comboOffer.DisplayOrder;
+                    existingComboOffer.AllowFreeDelivery = comboOffer.AllowFreeDelivery;
+                    existingComboOffer.FreeDeliveryMinimumAmount = comboOffer.FreeDeliveryMinimumAmount;
 
                     _unitOfWork.ComboOffer.Update(existingComboOffer);
                     _unitOfWork.save();

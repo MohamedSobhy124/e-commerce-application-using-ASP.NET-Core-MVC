@@ -1873,31 +1873,22 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 				subtotal += (cart.Price * cart.Count);
 			}
 
-			// Check if all products allow free delivery and get maximum minimum amount
+			// Check if all cart items (products and combos) allow free delivery and get maximum minimum amount
 			bool allProductsAllowFreeDelivery = true;
 			double maxFreeDeliveryMinimum = 0;
 
 			foreach (var cart in cartList)
 			{
-				if (cart.product == null)
+				var (allow, minimum) = GetFreeDeliverySettings(cart);
+				if (!allow)
 				{
-					cart.product = _unitOfWork.product.Get(p => p.Id == cart.ProductId);
+					allProductsAllowFreeDelivery = false;
+					break;
 				}
 
-				if (cart.product != null)
+				if (minimum > maxFreeDeliveryMinimum)
 				{
-					if (!cart.product.AllowFreeDelivery)
-					{
-						allProductsAllowFreeDelivery = false;
-						break;
-					}
-					else
-					{
-						if (cart.product.FreeDeliveryMinimumAmount > maxFreeDeliveryMinimum)
-						{
-							maxFreeDeliveryMinimum = cart.product.FreeDeliveryMinimumAmount;
-						}
-					}
+					maxFreeDeliveryMinimum = minimum;
 				}
 			}
 
@@ -2282,30 +2273,19 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
 				bool allProductsAllowFreeDelivery = true;
 				double maxFreeDeliveryMinimum = 0;
 				
-				// Check if all products in cart allow free delivery and get the maximum minimum amount
+				// Check if all cart items (products and combos) allow free delivery and get the maximum minimum amount
 				foreach (var cart in ShoppingCartVM.ShoppingCartList)
 				{
-					// Load product if not already loaded
-					if (cart.product == null)
+					var (allow, minimum) = GetFreeDeliverySettings(cart);
+					if (!allow)
 					{
-						cart.product = _unitOfWork.product.Get(p => p.Id == cart.ProductId);
+						allProductsAllowFreeDelivery = false;
+						break; // If any item doesn't allow free delivery, stop checking
 					}
-					
-					if (cart.product != null)
+
+					if (minimum > maxFreeDeliveryMinimum)
 					{
-						if (!cart.product.AllowFreeDelivery)
-						{
-							allProductsAllowFreeDelivery = false;
-							break; // If any product doesn't allow free delivery, stop checking
-						}
-						else
-						{
-							// Track the maximum minimum amount required
-							if (cart.product.FreeDeliveryMinimumAmount > maxFreeDeliveryMinimum)
-							{
-								maxFreeDeliveryMinimum = cart.product.FreeDeliveryMinimumAmount;
-							}
-						}
+						maxFreeDeliveryMinimum = minimum;
 					}
 				}
 				
@@ -4161,6 +4141,18 @@ namespace IdealWeightNutrition.Areas.Customer.Controllers
             }
 
             return (totalDiscount, itemDiscounts);
+        }
+
+        private (bool allow, double minimum) GetFreeDeliverySettings(ShoppingCart cart)
+        {
+            if (cart.ComboOfferId.HasValue)
+            {
+                var combo = cart.ComboOffer ?? _unitOfWork.ComboOffer.Get(c => c.Id == cart.ComboOfferId.Value);
+                return combo == null ? (false, 0) : (combo.AllowFreeDelivery, combo.FreeDeliveryMinimumAmount);
+            }
+
+            var product = cart.product ?? _unitOfWork.product.Get(p => p.Id == cart.ProductId);
+            return product == null ? (true, 0) : (product.AllowFreeDelivery, product.FreeDeliveryMinimumAmount);
         }
 
         private double GetCartItemPrice(ShoppingCart shoppingCart)

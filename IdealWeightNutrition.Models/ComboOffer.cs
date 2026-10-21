@@ -112,6 +112,14 @@ namespace IdealWeightNutrition.Models
         [Range(0, int.MaxValue, ErrorMessage = "Display order must be 0 or greater")]
         public int DisplayOrder { get; set; } = 0;
 
+        // Free Delivery Settings
+        [Display(Name = "Allow Free Delivery")]
+        public bool AllowFreeDelivery { get; set; } = false;
+
+        [Display(Name = "Free Delivery Minimum Amount (AED)")]
+        [Range(0, double.MaxValue, ErrorMessage = "Minimum amount must be 0 or greater")]
+        public double FreeDeliveryMinimumAmount { get; set; } = 0;
+
         // Navigation property for items in this combo
         [ValidateNever]
         public ICollection<ComboOfferItem> ComboOfferItems { get; set; } = new List<ComboOfferItem>();

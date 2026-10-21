@@ -321,6 +321,29 @@
                 <div class="savings-badge">
                     <i class="bi bi-tag-fill me-2"></i>@Localizer["YouSave"] @Html.Raw(currencySymbol)@Model.TotalSavings.ToString("N2")
                 </div>
+                @if (Model.AllowFreeDelivery)
+                {
+                    <div class="free-delivery-info mt-3 p-3" style="background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%); border: 2px solid #7BC043; border-radius: 8px; display: inline-block; text-align: start;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck text-success me-2" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <strong class="text-success">@Localizer["FreeDeliveryAvailable"]</strong>
+                                @if (Model.FreeDeliveryMinimumAmount > 0)
+                                {
+                                    <p class="mb-0 mt-1" style="font-size: 0.9rem; color: #333;">
+                                        @string.Format(Localizer["FreeDeliveryMinimumAmountMessage"].Value ?? "Free delivery on orders above {0} AED", Model.FreeDeliveryMinimumAmount.ToString("N2"))
+                                    </p>
+                                }
+                                else
+                                {
+                                    <p class="mb-0 mt-1" style="font-size: 0.9rem; color: #333;">
+                                        @Localizer["FreeDeliveryNoMinimumMessage"]
+                                    </p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
             </div>
             
             <!-- Add to Cart Section (Right Side) -->
