@@ -7,12 +7,17 @@
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var currentCulture = requestCulture.RequestCulture.Culture.Name;
     var isRtl = currentCulture == "ar";
+    var isAdminSurface = string.Equals(ViewContext.RouteData.Values["area"]?.ToString(), "Admin", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
 <html lang="@currentCulture" dir="@(isRtl ? "rtl" : "ltr")">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script>
+        if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
+        if (!location.hash) { window.scrollTo(0, 0); }
+    </script>
     @{
         var pageTitle = ViewData["Title"]?.ToString() ?? "";
         var isHomePage = string.IsNullOrEmpty(pageTitle) || pageTitle == "Home" || pageTitle == "الرئيسية";
@@ -123,6 +128,12 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="dns-prefetch" href="https://code.jquery.com">
     <link rel="dns-prefetch" href="https://cdn.datatables.net">
+    @if (isAdminSurface)
+    {
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    }
     
     <!-- Preload LCP Image (Largest Contentful Paint) -->
     @if (ViewBag.LcpImageUrl != null && !string.IsNullOrEmpty(ViewBag.LcpImageUrl.ToString()))
@@ -187,8 +198,15 @@
     <link rel="preload" href="~/css/cool-loader.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="~/css/cool-loader.css" asp-append-version="true"></noscript>
     
-    <link rel="preload" href="~/css/admin.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="~/css/admin.css" asp-append-version="true"></noscript>
+    @if (isAdminSurface)
+    {
+        <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    }
+    else
+    {
+        <link rel="preload" href="~/css/admin.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="~/css/admin.css" asp-append-version="true"></noscript>
+    }
     
     <link rel="preload" href="~/css/forms.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="~/css/forms.css" asp-append-version="true"></noscript>
@@ -202,8 +220,6 @@
     <link rel="preload" href="~/css/notification-bell.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="~/css/notification-bell.css" asp-append-version="true"></noscript>
     
-    <link rel="preload" href="~/css/ideal-weight-theme.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="~/css/ideal-weight-theme.css" asp-append-version="true"></noscript>
     
     <link rel="preload" href="~/css/whatsapp.css" as="style" asp-append-version="true" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="~/css/whatsapp.css" asp-append-version="true"></noscript>
@@ -278,10 +294,18 @@
     
     <!-- Page-Specific Head Content (meta tags, structured data, etc.) -->
     @RenderSection("Head", required: false)
+    <link rel="stylesheet" href="~/css/ideal-weight-theme.css" asp-append-version="true" />
+    @if (isAdminSurface)
+    {
+        <link rel="stylesheet" href="~/css/admin-theme.css" asp-append-version="true" />
+    }
 </head>
-<body data-is-authenticated="@(User.Identity.IsAuthenticated ? "true" : "false")">
+<body class="iw-app @(isAdminSurface ? "iw-admin" : "iw-customer") @(ViewData["PageClass"])" data-is-authenticated="@(User.Identity.IsAuthenticated ? "true" : "false")">
   
 
+    <a class="iw-skip-link" href="#main-content">@Localizer["SkipToContent"]</a>
+    @if (!isAdminSurface)
+    {
     <header>
         <nav class="navbar navbar-expand-lg navbar-toggleable-lg navbar-dark">
             <div class="container-fluid">
@@ -292,11 +316,24 @@
                 </a>
 
                 <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav"
-                aria-expanded="false" aria-label="Toggle navigation">
+                aria-expanded="false" aria-label="@Localizer["NavigationMenu"]">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        @if (isAdminSurface)
+                        {
+                            <li class="nav-item d-xl-none">
+                                <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar" aria-controls="adminSidebar" aria-label="@Localizer["NavigationMenu"]">
+                                    <i class="bi bi-list" aria-hidden="true"></i> @Localizer["Management"]
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Index"><i class="bi bi-shop me-1" aria-hidden="true"></i>@Localizer["BackToStore"]</a>
+                            </li>
+                        }
+                        else
+                        {
                         <li class="nav-item">
                             <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Index">
                                 <i class="bi bi-house-door me-1"></i>@Localizer["Home"]
@@ -308,92 +345,17 @@
                             </a>
                         </li>
 
+                        }
+
                         @if(User.IsInRole(SD.Role_Admin)){ 
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-gear me-1"></i>@Localizer["Management"]
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Order" asp-action="Index">
-                                            <i class="bi bi-receipt me-2"></i>@Localizer["Orders"]
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="ReturnRequest" asp-action="Index">
-                                            <i class="bi bi-arrow-return-left me-2"></i>@Localizer["ReturnRequests"]
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Review" asp-action="Index">
-                                            <i class="bi bi-star-fill me-2"></i>@Localizer["Reviews"]
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Brand" asp-action="Index">
-                                            <i class="bi bi-tag me-2"></i>@Localizer["Brands"]
-                                        </a>
-                                    </li> 
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Categries" asp-action="Index">
-                                            <i class="bi bi-tag me-2"></i>@Localizer["Category"]
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">
-                                            <i class="bi bi-box me-2"></i>@Localizer["Product"]
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="FlashSale" asp-action="Index">
-                                            <i class="bi bi-lightning-charge-fill me-2"></i>@Localizer["FlashSales"]
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="PromoCode" asp-action="Index">
-                                            <i class="bi bi-tag-fill me-2"></i>@Localizer["PromoCodes"]
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="ComboOffer" asp-action="Index">
-                                            <i class="bi bi-box-seam me-2"></i>@Localizer["ComboOffers"]
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Blog" asp-action="Index">
-                                            <i class="bi bi-journal-text me-2"></i>@Localizer["Blog"]
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="ServiceSubscription" asp-action="Index">
-                                            <i class="bi bi-briefcase-fill me-2"></i>@Localizer["ServiceSubscriptions"]
-                                        </a>
-                                    </li>
-                                   @*  <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="NewsletterSubscription" asp-action="Index">
-                                            <i class="bi bi-envelope-heart me-2"></i>@Localizer["NewsletterSubscribers"]
-                                        </a>
-                                    </li> *@
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="City" asp-action="Index">
-                                                    <i class="bi bi-building me-2"></i>@Localizer["CitiesDeliveryAreas"]
-                                        </a>
-                                    </li>
-                                   @*  <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="VideoBanner" asp-action="Index">
-                                            <i class="bi bi-play-circle-fill me-2"></i>@Localizer["VideoBanner"]
-                                        </a>
-                                    </li> *@
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="User" asp-action="CreateAdminUser">
-                                            <i class="bi bi-person-plus-fill me-2"></i> @Localizer["CreateNewUser"]
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
+                            @if (!isAdminSurface)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link iw-management-button" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                        <i class="bi bi-grid-1x2 me-1" aria-hidden="true"></i>@Localizer["Management"]
+                                    </a>
+                                </li>
+                            }
 
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle notification-nav-link" href="#" id="notificationDropdownToggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -477,8 +439,14 @@
             </div>
         </nav>
     </header>
-    <div style="padding-left: .5rem; padding-right: .5rem;">
-        <main role="main" class="pb-3">
+    }
+    @if (isAdminSurface && User.IsInRole(SD.Role_Admin))
+    {
+        <partial name="_AdminTopbar" />
+        <partial name="_AdminSidebar" />
+    }
+    <div class="iw-page">
+        <main id="main-content" tabindex="-1" class="pb-3">
             @RenderBody()
             @await Html.PartialAsync("_Notifications")
         </main>
@@ -699,6 +667,10 @@
     <script src="~/js/flash-sale-customer-fixed.js" asp-append-version="true" defer></script>
     <script src="~/js/site.js" asp-append-version="true" defer></script>
     <script src="~/js/image-lazy-loading.js" asp-append-version="true" defer></script>
+    @if (isAdminSurface)
+    {
+        <script src="~/js/admin-workspace.js" asp-append-version="true" defer></script>
+    }
 
     <!-- Global Authentication State -->
     <script>

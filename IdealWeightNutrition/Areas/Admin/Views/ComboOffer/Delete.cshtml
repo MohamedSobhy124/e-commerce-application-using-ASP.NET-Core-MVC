@@ -7,60 +7,52 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2>
-                <i class="bi bi-trash me-2"></i>@Localizer["DeleteComboOffer"]
-            </h2>
-        </div>
-    </div>
-
-    <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        <strong>@Localizer["Warning"]:</strong> @Localizer["AreYouSureDeleteComboOffer"]
-    </div>
-
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3">@Localizer["Name"]:</dt>
-                <dd class="col-sm-9">@Model.Name</dd>
-
-                <dt class="col-sm-3">@Localizer["NameAr"]:</dt>
-                <dd class="col-sm-9" dir="rtl">@Model.NameAr</dd>
-
-                <dt class="col-sm-3">@Localizer["ComboPrice"]:</dt>
-                <dd class="col-sm-9">@Model.ComboPrice.ToString("C")</dd>
-
-                <dt class="col-sm-3">@Localizer["TotalProducts"]:</dt>
-                <dd class="col-sm-9">@Model.TotalProducts</dd>
-
-                <dt class="col-sm-3">@Localizer["Status"]:</dt>
-                <dd class="col-sm-9">
-                    @if (Model.IsCurrentlyActive)
-                    {
-                        <span class="badge bg-success">@Localizer["Active"]</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">@Localizer["Inactive"]</span>
-                    }
-                </dd>
-            </dl>
-
-            <form asp-action="Delete" method="post">
-                <input hidden asp-for="Id" />
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash me-2"></i>@Localizer["Delete"]
-                    </button>
-                    <a asp-action="Index" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left me-2"></i>@Localizer["Cancel"]
-                    </a>
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-form-wrapper">
+            <div class="admin-form-header">
+                <h1 class="admin-form-title">@Localizer["DeleteComboOffer"]</h1>
+            </div>
+            <div class="admin-form-body">
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>
+                    <strong>@Localizer["Warning"]:</strong> @Localizer["AreYouSureDeleteComboOffer"]
                 </div>
-            </form>
+
+                <dl class="admin-details-list">
+                    <dt>@Localizer["Name"]</dt>
+                    <dd>@Model.Name</dd>
+                    <dt>@Localizer["NameAr"]</dt>
+                    <dd dir="rtl">@Model.NameAr</dd>
+                    <dt>@Localizer["ComboPrice"]</dt>
+                    <dd>@Model.ComboPrice.ToString("N2")</dd>
+                    <dt>@Localizer["TotalProducts"]</dt>
+                    <dd>@Model.TotalProducts</dd>
+                    <dt>@Localizer["Status"]</dt>
+                    <dd>
+                        <span data-schedule-badge
+                              data-badge-class="badge"
+                              data-enabled="@Model.IsActive.ToString().ToLower()"
+                              data-start="@Model.StartDate.ToString("yyyy-MM-ddTHH:mm:ss")"
+                              data-end="@Model.EndDate.ToString("yyyy-MM-ddTHH:mm:ss")"
+                              data-label-active="@Localizer["Active"].Value"
+                              data-label-scheduled="@Localizer["Scheduled"].Value"
+                              data-label-ended="@Localizer["Ended"].Value"
+                              data-label-inactive="@Localizer["Inactive"].Value"
+                              class="badge bg-secondary">@Localizer["Inactive"]</span>
+                    </dd>
+                </dl>
+
+                <form asp-action="Delete" method="post" class="form-actions">
+                    <input hidden asp-for="Id" />
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>@Localizer["Cancel"]
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2" aria-hidden="true"></i>@Localizer["Delete"]
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
-

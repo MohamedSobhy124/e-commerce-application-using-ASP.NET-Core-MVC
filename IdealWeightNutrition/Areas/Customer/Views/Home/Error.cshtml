@@ -15,15 +15,15 @@
             <div class="error-icon-wrapper">
                 @if (Model.StatusCode == 404)
                 {
-                    <i class="bi bi-file-earmark-x-fill error-icon" style="color: #3b82f6;"></i>
+                    <i class="bi bi-file-earmark-x-fill error-icon" style="color: var(--iw-action-blue);"></i>
                 }
                 else if (Model.StatusCode == 500)
                 {
-                    <i class="bi bi-exclamation-octagon-fill error-icon" style="color: #ef4444;"></i>
+                    <i class="bi bi-exclamation-octagon-fill error-icon" style="color: var(--iw-danger);"></i>
                 }
                 else
                 {
-                    <i class="bi bi-exclamation-triangle-fill error-icon" style="color: #f59e0b;"></i>
+                    <i class="bi bi-exclamation-triangle-fill error-icon" style="color: var(--iw-warning);"></i>
                 }
             </div>
             <div class="error-particles">
@@ -198,7 +198,7 @@
         align-items: center;
         justify-content: center;
         padding: 2rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
         position: relative;
         overflow: hidden;
     }
@@ -285,7 +285,7 @@
         position: absolute;
         width: 8px;
         height: 8px;
-        background: #f59e0b;
+        background: var(--iw-warning);
         border-radius: 50%;
         opacity: 0.6;
         animation: float 3s ease-in-out infinite;
@@ -340,14 +340,14 @@
     .error-title {
         font-size: 2.5rem;
         font-weight: 800;
-        color: #1f2937;
+        color: var(--iw-ink);
         margin-bottom: 1rem;
         line-height: 1.2;
     }
 
     .error-description {
         font-size: 1.1rem;
-        color: #6b7280;
+        color: var(--iw-muted);
         line-height: 1.6;
         margin-bottom: 1.5rem;
     }
@@ -355,7 +355,7 @@
     .error-request-id {
         margin-top: 1rem;
         padding: 0.75rem 1rem;
-        background: #f3f4f6;
+        background: var(--iw-canvas);
         border-radius: 10px;
         display: inline-block;
     }
@@ -393,7 +393,7 @@
     }
 
     .btn-error-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
         color: white;
         box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     }
@@ -408,12 +408,12 @@
     .btn-error-secondary {
         background: white;
         color: #374151;
-        border: 2px solid #e5e7eb;
+        border: 2px solid var(--iw-border);
     }
 
     .btn-error-secondary:hover {
-        background: #f9fafb;
-        border-color: #d1d5db;
+        background: var(--iw-canvas);
+        border-color: var(--iw-border);
         transform: translateY(-2px);
         color: #374151;
     }
@@ -421,13 +421,13 @@
     .error-help-section {
         margin-top: 2.5rem;
         padding-top: 2rem;
-        border-top: 2px solid #e5e7eb;
+        border-top: 2px solid var(--iw-border);
     }
 
     .help-card {
         text-align: center;
         padding: 1.5rem;
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        background: linear-gradient(135deg, var(--iw-light-blue) 0%, #e0f2fe 100%);
         border-radius: 15px;
         border: 2px solid #bae6fd;
     }
@@ -446,7 +446,7 @@
     }
 
     .help-card p {
-        color: #475569;
+        color: var(--iw-muted);
         margin-bottom: 1rem;
         font-size: 0.95rem;
     }

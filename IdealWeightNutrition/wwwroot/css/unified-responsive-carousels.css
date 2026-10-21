@@ -236,7 +236,7 @@
 .carousel-control-prev:hover,
 .carousel-control-next:hover {
     background: rgba(59, 130, 246, 0.95);
-    border-color: #3b82f6;
+    border-color: var(--iw-dark-blue);
     transform: translateY(-50%) scale(1.1);
 }
 
@@ -297,7 +297,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #d1d5db;
+    background: var(--iw-border);
     border: none;
     opacity: 1;
     transition: all 0.3s ease;
@@ -311,7 +311,7 @@
 }
 
 .carousel-indicators button.active {
-    background: #3b82f6;
+    background: var(--iw-dark-blue);
     width: 32px;
     border-radius: 16px;
 }
@@ -324,7 +324,10 @@
         bottom: -2rem;
         gap: 0.5rem;
         position: absolute;
-        left: 50%;
+        inset-inline: 0;
+        margin-inline: auto;
+        max-inline-size: calc(100% - var(--iw-space-6));
+        flex-wrap: wrap;
     }
     
     .product-carousel .carousel-indicators button,
@@ -332,7 +335,7 @@
         width: 15px !important;
         height: 15px !important;
         border-radius: 50%;
-        background: #d1d5db;
+        background: var(--iw-border);
         border: none;
         opacity: 1;
         cursor: pointer;
@@ -347,7 +350,7 @@
     
     .product-carousel .carousel-indicators button.active,
     .offers-carousel .carousel-indicators button.active {
-        background: #3b82f6;
+        background: var(--iw-dark-blue);
         width: 28px;
         border-radius: 14px;
     }
@@ -392,7 +395,7 @@
 
 @media (max-width: 768px) {
     .flash-sale-carousel-wrapper {
-        padding: 0 2.5rem;
+        padding-inline: 0.75rem;
     }
     
     .flash-sale-slide {
@@ -421,7 +424,7 @@
 
 @media (max-width: 576px) {
     .flash-sale-carousel-wrapper {
-        padding: 0 2rem;
+        padding-inline: 0.75rem;
     }
     
     .flash-sale-slide {
@@ -437,7 +440,7 @@
 
 @media (max-width: 400px) {
     .flash-sale-carousel-wrapper {
-        padding: 0 1.5rem;
+        padding-inline: 0.75rem;
     }
     
     .flash-sale-slide {
@@ -461,12 +464,19 @@
         display: none !important;
     }
     
-    /* Show all carousel indicators below on mobile */
+    /* Show all carousel indicators below on mobile. Do not use left:50% —
+       a 100% wide indicator strip starting at 50% overflows and shifts the page. */
     .carousel-indicators {
         display: flex !important;
-        position: absolute;
-        bottom: -2rem;
-        left: 50%;
+        position: relative;
+        inset: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        transform: none;
+        justify-content: center;
+        width: 100%;
+        max-width: 100%;
         z-index: 15;
     }
     

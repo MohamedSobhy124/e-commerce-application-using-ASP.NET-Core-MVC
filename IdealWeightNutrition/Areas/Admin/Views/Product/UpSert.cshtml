@@ -1,4 +1,4 @@
-﻿@model ProductVM
+@model ProductVM
 @using Microsoft.AspNetCore.Localization
 
 @{
@@ -13,10 +13,10 @@
     <div class="container-fluid">
         <div class="admin-form-wrapper">
             <div class="admin-form-header">
-                <h2 class="admin-form-title">
+                <h1 class="admin-form-title">
                     <i class="bi bi-@(Model.product.Id != 0 ? "pencil-square" : "plus-circle") me-3"></i>
                     @(Model.product.Id != 0 ? Localizer["Update"] : Localizer["Create"]) @Localizer["Product"]
-                </h2>
+                </h1>
             </div>
 
             <div class="admin-form-body">
@@ -30,6 +30,8 @@
                             <div class="admin-form-container">
                                 <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
 
+                                <section class="admin-form-section">
+                                <h2>@Localizer["Basics"]</h2>
                                 <!-- Title Fields - Both Languages -->
                                 <div class="row">
                                     <div class="col-md-6">
@@ -48,49 +50,6 @@
                                             </label>
                                             <input asp-for="product.TitleAr" class="admin-form-control" placeholder="@Localizer["EnterProductTitle"]" required />
                                             <span asp-validation-for="product.TitleAr" class="text-danger"></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- URL Slug Fields - Auto-generated, Editable -->
-                                <div class="alert alert-info mb-3" role="alert">
-                                    <div class="d-flex align-items-start">
-                                        <i class="bi bi-info-circle-fill me-2 mt-1" style="font-size: 1.2rem;"></i>
-                                        <div>
-                                            <strong>@(isArabic ? "معلومات عن روابط المنتجات (Slugs)" : "About Product URL Slugs")</strong>
-                                            <p class="mb-0 mt-1" style="font-size: 0.9rem;">
-                                                @(isArabic 
-                                                    ? "الروابط (Slugs) هي أجزاء من عنوان URL الخاص بالمنتج. يتم إنشاؤها تلقائياً من عنوان المنتج لتحسين محركات البحث (SEO). الروابط النظيفة تجعل عناوين URL أسهل في القراءة والفهم. مثال: /Customer/Home/Details/body-builder-whey-protein بدلاً من /Customer/Home/Details?productId=41"
-                                                    : "Slugs are parts of the product's URL. They are auto-generated from the product title for better SEO. Clean slugs make URLs easier to read and understand. Example: /Customer/Home/Details/body-builder-whey-protein instead of /Customer/Home/Details?productId=41")
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="admin-form-group">
-                                            <label class="admin-form-label d-flex justify-content-between align-items-center">
-                                                <span>
-                                                    <i class="bi bi-link-45deg me-2"></i>@(isArabic ? "رابط المنتج (إنجليزي)" : "Product URL Slug (English)") 
-                                                    <span class="text-muted small">(@(isArabic ? "يتم إنشاؤه تلقائياً" : "Auto-generated"))</span>
-                                                </span>
-                                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleSlugEdit('SlugEn')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                                                    <i class="bi bi-pencil" id="editIconSlugEn"></i> <span id="editTextSlugEn">@(isArabic ? "تعديل" : "Edit")</span>
-                                                </button>
-                                            </label>
-                                            <div class="input-group">
-                                                <input asp-for="product.SlugEn" id="SlugEn" class="admin-form-control slug-input bg-light" readonly placeholder="@(isArabic ? "سيتم إنشاء الرابط تلقائياً من العنوان" : "Will be auto-generated from title")" />
-                                              
-                                            </div>
-                                            <small class="text-muted d-block mt-1">
-                                                <i class="bi bi-lightbulb me-1"></i>
-                                                @(isArabic ? "مثال: body-builder-whey-protein-chocolate-5-lb" : "Example: body-builder-whey-protein-chocolate-5-lb")
-                                                <span id="slugEnPreview" class="text-primary ms-2" style="font-weight: 500;"></span>
-                                            </small>
-                                            <div class="text-danger small mt-1">
-                                                <span asp-validation-for="product.SlugEn"></span>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -183,6 +142,10 @@
                                     </div>
                                 </div>
 
+                                </section>
+
+                                <section class="admin-form-section">
+                                <h2>@Localizer["InventoryAndPricing"]</h2>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="admin-form-group">
@@ -295,7 +258,7 @@
                                             <i class="bi bi-diagram-3-fill me-2"></i>
                                             @Localizer["ProductType"] <span class="text-danger" style="font-weight: 700;">*</span>
                                         </label>
-                                        <select asp-for="product.ProductType" class="admin-form-select product-type-select" id="productTypeSelect" onchange="onProductTypeChange()" required>
+                                        <select asp-for="product.ProductType" class="admin-form-select product-type-select" id="productTypeSelect" aria-label="@Localizer["ProductType"]" onchange="onProductTypeChange()" required>
                                             <option value="0">@Localizer["SimpleProduct"]</option>
                                             <option value="1">@Localizer["VariableProduct"]</option>
                                         </select>
@@ -383,17 +346,54 @@
                                     </div>
                                 </div>
 
+                                <section class="admin-form-section mt-4">
+                                <h2>@Localizer["SEO"]</h2>
+                                <div class="alert alert-info mb-3" role="alert">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-info-circle-fill me-2 mt-1 product-slug-info-icon" aria-hidden="true"></i>
+                                        <div>
+                                            <strong>@Localizer["SEO"]</strong>
+                                            <p class="mb-0 mt-1 small">@Localizer["ProductSlugHelp"]</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="admin-form-group">
+                                            <label class="admin-form-label d-flex justify-content-between align-items-center">
+                                                <span>
+                                                    <i class="bi bi-link-45deg me-2"></i>@Localizer["ProductSlugEnglish"]
+                                                    <span class="text-muted small">(@Localizer["AutoGenerated"])</span>
+                                                </span>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary slug-edit-toggle" onclick="toggleSlugEdit('SlugEn')">
+                                                    <i class="bi bi-pencil" id="editIconSlugEn"></i> <span id="editTextSlugEn">@Localizer["Edit"]</span>
+                                                </button>
+                                            </label>
+                                            <div class="input-group">
+                                                <input asp-for="product.SlugEn" id="SlugEn" class="admin-form-control slug-input bg-light" readonly placeholder="@Localizer["SlugAutoPlaceholder"]" />
+                                            </div>
+                                            <small class="text-muted d-block mt-1">
+                                                <i class="bi bi-lightbulb me-1"></i>@Localizer["ProductSlugExample"]
+                                                <span id="slugEnPreview" class="text-primary ms-2 slug-preview"></span>
+                                            </small>
+                                            <div class="text-danger small mt-1">
+                                                <span asp-validation-for="product.SlugEn"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </section>
+
+                                </section>
+
                             </div>
                         </div>
 
                         <div class="col-lg-3 col-md-4">
-                            <div class="image-upload-wrapper">
-                                <h5 class="mb-3" style="color: #1976D2; font-weight: 700;">
-                                    <i class="bi bi-images me-2"></i>@Localizer["ProductImages"]
-                                </h5>
-                                
+                            <section class="admin-form-section image-upload-wrapper">
+                                <h2>@Localizer["ProductImages"]</h2>
                                 <!-- Upload Multiple Images -->
-                                <label for="files-input" class="upload-button" style="display: block; text-align: center; padding: 1rem; background: linear-gradient(135deg, #3B9DD5, #7BC043); color: white; border-radius: 10px; cursor: pointer; margin-bottom: 1.5rem;">
+                                <label for="files-input" class="upload-button" style="display: block; text-align: center; padding: 1rem;   border-radius: 10px; cursor: pointer; margin-bottom: 1.5rem;">
                                     <span class="upload-icon">
                                         <i class="bi bi-cloud-upload" style="font-size: 1.5rem;"></i>
                                     </span>
@@ -423,6 +423,10 @@
                                             <span class="main-image-badge">Main</span>
                                         </div>
                                     }
+                                    else
+                                    {
+                                        <div class="admin-thumb-placeholder admin-thumb-placeholder-lg" aria-hidden="true"><i class="bi bi-image"></i></div>
+                                    }
                                 </div>
 
                                 <!-- Preview for new images -->
@@ -430,12 +434,12 @@
                                 
                                 <!-- Info Image Upload -->
                                 <div class="mt-4 pt-4 border-top">
-                                    <h6 class="mb-3" style="color: #1976D2; font-weight: 600;">
+                                    <h6 class="mb-3" style="color: var(--iw-action-blue); font-weight: 600;">
                                         <i class="bi bi-info-circle me-2"></i>@Localizer["ImageInfo"] <span class="text-muted small">(Optional)</span>
                                     </h6>
                                     
                                     <!-- Upload Info Image Button (styled like multiple images) -->
-                                    <label for="infoImageInput" class="upload-button" style="display: block; text-align: center; padding: 1rem; background: linear-gradient(135deg, #7BC043, #3B9DD5); color: white; border-radius: 10px; cursor: pointer; margin-bottom: 1.5rem;">
+                                    <label for="infoImageInput" class="upload-button" style="display: block; text-align: center; padding: 1rem;   border-radius: 10px; cursor: pointer; margin-bottom: 1.5rem;">
                                         <span class="upload-icon">
                                             <i class="bi bi-cloud-upload" style="font-size: 1.5rem;"></i>
                                         </span>
@@ -476,7 +480,7 @@
                                         }
                                     </div>
                                 </div>
-                            </div>
+                            </section>
                         </div>
                             
                     </div>
@@ -487,7 +491,8 @@
                     {
                         <div class="row mt-4">
                             <div class="col-12">
-                                <div class="variant-management-wrapper">
+                                <section class="admin-form-section variant-management-wrapper">
+                                    <h2>@Localizer["OptionsVariants"]</h2>
                                     <div class="admin-form-section-title mb-4">
                                         <h4 class="section-title">
                                             <i class="bi bi-layers-fill me-2"></i>
@@ -516,7 +521,7 @@
                                                     <i class="bi bi-diagram-3-fill me-2"></i>
                                                     @Localizer["ProductType"] <span class="text-danger" style="font-weight: 700;">*</span>
                                                 </label>
-                                                <select asp-for="product.ProductType" class="admin-form-select product-type-select" id="productTypeSelect" onchange="onProductTypeChange()" required>
+                                                <select asp-for="product.ProductType" class="admin-form-select product-type-select" id="productTypeSelect" aria-label="@Localizer["ProductType"]" onchange="onProductTypeChange()" required>
                                                     <option value="0">@Localizer["SimpleProduct"]</option>
                                                     <option value="1">@Localizer["VariableProduct"]</option>
                                                 </select>
@@ -647,7 +652,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </section>
                         </div>
                     </div>
                     }
@@ -656,24 +661,24 @@
                     <div class="row mt-5">
                         <div class="col-12">
                             <div class="form-actions">
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>
+                                    @Localizer["BackToList"]
+                                </a>
                                 @if (Model.product.Id != 0)
                                 {
-                                    <button type="button" class="btn btn-submit" onclick="saveMainProduct(); return false;" id="saveProductBtn">
-                                        <i class="bi bi-check-circle me-2"></i>
+                                    <button type="button" class="btn btn-primary" onclick="saveMainProduct(); return false;" id="saveProductBtn">
+                                        <i class="bi bi-check-circle me-2" aria-hidden="true"></i>
                                         @Localizer["Update"] @Localizer["Product"]
                                     </button>
                                 }
                                 else
                                 {
-                                    <button type="button" class="btn btn-submit" onclick="saveMainProduct(); return false;" id="saveProductBtn">
-                                        <i class="bi bi-plus-circle me-2"></i>
+                                    <button type="button" class="btn btn-primary" onclick="saveMainProduct(); return false;" id="saveProductBtn">
+                                        <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>
                                         @Localizer["Create"] @Localizer["Product"]
                                     </button>
                                 }
-                                <a asp-action="Index" class="btn btn-back">
-                                    <i class="bi bi-arrow-left me-2"></i>
-                                    @Localizer["BackToList"]
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -2083,27 +2088,27 @@
                         </td>
                         <td data-label="${localizations.price}">
                             <div class="input-group-sm">
-                                <input type="number" step="0.01" class="form-control variant-input" value="${variant.price || 0}" onchange="updateVariantField(${variant.id}, 'price', this.value)">
+                                <input type="number" step="0.01" class="form-control variant-input" aria-label="${localizations.price}" value="${variant.price || 0}" onchange="updateVariantField(${variant.id}, 'price', this.value)">
                             </div>
                         </td>
                         <td data-label="${localizations.listPrice}">
                             <div class="input-group-sm">
-                                <input type="number" step="0.01" class="form-control variant-input" value="${variant.listPrice || ''}" onchange="updateVariantField(${variant.id}, 'listPrice', this.value)">
+                                <input type="number" step="0.01" class="form-control variant-input" aria-label="${localizations.listPrice}" value="${variant.listPrice || ''}" onchange="updateVariantField(${variant.id}, 'listPrice', this.value)">
                             </div>
                         </td>
                         <td data-label="${localizations.stock}">
                             <div class="input-group-sm">
-                                <input type="number" class="form-control variant-input" value="${variant.stockQuantity || 0}" onchange="updateVariantField(${variant.id}, 'stockQuantity', this.value)">
+                                <input type="number" class="form-control variant-input" aria-label="${localizations.stock}" value="${variant.stockQuantity || 0}" onchange="updateVariantField(${variant.id}, 'stockQuantity', this.value)">
                             </div>
                         </td>
                         <td data-label="${localizations.minStockAlert}">
                             <div class="input-group-sm">
-                                <input type="number" class="form-control variant-input" value="${variant.minimumStockAlert || 5}" onchange="updateVariantField(${variant.id}, 'minimumStockAlert', this.value)">
+                                <input type="number" class="form-control variant-input" aria-label="${localizations.minStockAlert}" value="${variant.minimumStockAlert || 5}" onchange="updateVariantField(${variant.id}, 'minimumStockAlert', this.value)">
                             </div>
                         </td>
                         <td data-label="${localizations.expiryDate}">
                             <div class="input-group-sm">
-                                <input type="date" class="form-control variant-input" value="${variant.expiryDate || ''}" onchange="updateVariantField(${variant.id}, 'expiryDate', this.value)">
+                                <input type="date" class="form-control variant-input" aria-label="${localizations.expiryDate}" value="${variant.expiryDate || ''}" onchange="updateVariantField(${variant.id}, 'expiryDate', this.value)">
                             </div>
                         </td>
                         <td class="variant-image-cell" data-label="${localizations.image}">
@@ -2572,12 +2577,12 @@
         position: relative;
         border-radius: 8px;
         overflow: hidden;
-        border: 2px solid #e0e0e0;
+        border: 2px solid var(--iw-border);
         transition: all 0.3s ease;
     }
 
     .image-item:hover {
-        border-color: #3B9DD5;
+        border-color: var(--iw-dark-blue);
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
@@ -2607,7 +2612,7 @@
     }
 
     .delete-image-btn:hover {
-        background: #dc3545;
+        background: var(--iw-danger);
         transform: scale(1.1);
     }
 
@@ -2630,7 +2635,7 @@
     }
 
     .image-info-section {
-        background: #f8f9fa;
+        background: var(--iw-canvas);
         padding: 1rem;
         border-radius: 8px;
         border: 1px solid #dee2e6;
@@ -2652,7 +2657,7 @@
 
     .image-info-input:focus {
         outline: none;
-        border-color: #3B9DD5;
+        border-color: var(--iw-dark-blue);
         box-shadow: 0 0 0 0.2rem rgba(59, 157, 213, 0.25);
     }
 
@@ -2660,7 +2665,7 @@
         position: relative;
         border-radius: 8px;
         overflow: hidden;
-        border: 2px dashed #7BC043;
+        border: 2px dashed var(--iw-dark-green);
     }
 
     .preview-image {
@@ -2673,7 +2678,7 @@
         position: absolute;
         top: 5px;
         right: 5px;
-        background: #7BC043;
+        background: var(--iw-dark-green);
         color: white;
         padding: 2px 6px;
         border-radius: 4px;
@@ -2728,11 +2733,11 @@
     .admin-form-section-title {
         margin-bottom: 1.5rem;
         padding-bottom: 0.75rem;
-        border-bottom: 2px solid #e5e7eb;
+        border-bottom: 2px solid var(--iw-border);
     }
 
     .section-title {
-        color: #3B9DD5;
+        color: var(--iw-action-blue);
         font-weight: 700;
         font-size: 1.25rem;
         margin: 0;
@@ -2741,7 +2746,7 @@
     }
 
     .section-subtitle {
-        color: #6c757d;
+        color: var(--iw-muted);
         font-size: 0.9rem;
         margin: 0.5rem 0 0 0;
     }
@@ -2753,7 +2758,7 @@
     }
 
     .product-type-select:focus {
-        border-color: #3B9DD5;
+        border-color: var(--iw-dark-blue);
         box-shadow: 0 0 0 0.2rem rgba(59, 157, 213, 0.25);
     }
 
@@ -2761,12 +2766,12 @@
         display: flex;
         align-items: center;
         margin-top: 0.5rem;
-        color: #6c757d;
+        color: var(--iw-muted);
         font-size: 0.875rem;
     }
 
     .form-help-text i {
-        color: #3B9DD5;
+        color: var(--iw-action-blue);
     }
 
     /* Step-by-Step Wizard Styles */
@@ -2776,7 +2781,7 @@
 
     .wizard-step {
         margin-bottom: 2rem;
-        background: #ffffff;
+        background: var(--iw-surface);
         border-radius: 12px;
         border: 2px solid #e9ecef;
         padding: 1.5rem;
@@ -2792,7 +2797,7 @@
         top: 0;
         bottom: 0;
         width: 4px;
-        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
         opacity: 0;
         transition: opacity 0.3s ease;
     }
@@ -2803,14 +2808,14 @@
     }
 
     .wizard-step.active {
-        border-color: #3B9DD5;
+        border-color: var(--iw-dark-blue);
         box-shadow: 0 4px 12px rgba(59, 157, 213, 0.15);
         transform: translateX(5px);
     }
 
     .wizard-step.completed {
-        border-color: #7BC043;
-        background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+        border-color: var(--iw-dark-green);
+        background: linear-gradient(135deg, var(--iw-surface) 0%, var(--iw-light-blue) 100%);
     }
 
     .step-header {
@@ -2825,7 +2830,7 @@
         height: 50px;
         border-radius: 50%;
         background: #e9ecef;
-        color: #6c757d;
+        color: var(--iw-muted);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -2837,17 +2842,17 @@
     }
 
     .step-number.active {
-        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
         color: white;
-        border-color: #3B9DD5;
+        border-color: var(--iw-dark-blue);
         box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3);
         transform: scale(1.1);
     }
 
     .step-number.completed {
-        background: #7BC043;
+        background: var(--iw-dark-green);
         color: white;
-        border-color: #7BC043;
+        border-color: var(--iw-dark-green);
     }
 
     .step-number.completed::after {
@@ -2869,12 +2874,12 @@
     }
 
     .step-title i {
-        color: #3B9DD5;
+        color: var(--iw-action-blue);
         font-size: 1.5rem;
     }
 
     .step-description {
-        color: #6c757d;
+        color: var(--iw-muted);
         font-size: 0.95rem;
         line-height: 1.6;
         margin: 0;
@@ -2896,8 +2901,8 @@
     }
 
     .step-info-box {
-        background: linear-gradient(135deg, #e3f2fd 0%, #f1f8ff 100%);
-        border-left: 4px solid #3B9DD5;
+        background: linear-gradient(135deg, var(--iw-light-blue) 0%, #f1f8ff 100%);
+        border-left: 4px solid var(--iw-dark-blue);
         padding: 1rem 1.25rem;
         border-radius: 8px;
         margin: 1rem 0;
@@ -2907,7 +2912,7 @@
     }
 
     .step-info-box i {
-        color: #3B9DD5;
+        color: var(--iw-action-blue);
         font-size: 1.25rem;
     }
 
@@ -2950,7 +2955,7 @@
         font-size: 1rem;
         font-weight: 600;
         border-radius: 8px;
-        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
         border: none;
         color: white;
         box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3);
@@ -2994,7 +2999,7 @@
     .variant-card-header {
         margin-bottom: 2rem;
         padding-bottom: 1rem;
-        border-bottom: 2px solid #e5e7eb;
+        border-bottom: 2px solid var(--iw-border);
     }
 
     .variant-header-content {
@@ -3005,8 +3010,8 @@
 
     .variant-header-icon {
         font-size: 2rem;
-        color: #3B9DD5;
-        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        color: var(--iw-action-blue);
+        background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -3020,7 +3025,7 @@
     }
 
     .variant-card-subtitle {
-        color: #6c757d;
+        color: var(--iw-muted);
         font-size: 0.9rem;
         margin: 0.25rem 0 0 0;
     }
@@ -3029,7 +3034,7 @@
     .options-container {
         margin-bottom: 2.5rem;
         padding: 1.5rem;
-        background: #ffffff;
+        background: var(--iw-surface);
         border-radius: 10px;
         border: 1px solid #e9ecef;
     }
@@ -3051,7 +3056,7 @@
 
     .options-icon {
         font-size: 1.5rem;
-        color: #3B9DD5;
+        color: var(--iw-action-blue);
     }
 
     .options-title {
@@ -3062,7 +3067,7 @@
     }
 
     .options-subtitle {
-        color: #6c757d;
+        color: var(--iw-muted);
         font-size: 0.85rem;
         margin: 0.25rem 0 0 0;
     }
@@ -3088,7 +3093,7 @@
 
     /* Option Card */
     .option-card {
-        background: #ffffff;
+        background: var(--iw-surface);
         border-radius: 10px;
         border: 1px solid #e9ecef;
         overflow: hidden;
@@ -3106,7 +3111,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 1rem 1.25rem;
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-surface) 100%);
         border-bottom: 1px solid #e9ecef;
     }
 
@@ -3117,7 +3122,7 @@
     }
 
     .option-card-icon {
-        color: #3B9DD5;
+        color: var(--iw-action-blue);
         font-size: 1.25rem;
     }
 
@@ -3162,7 +3167,7 @@
     }
 
     .no-values-message {
-        color: #6c757d;
+        color: var(--iw-muted);
         font-style: italic;
         padding: 0.5rem;
         display: flex;
@@ -3173,8 +3178,8 @@
     .no-variants-message {
         text-align: center;
         padding: 2rem;
-        color: #6c757d;
-        background: #f8f9fa;
+        color: var(--iw-muted);
+        background: var(--iw-canvas);
         border-radius: 8px;
         border: 2px dashed #dee2e6;
         display: flex;
@@ -3187,7 +3192,7 @@
     .no-options-message i,
     .no-variants-message i {
         font-size: 1.25rem;
-        color: #3B9DD5;
+        color: var(--iw-action-blue);
     }
 
     /* Option Value Badge */
@@ -3196,7 +3201,7 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem 1rem;
-        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
         color: white;
         border-radius: 20px;
         font-weight: 500;
@@ -3239,7 +3244,7 @@
     .variants-container {
         margin-top: 2rem;
         padding: 1.5rem;
-        background: #ffffff;
+        background: var(--iw-surface);
         border-radius: 10px;
         border: 1px solid #e9ecef;
     }
@@ -3261,7 +3266,7 @@
 
     .variants-icon {
         font-size: 1.5rem;
-        color: #7BC043;
+        color: var(--iw-action-green);
     }
 
     .variants-title {
@@ -3272,7 +3277,7 @@
     }
 
     .variants-subtitle {
-        color: #6c757d;
+        color: var(--iw-muted);
         font-size: 0.85rem;
         margin: 0.25rem 0 0 0;
     }
@@ -3318,7 +3323,7 @@
     }
 
     .variants-table-wrapper::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
         border-radius: 10px;
     }
 
@@ -3329,7 +3334,7 @@
     .table-variants {
         width: 100%;
         margin: 0;
-        background: #ffffff;
+        background: var(--iw-surface);
         border-collapse: separate;
         border-spacing: 0;
         table-layout: auto;
@@ -3338,7 +3343,7 @@
     }
 
     .table-variants thead {
-        background: linear-gradient(135deg, #3B9DD5, #7BC043);
+        background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
         color: white;
         position: sticky;
         top: 0;
@@ -3364,7 +3369,7 @@
 
     .table-variants tbody tr {
         transition: all 0.2s ease;
-        background: #ffffff;
+        background: var(--iw-surface);
     }
 
     .table-variants tbody tr:hover {
@@ -3413,7 +3418,7 @@
     }
 
     .variant-name-icon {
-        color: #3B9DD5;
+        color: var(--iw-action-blue);
     }
 
     .variant-name-text {
@@ -3430,12 +3435,12 @@
         min-width: 100px;
         max-width: none;
         transition: all 0.2s ease;
-        background: #ffffff;
+        background: var(--iw-surface);
         box-sizing: border-box;
     }
 
     .variant-input:focus {
-        border-color: #3B9DD5;
+        border-color: var(--iw-dark-blue);
         box-shadow: 0 0 0 0.3rem rgba(59, 157, 213, 0.25);
         outline: none;
         background: #f8f9ff;
@@ -3461,19 +3466,19 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem 1rem;
-        background: #f8f9fa;
+        background: var(--iw-canvas);
         border: 2px dashed #dee2e6;
         border-radius: 6px;
         cursor: pointer;
         transition: all 0.2s ease;
-        color: #6c757d;
+        color: var(--iw-muted);
         font-size: 0.875rem;
     }
 
     .variant-image-upload-label:hover {
         background: #e9ecef;
-        border-color: #3B9DD5;
-        color: #3B9DD5;
+        border-color: var(--iw-dark-blue);
+        color: var(--iw-action-blue);
     }
 
     .variant-image-input {
@@ -3619,7 +3624,7 @@
             border: 2px solid #e9ecef;
             border-radius: 12px;
             padding: 1.25rem;
-            background: #ffffff;
+            background: var(--iw-surface);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
@@ -3634,7 +3639,7 @@
             align-items: center;
             padding: 1rem 0;
             border: none;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--iw-canvas);
             min-width: auto;
             width: 100%;
         }
@@ -3646,7 +3651,7 @@
         .table-variants tbody td::before {
             content: attr(data-label);
             font-weight: 600;
-            color: #3B9DD5;
+            color: var(--iw-action-blue);
             margin-right: 1rem;
             font-size: 0.9rem;
             min-width: 120px;

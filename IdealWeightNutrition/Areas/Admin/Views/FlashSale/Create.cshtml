@@ -9,10 +9,10 @@
     <div class="container">
         <div class="admin-form-wrapper">
             <div class="admin-form-header">
-                <h2 class="admin-form-title">
+                <h1 class="admin-form-title">
                     <i class="bi bi-lightning-charge-fill me-3"></i>
                     @Localizer["CreateNewFlashSale"]
-                </h2>
+                </h1>
             </div>
 
             <div class="admin-form-body">
@@ -86,31 +86,24 @@
                             <!-- Image Upload -->
                             <div class="admin-form-group">
                                 <label class="admin-form-label">
-                                    <i class="bi bi-image me-2"></i>Image
+                                    <i class="bi bi-image me-2" aria-hidden="true"></i>@Localizer["FlashSaleImageLabel"]
                                     <span class="text-danger">*</span>
                                 </label>
-                                <input type="file" asp-for="ImageFile" class="admin-form-control" accept="image/*" />
+                                <input type="file" aria-label="@Localizer["UploadImages"]" asp-for="ImageFile" class="admin-form-control" accept="image/*" />
                                 <span asp-validation-for="ImageFile" class="text-danger"></span>
                                 <small class="form-text text-muted">
                                     <i class="bi bi-info-circle me-1"></i>
-                                    Please upload an image for the flash sale.
+                                    @Localizer["UploadFlashSaleImageHelp"]
                                 </small>
                                 <div id="imagePreview" class="mt-2" style="display: none;">
-                                    <img id="previewImg" src="#" alt="Preview" style="max-width: 300px; max-height: 300px; border: 1px solid #ddd; padding: 5px; border-radius: 5px;" />
+                                    <img id="previewImg" src="#" alt="@Localizer["Preview"]" class="admin-media-preview" />
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Date & Time Settings -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0">
-                                <i class="bi bi-calendar-event me-2"></i>
-                                @Localizer["Schedule"]
-                            </h5>
-                        </div>
-                        <div class="card-body">
+                    <section class="admin-form-section" data-schedule-from-inputs>
+                        <h2>@Localizer["Schedule"]</h2>
                             <div class="alert alert-info">
                                 <i class="bi bi-lightbulb me-2"></i>
                                 <strong>@Localizer["Tip"]:</strong> @Localizer["SetTimesCarefully"]
@@ -126,9 +119,8 @@
                                         </label>
                                         <input asp-for="StartDate" type="datetime-local" class="admin-form-control" />
                                         <span asp-validation-for="StartDate" class="text-danger"></span>
-                                        <small class="form-text text-muted">
-                                            @Localizer["WhenFlashSaleStarts"]
-                                        </small>
+                                        <small class="form-text text-muted">@Localizer["WhenFlashSaleStarts"]</small>
+                                        <small class="form-text text-muted admin-schedule-hint">@Localizer["TimezoneAsiaDubai"]</small>
                                     </div>
                                 </div>
 
@@ -141,20 +133,28 @@
                                         </label>
                                         <input asp-for="EndDate" type="datetime-local" class="admin-form-control" />
                                         <span asp-validation-for="EndDate" class="text-danger"></span>
-                                        <small class="form-text text-muted">
-                                            @Localizer["WhenFlashSaleEnds"]
-                                        </small>
+                                        <small class="form-text text-muted">@Localizer["WhenFlashSaleEnds"]</small>
+                                        <small class="form-text text-muted admin-schedule-hint">@Localizer["TimezoneAsiaDubai"]</small>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Duration Display -->
-                       @*      <div class="alert alert-secondary mt-3" id="durationAlert" style="display: none;">
-                                <i class="bi bi-clock me-2"></i>
-                                <strong>Duration:</strong> <span id="durationText"></span>
-                            </div> *@
-                        </div>
-                    </div>
+                            <div class="alert alert-secondary mt-3" id="durationAlert" hidden aria-live="polite">
+                                <i class="bi bi-clock me-2" aria-hidden="true"></i>
+                                <strong>@Localizer["Duration"]:</strong> <span id="durationText"></span>
+                            </div>
+                        <span data-schedule-badge
+                              data-badge-class="badge admin-schedule-live"
+                              data-enabled="true"
+                              data-start=""
+                              data-end=""
+                              data-label-active="@Localizer["Active"].Value"
+                              data-label-scheduled="@Localizer["Scheduled"].Value"
+                              data-label-ended="@Localizer["Ended"].Value"
+                              data-label-inactive="@Localizer["Inactive"].Value"
+                              class="badge admin-schedule-live bg-secondary">@Localizer["Scheduled"]</span>
+                    </section>
 
                     <!-- Active Status -->
                     <div class="card mb-4">

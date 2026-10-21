@@ -155,7 +155,7 @@
     right: 18px;
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, #3B9DD5 0%, #1976D2 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     border-radius: 50%;
     box-shadow: 0 4px 12px rgba(59, 157, 213, 0.4);
     display: flex;
@@ -173,7 +173,7 @@
 .floating-call-btn:hover {
     transform: scale(1.1);
     box-shadow: 0 6px 20px rgba(59, 157, 213, 0.6);
-    background: linear-gradient(135deg, #1976D2 0%, #3B9DD5 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
 }
 
 .floating-call-btn i {
@@ -204,7 +204,7 @@
     gap: 4px;
     min-width: 120px;
     font-size: 14px;
-    color: #1976D2;
+    color: var(--iw-action-blue);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
@@ -214,13 +214,13 @@
 .call-tooltip-text {
     font-weight: 600;
     font-size: 14px;
-    color: #1976D2;
+    color: var(--iw-action-blue);
 }
 
 .call-tooltip-phone {
     font-weight: 700;
     font-size: 13px;
-    color: #3B9DD5;
+    color: var(--iw-action-blue);
     letter-spacing: 0.5px;
 }
 
@@ -318,7 +318,7 @@
 }
 
 .whatsapp-contact-section p {
-    color: #666;
+    color: var(--iw-muted);
     margin-bottom: 1.5rem;
 }
 

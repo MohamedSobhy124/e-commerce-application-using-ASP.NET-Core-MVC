@@ -76,7 +76,7 @@ else
                     <!-- Flash Sale Badge -->
                     <div class="flash-sale-badge">
                         <i class="bi bi-lightning-fill"></i>
-                        -@Math.Round(item.DiscountPercentage)% @Localizer["OFF"]
+                        -@(Math.Round(item.DiscountPercentage))% @Localizer["OFF"]
                     </div>
 
                     <!-- Product Image -->
@@ -114,7 +114,7 @@ else
                         <!-- Variant Info (if exists) -->
                         @if (!string.IsNullOrEmpty(variantName))
                         {
-                            <div class="flash-sale-variant-info" style="background: #f0f0f0; padding: 0.5rem; border-radius: 6px; margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
+                            <div class="flash-sale-variant-info" style="background: var(--iw-canvas); padding: 0.5rem; border-radius: 6px; margin: 0.5rem 0; font-size: 0.85rem; color: var(--iw-muted);">
                                 <i class="bi bi-tag-fill me-1"></i>
                                 <strong>@Localizer["Variant"]:</strong> @variantName
                             </div>

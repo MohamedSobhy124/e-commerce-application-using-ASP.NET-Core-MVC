@@ -29,7 +29,7 @@
 <div class="container py-4" style="margin-top: 1rem;">
     <!-- Page Header -->
     <div class="text-center mb-4">
-        <h1 class="display-5 fw-bold mb-2" style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        <h1 class="display-5 fw-bold mb-2" style="background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
             <i class="bi bi-bag-check-fill me-2"></i>@Localizer["MyOrders"]
         </h1>
         <p class="text-muted">@(Localizer["ViewYourOrderHistory"]?.Value ?? "View your order history and track shipments")</p>
@@ -40,11 +40,11 @@
         <!-- Empty State -->
         <div class="text-center py-5">
             <div class="empty-orders-icon mb-4" style="width: 150px; height: 150px; margin: 0 auto; background: linear-gradient(135deg, rgba(59, 157, 213, 0.1) 0%, rgba(123, 192, 67, 0.1) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i class="bi bi-bag-x" style="font-size: 5rem; color: #3B9DD5;"></i>
+                <i class="bi bi-bag-x" style="font-size: 5rem; color: var(--iw-action-blue);"></i>
             </div>
-            <h3 class="fw-bold mb-2" style="color: #1f2937;">@(Localizer["NoOrdersYet"]?.Value ?? "No Orders Yet")</h3>
+            <h3 class="fw-bold mb-2" style="color: var(--iw-ink);">@(Localizer["NoOrdersYet"]?.Value ?? "No Orders Yet")</h3>
             <p class="text-muted mb-4">@(Localizer["StartShoppingToSeeOrders"]?.Value ?? "Start shopping to see your orders here")</p>
-            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-primary" style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); border: none; padding: 0.75rem 2rem; border-radius: 25px; font-weight: 700;">
+            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-primary" style="background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%); border: none; padding: 0.75rem 2rem; border-radius: 25px; font-weight: 700;">
                 <i class="bi bi-arrow-left me-2"></i>@Localizer["StartShopping"]
             </a>
         </div>
@@ -81,11 +81,11 @@
                             <div class="row align-items-center">
                                 <div class="col-md-6 mb-3 mb-md-0">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="order-icon-wrapper" style="width: 60px; height: 60px; background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3);">
+                                        <div class="order-icon-wrapper" style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3);">
                                             <i class="bi bi-receipt-cutoff" style="font-size: 1.5rem; color: white;"></i>
                                         </div>
                                         <div>
-                                            <h5 class="mb-1 fw-bold" style="color: #1f2937;">
+                                            <h5 class="mb-1 fw-bold" style="color: var(--iw-ink);">
                                                 @(Localizer["Order"]?.Value ?? "Order") #@order.Id
                                             </h5>
                                             <p class="mb-0 text-muted" style="font-size: 0.9rem;">
@@ -109,8 +109,8 @@
 
                         <!-- Order Items -->
                         <div class="order-items" style="padding: 1.5rem;">
-                            <h6 class="fw-bold mb-3" style="color: #1f2937; font-size: 1rem;">
-                                <i class="bi bi-box-seam me-2" style="color: #3B9DD5;"></i>@totalItems @(totalItems == 1 ? (Localizer["Item"]?.Value ?? "Item") : (Localizer["Items"]?.Value ?? "Items"))
+                            <h6 class="fw-bold mb-3" style="color: var(--iw-ink); font-size: 1rem;">
+                                <i class="bi bi-box-seam me-2" style="color: var(--iw-action-blue);"></i>@totalItems @(totalItems == 1 ? (Localizer["Item"]?.Value ?? "Item") : (Localizer["Items"]?.Value ?? "Items"))
                             </h6>
                             
                             <div class="order-items-list">
@@ -123,12 +123,12 @@
                                         ?? product?.ImageUrl 
                                         ?? "/images/default-product.jpg";
                                     
-                                    <div class="order-item-row" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 12px; margin-bottom: 0.75rem; transition: all 0.3s;">
+                                    <div class="order-item-row" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--iw-canvas); border-radius: 12px; margin-bottom: 0.75rem; transition: all 0.3s;">
                                         <div class="order-item-image" style="width: 80px; height: 80px; flex-shrink: 0; border-radius: 10px; overflow: hidden; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                                             <img src="@productImage" alt="@productName" style="width: 100%; height: 100%; object-fit: cover;" />
                                         </div>
                                         <div class="order-item-info" style="flex: 1; min-width: 0;">
-                                            <h6 class="mb-1 fw-bold" style="font-size: 0.95rem; color: #1f2937; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                            <h6 class="mb-1 fw-bold" style="font-size: 0.95rem; color: var(--iw-ink); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                                                 @productName
                                             </h6>
                                             @if (detail.ProductVariantId.HasValue && detail.ProductVariant != null)
@@ -149,7 +149,7 @@
                                             }
                                             @if (detail.FlashSaleItemId.HasValue)
                                             {
-                                                <span class="badge" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); font-size: 0.7rem; padding: 0.25rem 0.5rem;">
+                                                <span class="badge" style="background: linear-gradient(135deg, var(--iw-danger) 0%, #c82333 100%); font-size: 0.7rem; padding: 0.25rem 0.5rem;">
                                                     <i class="bi bi-lightning-fill me-1"></i>@(Localizer["FlashSale"]?.Value ?? "Flash Sale")
                                                 </span>
                                             }
@@ -157,9 +157,9 @@
                                         <div class="order-item-details text-end" style="flex-shrink: 0;">
                                             <div class="mb-1">
                                                 <span class="text-muted" style="font-size: 0.85rem;">@Localizer["Qty"]:</span>
-                                                <span class="fw-bold" style="color: #1f2937;">@detail.Count</span>
+                                                <span class="fw-bold" style="color: var(--iw-ink);">@detail.Count</span>
                                             </div>
-                                            <div class="fw-bold" style="color: #3B9DD5; font-size: 1.1rem;">
+                                            <div class="fw-bold" style="color: var(--iw-action-blue); font-size: 1.1rem;">
                                                 @Html.Raw(currencySymbol)@detail.Price.ToString("N2")
                                             </div>
                                         </div>
@@ -180,10 +180,10 @@
                         <!-- Transaction Information Section -->
                         <div class="transaction-section" style="background: linear-gradient(135deg, rgba(59, 157, 213, 0.03) 0%, rgba(123, 192, 67, 0.03) 100%); padding: 1.5rem; border-top: 1px solid rgba(59, 157, 213, 0.1);">
                             <div class="d-flex align-items-center justify-content-between mb-3">
-                                <h6 class="mb-0 fw-bold" style="color: #1f2937; font-size: 1rem;">
-                                    <i class="bi bi-credit-card-2-front me-2" style="color: #3B9DD5;"></i>@(Localizer["TransactionDetails"]?.Value ?? "Transaction Details")
+                                <h6 class="mb-0 fw-bold" style="color: var(--iw-ink); font-size: 1rem;">
+                                    <i class="bi bi-credit-card-2-front me-2" style="color: var(--iw-action-blue);"></i>@(Localizer["TransactionDetails"]?.Value ?? "Transaction Details")
                                 </h6>
-                                <button class="btn btn-sm btn-link p-0 toggle-transaction" style="color: #3B9DD5; text-decoration: none; font-weight: 700;" data-order-id="@order.Id">
+                                <button class="btn btn-sm btn-link p-0 toggle-transaction" style="color: var(--iw-action-blue); text-decoration: none; font-weight: 700;" data-order-id="@order.Id">
                                     <i class="bi bi-chevron-down me-1"></i><span class="toggle-text">@(Localizer["ShowDetails"]?.Value ?? "Show Details")</span>
                                 </button>
                             </div>
@@ -196,7 +196,7 @@
                                             <label class="text-muted small mb-1 d-block">
                                                 <i class="bi bi-wallet2 me-1"></i>@(Localizer["PaymentMethod"]?.Value ?? "Payment Method")
                                             </label>
-                                            <p class="mb-0 fw-bold" style="color: #1f2937;">
+                                            <p class="mb-0 fw-bold" style="color: var(--iw-ink);">
                                                 @if (!string.IsNullOrEmpty(order.PaymentMethod))
                                                 {
                                                     <span>@order.PaymentMethod</span>
@@ -215,7 +215,7 @@
                                             <label class="text-muted small mb-1 d-block">
                                                 <i class="bi bi-calendar-check me-1"></i>@(Localizer["PaymentDate"]?.Value ?? "Payment Date")
                                             </label>
-                                            <p class="mb-0 fw-bold" style="color: #1f2937;">
+                                            <p class="mb-0 fw-bold" style="color: var(--iw-ink);">
                                                 @if (order.PaymentDate > DateTime.MinValue && order.PaymentDate.Year > 2000)
                                                 {
                                                     <span>@order.PaymentDate.ToString("MMM dd, yyyy", System.Globalization.CultureInfo.GetCultureInfo(currentCulture)) @(Localizer["At"]?.Value ?? "at") @order.PaymentDate.ToString("HH:mm", System.Globalization.CultureInfo.GetCultureInfo(currentCulture))</span>
@@ -236,7 +236,7 @@
                                                 <label class="text-muted small mb-1 d-block">
                                                     <i class="bi bi-calendar-x me-1"></i>@(Localizer["PaymentDueDate"]?.Value ?? "Payment Due Date")
                                                 </label>
-                                                <p class="mb-0 fw-bold" style="color: #dc3545;">
+                                                <p class="mb-0 fw-bold" style="color: var(--iw-danger);">
                                                     @order.PaymentDueDate.ToString("MMM dd, yyyy", System.Globalization.CultureInfo.GetCultureInfo(currentCulture))
                                                 </p>
                                             </div>
@@ -251,7 +251,7 @@
                                                 <label class="text-muted small mb-1 d-block">
                                                     <i class="bi bi-receipt me-1"></i>@(Localizer["TransactionID"]?.Value ?? "Transaction ID")
                                                 </label>
-                                                <p class="mb-0" style="font-size: 0.85rem; color: #3B9DD5; word-break: break-all;">
+                                                <p class="mb-0" style="font-size: 0.85rem; color: var(--iw-action-blue); word-break: break-all;">
                                                     <code style="background: rgba(59, 157, 213, 0.1); padding: 0.25rem 0.5rem; border-radius: 5px;">@order.PaymentIntentId</code>
                                                 </p>
                                             </div>
@@ -266,7 +266,7 @@
                                                 <label class="text-muted small mb-1 d-block">
                                                     <i class="bi bi-key me-1"></i>@(Localizer["SessionID"]?.Value ?? "Session ID")
                                                 </label>
-                                                <p class="mb-0" style="font-size: 0.85rem; color: #3B9DD5; word-break: break-all;">
+                                                <p class="mb-0" style="font-size: 0.85rem; color: var(--iw-action-blue); word-break: break-all;">
                                                     <code style="background: rgba(59, 157, 213, 0.1); padding: 0.25rem 0.5rem; border-radius: 5px;">@order.SessionId</code>
                                                 </p>
                                             </div>
@@ -281,7 +281,7 @@
                                                 <label class="text-muted small mb-1 d-block">
                                                     <i class="bi bi-tag-fill me-1"></i>@(Localizer["PromoCode"]?.Value ?? "Promo Code")
                                                 </label>
-                                                <p class="mb-0 fw-bold" style="color: #7BC043;">
+                                                <p class="mb-0 fw-bold" style="color: var(--iw-action-green);">
                                                     @order.PromoCodeText
                                                 </p>
                                             </div>
@@ -292,16 +292,16 @@
                         </div>
 
                         <!-- Order Footer -->
-                        <div class="order-footer" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); padding: 1.5rem; border-top: 1px solid rgba(59, 157, 213, 0.1);">
+                        <div class="order-footer" style="background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-surface) 100%); padding: 1.5rem; border-top: 1px solid rgba(59, 157, 213, 0.1);">
                             <div class="row align-items-center">
                                 <div class="col-md-6 mb-3 mb-md-0">
                                     @if (!string.IsNullOrEmpty(order.TrackingNumber))
                                     {
                                         <div class="tracking-info">
-                                            <p class="mb-1 fw-bold" style="color: #1f2937; font-size: 0.9rem;">
-                                                <i class="bi bi-truck me-2" style="color: #3B9DD5;"></i>@(Localizer["TrackingNumber"]?.Value ?? "Tracking Number")
+                                            <p class="mb-1 fw-bold" style="color: var(--iw-ink); font-size: 0.9rem;">
+                                                <i class="bi bi-truck me-2" style="color: var(--iw-action-blue);"></i>@(Localizer["TrackingNumber"]?.Value ?? "Tracking Number")
                                             </p>
-                                            <p class="mb-0" style="color: #3B9DD5; font-weight: 700; font-size: 1rem;">
+                                            <p class="mb-0" style="color: var(--iw-action-blue); font-weight: 700; font-size: 1rem;">
                                                 @order.TrackingNumber
                                             </p>
                                             @if (!string.IsNullOrEmpty(order.Carrier))
@@ -338,8 +338,8 @@
                                             </div>
                                         }
                                         <div class="d-flex justify-content-md-end justify-content-between align-items-center pt-2" style="border-top: 2px solid rgba(59, 157, 213, 0.2);">
-                                            <span class="fw-bold me-3" style="font-size: 1.1rem; color: #1f2937;">@(Localizer["Total"]?.Value ?? "Total"):</span>
-                                            <span class="fw-bold" style="font-size: 1.3rem; color: #3B9DD5;">
+                                            <span class="fw-bold me-3" style="font-size: 1.1rem; color: var(--iw-ink);">@(Localizer["Total"]?.Value ?? "Total"):</span>
+                                            <span class="fw-bold" style="font-size: 1.3rem; color: var(--iw-action-blue);">
                                                 @Html.Raw(currencySymbol)@order.OrderTotal.ToString("N2")
                                             </span>
                                         </div>
@@ -353,14 +353,14 @@
                                     <div class="d-flex flex-wrap gap-2">
                                         <a href="@Url.EncryptedAction("OrderDetails", "Account", order.Id, new { area = "Customer" })" 
                                            class="btn btn-primary" 
-                                           style="background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%); border: none; border-radius: 10px; padding: 0.6rem 1.5rem; font-weight: 700; box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3);">
+                                           style="background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%); border: none; border-radius: 10px; padding: 0.6rem 1.5rem; font-weight: 700; box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3);">
                                             <i class="bi bi-eye me-2"></i>@Localizer["ViewDetails"]
                                         </a>
                                         @if (!string.IsNullOrEmpty(order.TrackingNumber))
                                         {
                                             <a asp-area="Customer" asp-controller="Home" asp-action="OrderTracking" asp-route-trackingNumber="@order.TrackingNumber" 
                                                class="btn btn-outline-primary" 
-                                               style="border: 2px solid #3B9DD5; color: #3B9DD5; border-radius: 10px; padding: 0.6rem 1.5rem; font-weight: 700; background: white;">
+                                               style="border: 2px solid var(--iw-dark-blue); color: var(--iw-action-blue); border-radius: 10px; padding: 0.6rem 1.5rem; font-weight: 700; background: white;">
                                                 <i class="bi bi-truck me-2"></i>@Localizer["TrackOrder"]
                                             </a>
                                         }

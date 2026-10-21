@@ -7,7 +7,7 @@
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     overflow: hidden;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--iw-border);
 }
 
 .service-offers-table {
@@ -15,7 +15,7 @@
 }
 
 .service-offers-table thead th {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
     color: white;
     font-weight: 600;
     padding: 1rem;
@@ -26,7 +26,7 @@
 .service-offers-table tbody td {
     padding: 1rem;
     vertical-align: middle;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--iw-border);
 }
 
 .service-offers-table tbody tr {
@@ -34,7 +34,7 @@
 }
 
 .service-offers-table tbody tr:hover {
-    background-color: #f9fafb;
+    background-color: var(--iw-canvas);
     transform: scale(1.005);
 }
 
@@ -54,27 +54,27 @@
 }
 
 .status-badge.active {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
     color: white;
 }
 
 .status-badge.inactive {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    background: linear-gradient(135deg, var(--iw-muted) 0%, var(--iw-muted) 100%);
     color: white;
 }
 
 .status-badge.expired {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 100%);
     color: white;
 }
 
 .status-badge.upcoming {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--iw-warning) 0%, var(--iw-warning) 100%);
     color: white;
 }
 
 .status-badge.paused {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--iw-warning) 0%, var(--iw-warning) 100%);
     color: white;
 }
 
@@ -87,12 +87,12 @@
 }
 
 .discount-badge.percentage {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
     color: white;
 }
 
 .discount-badge.fixed {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     color: white;
 }
 

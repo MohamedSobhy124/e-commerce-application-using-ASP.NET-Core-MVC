@@ -1,0 +1,85 @@
+@{
+    ViewData["Title"] = Localizer["Dashboard"];
+}
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div>
+                    <h1 class="admin-card-title">@Localizer["Dashboard"]</h1>
+                    <p class="text-muted mb-0">@Localizer["DashboardDescription"]</p>
+                </div>
+            </div>
+            <div class="admin-card-body" data-admin-dashboard
+                 data-orders-url="@Url.Action("GetOrderStatistics", "Order", new { area = "Admin" })"
+                 data-products-url="@Url.Action("GetProductStatistics", "Product", new { area = "Admin" })"
+                 data-error="@Localizer["CouldNotLoadDashboard"]">
+                <div class="admin-kpi-grid" id="adminKpiGrid">
+                    <a class="admin-kpi-card is-skeleton" asp-area="Admin" asp-controller="Order" asp-action="Index" asp-route-status="Pending">
+                        <span class="admin-kpi-label">@Localizer["Pending"]</span>
+                        <span class="admin-kpi-value" data-kpi="orders-pending">—</span>
+                        <span class="admin-kpi-hint">@Localizer["Orders"]</span>
+                    </a>
+                    <a class="admin-kpi-card is-skeleton" asp-area="Admin" asp-controller="Order" asp-action="Index" asp-route-status="Processing">
+                        <span class="admin-kpi-label">@Localizer["Processing"]</span>
+                        <span class="admin-kpi-value" data-kpi="orders-processing">—</span>
+                        <span class="admin-kpi-hint">@Localizer["Orders"]</span>
+                    </a>
+                    <a class="admin-kpi-card is-skeleton" asp-area="Admin" asp-controller="Product" asp-action="Index" asp-route-filter="lowstock">
+                        <span class="admin-kpi-label">@Localizer["LowStock"]</span>
+                        <span class="admin-kpi-value" data-kpi="products-lowstock">—</span>
+                        <span class="admin-kpi-hint">@Localizer["Product"]</span>
+                    </a>
+                    <a class="admin-kpi-card is-skeleton" asp-area="Admin" asp-controller="Product" asp-action="Index" asp-route-filter="outofstock">
+                        <span class="admin-kpi-label">@Localizer["OutOfStock"]</span>
+                        <span class="admin-kpi-value" data-kpi="products-outofstock">—</span>
+                        <span class="admin-kpi-hint">@Localizer["Product"]</span>
+                    </a>
+                </div>
+
+                <section class="admin-form-section">
+                    <h2>@Localizer["NeedsAttention"]</h2>
+                    <ul class="admin-attention-list">
+                        <li>
+                            <a asp-area="Admin" asp-controller="Order" asp-action="Index" asp-route-status="Pending">
+                                <span>@Localizer["Pending"] @Localizer["Orders"]</span>
+                                <strong data-kpi="orders-pending">—</strong>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Admin" asp-controller="ReturnRequest" asp-action="Index">
+                                <span>@Localizer["ReturnRequests"]</span>
+                                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Admin" asp-controller="Product" asp-action="Index" asp-route-filter="lowstock">
+                                <span>@Localizer["LowStock"]</span>
+                                <strong data-kpi="products-lowstock">—</strong>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Admin" asp-controller="Review" asp-action="Index">
+                                <span>@Localizer["Reviews"]</span>
+                                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+
+                <div class="form-actions">
+                    <a asp-area="Admin" asp-controller="Order" asp-action="Index" class="btn btn-primary">
+                        <i class="bi bi-receipt me-2" aria-hidden="true"></i>@Localizer["Orders"]
+                    </a>
+                    <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-box-seam me-2" aria-hidden="true"></i>@Localizer["Product"]
+                    </a>
+                    <a asp-area="Admin" asp-controller="User" asp-action="CreateAdminUser" class="btn btn-outline-secondary">
+                        <i class="bi bi-person-plus me-2" aria-hidden="true"></i>@Localizer["CreateAdminUser"]
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

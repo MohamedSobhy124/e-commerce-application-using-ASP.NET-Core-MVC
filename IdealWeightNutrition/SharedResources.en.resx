@@ -3024,6 +3024,12 @@
   <data name="NoOrdersFound" xml:space="preserve">
     <value>No Orders Found</value>
   </data>
+  <data name="NoServicePurchasesFound" xml:space="preserve">
+    <value>No service purchases found</value>
+  </data>
+  <data name="SearchServicePurchasesPlaceholder" xml:space="preserve">
+    <value>Search purchases...</value>
+  </data>
   <data name="Refunded" xml:space="preserve">
     <value>Refunded</value>
   </data>
@@ -4756,4 +4762,238 @@
     <value>Hide this blog from customers?</value>
   </data>
 
+  <data name="SkipToContent" xml:space="preserve"><value>Skip to content</value></data>
+  <data name="NavigationMenu" xml:space="preserve"><value>Navigation menu</value></data>
+  <data name="Companies" xml:space="preserve"><value>Companies</value></data>
+  <data name="NewsletterSubscriptions" xml:space="preserve"><value>Newsletter subscriptions</value></data>
+  <data name="SearchProductsPlaceholder" xml:space="preserve"><value>Search products…</value></data>
+  <data name="ProductSearchHint" xml:space="preserve"><value>Search the product catalog.</value></data>
+  <data name="ClearSearch" xml:space="preserve"><value>Clear search</value></data>
+  <data name="LowStock" xml:space="preserve"><value>Low stock</value></data>
+  <data name="BackToStore" xml:space="preserve"><value>Back to store</value></data>
+  <data name="CitiesAndDeliveryAreas" xml:space="preserve"><value>Cities &amp; delivery areas</value></data>
+  <data name="MinimumPrice" xml:space="preserve"><value>Minimum price</value></data>
+  <data name="MaximumPrice" xml:space="preserve"><value>Maximum price</value></data>
+  <data name="DecreaseQuantity" xml:space="preserve"><value>Decrease quantity</value></data>
+  <data name="IncreaseQuantity" xml:space="preserve"><value>Increase quantity</value></data>
+  <data name="ToggleCartSelection" xml:space="preserve"><value>Change cart selection</value></data>
+  <data name="SlideNumber" xml:space="preserve"><value>Image {0}</value></data>
+  <data name="AccountCreated" xml:space="preserve"><value>Account created</value></data>
+  <data name="AccountFound" xml:space="preserve"><value>Account found</value></data>
+  <data name="AccountLinked" xml:space="preserve"><value>Account linked</value></data>
+  <data name="Action" xml:space="preserve"><value>Action</value></data>
+  <data name="ActiveArea" xml:space="preserve"><value>Active delivery area</value></data>
+  <data name="AddAmount" xml:space="preserve"><value>Add amount</value></data>
+  <data name="Adding" xml:space="preserve"><value>Adding…</value></data>
+  <data name="Addresses" xml:space="preserve"><value>Addresses</value></data>
+  <data name="AdminActions" xml:space="preserve"><value>Admin actions</value></data>
+  <data name="AmountCannotExceed" xml:space="preserve"><value>The amount cannot exceed the outstanding total</value></data>
+  <data name="AnErrorOccurredProcessingRequest" xml:space="preserve"><value>We could not process your request</value></data>
+  <data name="AreYouSure" xml:space="preserve"><value>Are you sure?</value></data>
+  <data name="AreYouSureDeleteArea" xml:space="preserve"><value>Delete this delivery area?</value></data>
+  <data name="AreYouSureYouWantToRemoveThisServiceFromExcludedList" xml:space="preserve"><value>Remove this service from the exclusions?</value></data>
+  <data name="AreaNameArabic" xml:space="preserve"><value>Area name in Arabic</value></data>
+  <data name="AreaNameEnglish" xml:space="preserve"><value>Area name in English</value></data>
+  <data name="BackToCity" xml:space="preserve"><value>Back to city</value></data>
+  <data name="BackToLogin" xml:space="preserve"><value>Back to sign in</value></data>
+  <data name="BrowseServices" xml:space="preserve"><value>Browse services</value></data>
+  <data name="ChangePasswordAndSecurity" xml:space="preserve"><value>Password and security</value></data>
+  <data name="ChargeOverridesCityDefault" xml:space="preserve"><value>These charges override the city’s default delivery charge</value></data>
+  <data name="ClickHereToLogIn" xml:space="preserve"><value>Sign in here</value></data>
+  <data name="ConfirmPasswordPlaceholder" xml:space="preserve"><value>Confirm your password</value></data>
+  <data name="CreateAccountDescription" xml:space="preserve"><value>Create an account to manage orders and checkout faster</value></data>
+  <data name="CreateAccountForEasierTracking" xml:space="preserve"><value>Create an account to track your orders easily</value></data>
+  <data name="CreateAccountForFutureOrders" xml:space="preserve"><value>Create an account for faster checkout next time</value></data>
+  <data name="CreateRemoteArea" xml:space="preserve"><value>Add delivery area</value></data>
+  <data name="CurrentAmountPaid" xml:space="preserve"><value>Current amount paid</value></data>
+  <data name="CurrentStatus" xml:space="preserve"><value>Current status</value></data>
+  <data name="DeleteConfirmMessage" xml:space="preserve"><value>Delete this item?</value></data>
+  <data name="DeleteRemoteArea" xml:space="preserve"><value>Delete delivery area</value></data>
+  <data name="DeliveryChargeAED" xml:space="preserve"><value>Delivery charge in AED</value></data>
+  <data name="DetailedResponseCode" xml:space="preserve"><value>Detailed response code</value></data>
+  <data name="DidNotReceiveEmail" xml:space="preserve"><value>Didn’t receive the email?</value></data>
+  <data name="DiscountedProducts" xml:space="preserve"><value>Discounted products</value></data>
+  <data name="EditRemoteArea" xml:space="preserve"><value>Edit delivery area</value></data>
+  <data name="EmailMustMatchOrder" xml:space="preserve"><value>Your email must match the email on the order</value></data>
+  <data name="EnterNewPassword" xml:space="preserve"><value>Enter a new password</value></data>
+  <data name="EnterStreetAddress" xml:space="preserve"><value>Enter your street address</value></data>
+  <data name="EnterYourName" xml:space="preserve"><value>Enter your name</value></data>
+  <data name="EnterYourPhone" xml:space="preserve"><value>Enter your phone number</value></data>
+  <data name="ErrorCode" xml:space="preserve"><value>Error code</value></data>
+  <data name="ErrorDeletingRemoteArea" xml:space="preserve"><value>Could not delete the delivery area</value></data>
+  <data name="ErrorDetails" xml:space="preserve"><value>Error details</value></data>
+  <data name="ErrorLoadingRemoteAreas" xml:space="preserve"><value>Could not load delivery areas</value></data>
+  <data name="ExcludeAllServices" xml:space="preserve"><value>Exclude all services</value></data>
+  <data name="ExcludeAllServicesDescription" xml:space="preserve"><value>The promo code will not apply to any service</value></data>
+  <data name="ExcludeSpecificServices" xml:space="preserve"><value>Exclude selected services</value></data>
+  <data name="ExcludeSpecificServicesDescription" xml:space="preserve"><value>Choose services that the promo code will not apply to</value></data>
+  <data name="Export" xml:space="preserve"><value>Export</value></data>
+  <data name="ExportServicePurchases" xml:space="preserve"><value>Export service purchases</value></data>
+  <data name="FailedToLoadPaymentLibrary" xml:space="preserve"><value>Could not load the payment service</value></data>
+  <data name="FailedToStartPayment" xml:space="preserve"><value>Could not start payment</value></data>
+  <data name="ForgotPasswordConfirmation" xml:space="preserve"><value>Check your email</value></data>
+  <data name="ForgotYourPassword" xml:space="preserve"><value>Forgot your password?</value></data>
+  <data name="GuestReturnInfo" xml:space="preserve"><value>Use your order number and email to request a return</value></data>
+  <data name="GuestReturnRequest" xml:space="preserve"><value>Guest return request</value></data>
+  <data name="InactiveAreasWontAppear" xml:space="preserve"><value>Inactive areas will not appear at checkout</value></data>
+  <data name="ManageAddresses" xml:space="preserve"><value>Manage addresses</value></data>
+  <data name="ManageYourAddresses" xml:space="preserve"><value>Manage your delivery addresses</value></data>
+  <data name="ManageYourNotifications" xml:space="preserve"><value>Manage your notifications</value></data>
+  <data name="MySubscriptions" xml:space="preserve"><value>My subscriptions</value></data>
+  <data name="NoActions" xml:space="preserve"><value>No actions available</value></data>
+  <data name="NoServicesExcluded" xml:space="preserve"><value>No services excluded</value></data>
+  <data name="NoSubscriptionsYet" xml:space="preserve"><value>No subscriptions yet</value></data>
+  <data name="OrderWillBeLinkedToAccount" xml:space="preserve"><value>Your order will be linked to your account</value></data>
+  <data name="PasswordPlaceholder" xml:space="preserve"><value>Enter your password</value></data>
+  <data name="PasswordResetEmailSent" xml:space="preserve"><value>If the email is registered, we have sent a password reset link</value></data>
+  <data name="PasswordResetSuccessMessage" xml:space="preserve"><value>Your password has been reset. You can now sign in</value></data>
+  <data name="PasswordResetSuccessfully" xml:space="preserve"><value>Password reset successfully</value></data>
+  <data name="PaymentCancelled" xml:space="preserve"><value>Payment cancelled</value></data>
+  <data name="PaymentError" xml:space="preserve"><value>Payment error</value></data>
+  <data name="PaymentFailed" xml:space="preserve"><value>Payment failed</value></data>
+  <data name="PaymentFailedPleaseTryAgain" xml:space="preserve"><value>Payment failed. Please try again</value></data>
+  <data name="PaymentWasCancelled" xml:space="preserve"><value>Payment was cancelled</value></data>
+  <data name="PleaseEnterValidAmount" xml:space="preserve"><value>Enter a valid amount</value></data>
+  <data name="ProductFilter" xml:space="preserve"><value>Filter products</value></data>
+  <data name="RefundStatus" xml:space="preserve"><value>Refund status</value></data>
+  <data name="RemoteAreaInformation" xml:space="preserve"><value>Delivery area information</value></data>
+  <data name="ResetPassword" xml:space="preserve"><value>Reset password</value></data>
+  <data name="ResetPasswordConfirmation" xml:space="preserve"><value>Password reset</value></data>
+  <data name="ResetYourPassword" xml:space="preserve"><value>Reset your password</value></data>
+  <data name="Response" xml:space="preserve"><value>Response</value></data>
+  <data name="ResponseCode" xml:space="preserve"><value>Response code</value></data>
+  <data name="RestoreConfirmMessage" xml:space="preserve"><value>Restore this item?</value></data>
+  <data name="Security" xml:space="preserve"><value>Security</value></data>
+  <data name="ServiceExclusions" xml:space="preserve"><value>Service exclusions</value></data>
+  <data name="ServiceIsAlreadyExcluded" xml:space="preserve"><value>This service is already excluded</value></data>
+  <data name="ServicesInThisListWillNotReceiveThePromoCodeDiscount" xml:space="preserve"><value>The promo code discount will not apply to these services</value></data>
+  <data name="ShippingAddress" xml:space="preserve"><value>Delivery address</value></data>
+  <data name="Slide" xml:space="preserve"><value>Image</value></data>
+  <data name="StartBrowsingServices" xml:space="preserve"><value>Browse services</value></data>
+  <data name="StatusCode" xml:space="preserve"><value>Status code</value></data>
+  <data name="Support" xml:space="preserve"><value>Support</value></data>
+  <data name="Suspended" xml:space="preserve"><value>Suspended</value></data>
+  <data name="TechnicalDetailsLogged" xml:space="preserve"><value>Technical details have been logged</value></data>
+  <data name="TotalPurchases" xml:space="preserve"><value>Total purchases</value></data>
+  <data name="Undelete" xml:space="preserve"><value>Restore</value></data>
+  <data name="UpdateAmountPaid" xml:space="preserve"><value>Update amount paid</value></data>
+  <data name="UpdatePaymentStatus" xml:space="preserve"><value>Update payment status</value></data>
+  <data name="UpdateServiceStatus" xml:space="preserve"><value>Update service status</value></data>
+  <data name="Updating" xml:space="preserve"><value>Updating…</value></data>
+  <data name="ViewNotifications" xml:space="preserve"><value>View notifications</value></data>
+  <data name="ViewSubscriptions" xml:space="preserve"><value>View subscriptions</value></data>
+  <data name="ViewYourServiceSubscriptions" xml:space="preserve"><value>View your service subscriptions</value></data>
+  <data name="YesRestoreIt" xml:space="preserve"><value>Yes, restore</value></data>
+  <data name="ResendEmailConfirmation" xml:space="preserve"><value>Resend email confirmation</value></data>
+  <data name="EnterEmailAddress" xml:space="preserve"><value>Enter your email address</value></data>
+  <data name="Resend" xml:space="preserve"><value>Resend</value></data>
+  <data name="EmailConfirmationSent" xml:space="preserve"><value>Confirmation email sent</value></data>
+  <data name="RecoveryCodes" xml:space="preserve"><value>Recovery codes</value></data>
+  <data name="AdminNavOperations" xml:space="preserve"><value>Operations</value></data>
+  <data name="AdminNavCatalog" xml:space="preserve"><value>Catalog</value></data>
+  <data name="AdminNavPromotions" xml:space="preserve"><value>Promotions</value></data>
+  <data name="AdminNavServices" xml:space="preserve"><value>Services</value></data>
+  <data name="AdminNavContent" xml:space="preserve"><value>Content</value></data>
+  <data name="AdminNavSettings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Users" xml:space="preserve"><value>Users</value></data>
+  <data name="UsersList" xml:space="preserve"><value>Users list</value></data>
+  <data name="CreateAdminUser" xml:space="preserve"><value>Create admin user</value></data>
+  <data name="NoUsersYet" xml:space="preserve"><value>No users yet</value></data>
+  <data name="CompaniesList" xml:space="preserve"><value>Companies list</value></data>
+  <data name="CreateNewCompany" xml:space="preserve"><value>Create new company</value></data>
+  <data name="CreateCompany" xml:space="preserve"><value>Create company</value></data>
+  <data name="EditCompany" xml:space="preserve"><value>Edit company</value></data>
+  <data name="CompanyDetails" xml:space="preserve"><value>Company details</value></data>
+  <data name="NoCompaniesYet" xml:space="preserve"><value>No companies yet</value></data>
+  <data name="AreYouSureDeleteCompany" xml:space="preserve"><value>Are you sure you want to delete this company?</value></data>
+  <data name="CategoryDetails" xml:space="preserve"><value>Category details</value></data>
+  <data name="DeleteCategory" xml:space="preserve"><value>Delete category</value></data>
+  <data name="AreYouSureDeleteCategory" xml:space="preserve"><value>Are you sure you want to delete this category?</value></data>
+  <data name="NoItemsFound" xml:space="preserve"><value>No items found</value></data>
+  <data name="NoServiceOffersYet" xml:space="preserve"><value>No service offers yet</value></data>
+  <data name="TimezoneAsiaDubai" xml:space="preserve"><value>Timezone: Asia/Dubai</value></data>
+  <data name="Basics" xml:space="preserve"><value>Basics</value></data>
+  <data name="OptionsVariants" xml:space="preserve"><value>Options and variants</value></data>
+  <data name="SEO" xml:space="preserve"><value>SEO</value></data>
+  <data name="FulfillmentActions" xml:space="preserve"><value>Fulfillment actions</value></data>
+  <data name="MarkReceived" xml:space="preserve"><value>Mark received</value></data>
+  <data name="ForceComplete" xml:space="preserve"><value>Force complete</value></data>
+  <data name="NoProductsInThisSale" xml:space="preserve"><value>No products in this sale</value></data>
+  <data name="NoProductsInThisCombo" xml:space="preserve"><value>No products in this combo</value></data>
+  <data name="VideoDurationSizeHint" xml:space="preserve"><value>Prefer a short video with a homepage-friendly file size</value></data>
+  <data name="Role" xml:space="preserve"><value>Role</value></data>
+  <data name="CreateUser" xml:space="preserve"><value>Create user</value></data>
+  <data name="BackToManagement" xml:space="preserve"><value>Back to management</value></data>
+  <data name="ConfirmDeleteNamed" xml:space="preserve"><value>Do you want to delete {0}?</value></data>
+  <data name="NoOrdersFound" xml:space="preserve"><value>No orders found</value></data>
+  <data name="ExportOrders" xml:space="preserve"><value>Export orders</value></data>
+  <data name="ReviewsList" xml:space="preserve"><value>Reviews list</value></data>
+  <data name="CreateAdminUserToManageAccess" xml:space="preserve"><value>Create an admin user to manage store access.</value></data>
+  <data name="MinimumPasswordCharactersHint" xml:space="preserve"><value>Minimum 6 characters</value></data>
+  <data name="PhonePlaceholder" xml:space="preserve"><value>+971 50 000 0000</value></data>
+  <data name="SelectCompanyPlaceholder" xml:space="preserve"><value>Select company</value></data>
+  <data name="AdminUserCreatedSuccess" xml:space="preserve"><value>{0} user created successfully.</value></data>
+  <data name="ServicePurchasesCardDescription" xml:space="preserve"><value>View and manage customer service purchases.</value></data>
+  <data name="ServiceOffersCardDescription" xml:space="preserve"><value>Create and manage discounts for services.</value></data>
+  <data name="NoServiceSubscriptionsYet" xml:space="preserve"><value>No service subscriptions yet</value></data>
+  <data name="CreateFirstService" xml:space="preserve"><value>Create first service</value></data>
+  <data name="NoServicePurchasesYet" xml:space="preserve"><value>No service purchases yet</value></data>
+  <data name="NoNewsletterSubscribersYet" xml:space="preserve"><value>No newsletter subscribers yet</value></data>
+  <data name="ConfirmRestoreBlogNamed" xml:space="preserve"><value>Restore "{0}" and show it to customers?</value></data>
+  <data name="ConfirmHideBlogNamed" xml:space="preserve"><value>Hide "{0}" from customers?</value></data>
+  <data name="BlogPostUrlLabel" xml:space="preserve"><value>Post URL</value></data>
+  <data name="VideoBannerDropZoneHint" xml:space="preserve"><value>Drag and drop or choose a file</value></data>
+  <data name="ReplaceVideo" xml:space="preserve"><value>Replace video</value></data>
+  <data name="ReplacePoster" xml:space="preserve"><value>Replace poster</value></data>
+  <data name="ManageAreasForCity" xml:space="preserve"><value>Remote areas for this city</value></data>
+  <data name="NoReturnRequestsFound" xml:space="preserve"><value>No return requests found</value></data>
+  <data name="ReturnRequestDetails" xml:space="preserve"><value>Return request details</value></data>
+  <data name="NotAvailable" xml:space="preserve"><value>Not available</value></data>
+  <data name="UnknownProduct" xml:space="preserve"><value>Unknown product</value></data>
+  <data name="ReturnRequestNumber" xml:space="preserve"><value>Return request #{0}</value></data>
+  <data name="ConfirmApproveReturnRequest" xml:space="preserve"><value>Approve return request #{0}?</value></data>
+  <data name="ConfirmRejectReturnRequest" xml:space="preserve"><value>Reject return request #{0}?</value></data>
+  <data name="ConfirmMarkReturnReceived" xml:space="preserve"><value>Mark return request #{0} as received?</value></data>
+  <data name="ConfirmCompleteReturnRequest" xml:space="preserve"><value>Complete return request #{0} and process refund?</value></data>
+  <data name="Completed" xml:space="preserve"><value>Completed</value></data>
+  <data name="HideReview" xml:space="preserve"><value>Hide</value></data>
+  <data name="NoReviewsFound" xml:space="preserve"><value>No reviews found</value></data>
+  <data name="ViewFullComment" xml:space="preserve"><value>View full comment</value></data>
+  <data name="NoComment" xml:space="preserve"><value>No comment</value></data>
+  <data name="DeleteReviewTitle" xml:space="preserve"><value>Delete review for {0}?</value></data>
+  <data name="DeleteReviewConfirm" xml:space="preserve"><value>This will permanently delete the review for {0}.</value></data>
+  <data name="ExportPreparing" xml:space="preserve"><value>Preparing your export...</value></data>
+  <data name="ExportComplete" xml:space="preserve"><value>Export complete</value></data>
+  <data name="ExportReviewsSuccess" xml:space="preserve"><value>Your reviews have been exported successfully.</value></data>
+  <data name="ErrorTogglingReview" xml:space="preserve"><value>Could not update review approval</value></data>
+  <data name="ErrorDeletingReview" xml:space="preserve"><value>Could not delete review</value></data>
+  <data name="LoadingProductsHint" xml:space="preserve"><value>If this message persists, check the browser console (F12).</value></data>
+  <data name="TabulatorLoadFailed" xml:space="preserve"><value>Tabulator failed to load. Refresh the page or check your connection.</value></data>
+  <data name="NewBadge" xml:space="preserve"><value>New</value></data>
+  <data name="TrendingBadge" xml:space="preserve"><value>Trending</value></data>
+  <data name="InventoryAndPricing" xml:space="preserve"><value>Inventory and pricing</value></data>
+  <data name="ProductSummary" xml:space="preserve"><value>Product summary</value></data>
+  <data name="ProductSlugHelp" xml:space="preserve"><value>URL slugs are generated from the product title for SEO-friendly links.</value></data>
+  <data name="ProductSlugEnglish" xml:space="preserve"><value>Product URL slug (English)</value></data>
+  <data name="AutoGenerated" xml:space="preserve"><value>Auto-generated</value></data>
+  <data name="SlugAutoPlaceholder" xml:space="preserve"><value>Will be auto-generated from title</value></data>
+  <data name="ProductSlugExample" xml:space="preserve"><value>Example: body-builder-whey-protein</value></data>
+  <data name="Anonymous" xml:space="preserve"><value>Anonymous</value></data>
+  <data name="FilesSelectedCount" xml:space="preserve"><value>{0} file(s) selected</value></data>
+  <data name="NewFilesSelectedCount" xml:space="preserve"><value>{0} new file(s) selected</value></data>
+  <data name="InvalidProductId" xml:space="preserve"><value>Invalid product ID</value></data>
+  <data name="MultipleFileSelectionNotSupported" xml:space="preserve"><value>Your browser does not support multiple file selection. Please select all files at once.</value></data>
+  <data name="ErrorSubmittingForm" xml:space="preserve"><value>Error submitting form. Please try again.</value></data>
+  <data name="FlashSaleImageLabel" xml:space="preserve"><value>Flash sale image</value></data>
+  <data name="UploadFlashSaleImageHelp" xml:space="preserve"><value>Upload an image for the flash sale.</value></data>
+  <data name="DashboardDescription" xml:space="preserve"><value>Orders and catalog items that need attention.</value></data>
+  <data name="NeedsAttention" xml:space="preserve"><value>Needs attention</value></data>
+  <data name="CollapseSidebar" xml:space="preserve"><value>Collapse sidebar</value></data>
+  <data name="ExpandSidebar" xml:space="preserve"><value>Expand sidebar</value></data>
+  <data name="CouldNotLoadDashboard" xml:space="preserve"><value>Could not load dashboard statistics.</value></data>
+  <data name="CannotDeleteServiceWithPurchases" xml:space="preserve"><value>This service has {0} purchase(s). Remove purchases before deleting.</value></data>
+  <data name="PartiallyRefunded" xml:space="preserve"><value>Partially refunded</value></data>
+  <data name="Authorized" xml:space="preserve"><value>Authorized</value></data>
+  <data name="ServiceStatus" xml:space="preserve"><value>Service status</value></data>
+  <data name="ZoomImage" xml:space="preserve"><value>Zoom image</value></data>
 </root>

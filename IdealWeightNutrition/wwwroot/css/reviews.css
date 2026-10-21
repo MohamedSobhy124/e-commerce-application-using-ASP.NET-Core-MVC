@@ -18,11 +18,11 @@
     align-items: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid #e0e0e0;
+    border-bottom: 2px solid var(--iw-border);
 }
 
     .reviews-header h4 {
-        color: #1976D2;
+        color: var(--iw-action-blue);
         margin: 0;
     }
 
@@ -30,6 +30,10 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+}
+
+.reviews-rating-summary.is-empty {
+    display: none;
 }
 
 /* Star Rating Display */
@@ -45,11 +49,11 @@
 .rating-average {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #333;
+    color: var(--iw-ink);
 }
 
 .rating-count {
-    color: #666;
+    color: var(--iw-muted);
     font-size: 0.9rem;
 }
 
@@ -70,7 +74,7 @@
         cursor: pointer;
         font-size: 2.5rem;
         transition: all 0.2s ease;
-        color: #ddd;
+        color: var(--iw-border);
     }
 
         .star-rating-input label:hover,
@@ -85,32 +89,32 @@
 
 /* Review Form Section */
 .review-form-section {
-    background: linear-gradient(135deg, #E3F2FD, #F1F8E9);
+    background: linear-gradient(135deg, var(--iw-light-blue), var(--iw-light-green));
     padding: 2rem;
     border-radius: 12px;
     margin-bottom: 2rem;
-    border: 2px solid #3B9DD5;
+    border: 2px solid var(--iw-dark-blue);
 }
 
     .review-form-section h5 {
-        color: #1976D2;
+        color: var(--iw-action-blue);
         margin-bottom: 1.5rem;
         font-weight: 700;
     }
 
     .review-form-section .form-label {
         font-weight: 600;
-        color: #333;
+        color: var(--iw-ink);
     }
 
     .review-form-section textarea {
-        border: 2px solid #ddd;
+        border: 2px solid var(--iw-border);
         border-radius: 8px;
         transition: border-color 0.3s ease;
     }
 
         .review-form-section textarea:focus {
-            border-color: #3B9DD5;
+            border-color: var(--iw-dark-blue);
             box-shadow: 0 0 0 0.25rem rgba(59, 157, 213, 0.15);
         }
 
@@ -121,13 +125,13 @@
 
 .review-item {
     padding: 1.5rem;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--iw-border);
     transition: all 0.2s ease;
     background: white;
 }
 
     .review-item:hover {
-        background: #f8f9fa;
+        background: var(--iw-canvas);
         padding-left: 2rem;
     }
 
@@ -152,12 +156,12 @@
 }
 
     .review-user strong {
-        color: #333;
+        color: var(--iw-ink);
         font-size: 1.1rem;
     }
 
     .review-user .badge {
-        background: linear-gradient(135deg, #7BC043, #558B2F) !important;
+        background: linear-gradient(135deg, var(--iw-dark-green), var(--iw-dark-green)) !important;
         padding: 0.35rem 0.75rem;
         border-radius: 20px;
         font-size: 0.75rem;
@@ -177,7 +181,7 @@
 }
 
 .review-date {
-    color: #999;
+    color: var(--iw-muted);
     font-size: 0.85rem;
 }
 
@@ -237,7 +241,7 @@
     }
 
     .product-card-stars .bi-star {
-        color: #E0E0E0;
+        color: var(--iw-border);
     }
 
 .product-card-rating-number,
@@ -283,31 +287,31 @@
 .reviews-empty {
     text-align: center;
     padding: 3rem 1rem;
-    color: #999;
+    color: var(--iw-muted);
 }
 
     .reviews-empty i {
         font-size: 3rem;
-        color: #ddd;
+        color: var(--iw-border);
         margin-bottom: 1rem;
     }
 
 /* Helpful Button (Future Feature) */
 .review-helpful-btn {
     background: none;
-    border: 1px solid #ddd;
+    border: 1px solid var(--iw-border);
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
-    color: #666;
+    color: var(--iw-muted);
     font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
     .review-helpful-btn:hover {
-        border-color: #3B9DD5;
-        color: #3B9DD5;
-        background: #E3F2FD;
+        border-color: var(--iw-dark-blue);
+        color: var(--iw-action-blue);
+        background: var(--iw-light-blue);
     }
 
 /* RTL Support */
@@ -359,9 +363,9 @@
 .reviews-loading {
     text-align: center;
     padding: 2rem;
-    color: #999;
+    color: var(--iw-muted);
 }
 
     .reviews-loading .spinner-border {
-        color: #3B9DD5;
+        color: var(--iw-action-blue);
     }

@@ -4,7 +4,7 @@
 
 /* Hero Section */
 .hero-section {
-    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, #ec4899 100%);
     padding: 4rem 0 3rem;
     margin-bottom: 3rem;
     position: relative;
@@ -330,7 +330,7 @@
 
 /* Features Section - Enhanced */
 .features-section {
-    background: linear-gradient(135deg, #E3F2FD 0%, #F1F8E9 100%);
+    background: linear-gradient(135deg, var(--iw-light-blue) 0%, var(--iw-light-green) 100%);
     padding: 5rem 0;
     margin-top: 4rem;
     position: relative;
@@ -355,7 +355,7 @@
     text-align: center;
     font-size: 2.8rem;
     font-weight: 900;
-    color: #1976D2;
+    color: var(--iw-action-blue);
     margin-bottom: 1rem;
     position: relative;
     z-index: 1;
@@ -367,7 +367,7 @@
     display: block;
     width: 120px;
     height: 5px;
-    background: linear-gradient(90deg, #3B9DD5, #7BC043);
+    background: linear-gradient(90deg, var(--iw-dark-blue), var(--iw-dark-green));
     margin: 1.5rem auto 3rem auto;
     border-radius: 10px;
     animation: expandWidth 1s ease 0.5s both;
@@ -418,7 +418,7 @@
 .feature-card:hover {
     transform: translateY(-15px) scale(1.03);
     box-shadow: 0 20px 48px rgba(59, 157, 213, 0.2);
-    border-color: #3B9DD5;
+    border-color: var(--iw-dark-blue);
 }
 
 .feature-card:hover::before {
@@ -448,7 +448,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%);
     border-radius: 50%;
     color: white;
     font-size: 2.2rem;
@@ -470,7 +470,7 @@
     left: -5px;
     right: -5px;
     bottom: -5px;
-    background: linear-gradient(135deg, #7BC043 0%, #3B9DD5 100%);
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-blue) 100%);
     border-radius: 50%;
     opacity: 0;
     transition: opacity 0.4s ease;
@@ -485,7 +485,7 @@
 .feature-title {
     font-size: 1.35rem;
     font-weight: 800;
-    color: #1976D2;
+    color: var(--iw-action-blue);
     margin-bottom: 1rem;
     transition: color 0.3s ease;
     position: relative;
@@ -493,7 +493,7 @@
 }
 
 .feature-card:hover .feature-title {
-    color: #3B9DD5;
+    color: var(--iw-action-blue);
 }
 
 .feature-description {
@@ -506,7 +506,7 @@
 
 /* Statistics Section - Enhanced */
 .stats-section {
-    background: linear-gradient(135deg, #1976D2 0%, #3B9DD5 50%, #7BC043 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 50%, var(--iw-dark-green) 100%);
     background-size: 200% 200%;
     animation: gradientFlow 15s ease infinite;
     padding: 4rem 0;
@@ -597,9 +597,9 @@
 
 /* Payment Methods Section */
 .payment-methods-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-surface) 100%);
     padding: 18px 0;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--iw-border);
 }
 
 .payment-methods-wrapper {
@@ -620,7 +620,7 @@
 }
 
 .payment-methods-label i {
-    color: #10b981;
+    color: var(--iw-action-green);
     font-size: 1.1rem;
 }
 
@@ -638,8 +638,8 @@
     justify-content: center;
     width: 52px;
     height: 34px;
-    background: #fff;
-    border: 1px solid #e5e7eb;
+    background: var(--iw-surface);
+    border: 1px solid var(--iw-border);
     border-radius: 6px;
     transition: all 0.3s ease;
     overflow: hidden;
@@ -648,7 +648,7 @@
 .payment-icon:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: #d1d5db;
+    border-color: var(--iw-border);
 }
 
 .payment-icon svg {
@@ -666,7 +666,7 @@
 .payment-icon.samsung-pay .pay-text {
     font-size: 0.65rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--iw-surface);
     white-space: nowrap;
     letter-spacing: -0.3px;
 }
@@ -694,7 +694,7 @@
 .payment-icon.tamara .pay-text {
     font-size: 0.8rem;
     font-weight: 800;
-    color: #fff;
+    color: var(--iw-surface);
     text-transform: lowercase;
     letter-spacing: -0.5px;
 }
@@ -1198,7 +1198,7 @@
 }
 
 .about-us-section .carousel-indicators button.active {
-    background-color: #3B9DD5;
+    background-color: var(--iw-dark-blue);
     width: 30px;
     border-radius: 6px;
 }
@@ -1320,7 +1320,7 @@
 }
 
 .branch-map-card:hover .branch-header {
-    background: linear-gradient(135deg, #3B9DD5, #7BC043) !important;
+    background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green)) !important;
     color: white;
 }
 
@@ -1424,7 +1424,7 @@
    =================================== */
 
 .enhanced-filters {
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-surface) 100%);
     border-radius: 16px;
     padding: 1.5rem;
     margin-bottom: 2rem;
@@ -1458,11 +1458,11 @@
 }
 
 .filter-title i {
-    color: #7c3aed;
+    color: var(--iw-action-blue);
 }
 
 .filter-results-count {
-    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, #ec4899 100%);
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
@@ -1478,8 +1478,8 @@
 
 .filter-toggle-btn {
     background: transparent;
-    border: 2px solid #7c3aed;
-    color: #7c3aed;
+    border: 2px solid var(--iw-dark-blue);
+    color: var(--iw-action-blue);
     padding: 0.5rem 1rem;
     border-radius: 8px;
     cursor: pointer;
@@ -1488,7 +1488,7 @@
 }
 
 .filter-toggle-btn:hover {
-    background: #7c3aed;
+    background: var(--iw-dark-blue);
     color: white;
 }
 
@@ -1523,7 +1523,7 @@
 }
 
 .filter-label i {
-    color: #7c3aed;
+    color: var(--iw-action-blue);
     font-size: 1rem;
 }
 
@@ -1544,13 +1544,13 @@
 }
 
 .modern-select:hover {
-    border-color: #7c3aed;
+    border-color: var(--iw-dark-blue);
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
 .modern-select:focus {
     outline: none;
-    border-color: #7c3aed;
+    border-color: var(--iw-dark-blue);
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 
@@ -1583,7 +1583,7 @@
 
 .price-input:focus {
     outline: none;
-    border-color: #7c3aed;
+    border-color: var(--iw-dark-blue);
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
@@ -1616,7 +1616,7 @@
     appearance: none;
     width: 18px;
     height: 18px;
-    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, #ec4899 100%);
     border-radius: 50%;
     cursor: pointer;
     pointer-events: all;
@@ -1632,7 +1632,7 @@
 .range-input::-moz-range-thumb {
     width: 18px;
     height: 18px;
-    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, #ec4899 100%);
     border-radius: 50%;
     cursor: pointer;
     border: none;
@@ -1648,7 +1648,7 @@
 }
 
 .apply-filters-btn {
-    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, #ec4899 100%);
     color: white;
     border: none;
     padding: 0.875rem 1.5rem;

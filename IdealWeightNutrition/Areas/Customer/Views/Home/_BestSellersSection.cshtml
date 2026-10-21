@@ -134,7 +134,7 @@
                                                 <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="offer-card-link-simple">
                                                     @if (discount > 0)
                                                     {
-                                                        <div class="offer-discount-badge">@discount%<br/><small>@Localizer["Discount"]</small></div>
+                                                        <div class="offer-discount-badge">@(discount)%<br/><small>@Localizer["Discount"]</small></div>
                                                     }
                                                     <div class="offer-badge-trophy">
                                                         <i class="bi bi-trophy-fill"></i>
@@ -176,14 +176,14 @@
                                                     <div class="offer-actions-simple">
                                                         @if (product.ProductType == IdealWeightNutrition.Models.ProductType.Variable)
                                                         {
-                                                            <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="offer-btn-view">
+                                                            <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" class="offer-btn-view" aria-label="@Localizer["SelectOptions"]">
                                                                 <i class="bi bi-list-check"></i>
                                                                 <span>@Localizer["SelectOptions"]</span>
                                                             </a>
                                                         }
                                                         else
                                                         {
-                                                            <button class="offer-btn-add" 
+                                                            <button class="offer-btn-add" aria-label="@Localizer["AddToCart"]"
                                                                     data-product-id="@product.Id"
                                                                     onclick="toggleCart(@product.Id, this); event.stopPropagation();">
                                                                 <i class="bi bi-cart-plus"></i>

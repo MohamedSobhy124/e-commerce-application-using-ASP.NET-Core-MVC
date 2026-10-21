@@ -10,7 +10,7 @@
 }
 
 .add-products-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     padding: 2.5rem 2rem;
     position: relative;
     overflow: hidden;
@@ -100,7 +100,7 @@
 }
 
 .add-product-form-header {
-    background: linear-gradient(135deg, #3B9DD5 0%, #1976D2 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     border: none;
     padding: 1.5rem 2rem;
 }
@@ -136,7 +136,7 @@
 
 .add-product-form-body {
     padding: 1.5rem;
-    background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+    background: linear-gradient(to bottom, var(--iw-surface) 0%, var(--iw-canvas) 100%);
 }
 
 /* Add Product Form Grid */
@@ -163,13 +163,13 @@
 }
 
 .form-label i {
-    color: #3B9DD5;
+    color: var(--iw-action-blue);
     font-size: 1rem;
 }
 
 .form-select,
 .form-control {
-    border: 2px solid #e5e7eb;
+    border: 2px solid var(--iw-border);
     border-radius: 10px;
     padding: 0.625rem 1rem;
     font-size: 0.95rem;
@@ -180,14 +180,14 @@
 
 .form-select:focus,
 .form-control:focus {
-    border-color: #3B9DD5;
+    border-color: var(--iw-dark-blue);
     box-shadow: 0 0 0 3px rgba(59, 157, 213, 0.1);
     outline: none;
 }
 
 .form-help-text {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--iw-muted);
     margin-top: 0.375rem;
     display: flex;
     align-items: center;
@@ -206,7 +206,7 @@
 /* Compact Info Cards */
 .product-info-compact,
 .variant-info-compact {
-    background: #f0f9ff;
+    background: var(--iw-light-blue);
     border: 1px solid #bae6fd;
     border-radius: 8px;
     padding: 0.75rem;
@@ -228,7 +228,7 @@
 
 .info-compact-value {
     font-weight: 700;
-    color: #1f2937;
+    color: var(--iw-ink);
     font-size: 0.85rem;
 }
 
@@ -286,18 +286,18 @@
 
 .info-label {
     font-weight: 600;
-    color: #6b7280;
+    color: var(--iw-muted);
     font-size: 0.9rem;
 }
 
 .info-value {
     font-weight: 700;
-    color: #1f2937;
+    color: var(--iw-ink);
 }
 
 /* Add Button */
 .btn-add-product {
-    background: linear-gradient(135deg, #7BC043 0%, #558B2F 100%);
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
     border: none;
     color: white;
     font-weight: 700;
@@ -317,7 +317,7 @@
 .btn-add-product:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(123, 192, 67, 0.4);
-    background: linear-gradient(135deg, #558B2F 0%, #4a7c28 100%);
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, #4a7c28 100%);
     color: white;
 }
 
@@ -334,11 +334,11 @@
 
 .products-list-body {
     padding: 2rem;
-    background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+    background: linear-gradient(to bottom, var(--iw-surface) 0%, var(--iw-canvas) 100%);
 }
 
 .products-list-header {
-    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+    background: linear-gradient(135deg, var(--iw-muted) 0%, #374151 100%);
     border: none;
     padding: 1.5rem 2rem;
 }
@@ -393,7 +393,7 @@
     width: 120px;
     height: 120px;
     margin: 0 auto 1.5rem;
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-border) 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -406,7 +406,7 @@
 }
 
 .empty-state-title {
-    color: #6b7280;
+    color: var(--iw-muted);
     font-weight: 700;
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
@@ -432,7 +432,7 @@
 /* Compact Product Cards */
 .product-card-compact {
     background: white;
-    border: 2px solid #e5e7eb;
+    border: 2px solid var(--iw-border);
     border-radius: 12px;
     padding: 1rem;
     position: relative;
@@ -445,7 +445,7 @@
 .product-card-compact:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-    border-color: #3B9DD5;
+    border-color: var(--iw-dark-blue);
 }
 
 .product-card-compact-badge {
@@ -454,7 +454,7 @@
     right: 0.75rem;
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--iw-warning) 0%, var(--iw-warning) 100%);
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -478,7 +478,7 @@
 .product-card-compact-title {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #1f2937;
+    color: var(--iw-ink);
     margin: 0;
     line-height: 1.4;
     flex: 1;
@@ -489,7 +489,7 @@
     height: 28px;
     border-radius: 6px;
     border: none;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 100%);
     color: white;
     display: flex;
     align-items: center;
@@ -501,7 +501,7 @@
 
 .btn-remove-compact:hover {
     transform: scale(1.1);
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, #b91c1c 100%);
 }
 
 .btn-remove-compact i {
@@ -510,7 +510,7 @@
 
 .variant-badge-compact {
     background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border-left: 3px solid #f59e0b;
+    border-left: 3px solid var(--iw-warning);
     border-radius: 6px;
     padding: 0.5rem 0.75rem;
     margin-bottom: 0.75rem;
@@ -521,7 +521,7 @@
 }
 
 .variant-badge-compact i {
-    color: #f59e0b;
+    color: var(--iw-warning);
     font-size: 0.9rem;
 }
 
@@ -542,19 +542,19 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem;
-    background: #f9fafb;
+    background: var(--iw-canvas);
     border-radius: 6px;
 }
 
 .detail-label {
     font-size: 0.8rem;
-    color: #6b7280;
+    color: var(--iw-muted);
     font-weight: 600;
 }
 
 .detail-value {
     font-size: 0.85rem;
-    color: #1f2937;
+    color: var(--iw-ink);
     font-weight: 700;
 }
 
@@ -565,7 +565,7 @@
 }
 
 .flash-price-compact {
-    color: #ef4444;
+    color: var(--iw-danger);
     font-weight: 800;
     font-size: 0.95rem;
 }
@@ -577,7 +577,7 @@
     flex-wrap: wrap;
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 2px solid #e5e7eb;
+    border-top: 2px solid var(--iw-border);
 }
 
 .form-actions .btn-lg {
@@ -590,7 +590,7 @@
 }
 
 .form-actions .btn-primary {
-    background: linear-gradient(135deg, #3B9DD5 0%, #1976D2 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     border: none;
     color: white;
 }
@@ -598,11 +598,11 @@
 .form-actions .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(59, 157, 213, 0.3);
-    background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, #1565C0 100%);
 }
 
 .form-actions .btn-secondary {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    background: linear-gradient(135deg, var(--iw-muted) 0%, var(--iw-muted) 100%);
     border: none;
     color: white;
 }
@@ -610,7 +610,7 @@
 .form-actions .btn-secondary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(107, 114, 128, 0.3);
-    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+    background: linear-gradient(135deg, var(--iw-muted) 0%, #374151 100%);
 }
 
 /* Animations */

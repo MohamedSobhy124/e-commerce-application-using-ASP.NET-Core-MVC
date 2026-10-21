@@ -24,7 +24,7 @@
             <div class="card h-100 account-card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; transition: transform 0.3s;">
                 <div class="card-body text-center p-4">
                     <div class="account-icon-wrapper mb-3">
-                        <i class="bi bi-person-circle" style="font-size: 3rem; color: #3B9DD5;"></i>
+                        <i class="bi bi-person-circle" style="font-size: 3rem; color: var(--iw-action-blue);"></i>
                     </div>
                     <h5 class="card-title fw-bold">@Localizer["Profile"]</h5>
                     <p class="card-text text-muted small">@(Localizer["ViewAndEditYourProfile"]?.Value ?? "View and edit your profile information")</p>
@@ -40,7 +40,7 @@
             <div class="card h-100 account-card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; transition: transform 0.3s;">
                 <div class="card-body text-center p-4">
                     <div class="account-icon-wrapper mb-3">
-                        <i class="bi bi-bag-check" style="font-size: 3rem; color: #7BC043;"></i>
+                        <i class="bi bi-bag-check" style="font-size: 3rem; color: var(--iw-action-green);"></i>
                     </div>
                     <h5 class="card-title fw-bold">@Localizer["Orders"]</h5>
                     <p class="card-text text-muted small">@(Localizer["ViewYourOrderHistory"]?.Value ?? "View your order history and track shipments")</p>
@@ -56,7 +56,7 @@
             <div class="card h-100 account-card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; transition: transform 0.3s;">
                 <div class="card-body text-center p-4">
                     <div class="account-icon-wrapper mb-3" style="background: rgba(123, 192, 67, 0.1);">
-                        <i class="bi bi-briefcase-fill" style="font-size: 3rem; color: #7BC043;"></i>
+                        <i class="bi bi-briefcase-fill" style="font-size: 3rem; color: var(--iw-action-green);"></i>
                     </div>
                     <h5 class="card-title fw-bold">@(Localizer["MySubscriptions"]?.Value ?? "Subscriptions")</h5>
                     <p class="card-text text-muted small">@(Localizer["ViewYourServiceSubscriptions"]?.Value ?? "View your service subscriptions and purchase history")</p>
@@ -69,7 +69,7 @@
 
         <!-- Logout Card -->
         <div class="col-md-6 col-lg-4">
-            <div class="card h-100 account-card logout-card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; transition: all 0.3s; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card h-100 account-card logout-card" style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; transition: all 0.3s; background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);">
                 <div class="card-body text-center p-4 text-white">
                     <div class="account-icon-wrapper mb-3" style="background: rgba(255,255,255,0.2);">
                         <i class="bi bi-box-arrow-right" style="font-size: 3rem; color: white;"></i>
@@ -209,7 +209,7 @@
     
     /* Logout Card Specific Styles */
     .logout-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
         border: none;
         position: relative;
         overflow: hidden;
@@ -238,7 +238,7 @@
     
     .logout-btn {
         background: white;
-        color: #667eea;
+        color: var(--iw-action-blue);
         border: none;
         padding: 12px 24px;
         font-weight: 600;
@@ -249,8 +249,8 @@
     }
     
     .logout-btn:hover {
-        background: #f8f9fa;
-        color: #764ba2;
+        background: var(--iw-canvas);
+        color: var(--iw-action-blue);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }

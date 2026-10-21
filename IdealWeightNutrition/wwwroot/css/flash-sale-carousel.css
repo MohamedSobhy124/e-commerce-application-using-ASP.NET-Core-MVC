@@ -63,7 +63,7 @@
 .flash-sale-slide-placeholder {
     width: 100%;
     height: 400px;
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -135,7 +135,7 @@
 
 .flash-sale-slide-btn {
     background: white;
-    color: #ff6b6b;
+    color: var(--iw-danger);
     border: none;
     padding: 0.75rem 2rem;
     border-radius: 50px;
@@ -149,7 +149,7 @@
 }
 
 .flash-sale-slide-btn:hover {
-    background: #ff6b6b;
+    background: var(--iw-danger);
     color: white;
     transform: scale(1.05);
 }
@@ -171,14 +171,14 @@
     z-index: 10;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-    color: #ff6b6b;
+    color: var(--iw-danger);
     font-size: 1.5rem;
 }
 
 .flash-sale-carousel-nav:hover {
-    background: #ff6b6b;
+    background: var(--iw-danger);
     color: white;
-    border-color: #ff6b6b;
+    border-color: var(--iw-danger);
     transform: translateY(-50%) scale(1.1);
 }
 
@@ -209,7 +209,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: #d1d5db;
+    background: var(--iw-border);
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -223,7 +223,7 @@
 }
 
 .flash-sale-indicator.active {
-    background: #ff6b6b;
+    background: var(--iw-danger);
     width: 30px;
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
@@ -233,7 +233,7 @@
 .view-all-flash-sales-btn {
     display: inline-flex;
     align-items: center;
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 100%);
     color: white;
     padding: 0.75rem 2rem;
     border-radius: 50px;
@@ -324,7 +324,7 @@
     top: 1.25rem;
     right: 1.25rem;
     background: rgba(255, 255, 255, 0.95);
-    color: #333;
+    color: var(--iw-ink);
     border: 2px solid rgba(255, 107, 107, 0.3);
     width: 45px;
     height: 45px;
@@ -340,9 +340,9 @@
 }
 
 .flash-sale-modal-close:hover {
-    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    background: linear-gradient(135deg, var(--iw-danger), var(--iw-danger));
     color: white;
-    border-color: #ff6b6b;
+    border-color: var(--iw-danger);
     transform: rotate(90deg) scale(1.1);
     box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
 }
@@ -352,7 +352,7 @@
 }
 
 .flash-sale-modal-header {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #c44569 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 50%, #c44569 100%);
     color: white;
     padding: 3.75rem 2rem;
     text-align: center;
@@ -398,7 +398,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     flex: 1;
-    background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+    background: linear-gradient(to bottom, var(--iw-canvas) 0%, var(--iw-surface) 100%);
     position: relative;
 }
 
@@ -423,12 +423,12 @@
 }
 
 .flash-sale-modal-body::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    background: linear-gradient(135deg, var(--iw-danger), var(--iw-danger));
     border-radius: 10px;
 }
 
 .flash-sale-modal-body::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #ee5a6f, #c44569);
+    background: linear-gradient(135deg, var(--iw-danger), #c44569);
 }
 
 /* Timer Styles */
@@ -445,7 +445,7 @@
     font-size: 1.5rem;
     font-weight: 900;
     display: block;
-    color: #fff;
+    color: var(--iw-surface);
 }
 
 .timer-label {
@@ -458,7 +458,7 @@
 
 /* Compact Product Cards for Modal */
 .flash-sale-modal-body .flash-sale-product-card {
-    background: #fff;
+    background: var(--iw-surface);
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
@@ -474,7 +474,7 @@
 .flash-sale-modal-body .flash-sale-product-card:hover {
     transform: translateY(-8px) scale(1.02);
     box-shadow: 0 8px 30px rgba(255, 107, 107, 0.3);
-    border-color: #ff6b6b;
+    border-color: var(--iw-danger);
 }
 
 .flash-sale-modal-body .flash-sale-badge {
@@ -482,7 +482,7 @@
     top: 6px;
     left: 6px;
     z-index: 10;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    background: linear-gradient(135deg, var(--iw-danger), var(--iw-danger));
     color: white;
     padding: 0.25rem 0.5rem;
     border-radius: 16px;
@@ -558,7 +558,7 @@
 .flash-sale-modal-body .flash-sale-product-title {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--iw-ink);
     margin-bottom: 0.5rem;
     min-height: 38px;
     display: -webkit-box;
@@ -575,7 +575,7 @@
 }
 
 .flash-sale-modal-body .flash-sale-product-title a:hover {
-    color: #ff6b6b;
+    color: var(--iw-danger);
 }
 
 .flash-sale-modal-body .flash-sale-price-section {
@@ -604,7 +604,7 @@
 .flash-sale-modal-body .flash-sale-current-price {
     font-size: 1.1rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    background: linear-gradient(135deg, var(--iw-danger), var(--iw-danger));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -637,14 +637,14 @@
 
 .flash-sale-modal-body .stock-progress-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #ff6b6b, #ee5a6f);
+    background: linear-gradient(90deg, var(--iw-danger), var(--iw-danger));
     border-radius: 8px;
     transition: width 0.5s ease;
 }
 
 .flash-sale-modal-body .flash-sale-add-to-cart-btn {
     width: 100%;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    background: linear-gradient(135deg, var(--iw-danger), var(--iw-danger));
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -664,7 +664,7 @@
 .flash-sale-modal-body .flash-sale-add-to-cart-btn:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
-    background: linear-gradient(135deg, #ee5a6f, #c44569);
+    background: linear-gradient(135deg, var(--iw-danger), #c44569);
 }
 
 .flash-sale-modal-body .flash-sale-add-to-cart-btn:active:not(:disabled) {
@@ -677,12 +677,12 @@
 }
 
 .flash-sale-modal-body .flash-sale-variant-info {
-    background: #f0f0f0;
+    background: var(--iw-canvas);
     padding: 0.4rem;
     border-radius: 6px;
     margin: 0.4rem 0;
     font-size: 0.7rem;
-    color: #666;
+    color: var(--iw-muted);
 }
 
 /* Modal Product Grid - Smaller Columns */

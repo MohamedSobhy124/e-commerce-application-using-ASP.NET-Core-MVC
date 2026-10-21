@@ -80,7 +80,7 @@
                 <div class="shop-controls">
                     <div class="sort-control">
                         <label for="sortSelect"><i class="bi bi-sort-down"></i></label>
-                        <select id="sortSelect" class="form-select" onchange="applyFilters()">
+                        <select id="sortSelect" aria-label="@Localizer["SortBy"]" class="form-select" onchange="applyFilters()">
                             @if (string.IsNullOrEmpty(sortBy)) { <option value="" selected>@Localizer["SortBy"]</option> } else { <option value="">@Localizer["SortBy"]</option> }
                             @if (sortBy == "newest") { <option value="newest" selected>@Localizer["Newest"]</option> } else { <option value="newest">@Localizer["Newest"]</option> }
                             @if (sortBy == "price_low") { <option value="price_low" selected>@Localizer["PriceLowToHigh"]</option> } else { <option value="price_low">@Localizer["PriceLowToHigh"]</option> }
@@ -92,7 +92,7 @@
                     
                     <div class="availability-control">
                         <label for="availabilitySelect"><i class="bi bi-box-seam"></i></label>
-                        <select id="availabilitySelect" class="form-select" onchange="applyFilters()">
+                        <select id="availabilitySelect" aria-label="@Localizer["Availability"]" class="form-select" onchange="applyFilters()">
                             @if (string.IsNullOrEmpty(availability)) { <option value="" selected>@Localizer["AllProducts"]</option> } else { <option value="">@Localizer["AllProducts"]</option> }
                             @if (availability == "instock") { <option value="instock" selected>@Localizer["InStock"]</option> } else { <option value="instock">@Localizer["InStock"]</option> }
                             @if (availability == "outofstock") { <option value="outofstock" selected>@Localizer["OutOfStock"]</option> } else { <option value="outofstock">@Localizer["OutOfStock"]</option> }
@@ -246,7 +246,7 @@
                                 
                                 @if (discountPercent > 0)
                                 {
-                                    <div class="discount-badge">-@discountPercent%</div>
+                                    <div class="discount-badge">-@(discountPercent)%</div>
                                 }
                                 
                                 @if (isOutOfStock)
@@ -328,14 +328,14 @@
                                     @if (hasVariants)
                                     {
                                         <a href="@Url.Action("Details", "Home", new { area = "Customer", slug = product.GetSlug() })" 
-                                           class="btn-shop-action btn-view-options">
+                                           class="btn-shop-action btn-view-options" aria-label="@Localizer["ViewOptions"]">
                                             <i class="bi bi-list-check"></i>
                                             <span>@Localizer["ViewOptions"]</span>
                                         </a>
                                     }
                                     else if (!isOutOfStock)
                                     {
-                                        <button class="btn-shop-action btn-add-cart @(isInCart ? "in-cart" : "")" 
+                                        <button class="btn-shop-action btn-add-cart @(isInCart ? "in-cart" : "")" aria-label="@Localizer["ToggleCartSelection"]"
                                                 data-product-id="@product.Id"
                                                 onclick="toggleCart(@product.Id, this); event.stopPropagation();">
                                             <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart-plus")"></i>
@@ -344,7 +344,7 @@
                                     }
                                     else
                                     {
-                                        <button class="btn-shop-action btn-notify" disabled>
+                                        <button class="btn-shop-action btn-notify" aria-label="@Localizer["NotifyMe"]" disabled>
                                             <i class="bi bi-bell"></i>
                                             <span>@Localizer["NotifyMe"]</span>
                                         </button>
@@ -506,11 +506,11 @@
         
         let actionBtn = '';
         if (product.hasVariants) {
-                actionBtn = `<a href="/Customer/Home/Details/${product.slug}" class="btn-shop-action btn-view-options" onclick="event.stopPropagation();"><i class="bi bi-list-check"></i><span>@Localizer["ViewOptions"]</span></a>`;
+                actionBtn = `<a href="/Customer/Home/Details/${product.slug}" class="btn-shop-action btn-view-options" aria-label="@Localizer["ViewOptions"]" onclick="event.stopPropagation();"><i class="bi bi-list-check"></i><span>@Localizer["ViewOptions"]</span></a>`;
         } else if (!isOutOfStock) {
-            actionBtn = `<button class="btn-shop-action btn-add-cart ${product.isInCart ? 'in-cart' : ''}" data-product-id="${product.id}" onclick="toggleCart(${product.id}, this); event.stopPropagation();"><i class="bi ${product.isInCart ? 'bi-check-lg' : 'bi-cart-plus'}"></i><span>${product.isInCart ? '@Localizer["InCart"]' : '@Localizer["AddToCart"]'}</span></button>`;
+            actionBtn = `<button class="btn-shop-action btn-add-cart ${product.isInCart ? 'in-cart' : ''}" aria-label="@Localizer["ToggleCartSelection"]" data-product-id="${product.id}" onclick="toggleCart(${product.id}, this); event.stopPropagation();"><i class="bi ${product.isInCart ? 'bi-check-lg' : 'bi-cart-plus'}"></i><span>${product.isInCart ? '@Localizer["InCart"]' : '@Localizer["AddToCart"]'}</span></button>`;
         } else {
-            actionBtn = `<button class="btn-shop-action btn-notify" disabled><i class="bi bi-bell"></i><span>@Localizer["NotifyMe"]</span></button>`;
+            actionBtn = `<button class="btn-shop-action btn-notify" aria-label="@Localizer["NotifyMe"]" disabled><i class="bi bi-bell"></i><span>@Localizer["NotifyMe"]</span></button>`;
         }
         
         return `

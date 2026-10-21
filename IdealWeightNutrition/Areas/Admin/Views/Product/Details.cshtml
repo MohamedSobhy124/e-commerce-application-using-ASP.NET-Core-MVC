@@ -1,68 +1,136 @@
-﻿@model IdealWeightNutrition.Models.Product
+@model IdealWeightNutrition.Models.Product
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Localizer["ProductDetails"];
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var isArabic = currentCulture == "ar";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var title = isArabic && !string.IsNullOrWhiteSpace(Model.TitleAr) ? Model.TitleAr : Model.Title;
+    var description = isArabic && !string.IsNullOrWhiteSpace(Model.DescriptionAr) ? Model.DescriptionAr : Model.Description;
+    var images = Model.ProductImages?.Where(pi => pi.ImageInfo != "INFO_IMAGE").OrderBy(pi => pi.DisplayOrder).ToList()
+        ?? new List<IdealWeightNutrition.Models.ProductImage>();
 }
 
-<h1>Details</h1>
+<partial name="_Notifications" />
 
-<div>
-    <h4>Product</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Author)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Author)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ISBN)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ISBN)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ListPrice)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ListPrice)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Price)
-        <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Price100)
-        </dt>
-        <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Price100)
-        </dd>
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h1 class="admin-card-title">@title</h1>
+            </div>
+            <div class="admin-card-body">
+            <div class="admin-detail-layout">
+                <div>
+                <section class="admin-form-section">
+                    <h2>@Localizer["Basics"]</h2>
+                    <dl class="admin-details-list">
+                        <dt>@Localizer["TitleEnglish"]</dt>
+                        <dd>@Model.Title</dd>
+                        <dt>@Localizer["TitleArabic"]</dt>
+                        <dd dir="rtl">@Model.TitleAr</dd>
+                        <dt>@Localizer["Description"]</dt>
+                        <dd>@description</dd>
+                        <dt>@Localizer["Category"]</dt>
+                        <dd>@(Model.categry?.Name ?? Model.CategryId.ToString())</dd>
+                        <dt>@Localizer["Brand"]</dt>
+                        <dd>@(Model.Brand?.Name ?? Localizer["NotAvailable"].Value)</dd>
+                        <dt>@Localizer["ProductType"]</dt>
+                        <dd>@(Model.ProductType == IdealWeightNutrition.Models.ProductType.Variable ? Localizer["VariableProduct"] : Localizer["SimpleProduct"])</dd>
+                        <dt>@Localizer["ProductStatus"]</dt>
+                        <dd>
+                            @if (Model.IsNew) { <span class="badge bg-info me-1">@Localizer["NewBadge"]</span> }
+                            @if (Model.IsTrending) { <span class="badge bg-warning text-dark">@Localizer["TrendingBadge"]</span> }
+                            @if (!Model.IsNew && !Model.IsTrending) { <span class="text-muted">@Localizer["NotAvailable"]</span> }
+                        </dd>
+                    </dl>
+                </section>
 
+                <section class="admin-form-section">
+                    <h2>@Localizer["InventoryAndPricing"]</h2>
+                    <dl class="admin-details-list">
+                        <dt>@Localizer["ListPrice"]</dt>
+                        <dd>@currencySymbol @Model.ListPrice.ToString("N2")</dd>
+                        <dt>@Localizer["Price"]</dt>
+                        <dd>@currencySymbol @Model.Price.ToString("N2")</dd>
+                        <dt>@Localizer["StoreCost"]</dt>
+                        <dd>@(Model.StoreCost.HasValue && Model.StoreCost > 0 ? $"{currencySymbol} {Model.StoreCost.Value:N2}" : Localizer["NotAvailable"].Value)</dd>
+                        <dt>@Localizer["StockQuantity"]</dt>
+                        <dd>@Model.StockQuantity</dd>
+                        <dt>@Localizer["LowStockAlertLevel"]</dt>
+                        <dd>@Model.MinimumStockAlert</dd>
+                        @if (Model.ExpiryDate.HasValue)
+                        {
+                            <dt>@Localizer["ExpiryDate"]</dt>
+                            <dd>@Model.ExpiryDate.Value.ToString("yyyy-MM-dd")</dd>
+                        }
+                        <dt>@Localizer["AllowFreeDelivery"]</dt>
+                        <dd>@(Model.AllowFreeDelivery ? Localizer["Yes"].Value : Localizer["No"].Value)</dd>
+                        @if (Model.AllowFreeDelivery)
+                        {
+                            <dt>@Localizer["FreeDeliveryMinimumAmount"]</dt>
+                            <dd>@currencySymbol @Model.FreeDeliveryMinimumAmount.ToString("N2")</dd>
+                        }
+                    </dl>
+                </section>
 
-        <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Price50)
-        </dt>
-        <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Price50)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+                </div>
+                <aside>
+                <section class="admin-form-section">
+                    <h2>@Localizer["ProductImages"]</h2>
+                    @if (images.Any())
+                    {
+                        <div class="d-flex flex-wrap gap-3">
+                            @foreach (var image in images)
+                            {
+                                <img src="@image.ImageUrl" alt="@title" class="admin-media-preview" width="120" height="120" loading="lazy" />
+                            }
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@title" class="admin-media-preview" loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="admin-thumb-placeholder admin-thumb-placeholder-lg" aria-hidden="true"><i class="bi bi-image"></i></div>
+                    }
+                </section>
+                </aside>
+            </div>
+
+                @if (Model.ProductType == IdealWeightNutrition.Models.ProductType.Variable)
+                {
+                    <section class="admin-form-section">
+                        <h2>@Localizer["OptionsVariants"]</h2>
+                        <p class="text-muted mb-0">
+                            @(Model.ProductOptions?.Count ?? 0) @Localizer["OptionsVariants"],
+                            @(Model.ProductVariants?.Count ?? 0) @Localizer["Variant"]
+                        </p>
+                    </section>
+                }
+
+                <section class="admin-form-section">
+                    <h2>@Localizer["SEO"]</h2>
+                    <dl class="admin-details-list">
+                        <dt>@Localizer["SEO"] (@Localizer["TitleEnglish"])</dt>
+                        <dd dir="ltr">@(Model.SlugEn ?? Localizer["NotAvailable"].Value)</dd>
+                    </dl>
+                </section>
+
+                <div class="form-actions">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>@Localizer["BackToList"]
+                    </a>
+                    <a asp-action="UpSert" asp-route-id="@Model.Id" class="btn btn-primary">
+                        <i class="bi bi-pencil me-2" aria-hidden="true"></i>@Localizer["Edit"]
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

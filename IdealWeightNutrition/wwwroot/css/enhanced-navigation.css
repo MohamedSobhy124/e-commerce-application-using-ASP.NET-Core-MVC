@@ -9,6 +9,9 @@
     box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset, 0 0 60px rgba(139, 92, 246, 0.2) !important;
     position: sticky;
     top: 0;
+    inset-inline: 0;
+    width: 100%;
+    max-width: 100%;
     z-index: 1000;
     transition: all 0.3s ease;
 }
@@ -25,7 +28,7 @@
 .navbar-brand {
     font-size: 1.75rem;
     font-weight: 900;
-    color: #fff !important;
+    color: var(--iw-surface) !important;
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -107,7 +110,7 @@
 }
 
 .dropdown-item {
-    color: #333;
+    color: var(--iw-ink);
     padding: 0.75rem 1rem;
     border-radius: 8px;
     transition: all 0.2s ease;
@@ -120,13 +123,13 @@
 }
 
     .dropdown-item:hover {
-        background: linear-gradient(135deg, #e0e7ff, #cffafe);
-        color: #6366f1;
+        background: linear-gradient(135deg, var(--iw-light-blue), #cffafe);
+        color: var(--iw-action-blue);
         transform: translateX(5px);
     }
 
     .dropdown-item.active {
-        background: linear-gradient(135deg, #6366f1, #06b6d4);
+        background: linear-gradient(135deg, var(--iw-dark-blue), #06b6d4);
         color: white;
     }
 
@@ -137,7 +140,7 @@
 
 .dropdown-divider {
     margin: 0.5rem 0;
-    border-color: #e0e0e0;
+    border-color: var(--iw-border);
 }
 
 /* Language Switcher Dropdown */

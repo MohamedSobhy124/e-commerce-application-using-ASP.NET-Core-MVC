@@ -10,7 +10,7 @@
         <div class="col-12">
             <!-- Page Header -->
             <div class="page-header text-center mb-5">
-                <h1 class="display-4" style="color: #1976D2; font-weight: 800;">
+                <h1 class="display-4" style="color: var(--iw-action-blue); font-weight: 800;">
                     <i class="bi bi-truck me-3"></i>
                     @if(currentLang == "ar") {
                         <text>الشحن والتسليم</text>
@@ -18,7 +18,7 @@
                         <text>Shipping & Delivery</text>
                     }
                 </h1>
-                <div class="underline" style="width: 100px; height: 4px; background: linear-gradient(90deg, #3B9DD5, #7BC043); margin: 1rem auto;"></div>
+                <div class="underline" style="width: 100px; height: 4px; background: linear-gradient(90deg, var(--iw-dark-blue), var(--iw-dark-green)); margin: 1rem auto;"></div>
             </div>
 
             @if(currentLang == "ar") 
@@ -28,7 +28,7 @@
                     <!-- Introduction -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #3B9DD5; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-blue); font-weight: 700;">
                                 <i class="bi bi-info-circle me-3"></i>معلومات الشحن
                             </h2>
                             <p class="lead" style="line-height: 1.8; color: #555;">
@@ -44,7 +44,7 @@
                     <!-- Delivery Time -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-green); font-weight: 700;">
                                 <i class="bi bi-clock me-3"></i>مدة التسليم
                             </h2>
                             <p style="line-height: 1.8; color: #555;">
@@ -58,7 +58,7 @@
                     <!-- Customs and International Shipping -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-blue); font-weight: 700;">
                                 <i class="bi bi-globe me-3"></i>الشحن الدولي والجمارك
                             </h2>
                             <p style="line-height: 1.8; color: #555;">
@@ -79,7 +79,7 @@
                     <!-- Business Days -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #3B9DD5; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-blue); font-weight: 700;">
                                 <i class="bi bi-calendar me-3"></i>أيام العمل
                             </h2>
                             <p style="line-height: 1.8; color: #555;">
@@ -92,7 +92,7 @@
                     <!-- Delivery Details -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-green); font-weight: 700;">
                                 <i class="bi bi-geo-alt me-3"></i>التسليم
                             </h2>
                             <ul style="line-height: 2; color: #555;">
@@ -106,7 +106,7 @@
                     <!-- ID Requirement -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-blue); font-weight: 700;">
                                 <i class="bi bi-person-badge me-3"></i>متطلبات الهوية عند التسليم
                             </h2>
                             <p style="line-height: 1.8; color: #555;">
@@ -114,7 +114,7 @@
                                 إذا لم نتمكن من التحقق من أو المصادقة على أي معلومات تقدمها، يحق لنا رفض التسليم وإلغاء الطلب.
                             </p>
                             <p style="line-height: 1.8; color: #555;">
-                                لمزيد من المعلومات يرجى الاتصال بفريق خدمة العملاء لدينا <a asp-area="Customer" asp-controller="Home" asp-action="AboutUs" style="color: #7BC043; font-weight: 600;">من هنا</a>.
+                                لمزيد من المعلومات يرجى الاتصال بفريق خدمة العملاء لدينا <a asp-area="Customer" asp-controller="Home" asp-action="AboutUs" style="color: var(--iw-action-green); font-weight: 600;">من هنا</a>.
                             </p>
                         </div>
                     </div>
@@ -122,7 +122,7 @@
                     <!-- Free Shipping -->
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-green); font-weight: 700;">
                                 <i class="bi bi-gift me-3"></i>الشحن/التسليم المجاني
                             </h2>
                             <p style="line-height: 1.8; color: #555;">
@@ -149,7 +149,7 @@
                     <!-- Introduction -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #3B9DD5; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-blue); font-weight: 700;">
                                 <i class="bi bi-info-circle me-3"></i>Shipping Information
                             </h2>
                             <p class="lead" style="line-height: 1.8; color: #555;">
@@ -165,7 +165,7 @@
                     <!-- Delivery Time -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-green); font-weight: 700;">
                                 <i class="bi bi-clock me-3"></i>Delivery Time
                             </h2>
                             <p style="line-height: 1.8; color: #555;">
@@ -179,7 +179,7 @@
                     <!-- Customs and International Shipping -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-blue); font-weight: 700;">
                                 <i class="bi bi-globe me-3"></i>International Shipping & Customs
                             </h2>
                             <p style="line-height: 1.8; color: #555;">
@@ -200,7 +200,7 @@
                     <!-- Business Days -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #3B9DD5; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-blue); font-weight: 700;">
                                 <i class="bi bi-calendar me-3"></i>Business Days
                             </h2>
                             <p style="line-height: 1.8; color: #555;">
@@ -213,7 +213,7 @@
                     <!-- Delivery Details -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-green); font-weight: 700;">
                                 <i class="bi bi-geo-alt me-3"></i>Delivery
                             </h2>
                             <ul style="line-height: 2; color: #555;">
@@ -227,7 +227,7 @@
                     <!-- ID Requirement -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #1976D2; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-blue); font-weight: 700;">
                                 <i class="bi bi-person-badge me-3"></i>ID Requirement at Delivery
                             </h2>
                             <p style="line-height: 1.8; color: #555;">
@@ -235,7 +235,7 @@
                                 If we are unable to verify or authenticate any information you provide, we have the right to refuse delivery and cancel the order.
                             </p>
                             <p style="line-height: 1.8; color: #555;">
-                                For more information please contact our customer service team <a asp-area="Customer" asp-controller="Home" asp-action="AboutUs" style="color: #7BC043; font-weight: 600;">from Here</a>.
+                                For more information please contact our customer service team <a asp-area="Customer" asp-controller="Home" asp-action="AboutUs" style="color: var(--iw-action-green); font-weight: 600;">from Here</a>.
                             </p>
                         </div>
                     </div>
@@ -243,7 +243,7 @@
                     <!-- Free Shipping -->
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <h2 class="mb-4" style="color: #7BC043; font-weight: 700;">
+                            <h2 class="mb-4" style="color: var(--iw-action-green); font-weight: 700;">
                                 <i class="bi bi-gift me-3"></i>Free Shipping/Delivery
                             </h2>
                             <p style="line-height: 1.8; color: #555;">

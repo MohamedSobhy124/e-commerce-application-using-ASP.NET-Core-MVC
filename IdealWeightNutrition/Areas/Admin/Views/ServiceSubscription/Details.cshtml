@@ -4,158 +4,124 @@
     ViewData["Title"] = Localizer["ServiceDetails"];
 }
 
-<div class="container py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>@Localizer["ServiceSubscriptionDetails"]</h2>
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
                 <div>
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
-                        <i class="bi bi-pencil"></i> @Localizer["Edit"]
-                    </a>
-                    <a asp-action="Index" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> @Localizer["BackToList"]
-                    </a>
+                    <h1 class="admin-card-title">@Model.Title</h1>
+                    @if (!string.IsNullOrEmpty(Model.TitleAr))
+                    {
+                        <p class="text-muted mb-0" dir="rtl">@Model.TitleAr</p>
+                    }
                 </div>
+                <span class="badge @(Model.IsActive ? "bg-success" : "bg-secondary")">@(Model.IsActive ? Localizer["Active"] : Localizer["Inactive"])</span>
             </div>
+            <div class="admin-card-body">
+                <div class="admin-detail-layout">
+                    <div>
+                        <section class="admin-form-section">
+                            <h2>@Localizer["ServiceDetails"]</h2>
+                            <dl class="admin-details-list">
+                                <dt>@Localizer["ServiceType"]</dt>
+                                <dd>
+                                    @if (Model.ServiceType == ServiceType.Online)
+                                    {
+                                        <span class="badge bg-success">@Localizer["OnlineFullPayment"]</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">@Localizer["OfflinePartialPayment"]</span>
+                                        @if (Model.OfflinePaymentPercent.HasValue)
+                                        {
+                                            <span class="ms-2">@(Model.OfflinePaymentPercent.Value.ToString() + "%") @Localizer["OnlinePayment"]</span>
+                                        }
+                                    }
+                                </dd>
+                                <dt>@Localizer["Price"]</dt>
+                                <dd>@Model.Price.ToString("N2")</dd>
+                                <dt>@Localizer["DisplayOrder"]</dt>
+                                <dd>@Model.DisplayOrder</dd>
+                                @if (!string.IsNullOrEmpty(Model.Description))
+                                {
+                                    <dt>@Localizer["DescriptionEnglish"]</dt>
+                                    <dd>@Model.Description</dd>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.DescriptionAr))
+                                {
+                                    <dt>@Localizer["DescriptionArabic"]</dt>
+                                    <dd dir="rtl">@Model.DescriptionAr</dd>
+                                }
+                                <dt>@Localizer["CreatedDate"]</dt>
+                                <dd>@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</dd>
+                                @if (Model.UpdatedDate.HasValue)
+                                {
+                                    <dt>@Localizer["LastUpdated"]</dt>
+                                    <dd>@Model.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm")</dd>
+                                }
+                            </dl>
+                        </section>
 
-            <div class="card shadow">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
+                        @if (Model.ServicePurchases != null && Model.ServicePurchases.Any())
+                        {
+                            <section class="admin-form-section">
+                                <h2>@Localizer["PurchaseHistory"]</h2>
+                                <div class="table-responsive admin-table-wrapper">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">@Localizer["PurchaseID"]</th>
+                                                <th scope="col">@Localizer["Customer"]</th>
+                                                <th scope="col">@Localizer["AmountPaid"]</th>
+                                                <th scope="col">@Localizer["TotalAmount"]</th>
+                                                <th scope="col">@Localizer["Status"]</th>
+                                                <th scope="col">@Localizer["Date"]</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var purchase in Model.ServicePurchases.OrderByDescending(p => p.PurchaseDate))
+                                            {
+                                                <tr>
+                                                    <td>#@purchase.Id</td>
+                                                    <td>@(purchase.ApplicationUser != null ? purchase.ApplicationUser.Name : purchase.GuestName)</td>
+                                                    <td>@purchase.AmountPaid.ToString("N2")</td>
+                                                    <td>@purchase.TotalAmount.ToString("N2")</td>
+                                                    <td>
+                                                        <span class="badge @(purchase.PaymentStatus == "Approved" ? "bg-success" : "bg-warning")">@purchase.PaymentStatus</span>
+                                                    </td>
+                                                    <td>@purchase.PurchaseDate.ToString("yyyy-MM-dd")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        }
+                    </div>
+                    <aside>
+                        <section class="admin-form-section">
+                            <h2>@Localizer["Image"]</h2>
                             @if (!string.IsNullOrEmpty(Model.ImageUrl))
                             {
-                                <img src="@Model.ImageUrl" class="img-fluid rounded" alt="@Model.Title" />
+                                <img src="@Model.ImageUrl" class="admin-media-preview" alt="@Model.Title" width="320" height="240" />
                             }
                             else
                             {
-                                <div class="bg-light rounded p-5 text-center">
-                                    <i class="bi bi-image" style="font-size: 3rem; color: #ccc;"></i>
-                                </div>
+                                <div class="admin-thumb-placeholder admin-thumb-placeholder-lg" aria-hidden="true"><i class="bi bi-image"></i></div>
                             }
-                        </div>
-                        <div class="col-md-8">
-                            <h3>@Model.Title</h3>
-                            @if (!string.IsNullOrEmpty(Model.TitleAr))
-                            {
-                                <h4 class="text-muted">@Model.TitleAr</h4>
-                            }
-                            
-                            <hr />
-                            
-                            <div class="mb-3">
-                                <strong>@Localizer["ServiceType"]:</strong>
-                                @if (Model.ServiceType == ServiceType.Online)
-                                {
-                                    <span class="badge bg-success">@Localizer["OnlineFullPayment"]</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-info">@Localizer["OfflinePartialPayment"]</span>
-                                    @if (Model.OfflinePaymentPercent.HasValue)
-                                    {
-                                        <span class="ms-2">@Model.OfflinePaymentPercent.Value% @Localizer["OnlinePayment"]</span>
-                                    }
-                                }
-                            </div>
+                        </section>
+                    </aside>
+                </div>
 
-                            <div class="mb-3">
-                                <strong>@Localizer["Price"]:</strong> <span class="fs-4 text-primary">@Model.Price.ToString("C")</span>
-                            </div>
-
-                            <div class="mb-3">
-                                <strong>@Localizer["Status"]:</strong>
-                                @if (Model.IsActive)
-                                {
-                                    <span class="badge bg-success">@Localizer["Active"]</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">@Localizer["Inactive"]</span>
-                                }
-                            </div>
-
-                            <div class="mb-3">
-                                <strong>@Localizer["DisplayOrder"]:</strong> @Model.DisplayOrder
-                            </div>
-
-                            @if (!string.IsNullOrEmpty(Model.Description))
-                            {
-                                <div class="mb-3">
-                                    <strong>@Localizer["DescriptionEnglish"]:</strong>
-                                    <p>@Model.Description</p>
-                                </div>
-                            }
-
-                            @if (!string.IsNullOrEmpty(Model.DescriptionAr))
-                            {
-                                <div class="mb-3">
-                                    <strong>@Localizer["DescriptionArabic"]:</strong>
-                                    <p>@Model.DescriptionAr</p>
-                                </div>
-                            }
-
-                            <div class="mb-3">
-                                <strong>@Localizer["CreatedDate"]:</strong> @Model.CreatedDate.ToString("MMM dd, yyyy hh:mm tt")
-                            </div>
-
-                            @if (Model.UpdatedDate.HasValue)
-                            {
-                                <div class="mb-3">
-                                    <strong>@Localizer["LastUpdated"]:</strong> @Model.UpdatedDate.Value.ToString("MMM dd, yyyy hh:mm tt")
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                    @if (Model.ServicePurchases != null && Model.ServicePurchases.Any())
-                    {
-                        <hr />
-                        <h4>@Localizer["PurchaseHistory"]</h4>
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>@Localizer["PurchaseID"]</th>
-                                        <th>@Localizer["Customer"]</th>
-                                        <th>@Localizer["AmountPaid"]</th>
-                                        <th>@Localizer["TotalAmount"]</th>
-                                        <th>@Localizer["Status"]</th>
-                                        <th>@Localizer["Date"]</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var purchase in Model.ServicePurchases.OrderByDescending(p => p.PurchaseDate))
-                                    {
-                                        <tr>
-                                            <td>#@purchase.Id</td>
-                                            <td>
-                                                @if (purchase.ApplicationUser != null)
-                                                {
-                                                    @purchase.ApplicationUser.Name
-                                                }
-                                                else
-                                                {
-                                                    @purchase.GuestName
-                                                }
-                                            </td>
-                                            <td>@purchase.AmountPaid.ToString("C")</td>
-                                            <td>@purchase.TotalAmount.ToString("C")</td>
-                                            <td>
-                                                <span class="badge bg-@(purchase.PaymentStatus == "Approved" ? "success" : "warning")">
-                                                    @purchase.PaymentStatus
-                                                </span>
-                                            </td>
-                                            <td>@purchase.PurchaseDate.ToString("MMM dd, yyyy")</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
+                <div class="form-actions">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>@Localizer["BackToList"]
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                        <i class="bi bi-pencil me-2" aria-hidden="true"></i>@Localizer["Edit"]
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
-

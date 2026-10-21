@@ -86,7 +86,7 @@ body {
     line-height: 1.6;
     color: var(--gray-800);
     background-color: var(--gray-50);
-    overflow-x: hidden;
+    max-width: 100%;
     /* Optimize rendering performance */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -110,7 +110,6 @@ h6 { font-size: 1rem; }
 
 p {
     margin-bottom: 1rem;
-    color: var(--gray-700);
 }
 
 a {
@@ -133,6 +132,18 @@ a:hover {
 
 .container-fluid {
     padding: 0 1rem;
+}
+
+@media (max-width: 767.98px) {
+    .container {
+        max-width: 100%;
+        padding-inline: 0.75rem;
+        margin-inline: 0;
+    }
+
+    .container-fluid {
+        padding-inline: 0.75rem;
+    }
 }
 
 /* Buttons */

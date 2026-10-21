@@ -164,7 +164,7 @@
    4. GLOWING NEON TEXT EFFECTS
    ======================================== */
 .neon-text {
-    color: #fff;
+    color: var(--iw-surface);
     text-shadow: 
         0 0 10px rgba(59,157,213,0.8),
         0 0 20px rgba(59,157,213,0.6),
@@ -223,7 +223,7 @@
 
 .flip-card-back {
     transform: rotateY(180deg);
-    background: linear-gradient(135deg, #3B9DD5, #7BC043);
+    background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
     color: white;
     display: flex;
     align-items: center;
@@ -285,7 +285,7 @@
     left: -2px;
     right: -2px;
     bottom: -2px;
-    background: linear-gradient(45deg, #3B9DD5, #7BC043, #FF6B35, #3B9DD5);
+    background: linear-gradient(45deg, var(--iw-dark-blue), var(--iw-dark-green), #FF6B35, var(--iw-dark-blue));
     background-size: 300% 300%;
     border-radius: inherit;
     z-index: -1;
@@ -341,7 +341,7 @@
     left: -3px;
     right: -3px;
     bottom: -3px;
-    background: linear-gradient(45deg, #3B9DD5, #7BC043, #FF6B35, #3B9DD5);
+    background: linear-gradient(45deg, var(--iw-dark-blue), var(--iw-dark-green), #FF6B35, var(--iw-dark-blue));
     background-size: 300% 300%;
     border-radius: 18px;
     z-index: -1;
@@ -376,7 +376,7 @@
 .infinite-scroll {
     overflow: hidden;
     padding: 3rem 0;
-    background: linear-gradient(135deg, #E3F2FD, #F1F8E9);
+    background: linear-gradient(135deg, var(--iw-light-blue), var(--iw-light-green));
 }
 
 .scroll-track {
@@ -452,7 +452,7 @@
    ======================================== */
 .typing-effect {
     overflow: hidden;
-    border-right: 3px solid #3B9DD5;
+    border-right: 3px solid var(--iw-dark-blue);
     white-space: nowrap;
     animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
 }
@@ -464,7 +464,7 @@
 
 @keyframes blink-caret {
     from, to { border-color: transparent }
-    50% { border-color: #3B9DD5 }
+    50% { border-color: var(--iw-dark-blue) }
 }
 
 /* ========================================
@@ -505,7 +505,7 @@
 .loading-bar {
     width: 100%;
     height: 4px;
-    background: linear-gradient(90deg, #3B9DD5, #7BC043);
+    background: linear-gradient(90deg, var(--iw-dark-blue), var(--iw-dark-green));
     background-size: 200% 100%;
     animation: loadingSlide 2s ease-in-out infinite;
     border-radius: 10px;
@@ -529,7 +529,7 @@
 .fab-main {
     width: 70px;
     height: 70px;
-    background: linear-gradient(135deg, #3B9DD5, #7BC043);
+    background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -571,7 +571,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #3B9DD5;
+    color: var(--iw-action-blue);
     font-size: 1.5rem;
     cursor: pointer;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -589,7 +589,7 @@
 
 .fab-option:hover {
     transform: scale(1.2);
-    background: linear-gradient(135deg, #3B9DD5, #7BC043);
+    background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
     color: white;
 }
 
@@ -608,7 +608,7 @@
 
 .progress-circle-bg {
     fill: none;
-    stroke: #e0e0e0;
+    stroke: var(--iw-border);
     stroke-width: 10;
 }
 
@@ -653,7 +653,7 @@
 .animated-counter {
     font-size: 3rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #3B9DD5, #7BC043);
+    background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -663,7 +663,7 @@
    20. SKELETON LOADER
    ======================================== */
 .skeleton {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background: linear-gradient(90deg, var(--iw-canvas) 25%, var(--iw-border) 50%, var(--iw-canvas) 75%);
     background-size: 200% 100%;
     animation: skeletonLoading 1.5s infinite;
     border-radius: 8px;

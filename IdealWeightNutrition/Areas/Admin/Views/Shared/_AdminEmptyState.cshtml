@@ -1,0 +1,22 @@
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+@{
+    var icon = ViewData["EmptyIcon"] as string ?? "bi-inbox";
+    var title = ViewData["EmptyTitle"] as string ?? Localizer["NoItemsFound"].Value;
+    var text = ViewData["EmptyText"] as string ?? "";
+    var actionUrl = ViewData["EmptyActionUrl"] as string;
+    var actionText = ViewData["EmptyActionText"] as string;
+}
+<div class="admin-empty-state">
+    <i class="bi @icon" aria-hidden="true"></i>
+    <h2>@title</h2>
+    @if (!string.IsNullOrWhiteSpace(text))
+    {
+        <p>@text</p>
+    }
+    @if (!string.IsNullOrWhiteSpace(actionUrl) && !string.IsNullOrWhiteSpace(actionText))
+    {
+        <a href="@actionUrl" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>@actionText
+        </a>
+    }
+</div>

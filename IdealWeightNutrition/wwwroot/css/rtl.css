@@ -443,11 +443,13 @@
     }
 
  
-/* Fix carousel indicators position in RTL */
+/* Keep indicator order LTR; center with flex, not left:50% (that overflows). */
 [dir="rtl"] .carousel-indicators {
-    direction: ltr; /* Keep indicators LTR for proper numbering */
-    left: 50%;
+    direction: ltr;
+    inset-inline: 0;
+    left: auto;
     right: auto;
-    transform: translateX(-50%);
+    transform: none;
+    justify-content: center;
 }
 

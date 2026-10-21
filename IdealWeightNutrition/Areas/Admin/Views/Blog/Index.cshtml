@@ -5,7 +5,12 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var culture = requestCulture?.RequestCulture.Culture ?? System.Globalization.CultureInfo.CurrentCulture;
-    var dateFormat = culture.Name == "ar" ? "dd/MM/yyyy" : "MMM dd, yyyy";
+    var dateFormat = culture.Name == "ar" ? "dd/MM/yyyy" : "yyyy-MM-dd";
+    ViewData["EmptyIcon"] = "bi-journal-text";
+    ViewData["EmptyTitle"] = Localizer["NoBlogsYet"].Value;
+    ViewData["EmptyText"] = Localizer["CreateFirstBlog"].Value;
+    ViewData["EmptyActionUrl"] = Url.Action("Create");
+    ViewData["EmptyActionText"] = Localizer["AddFirstBlog"].Value;
 }
 
 <partial name="_Notifications" />
@@ -14,68 +19,53 @@
     <div class="container">
         <div class="admin-card">
             <div class="admin-card-header">
-                <h2 class="admin-card-title">
-                    <i class="bi bi-journal-text me-3"></i>
-                    @Localizer["BlogManagement"]
-                </h2>
+                <h1 class="admin-card-title">@Localizer["BlogManagement"]</h1>
             </div>
 
             <div class="admin-card-body">
-                <div class="blog-stats-bar">
-                    <div class="stats-count">
-                        <i class="bi bi-info-circle"></i>
-                        <span>@string.Format(Localizer["BlogPostsCount"].Value, Model.Count())</span>
-                    </div>
+                <div class="admin-toolbar">
+                    <p class="admin-toolbar-meta mb-0">@string.Format(Localizer["BlogPostsCount"].Value, Model.Count())</p>
                     <a asp-action="Create" class="create-new-btn">
-                        <i class="bi bi-plus-circle me-2"></i>
+                        <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>
                         @Localizer["AddNewBlog"]
                     </a>
                 </div>
 
                 @if (!Model.Any())
                 {
-                    <div class="blog-empty-state">
-                        <i class="bi bi-journal-plus blog-empty-icon"></i>
-                        <h4>@Localizer["NoBlogsYet"]</h4>
-                        <p>@Localizer["CreateFirstBlog"]</p>
-                        <a asp-action="Create" class="btn btn-primary">
-                            <i class="bi bi-plus-circle me-2"></i>
-                            @Localizer["AddFirstBlog"]
-                        </a>
-                    </div>
+                    <partial name="_AdminEmptyState" />
                 }
                 else
                 {
-                    <div class="admin-table-wrapper">
+                    <div class="table-responsive admin-table-wrapper">
                         <table class="table table-bordered table-hover">
                             <thead>
                                 <tr>
-                                    <th style="width: 70px;">@Localizer["Image"]</th>
-                                    <th>@Localizer["Title"]</th>
-                                    <th>@Localizer["Category"]</th>
-                                    <th>@Localizer["Author"]</th>
-                                    <th>@Localizer["Published"]</th>
-                                    <th>@Localizer["Status"]</th>
-                                    <th style="width: 180px;" class="text-center">@Localizer["Actions"]</th>
+                                    <th scope="col">@Localizer["Image"]</th>
+                                    <th scope="col">@Localizer["Title"]</th>
+                                    <th scope="col">@Localizer["Category"]</th>
+                                    <th scope="col">@Localizer["Author"]</th>
+                                    <th scope="col">@Localizer["PublishedDate"]</th>
+                                    <th scope="col">@Localizer["Status"]</th>
+                                    <th scope="col" class="text-center">@Localizer["Actions"]</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var item in Model)
                                 {
+                                    var titleDisplay = item.Title?.Length > 50 ? item.Title.Substring(0, 50) + "..." : item.Title;
                                     <tr class="@(item.IsDeleted ? "table-secondary" : "")">
                                         <td class="text-center">
                                             @if (!string.IsNullOrEmpty(item.ImageUrl))
                                             {
-                                                <img src="@(item.ImageUrl.StartsWith("http") ? item.ImageUrl : Url.Content("~" + item.ImageUrl))" alt="@item.Title" class="blog-thumb" />
+                                                <img src="@(item.ImageUrl.StartsWith("http") ? item.ImageUrl : Url.Content("~" + item.ImageUrl))" alt="@item.Title" class="blog-thumb" width="52" height="52" loading="lazy" />
                                             }
                                             else
                                             {
-                                                <i class="bi bi-image text-muted" style="font-size: 1.5rem;"></i>
+                                                <div class="admin-thumb-placeholder" aria-hidden="true"><i class="bi bi-image"></i></div>
                                             }
                                         </td>
-                                        <td>
-                                            <strong>@(item.Title?.Length > 50 ? item.Title.Substring(0, 50) + "..." : item.Title)</strong>
-                                        </td>
+                                        <td><strong>@titleDisplay</strong></td>
                                         <td>@item.Category</td>
                                         <td>@item.Author</td>
                                         <td>@item.PublishedDate.ToString(dateFormat)</td>
@@ -86,29 +76,29 @@
                                             }
                                             else
                                             {
-                                                <span class="badge badge-visible">@Localizer["Visible"]</span>
+                                                <span class="badge badge-visible">@Localizer["Published"]</span>
                                             }
                                         </td>
                                         <td>
-                                            <div class="btn-group btn-action-group" role="group">
-                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary" title="@Localizer["Edit"]">
-                                                    <i class="bi bi-pencil"></i>
+                                            <div class="admin-row-actions">
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary" aria-label="@Localizer["Edit"]">
+                                                    <i class="bi bi-pencil" aria-hidden="true"></i>
                                                 </a>
                                                 @if (item.IsDeleted)
                                                 {
-                                                    <form asp-action="Restore" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit='return confirm(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["ConfirmRestoreBlog"].Value)));'>
+                                                    <form asp-action="Restore" asp-route-id="@item.Id" method="post" class="d-inline blog-restore-form" data-title="@item.Title">
                                                         @Html.AntiForgeryToken()
-                                                        <button type="submit" class="btn btn-sm btn-success" title="@Localizer["Restore"]">
-                                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                                        <button type="submit" class="btn btn-sm btn-success" aria-label="@Localizer["Restore"]">
+                                                            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
                                                         </button>
                                                     </form>
                                                 }
                                                 else
                                                 {
-                                                    <form asp-action="Hide" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit='return confirm(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["ConfirmHideBlog"].Value)));'>
+                                                    <form asp-action="Hide" asp-route-id="@item.Id" method="post" class="d-inline blog-hide-form" data-title="@item.Title">
                                                         @Html.AntiForgeryToken()
-                                                        <button type="submit" class="btn btn-sm btn-warning" title="@Localizer["Hide"]">
-                                                            <i class="bi bi-eye-slash"></i>
+                                                        <button type="submit" class="btn btn-sm btn-warning" aria-label="@Localizer["Hide"]">
+                                                            <i class="bi bi-eye-slash" aria-hidden="true"></i>
                                                         </button>
                                                     </form>
                                                 }
@@ -127,4 +117,40 @@
 
 @section Head {
     <link rel="stylesheet" href="~/css/blog-admin.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var restoreTemplate = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["ConfirmRestoreBlogNamed"].Value));
+            var hideTemplate = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["ConfirmHideBlogNamed"].Value));
+
+            function bindConfirm(selector, template) {
+                document.querySelectorAll(selector).forEach(function (form) {
+                    form.addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        var title = form.getAttribute('data-title') || '';
+                        var message = template.replace('{0}', title);
+                        Swal.fire({
+                            title: '@Localizer["Confirm"]',
+                            text: message,
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: 'var(--iw-dark-green)',
+                            cancelButtonColor: 'var(--iw-muted)',
+                            confirmButtonText: '@Localizer["Confirm"]',
+                            cancelButtonText: '@Localizer["Cancel"]'
+                        }).then(function (result) {
+                            if (result.isConfirmed) {
+                                form.submit();
+                            }
+                        });
+                    });
+                });
+            }
+
+            bindConfirm('.blog-restore-form', restoreTemplate);
+            bindConfirm('.blog-hide-form', hideTemplate);
+        });
+    </script>
 }

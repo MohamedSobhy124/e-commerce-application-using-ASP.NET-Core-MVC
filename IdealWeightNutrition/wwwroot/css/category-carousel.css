@@ -15,7 +15,7 @@
 .category-section-title h2 {
     font-size: 2rem;
     font-weight: 700;
-    color: #1f2937;
+    color: var(--iw-ink);
     margin: 0;
     display: inline-block;
     position: relative;
@@ -30,7 +30,7 @@
     transform: translateX(-50%);
     width: 60px;
     height: 4px;
-    background: linear-gradient(90deg, #3B9DD5 0%, #7BC043 100%);
+    background: linear-gradient(90deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%);
     border-radius: 2px;
 }
 
@@ -98,9 +98,9 @@
 /* Mobile: Force 1 category per view */
 @media (max-width: 768px) {
     .category-card {
-        width: calc(100vw - 5rem) !important;
-        min-width: calc(100vw - 5rem) !important;
-        max-width: calc(100vw - 5rem) !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
         padding: 0.75rem 0.5rem !important;
     }
 }
@@ -113,14 +113,14 @@
 
 /* Active state - only when carousel item is active (not transitioning) */
 .category-carousel .carousel-item.active .category-card.active {
-    border-color: #3B9DD5;
+    border-color: var(--iw-dark-blue);
     box-shadow: 0 8px 24px rgba(59, 157, 213, 0.2);
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    background: linear-gradient(135deg, var(--iw-light-blue) 0%, #bbdefb 100%);
     transform: translateY(-4px);
 }
 
 .category-carousel .carousel-item.active .category-card.active .category-label {
-    color: #3B9DD5;
+    color: var(--iw-action-blue);
     font-weight: 700;
 }
 
@@ -133,7 +133,7 @@
 }
 
 .category-carousel .carousel-item:not(.active) .category-card.active .category-label {
-    color: #1f2937;
+    color: var(--iw-ink);
     font-weight: 600;
 }
 
@@ -153,7 +153,7 @@
 
 .category-carousel .carousel-item.carousel-item-next:not(.active) .category-card .category-label,
 .category-carousel .carousel-item.carousel-item-prev:not(.active) .category-card .category-label {
-    color: #1f2937;
+    color: var(--iw-ink);
     font-weight: 600;
 }
 
@@ -170,8 +170,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border: 3px solid #ffffff;
+    background: linear-gradient(135deg, var(--iw-canvas) 0%, #e9ecef 100%);
+    border: 3px solid var(--iw-surface);
 }
 
 /* Mobile: Smaller circle */
@@ -195,7 +195,7 @@
 .category-card:hover .category-circle {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(0, 0, 0, 0.05);
     transform: scale(1.08) rotate(2deg);
-    border-color: #ffffff;
+    border-color: var(--iw-surface);
 }
 
 .category-image-wrapper {
@@ -255,7 +255,7 @@
     text-align: center;
     font-size: 0.9375rem;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--iw-ink);
     margin-top: 0.5rem;
     line-height: 1.5;
     min-height: 2.5em;
@@ -267,7 +267,7 @@
 }
 
 .category-card:hover .category-label {
-    color: #3B9DD5;
+    color: var(--iw-action-blue);
 }
 
 /* Enhanced Carousel Navigation Arrows */
@@ -275,7 +275,7 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: #ffffff;
+    background: var(--iw-surface);
     border: 2px solid rgba(0, 0, 0, 0.08);
     width: 44px;
     height: 44px;
@@ -288,14 +288,14 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 10;
     font-size: 1.25rem;
-    color: #4b5563 !important;
+    color: var(--iw-muted) !important;
     opacity: 0.9;
 }
 
 .carousel-nav:hover:not(:disabled) {
-    background: #3B9DD5;
-    color: #ffffff;
-    border-color: #3B9DD5;
+    background: var(--iw-dark-blue);
+    color: var(--iw-surface);
+    border-color: var(--iw-dark-blue);
     box-shadow: 0 8px 24px rgba(59, 157, 213, 0.3), 0 4px 12px rgba(59, 157, 213, 0.2);
     transform: translateY(-50%) scale(1.1);
     opacity: 1;
@@ -382,7 +382,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #d1d5db;
+    background: var(--iw-border);
     border: none;
     padding: 0;
     cursor: pointer;
@@ -398,7 +398,7 @@
 
 .category-carousel-indicators button.active,
 .category-section .carousel-indicators button.active {
-    background: linear-gradient(135deg, #3B9DD5 0%, #2563eb 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     width: 24px;
     border-radius: 12px;
     box-shadow: 0 2px 6px rgba(59, 157, 213, 0.4);
@@ -409,7 +409,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #d1d5db;
+    background: var(--iw-border);
     border: none;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -426,7 +426,7 @@
 
 .category-carousel-container .carousel-indicator.active,
 .category-section .carousel-indicator.active {
-    background: #3B9DD5;
+    background: var(--iw-dark-blue);
     width: 24px;
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(59, 157, 213, 0.4);
@@ -577,15 +577,15 @@
     }
     
     .category-carousel-wrapper {
-        padding: 0 2.5rem;
+        padding-inline: 0.75rem;
     }
     
     /* Force 1 category per slide on mobile - full width */
     .category-card {
-        width: calc(100vw - 5rem) !important;
-        min-width: calc(100vw - 5rem) !important;
-        max-width: calc(100vw - 5rem) !important;
-        flex: 0 0 calc(100vw - 5rem) !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
         padding: 0.75rem;
     }
     
@@ -666,13 +666,13 @@
     }
     
     .category-carousel-wrapper {
-        padding: 0 1.5rem;
+        padding-inline: 0.75rem;
     }
     
     .category-card {
-        width: calc(100vw - 4rem) !important;
-        min-width: calc(100vw - 4rem) !important;
-        max-width: calc(100vw - 4rem) !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
         padding: 0.5rem;
         border-radius: 12px;
     }
@@ -772,7 +772,7 @@
     transform: translateX(-50%);
     width: 40px;
     height: 3px;
-    background: linear-gradient(90deg, #3B9DD5 0%, #7BC043 100%);
+    background: linear-gradient(90deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%);
     border-radius: 2px;
     animation: expandWidth 0.3s ease;
 }
@@ -807,7 +807,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #d1d5db;
+    background: var(--iw-border);
     border: none;
     padding: 0;
     cursor: pointer;
@@ -820,7 +820,7 @@
 }
 
 .carousel-dot.active {
-    background: linear-gradient(135deg, #3B9DD5 0%, #2563eb 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     width: 24px;
     border-radius: 12px;
     box-shadow: 0 2px 6px rgba(59, 157, 213, 0.4);
@@ -881,7 +881,7 @@
 .category-section-modern {
     width: 100%;
     padding: 2rem 0;
-    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 50%, #f8fafc 100%);
+    background: linear-gradient(180deg, var(--iw-canvas) 0%, var(--iw-surface) 50%, var(--iw-canvas) 100%);
     position: relative;
     overflow: hidden;
 }
@@ -910,7 +910,7 @@
 .category-section-title-modern {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #1f2937;
+    color: var(--iw-ink);
     margin: 0;
     position: relative;
     display: flex;
@@ -922,7 +922,7 @@
     content: '';
     width: 4px;
     height: 1.5rem;
-    background: linear-gradient(180deg, #3B9DD5 0%, #7BC043 100%);
+    background: linear-gradient(180deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%);
     border-radius: 2px;
 }
 
@@ -935,7 +935,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 2px solid #e5e7eb;
+    border: 2px solid var(--iw-border);
     background: white;
     color: #374151;
     cursor: pointer;
@@ -947,8 +947,8 @@
 }
 
 .category-scroll-btn:hover:not(:disabled) {
-    border-color: #3B9DD5;
-    color: #3B9DD5;
+    border-color: var(--iw-dark-blue);
+    color: var(--iw-action-blue);
     transform: scale(1.1);
     box-shadow: 0 4px 12px rgba(59, 157, 213, 0.25);
 }
@@ -983,12 +983,12 @@
 
 .category-scroll-wrapper::before {
     left: 0;
-    background: linear-gradient(90deg, #f8fafc 0%, transparent 100%);
+    background: linear-gradient(90deg, var(--iw-canvas) 0%, transparent 100%);
 }
 
 .category-scroll-wrapper::after {
     right: 0;
-    background: linear-gradient(270deg, #f8fafc 0%, transparent 100%);
+    background: linear-gradient(270deg, var(--iw-canvas) 0%, transparent 100%);
 }
 
 .category-scroll-container {
@@ -1055,7 +1055,7 @@
 }
 
 .category-scroll-card.active .category-card-inner {
-    background: linear-gradient(135deg, #3B9DD5 0%, #2563eb 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     border-color: transparent;
     box-shadow: 0 8px 24px rgba(59, 157, 213, 0.35);
 }
@@ -1096,7 +1096,7 @@
     width: 70px;
     height: 70px;
     border-radius: 16px;
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    background: linear-gradient(135deg, var(--iw-light-blue) 0%, #e0f2fe 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1106,7 +1106,7 @@
 
 .category-icon-wrapper i {
     font-size: 1.75rem;
-    color: #3B9DD5;
+    color: var(--iw-action-blue);
     transition: all 0.3s ease;
 }
 
@@ -1115,12 +1115,12 @@
 }
 
 .category-icon-wrapper.has-image {
-    background: #f8fafc;
+    background: var(--iw-canvas);
     padding: 0;
 }
 
 .category-icon-wrapper.has-products {
-    background: #f8fafc;
+    background: var(--iw-canvas);
     padding: 4px;
 }
 
@@ -1171,7 +1171,7 @@
 
 .category-progress-track {
     height: 4px;
-    background: #e5e7eb;
+    background: var(--iw-border);
     border-radius: 2px;
     position: relative;
     overflow: hidden;
@@ -1182,7 +1182,7 @@
     top: 0;
     left: 0;
     height: 100%;
-    background: linear-gradient(90deg, #3B9DD5 0%, #7BC043 100%);
+    background: linear-gradient(90deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%);
     border-radius: 2px;
     transition: left 0.15s ease-out, width 0.15s ease-out;
     min-width: 20%;
@@ -1200,13 +1200,13 @@
 [dir="rtl"] .category-scroll-wrapper::before {
     left: auto;
     right: 0;
-    background: linear-gradient(270deg, #f8fafc 0%, transparent 100%);
+    background: linear-gradient(270deg, var(--iw-canvas) 0%, transparent 100%);
 }
 
 [dir="rtl"] .category-scroll-wrapper::after {
     right: auto;
     left: 0;
-    background: linear-gradient(90deg, #f8fafc 0%, transparent 100%);
+    background: linear-gradient(90deg, var(--iw-canvas) 0%, transparent 100%);
 }
 
 [dir="rtl"] .category-scroll-container {

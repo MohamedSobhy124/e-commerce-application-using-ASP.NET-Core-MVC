@@ -1,0 +1,115 @@
+@using IdealWeightNutrition.Utility
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "ar";
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var pageTitle = ViewData["Title"]?.ToString() ?? Localizer["Management"].Value;
+
+    string SectionLabel(string name) => name switch
+    {
+        "Dashboard" => Localizer["Dashboard"].Value,
+        "Order" => Localizer["Orders"].Value,
+        "ReturnRequest" => Localizer["ReturnRequests"].Value,
+        "Review" => Localizer["Reviews"].Value,
+        "Product" => Localizer["Product"].Value,
+        "Categries" => Localizer["Category"].Value,
+        "Brand" => Localizer["Brands"].Value,
+        "ComboOffer" => Localizer["ComboOffers"].Value,
+        "FlashSale" => Localizer["FlashSales"].Value,
+        "PromoCode" => Localizer["PromoCodes"].Value,
+        "ServiceSubscription" => Localizer["ServiceSubscriptions"].Value,
+        "ServiceOffer" => Localizer["ServiceOffers"].Value,
+        "Blog" => Localizer["Blog"].Value,
+        "VideoBanner" => Localizer["VideoBanner"].Value,
+        "City" or "RemoteArea" => Localizer["CitiesAndDeliveryAreas"].Value,
+        "Companies" => Localizer["Companies"].Value,
+        "NewsletterSubscription" => Localizer["NewsletterSubscriptions"].Value,
+        "User" => Localizer["CreateAdminUser"].Value,
+        _ => Localizer["Management"].Value
+    };
+
+    var currentPath = Context.Request.Path.Value ?? "/";
+    var queryString = Context.Request.QueryString.Value ?? "";
+    var cleanQueryString = queryString
+        .Replace("?culture=ar", "")
+        .Replace("&culture=ar", "")
+        .Replace("?culture=en", "")
+        .Replace("&culture=en", "");
+    var querySeparator = string.IsNullOrEmpty(cleanQueryString) ? "?" : (cleanQueryString.Contains("?") ? "&" : "?");
+    var arUrl = $"{currentPath}{querySeparator}culture=ar{cleanQueryString}";
+    var enUrl = $"{currentPath}{querySeparator}culture=en{cleanQueryString}";
+}
+<header class="iw-admin-topbar">
+    <div class="iw-admin-topbar-start">
+        <button type="button" class="iw-admin-icon-btn d-xl-none" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar" aria-controls="adminSidebar" aria-label="@Localizer["NavigationMenu"]">
+            <i class="bi bi-list" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="iw-admin-icon-btn d-none d-xl-inline-flex" id="adminSidebarCollapse" aria-pressed="false" aria-label="@Localizer["CollapseSidebar"]" data-expand-label="@Localizer["ExpandSidebar"]">
+            <i class="bi bi-layout-sidebar-inset" aria-hidden="true"></i>
+        </button>
+        <a class="iw-admin-topbar-brand" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+            <img src="~/images/Brand/logo-google2.png" alt="" width="40" height="28" />
+            <span>@Localizer["IdealWeight"]</span>
+        </a>
+        <div class="iw-admin-crumbs">
+            <nav aria-label="@Localizer["Management"]">
+                <ol>
+                    <li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">@Localizer["Dashboard"]</a></li>
+                    @if (!string.Equals(controller, "Dashboard", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <li aria-hidden="true">/</li>
+                        <li>@SectionLabel(controller)</li>
+                    }
+                </ol>
+            </nav>
+            <h1>@pageTitle</h1>
+        </div>
+    </div>
+    <div class="iw-admin-topbar-end">
+        <a class="iw-admin-icon-btn" asp-area="Customer" asp-controller="Home" asp-action="Index" title="@Localizer["BackToStore"]">
+            <i class="bi bi-shop" aria-hidden="true"></i>
+            <span class="d-none d-lg-inline">@Localizer["BackToStore"]</span>
+        </a>
+        <div class="dropdown">
+            <a class="iw-admin-icon-btn dropdown-toggle notification-nav-link" href="#" id="notificationDropdownToggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="@Localizer["Notifications"]">
+                <i class="bi bi-bell" aria-hidden="true"></i>
+                <span id="notificationBadge" class="notification-badge">0</span>
+                <span class="notification-dot" id="notificationDot"></span>
+            </a>
+            <div id="notificationDropdown" class="dropdown-menu dropdown-menu-end notification-dropdown-menu" aria-labelledby="notificationDropdownToggle">
+                <div class="notification-dropdown-header">
+                    <h2 class="notification-dropdown-title h5 mb-0">
+                        <i class="bi bi-bell me-2" aria-hidden="true"></i>@Localizer["Notifications"]
+                    </h2>
+                    <button type="button" class="mark-all-read-btn" id="adminMarkAllReadBtn">
+                        @Localizer["MarkAllRead"]
+                    </button>
+                </div>
+                <div id="notificationList" class="notification-list">
+                    <div class="notification-empty">
+                        <i class="bi bi-bell-slash" aria-hidden="true"></i>
+                        <p>@Localizer["NoNotificationsYet"]</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button type="button" class="iw-admin-icon-btn dropdown-toggle" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-label="@Localizer["Language"]">
+                <i class="bi bi-globe" aria-hidden="true"></i>
+                <span id="currentLanguageDisplay" class="d-none d-md-inline">@(currentCulture == "ar" ? "العربية" : "English")</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                <li>
+                    <a href="@arUrl" onclick="event.preventDefault(); switchToArabic(); return false;" id="langButtonAr" class="dropdown-item @(currentCulture == "ar" ? "active" : null)">العربية</a>
+                </li>
+                <li>
+                    <a href="@enUrl" onclick="event.preventDefault(); switchToEnglish(); return false;" id="langButtonEn" class="dropdown-item @(currentCulture == "en" ? "active" : null)">English</a>
+                </li>
+            </ul>
+        </div>
+        <partial name="_LoginPartial" />
+    </div>
+</header>

@@ -15,7 +15,7 @@
 
 <style>
     .combo-detail-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
         color: white;
         padding: 4rem 0;
         margin-bottom: 3rem;
@@ -90,7 +90,7 @@
     .price-combo {
         font-size: 3rem;
         font-weight: 800;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -130,7 +130,7 @@
     .feature-icon {
         font-size: 2.5rem;
         margin-bottom: 0.5rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -200,7 +200,7 @@
     }
     
     .add-to-cart-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%) !important;
         border: none !important;
         color: white !important;
         padding: 1rem 2rem !important;
@@ -229,7 +229,7 @@
     .section-title {
         font-size: 2.5rem;
         font-weight: 800;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -263,7 +263,7 @@
                         <img src="@Model.ImageUrl" alt="@comboName" class="img-fluid w-100" style="height: 400px; object-fit: contain;" />
                     }
                     <div class="combo-badge-floating">
-                        @Model.DiscountPercentage.ToString("F0")% @Localizer["Off"]
+                        @(Model.DiscountPercentage.ToString("F0"))% @Localizer["OFF"]
                     </div>
                 </div>
             </div>
@@ -296,7 +296,7 @@
                         <div class="feature-icon">
                             <i class="bi bi-tag-fill"></i>
                         </div>
-                        <h5 class="fw-bold">@Model.DiscountPercentage.ToString("F0")%</h5>
+                        <h5 class="fw-bold">@(Model.DiscountPercentage.ToString("F0"))%</h5>
                         <p class="mb-0 text-muted">@Localizer["Discount"]</p>
                     </div>
                 </div>
@@ -307,7 +307,7 @@
 
 <div class="container">
     <!-- Combined Price and Add to Cart Section -->
-    <div class="mb-5" style="padding: 3rem 2rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 20px; margin: 2rem 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+    <div class="mb-5" style="padding: 3rem 2rem; background: linear-gradient(135deg, var(--iw-canvas) 0%, #e9ecef 100%); border-radius: 20px; margin: 2rem 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
         <div class="row align-items-center g-4">
             <!-- Price Section (Left Side) -->
             <div class="col-lg-6 text-center text-lg-start">
@@ -323,20 +323,20 @@
                 </div>
                 @if (Model.AllowFreeDelivery)
                 {
-                    <div class="free-delivery-info mt-3 p-3" style="background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%); border: 2px solid #7BC043; border-radius: 8px; display: inline-block; text-align: start;">
+                    <div class="free-delivery-info mt-3 p-3" style="background: linear-gradient(135deg, #E8F5E9 0%, var(--iw-light-green) 100%); border: 2px solid var(--iw-dark-green); border-radius: 8px; display: inline-block; text-align: start;">
                         <div class="d-flex align-items-center">
                             <i class="bi bi-truck text-success me-2" style="font-size: 1.5rem;"></i>
                             <div>
                                 <strong class="text-success">@Localizer["FreeDeliveryAvailable"]</strong>
                                 @if (Model.FreeDeliveryMinimumAmount > 0)
                                 {
-                                    <p class="mb-0 mt-1" style="font-size: 0.9rem; color: #333;">
+                                    <p class="mb-0 mt-1" style="font-size: 0.9rem; color: var(--iw-ink);">
                                         @string.Format(Localizer["FreeDeliveryMinimumAmountMessage"].Value ?? "Free delivery on orders above {0} AED", Model.FreeDeliveryMinimumAmount.ToString("N2"))
                                     </p>
                                 }
                                 else
                                 {
-                                    <p class="mb-0 mt-1" style="font-size: 0.9rem; color: #333;">
+                                    <p class="mb-0 mt-1" style="font-size: 0.9rem; color: var(--iw-ink);">
                                         @Localizer["FreeDeliveryNoMinimumMessage"]
                                     </p>
                                 }

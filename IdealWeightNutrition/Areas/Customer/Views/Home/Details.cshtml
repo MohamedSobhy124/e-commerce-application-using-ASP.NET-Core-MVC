@@ -4,10 +4,47 @@
 @inject IConfiguration Configuration
 @model ShoppingCart
 @{
+    ViewData["PageClass"] = "page-product-details";
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
     var baseUrl = Configuration["SiteSettings:BaseUrl"] ?? Context.Request.Scheme + "://" + Context.Request.Host;
+    var productTitle = currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title;
+    var categoryName = Model.product.categry?.Name ?? Localizer["Categories"].Value;
+    var placeholderUrl = Url.Content("~/Images/placeholder.png");
+
+    var productImages = Model.product.ProductImages != null && Model.product.ProductImages.Any()
+        ? Model.product.ProductImages
+            .Where(pi => pi.ImageInfo != "INFO_IMAGE")
+            .OrderBy(pi => pi.DisplayOrder)
+            .Select(pi => pi.ImageUrl)
+            .ToList()
+        : new List<string>();
+
+    if (!productImages.Any() && !string.IsNullOrEmpty(Model.product.ImageUrl))
+    {
+        productImages.Add(Model.product.ImageUrl);
+    }
+
+    if (Model.product.ProductType == IdealWeightNutrition.Models.ProductType.Variable &&
+        Model.product.ProductVariants != null && Model.product.ProductVariants.Any())
+    {
+        var variantImages = Model.product.ProductVariants
+            .Where(v => !string.IsNullOrEmpty(v.ImageUrl))
+            .Select(v => v.ImageUrl)
+            .Distinct()
+            .ToList();
+        productImages.AddRange(variantImages);
+    }
+
+    var infoImage = Model.product.ProductImages?.FirstOrDefault(pi => pi.ImageInfo == "INFO_IMAGE");
+    var lcpImageUrl = productImages.FirstOrDefault(u => !string.IsNullOrEmpty(u)) ?? Model.product.ImageUrl;
+    if (string.IsNullOrEmpty(lcpImageUrl))
+    {
+        lcpImageUrl = placeholderUrl;
+    }
+
+    string ProductImageSrc(string? url) => string.IsNullOrWhiteSpace(url) ? placeholderUrl : url;
     
     // Get SEO data from ViewData (set by controller)
     var seo = ViewData["SEO"] as SEOViewModel;
@@ -27,61 +64,42 @@
     string tamaraPublicKey = ViewData["TamaraPublicKey"]?.ToString() ?? "";
     double tamaraProductPrice = ViewData["TamaraProductPrice"] != null ? (double)ViewData["TamaraProductPrice"] : Model.product.Price;
 }
+
+@section Styles {
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+}
+
+@section Head {
+    @if (!string.IsNullOrEmpty(lcpImageUrl))
+    {
+        <link rel="preload" href="@lcpImageUrl" as="image" fetchpriority="high" />
+    }
+}
   
 <form method="post" id="addToCartForm">
     <input hidden asp-for="ProductId" />
     <div class="product-details-wrapper">
 
-        <div class="product-details-header">
-            <div class="text-center">
-                <h2>@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)</h2>
-            </div>
-        </div>
+        <div class="product-details-body">
 
-        <div class="product-details-body"> 
-
-            <a asp-action="Index" class="back-button">
-                <i class="bi bi-arrow-left"></i>
+            <a asp-action="Index" class="back-button" aria-label="@Localizer["BackToProducts"]">
+                <i class="bi bi-arrow-left" aria-hidden="true"></i>
                 <span>@Localizer["BackToProducts"]</span>
             </a>
 
-            <div class="container my-4">
-                <div class="row">
-                    <div class="col-md-4">
+            <nav class="pd-breadcrumb" aria-label="@Localizer["Home"]">
+                <ol>
+                    <li><a asp-area="Customer" asp-controller="Home" asp-action="Index">@Localizer["Home"]</a></li>
+                    <li><a asp-area="Customer" asp-controller="Home" asp-action="Index" asp-route-categoryId="@Model.product.CategryId">@categoryName</a></li>
+                    <li aria-current="page">@productTitle</li>
+                </ol>
+            </nav>
+
+            <div class="pd-layout">
+                    <div class="pd-gallery">
                         <div class="product-main-image">
-                            @{
-                                // Exclude info images (marked with ImageInfo == "INFO_IMAGE")
-                                var productImages = Model.product.ProductImages != null && Model.product.ProductImages.Any() 
-                                    ? Model.product.ProductImages
-                                        .Where(pi => pi.ImageInfo != "INFO_IMAGE")
-                                        .OrderBy(pi => pi.DisplayOrder)
-                                        .Select(pi => pi.ImageUrl)
-                                        .ToList()
-                                    : new List<string>();
-                                
-                                // If no ProductImages but has ImageUrl, use that
-                                if (!productImages.Any() && !string.IsNullOrEmpty(Model.product.ImageUrl))
-                                {
-                                    productImages.Add(Model.product.ImageUrl);
-                                }
-                                
-                                // For Variable products, add variant images
-                                if (Model.product.ProductType == IdealWeightNutrition.Models.ProductType.Variable && 
-                                    Model.product.ProductVariants != null && Model.product.ProductVariants.Any())
-                                {
-                                    var variantImages = Model.product.ProductVariants
-                                        .Where(v => !string.IsNullOrEmpty(v.ImageUrl))
-                                        .Select(v => v.ImageUrl)
-                                        .Distinct()
-                                        .ToList();
-                                    
-                                    // Append variant images to product images
-                                    productImages.AddRange(variantImages);
-                                }
-                                
-                                // Get info image separately
-                                var infoImage = Model.product.ProductImages?.FirstOrDefault(pi => pi.ImageInfo == "INFO_IMAGE");
-                            }
                             
                             @if (productImages.Count > 1)
                             {
@@ -90,17 +108,17 @@
                                         @for (int i = 0; i < productImages.Count; i++)
                                         {
                                             <div class="carousel-item @(i == 0 ? "active" : "")">
-                                                <img class="img-fluid product-image-clickable" src="@productImages[i]" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title) - Image @(i+1)" data-image-url="@productImages[i]" data-product-name="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)">
+                                                <img class="img-fluid product-image-clickable" src="@ProductImageSrc(productImages[i])" alt="@productTitle" data-image-url="@ProductImageSrc(productImages[i])" data-product-name="@productTitle" width="600" height="600" @(i == 0 ? Html.Raw("fetchpriority=\"high\"") : Html.Raw("loading=\"lazy\""))>
                                             </div>
                                         }
                                     </div>
                                     <button class="carousel-control-prev" type="button" data-bs-target="#productDetailsCarousel" data-bs-slide="prev" onclick="pauseCarouselAfterInteraction()">
                                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">Previous</span>
+                                        <span class="visually-hidden">@Localizer["Previous"]</span>
                                     </button>
                                     <button class="carousel-control-next" type="button" data-bs-target="#productDetailsCarousel" data-bs-slide="next" onclick="pauseCarouselAfterInteraction()">
                                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">Next</span>
+                                        <span class="visually-hidden">@Localizer["Next"]</span>
                                     </button>
                                     <div class="carousel-indicators">
                                         @for (int i = 0; i < productImages.Count; i++)
@@ -112,44 +130,51 @@
                             }
                             else if (productImages.Count == 1)
                             {
-                                <img class="img-fluid product-image-clickable" src="@productImages[0]" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)" data-image-url="@productImages[0]" data-product-name="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)">
+                                <img class="img-fluid product-image-clickable" src="@ProductImageSrc(productImages[0])" alt="@productTitle" data-image-url="@ProductImageSrc(productImages[0])" data-product-name="@productTitle" width="600" height="600" fetchpriority="high">
                             }
                             else
                             {
-                                <img class="img-fluid product-image-clickable" src="@Model.product.ImageUrl" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)" data-image-url="@Model.product.ImageUrl" data-product-name="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)">
+                                <img class="img-fluid product-image-clickable" src="@ProductImageSrc(Model.product.ImageUrl)" alt="@productTitle" data-image-url="@ProductImageSrc(Model.product.ImageUrl)" data-product-name="@productTitle" width="600" height="600" fetchpriority="high">
                             }
+                            <span class="pd-zoom-hint" aria-hidden="true"><i class="bi bi-zoom-in"></i></span>
+                            <span class="visually-hidden">@Localizer["ZoomImage"]</span>
                         </div>
                         
                         <!-- Info Image Section (separate from product images) - Desktop only -->
                         @if (infoImage != null && !string.IsNullOrEmpty(infoImage.ImageUrl))
                         {
                             <div class="product-info-image-section mt-4 d-none d-md-block">
-                                <h5 class="mb-3" style="color: #1976D2; font-weight: 600;">
-                                    <i class="bi bi-info-circle me-2"></i>@Localizer["ProductInformation"]
+                                <h5 class="mb-3">
+                                    <i class="bi bi-info-circle me-2" aria-hidden="true"></i>@Localizer["ProductInformation"]
                                 </h5>
-                                <div class="info-image-container" style="border: 2px solid #dee2e6; border-radius: 8px; padding: 10px; background: #f8f9fa;">
-                                    <img class="img-fluid" 
-                                         src="@infoImage.ImageUrl" 
-                                         alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title) - @Localizer["ProductInformation"]"
-                                         style="max-width: 100%; height: auto; border-radius: 4px;" />
+                                <div class="info-image-container">
+                                    <img class="img-fluid" src="@infoImage.ImageUrl" alt="@productTitle - @Localizer["ProductInformation"]" loading="lazy" />
                                 </div>
                             </div>
                         }
                     </div>
 
-                    <div class="col-md-8">
+                    <div class="pd-buy">
                         <div class="product-info">
                             <div class="product-category-badge">
-                                <i class="bi bi-tag-fill me-2"></i>@Model.product.categry.Name
+                                <i class="bi bi-tag-fill me-2" aria-hidden="true"></i>@categoryName
                             </div>
                             @if (Model.product.Brand != null)
                             {
-                                <div class="product-brand-badge" style="margin-top: 0.5rem;">
-                                    <i class="bi bi-award-fill me-2"></i>@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.Brand.NameAr) ? Model.product.Brand.NameAr : Model.product.Brand.Name)
+                                <div class="product-brand-badge">
+                                    <i class="bi bi-award-fill me-2" aria-hidden="true"></i>@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.Brand.NameAr) ? Model.product.Brand.NameAr : Model.product.Brand.Name)
                                 </div>
                             }
 
-                            <h3 class="product-category-name">@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title)</h3>
+                            <h1 class="product-category-name">@productTitle</h1>
+                            @if ((productReviewCount ?? 0) > 0)
+                            {
+                                <div class="pd-rating-chip">
+                                    <i class="bi bi-star-fill" aria-hidden="true"></i>
+                                    <span>@((productRating ?? 0).ToString("0.0"))</span>
+                                    <span>(@productReviewCount)</span>
+                                </div>
+                            }
 
                             <!-- Product Options (for Variable Products) -->
                             @if (Model.product.ProductType == IdealWeightNutrition.Models.ProductType.Variable && Model.product.ProductOptions != null && Model.product.ProductOptions.Any())
@@ -201,7 +226,7 @@
                                         string tamaraText;
                                         if (currentCulture == "ar")
                                         {
-                                            tamaraText = $"أو قسم فاتورتك على <strong>4</strong> دفعات بقيمة <strong>{tamaraAmount}</strong> بدون رسوم تأخير، متوافقة مع الشريعة الإسلامية <a href=\"#\" class=\"tamara-learn-more\" style=\"color: #7c3aed; text-decoration: underline;\">اعرف أكثر</a>";
+                                            tamaraText = $"أو قسم فاتورتك على <strong>4</strong> دفعات بقيمة <strong>{tamaraAmount}</strong> بدون رسوم تأخير، متوافقة مع الشريعة الإسلامية <a href=\"#\" class=\"tamara-learn-more\">اعرف أكثر</a>";
                                         }
                                         else
                                         {
@@ -211,28 +236,28 @@
                                         <div class="product-price-section-main">
                                             @if (isInFlashSale)
                                             {
-                                                <div class="flash-sale-badge-inline" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #f59e0b 100%); color: white; padding: 0.3rem 0.8rem; border-radius: 5px; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
-                                                    <i class="bi bi-lightning-fill"></i> @Localizer["FLASHSALE"]
+                                                <div class="flash-sale-badge-inline">
+                                                    <i class="bi bi-lightning-fill" aria-hidden="true"></i> @Localizer["FlashSale"]
                                                 </div>
-                                                <p class="product-old-price" style="text-decoration: line-through; color: #999; font-size: 1.1rem; margin-bottom: 0.3rem;">
-                                                    @Localizer["OriginalPrice"]: @Html.Raw(currencySymbol) @originalPrice.ToString("N2")
+                                                <p class="product-old-price">
+                                                    @Localizer["OriginalPrice"]: <bdi dir="ltr">@Html.Raw(currencySymbol) @originalPrice.ToString("N2")</bdi>
                                                 </p>
-                                                <p class="product-new-price" id="productPrice" style="color: #ef4444; font-size: 1.8rem; font-weight: 700;">
-                                                    @Html.Raw(currencySymbol) @productPrice.ToString("N2")
+                                                <p class="product-new-price" id="productPrice">
+                                                    <bdi dir="ltr">@Html.Raw(currencySymbol) @productPrice.ToString("N2")</bdi>
                                                 </p>
-                                                <div style="color: #10b981; font-size: 0.9rem; margin-top: 0.3rem;">
-                                                    <i class="bi bi-tag-fill"></i> @Localizer["YouSave"]: @Html.Raw(currencySymbol) @((originalPrice - productPrice).ToString("N2"))
+                                                <div class="pd-you-save">
+                                                    <i class="bi bi-tag-fill" aria-hidden="true"></i> @Localizer["YouSave"]: <bdi dir="ltr">@Html.Raw(currencySymbol) @((originalPrice - productPrice).ToString("N2"))</bdi>
                                                 </div>
                                             }
                                             else if (Model.product.ListPrice > Model.product.Price)
                                             {
                                                 <p class="product-old-price">
-                                                    @Localizer["OriginalPrice"]: @Html.Raw(currencySymbol) @Model.product.ListPrice.ToString("N2")
+                                                    @Localizer["OriginalPrice"]: <bdi dir="ltr">@Html.Raw(currencySymbol) @Model.product.ListPrice.ToString("N2")</bdi>
                                                 </p>
                                             }
                                             @if (!isInFlashSale)
                                             {
-                                                <p class="product-new-price" id="productPrice">@Html.Raw(currencySymbol) @Model.product.Price.ToString("N2")</p>
+                                                <p class="product-new-price" id="productPrice"><bdi dir="ltr">@Html.Raw(currencySymbol) @Model.product.Price.ToString("N2")</bdi></p>
                                             }
                                             @if (Model.product.ExpiryDate.HasValue)
                                             {
@@ -245,20 +270,20 @@
                                             @* Free Delivery Information *@
                                             @if (Model.product.AllowFreeDelivery)
                                             {
-                                                <div class="free-delivery-info mt-3 p-3" style="background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%); border: 2px solid #7BC043; border-radius: 8px;">
+                                                <div class="free-delivery-info mt-3 p-3">
                                                     <div class="d-flex align-items-center">
-                                                        <i class="bi bi-truck text-success me-2" style="font-size: 1.5rem;"></i>
+                                                        <i class="bi bi-truck text-success me-2" aria-hidden="true"></i>
                                                         <div>
                                                             <strong class="text-success">@Localizer["FreeDeliveryAvailable"]</strong>
                                                             @if (Model.product.FreeDeliveryMinimumAmount > 0)
                                                             {
-                                                                <p class="mb-0 mt-1" style="font-size: 0.9rem; color: #333;">
+                                                                <p class="mb-0 mt-1">
                                                                     @string.Format(Localizer["FreeDeliveryMinimumAmountMessage"].Value ?? "Free delivery on orders above {0} AED", Model.product.FreeDeliveryMinimumAmount.ToString("N2"))
                                                                 </p>
                                                             }
                                                             else
                                                             {
-                                                                <p class="mb-0 mt-1" style="font-size: 0.9rem; color: #333;">
+                                                                <p class="mb-0 mt-1">
                                                                     @Localizer["FreeDeliveryNoMinimumMessage"]
                                                                 </p>
                                                             }
@@ -275,7 +300,7 @@
                                                 <div class="installment-option installment-tabby">
                                                     <div class="installment-content">
                                                         <div class="installment-logo">
-                                                            <img src="~/Images/tappy.png" alt="@Localizer["Tabby"]" class="installment-logo-img" />
+                                                            <img src="~/Images/tappy.png" alt="@Localizer["Tabby"]" class="installment-logo-img" width="72" height="24" />
                                                         </div>
                                                         <div class="installment-text">
                                                             <span>@Html.Raw(tabbyText)</span>
@@ -289,7 +314,7 @@
                                                     <div class="installment-option installment-tamara">
                                                         <div class="installment-content">
                                                             <div class="installment-logo">
-                                                                <img src="~/Images/tamara.png" alt="@Localizer["Tamara"]" class="installment-logo-img" />
+                                                                <img src="~/Images/tamara.png" alt="@Localizer["Tamara"]" class="installment-logo-img" width="72" height="24" />
                                                             </div>
                                                             <div class="installment-text">
                                                                 <div>@Html.Raw(tamaraText)</div>
@@ -304,7 +329,7 @@
                                                     <div class="installment-option installment-tamara">
                                                         <div class="installment-content">
                                                             <div class="installment-logo">
-                                                                <img src="~/Images/tamara.png" alt="@Localizer["Tamara"]" class="installment-logo-img" />
+                                                                <img src="~/Images/tamara.png" alt="@Localizer["Tamara"]" class="installment-logo-img" width="72" height="24" />
                                                             </div>
                                                             <div class="installment-text">
                                                                 <div>@Html.Raw(tamaraText)</div>
@@ -320,13 +345,13 @@
                                 {
                                     <div class="product-price-with-installments">
                                         <div class="product-price-section-main">
-                                            <div id="variantFlashSaleBadge" style="display: none; background: linear-gradient(135deg, #FF6B35 0%, #f59e0b 100%); color: white; padding: 0.3rem 0.8rem; border-radius: 5px; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
-                                                <i class="bi bi-lightning-fill"></i> @Localizer["FLASHSALE"]
+                                            <div id="variantFlashSaleBadge" class="flash-sale-badge-inline" style="display: none;">
+                                                <i class="bi bi-lightning-fill" aria-hidden="true"></i> @Localizer["FlashSale"]
                                             </div>
                                             <p class="product-old-price" id="variantListPrice" style="display: none;"></p>
                                             <p class="product-new-price" id="variantPrice">@Localizer["SelectOptions"]</p>
-                                            <div id="variantSavings" style="display: none; color: #10b981; font-size: 0.9rem; margin-top: 0.3rem;">
-                                                <i class="bi bi-tag-fill"></i> <span id="variantSavingsText"></span>
+                                            <div id="variantSavings" class="pd-you-save" style="display: none;">
+                                                <i class="bi bi-tag-fill" aria-hidden="true"></i> <span id="variantSavingsText"></span>
                                             </div>
                                             <p class="product-tax-notice">@Localizer["AdditionalTaxMayApply"]</p>
                                             <div id="stockInfo" class="stock-info mt-2" style="display: none;">
@@ -340,20 +365,20 @@
                                             @* Free Delivery Information for Variants *@
                                             @if (Model.product.AllowFreeDelivery)
                                             {
-                                                <div id="variantFreeDeliveryInfo" class="free-delivery-info mt-3 p-3" style="background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%); border: 2px solid #7BC043; border-radius: 8px;">
+                                                <div id="variantFreeDeliveryInfo" class="free-delivery-info mt-3 p-3">
                                                     <div class="d-flex align-items-center">
-                                                        <i class="bi bi-truck text-success me-2" style="font-size: 1.5rem;"></i>
+                                                        <i class="bi bi-truck text-success me-2" aria-hidden="true"></i>
                                                         <div>
                                                             <strong class="text-success">@Localizer["FreeDeliveryAvailable"]</strong>
                                                             @if (Model.product.FreeDeliveryMinimumAmount > 0)
                                                             {
-                                                                <p class="mb-0 mt-1" style="font-size: 0.9rem; color: #333;">
+                                                                <p class="mb-0 mt-1">
                                                                     @string.Format(Localizer["FreeDeliveryMinimumAmountMessage"].Value ?? "Free delivery on orders above {0} AED", Model.product.FreeDeliveryMinimumAmount.ToString("N2"))
                                                                 </p>
                                                             }
                                                             else
                                                             {
-                                                                <p class="mb-0 mt-1" style="font-size: 0.9rem; color: #333;">
+                                                                <p class="mb-0 mt-1">
                                                                     @Localizer["FreeDeliveryNoMinimumMessage"]
                                                                 </p>
                                                             }
@@ -370,7 +395,7 @@
                                                 <div class="installment-option installment-tabby">
                                                     <div class="installment-content">
                                                         <div class="installment-logo">
-                                                            <img src="~/Images/tappy.png" alt="@Localizer["Tabby"]" class="installment-logo-img" />
+                                                            <img src="~/Images/tappy.png" alt="@Localizer["Tabby"]" class="installment-logo-img" width="72" height="24" />
                                                         </div>
                                                         <div class="installment-text">
                                                             <span id="variantTabbyText"></span>
@@ -384,7 +409,7 @@
                                                     <div class="installment-option installment-tamara">
                                                         <div class="installment-content">
                                                             <div class="installment-logo">
-                                                                <img src="~/Images/tamara.png" alt="@Localizer["Tamara"]" class="installment-logo-img" />
+                                                                <img src="~/Images/tamara.png" alt="@Localizer["Tamara"]" class="installment-logo-img" width="72" height="24" />
                                                             </div>
                                                             <div class="installment-text">
                                                                 <div id="variantTamaraText"></div>
@@ -399,7 +424,7 @@
                                                     <div class="installment-option installment-tamara">
                                                         <div class="installment-content">
                                                             <div class="installment-logo">
-                                                                <img src="~/Images/tamara.png" alt="@Localizer["Tamara"]" class="installment-logo-img" />
+                                                                <img src="~/Images/tamara.png" alt="@Localizer["Tamara"]" class="installment-logo-img" width="72" height="24" />
                                                             </div>
                                                             <div class="installment-text">
                                                                 <div id="variantTamaraText"></div>
@@ -456,19 +481,19 @@
 
                             <div class="product-actions">
                                 <div class="quantity-selector-wrapper">
-                                    <label class="quantity-label">@Localizer["Quantity"]:</label>
-                                    <div class="quantity-selector">
-                                        <button type="button" class="quantity-btn quantity-btn-minus" id="quantityDecrease" aria-label="Decrease quantity">
-                                            <i class="bi bi-dash-lg"></i>
+                                    <label class="quantity-label" for="quantityInput">@Localizer["Quantity"]:</label>
+                                    <div class="quantity-selector" dir="ltr">
+                                        <button type="button" class="quantity-btn quantity-btn-minus" id="quantityDecrease" aria-label="@Localizer["DecreaseQuantity"]">
+                                            <i class="bi bi-dash-lg" aria-hidden="true"></i>
                                         </button>
-                                        <input type="number" asp-for="Count" value="1" min="1" class="product-quantity-input" id="quantityInput" readonly>
-                                        <button type="button" class="quantity-btn quantity-btn-plus" id="quantityIncrease" aria-label="Increase quantity">
-                                            <i class="bi bi-plus-lg"></i>
+                                        <input type="number" asp-for="Count" value="1" min="1" class="product-quantity-input" id="quantityInput" aria-label="@Localizer["Quantity"]" inputmode="numeric" readonly>
+                                        <button type="button" class="quantity-btn quantity-btn-plus" id="quantityIncrease" aria-label="@Localizer["IncreaseQuantity"]">
+                                            <i class="bi bi-plus-lg" aria-hidden="true"></i>
                                         </button>
                                     </div>
                                 </div>
-                                <button type="submit" class="add-to-cart-button mt-4" id="addToCartBtn" @(Model.product.ProductType == IdealWeightNutrition.Models.ProductType.Variable ? "disabled" : "")>
-                                    <i class="bi bi-cart-plus"></i>
+                                <button type="submit" class="add-to-cart-button" id="addToCartBtn" @(Model.product.ProductType == IdealWeightNutrition.Models.ProductType.Variable ? "disabled" : "")>
+                                    <i class="bi bi-cart-plus" aria-hidden="true"></i>
                                     <span>@Localizer["AddToCart"]</span>
                                 </button>
                             </div>
@@ -484,28 +509,28 @@
                                     : $"Hello! I'm interested in this product: {productName}\n{productUrl}";
                                 var whatsAppProductUrl = $"https://wa.me/{whatsAppPhone}?text={Uri.EscapeDataString(whatsAppMsg)}";
                             }
-                            <div class="mt-3 mb-3">
+                            <div class="pd-whatsapp-wrap">
                                 <a href="@whatsAppProductUrl" 
                                    target="_blank" 
                                    class="whatsapp-product-btn"
                                    rel="noopener noreferrer">
-                                    <i class="bi bi-whatsapp"></i>
+                                    <i class="bi bi-whatsapp" aria-hidden="true"></i>
                                     <span>@Localizer["AskAboutProduct"]</span>
                                 </a>
+                            </div>
+                            <div class="pd-trust-row">
+                                <span><i class="bi bi-shield-check" aria-hidden="true"></i>@Localizer["SecurePaymentMethods"]</span>
                             </div>
                             
                             <!-- Info Image Section - Mobile only (after add to cart) -->
                             @if (infoImage != null && !string.IsNullOrEmpty(infoImage.ImageUrl))
                             {
                                 <div class="product-info-image-section-mobile mt-3 mb-3 d-md-none">
-                                    <h5 class="mb-3" style="color: #1976D2; font-weight: 600;">
-                                        <i class="bi bi-info-circle me-2"></i>@Localizer["ProductInformation"]
+                                    <h5 class="mb-3">
+                                        <i class="bi bi-info-circle me-2" aria-hidden="true"></i>@Localizer["ProductInformation"]
                                     </h5>
-                                    <div class="info-image-container" style="border: 2px solid #dee2e6; border-radius: 8px; padding: 10px; background: #f8f9fa;">
-                                        <img class="img-fluid" 
-                                             src="@infoImage.ImageUrl" 
-                                             alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(Model.product.TitleAr) ? Model.product.TitleAr : Model.product.Title) - @Localizer["ProductInformation"]"
-                                             style="max-width: 100%; height: auto; border-radius: 4px;" />
+                                    <div class="info-image-container">
+                                        <img class="img-fluid" src="@infoImage.ImageUrl" alt="@productTitle - @Localizer["ProductInformation"]" loading="lazy" />
                                     </div>
                                 </div>
                             }
@@ -623,32 +648,33 @@
                             }
                         </div>
                     </div>
-                </div>
             </div>
         </div>
     </div>
 </form>
 
 <!-- Reviews Section (OUTSIDE the Add to Cart form) -->
-<div class="container my-4">
+<div class="container my-4 pd-reviews-wrap">
     <div class="row">
         <div class="col-12">
                 <div class="product-reviews-section mt-5">
                     <div class="reviews-header">
-                        <h4>
-                            <i class="bi bi-star-fill me-2"></i>
+                        <h4 class="reviews-title">
+                            <i class="bi bi-star-fill" aria-hidden="true"></i>
                             @Localizer["CustomerReviews"]
                         </h4>
-                        <div class="reviews-rating-summary">
-                            <div class="rating-stars" id="averageRating">
-                                <i class="bi bi-star"></i>
-                                <i class="bi bi-star"></i>
-                                <i class="bi bi-star"></i>
-                                <i class="bi bi-star"></i>
-                                <i class="bi bi-star"></i>
-                            </div>
+                        <div class="reviews-rating-summary @((productReviewCount ?? 0) == 0 ? "is-empty" : "")">
                             <span class="rating-average" id="averageRatingText">0.0</span>
-                            <span class="rating-count">(<span id="reviewCount">0</span> @Localizer["Reviews"])</span>
+                            <div class="reviews-rating-meta">
+                                <div class="rating-stars" id="averageRating">
+                                    <i class="bi bi-star"></i>
+                                    <i class="bi bi-star"></i>
+                                    <i class="bi bi-star"></i>
+                                    <i class="bi bi-star"></i>
+                                    <i class="bi bi-star"></i>
+                                </div>
+                                <span class="rating-count">(<span id="reviewCount">0</span> @Localizer["Reviews"])</span>
+                            </div>
                         </div>
                     </div>
 
@@ -689,8 +715,8 @@
                                     <small class="text-muted">@Localizer["MinimumCharacters"]: 3</small>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-send me-2"></i>
+                                <button type="submit" class="btn btn-primary review-submit-btn">
+                                    <i class="bi bi-send" aria-hidden="true"></i>
                                     @Localizer["SubmitReview"]
                                 </button>
                             </form>
@@ -851,7 +877,7 @@
             outOfStockMsg: '@Html.Raw(Localizer["OutOfStock"] ?? "This product is out of stock")',
             installmentTabby: '@Html.Raw(Localizer["InstallmentTabby"])',
             installmentTamara: '@Html.Raw(Localizer["InstallmentTamara"])',
-            flashSale: '@Html.Raw(Localizer["FLASHSALE"] ?? "FLASH SALE")',
+            flashSale: '@Html.Raw(Localizer["FlashSale"] ?? "FLASH SALE")',
             youSave: '@Html.Raw(Localizer["YouSave"] ?? "You Save")',
             expiryDate: '@Html.Raw(Localizer["ExpiryDate"])'
         };
@@ -1678,6 +1704,11 @@
                     $('#averageRatingText').text(data.averageRating.toFixed(1));
                     $('#reviewCount').text(data.reviewCount);
                     displayStars(data.averageRating, '#averageRating');
+                    if (data.reviewCount > 0) {
+                        $('.reviews-rating-summary').removeClass('is-empty');
+                    } else {
+                        $('.reviews-rating-summary').addClass('is-empty');
+                    }
                 })
                 .catch(error => {
                     console.error('Error loading rating:', error);
@@ -1706,16 +1737,20 @@
 
         function createReviewHTML(review) {
             const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+            const initial = (review.userName || '?').trim().charAt(0).toUpperCase();
             const verifiedBadge = review.isVerifiedPurchase 
-                ? '<span class="badge bg-success ms-2"><i class="bi bi-check-circle"></i> @Localizer["VerifiedPurchase"]</span>' 
+                ? '<span class="badge review-verified"><i class="bi bi-check-circle" aria-hidden="true"></i> @Localizer["VerifiedPurchase"]</span>' 
                 : '';
             
             return `
-                <div class="review-item">
+                <article class="review-item">
                     <div class="review-header">
                         <div class="review-user">
-                            <strong>${review.userName}</strong>
-                            ${verifiedBadge}
+                            <span class="review-avatar" aria-hidden="true">${initial}</span>
+                            <div class="review-user-text">
+                                <strong>${review.userName}</strong>
+                                ${verifiedBadge}
+                            </div>
                         </div>
                         <div class="review-meta">
                             <span class="review-rating">${stars}</span>
@@ -1725,7 +1760,7 @@
                     <div class="review-comment">
                         ${review.comment}
                     </div>
-                </div>
+                </article>
             `;
         }
 

@@ -2,264 +2,198 @@
 
 @{
     ViewData["Title"] = Localizer["CreatePromoCode"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container py-4">
-    <div class="row">
-        <div class="col-lg-10 offset-lg-1">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-plus-circle-fill me-3" style="font-size: 2rem;"></i>
-                        <div>
-                            <h2 class="mb-0">@Localizer["CreateNewPromoCode"]</h2>
-                            <small class="opacity-75">@Localizer["EnterUniqueCode"]</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-4">
-                    <form asp-action="Create" method="post">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
-                        
-                        <!-- Code and Discount Type -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-tag-fill text-primary me-2"></i>@Localizer["Code"]
-                                </label>
-                                <input asp-for="Code" class="form-control form-control-lg text-uppercase" placeholder="@Localizer["ExampleSAVE20"]" />
-                                <span asp-validation-for="Code" class="text-danger"></span>
-                            </div>
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-form-wrapper">
+            <div class="admin-form-header">
+                <h1 class="admin-form-title">@Localizer["CreateNewPromoCode"]</h1>
+                <p class="text-muted mb-0">@Localizer["EnterUniqueCode"]</p>
+            </div>
+            <div class="admin-form-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
+                    <section class="admin-form-section">
+                        <h2>@Localizer["PromoCodeDetails"]</h2>
+                        <div class="row">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-percent text-success me-2"></i>@Localizer["DiscountType"]
-                                </label>
-                                <select asp-for="DiscountType" class="form-select form-select-lg" id="discountType">
-                                    <option value="1">@Localizer["Percentage"]</option>
-                                    <option value="2">@Localizer["FixedAmount"]</option>
-                                </select>
-                                <span asp-validation-for="DiscountType" class="text-danger"></span>
+                                <div class="admin-form-group">
+                                    <label asp-for="Code" class="admin-form-label">@Localizer["Code"] <span class="text-danger">*</span></label>
+                                    <input asp-for="Code" class="admin-form-control text-uppercase" autocomplete="off" placeholder="@Localizer["ExampleSAVE20"]" />
+                                    <span asp-validation-for="Code" class="text-danger"></span>
+                                </div>
                             </div>
-                        </div>
-
-                        <!-- Description -->
-                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="DiscountType" class="admin-form-label">@Localizer["DiscountType"]</label>
+                                    <select asp-for="DiscountType" class="admin-form-control" id="discountType">
+                                        <option value="1">@Localizer["Percentage"]</option>
+                                        <option value="2">@Localizer["FixedAmount"]</option>
+                                    </select>
+                                    <span asp-validation-for="DiscountType" class="text-danger"></span>
+                                </div>
+                            </div>
                             <div class="col-12">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-file-text text-info me-2"></i>@Localizer["Description"]
-                                </label>
-                                <textarea asp-for="Description" class="form-control" rows="3" placeholder="@Localizer["Example20PercentOff"]"></textarea>
-                                <span asp-validation-for="Description" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <!-- Discount Value and Minimum Order -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-cash-coin text-warning me-2"></i>@Localizer["DiscountValue"]
-                                </label>
-                                <div class="input-group input-group-lg">
-                                    <input asp-for="DiscountValue" class="form-control" type="number" step="0.01" />
-                                    <span class="input-group-text bg-primary text-white fw-bold" id="discountSymbol">%</span>
+                                <div class="admin-form-group">
+                                    <label asp-for="Description" class="admin-form-label">@Localizer["Description"]</label>
+                                    <textarea asp-for="Description" class="admin-form-control" rows="3" placeholder="@Localizer["Example20PercentOff"]"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
                                 </div>
-                                <span asp-validation-for="DiscountValue" class="text-danger"></span>
                             </div>
-
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-cart-check text-danger me-2"></i>@Localizer["MinimumOrder"]
-                                </label>
-                                <input asp-for="MinimumOrderAmount" class="form-control form-control-lg" type="number" step="0.01" placeholder="0.00" />
-                                <span asp-validation-for="MinimumOrderAmount" class="text-danger"></span>
-                                <small class="form-text text-muted">@Localizer["LeaveEmptyForNoMinimum"]</small>
+                                <div class="admin-form-group">
+                                    <label asp-for="DiscountValue" class="admin-form-label">@Localizer["DiscountValue"]</label>
+                                    <div class="input-group">
+                                        <input asp-for="DiscountValue" class="admin-form-control" type="number" step="0.01" />
+                                        <span class="input-group-text" id="discountSymbol">%</span>
+                                    </div>
+                                    <span asp-validation-for="DiscountValue" class="text-danger"></span>
+                                </div>
                             </div>
-                        </div>
-
-                        <!-- Start and End Date -->
-                        <div class="row mb-4">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-calendar-check text-success me-2"></i>@Localizer["StartDate"]
-                                </label>
-                                <input asp-for="StartDate" class="form-control form-control-lg" type="datetime-local" />
-                                <span asp-validation-for="StartDate" class="text-danger"></span>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-calendar-x text-danger me-2"></i>@Localizer["EndDate"]
-                                </label>
-                                <input asp-for="EndDate" class="form-control form-control-lg" type="datetime-local" />
-                                <span asp-validation-for="EndDate" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <!-- Usage Limits -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-arrow-repeat text-primary me-2"></i>@Localizer["UsageLimit"]
-                                </label>
-                                <input asp-for="UsageLimit" class="form-control form-control-lg" type="number" placeholder="@Localizer["Unlimited"]" />
-                                <span asp-validation-for="UsageLimit" class="text-danger"></span>
-                                <small class="form-text text-muted">@Localizer["TotalTimesCodeCanBeUsed"]</small>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-person-badge text-warning me-2"></i>@Localizer["PerUserLimit"]
-                                </label>
-                                <input asp-for="UsageLimitPerUser" class="form-control form-control-lg" type="number" placeholder="1" />
-                                <span asp-validation-for="UsageLimitPerUser" class="text-danger"></span>
-                                <small class="form-text text-muted">@Localizer["TimesEachUserCanUseCode"]</small>
-                            </div>
-                        </div>
-
-                        <!-- Maximum Discount and Active Status -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-shield-check text-info me-2"></i>@Localizer["MaximumDiscount"]
-                                </label>
-                                <input asp-for="MaximumDiscountAmount" class="form-control form-control-lg" type="number" step="0.01" placeholder="@Localizer["NoLimit"]" />
-                                <span asp-validation-for="MaximumDiscountAmount" class="text-danger"></span>
-                                <small class="form-text text-muted">@Localizer["MaximumDiscountForPercentageCodes"]</small>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold d-block">
-                                    <i class="bi bi-toggle-on text-success me-2"></i>@Localizer["Status"]
-                                </label>
-                                <div class="form-check form-switch mt-3">
-                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" style="width: 3rem; height: 1.5rem;" />
-                                    <label class="form-check-label ms-2 fw-bold">@Localizer["Active"]</label>
+                                <div class="admin-form-group">
+                                    <label asp-for="MinimumOrderAmount" class="admin-form-label">@Localizer["MinimumOrder"]</label>
+                                    <input asp-for="MinimumOrderAmount" class="admin-form-control" type="number" step="0.01" placeholder="0.00" />
+                                    <small class="form-text text-muted">@Localizer["LeaveEmptyForNoMinimum"]</small>
+                                    <span asp-validation-for="MinimumOrderAmount" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
+                    </section>
 
-                        <!-- Exclude Discounted Items -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="form-check form-switch">
-                                    <input asp-for="ExcludeDiscountedItems" class="form-check-input" type="checkbox" id="excludeDiscountedItems" style="width: 3rem; height: 1.5rem;" />
-                                    <label class="form-check-label ms-2 fw-bold d-flex" for="excludeDiscountedItems">
-                                        <i class="bi bi-x-circle text-danger me-2"></i>@Localizer["ExcludeItemsWithExistingDiscounts"]
-                                    </label>
+                    <section class="admin-form-section" data-schedule-from-inputs>
+                        <h2>@Localizer["Schedule"]</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="StartDate" class="admin-form-label">@Localizer["StartDate"]</label>
+                                    <input asp-for="StartDate" class="admin-form-control" type="datetime-local" />
+                                    <small class="form-text text-muted admin-schedule-hint">@Localizer["TimezoneAsiaDubai"]</small>
+                                    <span asp-validation-for="StartDate" class="text-danger"></span>
                                 </div>
-                                <small class="form-text text-muted ms-5">
-                                    @Localizer["WhenEnabledPromoCodeWillNotApplyToItemsWithFlashSalesComboOffersOrListPriceDiscounts"]
-                                </small>
-                                <div class="alert alert-info mt-2">
-                                    <i class="bi bi-info-circle me-2"></i>
-                                    <strong>@Localizer["Note"]:</strong> @Localizer["YouCanAddExcludedProductsAfterCreatingThePromoCode"]
+                            </div>
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="EndDate" class="admin-form-label">@Localizer["EndDate"]</label>
+                                    <input asp-for="EndDate" class="admin-form-control" type="datetime-local" />
+                                    <small class="form-text text-muted admin-schedule-hint">@Localizer["TimezoneAsiaDubai"]</small>
+                                    <span asp-validation-for="EndDate" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
+                        <span data-schedule-badge
+                              data-badge-class="badge admin-schedule-live"
+                              data-enabled="true"
+                              data-start=""
+                              data-end=""
+                              data-label-active="@Localizer["Active"].Value"
+                              data-label-scheduled="@Localizer["Scheduled"].Value"
+                              data-label-ended="@Localizer["Expired"].Value"
+                              data-label-inactive="@Localizer["Inactive"].Value"
+                              class="badge admin-schedule-live bg-secondary">@Localizer["Scheduled"]</span>
+                    </section>
 
-                        <!-- Exclude All Services -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="card border-info">
-                                    <div class="card-body">
-                                        <div class="form-check form-switch">
-                                            <input asp-for="ExcludeAllServices" class="form-check-input" type="checkbox" id="excludeAllServices" style="width: 3rem; height: 1.5rem;" checked />
-                                            <label class="form-check-label ms-2 fw-bold d-flex" for="excludeAllServices">
-                                                <i class="bi bi-briefcase text-info me-2"></i>@Localizer["ExcludeAllServices"]
-                                            </label>
-                                            <small class="form-text text-muted d-block ms-5 mt-2">@Localizer["ExcludeAllServicesDescription"]</small>
-                                        </div>
+                    <section class="admin-form-section">
+                        <h2>@Localizer["UsageStatistics"]</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="UsageLimit" class="admin-form-label">@Localizer["UsageLimit"]</label>
+                                    <input asp-for="UsageLimit" class="admin-form-control" type="number" placeholder="@Localizer["Unlimited"]" />
+                                    <small class="form-text text-muted">@Localizer["TotalTimesCodeCanBeUsed"]</small>
+                                    <span asp-validation-for="UsageLimit" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="UsageLimitPerUser" class="admin-form-label">@Localizer["PerUserLimit"]</label>
+                                    <input asp-for="UsageLimitPerUser" class="admin-form-control" type="number" placeholder="1" />
+                                    <small class="form-text text-muted">@Localizer["TimesEachUserCanUseCode"]</small>
+                                    <span asp-validation-for="UsageLimitPerUser" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="MaximumDiscountAmount" class="admin-form-label">@Localizer["MaximumDiscount"]</label>
+                                    <input asp-for="MaximumDiscountAmount" class="admin-form-control" type="number" step="0.01" placeholder="@Localizer["NoLimit"]" />
+                                    <small class="form-text text-muted">@Localizer["MaximumDiscountForPercentageCodes"]</small>
+                                    <span asp-validation-for="MaximumDiscountAmount" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <div class="form-check form-switch">
+                                        <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                                        <label asp-for="IsActive" class="form-check-label">@Localizer["Active"]</label>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </section>
 
-                        <hr class="my-4" />
-
-                        <!-- Action Buttons -->
-                        <div class="row">
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-lg btn-primary px-5 me-2">
-                                    <i class="bi bi-check-circle me-2"></i>@Localizer["CreatePromoCode"]
-                                </button>
-                                <a asp-action="Index" class="btn btn-lg btn-outline-secondary px-4">
-                                    <i class="bi bi-x-circle me-2"></i>@Localizer["Cancel"]
-                                </a>
+                    <section class="admin-form-section">
+                        <h2>@Localizer["DiscountExclusions"]</h2>
+                        <div class="admin-form-group">
+                            <div class="form-check form-switch">
+                                <input asp-for="ExcludeDiscountedItems" class="form-check-input" type="checkbox" id="excludeDiscountedItems" />
+                                <label class="form-check-label" for="excludeDiscountedItems">@Localizer["ExcludeItemsWithExistingDiscounts"]</label>
                             </div>
+                            <small class="form-text text-muted">@Localizer["WhenEnabledPromoCodeWillNotApplyToItemsWithFlashSalesComboOffersOrListPriceDiscounts"]</small>
                         </div>
-                    </form>
-                </div>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2" aria-hidden="true"></i>
+                            @Localizer["YouCanAddExcludedProductsAfterCreatingThePromoCode"]
+                        </div>
+                        <div class="admin-form-group">
+                            <div class="form-check form-switch">
+                                <input asp-for="ExcludeAllServices" class="form-check-input" type="checkbox" id="excludeAllServices" checked />
+                                <label class="form-check-label" for="excludeAllServices">@Localizer["ExcludeAllServices"]</label>
+                            </div>
+                            <small class="form-text text-muted">@Localizer["ExcludeAllServicesDescription"]</small>
+                        </div>
+                    </section>
+
+                    <div class="form-actions">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>@Localizer["Cancel"]
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2" aria-hidden="true"></i>@Localizer["CreatePromoCode"]
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    .bg-gradient {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .bg-gradient::before {
-        content: "";
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        animation: pulse 3s ease-in-out infinite;
-    }
-    
-    @@keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 0.5; }
-        50% { transform: scale(1.1); opacity: 0.8; }
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-    }
-
-    .card {
-        border-radius: 15px;
-    }
-
-    .card-header {
-        border-radius: 15px 15px 0 0 !important;
-    }
-
-    .form-check-input:checked {
-        background-color: #667eea;
-        border-color: #667eea;
-    }
-</style>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_ValidationScriptsPartial" />
     <script>
-        // Update discount symbol based on discount type
-        $('#discountType').change(function() {
-            var symbol = $(this).val() == '1' ? '%' : 'AED';
-            $('#discountSymbol').text(symbol);
+        document.getElementById('discountType')?.addEventListener('change', function () {
+            document.getElementById('discountSymbol').textContent = this.value === '1' ? '%' : 'AED';
         });
-
-        // Convert code to uppercase
-        $('input[name="Code"]').on('input', function() {
-            $(this).val($(this).val().toUpperCase());
+        document.querySelector('input[name="Code"]')?.addEventListener('input', function () {
+            this.value = this.value.toUpperCase();
         });
-
-        // Set minimum dates
         var now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         var nowString = now.toISOString().slice(0, 16);
-        $('input[name="StartDate"]').attr('min', nowString).val(nowString);
-        
+        var startInput = document.querySelector('input[name="StartDate"]');
+        var endInput = document.querySelector('input[name="EndDate"]');
+        if (startInput) {
+            startInput.min = nowString;
+            startInput.value = nowString;
+        }
         var tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         tomorrow.setMinutes(tomorrow.getMinutes() - tomorrow.getTimezoneOffset());
-        var tomorrowString = tomorrow.toISOString().slice(0, 16);
-        $('input[name="EndDate"]').attr('min', nowString).val(tomorrowString);
+        if (endInput) {
+            endInput.min = nowString;
+            endInput.value = tomorrow.toISOString().slice(0, 16);
+        }
     </script>
 }

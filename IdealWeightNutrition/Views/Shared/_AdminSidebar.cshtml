@@ -1,0 +1,69 @@
+@using IdealWeightNutrition.Utility
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+@{
+    var activeController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var activeAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+<aside class="iw-admin-sidebar offcanvas-xl offcanvas-start" tabindex="-1" id="adminSidebar" aria-labelledby="adminSidebarTitle">
+    <div class="offcanvas-header">
+        <h2 class="offcanvas-title" id="adminSidebarTitle">@Localizer["Management"]</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#adminSidebar" aria-label="@Localizer["Close"]"></button>
+    </div>
+    <div class="offcanvas-body">
+    <nav aria-label="@Localizer["Management"]">
+        <h2 class="d-none d-xl-block">@Localizer["Management"]</h2>
+        <ul>
+            <li>
+                <h2>@Localizer["AdminNavOperations"]</h2>
+                <ul>
+                    <li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" aria-current="@(activeController == "Dashboard" ? "page" : null)" title="@Localizer["Dashboard"]"><i class="bi bi-speedometer2" aria-hidden="true"></i><span>@Localizer["Dashboard"]</span></a></li>
+                    <li><a asp-area="Admin" asp-controller="Order" asp-action="Index" aria-current="@(activeController == "Order" ? "page" : null)" title="@Localizer["Orders"]"><i class="bi bi-receipt" aria-hidden="true"></i><span>@Localizer["Orders"]</span><span class="iw-admin-nav-badge" id="adminNavPendingBadge" hidden></span></a></li>
+                    <li><a asp-area="Admin" asp-controller="ReturnRequest" asp-action="Index" aria-current="@(activeController == "ReturnRequest" ? "page" : null)"><i class="bi bi-arrow-return-left" aria-hidden="true"></i><span>@Localizer["ReturnRequests"]</span></a></li>
+                    <li><a asp-area="Admin" asp-controller="Review" asp-action="Index" aria-current="@(activeController == "Review" ? "page" : null)"><i class="bi bi-star" aria-hidden="true"></i><span>@Localizer["Reviews"]</span></a></li>
+                </ul>
+            </li>
+            <li>
+                <h2>@Localizer["AdminNavCatalog"]</h2>
+                <ul>
+                    <li><a asp-area="Admin" asp-controller="Product" asp-action="Index" aria-current="@(activeController == "Product" ? "page" : null)"><i class="bi bi-box-seam" aria-hidden="true"></i><span>@Localizer["Product"]</span></a></li>
+                    <li><a asp-area="Admin" asp-controller="Categries" asp-action="Index" aria-current="@(activeController == "Categries" ? "page" : null)"><i class="bi bi-grid" aria-hidden="true"></i><span>@Localizer["Category"]</span></a></li>
+                    <li><a asp-area="Admin" asp-controller="Brand" asp-action="Index" aria-current="@(activeController == "Brand" ? "page" : null)"><i class="bi bi-tag" aria-hidden="true"></i><span>@Localizer["Brands"]</span></a></li>
+                </ul>
+            </li>
+            <li>
+                <h2>@Localizer["AdminNavPromotions"]</h2>
+                <ul>
+                    <li><a asp-area="Admin" asp-controller="ComboOffer" asp-action="Index" aria-current="@(activeController == "ComboOffer" ? "page" : null)"><i class="bi bi-boxes" aria-hidden="true"></i><span>@Localizer["ComboOffers"]</span></a></li>
+                    <li><a asp-area="Admin" asp-controller="FlashSale" asp-action="Index" aria-current="@(activeController == "FlashSale" ? "page" : null)"><i class="bi bi-lightning-charge" aria-hidden="true"></i><span>@Localizer["FlashSales"]</span></a></li>
+                    <li><a asp-area="Admin" asp-controller="PromoCode" asp-action="Index" aria-current="@(activeController == "PromoCode" ? "page" : null)"><i class="bi bi-ticket-perforated" aria-hidden="true"></i><span>@Localizer["PromoCodes"]</span></a></li>
+                </ul>
+            </li>
+            <li>
+                <h2>@Localizer["AdminNavServices"]</h2>
+                <ul>
+                    <li><a asp-area="Admin" asp-controller="ServiceSubscription" asp-action="Index" aria-current="@(activeController == "ServiceSubscription" && activeAction != "Purchases" && activeAction != "PurchaseDetails" ? "page" : null)"><i class="bi bi-briefcase" aria-hidden="true"></i><span>@Localizer["ServiceSubscriptions"]</span></a></li>
+                    <li><a asp-area="Admin" asp-controller="ServiceSubscription" asp-action="Purchases" aria-current="@(activeController == "ServiceSubscription" && (activeAction == "Purchases" || activeAction == "PurchaseDetails") ? "page" : null)"><i class="bi bi-receipt-cutoff" aria-hidden="true"></i><span>@Localizer["ServicePurchases"]</span></a></li>
+                    <li><a asp-area="Admin" asp-controller="ServiceOffer" asp-action="Index" aria-current="@(activeController == "ServiceOffer" ? "page" : null)"><i class="bi bi-gift" aria-hidden="true"></i><span>@Localizer["ServiceOffers"]</span></a></li>
+                </ul>
+            </li>
+            <li>
+                <h2>@Localizer["AdminNavContent"]</h2>
+                <ul>
+                    <li><a asp-area="Admin" asp-controller="Blog" asp-action="Index" aria-current="@(activeController == "Blog" ? "page" : null)"><i class="bi bi-journal-text" aria-hidden="true"></i><span>@Localizer["Blog"]</span></a></li>
+                    <li><a asp-area="Admin" asp-controller="VideoBanner" asp-action="Index" aria-current="@(activeController == "VideoBanner" ? "page" : null)"><i class="bi bi-play-circle" aria-hidden="true"></i><span>@Localizer["VideoBanner"]</span></a></li>
+                </ul>
+            </li>
+            <li>
+                <h2>@Localizer["AdminNavSettings"]</h2>
+                <ul>
+                    <li><a asp-area="Admin" asp-controller="City" asp-action="Index" aria-current="@((activeController == "City" || activeController == "RemoteArea") ? "page" : null)"><i class="bi bi-geo-alt" aria-hidden="true"></i><span>@Localizer["CitiesAndDeliveryAreas"]</span></a></li>
+                    <li><a asp-area="Admin" asp-controller="Companies" asp-action="Index" aria-current="@(activeController == "Companies" ? "page" : null)"><i class="bi bi-building" aria-hidden="true"></i><span>@Localizer["Companies"]</span></a></li>
+                    <li><a asp-area="Admin" asp-controller="NewsletterSubscription" asp-action="Index" aria-current="@(activeController == "NewsletterSubscription" ? "page" : null)"><i class="bi bi-envelope" aria-hidden="true"></i><span>@Localizer["NewsletterSubscriptions"]</span></a></li>
+                    <li><a asp-area="Admin" asp-controller="User" asp-action="CreateAdminUser" aria-current="@(activeController == "User" ? "page" : null)"><i class="bi bi-person-plus" aria-hidden="true"></i><span>@Localizer["CreateAdminUser"]</span></a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    </div>
+</aside>

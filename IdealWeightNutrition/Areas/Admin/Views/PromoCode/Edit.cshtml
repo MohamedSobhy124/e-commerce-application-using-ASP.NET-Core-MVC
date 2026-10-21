@@ -4,64 +4,61 @@
     ViewData["Title"] = Localizer["EditPromoCode"];
 }
 
-<div class="container py-4">
-    <div class="row">
-        <div class="col-lg-10 offset-lg-1">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-pencil-square me-3" style="font-size: 2rem;"></i>
-                            <div>
-                                <h2 class="mb-0">@Localizer["EditPromoCode"]</h2>
-                                <small class="opacity-75">@Localizer["Code"]: <strong>@Model.Code</strong></small>
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <span class="badge @(Model.IsActive ? "bg-success" : "bg-secondary") fs-6">
-                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>
-                                @(Model.IsActive ? Localizer["Active"] : Localizer["Inactive"])
-                            </span>
-                        </div>
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-form-wrapper">
+            <div class="admin-form-header">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                    <div>
+                        <h1 class="admin-form-title">@Localizer["EditPromoCode"]</h1>
+                        <p class="text-muted mb-0">@Localizer["Code"]: <strong>@Model.Code</strong></p>
                     </div>
+                    <span id="promoHeaderStatus"
+                          data-schedule-badge
+                          data-badge-class="badge admin-schedule-live"
+                          data-enabled="@Model.IsActive.ToString().ToLower()"
+                          data-start="@Model.StartDate.ToString("yyyy-MM-ddTHH:mm:ss")"
+                          data-end="@Model.EndDate.ToString("yyyy-MM-ddTHH:mm:ss")"
+                          data-label-active="@Localizer["Active"].Value"
+                          data-label-scheduled="@Localizer["Scheduled"].Value"
+                          data-label-ended="@Localizer["Expired"].Value"
+                          data-label-inactive="@Localizer["Inactive"].Value"
+                          class="badge admin-schedule-live bg-secondary">@Localizer["Inactive"]</span>
                 </div>
-                <div class="card-body p-4">
-                    <!-- Usage Statistics Card -->
-                    <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
-                        <i class="bi bi-info-circle-fill me-3" style="font-size: 1.5rem;"></i>
-                        <div>
-                            <strong>@Localizer["UsageStatistics"]:</strong>
-                            @Localizer["Currently used"]: <strong>@Model.TimesUsed</strong> @Localizer["times"]
-                            @if (Model.UsageLimit.HasValue)
-                            {
-                                <span> / @Model.UsageLimit @Localizer["total"]</span>
-                            }
-                        </div>
-                    </div>
+            </div>
+            <div class="admin-form-body">
+                <div class="alert alert-info mb-4" role="status">
+                    <strong>@Localizer["UsageStatistics"]:</strong>
+                    @Localizer["Currently used"] <strong>@Model.TimesUsed</strong> @Localizer["times"]
+                    @if (Model.UsageLimit.HasValue)
+                    {
+                        <span>/ @Model.UsageLimit</span>
+                    }
+                </div>
 
-                    <form asp-action="Edit" method="post">
+                <form asp-action="Edit" method="post">
                         <input type="hidden" asp-for="Id" />
                         <input type="hidden" asp-for="CreatedDate" />
                         <input type="hidden" asp-for="CreatedBy" />
                         <input type="hidden" asp-for="TimesUsed" />
                         
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
-                        
-                        <!-- Code and Discount Type -->
-                        <div class="row mb-4">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <section class="admin-form-section">
+                        <h2>@Localizer["PromoCodeDetails"]</h2>
+                        <div class="row">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-tag-fill text-primary me-2"></i>@Localizer["Code"]
-                                </label>
-                                <input asp-for="Code" class="form-control form-control-lg text-uppercase" />
+                                <div class="admin-form-group">
+                                <label asp-for="Code" class="admin-form-label">@Localizer["Code"]</label>
+                                <input asp-for="Code" class="admin-form-control text-uppercase" />
                                 <span asp-validation-for="Code" class="text-danger"></span>
+                                </div>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-percent text-success me-2"></i>@Localizer["DiscountType"]
-                                </label>
-                                <select asp-for="DiscountType" class="form-select form-select-lg" id="discountType">
+                                <div class="admin-form-group">
+                                <label asp-for="DiscountType" class="admin-form-label">@Localizer["DiscountType"]</label>
+                                <select asp-for="DiscountType" class="admin-form-control" id="discountType">
                                     <option value="1">@Localizer["Percentage"]</option>
                                     <option value="2">@Localizer["FixedAmount"]</option>
                                 </select>
@@ -75,7 +72,7 @@
                                 <label class="form-label fw-bold">
                                     <i class="bi bi-file-text text-info me-2"></i>@Localizer["Description"]
                                 </label>
-                                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                                <textarea aria-label="@Localizer["Description"]" asp-for="Description" class="form-control" rows="3"></textarea>
                                 <span asp-validation-for="Description" class="text-danger"></span>
                             </div>
                         </div>
@@ -87,7 +84,7 @@
                                     <i class="bi bi-cash-coin text-warning me-2"></i>@Localizer["DiscountValue"]
                                 </label>
                                 <div class="input-group input-group-lg">
-                                    <input asp-for="DiscountValue" class="form-control" type="number" step="0.01" />
+                                    <input aria-label="@Localizer["DiscountValue"]" asp-for="DiscountValue" class="form-control" type="number" step="0.01" />
                                     <span class="input-group-text bg-primary text-white fw-bold" id="discountSymbol">@(Model.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage ? "%" : "AED")</span>
                                 </div>
                                 <span asp-validation-for="DiscountValue" class="text-danger"></span>
@@ -97,27 +94,39 @@
                                 <label class="form-label fw-bold">
                                     <i class="bi bi-cart-check text-danger me-2"></i>@Localizer["MinimumOrder"]
                                 </label>
-                                <input asp-for="MinimumOrderAmount" class="form-control form-control-lg" type="number" step="0.01" />
+                                <input aria-label="@Localizer["MinimumOrderAmount"]" asp-for="MinimumOrderAmount" class="form-control form-control-lg" type="number" step="0.01" />
                                 <span asp-validation-for="MinimumOrderAmount" class="text-danger"></span>
                             </div>
                         </div>
 
-                        <!-- Start and End Date -->
-                        <div class="row mb-4">
+                        <div class="row mb-4" data-schedule-from-inputs>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-calendar-check text-success me-2"></i>@Localizer["StartDate"]
-                                </label>
-                                <input asp-for="StartDate" class="form-control form-control-lg" type="datetime-local" />
+                                <div class="admin-form-group">
+                                <label asp-for="StartDate" class="admin-form-label">@Localizer["StartDate"]</label>
+                                <input asp-for="StartDate" class="admin-form-control" type="datetime-local" />
+                                <small class="form-text text-muted admin-schedule-hint">@Localizer["TimezoneAsiaDubai"]</small>
                                 <span asp-validation-for="StartDate" class="text-danger"></span>
+                                </div>
                             </div>
-
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-calendar-x text-danger me-2"></i>@Localizer["EndDate"]
-                                </label>
-                                <input asp-for="EndDate" class="form-control form-control-lg" type="datetime-local" />
+                                <div class="admin-form-group">
+                                <label asp-for="EndDate" class="admin-form-label">@Localizer["EndDate"]</label>
+                                <input asp-for="EndDate" class="admin-form-control" type="datetime-local" />
+                                <small class="form-text text-muted admin-schedule-hint">@Localizer["TimezoneAsiaDubai"]</small>
                                 <span asp-validation-for="EndDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <span data-schedule-badge
+                                      data-badge-class="badge admin-schedule-live"
+                                      data-enabled="@Model.IsActive.ToString().ToLower()"
+                                      data-start="@Model.StartDate.ToString("yyyy-MM-ddTHH:mm:ss")"
+                                      data-end="@Model.EndDate.ToString("yyyy-MM-ddTHH:mm:ss")"
+                                      data-label-active="@Localizer["Active"].Value"
+                                      data-label-scheduled="@Localizer["Scheduled"].Value"
+                                      data-label-ended="@Localizer["Expired"].Value"
+                                      data-label-inactive="@Localizer["Inactive"].Value"
+                                      class="badge admin-schedule-live bg-secondary">@Localizer["Inactive"]</span>
                             </div>
                         </div>
 
@@ -127,7 +136,7 @@
                                 <label class="form-label fw-bold">
                                     <i class="bi bi-arrow-repeat text-primary me-2"></i>@Localizer["UsageLimit"]
                                 </label>
-                                <input asp-for="UsageLimit" class="form-control form-control-lg" type="number" />
+                                <input aria-label="@Localizer["UsageLimit"]" asp-for="UsageLimit" class="form-control form-control-lg" type="number" />
                                 <span asp-validation-for="UsageLimit" class="text-danger"></span>
                                 <small class="form-text text-muted">
                                     @Localizer["Currently used"]: <strong>@Model.TimesUsed</strong> @Localizer["times"]
@@ -138,7 +147,7 @@
                                 <label class="form-label fw-bold">
                                     <i class="bi bi-person-badge text-warning me-2"></i>@Localizer["PerUserLimit"]
                                 </label>
-                                <input asp-for="UsageLimitPerUser" class="form-control form-control-lg" type="number" />
+                                <input aria-label="@Localizer["UsageLimitPerUser"]" asp-for="UsageLimitPerUser" class="form-control form-control-lg" type="number" />
                                 <span asp-validation-for="UsageLimitPerUser" class="text-danger"></span>
                             </div>
                         </div>
@@ -149,7 +158,7 @@
                                 <label class="form-label fw-bold">
                                     <i class="bi bi-shield-check text-info me-2"></i>@Localizer["MaximumDiscount"]
                                 </label>
-                                <input asp-for="MaximumDiscountAmount" class="form-control form-control-lg" type="number" step="0.01" />
+                                <input aria-label="@Localizer["MaximumDiscountAmount"]" asp-for="MaximumDiscountAmount" class="form-control form-control-lg" type="number" step="0.01" />
                                 <span asp-validation-for="MaximumDiscountAmount" class="text-danger"></span>
                             </div>
 
@@ -182,289 +191,176 @@
                             </div>
                         </div>
 
-                        <!-- Excluded Products Section -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="card border-primary">
-                                    <div class="card-header bg-primary">
-                                        <h5 class="mb-0 text-white">
-                                            <i class="bi bi-ban me-2"></i>@Localizer["ExcludedProducts"]
-                                        </h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="text-muted mb-3">
-                                            @Localizer["ProductsInThisListWillNotReceiveThePromoCodeDiscount"]
-                                        </p>
-                                        
-                                        <!-- Add Product Form -->
-                                        <div class="mb-3">
-                                            <div class="row g-2">
-                                                <div class="col-md-8">
-                                                    <label for="productSelect" class="form-label">
-                                                        <i class="bi bi-box-seam me-1"></i>@Localizer["SelectProduct"]
-                                                    </label>
-                                                    <select id="productSelect" class="form-select">
-                                                        <option value="">-- @Localizer["SelectProduct"] --</option>
-                                                        @if (ViewBag.Products != null)
-                                                        {
-                                                            @foreach (var product in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.Products)
-                                                            {
-                                                                <option value="@product.Value">@product.Text</option>
-                                                            }
-                                                        }
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-4 d-flex align-items-end">
-                                                    <button type="button" class="btn btn-primary w-100" id="addProductBtn" style="display: none;">
-                                                        <i class="bi bi-plus-circle me-1"></i>@Localizer["Add"]
+                        @{
+                            var requestCulture = Context.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+                            var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+                        }
+                        <section class="admin-form-section">
+                            <h2>@Localizer["ExcludedProducts"]</h2>
+                            <p class="text-muted">@Localizer["ProductsInThisListWillNotReceiveThePromoCodeDiscount"]</p>
+                            <div class="admin-picker-layout">
+                                <div class="admin-picker-panel">
+                                    <label for="productSelect" class="admin-form-label">@Localizer["SelectProduct"]</label>
+                                    <select id="productSelect" class="admin-form-control admin-picker-search">
+                                        <option value="">@Localizer["SelectProduct"]</option>
+                                        @if (ViewBag.Products != null)
+                                        {
+                                            @foreach (var product in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.Products)
+                                            {
+                                                <option value="@product.Value">@product.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                    <button type="button" class="btn btn-primary w-100 mt-3" id="addProductBtn" hidden>
+                                        <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>@Localizer["Add"]
+                                    </button>
+                                </div>
+                                <div class="admin-picker-panel">
+                                    <div id="excludedProductsList" class="admin-picker-selected-list">
+                                        @if (Model.ExcludedProducts != null && Model.ExcludedProducts.Any())
+                                        {
+                                            @foreach (var excludedProduct in Model.ExcludedProducts)
+                                            {
+                                                var productTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(excludedProduct.Product?.TitleAr))
+                                                    ? excludedProduct.Product.TitleAr
+                                                    : (excludedProduct.Product?.Title ?? Localizer["Unknown"].Value);
+                                                <div class="admin-picker-selected-item excluded-product-item" data-excluded-id="@excludedProduct.Id" data-product-id="@excludedProduct.ProductId">
+                                                    <span class="admin-picker-selected-name">@productTitle</span>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger remove-excluded-product" aria-label="@Localizer["Remove"]">
+                                                        <i class="bi bi-trash" aria-hidden="true"></i>
                                                     </button>
                                                 </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Excluded Products List -->
-                                        <div id="excludedProductsList">
-                                            @{
-                                                var requestCulture = Context.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
-                                                var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
                                             }
-                                            @if (Model.ExcludedProducts != null && Model.ExcludedProducts.Any())
-                                            {
-                                                @foreach (var excludedProduct in Model.ExcludedProducts)
-                                                {
-                                                    var productTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(excludedProduct.Product?.TitleAr)) 
-                                                        ? excludedProduct.Product.TitleAr 
-                                                        : (excludedProduct.Product?.Title ?? Localizer["Unknown"].Value);
-                                                    <div class="badge bg-danger me-2 mb-2 p-2 excluded-product-item" data-excluded-id="@excludedProduct.Id" data-product-id="@excludedProduct.ProductId">
-                                                        <span>@productTitle</span>
-                                                        <button type="button" class="btn-close btn-close-white ms-2 remove-excluded-product" aria-label="@Localizer["Remove"]"></button>
-                                                    </div>
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <p class="text-muted">@Localizer["NoProductsExcluded"]</p>
-                                            }
-                                        </div>
+                                        }
+                                        else
+                                        {
+                                            <p class="text-muted mb-0" id="excludedProductsEmpty">@Localizer["NoProductsExcluded"]</p>
+                                        }
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </section>
 
-                        <!-- Excluded Combo Offers Section -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="card border-warning">
-                                    <div class="card-header bg-warning text-dark">
-                                        <h5 class="mb-0 text-white">
-                                            <i class="bi bi-box-seam me-2"></i>@Localizer["ExcludedComboOffers"]
-                                        </h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="text-muted mb-3">
-                                            @Localizer["ComboOffersInThisListWillNotReceiveThePromoCodeDiscount"]
-                                        </p>
-                                        
-                                        <!-- Add Combo Offer Form -->
-                                        <div class="mb-3">
-                                            <div class="row g-2">
-                                                <div class="col-md-8">
-                                                    <label for="comboOfferSelect" class="form-label">
-                                                        <i class="bi bi-box-seam me-1"></i>@Localizer["SelectComboOffer"]
-                                                    </label>
-                                                    <select id="comboOfferSelect" class="form-select">
-                                                        <option value="">-- @Localizer["SelectComboOffer"] --</option>
-                                                        @if (ViewBag.ComboOffers != null)
-                                                        {
-                                                            @foreach (var comboOffer in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.ComboOffers)
-                                                            {
-                                                                <option value="@comboOffer.Value">@comboOffer.Text</option>
-                                                            }
-                                                        }
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-4 d-flex align-items-end">
-                                                    <button type="button" class="btn btn-warning w-100" id="addComboOfferBtn" style="display: none;">
-                                                        <i class="bi bi-plus-circle me-1"></i>@Localizer["Add"]
+                        <section class="admin-form-section">
+                            <h2>@Localizer["ExcludedComboOffers"]</h2>
+                            <p class="text-muted">@Localizer["ComboOffersInThisListWillNotReceiveThePromoCodeDiscount"]</p>
+                            <div class="admin-picker-layout">
+                                <div class="admin-picker-panel">
+                                    <label for="comboOfferSelect" class="admin-form-label">@Localizer["SelectComboOffer"]</label>
+                                    <select id="comboOfferSelect" class="admin-form-control">
+                                        <option value="">@Localizer["SelectComboOffer"]</option>
+                                        @if (ViewBag.ComboOffers != null)
+                                        {
+                                            @foreach (var comboOffer in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.ComboOffers)
+                                            {
+                                                <option value="@comboOffer.Value">@comboOffer.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                    <button type="button" class="btn btn-primary w-100 mt-3" id="addComboOfferBtn" hidden>
+                                        <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>@Localizer["Add"]
+                                    </button>
+                                </div>
+                                <div class="admin-picker-panel">
+                                    <div id="excludedComboOffersList" class="admin-picker-selected-list">
+                                        @if (Model.ExcludedComboOffers != null && Model.ExcludedComboOffers.Any())
+                                        {
+                                            @foreach (var excludedComboOffer in Model.ExcludedComboOffers)
+                                            {
+                                                var comboOfferName = (currentCulture == "ar" && !string.IsNullOrEmpty(excludedComboOffer.ComboOffer?.NameAr))
+                                                    ? excludedComboOffer.ComboOffer.NameAr
+                                                    : (excludedComboOffer.ComboOffer?.Name ?? Localizer["Unknown"].Value);
+                                                <div class="admin-picker-selected-item excluded-combo-offer-item" data-excluded-id="@excludedComboOffer.Id" data-combo-offer-id="@excludedComboOffer.ComboOfferId">
+                                                    <span class="admin-picker-selected-name">@comboOfferName</span>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger remove-excluded-combo-offer" aria-label="@Localizer["Remove"]">
+                                                        <i class="bi bi-trash" aria-hidden="true"></i>
                                                     </button>
                                                 </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Excluded Combo Offers List -->
-                                        <div id="excludedComboOffersList">
-                                            @if (Model.ExcludedComboOffers != null && Model.ExcludedComboOffers.Any())
-                                            {
-                                                @foreach (var excludedComboOffer in Model.ExcludedComboOffers)
-                                                {
-                                                    var comboOfferName = (currentCulture == "ar" && !string.IsNullOrEmpty(excludedComboOffer.ComboOffer?.NameAr)) 
-                                                        ? excludedComboOffer.ComboOffer.NameAr 
-                                                        : (excludedComboOffer.ComboOffer?.Name ?? Localizer["Unknown"].Value);
-                                                    <div class="badge bg-warning text-dark me-2 mb-2 p-2 excluded-combo-offer-item" data-excluded-id="@excludedComboOffer.Id" data-combo-offer-id="@excludedComboOffer.ComboOfferId">
-                                                        <span>@comboOfferName</span>
-                                                        <button type="button" class="btn-close btn-close-dark ms-2 remove-excluded-combo-offer" aria-label="@Localizer["Remove"]"></button>
-                                                    </div>
-                                                }
                                             }
-                                            else
-                                            {
-                                                <p class="text-muted">@Localizer["NoComboOffersExcluded"]</p>
-                                            }
-                                        </div>
+                                        }
+                                        else
+                                        {
+                                            <p class="text-muted mb-0" id="excludedComboOffersEmpty">@Localizer["NoComboOffersExcluded"]</p>
+                                        }
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </section>
 
-                        <!-- Service Exclusion Section -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="card border-info">
-                                    <div class="card-header bg-info text-white">
-                                        <h5 class="mb-0">
-                                            <i class="bi bi-briefcase me-2"></i>@Localizer["ServiceExclusions"]
-                                        </h5>
+                        <section class="admin-form-section">
+                            <h2>@Localizer["ServiceExclusions"]</h2>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="ExcludeAllServices" id="excludeAllServices" value="true" @(Model.ExcludeAllServices ? "checked" : "")>
+                                <label class="form-check-label" for="excludeAllServices">@Localizer["ExcludeAllServices"]</label>
+                                <small class="text-muted d-block">@Localizer["ExcludeAllServicesDescription"]</small>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="radio" name="ExcludeAllServices" id="excludeSpecificServices" value="false" @(!Model.ExcludeAllServices ? "checked" : "")>
+                                <label class="form-check-label" for="excludeSpecificServices">@Localizer["ExcludeSpecificServices"]</label>
+                                <small class="text-muted d-block">@Localizer["ExcludeSpecificServicesDescription"]</small>
+                            </div>
+                            <div id="serviceExclusionSection" class="mt-3" @(Model.ExcludeAllServices ? "hidden" : "")>
+                                <p class="text-muted">@Localizer["ServicesInThisListWillNotReceiveThePromoCodeDiscount"]</p>
+                                <div class="admin-picker-layout">
+                                    <div class="admin-picker-panel">
+                                        <label for="serviceSelect" class="admin-form-label">@Localizer["SelectService"]</label>
+                                        <select id="serviceSelect" class="admin-form-control">
+                                            <option value="">@Localizer["SelectService"]</option>
+                                            @if (ViewBag.ServiceSubscriptions != null)
+                                            {
+                                                @foreach (var service in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.ServiceSubscriptions)
+                                                {
+                                                    <option value="@service.Value">@service.Text</option>
+                                                }
+                                            }
+                                        </select>
+                                        <button type="button" class="btn btn-primary w-100 mt-3" id="addServiceBtn" hidden>
+                                            <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>@Localizer["Add"]
+                                        </button>
                                     </div>
-                                    <div class="card-body">
-                                        <!-- Exclude All Services Radio Button -->
-                                        <div class="mb-4">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="ExcludeAllServices" id="excludeAllServices" value="true" @(Model.ExcludeAllServices ? "checked" : "")>
-                                                <label class="form-check-label" for="excludeAllServices">
-                                                    <strong>@Localizer["ExcludeAllServices"]</strong>
-                                                    <small class="text-muted d-block">@Localizer["ExcludeAllServicesDescription"]</small>
-                                                </label>
-                                            </div>
-                                            <div class="form-check mt-2">
-                                                <input class="form-check-input" type="radio" name="ExcludeAllServices" id="excludeSpecificServices" value="false" @(!Model.ExcludeAllServices ? "checked" : "")>
-                                                <label class="form-check-label" for="excludeSpecificServices">
-                                                    <strong>@Localizer["ExcludeSpecificServices"]</strong>
-                                                    <small class="text-muted d-block">@Localizer["ExcludeSpecificServicesDescription"]</small>
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <!-- Service Selection (only shown when ExcludeSpecificServices is selected) -->
-                                        <div id="serviceExclusionSection" style="display: @(!Model.ExcludeAllServices ? "block" : "none");">
-                                            <p class="text-muted mb-3">
-                                                @Localizer["ServicesInThisListWillNotReceiveThePromoCodeDiscount"]
-                                            </p>
-                                            
-                                            <!-- Add Service Form -->
-                                            <div class="mb-3">
-                                                <div class="row g-2">
-                                                    <div class="col-md-8">
-                                                        <label for="serviceSelect" class="form-label">
-                                                            <i class="bi bi-briefcase me-1"></i>@Localizer["SelectService"]
-                                                        </label>
-                                                        <select id="serviceSelect" class="form-select">
-                                                            <option value="">-- @Localizer["SelectService"] --</option>
-                                                            @if (ViewBag.ServiceSubscriptions != null)
-                                                            {
-                                                                @foreach (var service in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.ServiceSubscriptions)
-                                                                {
-                                                                    <option value="@service.Value">@service.Text</option>
-                                                                }
-                                                            }
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-4 d-flex align-items-end">
-                                                        <button type="button" class="btn btn-info w-100" id="addServiceBtn" style="display: none;">
-                                                            <i class="bi bi-plus-circle me-1"></i>@Localizer["Add"]
+                                    <div class="admin-picker-panel">
+                                        <div id="excludedServicesList" class="admin-picker-selected-list">
+                                            @if (Model.ExcludedServiceSubscriptions != null && Model.ExcludedServiceSubscriptions.Any())
+                                            {
+                                                @foreach (var excludedService in Model.ExcludedServiceSubscriptions)
+                                                {
+                                                    var serviceTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(excludedService.ServiceSubscription?.TitleAr))
+                                                        ? excludedService.ServiceSubscription.TitleAr
+                                                        : (excludedService.ServiceSubscription?.Title ?? Localizer["Unknown"].Value);
+                                                    <div class="admin-picker-selected-item excluded-service-item" data-excluded-id="@excludedService.Id" data-service-id="@excludedService.ServiceSubscriptionId">
+                                                        <span class="admin-picker-selected-name">@serviceTitle</span>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger remove-excluded-service" aria-label="@Localizer["Remove"]">
+                                                            <i class="bi bi-trash" aria-hidden="true"></i>
                                                         </button>
                                                     </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Excluded Services List -->
-                                            <div id="excludedServicesList">
-                                                @if (Model.ExcludedServiceSubscriptions != null && Model.ExcludedServiceSubscriptions.Any())
-                                                {
-                                                    @foreach (var excludedService in Model.ExcludedServiceSubscriptions)
-                                                    {
-                                                        var serviceTitle = (currentCulture == "ar" && !string.IsNullOrEmpty(excludedService.ServiceSubscription?.TitleAr)) 
-                                                            ? excludedService.ServiceSubscription.TitleAr 
-                                                            : (excludedService.ServiceSubscription?.Title ?? Localizer["Unknown"].Value);
-                                                        <div class="badge bg-info text-white me-2 mb-2 p-2 excluded-service-item" data-excluded-id="@excludedService.Id" data-service-id="@excludedService.ServiceSubscriptionId">
-                                                            <span>@serviceTitle</span>
-                                                            <button type="button" class="btn-close btn-close-white ms-2 remove-excluded-service" aria-label="@Localizer["Remove"]"></button>
-                                                        </div>
-                                                    }
                                                 }
-                                                else
-                                                {
-                                                    <p class="text-muted">@Localizer["NoServicesExcluded"]</p>
-                                                }
-                                            </div>
+                                            }
+                                            else
+                                            {
+                                                <p class="text-muted mb-0" id="excludedServicesEmpty">@Localizer["NoServicesExcluded"]</p>
+                                            }
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </section>
 
-                        <hr class="my-4" />
-
-                        <!-- Action Buttons -->
-                        <div class="row">
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-lg btn-warning px-5 me-2">
-                                    <i class="bi bi-save me-2"></i>@Localizer["UpdatePromoCode"]
-                                </button>
-                                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-lg btn-outline-info px-4 me-2">
-                                    <i class="bi bi-eye me-2"></i>@Localizer["ViewDetails"]
-                                </a>
-                                <a asp-action="Index" class="btn btn-lg btn-outline-secondary px-4">
-                                    <i class="bi bi-arrow-left me-2"></i>@Localizer["BackToList"]
-                                </a>
-                            </div>
+                        <div class="form-actions">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>@Localizer["BackToList"]
+                            </a>
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+                                <i class="bi bi-eye me-2" aria-hidden="true"></i>@Localizer["ViewDetails"]
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2" aria-hidden="true"></i>@Localizer["UpdatePromoCode"]
+                            </button>
                         </div>
                     </form>
-                </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .bg-gradient {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .bg-gradient::before {
-        content: "";
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        animation: pulse 3s ease-in-out infinite;
-    }
-    
-    @@keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 0.5; }
-        50% { transform: scale(1.1); opacity: 0.8; }
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: #f5576c;
-        box-shadow: 0 0 0 0.25rem rgba(245, 87, 108, 0.25);
-    }
-
-    .card {
-        border-radius: 15px;
-    }
-
-    .card-header {
-        border-radius: 15px 15px 0 0 !important;
-    }
-
-    .form-check-input:checked {
-        background-color: #f5576c;
-        border-color: #f5576c;
-    }
-</style>
 
 @Html.AntiForgeryToken()
 
@@ -610,11 +506,7 @@
 
             // Show/hide Add button based on selection
             $('#productSelect').on('change', function() {
-                if ($(this).val()) {
-                    $('#addProductBtn').show();
-                } else {
-                    $('#addProductBtn').hide();
-                }
+                document.getElementById('addProductBtn').hidden = !$(this).val();
             });
 
             // Initialize Select2 for combo offer dropdown
@@ -629,11 +521,7 @@
 
             // Show/hide Add button based on selection
             $('#comboOfferSelect').on('change', function() {
-                if ($(this).val()) {
-                    $('#addComboOfferBtn').show();
-                } else {
-                    $('#addComboOfferBtn').hide();
-                }
+                document.getElementById('addComboOfferBtn').hidden = !$(this).val();
             });
         });
 
@@ -678,21 +566,18 @@
                             : (response.productTitle || productTitle);
 
                         // Add to UI
-                        var badgeHtml = '<div class="badge bg-danger me-2 mb-2 p-2 excluded-product-item" data-excluded-id="' + response.excludedProductId + '" data-product-id="' + productId + '">';
-                        badgeHtml += '<span>' + displayTitle + '</span>';
-                        badgeHtml += '<button type="button" class="btn-close btn-close-white ms-2 remove-excluded-product" aria-label="@Html.Raw(Localizer["Remove"].Value)"></button>';
-                        badgeHtml += '</div>';
+                        var itemHtml = '<div class="admin-picker-selected-item excluded-product-item" data-excluded-id="' + response.excludedProductId + '" data-product-id="' + productId + '">';
+                        itemHtml += '<span class="admin-picker-selected-name">' + displayTitle + '</span>';
+                        itemHtml += '<button type="button" class="btn btn-sm btn-outline-danger remove-excluded-product" aria-label="@Html.Raw(Localizer["Remove"].Value)"><i class="bi bi-trash" aria-hidden="true"></i></button>';
+                        itemHtml += '</div>';
 
-                        if ($('#excludedProductsList p.text-muted').length > 0) {
-                            $('#excludedProductsList').html(badgeHtml);
-                        } else {
-                            $('#excludedProductsList').append(badgeHtml);
-                        }
+                        $('#excludedProductsEmpty').remove();
+                        $('#excludedProductsList').append(itemHtml);
 
                         // Remove from dropdown and reset selection
                         selectedOption.remove();
                         $('#productSelect').val('').trigger('change');
-                        $('#addProductBtn').hide();
+                        document.getElementById('addProductBtn').hidden = true;
 
                         if (typeof toastr !== 'undefined') {
                             toastr.success(response.message);
@@ -758,7 +643,7 @@
                         
                         // Show message if no products left
                         if ($('.excluded-product-item').length === 0) {
-                            $('#excludedProductsList').html('<p class="text-muted">@Html.Raw(Localizer["NoProductsExcluded"].Value)</p>');
+                            $('#excludedProductsList').html('<p class="text-muted mb-0" id="excludedProductsEmpty">@Html.Raw(Localizer["NoProductsExcluded"].Value)</p>');
                         }
 
                         if (typeof toastr !== 'undefined') {
@@ -825,21 +710,18 @@
                             : (response.comboOfferName || comboOfferName);
 
                         // Add to UI
-                        var badgeHtml = '<div class="badge bg-warning text-dark me-2 mb-2 p-2 excluded-combo-offer-item" data-excluded-id="' + response.excludedComboOfferId + '" data-combo-offer-id="' + comboOfferId + '">';
-                        badgeHtml += '<span>' + displayName + '</span>';
-                        badgeHtml += '<button type="button" class="btn-close btn-close-dark ms-2 remove-excluded-combo-offer" aria-label="@Html.Raw(Localizer["Remove"].Value)"></button>';
-                        badgeHtml += '</div>';
+                        var itemHtml = '<div class="admin-picker-selected-item excluded-combo-offer-item" data-excluded-id="' + response.excludedComboOfferId + '" data-combo-offer-id="' + comboOfferId + '">';
+                        itemHtml += '<span class="admin-picker-selected-name">' + displayName + '</span>';
+                        itemHtml += '<button type="button" class="btn btn-sm btn-outline-danger remove-excluded-combo-offer" aria-label="@Html.Raw(Localizer["Remove"].Value)"><i class="bi bi-trash" aria-hidden="true"></i></button>';
+                        itemHtml += '</div>';
 
-                        if ($('#excludedComboOffersList p.text-muted').length > 0) {
-                            $('#excludedComboOffersList').html(badgeHtml);
-                        } else {
-                            $('#excludedComboOffersList').append(badgeHtml);
-                        }
+                        $('#excludedComboOffersEmpty').remove();
+                        $('#excludedComboOffersList').append(itemHtml);
 
                         // Remove from dropdown and reset selection
                         selectedOption.remove();
                         $('#comboOfferSelect').val('').trigger('change');
-                        $('#addComboOfferBtn').hide();
+                        document.getElementById('addComboOfferBtn').hidden = true;
 
                         if (typeof toastr !== 'undefined') {
                             toastr.success(response.message);
@@ -904,7 +786,7 @@
                         
                         // Show message if no combo offers left
                         if ($('.excluded-combo-offer-item').length === 0) {
-                            $('#excludedComboOffersList').html('<p class="text-muted">@Html.Raw(Localizer["NoComboOffersExcluded"].Value)</p>');
+                            $('#excludedComboOffersList').html('<p class="text-muted mb-0" id="excludedComboOffersEmpty">@Html.Raw(Localizer["NoComboOffersExcluded"].Value)</p>');
                         }
 
                         if (typeof toastr !== 'undefined') {
@@ -944,9 +826,9 @@
         $('#serviceSelect').on('change', function() {
             var serviceId = $(this).val();
             if (serviceId) {
-                $('#addServiceBtn').show();
+                document.getElementById('addServiceBtn').hidden = false;
             } else {
-                $('#addServiceBtn').hide();
+                document.getElementById('addServiceBtn').hidden = true;
             }
         });
 
@@ -992,21 +874,18 @@
                             : (response.serviceTitle || serviceName);
 
                         // Add to UI
-                        var badgeHtml = '<div class="badge bg-info text-white me-2 mb-2 p-2 excluded-service-item" data-excluded-id="' + response.excludedServiceSubscriptionId + '" data-service-id="' + serviceId + '">';
-                        badgeHtml += '<span>' + displayName + '</span>';
-                        badgeHtml += '<button type="button" class="btn-close btn-close-white ms-2 remove-excluded-service" aria-label="@Html.Raw(Localizer["Remove"].Value)"></button>';
-                        badgeHtml += '</div>';
+                        var itemHtml = '<div class="admin-picker-selected-item excluded-service-item" data-excluded-id="' + response.excludedServiceSubscriptionId + '" data-service-id="' + serviceId + '">';
+                        itemHtml += '<span class="admin-picker-selected-name">' + displayName + '</span>';
+                        itemHtml += '<button type="button" class="btn btn-sm btn-outline-danger remove-excluded-service" aria-label="@Html.Raw(Localizer["Remove"].Value)"><i class="bi bi-trash" aria-hidden="true"></i></button>';
+                        itemHtml += '</div>';
 
-                        if ($('#excludedServicesList p.text-muted').length > 0) {
-                            $('#excludedServicesList').html(badgeHtml);
-                        } else {
-                            $('#excludedServicesList').append(badgeHtml);
-                        }
+                        $('#excludedServicesEmpty').remove();
+                        $('#excludedServicesList').append(itemHtml);
 
                         // Remove from dropdown and reset selection
                         selectedOption.remove();
                         $('#serviceSelect').val('').trigger('change');
-                        $('#addServiceBtn').hide();
+                        document.getElementById('addServiceBtn').hidden = true;
 
                         if (typeof toastr !== 'undefined') {
                             toastr.success(response.message);
@@ -1071,7 +950,7 @@
                         
                         // Show message if no services left
                         if ($('.excluded-service-item').length === 0) {
-                            $('#excludedServicesList').html('<p class="text-muted">@Html.Raw(Localizer["NoServicesExcluded"].Value)</p>');
+                            $('#excludedServicesList').html('<p class="text-muted mb-0" id="excludedServicesEmpty">@Html.Raw(Localizer["NoServicesExcluded"].Value)</p>');
                         }
 
                         if (typeof toastr !== 'undefined') {

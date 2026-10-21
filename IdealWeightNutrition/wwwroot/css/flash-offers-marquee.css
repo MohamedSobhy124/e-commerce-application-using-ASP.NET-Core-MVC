@@ -1,4 +1,4 @@
-﻿/* Flash Offers Marquee Banner - Enhanced Style */
+/* Flash Offers Marquee Banner - Enhanced Style */
 .flash-offers-marquee {
     position: relative;
     width: 100%;
@@ -138,7 +138,7 @@
     font-size: 15px;
     font-weight: 600;
     position: relative;
-    color: #fff;
+    color: var(--iw-surface);
     flex-shrink: 0;
     box-sizing: border-box;
     margin: 0;
@@ -155,7 +155,7 @@
 .marquee-text {
     display: inline-block;
     line-height: 1.5;
-    background: linear-gradient(180deg, #ffffff 0%, #e8e8ff 100%);
+    background: linear-gradient(180deg, var(--iw-surface) 0%, #e8e8ff 100%);
     -webkit-background-clip: text; 
     background-clip: text;
 }

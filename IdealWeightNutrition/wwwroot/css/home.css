@@ -46,7 +46,7 @@
     position: absolute;
     top: 12px;
     right: 12px;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 100%);
     color: var(--white);
     padding: 8px 16px;
     border-radius: 50px;
@@ -70,7 +70,7 @@
     position: absolute;
     inset: -2px;
     border-radius: 50px;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 100%);
     z-index: -1;
     opacity: 0.4;
     filter: blur(6px);
@@ -169,7 +169,7 @@
 }
 
 .current-price {
-    color: #ef4444;
+    color: var(--iw-danger);
     font-size: 1.75rem;
     font-weight: 900;
     margin: 0;
@@ -191,17 +191,17 @@
 
 /* Discount savings display */
 .price-savings {
-    color: #10b981;
+    color: var(--iw-action-green);
     font-size: 0.85rem;
     font-weight: 700;
     margin-top: 0.5rem;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    background: linear-gradient(135deg, var(--iw-light-green) 0%, #a7f3d0 100%);
     padding: 0.3rem 0.7rem;
     border-radius: 15px;
-    border: 1px solid #10b981;
+    border: 1px solid var(--iw-dark-green);
 }
 
 .price-savings::before {
@@ -607,7 +607,7 @@ button.loading,
     right: 32px;
     width: 70px;
     height: 70px;
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     color: var(--white);
     border: none;
     border-radius: 50%;
@@ -633,7 +633,7 @@ button.loading,
     position: absolute;
     top: -6px;
     right: -6px;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 100%);
     color: var(--white);
     width: 32px;
     height: 32px;

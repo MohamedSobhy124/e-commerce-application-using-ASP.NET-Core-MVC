@@ -2,85 +2,56 @@
 
 @{
     ViewData["Title"] = Localizer["DeletePromoCode"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card shadow border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h2 class="mb-0">@Localizer["DeletePromoCode"]</h2>
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-form-wrapper">
+            <div class="admin-form-header">
+                <h1 class="admin-form-title">@Localizer["DeletePromoCode"]</h1>
+            </div>
+            <div class="admin-form-body">
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
+                    <strong>@Localizer["Warning"]</strong> @Localizer["AreYouSureDeletePromoCode"]
                 </div>
-                <div class="card-body">
-                    <div class="alert alert-danger" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill"></i>
-                        <strong>@Localizer["Warning"]!</strong> @Localizer["AreYouSureDeletePromoCode"]
-                    </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <strong>@Localizer["Code"]:</strong>
-                        </div>
-                        <div class="col-md-8">
-                            <span class="text-primary fs-5">@Model.Code</span>
-                        </div>
-                    </div>
+                <dl class="admin-details-list">
+                    <dt>@Localizer["Code"]</dt>
+                    <dd><strong class="text-primary">@Model.Code</strong></dd>
+                    <dt>@Localizer["Description"]</dt>
+                    <dd>@Model.Description</dd>
+                    <dt>@Localizer["Discount"]</dt>
+                    <dd>
+                        @if (Model.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
+                        {
+                            <span class="badge bg-success">@(Model.DiscountValue)%</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-info text-dark">@Model.DiscountValue.ToString("N2")</span>
+                        }
+                    </dd>
+                    <dt>@Localizer["ValidPeriod"]</dt>
+                    <dd>
+                        @Model.StartDate.ToString("yyyy-MM-dd HH:mm") – @Model.EndDate.ToString("yyyy-MM-dd HH:mm")
+                        <small class="text-muted admin-schedule-hint d-block">@Localizer["TimezoneAsiaDubai"]</small>
+                    </dd>
+                    <dt>@Localizer["TimesUsed"]</dt>
+                    <dd><span class="badge bg-primary">@Model.TimesUsed</span></dd>
+                </dl>
 
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <strong>@Localizer["Description"]:</strong>
-                        </div>
-                        <div class="col-md-8">
-                            @Model.Description
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <strong>@Localizer["Discount"]:</strong>
-                        </div>
-                        <div class="col-md-8">
-                            @if (Model.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
-                            {
-                                <span class="badge bg-success">@Model.DiscountValue%</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-info">@Model.DiscountValue.ToString("C")</span>
-                            }
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <strong>@Localizer["ValidPeriod"]:</strong>
-                        </div>
-                        <div class="col-md-8">
-                            @Model.StartDate.ToString("MMM dd, yyyy") - @Model.EndDate.ToString("MMM dd, yyyy")
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <strong>@Localizer["TimesUsed"]:</strong>
-                        </div>
-                        <div class="col-md-8">
-                            <span class="badge bg-primary">@Model.TimesUsed</span>
-                        </div>
-                    </div>
-
-                    <form asp-action="Delete" method="post" class="mt-4">
-                        <input type="hidden" asp-for="Id" />
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash"></i> @Localizer["YesDelete"]
-                        </button>
-                        <a asp-action="Index" class="btn btn-secondary">
-                            <i class="bi bi-x-circle"></i> @Localizer["Cancel"]
-                        </a>
-                    </form>
-                </div>
+                <form asp-action="Delete" method="post" class="form-actions">
+                    <input type="hidden" asp-for="Id" />
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-2" aria-hidden="true"></i>@Localizer["Cancel"]
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2" aria-hidden="true"></i>@Localizer["YesDelete"]
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 </div>
-

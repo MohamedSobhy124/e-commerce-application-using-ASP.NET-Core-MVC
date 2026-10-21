@@ -4931,4 +4931,202 @@
   <data name="ConfirmHideBlog" xml:space="preserve">
     <value>إخفاء هذا المقال عن العملاء؟</value>
   </data>
+  <data name="SkipToContent" xml:space="preserve"><value>انتقل إلى المحتوى</value></data>
+  <data name="NavigationMenu" xml:space="preserve"><value>قائمة التنقل</value></data>
+  <data name="Companies" xml:space="preserve"><value>الشركات</value></data>
+  <data name="NewsletterSubscriptions" xml:space="preserve"><value>اشتراكات النشرة البريدية</value></data>
+  <data name="SearchProductsPlaceholder" xml:space="preserve"><value>ابحث عن المنتجات…</value></data>
+  <data name="ProductSearchHint" xml:space="preserve"><value>ابحث في قائمة المنتجات.</value></data>
+  <data name="ClearSearch" xml:space="preserve"><value>مسح البحث</value></data>
+  <data name="LowStock" xml:space="preserve"><value>مخزون منخفض</value></data>
+  <data name="BackToStore" xml:space="preserve"><value>العودة إلى المتجر</value></data>
+  <data name="CitiesAndDeliveryAreas" xml:space="preserve"><value>المدن ومناطق التوصيل</value></data>
+  <data name="MinimumPrice" xml:space="preserve"><value>أقل سعر</value></data>
+  <data name="MaximumPrice" xml:space="preserve"><value>أعلى سعر</value></data>
+  <data name="DecreaseQuantity" xml:space="preserve"><value>تقليل الكمية</value></data>
+  <data name="IncreaseQuantity" xml:space="preserve"><value>زيادة الكمية</value></data>
+  <data name="ToggleCartSelection" xml:space="preserve"><value>تغيير اختيار السلة</value></data>
+  <data name="SlideNumber" xml:space="preserve"><value>الصورة {0}</value></data>
+  <data name="Action" xml:space="preserve"><value>الإجراء</value></data>
+  <data name="ActiveArea" xml:space="preserve"><value>منطقة نشطة</value></data>
+  <data name="Adding" xml:space="preserve"><value>جارٍ الإضافة…</value></data>
+  <data name="Addresses" xml:space="preserve"><value>العناوين</value></data>
+  <data name="Admin_StreetAddress" xml:space="preserve"><value>عنوان الشارع</value></data>
+  <data name="AmountCannotExceed" xml:space="preserve"><value>لا يمكن أن يتجاوز المبلغ الإجمالي المستحق</value></data>
+  <data name="AnErrorOccurredProcessingRequest" xml:space="preserve"><value>حدث خطأ أثناء معالجة الطلب</value></data>
+  <data name="AreYouSure" xml:space="preserve"><value>هل أنت متأكد؟</value></data>
+  <data name="AreYouSureDeleteArea" xml:space="preserve"><value>هل تريد حذف منطقة التوصيل هذه؟</value></data>
+  <data name="AreYouSureYouWantToRemoveThisServiceFromExcludedList" xml:space="preserve"><value>هل تريد إزالة هذه الخدمة من قائمة الاستثناءات؟</value></data>
+  <data name="AreaNameArabic" xml:space="preserve"><value>اسم المنطقة بالعربية</value></data>
+  <data name="AreaNameEnglish" xml:space="preserve"><value>اسم المنطقة بالإنجليزية</value></data>
+  <data name="BackToCity" xml:space="preserve"><value>العودة إلى المدينة</value></data>
+  <data name="ChangePasswordAndSecurity" xml:space="preserve"><value>كلمة المرور والأمان</value></data>
+  <data name="ChargeOverridesCityDefault" xml:space="preserve"><value>تُستخدم هذه الرسوم بدلاً من رسوم المدينة الافتراضية</value></data>
+  <data name="Content" xml:space="preserve"><value>المحتوى</value></data>
+  <data name="CreateAccountForEasierTracking" xml:space="preserve"><value>أنشئ حساباً لتتبع طلباتك بسهولة</value></data>
+  <data name="CreateRemoteArea" xml:space="preserve"><value>إضافة منطقة توصيل</value></data>
+  <data name="DeleteConfirmMessage" xml:space="preserve"><value>هل تريد حذف هذا العنصر؟</value></data>
+  <data name="DeleteRemoteArea" xml:space="preserve"><value>حذف منطقة التوصيل</value></data>
+  <data name="DeliveryChargeAED" xml:space="preserve"><value>رسوم التوصيل بالدرهم</value></data>
+  <data name="DetailedResponseCode" xml:space="preserve"><value>رمز الاستجابة التفصيلي</value></data>
+  <data name="DiscountedProducts" xml:space="preserve"><value>المنتجات المخفضة</value></data>
+  <data name="EditRemoteArea" xml:space="preserve"><value>تعديل منطقة التوصيل</value></data>
+  <data name="EmailMustMatchOrder" xml:space="preserve"><value>يجب أن يطابق البريد الإلكتروني بريد الطلب</value></data>
+  <data name="EnterStreetAddress" xml:space="preserve"><value>أدخل عنوان الشارع</value></data>
+  <data name="EnterYourName" xml:space="preserve"><value>أدخل اسمك</value></data>
+  <data name="EnterYourPhone" xml:space="preserve"><value>أدخل رقم هاتفك</value></data>
+  <data name="ErrorCode" xml:space="preserve"><value>رمز الخطأ</value></data>
+  <data name="ErrorDeletingRemoteArea" xml:space="preserve"><value>تعذر حذف منطقة التوصيل</value></data>
+  <data name="ErrorDetails" xml:space="preserve"><value>تفاصيل الخطأ</value></data>
+  <data name="ErrorLoadingRemoteAreas" xml:space="preserve"><value>تعذر تحميل مناطق التوصيل</value></data>
+  <data name="ExcludeAllServices" xml:space="preserve"><value>استثناء جميع الخدمات</value></data>
+  <data name="ExcludeAllServicesDescription" xml:space="preserve"><value>لن يطبق رمز الخصم على أي خدمة</value></data>
+  <data name="ExcludeSpecificServices" xml:space="preserve"><value>استثناء خدمات محددة</value></data>
+  <data name="ExcludeSpecificServicesDescription" xml:space="preserve"><value>اختر الخدمات التي لا يشملها رمز الخصم</value></data>
+  <data name="Export" xml:space="preserve"><value>تصدير</value></data>
+  <data name="FailedToLoadPaymentLibrary" xml:space="preserve"><value>تعذر تحميل خدمة الدفع</value></data>
+  <data name="FailedToStartPayment" xml:space="preserve"><value>تعذر بدء عملية الدفع</value></data>
+  <data name="GuestReturnInfo" xml:space="preserve"><value>استخدم بريد الطلب ورقمه لطلب الإرجاع</value></data>
+  <data name="GuestReturnRequest" xml:space="preserve"><value>طلب إرجاع للزائر</value></data>
+  <data name="Hide" xml:space="preserve"><value>إخفاء</value></data>
+  <data name="InactiveAreasWontAppear" xml:space="preserve"><value>لن تظهر المناطق غير النشطة عند إتمام الطلب</value></data>
+  <data name="ManageAddresses" xml:space="preserve"><value>إدارة العناوين</value></data>
+  <data name="ManageYourAddresses" xml:space="preserve"><value>إدارة عناوين التوصيل</value></data>
+  <data name="ManageYourNotifications" xml:space="preserve"><value>إدارة إشعاراتك</value></data>
+  <data name="NoActions" xml:space="preserve"><value>لا توجد إجراءات متاحة</value></data>
+  <data name="NoServicesExcluded" xml:space="preserve"><value>لا توجد خدمات مستثناة</value></data>
+  <data name="PaymentError" xml:space="preserve"><value>خطأ في الدفع</value></data>
+  <data name="PaymentFailedPleaseTryAgain" xml:space="preserve"><value>تعذر إتمام الدفع. حاول مرة أخرى</value></data>
+  <data name="PaymentWasCancelled" xml:space="preserve"><value>تم إلغاء الدفع</value></data>
+  <data name="ProductFilter" xml:space="preserve"><value>تصفية المنتجات</value></data>
+  <data name="RefundStatus" xml:space="preserve"><value>حالة استرداد المبلغ</value></data>
+  <data name="RemoteAreaInformation" xml:space="preserve"><value>معلومات منطقة التوصيل</value></data>
+  <data name="Response" xml:space="preserve"><value>الاستجابة</value></data>
+  <data name="ResponseCode" xml:space="preserve"><value>رمز الاستجابة</value></data>
+  <data name="Restore" xml:space="preserve"><value>استعادة</value></data>
+  <data name="RestoreConfirmMessage" xml:space="preserve"><value>هل تريد استعادة هذا العنصر؟</value></data>
+  <data name="Security" xml:space="preserve"><value>الأمان</value></data>
+  <data name="ServiceExclusions" xml:space="preserve"><value>استثناءات الخدمات</value></data>
+  <data name="ServiceIsAlreadyExcluded" xml:space="preserve"><value>هذه الخدمة مستثناة بالفعل</value></data>
+  <data name="ServicesInThisListWillNotReceiveThePromoCodeDiscount" xml:space="preserve"><value>لن يطبق خصم الرمز على الخدمات الموجودة في هذه القائمة</value></data>
+  <data name="ShippingAddress" xml:space="preserve"><value>عنوان التوصيل</value></data>
+  <data name="Slide" xml:space="preserve"><value>الصورة</value></data>
+  <data name="StatusCode" xml:space="preserve"><value>رمز الحالة</value></data>
+  <data name="Support" xml:space="preserve"><value>الدعم</value></data>
+  <data name="TechnicalDetailsLogged" xml:space="preserve"><value>تم تسجيل التفاصيل الفنية</value></data>
+  <data name="Undelete" xml:space="preserve"><value>استعادة</value></data>
+  <data name="ViewNotifications" xml:space="preserve"><value>عرض الإشعارات</value></data>
+  <data name="YesRestoreIt" xml:space="preserve"><value>نعم، استعادة</value></data>
+  <data name="ResendEmailConfirmation" xml:space="preserve"><value>إعادة إرسال تأكيد البريد الإلكتروني</value></data>
+  <data name="EnterEmailAddress" xml:space="preserve"><value>أدخل بريدك الإلكتروني</value></data>
+  <data name="Resend" xml:space="preserve"><value>إعادة الإرسال</value></data>
+  <data name="EmailConfirmationSent" xml:space="preserve"><value>تم إرسال رسالة التأكيد</value></data>
+  <data name="RecoveryCodes" xml:space="preserve"><value>رموز الاسترداد</value></data>
+  <data name="AdminNavOperations" xml:space="preserve"><value>العمليات</value></data>
+  <data name="AdminNavCatalog" xml:space="preserve"><value>الكتالوج</value></data>
+  <data name="AdminNavPromotions" xml:space="preserve"><value>العروض</value></data>
+  <data name="AdminNavServices" xml:space="preserve"><value>الخدمات</value></data>
+  <data name="AdminNavContent" xml:space="preserve"><value>المحتوى</value></data>
+  <data name="AdminNavSettings" xml:space="preserve"><value>الإعدادات</value></data>
+  <data name="Users" xml:space="preserve"><value>المستخدمون</value></data>
+  <data name="UsersList" xml:space="preserve"><value>قائمة المستخدمين</value></data>
+  <data name="CreateAdminUser" xml:space="preserve"><value>إنشاء مستخدم إدارة</value></data>
+  <data name="NoUsersYet" xml:space="preserve"><value>لا يوجد مستخدمون بعد</value></data>
+  <data name="CompaniesList" xml:space="preserve"><value>قائمة الشركات</value></data>
+  <data name="CreateNewCompany" xml:space="preserve"><value>إنشاء شركة جديدة</value></data>
+  <data name="CreateCompany" xml:space="preserve"><value>إنشاء شركة</value></data>
+  <data name="EditCompany" xml:space="preserve"><value>تعديل الشركة</value></data>
+  <data name="CompanyDetails" xml:space="preserve"><value>تفاصيل الشركة</value></data>
+  <data name="NoCompaniesYet" xml:space="preserve"><value>لا توجد شركات بعد</value></data>
+  <data name="AreYouSureDeleteCompany" xml:space="preserve"><value>هل أنت متأكد من حذف هذه الشركة؟</value></data>
+  <data name="CategoryDetails" xml:space="preserve"><value>تفاصيل التصنيف</value></data>
+  <data name="DeleteCategory" xml:space="preserve"><value>حذف التصنيف</value></data>
+  <data name="AreYouSureDeleteCategory" xml:space="preserve"><value>هل أنت متأكد من حذف هذا التصنيف؟</value></data>
+  <data name="NoItemsFound" xml:space="preserve"><value>لا توجد عناصر</value></data>
+  <data name="NoServiceOffersYet" xml:space="preserve"><value>لا توجد عروض خدمات بعد</value></data>
+  <data name="TimezoneAsiaDubai" xml:space="preserve"><value>التوقيت: آسيا/دبي</value></data>
+  <data name="Basics" xml:space="preserve"><value>الأساسيات</value></data>
+  <data name="OptionsVariants" xml:space="preserve"><value>الخيارات والمتغيرات</value></data>
+  <data name="SEO" xml:space="preserve"><value>تحسين محركات البحث</value></data>
+  <data name="FulfillmentActions" xml:space="preserve"><value>إجراءات التنفيذ</value></data>
+  <data name="MarkReceived" xml:space="preserve"><value>تعيين كمستلم</value></data>
+  <data name="ForceComplete" xml:space="preserve"><value>إكمال إجباري</value></data>
+  <data name="NoProductsInThisSale" xml:space="preserve"><value>لا توجد منتجات في هذا العرض</value></data>
+  <data name="NoProductsInThisCombo" xml:space="preserve"><value>لا توجد منتجات في هذه الباقة</value></data>
+  <data name="VideoDurationSizeHint" xml:space="preserve"><value>يفضل فيديو قصير بحجم مناسب للصفحة الرئيسية</value></data>
+  <data name="Role" xml:space="preserve"><value>الدور</value></data>
+  <data name="CreateUser" xml:space="preserve"><value>إنشاء مستخدم</value></data>
+  <data name="BackToManagement" xml:space="preserve"><value>العودة إلى الإدارة</value></data>
+  <data name="ConfirmDeleteNamed" xml:space="preserve"><value>هل تريد حذف {0}؟</value></data>
+  <data name="NoOrdersFound" xml:space="preserve"><value>لا توجد طلبات</value></data>
+  <data name="ExportOrders" xml:space="preserve"><value>تصدير الطلبات</value></data>
+  <data name="ReviewsList" xml:space="preserve"><value>قائمة التقييمات</value></data>
+  <data name="CreateAdminUserToManageAccess" xml:space="preserve"><value>أنشئ مستخدم إدارة لإدارة صلاحيات المتجر.</value></data>
+  <data name="MinimumPasswordCharactersHint" xml:space="preserve"><value>6 أحرف على الأقل</value></data>
+  <data name="PhonePlaceholder" xml:space="preserve"><value>+971 50 000 0000</value></data>
+  <data name="SelectCompanyPlaceholder" xml:space="preserve"><value>اختر الشركة</value></data>
+  <data name="AdminUserCreatedSuccess" xml:space="preserve"><value>تم إنشاء مستخدم {0} بنجاح.</value></data>
+  <data name="ServicePurchasesCardDescription" xml:space="preserve"><value>عرض وإدارة مشتريات الخدمات من العملاء.</value></data>
+  <data name="ServiceOffersCardDescription" xml:space="preserve"><value>إنشاء وإدارة خصومات الخدمات.</value></data>
+  <data name="NoServiceSubscriptionsYet" xml:space="preserve"><value>لا توجد اشتراكات خدمات بعد</value></data>
+  <data name="CreateFirstService" xml:space="preserve"><value>إنشاء أول خدمة</value></data>
+  <data name="NoServicePurchasesYet" xml:space="preserve"><value>لا توجد مشتريات خدمات بعد</value></data>
+  <data name="NoNewsletterSubscribersYet" xml:space="preserve"><value>لا يوجد مشتركون في النشرة بعد</value></data>
+  <data name="ConfirmRestoreBlogNamed" xml:space="preserve"><value>استعادة "{0}" وإظهاره للعملاء؟</value></data>
+  <data name="ConfirmHideBlogNamed" xml:space="preserve"><value>إخفاء "{0}" عن العملاء؟</value></data>
+  <data name="BlogPostUrlLabel" xml:space="preserve"><value>رابط المقال</value></data>
+  <data name="VideoBannerDropZoneHint" xml:space="preserve"><value>اسحب وأفلت أو اختر ملفًا</value></data>
+  <data name="ReplaceVideo" xml:space="preserve"><value>استبدال الفيديو</value></data>
+  <data name="ReplacePoster" xml:space="preserve"><value>استبدال صورة الغلاف</value></data>
+  <data name="ManageAreasForCity" xml:space="preserve"><value>المناطق النائية لهذه المدينة</value></data>
+  <data name="NoReturnRequestsFound" xml:space="preserve"><value>لا توجد طلبات إرجاع</value></data>
+  <data name="ReturnRequestDetails" xml:space="preserve"><value>تفاصيل طلب الإرجاع</value></data>
+  <data name="NotAvailable" xml:space="preserve"><value>غير متوفر</value></data>
+  <data name="UnknownProduct" xml:space="preserve"><value>منتج غير معروف</value></data>
+  <data name="ReturnRequestNumber" xml:space="preserve"><value>طلب الإرجاع #{0}</value></data>
+  <data name="ConfirmApproveReturnRequest" xml:space="preserve"><value>الموافقة على طلب الإرجاع #{0}؟</value></data>
+  <data name="ConfirmRejectReturnRequest" xml:space="preserve"><value>رفض طلب الإرجاع #{0}؟</value></data>
+  <data name="ConfirmMarkReturnReceived" xml:space="preserve"><value>تعيين طلب الإرجاع #{0} كمستلم؟</value></data>
+  <data name="ConfirmCompleteReturnRequest" xml:space="preserve"><value>إكمال طلب الإرجاع #{0} ومعالجة الاسترداد؟</value></data>
+  <data name="Completed" xml:space="preserve"><value>مكتمل</value></data>
+  <data name="HideReview" xml:space="preserve"><value>إخفاء</value></data>
+  <data name="NoReviewsFound" xml:space="preserve"><value>لا توجد تقييمات</value></data>
+  <data name="ViewFullComment" xml:space="preserve"><value>عرض التعليق كاملًا</value></data>
+  <data name="NoComment" xml:space="preserve"><value>لا يوجد تعليق</value></data>
+  <data name="DeleteReviewTitle" xml:space="preserve"><value>حذف تقييم {0}؟</value></data>
+  <data name="DeleteReviewConfirm" xml:space="preserve"><value>سيؤدي هذا إلى حذف تقييم {0} نهائيًا.</value></data>
+  <data name="ExportPreparing" xml:space="preserve"><value>جاري تجهيز التصدير...</value></data>
+  <data name="ExportComplete" xml:space="preserve"><value>اكتمل التصدير</value></data>
+  <data name="ExportReviewsSuccess" xml:space="preserve"><value>تم تصدير التقييمات بنجاح.</value></data>
+  <data name="ErrorTogglingReview" xml:space="preserve"><value>تعذر تحديث حالة التقييم</value></data>
+  <data name="ErrorDeletingReview" xml:space="preserve"><value>تعذر حذف التقييم</value></data>
+  <data name="LoadingProductsHint" xml:space="preserve"><value>إذا استمرت هذه الرسالة، تحقق من وحدة تحكم المتصفح (F12).</value></data>
+  <data name="TabulatorLoadFailed" xml:space="preserve"><value>تعذر تحميل Tabulator. حدّث الصفحة أو تحقق من الاتصال.</value></data>
+  <data name="NewBadge" xml:space="preserve"><value>جديد</value></data>
+  <data name="TrendingBadge" xml:space="preserve"><value>رائج</value></data>
+  <data name="InventoryAndPricing" xml:space="preserve"><value>المخزون والتسعير</value></data>
+  <data name="ProductSummary" xml:space="preserve"><value>ملخص المنتج</value></data>
+  <data name="ProductSlugHelp" xml:space="preserve"><value>يتم إنشاء روابط URL تلقائيًا من عنوان المنتج لروابط مناسبة لمحركات البحث.</value></data>
+  <data name="ProductSlugEnglish" xml:space="preserve"><value>رابط المنتج (إنجليزي)</value></data>
+  <data name="AutoGenerated" xml:space="preserve"><value>يُنشأ تلقائيًا</value></data>
+  <data name="SlugAutoPlaceholder" xml:space="preserve"><value>سيتم إنشاء الرابط تلقائيًا من العنوان</value></data>
+  <data name="ProductSlugExample" xml:space="preserve"><value>مثال: body-builder-whey-protein</value></data>
+  <data name="Anonymous" xml:space="preserve"><value>مجهول</value></data>
+  <data name="FilesSelectedCount" xml:space="preserve"><value>{0} ملف/ملفات محددة</value></data>
+  <data name="NewFilesSelectedCount" xml:space="preserve"><value>{0} ملف/ملفات جديدة محددة</value></data>
+  <data name="InvalidProductId" xml:space="preserve"><value>معرّف منتج غير صالح</value></data>
+  <data name="MultipleFileSelectionNotSupported" xml:space="preserve"><value>متصفحك لا يدعم اختيار عدة ملفات. يرجى اختيار جميع الملفات دفعة واحدة.</value></data>
+  <data name="ErrorSubmittingForm" xml:space="preserve"><value>تعذر إرسال النموذج. يرجى المحاولة مرة أخرى.</value></data>
+  <data name="FlashSaleImageLabel" xml:space="preserve"><value>صورة التخفيض</value></data>
+  <data name="UploadFlashSaleImageHelp" xml:space="preserve"><value>ارفع صورة لعرض التخفيض.</value></data>
+  <data name="DashboardDescription" xml:space="preserve"><value>الطلبات والمنتجات التي تحتاج متابعة.</value></data>
+  <data name="NeedsAttention" xml:space="preserve"><value>يحتاج متابعة</value></data>
+  <data name="CollapseSidebar" xml:space="preserve"><value>طي الشريط الجانبي</value></data>
+  <data name="ExpandSidebar" xml:space="preserve"><value>توسيع الشريط الجانبي</value></data>
+  <data name="CouldNotLoadDashboard" xml:space="preserve"><value>تعذر تحميل إحصاءات لوحة التحكم.</value></data>
+  <data name="CannotDeleteServiceWithPurchases" xml:space="preserve"><value>هذه الخدمة لديها {0} عملية شراء. أزل المشتريات قبل الحذف.</value></data>
+  <data name="PartiallyRefunded" xml:space="preserve"><value>مسترد جزئياً</value></data>
+  <data name="Authorized" xml:space="preserve"><value>مصرّح</value></data>
+  <data name="ServiceStatus" xml:space="preserve"><value>حالة الخدمة</value></data>
+  <data name="ZoomImage" xml:space="preserve"><value>تكبير الصورة</value></data>
 </root>

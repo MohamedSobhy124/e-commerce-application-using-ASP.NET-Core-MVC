@@ -26,6 +26,11 @@
 .hero-search-box-sticky {
     position: sticky;
     top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
     z-index: 999;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px) saturate(180%);
@@ -109,7 +114,7 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%);
     color: var(--white);
     border: none;
     font-size: 1.2rem;
@@ -151,7 +156,7 @@
 }
 
 .mobile-search-toggle.active {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, #c82333 100%);
     box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
 }
 
@@ -237,7 +242,7 @@
 .cart-action-btn {
     background: linear-gradient(135deg, rgba(59, 157, 213, 0.1) 0%, rgba(123, 192, 67, 0.1) 100%);
     border-color: rgba(59, 157, 213, 0.3);
-    color: #3B9DD5;
+    color: var(--iw-action-blue);
 }
 
 .cart-action-btn::before {
@@ -245,7 +250,7 @@
 }
 
 .cart-action-btn:hover {
-    background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%);
     border-color: transparent;
     color: var(--white);
     box-shadow: 0 8px 24px rgba(59, 157, 213, 0.35), 0 4px 12px rgba(123, 192, 67, 0.25);
@@ -273,7 +278,7 @@
 .filter-action-btn {
     background: linear-gradient(135deg, rgba(107, 114, 128, 0.1) 0%, rgba(75, 85, 99, 0.1) 100%);
     border-color: rgba(107, 114, 128, 0.3);
-    color: #6b7280;
+    color: var(--iw-muted);
 }
 
 .filter-action-btn::before {
@@ -281,7 +286,7 @@
 }
 
 .filter-action-btn:hover {
-    background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%);
     border-color: transparent;
     color: var(--white);
     box-shadow: 0 8px 24px rgba(59, 157, 213, 0.35), 0 4px 12px rgba(123, 192, 67, 0.25);
@@ -292,7 +297,7 @@
     position: absolute;
     top: -6px;
     right: -6px;
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, #c82333 100%);
     color: var(--white);
     border-radius: 12px;
     min-width: 22px;
@@ -361,7 +366,7 @@
     border-radius: 12px;
     background: rgba(59, 157, 213, 0.1);
     border: 2px solid rgba(59, 157, 213, 0.2);
-    color: #3B9DD5;
+    color: var(--iw-action-blue);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     align-items: center;
@@ -546,7 +551,7 @@
         padding: 0.3rem 0.4rem;
         font-size: 0.8rem;
         outline: none;
-        color: #1e293b;
+        color: var(--iw-ink);
         min-width: 0;
         width: 100%;
     }
@@ -600,7 +605,7 @@
         border-radius: 50%;
         background: rgba(107, 114, 128, 0.1);
         border: none;
-        color: #6b7280;
+        color: var(--iw-muted);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -846,7 +851,7 @@
     padding: 0.4rem 0.6rem;
     font-size: 0.875rem;
     outline: none;
-    color: #1e293b;
+    color: var(--iw-ink);
     width: 100%;
 }
 
@@ -870,7 +875,7 @@
 }
 
 .hero-search-box-sticky .hero-search-btn {
-    background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%);
     color: white;
     border: none;
     border-radius: 50px;

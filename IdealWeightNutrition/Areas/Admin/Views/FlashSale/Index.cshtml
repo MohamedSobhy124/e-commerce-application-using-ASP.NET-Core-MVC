@@ -12,31 +12,29 @@
     <div class="container">
         <div class="admin-card">
             <div class="admin-card-header">
-                <h2 class="admin-card-title">
+                <h1 class="admin-card-title">
                     <i class="bi bi-lightning-charge-fill me-3"></i>
                     @Localizer["FlashSalesManagement"]
-                </h2>
+                </h1>
             </div>
 
             <div class="admin-card-body">
-                <div class="text-end mb-4">
-                    <a asp-action="Create" class="btn btn-primary btn-lg">
-                        <i class="bi bi-plus-circle me-2"></i>
+                <div class="admin-toolbar">
+                    <p class="admin-toolbar-meta mb-0">@Model.Count() @Localizer["FlashSalesManagement"]</p>
+                    <a asp-action="Create" class="create-new-btn">
+                        <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>
                         @Localizer["CreateNewFlashSale"]
                     </a>
                 </div>
 
                 @if (!Model.Any())
                 {
-                    <div class="alert alert-info text-center py-5">
-                        <i class="bi bi-info-circle" style="font-size: 3rem; color: #3B9DD5;"></i>
-                        <h4 class="mt-3">@Localizer["NoFlashSalesYet"]</h4>
-                        <p class="mb-3">@Localizer["CreateFlashSaleToBoostSales"]</p>
-                        <a asp-action="Create" class="btn btn-primary">
-                            <i class="bi bi-plus-circle me-2"></i>
-                            @Localizer["CreateFirstFlashSale"]
-                        </a>
-                    </div>
+                    ViewData["EmptyIcon"] = "bi-lightning-charge";
+                    ViewData["EmptyTitle"] = Localizer["NoFlashSalesYet"].Value;
+                    ViewData["EmptyText"] = Localizer["CreateFlashSaleToBoostSales"].Value;
+                    ViewData["EmptyActionUrl"] = Url.Action("Create");
+                    ViewData["EmptyActionText"] = Localizer["CreateFirstFlashSale"].Value;
+                    <partial name="_AdminEmptyState" />
                 }
                 else
                 {
@@ -80,28 +78,19 @@
                             }
 
                             <div class="col-md-6 col-lg-4">
-                                <div class="card flash-sale-card @cardBorder" style="border-width: 2px;">
-                                    <!-- Status Badge -->
+                                <div class="card flash-sale-card @cardBorder" id="flashSaleCard_@flashSale.Id">
                                     <div class="position-absolute top-0 end-0 m-3">
-                                        <span class="badge @statusBadge fs-6">
-                                            <i class="bi @statusIcon me-1"></i>
-                                            @if (!flashSale.IsActive)
-                                            {
-                                                <text>@Localizer["Inactive"]</text>
-                                            }
-                                            else if (hasEnded)
-                                            {
-                                                <text>@Localizer["Ended"]</text>
-                                            }
-                                            else if (isActive)
-                                            {
-                                                <text>@Localizer["Active"]</text>
-                                            }
-                                            else
-                                            {
-                                                <text>@Localizer["Scheduled"]</text>
-                                            }
-                                        </span>
+                                        <span id="flashSaleStatus_@flashSale.Id"
+                                              data-schedule-badge
+                                              data-badge-class="badge fs-6"
+                                              data-enabled="@flashSale.IsActive.ToString().ToLower()"
+                                              data-start="@flashSale.StartDate.ToString("yyyy-MM-ddTHH:mm:ss")"
+                                              data-end="@flashSale.EndDate.ToString("yyyy-MM-ddTHH:mm:ss")"
+                                              data-label-active="@Localizer["Active"].Value"
+                                              data-label-scheduled="@Localizer["Scheduled"].Value"
+                                              data-label-ended="@Localizer["Ended"].Value"
+                                              data-label-inactive="@Localizer["Inactive"].Value"
+                                              class="badge @statusBadge fs-6">@Localizer["Inactive"]</span>
                                     </div>
 
                                     <div class="card-body">
@@ -120,13 +109,14 @@
                                         <!-- Dates -->
                                         <div class="mb-3">
                                             <small class="d-flex mb-1">
-                                                <i class="bi bi-calendar-event text-success me-1"></i>
-                                                <strong>@Localizer["Start"]:</strong> @flashSale.StartDate.ToString("MMM dd, yyyy HH:mm")
+                                                <i class="bi bi-calendar-event text-success me-1" aria-hidden="true"></i>
+                                                <strong>@Localizer["Start"]:</strong> @flashSale.StartDate.ToString("yyyy-MM-dd HH:mm")
                                             </small>
                                             <small class="d-flex">
-                                                <i class="bi bi-calendar-x text-danger me-1"></i>
-                                                <strong>@Localizer["End"]:</strong> @flashSale.EndDate.ToString("MMM dd, yyyy HH:mm")
+                                                <i class="bi bi-calendar-x text-danger me-1" aria-hidden="true"></i>
+                                                <strong>@Localizer["End"]:</strong> @flashSale.EndDate.ToString("yyyy-MM-dd HH:mm")
                                             </small>
+                                            <small class="text-muted admin-schedule-hint">@Localizer["TimezoneAsiaDubai"]</small>
                                         </div>
 
                                         <!-- Stats -->
@@ -138,7 +128,7 @@
                                                 <small class="text-muted">@Localizer["Products"]</small>
                                             </div>
                                             <div class="text-center flex-fill border-start">
-                                                <div style="font-size: 1.4rem; font-weight: 800; color: #7BC043;">
+                                                <div style="font-size: 1.4rem; font-weight: 800; color: var(--iw-action-green);">
                                                     @totalQty
                                                 </div>
                                                 <small class="text-muted">@Localizer["TotalQty"]</small>
@@ -159,7 +149,7 @@
                                                 </a>
                                             </div>
                                             <div class="btn-group">
-                                                <button onclick="toggleActive(@flashSale.Id)" class="btn btn-sm @(flashSale.IsActive ? "btn-warning" : "btn-success")" id="toggleBtn_@flashSale.Id">
+                                                <button type="button" onclick="toggleActive(@flashSale.Id)" class="btn btn-sm @(flashSale.IsActive ? "btn-warning" : "btn-success")" id="toggleBtn_@flashSale.Id" data-flash-active="@flashSale.IsActive.ToString().ToLower()">
                                                     <i class="bi @(flashSale.IsActive ? "bi-pause" : "bi-play") me-1"></i>
                                                     @(flashSale.IsActive ? Localizer["Deactivate"] : Localizer["Activate"])
                                                 </button>
@@ -205,7 +195,22 @@
                     .then(data => {
                         if (data.success) {
                             toastr.success(data.message);
-                            setTimeout(() => location.reload(), 1000);
+                            var statusEl = document.getElementById('flashSaleStatus_' + id);
+                            var toggleBtn = document.getElementById('toggleBtn_' + id);
+                            if (statusEl) {
+                                statusEl.setAttribute('data-enabled', data.isActive ? 'true' : 'false');
+                                if (typeof refreshScheduleBadges === 'function') {
+                                    refreshScheduleBadges();
+                                }
+                            }
+                            if (toggleBtn) {
+                                toggleBtn.dataset.flashActive = data.isActive ? 'true' : 'false';
+                                toggleBtn.classList.toggle('btn-warning', data.isActive);
+                                toggleBtn.classList.toggle('btn-success', !data.isActive);
+                                toggleBtn.innerHTML = data.isActive
+                                    ? '<i class="bi bi-pause me-1" aria-hidden="true"></i>@Html.Raw(Localizer["Deactivate"].Value)'
+                                    : '<i class="bi bi-play me-1" aria-hidden="true"></i>@Html.Raw(Localizer["Activate"].Value)';
+                            }
                         } else {
                             toastr.error(data.message);
                         }

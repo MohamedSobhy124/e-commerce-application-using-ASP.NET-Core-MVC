@@ -34,7 +34,7 @@
                                 <img src="@comboOffer.ImageUrl" alt="@(currentCulture == "ar" && !string.IsNullOrEmpty(comboOffer.NameAr) ? comboOffer.NameAr : comboOffer.Name)" class="combo-offer-image" />
                             }
                             <div class="combo-offer-badge">
-                                <span class="badge bg-danger">@comboOffer.DiscountPercentage.ToString("F0")% @Localizer["Off"]</span>
+                                <span class="badge bg-danger">@(comboOffer.DiscountPercentage.ToString("F0"))% @Localizer["OFF"]</span>
                             </div>
                             @if (comboOffer.IsCurrentlyActive)
                             {

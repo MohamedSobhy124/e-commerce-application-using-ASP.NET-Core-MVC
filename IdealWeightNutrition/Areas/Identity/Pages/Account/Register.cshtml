@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model RegisterModel
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
@@ -11,7 +11,7 @@
     <div class="auth-card" style="max-width: 600px;">
         <div class="auth-header">
             <i class="bi bi-heart-pulse"></i>
-            <h2>@Localizer["CreateAccount"]</h2>
+            <h1>@Localizer["CreateAccount"]</h1>
             <p>@Localizer["JoinIdealWeightToday"]</p>
         </div>
         <div class="auth-body">
@@ -55,7 +55,7 @@
                     </div>
 
                     <!-- Email Verification OTP Section -->
-                    <div id="emailVerificationSection" class="col-md-12 form-group" style="display: none; margin-top: 15px; padding: 20px; background: #f0f9ff; border-radius: 8px; border: 2px solid #0ea5e9;">
+                    <div id="emailVerificationSection" class="col-md-12 form-group" style="display: none; margin-top: 15px; padding: 20px; background: var(--iw-light-blue); border-radius: 8px; border: 2px solid #0ea5e9;">
                         <div class="d-flex align-items-center mb-3">
                             <i class="bi bi-shield-check text-primary me-2" style="font-size: 1.5rem;"></i>
                             <div>

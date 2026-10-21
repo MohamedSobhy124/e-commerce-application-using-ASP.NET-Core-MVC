@@ -10,251 +10,193 @@
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var orderId = Model.OrderHeader.Id;
+    var orderStatus = Model.OrderHeader.OrderStatus ?? string.Empty;
+    var paymentStatus = Model.OrderHeader.PaymentStatus ?? string.Empty;
+    var canCancelOrder = orderStatus != SD.StatusCancelled && orderStatus != SD.StatusShipped && orderStatus != SD.StatusDelivered;
+    var canRefundOrder = paymentStatus == SD.PaymentStatusPaid && orderStatus != SD.StatusCancelled;
+    var showForceComplete = orderStatus != SD.StatusDelivered && orderStatus != SD.StatusCancelled;
+    var showForceCancel = orderStatus != SD.StatusCancelled;
+    var timelineCurrent = orderStatus switch
+    {
+        SD.StatusCancelled => "cancelled",
+        SD.StatusDelivered => "delivered",
+        SD.StatusShipped => "shipped",
+        SD.StatusInProcess => "processing",
+        SD.StatusApproved or SD.StatusPaid => "approved",
+        _ => "placed"
+    };
 }
 
 <partial name="_Notifications" />
+@Html.AntiForgeryToken()
 
-<div class="order-details-wrapper">
+<div class="admin-wrapper">
     <div class="container">
-        <!-- Back Button -->
-        <a asp-action="Index" class="back-to-list-btn">
-            <i class="bi bi-arrow-left"></i>
-            @Localizer["Admin_BackToOrdersList"]
-        </a>
+        <div class="admin-card">
+            <div class="admin-card-body">
+                <a asp-action="Index" class="btn btn-outline-secondary mb-4">
+                    <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>
+                    @Localizer["Admin_BackToOrdersList"]
+                </a>
 
-        <!-- Order Details Card -->
-        <div class="order-details-card">
-            <!-- Header -->
-            <div class="order-details-header">
-                <div class="order-header-left">
-                    <h1>
-                        <i class="bi bi-receipt me-3"></i>
-                        @Localizer["Admin_Order"] #@Model.OrderHeader.Id
-                    </h1>
-                    <p>
-                        <i class="bi bi-calendar3 me-2"></i>
-                        @Localizer["Admin_PlacedOn"] @Model.OrderHeader.OrderDate.ToString("MMM dd, yyyy hh:mm tt")
-                    </p>
+                <div class="admin-order-details-header">
+                    <div>
+                        <h1 class="admin-card-title mb-2">
+                            <i class="bi bi-receipt me-2" aria-hidden="true"></i>
+                            @Localizer["Admin_Order"] #@orderId
+                        </h1>
+                        <p class="admin-order-meta">
+                            <i class="bi bi-calendar3 me-2" aria-hidden="true"></i>
+                            @Localizer["Admin_PlacedOn"] @Model.OrderHeader.OrderDate.ToString("MMM dd, yyyy hh:mm tt")
+                        </p>
+                    </div>
+                    <div class="admin-order-badge-group">
+                        <span class="badge bg-primary">@Model.OrderHeader.OrderStatus</span>
+                        <span class="badge bg-secondary">@Model.OrderHeader.PaymentStatus</span>
+                    </div>
                 </div>
-                <div class="order-status-badges">
-                    @{
-                        var orderStatusClass = Model.OrderHeader.OrderStatus?.ToLower() switch
-                        {
-                            var s when s.Contains("pending") => "pending",
-                            var s when s.Contains("approved") => "approved",
-                            var s when s.Contains("process") => "processing",
-                            var s when s.Contains("shipped") => "shipped",
-                            var s when s.Contains("cancel") => "cancelled",
-                            _ => "pending"
-                        };
 
-                        var paymentStatusClass = Model.OrderHeader.PaymentStatus?.ToLower() switch
-                        {
-                            var s when s.Contains("approved") || s.Contains("paid") => "approved",
-                            var s when s.Contains("pending") => "pending",
-                            var s when s.Contains("rejected") || s.Contains("refunded") => "cancelled",
-                            _ => "pending"
-                        };
+                <nav class="admin-status-timeline" aria-label="@Localizer["Admin_OrderTimeline"]">
+                    <span class="admin-status-step @(timelineCurrent == "placed" ? "is-current" : "")">@Localizer["Admin_OrderPlaced"]</span>
+                    <span class="admin-status-step @(timelineCurrent == "approved" ? "is-current" : "")">@Localizer["Approved"]</span>
+                    <span class="admin-status-step @(timelineCurrent == "processing" ? "is-current" : "")">@Localizer["Processing"]</span>
+                    <span class="admin-status-step @(timelineCurrent == "shipped" ? "is-current" : "")">@Localizer["Shipped"]</span>
+                    <span class="admin-status-step @(timelineCurrent == "delivered" ? "is-current" : "")">@Localizer["Delivered"]</span>
+                    @if (timelineCurrent == "cancelled")
+                    {
+                        <span class="admin-status-step is-current">@Localizer["Cancelled"]</span>
                     }
-                    <div class="status-badge @orderStatusClass">
-                        <i class="bi bi-box"></i>
-                        @Model.OrderHeader.OrderStatus
-                    </div>
-                    <div class="status-badge @paymentStatusClass">
-                        <i class="bi bi-credit-card"></i>
-                        @Model.OrderHeader.PaymentStatus
-                    </div>
-                </div>
-            </div>
+                </nav>
 
-            <!-- Body -->
-            <div class="order-details-body">
-                <!-- Order Information Grid -->
-                <div class="order-info-grid">
-                    <!-- Customer Information -->
-                    <div class="info-card">
-                        <div class="info-card-header">
-                            <div class="info-card-icon">
-                                <i class="bi bi-person"></i>
-                            </div>
-                            <h3 class="info-card-title">@Localizer["Admin_CustomerInformation"]</h3>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">@Localizer["Admin_Name"]</span>
-                            <span class="info-value">@Model.OrderHeader.Name</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">@Localizer["Admin_Email"]</span>
-                            <span class="info-value">
-                                @if (Model.OrderHeader.IsGuestOrder || Model.OrderHeader.ApplicationUser == null)
-                                {
-                                    @(Model.OrderHeader.Email ?? "N/A")
-                                    @if (Model.OrderHeader.IsGuestOrder)
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-4">
+                        <section class="admin-form-section-card">
+                            <h2>@Localizer["Admin_CustomerInformation"]</h2>
+                            <dl class="admin-details-list">
+                                <dt>@Localizer["Admin_Name"]</dt>
+                                <dd>@Model.OrderHeader.Name</dd>
+                                <dt>@Localizer["Admin_Email"]</dt>
+                                <dd>
+                                    @if (Model.OrderHeader.IsGuestOrder || Model.OrderHeader.ApplicationUser == null)
                                     {
-                                        <span class="badge bg-info ms-2">@Localizer["Admin_Guest"]</span>
+                                        @(Model.OrderHeader.Email ?? Localizer["NA"])
+                                        @if (Model.OrderHeader.IsGuestOrder)
+                                        {
+                                            <span class="badge bg-info ms-2">@Localizer["Admin_Guest"]</span>
+                                        }
                                     }
-                                }
-                                else
+                                    else
+                                    {
+                                        @Model.OrderHeader.ApplicationUser.Email
+                                    }
+                                </dd>
+                                <dt>@Localizer["Admin_Phone"]</dt>
+                                <dd>@Model.OrderHeader.PhoneNumber</dd>
+                            </dl>
+                        </section>
+                    </div>
+                    <div class="col-lg-4">
+                        <section class="admin-form-section-card">
+                            <h2>@Localizer["Admin_ShippingInformation"]</h2>
+                            <dl class="admin-details-list">
+                                <dt>@Localizer["Admin_Address"]</dt>
+                                <dd>@Model.OrderHeader.StreetAddress</dd>
+                                <dt>@Localizer["Admin_City"]</dt>
+                                <dd>@Model.OrderHeader.City</dd>
+                                <dt>@Localizer["Admin_State"]</dt>
+                                <dd>@Model.OrderHeader.State</dd>
+                                <dt>@Localizer["Admin_PostalCode"]</dt>
+                                <dd>@Model.OrderHeader.PostalCode</dd>
+                            </dl>
+                        </section>
+                    </div>
+                    <div class="col-lg-4">
+                        <section class="admin-form-section-card">
+                            <h2>@Localizer["Admin_OrderSummary"]</h2>
+                            <dl class="admin-details-list">
+                                <dt>@Localizer["Admin_OrderDate"]</dt>
+                                <dd>@Model.OrderHeader.OrderDate.ToString("MMM dd, yyyy")</dd>
+                                @if (Model.OrderHeader.ShippingDate != DateTime.MinValue)
                                 {
-                                    @Model.OrderHeader.ApplicationUser.Email
+                                    <dt>@Localizer["Admin_ShippingDate"]</dt>
+                                    <dd>@Model.OrderHeader.ShippingDate.ToString("MMM dd, yyyy")</dd>
                                 }
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">@Localizer["Admin_Phone"]</span>
-                            <span class="info-value">@Model.OrderHeader.PhoneNumber</span>
-                        </div>
-                    </div>
-
-                    <!-- Shipping Information -->
-                    <div class="info-card">
-                        <div class="info-card-header">
-                            <div class="info-card-icon">
-                                <i class="bi bi-truck"></i>
-                            </div>
-                            <h3 class="info-card-title">@Localizer["Admin_ShippingInformation"]</h3>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">@Localizer["Admin_Address"]</span>
-                            <span class="info-value">@Model.OrderHeader.StreetAddress</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">@Localizer["Admin_City"]</span>
-                            <span class="info-value">@Model.OrderHeader.City</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">@Localizer["Admin_State"]</span>
-                            <span class="info-value">@Model.OrderHeader.State</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">@Localizer["Admin_PostalCode"]</span>
-                            <span class="info-value">@Model.OrderHeader.PostalCode</span>
-                        </div>
-                    </div>
-
-                    <!-- Order Summary -->
-                    <div class="info-card">
-                        <div class="info-card-header">
-                            <div class="info-card-icon">
-                                <i class="bi bi-cash-stack"></i>
-                            </div>
-                            <h3 class="info-card-title">@Localizer["Admin_OrderSummary"]</h3>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">@Localizer["Admin_OrderDate"]</span>
-                            <span class="info-value">@Model.OrderHeader.OrderDate.ToString("MMM dd, yyyy")</span>
-                        </div>
-                        @if (Model.OrderHeader.ShippingDate != DateTime.MinValue)
-                        {
-                            <div class="info-row">
-                                <span class="info-label">@Localizer["Admin_ShippingDate"]</span>
-                                <span class="info-value">@Model.OrderHeader.ShippingDate.ToString("MMM dd, yyyy")</span>
-                            </div>
-                        }
-                        <div class="info-row">
-                            <span class="info-label">@Localizer["Admin_OrderStatus"]</span>
-                            <span class="info-value success">@Model.OrderHeader.OrderStatus</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">@Localizer["Admin_OrderTotal"]</span>
-                            <span class="info-value highlight">@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2")</span>
-                        </div>
+                                <dt>@Localizer["Admin_OrderTotal"]</dt>
+                                <dd>@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2")</dd>
+                            </dl>
+                        </section>
                     </div>
                 </div>
 
-                <!-- Payment Information -->
-                <div class="payment-info-box">
-                    <h4>
-                        <i class="bi bi-credit-card-2-front"></i>
-                        @Localizer["Admin_PaymentDetails"]
-                    </h4>
-                    <div class="payment-details">
-                        <div class="payment-detail-item">
-                            <span class="payment-label">@Localizer["Admin_PaymentStatus"]</span>
-                            <span class="payment-value">@Model.OrderHeader.PaymentStatus</span>
-                        </div>
+                <section class="admin-form-section-card mb-4">
+                    <h2>@Localizer["Admin_PaymentDetails"]</h2>
+                    <dl class="admin-details-list">
+                        <dt>@Localizer["Admin_PaymentStatus"]</dt>
+                        <dd>@Model.OrderHeader.PaymentStatus</dd>
                         @if (!string.IsNullOrEmpty(Model.OrderHeader.PaymentMethod))
                         {
-                            <div class="payment-detail-item">
-                                <span class="payment-label">@Localizer["PaymentMethod"]</span>
-                                <span class="payment-value" style="font-size: 0.875rem; word-break: break-all;">@Model.OrderHeader.PaymentMethod</span>
-                            </div>
+                            <dt>@Localizer["PaymentMethod"]</dt>
+                            <dd class="text-break">@Model.OrderHeader.PaymentMethod</dd>
                         }
                         @if (!string.IsNullOrEmpty(Model.OrderHeader.SessionId))
                         {
-                            <div class="payment-detail-item">
-                                <span class="payment-label">@Localizer["Admin_SessionID"]</span>
-                                <span class="payment-value" style="font-size: 0.875rem; word-break: break-all;">@Model.OrderHeader.SessionId</span>
-                            </div>
-                        }  
-                       
+                            <dt>@Localizer["Admin_SessionID"]</dt>
+                            <dd class="text-break">@Model.OrderHeader.SessionId</dd>
+                        }
                         @if (!string.IsNullOrEmpty(Model.OrderHeader.PaymentIntentId))
                         {
-                            <div class="payment-detail-item">
-                                <span class="payment-label">@Localizer["Admin_PaymentIntentID"]</span>
-                                <span class="payment-value" style="font-size: 0.875rem; word-break: break-all;">@Model.OrderHeader.PaymentIntentId</span>
-                            </div>
+                            <dt>@Localizer["Admin_PaymentIntentID"]</dt>
+                            <dd class="text-break">@Model.OrderHeader.PaymentIntentId</dd>
                         }
                         @if (Model.OrderHeader.PaymentDate != DateTime.MinValue)
                         {
-                            <div class="payment-detail-item">
-                                <span class="payment-label">@Localizer["Admin_PaymentDate"]</span>
-                                <span class="payment-value">@Model.OrderHeader.PaymentDate.ToString("MMM dd, yyyy")</span>
-                            </div>
+                            <dt>@Localizer["Admin_PaymentDate"]</dt>
+                            <dd>@Model.OrderHeader.PaymentDate.ToString("MMM dd, yyyy")</dd>
                         }
-                    </div>
-                </div>
+                    </dl>
+                </section>
 
-                <!-- Order Items -->
-                <div class="order-items-section">
-                    <div class="order-items-header">
-                        <h3>
-                            <i class="bi bi-basket3"></i>
-                            @Localizer["Admin_OrderItems"]
-                        </h3>
-                    </div>
-                    <table class="order-items-table">
-                        <thead>
-                            <tr>
-                                <th>@Localizer["Admin_Product"]</th>
-                                <th style="text-align: center;">@Localizer["Admin_Quantity"]</th>
-                                <th style="text-align: right;">@Localizer["Admin_Price"]</th>
-                                <th style="text-align: right;">@Localizer["Admin_Total"]</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var detail in Model.OrderDetail)
-                            {
+                <section class="admin-form-section-card mb-4">
+                    <h2>@Localizer["Admin_OrderItems"]</h2>
+                    <div class="table-responsive">
+                        <table class="table order-items-table align-middle mb-0">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <div class="product-info" style="display:flex">
-                                            <img src="@detail.Product.ImageUrl" alt="@detail.Product.Title" class="product-image" style="max-height: 10rem !important;" />
-                                            <div class="product-details">
-                                                <h4>@detail.Product.Title</h4>
-                                                <p>by @detail.Product.Author</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td style="text-align: center;">
-                                        <span class="quantity-badge">@detail.Count</span>
-                                    </td>
-                                    <td style="text-align: right;" class="price-cell">
-                                        @Html.Raw(currencySymbol) @detail.Price.ToString("N2")
-                                    </td>
-                                    <td style="text-align: right;" class="total-cell">
-                                        @Html.Raw(currencySymbol) @((detail.Price * detail.Count).ToString("N2"))
-                                    </td>
+                                    <th scope="col">@Localizer["Admin_Product"]</th>
+                                    <th scope="col" class="text-center">@Localizer["Admin_Quantity"]</th>
+                                    <th scope="col" class="text-end">@Localizer["Admin_Price"]</th>
+                                    <th scope="col" class="text-end">@Localizer["Admin_Total"]</th>
                                 </tr>
-                            }
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="3" class="label">@Localizer["Admin_OrderTotal"]:</td>
-                                <td class="value">@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2")</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                @foreach (var detail in Model.OrderDetail)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="admin-product-row">
+                                                <img src="@detail.Product.ImageUrl" alt="@detail.Product.Title" width="64" height="64" loading="lazy" />
+                                                <div>
+                                                    <div class="fw-semibold">@detail.Product.Title</div>
+                                                    <div class="text-muted small">@detail.Product.Author</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">@detail.Count</td>
+                                        <td class="text-end">@Html.Raw(currencySymbol) @detail.Price.ToString("N2")</td>
+                                        <td class="text-end">@Html.Raw(currencySymbol) @((detail.Price * detail.Count).ToString("N2"))</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end fw-semibold">@Localizer["Admin_OrderTotal"]</td>
+                                    <td class="text-end fw-bold">@Html.Raw(currencySymbol) @Model.OrderHeader.OrderTotal.ToString("N2")</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </section>
 
                 <!-- Editable Information (For Admin) -->
                 <form method="post">
@@ -317,8 +259,8 @@
                         </div>
                         
                         <div class="text-end mt-4">
-                            <button type="submit" asp-action="UpdateOrderDetail" class="action-btn action-btn-primary">
-                                <i class="bi bi-check-circle"></i>
+                            <button type="submit" asp-action="UpdateOrderDetail" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2" aria-hidden="true"></i>
                                 @Localizer["Admin_UpdateOrderDetails"]
                             </button>
                         </div>
@@ -328,36 +270,29 @@
               
                 <!-- Manual Payment Reconciliation (Admin Tools) -->
                 <div class="payment-reconciliation-section">
-                    <h3>
-                        <i class="bi bi-shield-check"></i>
+                    <h2 class="h5 mb-2">
+                        <i class="bi bi-shield-check me-2" aria-hidden="true"></i>
                         @Localizer["Admin_PaymentReconciliation"]
-                    </h3>
-                    <p class="section-description">
+                    </h2>
+                    <p class="text-muted mb-3">
                         @Localizer["Admin_PaymentReconciliationDescription"]
                     </p>
 
-                    <div class="reconciliation-actions">
-                        <!-- Recheck Payment Status -->
-                        <form method="post" asp-action="RecheckPaymentStatus" style="display:inline-block;">
-                            <input type="hidden" name="id" value="@Model.OrderHeader.Id" />
-                            <button type="submit" class="action-btn action-btn-info" 
-                                    title="@Localizer["Admin_RecheckPaymentStatusTooltip"]">
-                                <i class="bi bi-arrow-clockwise"></i>
+                    <div class="admin-header-actions mb-3">
+                        <form method="post" asp-action="RecheckPaymentStatus" class="d-inline">
+                            <input type="hidden" name="id" value="@orderId" />
+                            <button type="submit" class="btn btn-outline-primary" title="@Localizer["Admin_RecheckPaymentStatusTooltip"]">
+                                <i class="bi bi-arrow-clockwise me-2" aria-hidden="true"></i>
                                 @Localizer["Admin_RecheckPaymentStatus"]
                             </button>
                         </form>
-                         
-                        <!-- View Audit Log -->
-                        <a href="#auditLogSection" class="action-btn action-btn-secondary"
-                           onclick="loadAuditLog(@Model.OrderHeader.Id); return false;"
-                           title="@Localizer["Admin_ViewAuditLogTooltip"]">
-                            <i class="bi bi-journal-text"></i>
+                        <button type="button" class="btn btn-outline-secondary" id="btnViewAuditLog" title="@Localizer["Admin_ViewAuditLogTooltip"]">
+                            <i class="bi bi-journal-text me-2" aria-hidden="true"></i>
                             @Localizer["Admin_ViewAuditLog"]
-                        </a>
+                        </button>
                     </div>
 
-                    <!-- Audit Log Section (Initially hidden, loaded via AJAX) -->
-                    <div id="auditLogSection" class="audit-log-section" style="display:none;">
+                    <div id="auditLogSection" class="audit-log-section d-none">
                         <h4>
                             <i class="bi bi-clock-history"></i>
                             @Localizer["Admin_AuditTrail"]
@@ -369,405 +304,95 @@
                         </div>
                     </div>
                 </div>
-                <!-- Order Actions -->
-                <div class="order-actions">
+                <div class="form-actions form-actions--sticky">
                     @if (Model.OrderHeader.OrderStatus == SD.StatusPaid || Model.OrderHeader.OrderStatus == SD.StatusApproved)
                     {
-                        <form method="post" asp-action="StartProcessing">
-                            <input type="hidden" name="id" value="@Model.OrderHeader.Id" />
-                            <button type="submit" class="action-btn action-btn-info">
-                                <i class="bi bi-play-circle"></i>
+                        <form method="post" asp-action="StartProcessing" class="d-inline">
+                            <input type="hidden" name="id" value="@orderId" />
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-play-circle me-2" aria-hidden="true"></i>
                                 @Localizer["Admin_StartProcessing"]
                             </button>
                         </form>
                     }
-
                     @if (Model.OrderHeader.OrderStatus == SD.StatusInProcess)
                     {
-                        <form method="post" asp-action="ShipOrder">
-                            <input type="hidden" name="id" value="@Model.OrderHeader.Id" />
+                        <form method="post" asp-action="ShipOrder" class="d-inline">
+                            <input type="hidden" name="id" value="@orderId" />
                             <input type="hidden" name="carrier" value="@Model.OrderHeader.Carrier" />
                             <input type="hidden" name="trackingNumber" value="@Model.OrderHeader.TrackingNumber" />
-                            <button type="submit" class="action-btn action-btn-success">
-                                <i class="bi bi-truck"></i>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-truck me-2" aria-hidden="true"></i>
                                 @Localizer["Admin_ShipOrder"]
                             </button>
                         </form>
                     }
-
                     @if (Model.OrderHeader.OrderStatus == SD.StatusShipped)
                     {
-                        <form method="post" asp-action="MarkAsDelivered">
-                            <input type="hidden" name="id" value="@Model.OrderHeader.Id" />
-                            <button type="submit" class="action-btn action-btn-success">
-                                <i class="bi bi-check-circle-fill"></i>
+                        <form method="post" asp-action="MarkAsDelivered" class="d-inline">
+                            <input type="hidden" name="id" value="@orderId" />
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle-fill me-2" aria-hidden="true"></i>
                                 @Localizer["Admin_MarkAsDelivered"]
                             </button>
                         </form>
                     }
-
-
-                </div>
-
-                <!-- Order Timeline -->
-                <div class="order-timeline">
-                    <h3>
-                        <i class="bi bi-clock-history"></i>
-                        @Localizer["Admin_OrderTimeline"]
-                    </h3>
-                    <div class="timeline">
-                        <div class="timeline-item">
-                            <div class="timeline-icon completed">
-                                <i class="bi bi-check"></i>
-                            </div>
-                            <div class="timeline-content">
-                                <h4 class="timeline-title">@Localizer["Admin_OrderPlaced"]</h4>
-                                <p class="timeline-date">@Model.OrderHeader.OrderDate.ToString("MMM dd, yyyy hh:mm tt")</p>
-                                <p class="timeline-description">@Localizer["Admin_OrderPlacedDescription"]</p>
-                            </div>
-                        </div>
-
-                        @if (Model.OrderHeader.OrderStatus == SD.StatusInProcess || 
-                             Model.OrderHeader.OrderStatus == SD.StatusShipped)
-                        {
-                            <div class="timeline-item">
-                                <div class="timeline-icon completed">
-                                    <i class="bi bi-gear"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <h4 class="timeline-title">@Localizer["Admin_Processing"]</h4>
-                                    <p class="timeline-description">@Localizer["Admin_ProcessingDescription"]</p>
-                                </div>
-                            </div>
-                        }
-
-                        @if (Model.OrderHeader.OrderStatus == SD.StatusShipped)
-                        {
-                            <div class="timeline-item">
-                                <div class="timeline-icon completed">
-                                    <i class="bi bi-truck"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <h4 class="timeline-title">@Localizer["Admin_Shipped"]</h4>
-                                    <p class="timeline-date">@Model.OrderHeader.ShippingDate.ToString("MMM dd, yyyy")</p>
-                                    <p class="timeline-description">
-                                        @Localizer["Admin_Carrier"]: <strong>@Model.OrderHeader.Carrier</strong><br />
-                                        @Localizer["Admin_Tracking"]: <strong>@Model.OrderHeader.TrackingNumber</strong>
-                                    </p>
-                                </div>
-                            </div>
-                        }
-
-                        @if (Model.OrderHeader.OrderStatus == SD.StatusCancelled)
-                        {
-                            <div class="timeline-item">
-                                <div class="timeline-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
-                                    <i class="bi bi-x"></i>
-                                </div>
-                                <div class="timeline-content" style="border-left-color: #ef4444;">
-                                    <h4 class="timeline-title">@Localizer["Admin_OrderCancelled"]</h4>
-                                    <p class="timeline-description">@Localizer["Admin_OrderCancelledDescription"]</p>
-                                </div>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="timeline-item">
-                                <div class="timeline-icon pending">
-                                    <i class="bi bi-hourglass-split"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <h4 class="timeline-title">@Localizer["Admin_Delivered"]</h4>
-                                    <p class="timeline-description">@Localizer["Admin_EstimatedDelivery"]: @(Localizer["Within48HoursWorkingDays"]?.Value ?? "Within 48 hours (working days)")</p>
-                                </div>
-                            </div>
-                        }
-                    </div>
+                    @if (canCancelOrder)
+                    {
+                        <button type="button" class="btn btn-outline-danger" id="btnCancelOrder">
+                            <i class="bi bi-x-circle me-2" aria-hidden="true"></i>
+                            @Localizer["Admin_CancelOrder"]
+                        </button>
+                    }
+                    @if (canRefundOrder)
+                    {
+                        <button type="button" class="btn btn-outline-warning" id="btnRefundOrder">
+                            <i class="bi bi-arrow-counterclockwise me-2" aria-hidden="true"></i>
+                            @Localizer["Admin_RefundOrder"]
+                        </button>
+                    }
+                    @if (showForceComplete)
+                    {
+                        <button type="button" class="btn btn-outline-primary" id="btnForceComplete">
+                            <i class="bi bi-check-circle me-2" aria-hidden="true"></i>
+                            @Localizer["Admin_ForceComplete"]
+                        </button>
+                    }
+                    @if (showForceCancel)
+                    {
+                        <button type="button" class="btn btn-outline-danger" id="btnForceCancel">
+                            <i class="bi bi-slash-circle me-2" aria-hidden="true"></i>
+                            @Localizer["Admin_ForceCancelTitle"]
+                        </button>
+                    }
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@section Styles {
-    <style>
-        /* Payment Reconciliation Section */
-        .payment-reconciliation-section {
-            background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%);
-            border: 2px solid #f59e0b;
-            border-radius: 12px;
-            padding: 2rem;
-            margin: 2rem 0;
-        }
-
-        .payment-reconciliation-section h3 {
-            color: #92400e;
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section-description {
-            color: #78350f;
-            font-size: 0.95rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-
-        .reconciliation-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Audit Log Section */
-        .audit-log-section {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 2px dashed #f59e0b;
-        }
-
-        .audit-log-section h4 {
-            color: #92400e;
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .audit-log-table-wrapper {
-            background: white;
-            border-radius: 8px;
-            padding: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .audit-log-table-wrapper table {
-            margin-bottom: 0;
-        }
-
-        .audit-log-table-wrapper th {
-            background-color: #f59e0b;
-            color: white;
-            font-weight: 600;
-            padding: 0.75rem;
-            border: none;
-        }
-
-        .audit-log-table-wrapper td {
-            padding: 0.75rem;
-            vertical-align: middle;
-        }
-
-        .audit-log-table-wrapper tbody tr:hover {
-            background-color: #fffbeb;
-        }
-
-        /* Responsive Design */
-        @@media (max-width: 768px) {
-            .reconciliation-actions {
-                flex-direction: column;
-            }
-
-            .reconciliation-actions .action-btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .payment-reconciliation-section {
-                padding: 1rem;
-            }
-
-            .audit-log-table-wrapper {
-                overflow-x: auto;
-            }
-
-            .audit-log-table-wrapper table {
-                font-size: 0.85rem;
-            }
-        }
-    </style>
-}
-
 @section Scripts {
-    <style>
-        /* Enhanced SweetAlert2 Styling */
-        .swal2-popup {
-            border-radius: 16px !important;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
-            padding: 2.5rem !important;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
-        }
-        
-        .swal2-title {
-            font-size: 1.75rem !important;
-            font-weight: 700 !important;
-            color: #1f2937 !important;
-            margin-bottom: 1rem !important;
-            line-height: 1.4 !important;
-        }
-        
-        .swal2-content {
-            font-size: 1.063rem !important;
-            color: #4b5563 !important;
-            line-height: 1.6 !important;
-        }
-        
-        .swal2-icon {
-            width: 5rem !important;
-            height: 5rem !important;
-            margin: 1.5rem auto 1rem !important;
-            border-width: 4px !important;
-        }
-        
-        .swal2-icon.swal2-warning {
-            border-color: #f59e0b !important;
-            color: #f59e0b !important;
-        }
-        
-        .swal2-icon.swal2-success {
-            border-color: #10b981 !important;
-            color: #10b981 !important;
-        }
-        
-        .swal2-icon.swal2-error {
-            border-color: #ef4444 !important;
-            color: #ef4444 !important;
-        }
-        
-        .swal2-icon.swal2-question {
-            border-color: #3b82f6 !important;
-            color: #3b82f6 !important;
-        }
-        
-        .swal2-actions {
-            margin-top: 2rem !important;
-            gap: 0.75rem !important;
-        }
-        
-        .swal2-confirm,
-        .swal2-cancel {
-            border-radius: 8px !important;
-            padding: 0.75rem 2rem !important;
-            font-size: 1rem !important;
-            font-weight: 600 !important;
-            transition: all 0.3s ease !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-        }
-        
-        .swal2-confirm:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-        }
-        
-        .swal2-cancel:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-        }
-        
-        .swal2-input,
-        .swal2-textarea {
-            border-radius: 8px !important;
-            border: 2px solid #e5e7eb !important;
-            padding: 0.75rem 1rem !important;
-            font-size: 1rem !important;
-            transition: all 0.3s ease !important;
-            margin-top: 0.75rem !important;
-        }
-        
-        .swal2-input:focus,
-        .swal2-textarea:focus {
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-            outline: none !important;
-        }
-        
-        .swal2-validation-message {
-            background: #fef2f2 !important;
-            color: #dc2626 !important;
-            border-radius: 8px !important;
-            padding: 0.75rem 1rem !important;
-            margin-top: 1rem !important;
-            border-left: 4px solid #dc2626 !important;
-            font-weight: 500 !important;
-        }
-        
-        .swal2-html-container {
-            margin: 1.5rem 0 !important;
-        }
-        
-        .swal2-html-container strong {
-            color: #1f2937 !important;
-            font-weight: 700 !important;
-        }
-        
-        .swal2-loader {
-            border-color: #3b82f6 transparent #3b82f6 transparent !important;
-        }
-        
-        /* Animation enhancements */
-        @@keyframes swal2-show {
-            0% {
-                transform: scale(0.9);
-                opacity: 0;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        
-        @@keyframes swal2-hide {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(0.9);
-                opacity: 0;
-            }
-        }
-        
-        .swal2-show {
-            animation: swal2-show 0.3s ease-out !important;
-        }
-        
-        .swal2-hide {
-            animation: swal2-hide 0.2s ease-in !important;
-        }
-        
-        /* Custom icon animations */
-        .swal2-icon.swal2-success [class^=swal2-success-line] {
-            background-color: #10b981 !important;
-        }
-        
-        .swal2-icon.swal2-error [class^=swal2-x-mark-line] {
-            background-color: #ef4444 !important;
-        }
-        
-        /* Refund modal specific styling */
-        .refund-modal-content {
-            text-align: left;
-        }
-        
-        .refund-modal-content p {
-            margin-bottom: 1rem;
-            color: #4b5563;
-        }
-        
-        .refund-modal-content strong {
-            color: #1f2937;
-            font-size: 1.125rem;
-        }
-    </style>
-    
     <script>
-        // Enhanced SweetAlert2 configuration
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('btnViewAuditLog')?.addEventListener('click', function () {
+                loadAuditLog(@orderId);
+            });
+            document.getElementById('btnCancelOrder')?.addEventListener('click', function () {
+                cancelOrder(@orderId);
+            });
+            document.getElementById('btnRefundOrder')?.addEventListener('click', function () {
+                showRefundModal(@orderId, @Model.OrderHeader.OrderTotal.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            });
+            document.getElementById('btnForceComplete')?.addEventListener('click', function () {
+                showForceCompleteModal(@orderId);
+            });
+            document.getElementById('btnForceCancel')?.addEventListener('click', function () {
+                showForceCancelModal(@orderId);
+            });
+        });
+    </script>
+    <script>
+        const orderNumberLabel = '@Localizer["Admin_Order"] #@orderId';
         const swalConfig = {
             customClass: {
                 popup: 'swal2-enhanced',
@@ -791,7 +416,7 @@
             Swal.fire({
                 title: '<i class="bi bi-exclamation-triangle-fill" style="color: #f59e0b; font-size: 3rem; display: block; margin-bottom: 1rem;"></i>' + 
                        '<span style="display: block; margin-top: 0.5rem;">@Localizer["Admin_CancelOrderTitle"]</span>',
-                html: '<div style="text-align: left; padding: 1rem 0;"><p style="color: #4b5563; font-size: 1.063rem; line-height: 1.6;">@Localizer["Admin_CancelOrderConfirm"]</p></div>',
+                html: '<p class="mb-0">@Localizer["Admin_CancelOrderConfirm"]</p><p class="mt-2 fw-bold">' + orderNumberLabel + '</p>',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc2626',
@@ -1013,6 +638,7 @@
                             <p style="margin: 0; color: #065f46; font-size: 0.938rem;">
                                 <i class="bi bi-exclamation-triangle me-2"></i>@Localizer["Admin_ForceCompleteWarning"]
                             </p>
+                            <p class="mb-0 fw-bold">${orderNumberLabel}</p>
                         </div>
                         <div>
                             <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem; font-size: 0.938rem;">
@@ -1081,6 +707,7 @@
                             <p style="margin: 0; color: #991b1b; font-size: 0.938rem;">
                                 <i class="bi bi-exclamation-triangle me-2"></i>@Localizer["Admin_ForceCancelWarning"]
                             </p>
+                            <p class="mb-0 fw-bold">${orderNumberLabel}</p>
                         </div>
                         <div>
                             <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem; font-size: 0.938rem;">
@@ -1143,7 +770,7 @@
             const section = document.getElementById('auditLogSection');
             const content = document.getElementById('auditLogContent');
 
-            section.style.display = 'block';
+            section.classList.remove('d-none');
             content.innerHTML = '<p class="text-center text-muted"><i class="bi bi-hourglass-split"></i> @Localizer["Common_Loading"]</p>';
 
             fetch(`@Url.Action("GetAuditLog", "Order")?id=${orderId}`)

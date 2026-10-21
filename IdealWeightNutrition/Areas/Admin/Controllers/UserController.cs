@@ -1,10 +1,13 @@
+using IdealWeightNutrition;
 using IdealWeightNutrition.DataAccess.Repository.IRepository;
 using IdealWeightNutrition.Models;
+using IdealWeightNutrition.Models.ViewModels;
 using IdealWeightNutrition.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Localization;
 
 namespace IdealWeightNutrition.Areas.Admin.Controllers
 {
@@ -15,15 +18,23 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStringLocalizer<SharedResources> _localizer;
 
         public UserController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IStringLocalizer<SharedResources> localizer)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _unitOfWork = unitOfWork;
+            _localizer = localizer;
+        }
+
+        public IActionResult Index()
+        {
+            return RedirectToAction(nameof(CreateAdminUser));
         }
 
         public IActionResult CreateAdminUser()
@@ -46,7 +57,7 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || 
                 string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(role))
             {
-                TempData["error"] = "Please fill all required fields";
+                TempData["error"] = _localizer["PleaseFillAllRequiredFields"].Value;
                 return RedirectToAction(nameof(CreateAdminUser));
             }
 
@@ -72,7 +83,7 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
                 // Assign role
                 await _userManager.AddToRoleAsync(user, role);
 
-                TempData["success"] = $"{role} user created successfully!";
+                TempData["success"] = _localizer["AdminUserCreatedSuccess", role].Value;
                 return RedirectToAction(nameof(CreateAdminUser));
             }
 

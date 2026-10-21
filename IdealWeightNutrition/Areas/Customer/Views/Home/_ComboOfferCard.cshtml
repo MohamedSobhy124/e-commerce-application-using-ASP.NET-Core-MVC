@@ -1,0 +1,123 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Localization
+@using IdealWeightNutrition.Utility
+@inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
+@model IdealWeightNutrition.Models.ComboOffer
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
+    var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
+    var comboOffer = Model;
+    var comboName = currentCulture == "ar" && !string.IsNullOrEmpty(comboOffer.NameAr)
+        ? comboOffer.NameAr
+        : comboOffer.Name;
+    var comboDescription = currentCulture == "ar" && !string.IsNullOrEmpty(comboOffer.DescriptionAr)
+        ? comboOffer.DescriptionAr
+        : comboOffer.Description;
+
+    var comboImages = new List<string>();
+    if (comboOffer.ComboOfferImages != null && comboOffer.ComboOfferImages.Any())
+    {
+        comboImages = comboOffer.ComboOfferImages.OrderBy(img => img.DisplayOrder).Select(img => img.ImageUrl).Where(url => !string.IsNullOrEmpty(url)).ToList();
+    }
+    if (!string.IsNullOrEmpty(comboOffer.ImageUrl) && !comboImages.Contains(comboOffer.ImageUrl))
+    {
+        comboImages.Insert(0, comboOffer.ImageUrl);
+    }
+    if (!comboImages.Any() && comboOffer.ComboOfferItems != null)
+    {
+        foreach (var item in comboOffer.ComboOfferItems.Where(i => !i.IsDeleted && i.Product != null))
+        {
+            var productImage = item.Product.ProductImages?.FirstOrDefault()?.ImageUrl ?? item.Product.ImageUrl;
+            if (!string.IsNullOrEmpty(productImage) && !comboImages.Contains(productImage))
+            {
+                comboImages.Add(productImage);
+            }
+        }
+    }
+
+    var includedItems = comboOffer.ComboOfferItems?
+        .Where(item => !item.IsDeleted && item.Product != null)
+        .OrderBy(item => item.DisplayOrder)
+        .Take(3)
+        .ToList() ?? new List<IdealWeightNutrition.Models.ComboOfferItem>();
+}
+
+<article class="combo-offer-card-mini">
+    <a asp-area="Customer" asp-controller="ComboOffer" asp-action="Details" asp-route-id="@comboOffer.Id" class="combo-offer-card-link">
+        <div class="combo-offer-image-wrapper-mini">
+            @if (comboImages.Any())
+            {
+                <img src="@comboImages.First()" alt="@comboName" class="product-image-mini" width="360" height="280" loading="lazy" />
+            }
+            else
+            {
+                <div class="combo-offer-image-fallback" aria-hidden="true">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+            }
+
+            <div class="product-badge-mini combo-offer-badge-mini">
+                <span class="badge bg-danger">@(comboOffer.DiscountPercentage.ToString("F0"))% @Localizer["OFF"]</span>
+            </div>
+        </div>
+
+        <div class="product-content-mini">
+            <h3 class="product-title-mini combo-offer-title-mini">
+                @comboName
+            </h3>
+
+            @if (!string.IsNullOrWhiteSpace(comboDescription))
+            {
+                <p class="combo-offer-excerpt">@comboDescription</p>
+            }
+
+            @if (includedItems.Any())
+            {
+                <ul class="combo-offer-bundle">
+                    @foreach (var item in includedItems)
+                    {
+                        var itemName = currentCulture == "ar" && !string.IsNullOrEmpty(item.Product.TitleAr)
+                            ? item.Product.TitleAr
+                            : item.Product.Title;
+                        var itemImage = item.Product.ProductImages?.FirstOrDefault()?.ImageUrl ?? item.Product.ImageUrl;
+                        <li>
+                            @if (!string.IsNullOrEmpty(itemImage))
+                            {
+                                <img src="@itemImage" alt="" width="36" height="36" loading="lazy" />
+                            }
+                            else
+                            {
+                                <span class="combo-offer-bundle-icon" aria-hidden="true"><i class="bi bi-box"></i></span>
+                            }
+                            <span>@itemName</span>
+                        </li>
+                    }
+                </ul>
+            }
+
+            <div class="combo-offer-price-mini">
+                <span class="combo-offer-price-new"><bdi>@currencySymbol @comboOffer.ComboPrice.ToString("N2")</bdi></span>
+                <span class="combo-offer-price-old"><bdi>@currencySymbol @comboOffer.OriginalTotalPrice.ToString("N2")</bdi></span>
+            </div>
+
+            <div class="combo-offer-meta-mini">
+                <span class="combo-offer-savings-mini">
+                    <i class="bi bi-tag-fill" aria-hidden="true"></i>
+                    @Localizer["DiscountSave"] <bdi>@currencySymbol @comboOffer.TotalSavings.ToString("N2")</bdi>
+                </span>
+                <span class="combo-offer-info-mini">
+                    <i class="bi bi-box-seam" aria-hidden="true"></i>
+                    @comboOffer.TotalProducts @Localizer["Items"]
+                </span>
+            </div>
+
+            <div class="product-actions-mini">
+                <span class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-eye me-1" aria-hidden="true"></i>@Localizer["View"]
+                </span>
+            </div>
+        </div>
+    </a>
+</article>

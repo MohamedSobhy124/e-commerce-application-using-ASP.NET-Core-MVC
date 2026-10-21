@@ -10,7 +10,7 @@
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid #ced4da;
-    background: #fff;
+    background: var(--iw-surface);
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
@@ -32,10 +32,10 @@
 }
 
 .category-dropdown-btn {
-    background: #f8f9fa;
+    background: var(--iw-canvas);
     border: none;
     padding: 0 0.75rem;
-    color: #6c757d;
+    color: var(--iw-muted);
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
 }
@@ -51,7 +51,7 @@
     left: 0;
     right: 0;
     margin-top: 4px;
-    background: #fff;
+    background: var(--iw-surface);
     border: 1px solid #dee2e6;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);

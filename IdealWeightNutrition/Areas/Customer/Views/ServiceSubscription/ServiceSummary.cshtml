@@ -55,10 +55,10 @@
         <div class="container">
             <div class="order-summary-card">
                 <div class="order-summary-header">
-                    <h5 class="order-summary-title">
+                    <h1 class="order-summary-title">
                         <i class="bi bi-briefcase @(isRtl ? "ms-2" : "me-2")"></i>
                         @(Localizer["ServiceCheckout"] ?? "Service Checkout")
-                    </h5>
+                    </h1>
                     <a asp-action="Details" asp-route-id="@Model.Service.Id" class="back-to-cart-btn">
                         <i class="bi bi-arrow-@(isRtl ? "right" : "left") @(isRtl ? "ms-2" : "me-2")"></i>
                         @(Localizer["Back"] ?? "Back")
@@ -69,10 +69,10 @@
                     <div class="row">
                         <div class="col-12 col-lg-6 pb-4">
                             <div class="shipping-details-section">
-                                <h4>
+                                <h2>
                                     <i class="bi bi-person @(isRtl ? "ms-2" : "me-2")"></i>
                                     @(Localizer["CustomerInformation"] ?? "Customer Information")
-                                </h4>
+                                </h2>
                                 
                                 @if (Model.IsGuest || !User.Identity.IsAuthenticated)
                                 {
@@ -89,13 +89,13 @@
                                         <label class="form-label-enhanced">
                                             <i class="bi bi-envelope-fill @(isRtl ? "ms-2" : "me-2")"></i>@(Localizer["EmailAddress"] ?? "Email Address") <span class="text-danger">*</span>
                                         </label>
-                                        <input asp-for="GuestEmail" type="email" id="guestEmailInput" class="form-control-enhanced" placeholder="@(Localizer["EnterYourEmail"] ?? "Enter your email")" required />
+                                        <input asp-for="GuestEmail" type="email" id="guestEmailInput" aria-label="@Localizer["Email"]" class="form-control-enhanced" placeholder="@(Localizer["EnterYourEmail"] ?? "Enter your email")" required />
                                         <span asp-validation-for="GuestEmail" class="text-danger validation-message"></span>
                                         <div id="emailValidationMessage" class="validation-error-message text-danger small mt-1" style="display: none;"></div>
                                     </div>
                                     
                                     <!-- Email Verification OTP Section -->
-                                    <div id="emailVerificationSection" class="form-row-enhanced" style="display: none; margin-top: 15px; padding: 20px; background: #f0f9ff; border-radius: 8px; border: 2px solid #0ea5e9;">
+                                    <div id="emailVerificationSection" class="form-row-enhanced" style="display: none; margin-top: 15px; padding: 20px; background: var(--iw-light-blue); border-radius: 8px; border: 2px solid #0ea5e9;">
                                         <div class="d-flex align-items-center mb-3">
                                             <i class="bi bi-shield-check text-primary @(isRtl ? "ms-2" : "me-2")" style="font-size: 1.5rem;"></i>
                                             <div>
@@ -116,7 +116,7 @@
                                                 <i class="bi bi-key @(isRtl ? "ms-2" : "me-2")"></i>@(Localizer["EnterVerificationCode"] ?? "Enter Verification Code") <span class="text-danger">*</span>
                                             </label>
                                             <div class="d-flex gap-2">
-                                                <input type="text" id="otpInput" class="form-control-enhanced" placeholder="000000" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 4px; font-weight: bold; font-family: monospace;" />
+                                                <input type="text" id="otpInput" aria-label="@Localizer["EnterVerificationCode"]" class="form-control-enhanced" placeholder="000000" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 4px; font-weight: bold; font-family: monospace;" />
                                                 <button type="button" id="verifyOtpBtn" class="btn btn-success btn-sm" style="border-radius: 6px; min-width: 100px;">
                                                     <i class="bi bi-check-circle @(isRtl ? "ms-1" : "me-1")"></i>@(Localizer["Verify"] ?? "Verify")
                                                 </button>
@@ -163,7 +163,7 @@
                                     }
                                     else
                                     {
-                                        <input type="text" class="form-control-enhanced" value="@(Model.User?.Name ?? "")" readonly />
+                                        <input type="text" class="form-control-enhanced" aria-label="@Localizer["Name"]" value="@(Model.User?.Name ?? "")" readonly />
                                     }
                                 </div>
 
@@ -178,7 +178,7 @@
                                     }
                                     else
                                     {
-                                        <input type="text" class="form-control-enhanced" value="@(Model.User?.PhoneNumber ?? "")" readonly />
+                                        <input type="text" class="form-control-enhanced" aria-label="@Localizer["Phone"]" value="@(Model.User?.PhoneNumber ?? "")" readonly />
                                     }
                                 </div>
                             </div>
@@ -245,7 +245,7 @@
                                             </label>
                                             <div class="input-group amount-input-group">
                                                 <span class="input-group-text">@currencySymbol</span>
-                                                <input asp-for="CustomAmount" type="number" id="CustomAmount" class="form-control form-control-enhanced" 
+                                                <input asp-for="CustomAmount" type="number" id="CustomAmount" aria-label="@Localizer["AmountToPayNow"]" class="form-control form-control-enhanced"
                                                        step="0.01" 
                                                        data-min-amount="@Model.MinAmountRequired.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" 
                                                        data-max-amount="@Model.TotalAmount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)"
@@ -281,7 +281,7 @@
                                 @if (isFreeSubscription)
                                 {
                                     <!-- Free Subscription Notice -->
-                                    <div class="alert alert-success mt-4" style="border-left: 4px solid #10b981; background: #f0fdf4;">
+                                    <div class="alert alert-success mt-4" style="border-left: 4px solid var(--iw-dark-green); background: #f0fdf4;">
                                         <div class="d-flex align-items-center">
                                             <i class="bi bi-gift-fill text-success @(isRtl ? "ms-2" : "me-2")" style="font-size: 1.5rem;"></i>
                                             <div>
@@ -421,7 +421,7 @@
         padding: 1rem;
         background: white;
         border-radius: 10px;
-        border: 1px solid #e0e0e0;
+        border: 1px solid var(--iw-border);
         margin-bottom: 1rem;
     }
     
@@ -438,7 +438,7 @@
     
     .pricing-summary {
         padding: 1rem;
-        background: #f8f9fa;
+        background: var(--iw-canvas);
         border-radius: 10px;
     }
     
@@ -446,15 +446,15 @@
         display: flex;
         justify-content: space-between;
         padding: 0.5rem 0;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--iw-border);
     }
     
     .price-row.discount {
-        color: #059669;
+        color: var(--iw-action-green);
     }
     
     .price-row.total {
-        border-top: 2px solid #e0e0e0;
+        border-top: 2px solid var(--iw-border);
         margin-top: 0.5rem;
         padding-top: 0.75rem;
         font-size: 1.1rem;
@@ -462,12 +462,12 @@
     
     /* Validation error styles */
     .is-invalid {
-        border-color: #dc2626 !important;
+        border-color: var(--iw-danger) !important;
         background-color: #fef2f2 !important;
     }
     
     .is-invalid:focus {
-        border-color: #dc2626 !important;
+        border-color: var(--iw-danger) !important;
         box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.25) !important;
     }
     
@@ -475,11 +475,11 @@
         display: block;
         margin-top: 0.25rem;
         font-size: 0.875rem;
-        color: #dc2626;
+        color: var(--iw-danger);
     }
     
     .payment-method-section.border-danger {
-        border-color: #dc2626 !important;
+        border-color: var(--iw-danger) !important;
         background-color: #fef2f2 !important;
     }
     
@@ -487,9 +487,9 @@
     .payment-method-section {
         margin-top: 2rem;
         padding: 1.5rem;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-canvas) 100%);
         border-radius: 16px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--iw-border);
     }
 
     .payment-method-section h4 {
@@ -502,7 +502,7 @@
     }
 
     .payment-method-section h4 i {
-        color: #3b82f6;
+        color: var(--iw-action-blue);
     }
 
     /* Primary Payment Method - Geidea */
@@ -526,8 +526,8 @@
         align-items: center;
         gap: 1rem;
         padding: 1.25rem 1.5rem;
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        border: 2px solid #e2e8f0;
+        background: linear-gradient(135deg, var(--iw-surface) 0%, var(--iw-canvas) 100%);
+        border: 2px solid var(--iw-border);
         border-radius: 14px;
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -538,7 +538,7 @@
     .payment-primary-icon {
         width: 50px;
         height: 50px;
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        background: linear-gradient(135deg, var(--iw-dark-blue) 0%, #1d4ed8 100%);
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -558,13 +558,13 @@
 
     .payment-primary-title {
         font-weight: 700;
-        color: #1e293b;
+        color: var(--iw-ink);
         font-size: 1.1rem;
         display: block;
     }
 
     .payment-primary-desc {
-        color: #64748b;
+        color: var(--iw-muted);
         font-size: 0.8rem;
         display: block;
         margin-top: 2px;
@@ -599,14 +599,14 @@
     }
 
     .payment-method-option input[type="radio"]:checked + .payment-method-label-primary {
-        border-color: #3b82f6;
-        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-color: var(--iw-dark-blue);
+        background: linear-gradient(135deg, var(--iw-light-blue) 0%, #dbeafe 100%);
         box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
     }
 
     .payment-method-option input[type="radio"]:checked + .payment-method-label-primary .payment-check-indicator {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        border-color: #3b82f6;
+        background: linear-gradient(135deg, var(--iw-dark-blue) 0%, #1d4ed8 100%);
+        border-color: var(--iw-dark-blue);
     }
 
     .payment-method-option input[type="radio"]:checked + .payment-method-label-primary .payment-check-indicator i {
@@ -636,7 +636,7 @@
     }
 
     .alternative-payments-divider span {
-        color: #64748b;
+        color: var(--iw-muted);
         font-size: 0.8rem;
         font-weight: 500;
         text-transform: uppercase;
@@ -661,7 +661,7 @@
         align-items: center;
         padding: 1rem 1.25rem;
         background: white;
-        border: 2px solid #e2e8f0;
+        border: 2px solid var(--iw-border);
         border-radius: 12px;
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -692,13 +692,13 @@
 
     .payment-alt-title {
         font-weight: 700;
-        color: #1e293b;
+        color: var(--iw-ink);
         font-size: 0.95rem;
         display: block;
     }
 
     .payment-alt-desc {
-        color: #64748b;
+        color: var(--iw-muted);
         font-size: 0.75rem;
         display: block;
         margin-top: 2px;
@@ -725,7 +725,7 @@
 
     /* Consistent Hover Effect for Alternative Payment Options */
     .payment-method-label-alt:hover {
-        border-color: #3b82f6;
+        border-color: var(--iw-dark-blue);
         box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
         transform: translateY(-2px);
     }
@@ -737,14 +737,14 @@
 
     /* Consistent Selected State for Alternative Payment Options */
     .payment-method-option input[type="radio"]:checked + .payment-method-label-alt {
-        border-color: #3b82f6;
-        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-color: var(--iw-dark-blue);
+        background: linear-gradient(135deg, var(--iw-light-blue) 0%, #dbeafe 100%);
         box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
     }
 
     .payment-method-option input[type="radio"]:checked + .payment-method-label-alt .payment-alt-check {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        border-color: #3b82f6;
+        background: linear-gradient(135deg, var(--iw-dark-blue) 0%, #1d4ed8 100%);
+        border-color: var(--iw-dark-blue);
     }
 
     .payment-method-option input[type="radio"]:checked + .payment-method-label-alt .payment-alt-check i {
@@ -826,7 +826,7 @@
     .payment-minimum-notice {
         padding: 0.875rem 1rem;
         background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border: 1px solid #f59e0b;
+        border: 1px solid var(--iw-warning);
         border-radius: 10px;
         color: #92400e;
         font-size: 0.875rem;
@@ -838,7 +838,7 @@
     
     .payment-minimum-notice i {
         font-size: 1.1rem;
-        color: #f59e0b;
+        color: var(--iw-warning);
         flex-shrink: 0;
     }
     
@@ -870,14 +870,14 @@
         min-width: 60px;
         justify-content: center;
         font-weight: 600;
-        background: #f8f9fa;
-        border: 2px solid #e5e7eb;
+        background: var(--iw-canvas);
+        border: 2px solid var(--iw-border);
         border-right: none;
         border-radius: 12px 0 0 12px;
     }
     
     [dir="rtl"] .amount-input-group .input-group-text {
-        border-right: 2px solid #e5e7eb;
+        border-right: 2px solid var(--iw-border);
         border-left: none;
         border-radius: 0 12px 12px 0;
     }
@@ -885,20 +885,20 @@
     .amount-input-group .form-control {
         border-left: none;
         border-radius: 0 12px 12px 0;
-        border: 2px solid #e5e7eb;
+        border: 2px solid var(--iw-border);
         padding: 0.875rem 1rem;
         font-size: 1rem;
         font-weight: 600;
     }
     
     [dir="rtl"] .amount-input-group .form-control {
-        border-left: 2px solid #e5e7eb;
+        border-left: 2px solid var(--iw-border);
         border-right: none;
         border-radius: 12px 0 0 12px;
     }
     
     .amount-input-group .form-control:focus {
-        border-color: #667eea;
+        border-color: var(--iw-dark-blue);
         box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
     }
     
@@ -937,25 +937,25 @@
         .amount-input-group .input-group-text {
             width: 100%;
             border-radius: 12px 12px 0 0;
-            border-right: 2px solid #e5e7eb;
+            border-right: 2px solid var(--iw-border);
             border-bottom: none;
         }
         
         [dir="rtl"] .amount-input-group .input-group-text {
-            border-left: 2px solid #e5e7eb;
-            border-right: 2px solid #e5e7eb;
+            border-left: 2px solid var(--iw-border);
+            border-right: 2px solid var(--iw-border);
         }
         
         .amount-input-group .form-control {
             width: 100%;
             border-radius: 0 0 12px 12px;
-            border-left: 2px solid #e5e7eb;
+            border-left: 2px solid var(--iw-border);
             border-top: none;
         }
         
         [dir="rtl"] .amount-input-group .form-control {
-            border-right: 2px solid #e5e7eb;
-            border-left: 2px solid #e5e7eb;
+            border-right: 2px solid var(--iw-border);
+            border-left: 2px solid var(--iw-border);
         }
         
         .promo-code-section {

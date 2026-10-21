@@ -17,10 +17,10 @@
 			<div class="order-summary-card">
 
 				<div class="order-summary-header">
-					<h5 class="order-summary-title">
+					<h1 class="order-summary-title">
 						<i class="bi bi-file-earmark-text me-2"></i>
 						@Localizer["OrderSummary"]
-					</h5>
+					</h1>
 					<a asp-action="Index" class="back-to-cart-btn">
 						<i class="bi bi-arrow-left me-2"></i>
 						@Localizer["BackToCart"]
@@ -57,7 +57,7 @@
 									</div>
 									
 									<!-- Email Verification OTP Section -->
-									<div id="emailVerificationSection" class="form-row-enhanced" style="display: none; margin-top: 15px; padding: 20px; background: #f0f9ff; border-radius: 8px; border: 2px solid #0ea5e9;">
+									<div id="emailVerificationSection" class="form-row-enhanced" style="display: none; margin-top: 15px; padding: 20px; background: var(--iw-light-blue); border-radius: 8px; border: 2px solid #0ea5e9;">
 										<div class="d-flex align-items-center mb-3">
 											<i class="bi bi-shield-check text-primary me-2" style="font-size: 1.5rem;"></i>
 											<div>
@@ -136,7 +136,7 @@
 								<label class="form-label-enhanced">
 									<i class="bi bi-building me-2"></i>@Localizer["City"] <span class="text-danger">*</span>
 								</label>
-								<select asp-for="OrderHeader.City" id="citySelect" class="form-control-enhanced" required>
+								<select asp-for="OrderHeader.City" id="citySelect" aria-label="@Localizer["City"]" class="form-control-enhanced" required>
 									<option value="">@Localizer["SelectCity"]</option>
 									@if (ViewData["Cities"] != null)
 									{
@@ -556,9 +556,9 @@
 	.payment-method-section {
 		margin-top: 2rem;
 		padding: 1.5rem;
-		background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+		background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-canvas) 100%);
 		border-radius: 16px;
-		border: 1px solid #e2e8f0;
+		border: 1px solid var(--iw-border);
 	}
 
 	.payment-method-section h4 {
@@ -571,7 +571,7 @@
 	}
 
 	.payment-method-section h4 i {
-		color: #3b82f6;
+		color: var(--iw-action-blue);
 	}
 
 	/* Primary Payment Method - Geidea */
@@ -595,8 +595,8 @@
 		align-items: center;
 		gap: 1rem;
 		padding: 1.25rem 1.5rem;
-		background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-		border: 2px solid #e2e8f0;
+		background: linear-gradient(135deg, var(--iw-surface) 0%, var(--iw-canvas) 100%);
+		border: 2px solid var(--iw-border);
 		border-radius: 14px;
 		cursor: pointer;
 		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -608,7 +608,7 @@
 		position: absolute;
 		top: -10px;
 		left: 20px;
-		background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+		background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
 		color: white;
 		font-size: 0.7rem;
 		font-weight: 700;
@@ -622,7 +622,7 @@
 	.payment-primary-icon {
 		width: 50px;
 		height: 50px;
-		background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+		background: linear-gradient(135deg, var(--iw-dark-blue) 0%, #1d4ed8 100%);
 		border-radius: 12px;
 		display: flex;
 		align-items: center;
@@ -642,13 +642,13 @@
 
 	.payment-primary-title {
 		font-weight: 700;
-		color: #1e293b;
+		color: var(--iw-ink);
 		font-size: 1.1rem;
 		display: block;
 	}
 
 	.payment-primary-desc {
-		color: #64748b;
+		color: var(--iw-muted);
 		font-size: 0.8rem;
 		display: block;
 		margin-top: 2px;
@@ -683,14 +683,14 @@
 	}
 
 	.payment-method-option input[type="radio"]:checked + .payment-method-label-primary {
-		border-color: #3b82f6;
-		background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+		border-color: var(--iw-dark-blue);
+		background: linear-gradient(135deg, var(--iw-light-blue) 0%, #dbeafe 100%);
 		box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
 	}
 
 	.payment-method-option input[type="radio"]:checked + .payment-method-label-primary .payment-check-indicator {
-		background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-		border-color: #3b82f6;
+		background: linear-gradient(135deg, var(--iw-dark-blue) 0%, #1d4ed8 100%);
+		border-color: var(--iw-dark-blue);
 	}
 
 	.payment-method-option input[type="radio"]:checked + .payment-method-label-primary .payment-check-indicator i {
@@ -720,7 +720,7 @@
 	}
 
 	.alternative-payments-divider span {
-		color: #64748b;
+		color: var(--iw-muted);
 		font-size: 0.8rem;
 		font-weight: 500;
 		text-transform: uppercase;
@@ -745,7 +745,7 @@
 		align-items: center;
 		padding: 1rem 1.25rem;
 		background: white;
-		border: 2px solid #e2e8f0;
+		border: 2px solid var(--iw-border);
 		border-radius: 12px;
 		cursor: pointer;
 		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -776,13 +776,13 @@
 
 	.payment-alt-title {
 		font-weight: 700;
-		color: #1e293b;
+		color: var(--iw-ink);
 		font-size: 0.95rem;
 		display: block;
 	}
 
 	.payment-alt-desc {
-		color: #64748b;
+		color: var(--iw-muted);
 		font-size: 0.75rem;
 		display: block;
 		margin-top: 2px;
@@ -809,7 +809,7 @@
 
 	/* Consistent Hover Effect for Alternative Payment Options */
 	.payment-method-label-alt:hover {
-		border-color: #3b82f6;
+		border-color: var(--iw-dark-blue);
 		box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
 		transform: translateY(-2px);
 	}
@@ -821,14 +821,14 @@
 
 	/* Consistent Selected State for Alternative Payment Options */
 	.payment-method-option input[type="radio"]:checked + .payment-method-label-alt {
-		border-color: #3b82f6;
-		background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+		border-color: var(--iw-dark-blue);
+		background: linear-gradient(135deg, var(--iw-light-blue) 0%, #dbeafe 100%);
 		box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
 	}
 
 	.payment-method-option input[type="radio"]:checked + .payment-method-label-alt .payment-alt-check {
-		background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-		border-color: #3b82f6;
+		background: linear-gradient(135deg, var(--iw-dark-blue) 0%, #1d4ed8 100%);
+		border-color: var(--iw-dark-blue);
 	}
 
 	.payment-method-option input[type="radio"]:checked + .payment-method-label-alt .payment-alt-check i {
@@ -840,7 +840,7 @@
 		margin-top: 1rem;
 		padding: 0.75rem 1rem;
 		background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-		border: 1px solid #f59e0b;
+		border: 1px solid var(--iw-warning);
 		border-radius: 10px;
 		color: #92400e;
 		font-size: 0.85rem;
@@ -849,7 +849,7 @@
 	}
 
 	.payment-minimum-notice i {
-		color: #f59e0b;
+		color: var(--iw-warning);
 		font-size: 1rem;
 	}
 
@@ -934,13 +934,13 @@
 	/* Promo Code Section Styles */
 	.promo-code-section {
 		padding: 1.5rem;
-		background: #f8f9fa;
+		background: var(--iw-canvas);
 		border-radius: 12px;
-		border: 2px solid #e0e0e0;
+		border: 2px solid var(--iw-border);
 	}
 
 	.promo-code-section h4 {
-		color: #1976D2;
+		color: var(--iw-action-blue);
 		font-weight: 700;
 		margin-bottom: 1rem;
 		font-size: 1.25rem;
@@ -954,7 +954,7 @@
 	.promo-code-input-group input {
 		flex: 1;
 		padding: 0.75rem;
-		border: 2px solid #e0e0e0;
+		border: 2px solid var(--iw-border);
 		border-radius: 8px;
 		font-size: 1rem;
 		text-transform: uppercase;
@@ -964,7 +964,7 @@
 		padding: 0.75rem 1.5rem;
 		border-radius: 8px;
 		font-weight: 600;
-		background: #7BC043;
+		background: var(--iw-dark-green);
 		border: none;
 		color: white;
 		transition: all 0.3s ease;
@@ -978,8 +978,8 @@
 
 	.promo-applied-box {
 		padding: 1rem;
-		background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
-		border: 2px solid #7BC043;
+		background: linear-gradient(135deg, #E8F5E9 0%, var(--iw-light-green) 100%);
+		border: 2px solid var(--iw-dark-green);
 		border-radius: 8px;
 	}
 
@@ -991,25 +991,25 @@
 
 	.order-total-section {
 		padding: 1.5rem;
-		background: linear-gradient(135deg, #E3F2FD 0%, #F1F8E9 100%);
+		background: linear-gradient(135deg, var(--iw-light-blue) 0%, var(--iw-light-green) 100%);
 		border-radius: 12px;
-		border: 2px solid #3B9DD5;
+		border: 2px solid var(--iw-dark-blue);
 	}
 
 	.order-total-section h4 {
-		color: #1976D2;
+		color: var(--iw-action-blue);
 		font-weight: 700;
 	}
 
 	.order-final-total {
 		font-size: 1.75rem;
-		color: #7BC043;
+		color: var(--iw-action-green);
 		font-weight: 700;
 	}
 
 	.promo-discount-applied {
 		background-color: #E8F5E9;
-		border-left: 4px solid #7BC043;
+		border-left: 4px solid var(--iw-dark-green);
 		padding-left: 0.5rem;
 		transition: all 0.3s ease;
 	}
@@ -1045,18 +1045,18 @@
 		margin-top: 0.25rem;
 		margin-bottom: 0.25rem;
 		padding: 0.25rem 0.5rem;
-		background-color: #f0f0f0;
+		background-color: var(--iw-canvas);
 		border-radius: 4px;
 		display: inline-block;
 	}
 
 	.order-item-variant i {
 		font-size: 0.75rem;
-		color: #6c757d;
+		color: var(--iw-muted);
 	}
 
 	.form-control.is-invalid {
-		border-color: #dc3545;
+		border-color: var(--iw-danger);
 		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6 .4.4.4-.4M6 8.5V6'/%3e%3c/svg%3e");
 		background-repeat: no-repeat;
 		background-position: right calc(0.375em + 0.1875rem) center;

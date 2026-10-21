@@ -15,16 +15,16 @@
 
 <div class="admin-wrapper">
     <div class="container-fluid">
-        <div class="admin-form-wrapper add-products-wrapper" style="max-width: 1400px;">
+        <div class="admin-form-wrapper add-products-wrapper">
             <div class="admin-form-header add-products-header">
                 <div class="header-content">
                     <div class="header-icon">
                         <i class="bi bi-lightning-charge-fill"></i>
                     </div>
                     <div class="header-text">
-                        <h2 class="admin-form-title">
+                        <h1 class="admin-form-title">
                             @Localizer["AddProductsToFlashSale"]
-                        </h2>
+                        </h1>
                         <p class="header-subtitle">
                             <i class="bi bi-tag me-2"></i>
                             @Localizer["FlashSale"]: <strong>@flashSale.Name</strong>
@@ -172,7 +172,7 @@
                                 <div class="empty-state-icon">
                                     <i class="bi bi-inbox"></i>
                                 </div>
-                                <h4 class="empty-state-title">@Localizer["NoProductsAddedYet"]</h4>
+                                <h4 class="empty-state-title">@Localizer["NoProductsInThisSale"]</h4>
                                 <p class="empty-state-text">@Localizer["AddAtLeastOneProduct"]</p>
                             </div>
                         }
@@ -258,7 +258,7 @@
                                                 </div>
                                                 <div class="detail-item-compact">
                                                     <span class="detail-label">@Localizer["Discount"]:</span>
-                                                    <span class="badge bg-success badge-sm">-@discount%</span>
+                                                    <span class="badge bg-success badge-sm">-@(discount)%</span>
                                                 </div>
                                             </div>
                                             <div class="product-card-compact-badge">
@@ -570,14 +570,11 @@
                 return;
             }
 
-            // Show loading
-            Swal.fire({
-                title: '@Localizer["AddingProduct"]',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
+            const addBtn = document.querySelector('.btn-add-product');
+            if (addBtn) {
+                addBtn.disabled = true;
+                addBtn.setAttribute('aria-busy', 'true');
+            }
 
             // Add product
             const params = new URLSearchParams({
@@ -600,7 +597,10 @@
             })
             .then(response => response.json())
             .then(data => {
-                Swal.close();
+                if (addBtn) {
+                    addBtn.disabled = false;
+                    addBtn.removeAttribute('aria-busy');
+                }
                 if (data.success) {
                     toastr.success(data.message);
                     setTimeout(() => location.reload(), 1000);
@@ -609,7 +609,10 @@
                 }
             })
             .catch(error => {
-                Swal.close();
+                if (addBtn) {
+                    addBtn.disabled = false;
+                    addBtn.removeAttribute('aria-busy');
+                }
                 toastr.error('@Localizer["AnErrorOccurred"]');
                 console.error('Error:', error);
             });
@@ -619,7 +622,7 @@
         function removeProduct(itemId) {
             if (!itemId || itemId === 0) {
                 console.error('Invalid itemId:', itemId);
-                toastr.error('Invalid product ID');
+                toastr.error('@Html.Raw(Localizer["InvalidProductId"].Value)');
                 return;
             }
             

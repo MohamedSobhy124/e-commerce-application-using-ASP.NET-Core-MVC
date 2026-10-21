@@ -20,7 +20,7 @@
 }
 
 .notification-bell:hover {
-    color: #ffffff;
+    color: var(--iw-surface);
     transform: scale(1.1);
 }
 
@@ -46,8 +46,8 @@
     position: absolute;
     top: 0;
     right: 0;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 100%);
+    color: var(--iw-surface);
     font-size: 0.75rem;
     font-weight: 700;
     padding: 0.125rem 0.4rem;
@@ -57,7 +57,7 @@
     display: none;
     align-items: center;
     justify-content: center;
-    border: 2px solid #1f2937;
+    border: 2px solid var(--iw-ink);
     box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
     animation: popIn 0.3s ease;
 }
@@ -79,7 +79,7 @@
     right: 0;
     width: 400px;
     max-height: 500px;
-    background: #ffffff;
+    background: var(--iw-surface);
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     display: none;
@@ -109,7 +109,7 @@
     right: 0;
     width: 400px;
     max-height: 500px;
-    background: #ffffff;
+    background: var(--iw-surface);
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     display: none;
@@ -155,8 +155,8 @@
 
 .notification-dropdown-header {
     padding: 1.25rem 1.5rem;
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
+    color: var(--iw-surface);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -171,7 +171,7 @@
 
 .mark-all-read-btn {
     background: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
+    color: var(--iw-surface);
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 6px;
@@ -196,17 +196,17 @@
 }
 
 .notification-list::-webkit-scrollbar-track {
-    background: #f3f4f6;
+    background: var(--iw-canvas);
 }
 
 .notification-list::-webkit-scrollbar-thumb {
-    background: #d1d5db;
+    background: var(--iw-border);
     border-radius: 3px;
 }
 
 .notification-item {
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--iw-border);
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
@@ -214,11 +214,11 @@
 }
 
 .notification-item:hover {
-    background: #f9fafb;
+    background: var(--iw-canvas);
 }
 
 .notification-item.unread {
-    background: #ede9fe;
+    background: var(--iw-light-blue);
 }
 
 .notification-item.unread:hover {
@@ -231,8 +231,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
+    color: var(--iw-surface);
     border-radius: 50%;
     font-size: 1.25rem;
     flex-shrink: 0;
@@ -245,13 +245,13 @@
 .notification-item-title {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #1f2937;
+    color: var(--iw-ink);
     margin: 0 0 0.25rem 0;
 }
 
 .notification-item-message {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: var(--iw-muted);
     margin: 0 0 0.5rem 0;
     line-height: 1.4;
 }
@@ -269,19 +269,19 @@
 
 .notification-empty i {
     font-size: 3rem;
-    color: #d1d5db;
+    color: var(--iw-border);
     margin-bottom: 1rem;
 }
 
 .notification-dropdown-footer {
     padding: 1rem 1.5rem;
-    background: #f9fafb;
-    border-top: 1px solid #e5e7eb;
+    background: var(--iw-canvas);
+    border-top: 1px solid var(--iw-border);
     text-align: center;
 }
 
 .view-all-notifications {
-    color: #7c3aed;
+    color: var(--iw-action-blue);
     font-weight: 700;
     font-size: 0.95rem;
     text-decoration: none;
@@ -289,7 +289,7 @@
 }
 
 .view-all-notifications:hover {
-    color: #6d28d9;
+    color: var(--iw-action-blue);
 }
 
 /* Responsive - Tablet and below - Show inside navbar like other dropdowns */
@@ -504,9 +504,9 @@
     right: 8px;
     width: 10px;
     height: 10px;
-    background: #ef4444;
+    background: var(--iw-danger);
     border-radius: 50%;
-    border: 2px solid #1f2937;
+    border: 2px solid var(--iw-ink);
     animation: pulse 2s ease-in-out infinite;
     display: none;
 }

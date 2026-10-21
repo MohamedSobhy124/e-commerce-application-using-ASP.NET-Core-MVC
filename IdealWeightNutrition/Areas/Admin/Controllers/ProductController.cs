@@ -61,7 +61,7 @@ namespace IdealWeightNutrition.Areas.Admin.Controllers
         public async Task<IActionResult> Details(int? id)
         {
 
-            var Product = _unitOfWork.product.Get(m => m.Id == id);
+            var Product = _unitOfWork.product.Get(m => m.Id == id, includeProperties: "categry,Brand,ProductImages,ProductVariants,ProductOptions");
 
             if (Product == null)
             {

@@ -79,7 +79,7 @@
 /* Hero Section Container */
 .hero-section {
     position: relative;
-    background: linear-gradient(-45deg, #3B9DD5, #7BC043, #2980b9, #5a9c2a);
+    background: linear-gradient(-45deg, var(--iw-dark-blue), var(--iw-dark-green), var(--iw-dark-blue), var(--iw-dark-green));
     background-size: 400% 400%;
     animation: gradientFlow 15s ease infinite;
     padding: 5rem 0 4rem 0;
@@ -110,7 +110,7 @@
     left: 0;
     right: 0;
     height: 100px;
-    background: linear-gradient(to top, #f9fafb 0%, transparent 100%);
+    background: linear-gradient(to top, var(--iw-canvas) 0%, transparent 100%);
     pointer-events: none;
 }
 
@@ -136,7 +136,7 @@
 }
 
 .hero-welcome-text {
-    color: #3B9DD5;
+    color: var(--iw-action-blue);
     font-size: 1rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -209,12 +209,12 @@
     background: white;
     transform: translateY(-4px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    border-color: #3B9DD5;
-    color: #3B9DD5;
+    border-color: var(--iw-dark-blue);
+    color: var(--iw-action-blue);
 }
 
 .hero-category-badge.active {
-    background: linear-gradient(135deg, #3B9DD5 0%, #7BC043 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-green) 100%);
     color: white;
     box-shadow: 0 6px 20px rgba(59, 157, 213, 0.4);
 }

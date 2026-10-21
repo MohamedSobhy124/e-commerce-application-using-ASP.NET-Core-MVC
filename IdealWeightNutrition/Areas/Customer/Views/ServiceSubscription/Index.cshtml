@@ -155,16 +155,16 @@
                                                 </div>
                                             }
                                         </div>
-                                        <button class="carousel-control-prev" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="prev" onclick="event.stopPropagation(); event.preventDefault();">
+                                        <button class="carousel-control-prev" aria-label="@Localizer["Previous"]" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="prev" onclick="event.stopPropagation(); event.preventDefault();">
                                             <span class="carousel-nav-icon"><i class="bi bi-chevron-left"></i></span>
                                         </button>
-                                        <button class="carousel-control-next" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="next" onclick="event.stopPropagation(); event.preventDefault();">
+                                        <button class="carousel-control-next" aria-label="@Localizer["Next"]" type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide="next" onclick="event.stopPropagation(); event.preventDefault();">
                                             <span class="carousel-nav-icon"><i class="bi bi-chevron-right"></i></span>
                                         </button>
                                         <div class="carousel-indicators custom-indicators">
                                             @for (int i = 0; i < serviceImages.Count; i++)
                                             {
-                                                <button type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" onclick="event.stopPropagation();"></button>
+                                                <button type="button" data-bs-target="#serviceCarousel_@service.Id" data-bs-slide-to="@i" aria-label="@Localizer["SlideNumber", i + 1]" class="@(i == 0 ? "active" : "")" onclick="event.stopPropagation();"></button>
                                             }
                                         </div>
                                     </div>
@@ -221,7 +221,7 @@
                                     <div class="ribbon-content">
                                         @if (bestOffer.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
                                         {
-                                            <span class="ribbon-percent">@bestOffer.DiscountValue%</span>
+                                            <span class="ribbon-percent">@(bestOffer.DiscountValue)%</span>
                                             <span class="ribbon-text">@Localizer["OFF"]</span>
                                         }
                                         else
@@ -372,7 +372,7 @@
     .hero-shape.shape-1 {
         width: 400px;
         height: 400px;
-        background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+        background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
         top: -150px;
         right: -100px;
         animation: float 8s ease-in-out infinite;
@@ -381,7 +381,7 @@
     .hero-shape.shape-2 {
         width: 300px;
         height: 300px;
-        background: linear-gradient(135deg, #5a9c32 0%, #7BC043 100%);
+        background: linear-gradient(135deg, #5a9c32 0%, var(--iw-dark-green) 100%);
         bottom: -100px;
         left: -80px;
         animation: float 10s ease-in-out infinite reverse;
@@ -390,7 +390,7 @@
     .hero-shape.shape-3 {
         width: 200px;
         height: 200px;
-        background: linear-gradient(135deg, #7BC043 0%, #8fd455 100%);
+        background: linear-gradient(135deg, var(--iw-dark-green) 0%, #8fd455 100%);
         top: 40%;
         left: 15%;
         animation: float 6s ease-in-out infinite;
@@ -399,7 +399,7 @@
     .floating-icon {
         position: absolute;
         font-size: 2rem;
-        color: #7BC043;
+        color: var(--iw-action-green);
         opacity: 0.2;
         animation: floatIcon 4s ease-in-out infinite;
     }
@@ -436,7 +436,7 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+        background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
         color: white;
         padding: 10px 24px;
         border-radius: 50px;
@@ -491,7 +491,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #7BC043;
+        color: var(--iw-action-green);
         font-size: 1.3rem;
     }
 
@@ -515,7 +515,7 @@
     .stat-divider {
         width: 1px;
         height: 40px;
-        background: #e5e7eb;
+        background: var(--iw-border);
     }
 
     /* Animations */
@@ -577,7 +577,7 @@
     .empty-state-icon-wrapper {
         width: 100px;
         height: 100px;
-        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-border) 100%);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -597,12 +597,12 @@
     }
 
     .empty-state-card p {
-        color: #6b7280;
+        color: var(--iw-muted);
         margin-bottom: 24px;
     }
 
     .btn-back-home {
-        background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+        background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
         color: white;
         padding: 12px 28px;
         border-radius: 12px;
@@ -624,7 +624,7 @@
        ======================================== */
     .service-card-modern {
         position: relative;
-        background: #ffffff;
+        background: var(--iw-surface);
         border-radius: 24px;
         overflow: hidden;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -649,7 +649,7 @@
     .service-card-modern:hover {
         transform: translateY(-12px);
         box-shadow: 0 25px 60px rgba(123, 192, 67, 0.2);
-        border-color: #7BC043;
+        border-color: var(--iw-dark-green);
     }
 
     .card-glow {
@@ -658,7 +658,7 @@
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+        background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
         transform: scaleX(0);
         transform-origin: left;
         transition: transform 0.4s ease;
@@ -716,7 +716,7 @@
 
     .carousel-control-prev:hover .carousel-nav-icon,
     .carousel-control-next:hover .carousel-nav-icon {
-        background: #7BC043;
+        background: var(--iw-dark-green);
         color: white;
         transform: scale(1.1);
     }
@@ -748,7 +748,7 @@
     }
 
     .custom-indicators button.active {
-        background: #7BC043;
+        background: var(--iw-dark-green);
         transform: scale(1.3);
     }
 
@@ -766,7 +766,7 @@
     .placeholder-icon {
         width: 80px;
         height: 80px;
-        background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+        background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -887,7 +887,7 @@
     }
 
     .ribbon-content {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 100%);
         color: white;
         padding: 10px 18px;
         border-radius: 14px;
@@ -958,18 +958,18 @@
     }
 
     .service-title-modern a {
-        color: #1f2937;
+        color: var(--iw-ink);
         text-decoration: none;
         transition: color 0.3s ease;
         display: block;
     }
 
     .service-title-modern a:hover {
-        color: #7BC043;
+        color: var(--iw-action-green);
     }
 
     .service-excerpt {
-        color: #6b7280;
+        color: var(--iw-muted);
         font-size: 0.92rem;
         line-height: 1.6;
         margin-bottom: 16px;
@@ -982,7 +982,7 @@
         gap: 8px;
         margin-bottom: 20px;
         padding-bottom: 16px;
-        border-bottom: 1px dashed #e5e7eb;
+        border-bottom: 1px dashed var(--iw-border);
     }
 
     .feature-item {
@@ -990,11 +990,11 @@
         align-items: center;
         gap: 10px;
         font-size: 0.85rem;
-        color: #4b5563;
+        color: var(--iw-muted);
     }
 
     .feature-item i {
-        color: #7BC043;
+        color: var(--iw-action-green);
         font-size: 1rem;
     }
 
@@ -1049,7 +1049,7 @@
     .final-price {
         font-size: 1.9rem;
         font-weight: 900;
-        background: linear-gradient(135deg, #7BC043 0%, #5a9c32 100%);
+        background: linear-gradient(135deg, var(--iw-dark-green) 0%, #5a9c32 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -1062,16 +1062,16 @@
         gap: 8px;
         margin-top: 12px;
         padding: 10px 12px;
-        background: #f0f9ff;
+        background: var(--iw-light-blue);
         border-radius: 10px;
         font-size: 0.82rem;
         color: #1e40af;
-        border-left: 3px solid #3b82f6;
+        border-left: 3px solid var(--iw-dark-blue);
     }
 
     [dir="rtl"] .offline-info-badge {
         border-left: none;
-        border-right: 3px solid #3b82f6;
+        border-right: 3px solid var(--iw-dark-blue);
     }
 
     .offline-info-badge i {
@@ -1093,7 +1093,7 @@
         gap: 10px;
         width: 100%;
         padding: 16px 28px;
-        background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+        background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
         color: white;
         border: none;
         border-radius: 14px;

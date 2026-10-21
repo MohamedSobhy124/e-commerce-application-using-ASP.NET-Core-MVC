@@ -55,7 +55,7 @@
 }
 
 .quick-view-close:hover {
-    background: #ef4444;
+    background: var(--iw-danger);
     color: white;
     transform: rotate(90deg) scale(1.1);
 }
@@ -68,7 +68,7 @@
     width: 45px;
     height: 45px;
     background: white;
-    border: 2px solid #e5e7eb;
+    border: 2px solid var(--iw-border);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -84,17 +84,17 @@
 }
 
 .wishlist-btn:hover {
-    border-color: #ef4444;
+    border-color: var(--iw-danger);
     transform: scale(1.1);
 }
 
 .wishlist-btn:hover i {
-    color: #ef4444;
+    color: var(--iw-danger);
 }
 
 .wishlist-btn.active {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    border-color: #ef4444;
+    background: linear-gradient(135deg, var(--iw-danger), var(--iw-danger));
+    border-color: var(--iw-danger);
     animation: heartBeat 0.6s ease;
 }
 
@@ -114,7 +114,7 @@
     position: absolute;
     width: 8px;
     height: 8px;
-    background: #ef4444;
+    background: var(--iw-danger);
     border-radius: 50%;
     pointer-events: none;
     animation: wishlistParticle 1s ease-out forwards;
@@ -160,7 +160,7 @@
     height: 50px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #7BC043;
+    border: 3px solid var(--iw-dark-green);
 }
 
 .social-proof-text {
@@ -169,12 +169,12 @@
 
 .social-proof-name {
     font-weight: 700;
-    color: #1976D2;
+    color: var(--iw-action-blue);
     margin-bottom: 0.25rem;
 }
 
 .social-proof-action {
-    color: #6b7280;
+    color: var(--iw-muted);
     font-size: 0.9rem;
 }
 
@@ -199,14 +199,14 @@
 }
 
 .social-proof-close:hover {
-    color: #ef4444;
+    color: var(--iw-danger);
 }
 
 /* ========================================
    4. FLASH SALE COUNTDOWN TIMER
    ======================================== */
 .flash-sale-banner {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
+    background: linear-gradient(135deg, var(--iw-danger), var(--iw-danger));
     color: white;
     padding: 1rem 0;
     text-align: center;
@@ -287,9 +287,9 @@
 }
 
 .color-swatch.active {
-    border-color: #3B9DD5;
+    border-color: var(--iw-dark-blue);
     transform: scale(1.2);
-    box-shadow: 0 0 0 2px white, 0 0 0 4px #3B9DD5;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--iw-dark-blue);
 }
 
 .color-swatch::after {
@@ -323,7 +323,7 @@
     min-width: 55px;
     padding: 0.75rem 1rem;
     background: white;
-    border: 2px solid #e5e7eb;
+    border: 2px solid var(--iw-border);
     border-radius: 12px;
     text-align: center;
     font-weight: 700;
@@ -332,15 +332,15 @@
 }
 
 .size-option:hover {
-    border-color: #3B9DD5;
+    border-color: var(--iw-dark-blue);
     transform: translateY(-3px);
     box-shadow: 0 4px 12px rgba(59, 157, 213, 0.2);
 }
 
 .size-option.active {
-    background: linear-gradient(135deg, #3B9DD5, #7BC043);
+    background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
     color: white;
-    border-color: #3B9DD5;
+    border-color: var(--iw-dark-blue);
     transform: translateY(-3px);
 }
 
@@ -357,10 +357,10 @@
     display: inline-flex;
     align-items: center;
     gap: 1rem;
-    background: #f9fafb;
+    background: var(--iw-canvas);
     padding: 0.5rem 1rem;
     border-radius: 50px;
-    border: 2px solid #e5e7eb;
+    border: 2px solid var(--iw-border);
 }
 
 .qty-btn {
@@ -371,7 +371,7 @@
     border-radius: 50%;
     font-size: 1.2rem;
     font-weight: bold;
-    color: #3B9DD5;
+    color: var(--iw-action-blue);
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -380,7 +380,7 @@
 }
 
 .qty-btn:hover {
-    background: linear-gradient(135deg, #3B9DD5, #7BC043);
+    background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
     color: white;
     transform: scale(1.15);
 }
@@ -394,7 +394,7 @@
     text-align: center;
     font-size: 1.2rem;
     font-weight: 700;
-    color: #1976D2;
+    color: var(--iw-action-blue);
 }
 
 /* ========================================
@@ -441,13 +441,13 @@
 
 .sticky-product-name {
     font-weight: 700;
-    color: #1976D2;
+    color: var(--iw-action-blue);
 }
 
 .sticky-product-price {
     font-size: 1.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #7BC043, #558B2F);
+    background: linear-gradient(135deg, var(--iw-dark-green), var(--iw-dark-green));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -462,7 +462,7 @@
    9. TRUST BADGES CAROUSEL
    ======================================== */
 .trust-badges-section {
-    background: #f9fafb;
+    background: var(--iw-canvas);
     padding: 2rem 0;
     overflow: hidden;
 }
@@ -492,7 +492,7 @@
 
 .trust-badge-icon {
     font-size: 2rem;
-    color: #7BC043;
+    color: var(--iw-action-green);
 }
 
 .trust-badge-text {
@@ -524,19 +524,19 @@
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--iw-muted);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
 
 .compare-label:hover {
-    background: #3B9DD5;
+    background: var(--iw-dark-blue);
     color: white;
     transform: translateY(-2px);
 }
 
 .compare-checkbox input:checked + .compare-label {
-    background: linear-gradient(135deg, #3B9DD5, #7BC043);
+    background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green));
     color: white;
 }
 
@@ -579,14 +579,14 @@
 .recently-viewed {
     background: white;
     padding: 3rem 0;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--iw-border);
 }
 
 .recently-viewed-title {
     text-align: center;
     font-size: 2rem;
     font-weight: 800;
-    color: #1976D2;
+    color: var(--iw-action-blue);
     margin-bottom: 2rem;
 }
 
@@ -597,7 +597,7 @@
     scroll-behavior: smooth;
     padding: 1rem 0;
     scrollbar-width: thin;
-    scrollbar-color: #3B9DD5 #f3f4f6;
+    scrollbar-color: var(--iw-dark-blue) var(--iw-canvas);
 }
 
 .recently-viewed-slider::-webkit-scrollbar {
@@ -605,12 +605,12 @@
 }
 
 .recently-viewed-slider::-webkit-scrollbar-track {
-    background: #f3f4f6;
+    background: var(--iw-canvas);
     border-radius: 10px;
 }
 
 .recently-viewed-slider::-webkit-scrollbar-thumb {
-    background: linear-gradient(90deg, #3B9DD5, #7BC043);
+    background: linear-gradient(90deg, var(--iw-dark-blue), var(--iw-dark-green));
     border-radius: 10px;
 }
 
@@ -646,26 +646,26 @@
 .mega-menu-title {
     font-size: 1.1rem;
     font-weight: 800;
-    color: #1976D2;
+    color: var(--iw-action-blue);
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid #3B9DD5;
+    border-bottom: 2px solid var(--iw-dark-blue);
 }
 
 .mega-menu-link {
     display: block;
     padding: 0.5rem 0;
-    color: #6b7280;
+    color: var(--iw-muted);
     transition: all 0.3s ease;
 }
 
 .mega-menu-link:hover {
-    color: #3B9DD5;
+    color: var(--iw-action-blue);
     transform: translateX(5px);
 }
 
 .mega-menu-featured {
-    background: linear-gradient(135deg, #E3F2FD, #F1F8E9);
+    background: linear-gradient(135deg, var(--iw-light-blue), var(--iw-light-green));
     border-radius: 16px;
     padding: 1.5rem;
     text-align: center;
@@ -684,14 +684,14 @@
     position: relative;
     width: 60px;
     height: 30px;
-    background: #e5e7eb;
+    background: var(--iw-border);
     border-radius: 30px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .dark-mode-toggle.active {
-    background: linear-gradient(135deg, #1976D2, #3B9DD5);
+    background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-blue));
 }
 
 .dark-mode-toggle-slider {
@@ -732,7 +732,7 @@
 
 .zoom-lens {
     position: absolute;
-    border: 2px solid #3B9DD5;
+    border: 2px solid var(--iw-dark-blue);
     border-radius: 50%;
     width: 100px;
     height: 100px;

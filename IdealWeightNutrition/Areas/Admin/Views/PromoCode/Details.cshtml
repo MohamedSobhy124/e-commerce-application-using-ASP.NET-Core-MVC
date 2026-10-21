@@ -2,244 +2,123 @@
 
 @{
     ViewData["Title"] = Localizer["PromoCodeDetails"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
     var usages = ViewBag.Usages as IEnumerable<IdealWeightNutrition.Models.PromoCodeUsage>;
-    var now = IdealWeightNutrition.Utility.DateTimeHelper.Now;
-    var isActive = Model.IsActive && Model.StartDate <= now && Model.EndDate >= now;
 }
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-10 offset-md-1">
-            <div class="card shadow">
-                <div class="card-header bg-info text-white">
-                    <h2 class="mb-0">@Localizer["PromoCodeDetails"]</h2>
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-form-wrapper">
+            <div class="admin-form-header">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                    <div>
+                        <h1 class="admin-form-title">@Model.Code</h1>
+                        <p class="text-muted mb-0">@Model.Description</p>
+                    </div>
+                    <span data-schedule-badge
+                          data-badge-class="badge admin-schedule-live fs-6"
+                          data-enabled="@Model.IsActive.ToString().ToLower()"
+                          data-start="@Model.StartDate.ToString("yyyy-MM-ddTHH:mm:ss")"
+                          data-end="@Model.EndDate.ToString("yyyy-MM-ddTHH:mm:ss")"
+                          data-label-active="@Localizer["Active"].Value"
+                          data-label-scheduled="@Localizer["Scheduled"].Value"
+                          data-label-ended="@Localizer["Expired"].Value"
+                          data-label-inactive="@Localizer["Inactive"].Value"
+                          class="badge admin-schedule-live bg-secondary">@Localizer["Inactive"]</span>
                 </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h3 class="text-primary">@Model.Code</h3>
-                            <p class="text-muted">@Model.Description</p>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            @if (isActive)
-                            {
-                                <span class="badge bg-success fs-5">@Localizer["Active"]</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary fs-5">@Localizer["Inactive"]</span>
-                            }
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h5 class="card-title">@Localizer["DiscountInformation"]</h5>
-                                    <hr/>
-                                    <p><strong>@Localizer["Type"]:</strong> 
-                                        @if (Model.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
-                                        {
-                                            <span class="badge bg-success">@Localizer["Percentage"]</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-info">@Localizer["FixedAmount"]</span>
-                                        }
-                                    </p>
-                                    <p><strong>@Localizer["Value"]:</strong> 
-                                        @if (Model.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
-                                        {
-                                            <span class="text-success fs-4">@Model.DiscountValue%</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-success fs-4">@Model.DiscountValue.ToString("C")</span>
-                                        }
-                                    </p>
-                                    @if (Model.MinimumOrderAmount.HasValue)
+            </div>
+            <div class="admin-form-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <section class="admin-form-section">
+                            <h2>@Localizer["DiscountInformation"]</h2>
+                            <dl class="admin-details-list">
+                                <dt>@Localizer["Type"]</dt>
+                                <dd>
+                                    @if (Model.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
                                     {
-                                        <p><strong>@Localizer["MinimumOrder"]:</strong> @Model.MinimumOrderAmount.Value.ToString("C")</p>
-                                    }
-                                    @if (Model.MaximumDiscountAmount.HasValue)
-                                    {
-                                        <p><strong>@Localizer["MaximumDiscount"]:</strong> @Model.MaximumDiscountAmount.Value.ToString("C")</p>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h5 class="card-title">@Localizer["ValidityPeriod"]</h5>
-                                    <hr/>
-                                    <p><strong>@Localizer["StartDate"]:</strong> @Model.StartDate.ToString("MMM dd, yyyy hh:mm tt")</p>
-                                    <p><strong>@Localizer["EndDate"]:</strong> @Model.EndDate.ToString("MMM dd, yyyy hh:mm tt")</p>
-                                    @if (Model.EndDate < now)
-                                    {
-                                        <span class="badge bg-danger">@Localizer["Expired"]</span>
-                                    }
-                                    else if (Model.StartDate > now)
-                                    {
-                                        <span class="badge bg-warning">@Localizer["NotStartedYet"]</span>
+                                        <span class="badge bg-success">@Localizer["Percentage"]</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-success">@Localizer["CurrentlyValid"]</span>
+                                        <span class="badge bg-info text-dark">@Localizer["FixedAmount"]</span>
                                     }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h5 class="card-title">@Localizer["UsageStatistics"]</h5>
-                                    <hr/>
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <p><strong>@Localizer["TimesUsed"]:</strong> <span class="badge bg-primary fs-5">@Model.TimesUsed</span></p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <p><strong>@Localizer["UsageLimit"]:</strong> 
-                                                @if (Model.UsageLimit.HasValue)
-                                                {
-                                                    <span class="badge bg-info fs-5">@Model.UsageLimit</span>
-                                                    @if (Model.TimesUsed >= Model.UsageLimit.Value)
-                                                    {
-                                                        <span class="badge bg-danger">@Localizer["LimitReached"]</span>
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-secondary">@Localizer["Unlimited"]</span>
-                                                }
-                                            </p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <p><strong>@Localizer["PerUserLimit"]:</strong> 
-                                                @if (Model.UsageLimitPerUser.HasValue)
-                                                {
-                                                    <span class="badge bg-info fs-5">@Model.UsageLimitPerUser</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-secondary">@Localizer["Unlimited"]</span>
-                                                }
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Discount Exclusions -->
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h5 class="card-title">
-                                        <i class="bi bi-shield-exclamation text-warning me-2"></i>@Localizer["DiscountExclusions"]
-                                    </h5>
-                                    <hr/>
-                                    <p>
-                                        <strong>@Localizer["ExcludeItemsWithExistingDiscounts"]:</strong>
-                                        @if (Model.ExcludeDiscountedItems)
-                                        {
-                                            <span class="badge bg-success">@Localizer["Yes"]</span>
-                                            <small class="text-muted d-block mt-1">
-                                                @Localizer["PromoCodeWillNotApplyToItemsWithFlashSalesComboOffersOrListPriceDiscounts"]
-                                            </small>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary">@Localizer["No"]</span>
-                                        }
-                                    </p>
-                                    @if (Model.ExcludedProducts != null && Model.ExcludedProducts.Any())
+                                </dd>
+                                <dt>@Localizer["Value"]</dt>
+                                <dd>
+                                    @if (Model.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
                                     {
-                                        <p><strong>@Localizer["ExcludedProducts"]:</strong></p>
-                                        <div class="d-flex flex-wrap gap-2">
-                                            @foreach (var excludedProduct in Model.ExcludedProducts)
-                                            {
-                                                <span class="badge bg-danger p-2">
-                                                    @(excludedProduct.Product?.Title ?? "Unknown")
-                                                </span>
-                                            }
-                                        </div>
-                                        <small class="text-muted d-block mt-2">
-                                            @Model.ExcludedProducts.Count @Localizer["Product"]@(Model.ExcludedProducts.Count != 1 ? "s" : "") @Localizer["ExcludedFromPromoCode"]
-                                        </small>
+                                        <span>@(Model.DiscountValue.ToString() + "%")</span>
                                     }
                                     else
                                     {
-                                        <p class="text-muted">@Localizer["NoProductsExcluded"]</p>
+                                        <span>@Model.DiscountValue.ToString("N2")</span>
                                     }
-                                </div>
-                            </div>
-                        </div>
+                                </dd>
+                                @if (Model.MinimumOrderAmount.HasValue)
+                                {
+                                    <dt>@Localizer["MinimumOrder"]</dt>
+                                    <dd>@Model.MinimumOrderAmount.Value.ToString("N2")</dd>
+                                }
+                                @if (Model.MaximumDiscountAmount.HasValue)
+                                {
+                                    <dt>@Localizer["MaximumDiscount"]</dt>
+                                    <dd>@Model.MaximumDiscountAmount.Value.ToString("N2")</dd>
+                                }
+                            </dl>
+                        </section>
                     </div>
-
-                    @if (usages != null && usages.Any())
-                    {
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <h5>@Localizer["UsageHistory"]</h5>
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>@Localizer["Date"]</th>
-                                                <th>@Localizer["User"]</th>
-                                                <th>@Localizer["OrderID"]</th>
-                                                <th>@Localizer["OrderTotal"]</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var usage in usages.OrderByDescending(u => u.UsedDate))
-                                            {
-                                                <tr>
-                                                    <td>@usage.UsedDate.ToString("MMM dd, yyyy hh:mm tt")</td>
-                                                    <td>@(usage.ApplicationUser?.Name ?? Localizer["Guest"].Value)</td>
-                                                    <td>
-                                                        <a asp-controller="Order" asp-action="Details" asp-route-orderId="@usage.OrderId">
-                                                            #@usage.OrderId
-                                                        </a>
-                                                    </td>
-                                                    <td>@usage.OrderHeader.OrderTotal.ToString("C")</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    }
-
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
-                                <i class="bi bi-pencil"></i> @Localizer["Edit"]
-                            </a>
-                            @if (Model.TimesUsed == 0)
-                            {
-                                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
-                                    <i class="bi bi-trash"></i> @Localizer["Delete"]
-                                </a>
-                            }
-                            <a asp-action="Index" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left"></i> @Localizer["BackToList"]
-                            </a>
-                        </div>
+                    <div class="col-md-6">
+                        <section class="admin-form-section">
+                            <h2>@Localizer["ValidityPeriod"]</h2>
+                            <dl class="admin-details-list">
+                                <dt>@Localizer["StartDate"]</dt>
+                                <dd>@Model.StartDate.ToString("yyyy-MM-dd HH:mm")</dd>
+                                <dt>@Localizer["EndDate"]</dt>
+                                <dd>@Model.EndDate.ToString("yyyy-MM-dd HH:mm")</dd>
+                            </dl>
+                            <small class="text-muted admin-schedule-hint">@Localizer["TimezoneAsiaDubai"]</small>
+                        </section>
                     </div>
+                </div>
+
+                @if (usages != null && usages.Any())
+                {
+                    <section class="admin-form-section mt-4">
+                        <h2>@Localizer["UsageStatistics"]</h2>
+                        <div class="table-responsive admin-table-wrapper">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">@Localizer["User"]</th>
+                                        <th scope="col">@Localizer["Order"]</th>
+                                        <th scope="col">@Localizer["UsedDate"]</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var usage in usages)
+                                    {
+                                        <tr>
+                                            <td>@(usage.ApplicationUser?.Email ?? usage.UserId)</td>
+                                            <td>#@usage.OrderId</td>
+                                            <td>@usage.UsedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                }
+
+                <div class="form-actions">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>@Localizer["BackToList"]
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                        <i class="bi bi-pencil me-2" aria-hidden="true"></i>@Localizer["Edit"]
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
-

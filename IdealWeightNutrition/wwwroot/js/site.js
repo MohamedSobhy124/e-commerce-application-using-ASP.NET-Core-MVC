@@ -3,6 +3,27 @@
 
 // Write your JavaScript code.
 
+(function () {
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+
+    function resetScrollOnNewPage() {
+        if (window.location.hash) {
+            return;
+        }
+        window.scrollTo(0, 0);
+        if (document.documentElement) {
+            document.documentElement.scrollTop = 0;
+        }
+        if (document.body) {
+            document.body.scrollTop = 0;
+        }
+    }
+
+    resetScrollOnNewPage();
+})();
+
 /**
  * iOS/Mobile Touch Fix
  * Fixes the double-tap issue on iOS Safari for buttons with hover states

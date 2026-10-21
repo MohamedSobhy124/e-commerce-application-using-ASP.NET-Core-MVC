@@ -14,10 +14,10 @@
     <div class="container">
         <div class="admin-form-wrapper">
             <div class="admin-form-header">
-                <h2 class="admin-form-title">
+                <h1 class="admin-form-title">
                     <i class="bi bi-@(isEdit ? "pencil" : "plus-circle")-fill me-3"></i>
                     @(isEdit ? Localizer["EditRemoteArea"] : Localizer["CreateRemoteArea"])
-                </h2>
+                </h1>
                 <div class="text-muted">
                     <i class="bi bi-building me-2"></i>
                     @Localizer["City"]: <strong>@cityName</strong>
@@ -29,15 +29,8 @@
                     <div asp-validation-summary="All" class="alert alert-danger"></div>
                     <input asp-for="Id" hidden />
 
-                    <!-- Remote Area Information -->
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">
-                                <i class="bi bi-info-circle me-2"></i>
-                                @Localizer["RemoteAreaInformation"]
-                            </h5>
-                        </div>
-                        <div class="card-body">
+                    <section class="admin-form-section">
+                        <h2>@Localizer["RemoteAreaInformation"]</h2>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="admin-form-group">
@@ -75,18 +68,10 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                    </section>
 
-                    <!-- Delivery Settings -->
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0">
-                                <i class="bi bi-truck me-2"></i>
-                                @Localizer["DeliverySettings"]
-                            </h5>
-                        </div>
-                        <div class="card-body">
+                    <section class="admin-form-section">
+                        <h2>@Localizer["DeliverySettings"]</h2>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="admin-form-group">
@@ -138,19 +123,17 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                    </section>
 
-                    <!-- Form Actions -->
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="bi bi-check-circle me-2"></i>
-                            @(isEdit ? Localizer["Update"] : Localizer["Create"])
-                        </button>
-                        <a asp-controller="City" asp-action="Upsert" asp-route-id="@Model.CityId" class="btn btn-secondary btn-lg">
-                            <i class="bi bi-arrow-left me-2"></i>
+                        <a asp-controller="City" asp-action="Upsert" asp-route-id="@Model.CityId" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>
                             @Localizer["BackToCity"]
                         </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2" aria-hidden="true"></i>
+                            @(isEdit ? Localizer["Update"] : Localizer["Create"])
+                        </button>
                     </div>
                 </form>
             </div>
@@ -164,31 +147,3 @@
     }
 }
 
-<style>
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-        padding: 1.5rem 0;
-        border-top: 2px solid #e9ecef;
-        margin-top: 2rem;
-    }
-    
-    .card {
-        border: none;
-        border-radius: 12px;
-    }
-    
-    .card-header {
-        border-radius: 12px 12px 0 0 !important;
-        font-weight: 600;
-    }
-    
-    .admin-form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-check-input:checked {
-        background-color: #28a745;
-        border-color: #28a745;
-    }
-</style>

@@ -201,7 +201,7 @@
     left: -2px;
     right: -2px;
     bottom: -2px;
-    background: linear-gradient(135deg, #3B9DD5, #7BC043, #3B9DD5);
+    background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green), var(--iw-dark-blue));
     border-radius: 12px;
     z-index: -1;
     opacity: 0;
@@ -211,7 +211,7 @@
 .product-card:hover {
     transform: translateY(-4px) scale(1.01) !important;
     box-shadow: 0 6px 18px rgba(59, 157, 213, 0.25) !important;
-    border-image: linear-gradient(135deg, #3B9DD5, #7BC043) 1 !important;
+    border-image: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-green)) 1 !important;
 }
 
 .product-card:hover::after {
@@ -722,14 +722,15 @@
 
 /* Container Padding - Reduced */
 .container {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
+    max-width: 100%;
+    padding-inline: 0.75rem !important;
 }
 
 @media (max-width: 768px) {
     .container {
-        padding-left: 0.5rem !important;
-        padding-right: 0.5rem !important;
+        max-width: 100%;
+        margin-inline: 0;
+        padding-inline: 0.75rem !important;
     }
 }
 
@@ -1131,6 +1132,95 @@ section {
         width: 26px !important;
         height: 26px !important;
         font-size: 0.65rem !important;
+    }
+}
+
+/* After scroll, home carousels and the sticky search bar were leaving a left
+   gutter on RTL phones. Pin chrome to both edges and fill leftover slides. */
+@media (max-width: 767.98px) {
+    .hero-search-box-sticky,
+    .hero-search-box-sticky.scrolled {
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        border-image: none !important;
+    }
+
+    .hero-search-box-sticky .container {
+        max-width: 100% !important;
+        margin-inline: 0 !important;
+        padding-inline: 0.75rem !important;
+    }
+
+    .offers-section,
+    .best-sellers-section,
+    .new-arrivals-section,
+    .combo-offers-section,
+    .services-showcase-section,
+    .category-section,
+    .flash-sale-section {
+        max-width: 100%;
+        overflow-x: clip;
+        padding-inline: 0;
+    }
+
+    .offers-carousel,
+    .product-carousel,
+    .combo-offers-carousel,
+    .category-carousel-wrapper,
+    .flash-sale-carousel-wrapper {
+        max-width: 100%;
+        padding-inline: 0;
+        overflow-x: clip;
+    }
+
+    .category-card {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+
+    .offers-carousel .carousel-item .row,
+    .product-carousel .carousel-item .row,
+    .combo-offers-carousel .carousel-item .row {
+        width: 100%;
+        margin-inline: 0 !important;
+        padding-inline: 0;
+        gap: 0.5rem !important;
+    }
+
+    .offers-carousel .carousel-item .row > [class*="col-"],
+    .product-carousel .carousel-item .row > [class*="col-"],
+    .combo-offers-carousel .carousel-item .row > [class*="col-"] {
+        padding-inline: 0 !important;
+    }
+
+    .offers-carousel .carousel-item .row > [class*="col-"]:only-child,
+    .product-carousel .carousel-item .row > [class*="col-"]:only-child,
+    .combo-offers-carousel .carousel-item .row > [class*="col-"]:only-child,
+    .offers-carousel .carousel-item .row > [class*="col-"]:last-child:nth-child(odd),
+    .product-carousel .carousel-item .row > [class*="col-"]:last-child:nth-child(odd),
+    .combo-offers-carousel .carousel-item .row > [class*="col-"]:last-child:nth-child(odd) {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .services-grid,
+    .services-grid-simple {
+        grid-template-columns: 1fr !important;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .service-card-simple {
+        min-inline-size: 0;
+        max-inline-size: 100%;
+        width: 100%;
     }
 }
 

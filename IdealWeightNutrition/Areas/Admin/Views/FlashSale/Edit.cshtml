@@ -9,10 +9,10 @@
     <div class="container">
         <div class="admin-form-wrapper">
             <div class="admin-form-header">
-                <h2 class="admin-form-title">
+                <h1 class="admin-form-title">
                     <i class="bi bi-pencil-square me-3"></i>
                     @Localizer["EditFlashSale"]
-                </h2>
+                </h1>
             </div>
 
             <div class="admin-form-body">
@@ -46,7 +46,7 @@
                             <!-- Name Arabic -->
                             <div class="admin-form-group">
                                 <label class="admin-form-label">
-                                    <i class="bi bi-tag me-2"></i>@Localizer["FlashSaleName"] (عربي)
+                                    <i class="bi bi-tag me-2" aria-hidden="true"></i>@Localizer["NameArabic"]
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input asp-for="NameAr" class="admin-form-control" dir="rtl" placeholder="اسم التخفيضات" />
@@ -73,7 +73,7 @@
                             <!-- Description Arabic -->
                             <div class="admin-form-group">
                                 <label class="admin-form-label">
-                                    <i class="bi bi-text-paragraph me-2"></i>@Localizer["Description"] (عربي)
+                                    <i class="bi bi-text-paragraph me-2" aria-hidden="true"></i>@Localizer["DescriptionArabic"]
                                 </label>
                                 <textarea asp-for="DescriptionAr" class="admin-form-control" rows="3" dir="rtl" placeholder="وصف التخفيضات"></textarea>
                                 <span asp-validation-for="DescriptionAr" class="text-danger"></span>
@@ -100,7 +100,7 @@
                                     <div class="mt-2">
                                         <label class="form-label">@Localizer["CurrentImage"]:</label>
                                         <div>
-                                            <img src="@Model.ImageUrl" alt="Current Image" style="max-width: 300px; max-height: 300px; border: 1px solid #ddd; padding: 5px; border-radius: 5px;" />
+                                            <img src="@Model.ImageUrl" alt="Current Image" style="max-width: 300px; max-height: 300px; border: 1px solid var(--iw-border); padding: 5px; border-radius: 5px;" />
                                         </div>
                                     </div>
                                 }
@@ -108,7 +108,7 @@
                                 <div id="imagePreview" class="mt-2" style="display: none;">
                                     <label class="form-label">@Localizer["NewImagePreview"]:</label>
                                     <div>
-                                        <img id="previewImg" src="#" alt="Preview" style="max-width: 300px; max-height: 300px; border: 1px solid #ddd; padding: 5px; border-radius: 5px;" />
+                                        <img id="previewImg" src="#" alt="Preview" style="max-width: 300px; max-height: 300px; border: 1px solid var(--iw-border); padding: 5px; border-radius: 5px;" />
                                     </div>
                                 </div>
                             </div>

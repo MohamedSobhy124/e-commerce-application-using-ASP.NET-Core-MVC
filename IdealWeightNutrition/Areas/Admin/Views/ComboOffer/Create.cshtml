@@ -7,23 +7,18 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2>
-                <i class="bi bi-box-seam me-2"></i>@Localizer["CreateComboOffer"]
-            </h2>
-        </div>
-    </div>
-
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-form-wrapper">
+            <div class="admin-form-header">
+                <h1 class="admin-form-title">@Localizer["CreateComboOffer"]</h1>
+            </div>
+            <div class="admin-form-body">
     <form asp-action="Create" method="post" enctype="multipart/form-data">
         <div class="row">
-            <div class="col-md-8">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>@Localizer["BasicInformation"]</h5>
-                    </div>
-                    <div class="card-body">
+            <div class="col-lg-8">
+                <section class="admin-form-section">
+                        <h2>@Localizer["BasicInformation"]</h2>
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                         <div class="row">
@@ -53,22 +48,18 @@
 
                         <div class="mb-3">
                             <label class="form-label">@Localizer["Images"] <span class="text-danger">*</span></label>
-                            <input type="file" name="files" class="form-control" accept="image/*" multiple required />
+                            <input type="file" name="files" aria-label="@Localizer["UploadImages"]" class="form-control" accept="image/*" multiple required />
                             <span class="text-danger field-validation-valid" data-valmsg-for="files" data-valmsg-replace="true"></span>
                             <small class="form-text text-muted">@Localizer["AtLeastOneImageRequired"]</small>
-                            <div id="fileCount" class="mt-2 text-info" style="display: none;">
-                                <i class="bi bi-info-circle"></i> <span id="fileCountText">0 files selected</span>
+                            <div id="fileCount" class="mt-2 text-info" hidden>
+                                <i class="bi bi-info-circle" aria-hidden="true"></i> <span id="fileCountText"></span>
                             </div>
                             <div id="imagePreview" class="mt-3 d-flex flex-wrap gap-2"></div>
                         </div>
-                    </div>
-                </div>
+                </section>
 
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>@Localizer["Pricing"]</h5>
-                    </div>
-                    <div class="card-body">
+                <section class="admin-form-section">
+                        <h2>@Localizer["Pricing"]</h2>
                         <div class="mb-3">
                             <label asp-for="ComboPrice" class="form-label">@Localizer["ComboPrice"] <span class="text-danger">*</span></label>
                             <div class="input-group">
@@ -83,36 +74,40 @@
                             <i class="bi bi-info-circle me-2"></i>
                             <strong>@Localizer["Note"]:</strong> @Localizer["OriginalPriceWillBeCalculated"] @Localizer["AfterAddingProducts"]
                         </div>
-                    </div>
-                </div>
+                </section>
 
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0"><i class="bi bi-calendar-event me-2"></i>@Localizer["Schedule"]</h5>
-                    </div>
-                    <div class="card-body">
+                <section class="admin-form-section" data-schedule-from-inputs>
+                        <h2>@Localizer["Schedule"]</h2>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label asp-for="StartDate" class="form-label">@Localizer["StartDate"] <span class="text-danger">*</span></label>
-                                <input asp-for="StartDate" class="form-control" type="datetime-local" />
+                                <label asp-for="StartDate" class="admin-form-label">@Localizer["StartDate"] <span class="text-danger">*</span></label>
+                                <input asp-for="StartDate" class="admin-form-control" type="datetime-local" />
+                                <small class="form-text text-muted admin-schedule-hint">@Localizer["TimezoneAsiaDubai"]</small>
                                 <span asp-validation-for="StartDate" class="text-danger"></span>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label asp-for="EndDate" class="form-label">@Localizer["EndDate"] <span class="text-danger">*</span></label>
-                                <input asp-for="EndDate" class="form-control" type="datetime-local" />
+                                <label asp-for="EndDate" class="admin-form-label">@Localizer["EndDate"] <span class="text-danger">*</span></label>
+                                <input asp-for="EndDate" class="admin-form-control" type="datetime-local" />
+                                <small class="form-text text-muted admin-schedule-hint">@Localizer["TimezoneAsiaDubai"]</small>
                                 <span asp-validation-for="EndDate" class="text-danger"></span>
                             </div>
                         </div>
-                    </div>
-                </div>
+                        <span data-schedule-badge
+                              data-badge-class="badge admin-schedule-live"
+                              data-enabled="true"
+                              data-start=""
+                              data-end=""
+                              data-label-active="@Localizer["Active"].Value"
+                              data-label-scheduled="@Localizer["Scheduled"].Value"
+                              data-label-ended="@Localizer["Ended"].Value"
+                              data-label-inactive="@Localizer["Inactive"].Value"
+                              class="badge admin-schedule-live bg-secondary">@Localizer["Scheduled"]</span>
+                </section>
             </div>
 
-            <div class="col-md-4">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="bi bi-gear me-2"></i>@Localizer["Settings"]</h5>
-                    </div>
-                    <div class="card-body">
+            <div class="col-lg-4">
+                <section class="admin-form-section">
+                        <h2>@Localizer["Settings"]</h2>
                         <div class="mb-3">
                             <div class="form-check form-switch">
                                 <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
@@ -167,31 +162,29 @@
                             </small>
                             <span asp-validation-for="FreeDeliveryMinimumAmount" class="text-danger"></span>
                         </div>
-                    </div>
-                </div>
+                </section>
 
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-check-circle me-2"></i>@Localizer["CreateComboOffer"]
-                            </button>
-                            <a asp-action="Index" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left me-2"></i>@Localizer["BackToList"]
-                            </a>
-                        </div>
-                    </div>
+                <div class="form-actions">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>@Localizer["BackToList"]
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-2" aria-hidden="true"></i>@Localizer["CreateComboOffer"]
+                    </button>
                 </div>
             </div>
         </div>
     </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
         (function() {
-            const fileInput = document.querySelector('input[type="file"][name="files"]');
+            const fileInput = document.querySelector('input[type="file"][name="files" aria-label="@Localizer["UploadImages"]"]');
             const preview = document.getElementById('imagePreview');
             const form = fileInput ? fileInput.closest('form') : null;
             let selectedFiles = [];
@@ -250,7 +243,7 @@
                         fileInput.files = dataTransfer.files;
                     } catch (err) {
                         console.error('DataTransfer API not supported:', err);
-                        alert('Your browser does not support multiple file selection. Please select all files at once.');
+                        alert('@Html.Raw(Localizer["MultipleFileSelectionNotSupported"].Value)');
                     }
                 }
                 
@@ -286,7 +279,7 @@
                     })
                     .catch(err => {
                         console.error('Form submission error:', err);
-                        alert('Error submitting form. Please try again.');
+                        alert('@Html.Raw(Localizer["ErrorSubmittingForm"].Value)');
                     });
                 }
                 
@@ -296,10 +289,10 @@
                     const fileCountText = document.getElementById('fileCountText');
                     if (fileCountDiv && fileCountText) {
                         if (selectedFiles.length > 0) {
-                            fileCountDiv.style.display = 'block';
-                            fileCountText.textContent = selectedFiles.length + ' file(s) selected';
+                            fileCountDiv.hidden = false;
+                            fileCountText.textContent = '@Html.Raw(string.Format(Localizer["FilesSelectedCount"].Value, "{0}"))'.replace('{0}', selectedFiles.length);
                         } else {
-                            fileCountDiv.style.display = 'none';
+                            fileCountDiv.hidden = true;
                         }
                     }
                     

@@ -4,10 +4,37 @@ $(document).ready(function () {
     loadDataTable();
 });
 
+function toggleServiceEmptyState(count) {
+    var empty = document.getElementById('serviceSubscriptionsEmpty');
+    var wrap = document.getElementById('serviceSubscriptionsTableWrap');
+    var meta = document.getElementById('serviceCountMeta');
+    if (!empty || !wrap) return;
+    if (count === 0) {
+        empty.hidden = false;
+        wrap.hidden = true;
+    } else {
+        empty.hidden = true;
+        wrap.hidden = false;
+        if (meta) {
+            meta.textContent = count + ' ' + (meta.dataset.label || '');
+        }
+    }
+}
+
 function loadDataTable() {
+    var countLabel = document.getElementById('serviceCountMeta');
+    if (countLabel) {
+        countLabel.dataset.label = countLabel.textContent.trim();
+    }
+
     dataTable = $('#tblData').DataTable({
         "ajax": {
-            "url": "/Admin/ServiceSubscription/GetAll"
+            "url": "/Admin/ServiceSubscription/GetAll",
+            "dataSrc": function (json) {
+                var rows = json.data || json;
+                toggleServiceEmptyState(Array.isArray(rows) ? rows.length : 0);
+                return rows;
+            }
         },
         "columns": [
             { "data": "id", "width": "5%" },

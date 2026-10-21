@@ -1,0 +1,61 @@
+@model IEnumerable<IdealWeightNutrition.Models.ViewModels.AdminUserListItemVM>
+
+@{
+    ViewData["Title"] = Localizer["UsersList"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["EmptyIcon"] = "bi-people";
+    ViewData["EmptyTitle"] = Localizer["NoUsersYet"].Value;
+    ViewData["EmptyText"] = Localizer["CreateAdminUserToManageAccess"].Value;
+    ViewData["EmptyActionUrl"] = Url.Action("CreateAdminUser");
+    ViewData["EmptyActionText"] = Localizer["CreateAdminUser"].Value;
+}
+
+<partial name="_Notifications" />
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h1 class="admin-card-title">@Localizer["UsersList"]</h1>
+            </div>
+            <div class="admin-card-body">
+                <div class="admin-toolbar">
+                    <p class="admin-toolbar-meta mb-0">@Model.Count() @Localizer["Users"]</p>
+                    <a asp-action="CreateAdminUser" class="create-new-btn">
+                        <i class="bi bi-person-plus me-2" aria-hidden="true"></i>
+                        @Localizer["CreateAdminUser"]
+                    </a>
+                </div>
+
+                @if (!Model.Any())
+                {
+                    <partial name="_AdminEmptyState" />
+                }
+                else
+                {
+                    <div class="table-responsive admin-table-wrapper">
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">@Localizer["Email"]</th>
+                                    <th scope="col">@Localizer["FullName"]</th>
+                                    <th scope="col">@Localizer["Role"]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td><a href="mailto:@item.Email" class="text-decoration-none">@item.Email</a></td>
+                                        <td><strong>@item.Name</strong></td>
+                                        <td><span class="badge bg-light text-dark">@item.Role</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

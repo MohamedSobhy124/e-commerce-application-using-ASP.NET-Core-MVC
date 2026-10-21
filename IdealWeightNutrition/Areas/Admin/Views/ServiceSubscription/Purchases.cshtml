@@ -1,7 +1,8 @@
-@model IEnumerable<IdealWeightNutrition.Models.ServicePurchase>
-
 @{
     ViewData["Title"] = Localizer["ServicePurchases"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["EmptyIcon"] = "bi-cart-check";
+    ViewData["EmptyTitle"] = Localizer["NoServicePurchasesYet"].Value;
 }
 
 <partial name="_Notifications" />
@@ -10,38 +11,39 @@
     <div class="container">
         <div class="admin-card">
             <div class="admin-card-header">
-                <h2 class="admin-card-title">
-                    <i class="bi bi-cart-check me-3"></i>
-                    @Localizer["ServicePurchasesManagement"]
-                </h2>
-                <div class="d-flex gap-2 align-items-center">
-                    <a asp-action="Index" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-2"></i>
-                        @Localizer["BackToList"]
-                    </a>
-                </div>
+                <h1 class="admin-card-title">@Localizer["ServicePurchasesManagement"]</h1>
             </div>
 
             <div class="admin-card-body">
-                <div class="admin-table-wrapper" style="overflow-x: auto;">
-                    <table id="tblData" class="table table-bordered table-striped table-hover" style="width: 100%;">
+                <div class="admin-toolbar">
+                    <p class="admin-toolbar-meta mb-0" id="purchaseCountMeta">@Localizer["ServicePurchases"]</p>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>
+                        @Localizer["BackToList"]
+                    </a>
+                </div>
+
+                <div id="servicePurchasesEmpty" hidden>
+                    <partial name="_AdminEmptyState" />
+                </div>
+
+                <div class="table-responsive admin-table-wrapper" id="servicePurchasesTableWrap">
+                    <table id="tblData" class="table table-bordered table-striped table-hover w-100">
                         <thead>
                             <tr>
-                                <th>@Localizer["PurchaseID"]</th>
-                                <th>@Localizer["Service"]</th>
-                                <th>@Localizer["Customer"]</th>
-                                <th>@Localizer["Email"]</th>
-                                <th>@Localizer["Phone"]</th>
-                                <th>@Localizer["TotalAmount"]</th>
-                                <th>@Localizer["AmountPaid"]</th>
-                                <th>@Localizer["PaymentStatus"]</th>
-                                <th>@Localizer["PurchaseDate"]</th>
-                                <th>@Localizer["Actions"]</th>
-                            </tr>   
+                                <th scope="col">@Localizer["PurchaseID"]</th>
+                                <th scope="col">@Localizer["Service"]</th>
+                                <th scope="col">@Localizer["Customer"]</th>
+                                <th scope="col">@Localizer["Email"]</th>
+                                <th scope="col">@Localizer["Phone"]</th>
+                                <th scope="col">@Localizer["TotalAmount"]</th>
+                                <th scope="col">@Localizer["AmountPaid"]</th>
+                                <th scope="col">@Localizer["PaymentStatus"]</th>
+                                <th scope="col">@Localizer["PurchaseDate"]</th>
+                                <th scope="col" class="text-center">@Localizer["Actions"]</th>
+                            </tr>
                         </thead>
-                        <tbody>
-                            <!-- DataTable will populate this -->
-                        </tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>
@@ -49,7 +51,10 @@
     </div>
 </div>
 
-@section Scripts{
-    <script type="text/javascript" src="~/js/ServicePurchase.js"></script>
+@section Styles {
+    <link rel="stylesheet" href="~/css/service-subscription-admin.css" asp-append-version="true" />
 }
 
+@section Scripts{
+    <script type="text/javascript" src="~/js/ServicePurchase.js" asp-append-version="true"></script>
+}

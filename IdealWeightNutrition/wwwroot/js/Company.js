@@ -1,58 +1,59 @@
-﻿var dataTable;
-$(document).ready(function () {
-    loadDataTable();
-});
+﻿$(document).ready(function () {
+    var table = document.getElementById('tblData');
+    if (!table) {
+        return;
+    }
 
-
-function loadDataTable() {
-    dataTable = $('#tblData').DataTable({
-        "ajax": { url: '/Admin/Companies/getall' },
-        "columns": [
-            { data: 'id', "width": "15%" },
-            { data: 'name',"width":"15%" },
-            { data: 'phoneNumber', "width": "10%" },
-            { data: 'city', "width": "10%" },
-            { data: 'state', "width": "10%" }, 
+    var labels = table.dataset;
+    var dataTable = $('#tblData').DataTable({
+        ajax: { url: '/Admin/Companies/getall' },
+        language: {
+            emptyTable: labels.empty || ''
+        },
+        columns: [
+            { data: 'id' },
+            { data: 'name' },
+            { data: 'phoneNumber' },
+            { data: 'city' },
+            { data: 'state' },
             {
                 data: 'id',
-                "render": function (data) {
-                    return `
-                    <div class="w-75 btn-group" role="group">
-                    <a href="/Admin/Companies/UpSert?id=${data}" class="btn btn-dark mx-2"><i class="bi bi-pencil-square"></i>Edit</a>
-
-                    <a Onclick="Delete('/Admin/Companies/Delete?id=${data}')" class="btn btn-danger mx-2"><i class="bi bi-trash-fill"></i>Delete</a>
-                    </div>`
-                },
-                "width": "25%"
+                orderable: false,
+                render: function (data, type, row) {
+                    var name = row && row.name ? row.name : '';
+                    return '<div class="admin-row-actions">' +
+                        '<a href="/Admin/Companies/UpSert?id=' + data + '" class="btn btn-sm btn-primary" aria-label="' + labels.labelEdit + '"><i class="bi bi-pencil" aria-hidden="true"></i></a>' +
+                        '<button type="button" class="btn btn-sm btn-danger js-delete-company" data-url="/Admin/Companies/Delete?id=' + data + '" data-name="' + name + '" aria-label="' + labels.labelDelete + '"><i class="bi bi-trash" aria-hidden="true"></i></button>' +
+                        '</div>';
+                }
             }
-
         ]
     });
-};
-function Delete(url) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
+
+    $('#tblData').on('click', '.js-delete-company', function () {
+        var button = this;
+        Swal.fire({
+            title: labels.confirmTitle,
+            text: (labels.confirmText || '') + ' ' + (button.dataset.name || ''),
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: labels.confirmYes
+        }).then(function (result) {
+            if (!result.isConfirmed) {
+                return;
+            }
             $.ajax({
-                url: url,
-                    type: 'DELETE',
-                Success: function (data) {
-                    
-                    toastr.Success(data.message);
-                    
+                url: button.dataset.url,
+                type: 'DELETE',
+                success: function (data) {
+                    if (data.success) {
+                        toastr.success(data.massage || data.message);
+                        dataTable.ajax.reload();
+                    } else {
+                        toastr.error(data.massage || data.message);
                     }
-            })
-        }
-    }).then(function () {
-        location.reload();
+                }
+            });
+        });
     });
-
-}
-
+});

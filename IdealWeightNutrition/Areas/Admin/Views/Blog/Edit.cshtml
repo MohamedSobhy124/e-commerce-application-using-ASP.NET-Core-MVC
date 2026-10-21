@@ -7,16 +7,9 @@
 
 <div class="admin-wrapper blog-admin">
     <div class="container">
-        <a asp-action="Index" class="blog-quick-back">
-            <i class="bi bi-arrow-left"></i>
-            @Localizer["BackToList"]
-        </a>
         <div class="admin-form-wrapper">
             <div class="admin-form-header">
-                <h2 class="admin-form-title">
-                    <i class="bi bi-pencil-square me-3"></i>
-                    @Localizer["EditBlogPost"]
-                </h2>
+                <h1 class="admin-form-title">@Localizer["EditBlogPost"]</h1>
             </div>
 
             <div class="admin-form-body">
@@ -24,15 +17,11 @@
                     <input type="hidden" asp-for="Id" />
                     <input type="hidden" asp-for="Slug" />
                     <div asp-validation-summary="All" class="alert alert-danger"></div>
-                    <div class="blog-url-info mb-3">
-                        <small><strong>URL:</strong> /Customer/Blog/Details/<code>@Model.Slug</code></small>
-                    </div>
+                    <p class="blog-url-info mb-3"><strong>@Localizer["BlogPostUrlLabel"]:</strong> /Customer/Blog/Details/<code>@Model.Slug</code></p>
 
-                    <div class="card mb-4 content-section-card">
-                        <div class="card-header english">
-                            <h5 class="mb-0"><i class="bi bi-translate me-2"></i>@Localizer["EnglishContent"]</h5>
-                        </div>
-                        <div class="card-body">
+                    <section class="admin-form-section content-section-card">
+                        <h2><i class="bi bi-translate me-2" aria-hidden="true"></i>@Localizer["EnglishContent"]</h2>
+                        <div>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="admin-form-group">
@@ -79,13 +68,11 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    <div class="card mb-4 content-section-card">
-                        <div class="card-header arabic">
-                            <h5 class="mb-0"><i class="bi bi-translate me-2"></i>@Localizer["ArabicContent"]</h5>
-                        </div>
-                        <div class="card-body">
+                    <section class="admin-form-section content-section-card">
+                        <h2><i class="bi bi-translate me-2" aria-hidden="true"></i>@Localizer["ArabicContent"]</h2>
+                        <div>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="admin-form-group">
@@ -132,13 +119,11 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    <div class="card mb-4 content-section-card">
-                        <div class="card-header settings">
-                            <h5 class="mb-0"><i class="bi bi-image me-2"></i>@Localizer["ImageAndSettings"]</h5>
-                        </div>
-                        <div class="card-body">
+                    <section class="admin-form-section content-section-card">
+                        <h2><i class="bi bi-image me-2" aria-hidden="true"></i>@Localizer["ImageAndSettings"]</h2>
+                        <div>
                             @if (!string.IsNullOrEmpty(Model.ImageUrl))
                             {
                                 <div class="admin-form-group">
@@ -169,15 +154,15 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="bi bi-check-circle me-2"></i>@Localizer["SaveChanges"]
-                        </button>
-                        <a asp-action="Index" class="btn btn-secondary btn-lg">
-                            <i class="bi bi-arrow-left me-2"></i>@Localizer["BackToList"]
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>@Localizer["BackToList"]
                         </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2" aria-hidden="true"></i>@Localizer["SaveChanges"]
+                        </button>
                     </div>
                 </form>
             </div>

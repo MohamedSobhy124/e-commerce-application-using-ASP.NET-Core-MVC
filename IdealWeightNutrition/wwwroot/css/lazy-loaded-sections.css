@@ -8,7 +8,7 @@
 .new-arrivals-section {
     /* Allow vertical scrolling to pass through */
     touch-action: pan-y !important; /* Force allow vertical scrolling */
-    overscroll-behavior-y: none !important; /* Force allow vertical scroll to pass through */
+    overscroll-behavior-y: auto !important;
     padding: 2rem 0;
     margin: 0;
     position: relative;
@@ -19,22 +19,22 @@
     .best-sellers-section,
     .new-arrivals-section {
         touch-action: pan-y !important;
-        overscroll-behavior-y: none !important;
+        overscroll-behavior-y: auto !important;
         overflow: visible !important;
     }
     
     .best-sellers-section *,
     .new-arrivals-section * {
-        touch-action: pan-y pan-x !important; /* Allow both directions on all children */
+        touch-action: pan-y !important;
     }
 }
 
 .best-sellers-section {
-    background: linear-gradient(135deg, #fff5f5 0%, #ffffff 50%, #f0f9ff 100%);
+    background: linear-gradient(135deg, #fff5f5 0%, var(--iw-surface) 50%, var(--iw-light-blue) 100%);
 }
 
 .new-arrivals-section {
-    background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 50%, #f5f3ff 100%);
+    background: linear-gradient(135deg, var(--iw-light-blue) 0%, var(--iw-surface) 50%, #f5f3ff 100%);
 }
 
 .best-sellers-section::before,
@@ -45,7 +45,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+    background: linear-gradient(90deg, var(--iw-dark-blue), var(--iw-dark-blue), #ec4899, var(--iw-warning));
     background-size: 300% 100%;
     animation: gradientShift 8s ease infinite;
 }
@@ -72,14 +72,14 @@
     align-items: center;
     justify-content: center;
     gap: 1rem;
-    background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+    background: linear-gradient(135deg, var(--iw-ink) 0%, var(--iw-muted) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
 .best-sellers-section .section-title i {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--iw-warning) 0%, var(--iw-warning) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -87,7 +87,7 @@
 }
 
 .new-arrivals-section .section-title i {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -107,7 +107,7 @@
 .best-sellers-section .section-subtitle,
 .new-arrivals-section .section-subtitle {
     font-size: 1.125rem;
-    color: #64748b;
+    color: var(--iw-muted);
     margin: 0;
     font-weight: 500;
 }
@@ -117,18 +117,18 @@
     position: relative;
     padding: 1rem 0 3rem;
     width: 100%;
-    overflow: visible; /* Changed from hidden to visible to allow scrolling */
-    touch-action: pan-y pan-x; /* Allow both vertical and horizontal scrolling naturally */
-    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
-    will-change: transform; /* Optimize for carousel transitions */
-    overscroll-behavior-x: contain; /* Prevent scroll chaining to parent */
-    overscroll-behavior-y: none; /* Allow vertical scroll to pass through to page */
+    overflow: hidden;
+    touch-action: pan-y;
+    -webkit-tap-highlight-color: transparent;
+    will-change: auto;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: auto;
 }
 
 @media (max-width: 767px) {
     .product-carousel {
-        overflow: visible; /* Ensure visible on mobile */
-        touch-action: pan-y pan-x; /* Explicitly allow both directions */
+        overflow: hidden;
+        touch-action: pan-y;
     }
 }
 
@@ -140,22 +140,22 @@
     -webkit-touch-callout: default; /* Allow default touch behavior */
 }
 
-/* Ensure carousel container doesn't block vertical scrolling */
+/* Clip sideways overflow on both axes so the page stays the vertical scroller. */
 .product-carousel .carousel-inner {
-    overscroll-behavior-y: none !important; /* Force allow vertical scroll to pass through */
-    overflow: visible; /* Don't clip content */
+    overscroll-behavior-y: auto;
+    overflow: hidden;
 }
 
 @media (max-width: 767px) {
     .product-carousel .carousel-inner {
-        overflow: visible !important;
-        touch-action: pan-y pan-x !important;
+        overflow: hidden;
+        touch-action: pan-y !important;
     }
     
     .product-carousel .carousel-item,
     .product-carousel .carousel-item * {
-        touch-action: pan-y pan-x !important;
-        pointer-events: auto; /* Ensure touch events work */
+        touch-action: pan-y !important;
+        pointer-events: auto;
     }
 }
 
@@ -192,7 +192,7 @@
 }
 
 .product-card-simple {
-    background: #ffffff;
+    background: var(--iw-surface);
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -224,7 +224,7 @@
 .product-card-simple:hover {
     transform: translateY(-12px) scale(1.02);
     box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
-    border-color: #3b82f6;
+    border-color: var(--iw-dark-blue);
 }
 
 .product-card-link {
@@ -240,7 +240,7 @@
 .product-card-image {
     position: relative;
     height: 120px;
-    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-light-blue) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -265,13 +265,13 @@
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    background: #ffffff;
+    background: var(--iw-surface);
 }
 
 .product-card-title {
     font-size: 0.9rem;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--iw-ink);
     margin: 0 0 0.75rem 0;
     line-height: 1.4;
     display: -webkit-box;
@@ -296,7 +296,7 @@
 .product-price-current {
     font-size: 1.1rem;
     font-weight: 900;
-    color: #059669;
+    color: var(--iw-action-green);
     line-height: 1;
 }
 
@@ -320,7 +320,7 @@
 /* Show Details Button */
 .product-card-simple .btn-show-details {
     width: 100%;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     color: white;
     border: none;
     padding: 0.6rem 0.875rem;
@@ -337,7 +337,7 @@
 }
 
 .product-card-simple .btn-show-details:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, #1d4ed8 100%);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     color: white;
@@ -353,7 +353,7 @@
 .product-card-simple .bestseller-cart-btn,
 .product-card-simple .newarrival-cart-btn {
     width: 100% !important;
-    background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
     color: white;
     border: none;
     padding: 0.6rem 0.875rem;
@@ -374,7 +374,7 @@
 .product-card-simple .btn-add-cart-quick:hover,
 .product-card-simple .bestseller-cart-btn:hover,
 .product-card-simple .newarrival-cart-btn:hover {
-    background: linear-gradient(135deg, #6ba836 0%, #5a9030 100%);
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, #5a9030 100%);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(123, 192, 67, 0.4);
 }
@@ -382,7 +382,7 @@
 .product-card-simple .btn-add-cart-quick.in-cart,
 .product-card-simple .bestseller-cart-btn.in-cart,
 .product-card-simple .newarrival-cart-btn.in-cart {
-    background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
 }
 
 .product-card-simple .btn-add-cart-quick i,
@@ -397,7 +397,7 @@
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 100%);
     color: white;
     padding: 0.4rem 0.8rem;
     border-radius: 50px;
@@ -412,7 +412,7 @@
     position: absolute;
     top: 1rem;
     left: 1rem;
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--iw-warning) 0%, var(--iw-warning) 100%);
     color: white;
     width: 40px;
     height: 40px;
@@ -433,7 +433,7 @@
     position: absolute;
     top: 1rem;
     left: 1rem;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     color: white;
     padding: 0.4rem 0.8rem;
     border-radius: 50px;
@@ -490,8 +490,8 @@
 
 .product-carousel .carousel-control-prev:hover,
 .product-carousel .carousel-control-next:hover {
-    background: #3b82f6;
-    border-color: #3b82f6;
+    background: var(--iw-dark-blue);
+    border-color: var(--iw-dark-blue);
     transform: translateY(-50%) scale(1.1);
 }
 
@@ -544,7 +544,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    background: linear-gradient(135deg, var(--iw-border) 0%, #cbd5e1 100%);
     border: none;
     opacity: 1;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -742,7 +742,7 @@
 /* ===== SERVICES SECTION ENHANCEMENTS ===== */
 .services-showcase-section {
     padding: 4rem 0;
-    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-surface) 100%);
     margin: 2rem 0;
     position: relative;
     overflow: hidden;
@@ -755,7 +755,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #10b981, #059669, #047857);
+    background: linear-gradient(90deg, var(--iw-dark-green), var(--iw-dark-green), #047857);
     background-size: 300% 100%;
     animation: gradientShift 8s ease infinite;
 }
@@ -775,14 +775,14 @@
     margin: 0;
     display: inline-flex;
     align-items: center;
-    background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+    background: linear-gradient(135deg, var(--iw-ink) 0%, var(--iw-muted) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
 .services-title i {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -790,7 +790,7 @@
 
 .services-subtitle {
     font-size: 1.125rem;
-    color: #64748b;
+    color: var(--iw-muted);
     margin: 0.5rem 0 0 0;
     font-weight: 500;
 }
@@ -799,7 +799,7 @@
     display: inline-flex;
     align-items: center;
     padding: 0.875rem 1.75rem;
-    background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
     color: white;
     text-decoration: none;
     border-radius: 50px;
@@ -830,7 +830,7 @@
 .service-card-home:hover {
     transform: translateY(-12px) scale(1.02);
     box-shadow: 0 20px 40px rgba(16, 185, 129, 0.2);
-    border-color: #10b981;
+    border-color: var(--iw-dark-green);
 }
 
 .service-card-image-wrapper {
@@ -855,7 +855,7 @@
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 100%);
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 50px;
@@ -876,7 +876,7 @@
 .service-card-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--iw-ink);
     margin: 0 0 1rem 0;
     line-height: 1.4;
 }
@@ -888,14 +888,14 @@
 .service-price {
     font-size: 1.5rem;
     font-weight: 900;
-    color: #059669;
+    color: var(--iw-action-green);
 }
 
 .service-card-btn {
     display: inline-flex;
     align-items: center;
     padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%);
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
     color: white;
     text-decoration: none;
     border-radius: 50px;
@@ -973,7 +973,7 @@
 
 .service-card-image-placeholder i {
     font-size: 4rem;
-    color: #10b981;
+    color: var(--iw-action-green);
     opacity: 0.3;
 }
 
@@ -1020,7 +1020,7 @@
     padding: 5rem 2rem;
     min-height: 300px;
     position: relative;
-    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);
+    background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-surface) 50%, var(--iw-canvas) 100%);
     border-radius: 20px;
     margin: 2rem 0;
     overflow: hidden;
@@ -1054,19 +1054,19 @@
     width: 100%;
     height: 100%;
     border: 4px solid transparent;
-    border-top-color: #3b82f6;
+    border-top-color: var(--iw-dark-blue);
     border-radius: 50%;
     animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
 }
 
 .spinner-ring:nth-child(1) {
     animation-delay: -0.45s;
-    border-top-color: #3b82f6;
+    border-top-color: var(--iw-dark-blue);
 }
 
 .spinner-ring:nth-child(2) {
     animation-delay: -0.3s;
-    border-top-color: #8b5cf6;
+    border-top-color: var(--iw-dark-blue);
     width: 70px;
     height: 70px;
     top: 5px;
@@ -1102,7 +1102,7 @@
 }
 
 .flash-icon {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--iw-warning) 0%, var(--iw-warning) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1110,7 +1110,7 @@
 }
 
 .offer-icon {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1118,7 +1118,7 @@
 }
 
 .service-icon {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1126,7 +1126,7 @@
 }
 
 .bestseller-icon {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--iw-warning) 0%, var(--iw-warning) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1134,7 +1134,7 @@
 }
 
 .newarrival-icon {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1197,9 +1197,9 @@
 .cool-loading-text {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #475569;
+    color: var(--iw-muted);
     margin: 0;
-    background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+    background: linear-gradient(135deg, var(--iw-ink) 0%, var(--iw-muted) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

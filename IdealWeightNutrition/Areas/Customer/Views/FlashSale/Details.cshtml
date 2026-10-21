@@ -95,7 +95,7 @@ else
                             <!-- Flash Sale Badge -->
                             <div class="flash-sale-badge">
                                 <i class="bi bi-lightning-fill"></i>
-                                -@Math.Round(item.DiscountPercentage)% @Localizer["OFF"]
+                                -@(Math.Round(item.DiscountPercentage))% @Localizer["OFF"]
                             </div>
 
                             <!-- Product Image -->
@@ -111,7 +111,7 @@ else
                                 <!-- Product Timer -->
                                 <div class="flash-sale-product-timer">
                                     <i class="bi bi-clock-fill me-2"></i>
-                                    @Localizer["EndsIn"]: <span id="productTimer_@item.Id" data-product-timer-end="@Model.EndDate.ToString("o")"></span>
+                                    @Localizer["ENDSIN"]: <span id="productTimer_@item.Id" data-product-timer-end="@Model.EndDate.ToString("o")"></span>
                                 </div>
 
                                 <!-- Product Title -->
@@ -128,7 +128,7 @@ else
                                         <span class="flash-sale-current-price">@Html.Raw(currencySymbol) @item.FlashSalePrice.ToString("N2")</span>
                                     </div>
                                     <div class="flash-sale-discount-badge">
-                                        @Localizer["SAVE"] @Html.Raw(currencySymbol) @((product.Price - (double)item.FlashSalePrice).ToString("N2"))
+                                        @Localizer["Save"] @Html.Raw(currencySymbol) @((product.Price - (double)item.FlashSalePrice).ToString("N2"))
                                     </div>
                                 </div>
 

@@ -58,7 +58,7 @@ else
         <section class="flash-sale-products">
             <div class="container">
                 <!-- Flash Sale Header -->
-                <div class="card mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 12px; padding: 1rem; color: white;">
+                <div class="card mb-3" style="background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%); border: none; border-radius: 12px; padding: 1rem; color: white;">
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             @{
@@ -144,7 +144,7 @@ else
                                 <!-- Flash Sale Badge -->
                                 <div class="flash-sale-badge">
                                     <i class="bi bi-lightning-fill"></i>
-                                    -@Math.Round(item.DiscountPercentage)% @Localizer["OFF"]
+                                    -@(Math.Round(item.DiscountPercentage))% @Localizer["OFF"]
                                 </div>
 
                                 <!-- Product Image -->
@@ -160,7 +160,7 @@ else
                                     <!-- Product Timer -->
                                     <div class="flash-sale-product-timer">
                                         <i class="bi bi-clock-fill me-2"></i>
-                                        @Localizer["EndsIn"]: <span id="productTimer_@item.Id" data-product-timer-end="@flashSale.EndDate.ToString("o")"></span>
+                                        @Localizer["ENDSIN"]: <span id="productTimer_@item.Id" data-product-timer-end="@flashSale.EndDate.ToString("o")"></span>
                                     </div>
 
                                     <!-- Product Title -->
@@ -173,7 +173,7 @@ else
                                     <!-- Variant Info (if exists) -->
                                     @if (!string.IsNullOrEmpty(variantName))
                                     {
-                                        <div class="flash-sale-variant-info" style="background: #f0f0f0; padding: 0.5rem; border-radius: 6px; margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
+                                        <div class="flash-sale-variant-info" style="background: var(--iw-canvas); padding: 0.5rem; border-radius: 6px; margin: 0.5rem 0; font-size: 0.85rem; color: var(--iw-muted);">
                                             <i class="bi bi-tag-fill me-1"></i>
                                             <strong>@Localizer["Variant"]:</strong> @variantName
                                         </div>
@@ -186,7 +186,7 @@ else
                                             <span class="flash-sale-current-price">@Html.Raw(currencySymbol) @item.FlashSalePrice.ToString("N2")</span>
                                         </div>
                                         <div class="flash-sale-discount-badge">
-                                            @Localizer["SAVE"] @Html.Raw(currencySymbol) @((originalPrice - (decimal)item.FlashSalePrice).ToString("N2"))
+                                            @Localizer["Save"] @Html.Raw(currencySymbol) @((originalPrice - (decimal)item.FlashSalePrice).ToString("N2"))
                                         </div>
                                     </div>
 
@@ -240,7 +240,7 @@ else
                     }
                 </div>
 
-                <hr style="margin: 2rem 0; border: none; height: 1px; background: linear-gradient(90deg, transparent, #ddd, transparent);" />
+                <hr style="margin: 2rem 0; border: none; height: 1px; background: linear-gradient(90deg, transparent, var(--iw-border), transparent);" />
             </div>
         </section>
     }

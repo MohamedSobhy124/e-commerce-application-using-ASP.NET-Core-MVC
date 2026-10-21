@@ -13,14 +13,14 @@
 }
 
 .hero-subtitle {
-    color: #666 !important;
+    color: var(--iw-muted) !important;
     font-weight: 400 !important;
     letter-spacing: 0.2px !important;
 }
 
 .section-title {
     font-weight: 600 !important;
-    color: #2c3e50 !important;
+    color: var(--iw-ink) !important;
     letter-spacing: -0.3px !important;
 }
 
@@ -28,7 +28,7 @@
    2. HERO SECTION - PROFESSIONAL
    =================================== */
 .hero-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
+    background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-surface) 100%) !important;
     position: relative;
     overflow: hidden;
 }
@@ -59,7 +59,7 @@
 }
 
 .hero-welcome-text {
-    color: #3B9DD5 !important;
+    color: var(--iw-action-blue) !important;
     font-weight: 600 !important;
 }
 
@@ -78,7 +78,7 @@
 }
 
 .trust-badge i {
-    color: #3B9DD5 !important;
+    color: var(--iw-action-blue) !important;
 }
 
 /* Search Box - Professional */
@@ -95,20 +95,20 @@
 }
 
 .hero-search-input:focus {
-    border-color: #3B9DD5 !important;
+    border-color: var(--iw-dark-blue) !important;
     box-shadow: 0 0 0 3px rgba(59, 157, 213, 0.1) !important;
     outline: none !important;
 }
 
 .hero-search-btn {
-    background: linear-gradient(135deg, #3B9DD5 0%, #2a7ba8 100%) !important;
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%) !important;
     border: none !important;
     box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3) !important;
     transition: all 0.3s ease !important;
 }
 
 .hero-search-btn:hover {
-    background: linear-gradient(135deg, #2a7ba8 0%, #3B9DD5 100%) !important;
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%) !important;
     box-shadow: 0 6px 18px rgba(59, 157, 213, 0.4) !important;
     transform: translateY(-2px) !important;
 }
@@ -123,13 +123,13 @@
 
 .hero-category-badge:hover {
     background: rgba(59, 157, 213, 0.1) !important;
-    border-color: #3B9DD5 !important;
+    border-color: var(--iw-dark-blue) !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 4px 12px rgba(59, 157, 213, 0.15) !important;
 }
 
 .hero-category-badge.active {
-    background: linear-gradient(135deg, #3B9DD5 0%, #2a7ba8 100%) !important;
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%) !important;
     color: white !important;
     border-color: transparent !important;
     box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3) !important;
@@ -139,7 +139,7 @@
    3. FLASH SALE SECTION - ELEGANT
    =================================== */
 .flash-sale-hero {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%) !important;
     position: relative;
     overflow: hidden;
 }
@@ -165,20 +165,20 @@
 .flash-sale-section-header {
     text-align: center;
     padding: 1.5rem 0 0.5rem 0;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-surface) 100%);
 }
 
 .flash-sale-section-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--iw-ink);
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
 }
 
 .flash-sale-section-title i {
-    color: #f59e0b;
+    color: var(--iw-warning);
     animation: pulse 2s ease-in-out infinite;
 }
 
@@ -191,7 +191,7 @@
    4. PRODUCT CARDS - PREMIUM LOOK
    =================================== */
 .product-card {
-    background: #ffffff !important;
+    background: var(--iw-surface) !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     position: relative;
 }
@@ -206,7 +206,7 @@
     border-radius: 12px;
     padding: 2px;
     background: linear-gradient(135deg, rgba(59, 157, 213, 0.1), rgba(123, 192, 67, 0.1));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(var(--iw-surface) 0 0) content-box, linear-gradient(var(--iw-surface) 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     opacity: 0;
@@ -225,7 +225,7 @@
 }
 
 .product-image-wrapper {
-    background: #f8f9fa !important;
+    background: var(--iw-canvas) !important;
     border-radius: 10px 10px 0 0 !important;
     overflow: hidden;
     position: relative;
@@ -245,7 +245,7 @@
 }
 
 .product-category {
-    color: #3B9DD5 !important;
+    color: var(--iw-action-blue) !important;
     font-weight: 600 !important;
     font-size: 0.75rem !important;
     text-transform: uppercase !important;
@@ -254,7 +254,7 @@
 }
 
 .product-title {
-    color: #2c3e50 !important;
+    color: var(--iw-ink) !important;
     font-weight: 600 !important;
     line-height: 1.4 !important;
     margin-bottom: 0.5rem !important;
@@ -266,19 +266,19 @@
 }
 
 .current-price {
-    color: #2c3e50 !important;
+    color: var(--iw-ink) !important;
     font-weight: 700 !important;
     font-size: 1.25rem !important;
 }
 
 .list-price {
-    color: #999 !important;
+    color: var(--iw-muted) !important;
     text-decoration: line-through !important;
     font-size: 0.9rem !important;
 }
 
 .discount-percent {
-    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    background: linear-gradient(135deg, var(--iw-danger), var(--iw-danger)) !important;
     color: white !important;
     padding: 0.25rem 0.6rem !important;
     border-radius: 12px !important;
@@ -290,7 +290,7 @@
 .btn-view-details,
 .btn-select-options {
     background: rgba(59, 157, 213, 0.1) !important;
-    color: #3B9DD5 !important;
+    color: var(--iw-action-blue) !important;
     border: 1px solid rgba(59, 157, 213, 0.3) !important;
     transition: all 0.3s ease !important;
     font-weight: 600 !important;
@@ -298,7 +298,7 @@
 
 .btn-view-details:hover,
 .btn-select-options:hover {
-    background: linear-gradient(135deg, #3B9DD5 0%, #2a7ba8 100%) !important;
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%) !important;
     color: white !important;
     border-color: transparent !important;
     transform: translateY(-2px) !important;
@@ -306,7 +306,7 @@
 }
 
 .btn-add-cart-quick {
-    background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%) !important;
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%) !important;
     color: white !important;
     border: none !important;
     box-shadow: 0 4px 12px rgba(123, 192, 67, 0.3) !important;
@@ -314,13 +314,13 @@
 }
 
 .btn-add-cart-quick:hover {
-    background: linear-gradient(135deg, #6ba836 0%, #7BC043 100%) !important;
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%) !important;
     box-shadow: 0 6px 18px rgba(123, 192, 67, 0.4) !important;
     transform: translateY(-2px) scale(1.05) !important;
 }
 
 .btn-add-cart-quick.in-cart {
-    background: linear-gradient(135deg, #7BC043 0%, #6ba836 100%) !important;
+    background: linear-gradient(135deg, var(--iw-dark-green) 0%, var(--iw-dark-green) 100%) !important;
     box-shadow: 0 4px 12px rgba(123, 192, 67, 0.3) !important;
 }
 
@@ -328,21 +328,21 @@
    5. SERVICES SECTION - ELEGANT
    =================================== */
 .services-showcase-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
+    background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-surface) 100%) !important;
     position: relative;
 }
 
 .services-title {
-    color: #2c3e50 !important;
+    color: var(--iw-ink) !important;
     font-weight: 700 !important;
 }
 
 .services-title i {
-    color: #3B9DD5 !important;
+    color: var(--iw-action-blue) !important;
 }
 
 .service-card-home {
-    background: #ffffff !important;
+    background: var(--iw-surface) !important;
     border: 1px solid rgba(0, 0, 0, 0.06) !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
@@ -354,35 +354,35 @@
 }
 
 .service-card-image-wrapper {
-    background: #f8f9fa !important;
+    background: var(--iw-canvas) !important;
     overflow: hidden;
 }
 
 .service-card-title {
-    color: #2c3e50 !important;
+    color: var(--iw-ink) !important;
     font-weight: 600 !important;
 }
 
 .service-card-description {
-    color: #666 !important;
+    color: var(--iw-muted) !important;
     line-height: 1.6 !important;
 }
 
 .service-price-final {
-    color: #3B9DD5 !important;
+    color: var(--iw-action-blue) !important;
     font-weight: 700 !important;
 }
 
 .service-card-btn {
     background: rgba(59, 157, 213, 0.1) !important;
-    color: #3B9DD5 !important;
+    color: var(--iw-action-blue) !important;
     border: 1px solid rgba(59, 157, 213, 0.3) !important;
     transition: all 0.3s ease !important;
     font-weight: 600 !important;
 }
 
 .service-card-btn:hover {
-    background: linear-gradient(135deg, #3B9DD5 0%, #2a7ba8 100%) !important;
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%) !important;
     color: white !important;
     border-color: transparent !important;
     transform: translateY(-2px) !important;
@@ -393,13 +393,13 @@
    6. FILTER SECTION - CLEAN
    =================================== */
 .filter-section {
-    background: #ffffff !important;
+    background: var(--iw-surface) !important;
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
 }
 
 .filter-title {
-    color: #2c3e50 !important;
+    color: var(--iw-ink) !important;
     font-weight: 600 !important;
     border-bottom: 2px solid rgba(59, 157, 213, 0.2) !important;
     padding-bottom: 0.75rem !important;
@@ -407,12 +407,12 @@
 }
 
 .filter-title i {
-    color: #3B9DD5 !important;
+    color: var(--iw-action-blue) !important;
 }
 
 .form-select:focus,
 .form-control:focus {
-    border-color: #3B9DD5 !important;
+    border-color: var(--iw-dark-blue) !important;
     box-shadow: 0 0 0 3px rgba(59, 157, 213, 0.1) !important;
     outline: none !important;
 }
@@ -421,11 +421,11 @@
    7. FEATURES SECTION - PROFESSIONAL
    =================================== */
 .features-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
+    background: linear-gradient(135deg, var(--iw-canvas) 0%, var(--iw-surface) 100%) !important;
 }
 
 .feature-item {
-    background: #ffffff !important;
+    background: var(--iw-surface) !important;
     border: 1px solid rgba(0, 0, 0, 0.06) !important;
     transition: all 0.3s ease !important;
 }
@@ -438,16 +438,16 @@
 
 .feature-icon {
     background: linear-gradient(135deg, rgba(59, 157, 213, 0.1), rgba(123, 192, 67, 0.1)) !important;
-    color: #3B9DD5 !important;
+    color: var(--iw-action-blue) !important;
 }
 
 .feature-title {
-    color: #2c3e50 !important;
+    color: var(--iw-ink) !important;
     font-weight: 600 !important;
 }
 
 .feature-description {
-    color: #666 !important;
+    color: var(--iw-muted) !important;
     line-height: 1.6 !important;
 }
 
@@ -457,7 +457,7 @@
    9. LOAD MORE BUTTON - REFINED
    =================================== */
 #loadMoreBtn {
-    background: linear-gradient(135deg, #3B9DD5 0%, #2a7ba8 100%) !important;
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%) !important;
     border: none !important;
     box-shadow: 0 4px 12px rgba(59, 157, 213, 0.3) !important;
     transition: all 0.3s ease !important;
@@ -465,7 +465,7 @@
 }
 
 #loadMoreBtn:hover {
-    background: linear-gradient(135deg, #2a7ba8 0%, #3B9DD5 100%) !important;
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%) !important;
     box-shadow: 0 6px 18px rgba(59, 157, 213, 0.4) !important;
     transform: translateY(-2px) !important;
 }

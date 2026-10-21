@@ -2,163 +2,156 @@
 
 @{
     ViewData["Title"] = Localizer["PromoCodes"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["EmptyIcon"] = "bi-tag";
+    ViewData["EmptyTitle"] = Localizer["NoItemsFound"].Value;
+    ViewData["EmptyText"] = Localizer["CreateNewPromoCode"].Value;
+    ViewData["EmptyActionUrl"] = Url.Action("Create");
+    ViewData["EmptyActionText"] = Localizer["CreateNewPromoCode"].Value;
+    var badgeClass = "badge admin-schedule-live";
 }
 
-<div class="container-fluid px-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="mt-4">@Localizer["PromoCodesManagement"]</h1>
-                <a asp-action="Create" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> @Localizer["CreateNewPromoCode"]
-                </a>
+<partial name="_Notifications" />
+@Html.AntiForgeryToken()
+
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h1 class="admin-card-title">@Localizer["PromoCodesManagement"]</h1>
             </div>
-
-            @if (TempData["success"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    @TempData["success"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="admin-card-body">
+                <div class="admin-toolbar">
+                    <p class="admin-toolbar-meta mb-0">@Model.Count() @Localizer["PromoCodes"]</p>
+                    <a asp-action="Create" class="create-new-btn">
+                        <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>
+                        @Localizer["CreateNewPromoCode"]
+                    </a>
                 </div>
-            }
 
-            @if (TempData["error"] != null)
-            {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    @TempData["error"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
+                @if (!Model.Any())
+                {
+                    <partial name="_AdminEmptyState" />
+                }
+                else
+                {
+                    <div class="table-responsive admin-table-wrapper">
+                        <table class="table table-bordered table-striped table-hover" id="promoCodesTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">@Localizer["Code"]</th>
+                                    <th scope="col">@Localizer["Description"]</th>
+                                    <th scope="col">@Localizer["Discount"]</th>
+                                    <th scope="col">@Localizer["ValidPeriod"]</th>
+                                    <th scope="col">@Localizer["Usage"]</th>
+                                    <th scope="col">@Localizer["Status"]</th>
+                                    <th scope="col" class="text-center">@Localizer["Actions"]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var promo in Model)
+                                {
+                                    var isUsageLimitReached = promo.UsageLimit.HasValue && promo.TimesUsed >= promo.UsageLimit.Value;
 
-            <div class="card shadow">
-                <div class="card-body">
-                    <table class="table table-hover" id="promoCodesTable">
-                        <thead>
-                            <tr>
-                                <th>@Localizer["Code"]</th>
-                                <th>@Localizer["Description"]</th>
-                                <th>@Localizer["Discount"]</th>
-                                <th>@Localizer["ValidPeriod"]</th>
-                                <th>@Localizer["Usage"]</th>
-                                <th>@Localizer["Status"]</th>
-                                <th>@Localizer["Actions"]</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var promo in Model)
-                            {
-                                var now = IdealWeightNutrition.Utility.DateTimeHelper.Now;
-                                var isExpired = promo.EndDate < now;
-                                var isNotStarted = promo.StartDate > now;
-                                var isUsageLimitReached = promo.UsageLimit.HasValue && promo.TimesUsed >= promo.UsageLimit.Value;
-                                
-                                <tr class="@(isExpired || isUsageLimitReached ? "table-secondary" : "")">
-                                    <td>
-                                        <strong class="text-primary">@promo.Code</strong>
-                                    </td>
-                                    <td>@promo.Description</td>
-                                    <td>
-                                        @if (promo.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
-                                        {
-                                            <span class="badge bg-success">@promo.DiscountValue%</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-info">@promo.DiscountValue.ToString("C")</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <small>
-                                            @promo.StartDate.ToString("MMM dd, yyyy")<br/>
-                                            <i class="bi bi-arrow-right"></i> @promo.EndDate.ToString("MMM dd, yyyy")
-                                        </small>
-                                        @if (isExpired)
-                                        {
-                                            <br/><span class="badge bg-danger">@Localizer["Expired"]</span>
-                                        }
-                                        else if (isNotStarted)
-                                        {
-                                            <br/><span class="badge bg-warning">@Localizer["Upcoming"]</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-primary">@promo.TimesUsed</span>
-                                        @if (promo.UsageLimit.HasValue)
-                                        {
-                                            <span>/ @promo.UsageLimit</span>
+                                    <tr class="@(isUsageLimitReached ? "table-secondary" : "")" data-promo-row="@promo.Id">
+                                        <td><strong class="text-primary">@promo.Code</strong></td>
+                                        <td>@promo.Description</td>
+                                        <td>
+                                            @if (promo.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
+                                            {
+                                                <span class="badge bg-success">@(promo.DiscountValue)%</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-info text-dark">@promo.DiscountValue.ToString("N2")</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div>@promo.StartDate.ToString("yyyy-MM-dd HH:mm")</div>
+                                            <div>@promo.EndDate.ToString("yyyy-MM-dd HH:mm")</div>
+                                            <small class="text-muted admin-schedule-hint">@Localizer["TimezoneAsiaDubai"]</small>
                                             @if (isUsageLimitReached)
                                             {
-                                                <br/><span class="badge bg-danger">@Localizer["LimitReached"]</span>
+                                                <div><span class="badge bg-danger">@Localizer["LimitReached"]</span></div>
                                             }
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">/ @Localizer["Unlimited"]</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (promo.IsActive && !isExpired && !isUsageLimitReached && !isNotStarted)
-                                        {
-                                            <span class="badge bg-success" id="status-@promo.Id">@Localizer["Active"]</span>
-                                        }
-                                        else if (!promo.IsActive)
-                                        {
-                                            <span class="badge bg-secondary" id="status-@promo.Id">@Localizer["Inactive"]</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-warning" id="status-@promo.Id">@Localizer["Paused"]</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a asp-action="Details" asp-route-id="@promo.Id" class="btn btn-sm btn-info" title="@Localizer["Details"]">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a asp-action="Edit" asp-route-id="@promo.Id" class="btn btn-sm btn-warning" title="@Localizer["Edit"]">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-sm btn-secondary toggle-active" data-id="@promo.Id" title="@Localizer["ToggleActive"]">
-                                                <i class="bi bi-toggle-@(promo.IsActive ? "on" : "off")"></i>
-                                            </button>
-                                            @if (promo.TimesUsed == 0)
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">@promo.TimesUsed</span>
+                                            @if (promo.UsageLimit.HasValue)
                                             {
-                                                <a asp-action="Delete" asp-route-id="@promo.Id" class="btn btn-sm btn-danger" title="@Localizer["Delete"]">
-                                                    <i class="bi bi-trash"></i>
-                                                </a>
+                                                <span>/ @promo.UsageLimit</span>
                                             }
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                                            else
+                                            {
+                                                <span class="text-muted">/ @Localizer["Unlimited"]</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (isUsageLimitReached)
+                                            {
+                                                <span class="badge bg-warning text-dark" id="status-@promo.Id">@Localizer["Paused"]</span>
+                                            }
+                                            else
+                                            {
+                                                <span id="status-@promo.Id"
+                                                      data-schedule-badge
+                                                      data-badge-class="@badgeClass"
+                                                      data-enabled="@promo.IsActive.ToString().ToLower()"
+                                                      data-start="@promo.StartDate.ToString("yyyy-MM-ddTHH:mm:ss")"
+                                                      data-end="@promo.EndDate.ToString("yyyy-MM-ddTHH:mm:ss")"
+                                                      data-label-active="@Localizer["Active"].Value"
+                                                      data-label-scheduled="@Localizer["Scheduled"].Value"
+                                                      data-label-ended="@Localizer["Expired"].Value"
+                                                      data-label-inactive="@Localizer["Inactive"].Value"
+                                                      class="@badgeClass bg-secondary">@Localizer["Inactive"]</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="admin-row-actions">
+                                                <a asp-action="Details" asp-route-id="@promo.Id" class="btn btn-sm btn-outline-secondary" aria-label="@Localizer["Details"]">
+                                                    <i class="bi bi-eye" aria-hidden="true"></i>
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@promo.Id" class="btn btn-sm btn-primary" aria-label="@Localizer["Edit"]">
+                                                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary toggle-active toggle-active-btn" data-id="@promo.Id" aria-label="@Localizer["ToggleActive"]">
+                                                    <i class="bi bi-toggle-@(promo.IsActive ? "on" : "off")" aria-hidden="true"></i>
+                                                </button>
+                                                @if (promo.TimesUsed == 0)
+                                                {
+                                                    <a asp-action="Delete" asp-route-id="@promo.Id" class="btn btn-sm btn-danger" aria-label="@Localizer["Delete"]">
+                                                        <i class="bi bi-trash" aria-hidden="true"></i>
+                                                    </a>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
             </div>
         </div>
     </div>
 </div>
 
-@Html.AntiForgeryToken()
-
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // Initialize DataTable
-            $('#promoCodesTable').DataTable({
-                "order": [[3, "desc"]], // Sort by start date descending
-                "pageLength": 25
-            });
+            if ($.fn.DataTable) {
+                $('#promoCodesTable').DataTable({
+                    order: [[3, 'desc']],
+                    pageLength: 25
+                });
+            }
 
-            // Toggle active status - Use event delegation for DataTable compatibility
             $(document).on('click', '.toggle-active', function (e) {
                 e.preventDefault();
                 var promoId = $(this).data('id');
                 var btn = $(this);
-                
-                // Disable button during request
                 btn.prop('disabled', true);
-                
+
                 $.ajax({
                     url: '@Url.Action("ToggleActive", "PromoCode", new { area = "Admin" })',
                     type: 'POST',
@@ -168,55 +161,35 @@
                     },
                     success: function (response) {
                         if (response.success) {
-                            // Update status badge
                             var statusBadge = $('#status-' + promoId);
-                            var row = btn.closest('tr');
-                            
-                            // Check if promo is expired or not started
-                            var isExpired = row.find('.badge.bg-danger').length > 0;
-                            var isNotStarted = row.find('.badge.bg-warning:contains("@Localizer["Upcoming"]")').length > 0;
-                            var isUsageLimitReached = row.find('.badge.bg-danger:contains("@Localizer["LimitReached"]")').length > 0;
-                            
-                            // Update badge based on active status and other conditions
-                            statusBadge.removeClass('bg-success bg-secondary bg-warning');
-                            
-                            if (response.isActive && !isExpired && !isUsageLimitReached && !isNotStarted) {
-                                statusBadge.addClass('bg-success').text('@Html.Raw(Localizer["Active"].Value)');
-                            } else if (!response.isActive) {
-                                statusBadge.addClass('bg-secondary').text('@Html.Raw(Localizer["Inactive"].Value)');
+                            var isUsageLimitReached = $('tr[data-promo-row="' + promoId + '"]').find('.badge.bg-danger').filter(function () {
+                                return $(this).text().indexOf('@Html.Raw(Localizer["LimitReached"].Value)') >= 0;
+                            }).length > 0;
+
+                            if (statusBadge.attr('data-schedule-badge')) {
+                                statusBadge.attr('data-enabled', response.isActive ? 'true' : 'false');
+                                if (typeof refreshScheduleBadges === 'function') {
+                                    refreshScheduleBadges();
+                                }
                             } else {
-                                statusBadge.addClass('bg-warning').text('@Html.Raw(Localizer["Paused"].Value)');
+                                statusBadge.removeClass('bg-success bg-secondary bg-warning');
+                                statusBadge.addClass(response.isActive && !isUsageLimitReached ? 'bg-success' : 'bg-secondary')
+                                    .text(response.isActive ? '@Html.Raw(Localizer["Active"].Value)' : '@Html.Raw(Localizer["Inactive"].Value)');
                             }
-                            
-                            // Update toggle button
-                            if (response.isActive) {
-                                btn.find('i').removeClass('bi-toggle-off').addClass('bi-toggle-on');
-                                btn.removeClass('btn-secondary').addClass('btn-success');
-                            } else {
-                                btn.find('i').removeClass('bi-toggle-on').addClass('bi-toggle-off');
-                                btn.removeClass('btn-success').addClass('btn-secondary');
-                            }
-                            
-                            // Show success message
+
+                            btn.find('i').removeClass('bi-toggle-on bi-toggle-off')
+                                .addClass(response.isActive ? 'bi-toggle-on' : 'bi-toggle-off');
+
                             if (typeof toastr !== 'undefined') {
                                 toastr.success(response.message);
-                            } else {
-                                alert(response.message);
                             }
-                        } else {
-                            if (typeof toastr !== 'undefined') {
-                                toastr.error(response.message);
-                            } else {
-                                alert(response.message);
-                            }
+                        } else if (typeof toastr !== 'undefined') {
+                            toastr.error(response.message);
                         }
                     },
-                    error: function (xhr, status, error) {
-                        console.error('Toggle active error:', error);
+                    error: function () {
                         if (typeof toastr !== 'undefined') {
-                            toastr.error('@Html.Raw(Localizer["An error occurred. Please try again."].Value)');
-                        } else {
-                            alert('An error occurred. Please try again.');
+                            toastr.error('@Html.Raw(Localizer["AnErrorOccurredPleaseTryAgain"].Value)');
                         }
                     },
                     complete: function () {
@@ -227,4 +200,3 @@
         });
     </script>
 }
-

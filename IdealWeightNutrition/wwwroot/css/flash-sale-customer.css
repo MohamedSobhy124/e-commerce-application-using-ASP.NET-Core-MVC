@@ -4,7 +4,7 @@
 
 /* Flash Sale Hero Section */
 .flash-sale-hero {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 25%, #c44569 50%, #a8394e 75%, #8b2e3e 100%);
+    background: linear-gradient(135deg, var(--iw-danger) 0%, var(--iw-danger) 25%, #c44569 50%, #a8394e 75%, #8b2e3e 100%);
     padding: 1.5rem 0;
     margin: 1rem 0;
     border-radius: 16px;
@@ -112,7 +112,7 @@
     font-weight: 900;
     display: block;
     line-height: 1;
-    color: #fff;
+    color: var(--iw-surface);
     text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
 }
 
@@ -138,7 +138,7 @@
 .flash-sale-section-title {
     font-size: 2.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    background: linear-gradient(135deg, var(--iw-danger), var(--iw-danger));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -146,7 +146,7 @@
 }
 
 .flash-sale-product-card {
-    background: #fff;
+    background: var(--iw-surface);
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -159,7 +159,7 @@
 .flash-sale-product-card:hover {
     transform: translateY(-5px) scale(1.01);
     box-shadow: 0 8px 30px rgba(255, 107, 107, 0.25);
-    border-color: #ff6b6b;
+    border-color: var(--iw-danger);
 }
 
 .flash-sale-badge {
@@ -167,7 +167,7 @@
     top: 8px;
     left: 8px;
     z-index: 10;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    background: linear-gradient(135deg, var(--iw-danger), var(--iw-danger));
     color: white;
     padding: 0.3rem 0.6rem;
     border-radius: 20px;
@@ -218,7 +218,7 @@
 .flash-sale-product-title {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--iw-ink);
     margin-bottom: 0.6rem;
     min-height: 45px;
     display: -webkit-box;
@@ -270,7 +270,7 @@
 .flash-sale-current-price {
     font-size: 1.3rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    background: linear-gradient(135deg, var(--iw-danger), var(--iw-danger));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -310,7 +310,7 @@
 
 .stock-progress-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #ff6b6b, #ee5a6f);
+    background: linear-gradient(90deg, var(--iw-danger), var(--iw-danger));
     border-radius: 10px;
     transition: width 0.5s ease;
     position: relative;
@@ -348,7 +348,7 @@
 
 /* Timer per product */
 .flash-sale-product-timer {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
     color: white;
     padding: 0.4rem 0.6rem;
     border-radius: 8px;
@@ -368,7 +368,7 @@
 .flash-sale-add-to-cart-btn {
     width: 100%;
     padding: 0.6rem;
-    background: linear-gradient(135deg, #3B9DD5, #1976D2);
+    background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-blue));
     color: white;
     border: none;
     border-radius: 8px;
@@ -421,7 +421,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.7rem 1.5rem;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    background: linear-gradient(135deg, var(--iw-danger), var(--iw-danger));
     color: white;
     border: none;
     border-radius: 25px;
@@ -621,7 +621,7 @@
 .empty-state-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--iw-ink);
     margin-bottom: 0.6rem;
 }
 

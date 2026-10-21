@@ -65,7 +65,7 @@
                             <div class="service-discount-badge">
                                 @if (bestOffer.DiscountType == IdealWeightNutrition.Models.DiscountType.Percentage)
                                 {
-                                    <span>@bestOffer.DiscountValue%</span>
+                                    <span>@(bestOffer.DiscountValue)%</span>
                                     <small>@Localizer["OFF"]</small>
                                 }
                                 else

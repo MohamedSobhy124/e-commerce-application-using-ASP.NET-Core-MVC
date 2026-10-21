@@ -21,14 +21,14 @@
 
 <div class="admin-wrapper">
     <div class="container-fluid">
-        <div class="admin-form-wrapper" style="max-width: 1400px;">
+        <div class="admin-form-wrapper">
             <div class="admin-form-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h2 class="admin-form-title mb-2">
+                        <h1 class="admin-form-title mb-2">
                             <i class="bi bi-lightning-charge-fill me-3"></i>
                             @Model.Name
-                        </h2>
+                        </h1>
                         <p class="text-muted mb-0">@Localizer["FlashSaleDetails"]</p>
                     </div>
                     <div>
@@ -79,7 +79,7 @@
                                     </tr>
                                     <tr>
                                         <td class="fw-bold"><i class="bi bi-text-paragraph me-2 text-primary"></i>@Localizer["Description"]:</td>
-                                        <td>@(string.IsNullOrEmpty(Model.Description) ? "N/A" : Model.Description)</td>
+                                        <td>@(string.IsNullOrEmpty(Model.Description) ? Localizer["NA"].Value : Model.Description)</td>
                                     </tr>
                                     <tr>
                                         <td class="fw-bold"><i class="bi bi-calendar-check me-2 text-success"></i>@Localizer["StartDate"]:</td>
@@ -179,12 +179,12 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <strong style="color: #ef4444; font-size: 1.1rem;">
+                                                    <strong style="color: var(--iw-danger); font-size: 1.1rem;">
                                                         @Html.Raw(currencySymbol) @item.FlashSalePrice.ToString("N2")
                                                     </strong>
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-success">-@discount%</span>
+                                                    <span class="badge bg-success">-@(discount)%</span>
                                                 </td>
                                                 <td>
                                                     <span class="badge bg-primary">@item.FlashSaleQuantity</span>
@@ -199,7 +199,7 @@
                                     <tfoot class="table-light">
                                         <tr>
                                             <td colspan="6" class="text-end fw-bold">@Localizer["TotalFlashSaleValue"]:</td>
-                                            <td class="fw-bold" style="color: #3B9DD5; font-size: 1.2rem;">
+                                            <td class="fw-bold" style="color: var(--iw-action-blue); font-size: 1.2rem;">
                                                 @Html.Raw(currencySymbol) @totalValue.ToString("N2")
                                             </td>
                                         </tr>

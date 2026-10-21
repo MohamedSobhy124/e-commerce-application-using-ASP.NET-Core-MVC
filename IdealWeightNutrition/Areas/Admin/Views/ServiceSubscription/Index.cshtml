@@ -1,7 +1,10 @@
-@model IEnumerable<IdealWeightNutrition.Models.ServiceSubscription>
-
 @{
     ViewData["Title"] = Localizer["ServiceSubscriptions"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["EmptyIcon"] = "bi-briefcase";
+    ViewData["EmptyTitle"] = Localizer["NoServiceSubscriptionsYet"].Value;
+    ViewData["EmptyActionUrl"] = Url.Action("Create");
+    ViewData["EmptyActionText"] = Localizer["CreateNewService"].Value;
 }
 
 <partial name="_Notifications" />
@@ -10,60 +13,59 @@
     <div class="container">
         <div class="admin-card">
             <div class="admin-card-header">
-                <h2 class="admin-card-title">
-                    <i class="bi bi-briefcase me-3"></i>
-                    @Localizer["ServiceSubscriptionsManagement"]
-                </h2>
-                <div class="d-flex gap-2 align-items-center">
-                    <a asp-action="Create" class="create-new-btn">
-                        <i class="bi bi-plus-circle"></i>
-                        @Localizer["CreateNewService"]
-                    </a>
-                </div>
+                <h1 class="admin-card-title">@Localizer["ServiceSubscriptionsManagement"]</h1>
             </div>
 
             <div class="admin-card-body">
-                <!-- Quick Action Cards -->
                 <div class="service-quick-actions">
                     <div class="service-action-card purchases">
-                        <i class="bi bi-cart-check service-action-icon"></i>
-                        <h3 class="service-action-title">@Localizer["ServicePurchases"]</h3>
-                        <p class="service-action-description">View and manage all service purchases and subscriptions from customers.</p>
+                        <i class="bi bi-cart-check service-action-icon" aria-hidden="true"></i>
+                        <h2 class="service-action-title h5">@Localizer["ServicePurchases"]</h2>
+                        <p class="service-action-description">@Localizer["ServicePurchasesCardDescription"]</p>
                         <a asp-action="Purchases" class="service-action-btn">
-                            <i class="bi bi-arrow-right"></i>
+                            <i class="bi bi-arrow-right" aria-hidden="true"></i>
                             @Localizer["ViewPurchases"]
                         </a>
                     </div>
                     <div class="service-action-card offers">
-                        <i class="bi bi-tag service-action-icon"></i>
-                        <h3 class="service-action-title">@Localizer["ServiceOffers"]</h3>
-                        <p class="service-action-description">Create and manage special offers and discounts for services.</p>
+                        <i class="bi bi-tag service-action-icon" aria-hidden="true"></i>
+                        <h2 class="service-action-title h5">@Localizer["ServiceOffers"]</h2>
+                        <p class="service-action-description">@Localizer["ServiceOffersCardDescription"]</p>
                         <a asp-area="Admin" asp-controller="ServiceOffer" asp-action="Index" class="service-action-btn">
-                            <i class="bi bi-arrow-right"></i>
+                            <i class="bi bi-arrow-right" aria-hidden="true"></i>
                             @Localizer["ManageOffers"]
                         </a>
                     </div>
                 </div>
 
-                <!-- Services Table -->
-                <div class="service-subscription-table-wrapper">
-                    <div class="admin-table-wrapper">
-                        <table id="tblData" class="table table-bordered table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>@Localizer["ID"]</th>
-                                    <th>@Localizer["Image"]</th>
-                                    <th>@Localizer["Title"]</th>
-                                    <th>@Localizer["Type"]</th>
-                                    <th>@Localizer["Price"]</th>
-                                    <th>@Localizer["OfflinePercent"]</th>
-                                    <th>@Localizer["Status"]</th>
-                                    <th>@Localizer["Purchases"]</th>
-                                    <th>@Localizer["Actions"]</th>
-                                </tr>   
-                            </thead>
-                        </table>
-                    </div>
+                <div class="admin-toolbar">
+                    <p class="admin-toolbar-meta mb-0" id="serviceCountMeta">@Localizer["ServiceSubscriptions"]</p>
+                    <a asp-action="Create" class="create-new-btn">
+                        <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>
+                        @Localizer["CreateNewService"]
+                    </a>
+                </div>
+
+                <div id="serviceSubscriptionsEmpty" hidden>
+                    <partial name="_AdminEmptyState" />
+                </div>
+
+                <div class="table-responsive admin-table-wrapper" id="serviceSubscriptionsTableWrap">
+                    <table id="tblData" class="table table-bordered table-striped table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th scope="col">@Localizer["ID"]</th>
+                                <th scope="col">@Localizer["Image"]</th>
+                                <th scope="col">@Localizer["Title"]</th>
+                                <th scope="col">@Localizer["Type"]</th>
+                                <th scope="col">@Localizer["Price"]</th>
+                                <th scope="col">@Localizer["OfflinePercent"]</th>
+                                <th scope="col">@Localizer["Status"]</th>
+                                <th scope="col">@Localizer["Purchases"]</th>
+                                <th scope="col" class="text-center">@Localizer["Actions"]</th>
+                            </tr>
+                        </thead>
+                    </table>
                 </div>
             </div>
         </div>
@@ -71,10 +73,9 @@
 </div>
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/service-subscription-admin.css" />
+    <link rel="stylesheet" href="~/css/service-subscription-admin.css" asp-append-version="true" />
 }
 
 @section Scripts{
-    <script type="text/javascript" src="~/js/ServiceSubscription.js"></script>
+    <script type="text/javascript" src="~/js/ServiceSubscription.js" asp-append-version="true"></script>
 }
-

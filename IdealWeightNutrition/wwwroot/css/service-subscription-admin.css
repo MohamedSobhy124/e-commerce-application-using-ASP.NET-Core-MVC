@@ -38,13 +38,13 @@
 }
 
 .service-action-card.purchases {
-    border-left-color: #3b82f6;
-    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    border-left-color: var(--iw-dark-blue);
+    background: linear-gradient(135deg, var(--iw-light-blue) 0%, var(--iw-surface) 100%);
 }
 
 .service-action-card.offers {
-    border-left-color: #10b981;
-    background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%);
+    border-left-color: var(--iw-dark-green);
+    background: linear-gradient(135deg, var(--iw-light-green) 0%, var(--iw-surface) 100%);
 }
 
 .service-action-icon {
@@ -54,23 +54,23 @@
 }
 
 .service-action-card.purchases .service-action-icon {
-    color: #3b82f6;
+    color: var(--iw-action-blue);
 }
 
 .service-action-card.offers .service-action-icon {
-    color: #10b981;
+    color: var(--iw-action-green);
 }
 
 .service-action-title {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #1f2937;
+    color: var(--iw-ink);
     margin-bottom: 0.5rem;
 }
 
 .service-action-description {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: var(--iw-muted);
     margin-bottom: 1rem;
     line-height: 1.5;
 }
@@ -92,24 +92,24 @@
 }
 
 .service-action-card.purchases .service-action-btn {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: linear-gradient(135deg, var(--iw-dark-blue), var(--iw-dark-blue));
     color: white;
 }
 
 .service-action-card.purchases .service-action-btn:hover {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    background: linear-gradient(135deg, var(--iw-dark-blue), #1d4ed8);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     color: white;
 }
 
 .service-action-card.offers .service-action-btn {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: linear-gradient(135deg, var(--iw-dark-green), var(--iw-dark-green));
     color: white;
 }
 
 .service-action-card.offers .service-action-btn:hover {
-    background: linear-gradient(135deg, #059669, #047857);
+    background: linear-gradient(135deg, var(--iw-dark-green), #047857);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
     color: white;
@@ -121,7 +121,7 @@
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     overflow: hidden;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--iw-border);
 }
 
 /* Mobile Responsive */
@@ -138,5 +138,100 @@
     .service-action-icon {
         font-size: 2rem;
     }
+}
+
+.iw-admin .service-purchase-details .admin-details-section {
+    background: var(--iw-canvas);
+    border: 1px solid var(--iw-border);
+    border-radius: var(--iw-radius);
+    padding: var(--iw-space-4);
+    margin-block-end: var(--iw-space-4);
+}
+
+.iw-admin .service-purchase-details .admin-details-section h2 {
+    font-size: var(--iw-text-lg);
+    margin-block-end: var(--iw-space-4);
+    padding-block-end: var(--iw-space-2);
+    border-bottom: 2px solid var(--iw-border);
+}
+
+.iw-admin .service-purchase-details .payment-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: var(--iw-space-3);
+}
+
+.iw-admin .service-purchase-details .payment-detail-card {
+    background: var(--iw-surface);
+    border: 1px solid var(--iw-border);
+    border-radius: var(--iw-radius);
+    padding: var(--iw-space-4);
+    text-align: center;
+}
+
+.iw-admin .service-purchase-details .payment-label {
+    font-size: var(--iw-text-sm);
+    color: var(--iw-muted);
+    font-weight: 600;
+}
+
+.iw-admin .service-purchase-details .payment-value {
+    font-size: var(--iw-text-xl);
+    font-weight: 800;
+    color: var(--iw-ink);
+}
+
+.iw-admin .service-purchase-details .admin-action-card {
+    background: var(--iw-surface);
+    border: 1px solid var(--iw-border);
+    border-radius: var(--iw-radius);
+    padding: var(--iw-space-4);
+    height: 100%;
+}
+
+.iw-admin #tblData thead th {
+    background: var(--iw-dark-blue);
+    color: var(--iw-surface);
+}
+
+.iw-admin .service-purchase-details .detail-section,
+.iw-admin .service-purchase-details .admin-actions-section {
+    background: var(--iw-canvas);
+    border-radius: var(--iw-radius);
+    padding: var(--iw-space-4);
+    border: 1px solid var(--iw-border);
+}
+
+.iw-admin .service-purchase-details .section-title {
+    font-size: var(--iw-text-lg);
+    font-weight: 700;
+    color: var(--iw-ink);
+    margin-block-end: var(--iw-space-4);
+    padding-block-end: var(--iw-space-2);
+    border-bottom: 2px solid var(--iw-border);
+}
+
+.iw-admin .service-purchase-details .detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--iw-space-3);
+    padding: var(--iw-space-2) 0;
+    border-bottom: 1px solid var(--iw-border);
+}
+
+.iw-admin .service-purchase-details .detail-item:last-child {
+    border-bottom: none;
+}
+
+.iw-admin .service-purchase-details .detail-label {
+    font-weight: 600;
+    color: var(--iw-muted);
+}
+
+.iw-admin .service-purchase-details .detail-value {
+    color: var(--iw-ink);
+    font-weight: 500;
+    text-align: end;
 }
 

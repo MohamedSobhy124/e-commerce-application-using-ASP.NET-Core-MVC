@@ -4,20 +4,14 @@
     ViewData["Title"] = Localizer["CreateServiceSubscription"];
 }
 
-<div class="container py-4">
-    <div class="row">
-        <div class="col-lg-10 offset-lg-1">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-plus-circle-fill me-3" style="font-size: 2rem;"></i>
-                        <div>
-                            <h2 class="mb-0">@Localizer["CreateNewServiceSubscription"]</h2>
-                            <small class="opacity-75">@Localizer["AddNewServiceForCustomers"]</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-4">
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-form-wrapper">
+            <div class="admin-form-header">
+                <h1 class="admin-form-title">@Localizer["CreateNewServiceSubscription"]</h1>
+                <p class="text-muted mb-0">@Localizer["AddNewServiceForCustomers"]</p>
+            </div>
+            <div class="admin-form-body">
                     <form asp-action="Create" method="post" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
                         
@@ -137,86 +131,39 @@
                             </div>
                         </div>
 
-                        <hr class="my-4" />
-
-                        <!-- Action Buttons -->
-                        <div class="row">
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-lg btn-primary px-5 me-2">
-                                    <i class="bi bi-check-circle me-2"></i>@Localizer["CreateService"]
-                                </button>
-                                <a asp-action="Index" class="btn btn-lg btn-outline-secondary px-4">
-                                    <i class="bi bi-x-circle me-2"></i>@Localizer["Cancel"]
-                                </a>
-                            </div>
+                        <div class="form-actions">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>@Localizer["Cancel"]
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2" aria-hidden="true"></i>@Localizer["CreateService"]
+                            </button>
                         </div>
                     </form>
-                </div>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    .bg-gradient {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .bg-gradient::before {
-        content: "";
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        animation: pulse 3s ease-in-out infinite;
-    }
-    
-    @@keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 0.5; }
-        50% { transform: scale(1.1); opacity: 0.8; }
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-    }
-
-    .card {
-        border-radius: 15px;
-    }
-
-    .card-header {
-        border-radius: 15px 15px 0 0 !important;
-    }
-
-    .form-check-input:checked {
-        background-color: #667eea;
-        border-color: #667eea;
-    }
-</style>
-
-<style>
     .image-upload-section {
-        border: 2px dashed #667eea;
+        border: 2px dashed var(--iw-dark-blue);
         border-radius: 10px;
         padding: 2rem;
         text-align: center;
-        background: #f9fafb;
+        background: var(--iw-canvas);
         transition: all 0.3s ease;
     }
 
     .image-upload-section:hover {
-        border-color: #764ba2;
-        background: #f3f4f6;
+        border-color: var(--iw-dark-blue);
+        background: var(--iw-canvas);
     }
 
     .upload-button {
         display: inline-block;
         padding: 1rem 2rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--iw-dark-blue) 0%, var(--iw-dark-blue) 100%);
         color: white;
         border-radius: 8px;
         cursor: pointer;

@@ -30,6 +30,7 @@
     // 2. PARALLAX EFFECT ON SCROLL (Optimized for mobile)
     // ========================================
     function initParallax() {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
         // Disable parallax on mobile for better performance
         if (window.innerWidth <= 768) {
             return;
@@ -106,6 +107,7 @@
     // 5. ANIMATED COUNTER
     // ========================================
     function initCounters() {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
         const counters = document.querySelectorAll('.animated-counter');
         
         const counterObserver = new IntersectionObserver((entries) => {
@@ -119,10 +121,10 @@
                     const updateCounter = () => {
                         current += increment;
                         if (current < target) {
-                            entry.target.textContent = Math.floor(current);
+                            entry.target.textContent = Math.floor(current).toLocaleString('en-US');
                             requestAnimationFrame(updateCounter);
                         } else {
-                            entry.target.textContent = target;
+                            entry.target.textContent = target.toLocaleString('en-US');
                         }
                     };
                     
@@ -166,6 +168,7 @@
     // 7. SMOOTH SCROLL TO SECTIONS
     // ========================================
     function initSmoothScroll() {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 const href = this.getAttribute('href');
@@ -251,6 +254,7 @@
     // 9. TYPING EFFECT
     // ========================================
     function initTypingEffect() {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
         const typingElements = document.querySelectorAll('.typing-effect');
         
         typingElements.forEach(el => {

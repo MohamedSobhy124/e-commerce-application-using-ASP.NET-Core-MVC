@@ -4,366 +4,306 @@
 @inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
 
 @{
-    ViewData["Title"] = "Return Request Details";
+    ViewData["Title"] = Localizer["ReturnRequestDetails"];
     Layout = "~/Views/Shared/_Layout.cshtml";
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var currentCulture = requestCulture?.RequestCulture.Culture.Name ?? "en";
     var currencySymbol = CurrencyHelper.GetCurrencySymbol(currentCulture);
-    
-    Func<object, string> formatCurrency = (amount) => 
+    var notAvailable = Localizer["NotAvailable"].Value;
+
+    Func<object, string> formatCurrency = (amount) =>
     {
         decimal value = amount is decimal d ? d : (amount is double db ? (decimal)db : Convert.ToDecimal(amount));
         return $"{currencySymbol} {value.ToString("N2", System.Globalization.CultureInfo.InvariantCulture).Replace(".", ",")}";
     };
+
+    string StatusLabel(string status) => status switch
+    {
+        SD.ReturnStatusPending => Localizer["Pending"].Value,
+        SD.ReturnStatusApproved => Localizer["Approved"].Value,
+        SD.ReturnStatusRejected => Localizer["Rejected"].Value,
+        SD.ReturnStatusProcessing => Localizer["Processing"].Value,
+        SD.ReturnStatusCompleted => Localizer["Completed"].Value,
+        SD.ReturnStatusCancelled => Localizer["Cancelled"].Value,
+        _ => status
+    };
+
+    var statusSteps = new[] { SD.ReturnStatusPending, SD.ReturnStatusApproved, SD.ReturnStatusProcessing, SD.ReturnStatusCompleted };
 }
 
 <partial name="_Notifications" />
 
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <a asp-action="Index" class="btn btn-outline-secondary mb-3">
-                <i class="bi bi-arrow-left me-2"></i>@(Localizer["BackToReturnRequests"]?.Value ?? "Back to Return Requests")
-            </a>
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">
-                        <i class="bi bi-arrow-return-left me-2"></i>@Localizer["ReturnRequest"] #@Model.Id
-                    </h3>
+<div class="admin-wrapper">
+    <div class="container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h1 class="admin-card-title">
+                    <i class="bi bi-arrow-return-left me-2" aria-hidden="true"></i>
+                    @Localizer["ReturnRequest"] #@Model.Id
+                </h1>
+            </div>
+            <div class="admin-card-body">
+                <div class="admin-status-timeline" aria-label="@Localizer["Status"]">
+                    @foreach (var step in statusSteps)
+                    {
+                        var isCurrent = Model.Status == step
+                            || (step == SD.ReturnStatusProcessing && Model.Status == SD.ReturnStatusProcessing)
+                            || (step == SD.ReturnStatusApproved && Model.Status == SD.ReturnStatusApproved);
+                        if (Model.Status == SD.ReturnStatusRejected || Model.Status == SD.ReturnStatusCancelled)
+                        {
+                            isCurrent = step == SD.ReturnStatusPending && Model.Status == SD.ReturnStatusPending;
+                        }
+                        <span class="admin-status-step @(Model.Status == step ? "is-current" : "")">@StatusLabel(step)</span>
+                    }
+                    @if (Model.Status == SD.ReturnStatusRejected)
+                    {
+                        <span class="admin-status-step is-current">@StatusLabel(SD.ReturnStatusRejected)</span>
+                    }
+                    @if (Model.Status == SD.ReturnStatusCancelled)
+                    {
+                        <span class="admin-status-step is-current">@StatusLabel(SD.ReturnStatusCancelled)</span>
+                    }
                 </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h5>@Localizer["CustomerInformation"]</h5>
-                            <table class="table table-sm">
-                                <tr>
-                                    <td><strong>@(Localizer["Name"]?.Value ?? "Name"):</strong></td>
-                                    <td>@Model.OrderHeader?.Name</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>@(Localizer["Email"]?.Value ?? "Email"):</strong></td>
-                                    <td>@(Model.Email ?? Model.OrderHeader?.Email ?? "N/A")</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>@(Localizer["Phone"]?.Value ?? "Phone"):</strong></td>
-                                    <td>@(Model.PhoneNumber ?? Model.OrderHeader?.PhoneNumber ?? "N/A")</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>@(Localizer["OrderNumber"]?.Value ?? "Order ID"):</strong></td>
-                                    <td><a href="/Admin/Order/Details/@Model.OrderHeaderId" target="_blank">#@Model.OrderHeaderId</a></td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="col-md-6">
-                            <h5>@Localizer["ReturnRequestInformation"]
-                            <table class="table table-sm">
-                                <tr>
-                                    <td><strong>@(Localizer["Status"]?.Value ?? "Status"):</strong></td>
-                                    <td>
-                                        @{
-                                            var statusClass = Model.Status switch
-                                            {
-                                                SD.ReturnStatusPending => "warning",
-                                                SD.ReturnStatusApproved => "success",
-                                                SD.ReturnStatusRejected => "danger",
-                                                SD.ReturnStatusProcessing => "info",
-                                                SD.ReturnStatusCompleted => "success",
-                                                SD.ReturnStatusCancelled => "secondary",
-                                                _ => "secondary"
-                                            };
-                                        }
-                                        <span class="badge bg-@statusClass">@Model.Status</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><strong>@Localizer["RequestDate"]:</strong></td>
-                                    <td>@Model.RequestDate.ToString("MMM dd, yyyy HH:mm")</td>
-                                </tr>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <section class="admin-form-section">
+                            <h2>@Localizer["CustomerInformation"]</h2>
+                            <dl class="admin-details-list">
+                                <dt>@Localizer["Name"]</dt>
+                                <dd>@Model.OrderHeader?.Name</dd>
+                                <dt>@Localizer["Email"]</dt>
+                                <dd>@(Model.Email ?? Model.OrderHeader?.Email ?? notAvailable)</dd>
+                                <dt>@Localizer["Phone"]</dt>
+                                <dd>@(Model.PhoneNumber ?? Model.OrderHeader?.PhoneNumber ?? notAvailable)</dd>
+                                <dt>@Localizer["OrderNumber"]</dt>
+                                <dd>
+                                    <a class="order-id-link" href="/Admin/Order/Details/@Model.OrderHeaderId">#@Model.OrderHeaderId</a>
+                                </dd>
+                            </dl>
+                        </section>
+                    </div>
+                    <div class="col-md-6">
+                        <section class="admin-form-section">
+                            <h2>@Localizer["ReturnRequestInformation"]</h2>
+                            <dl class="admin-details-list">
+                                <dt>@Localizer["Status"]</dt>
+                                <dd><span class="badge bg-secondary">@StatusLabel(Model.Status)</span></dd>
+                                <dt>@Localizer["RequestDate"]</dt>
+                                <dd>@Model.RequestDate.ToString("MMM dd, yyyy HH:mm")</dd>
                                 @if (Model.ApprovedDate.HasValue)
                                 {
-                                    <tr>
-                                        <td><strong>@(Localizer["ApprovedDate"]?.Value ?? "Approved Date"):</strong></td>
-                                        <td>@Model.ApprovedDate.Value.ToString("MMM dd, yyyy HH:mm")</td>
-                                    </tr>
+                                    <dt>@Localizer["ApprovedDate"]</dt>
+                                    <dd>@Model.ApprovedDate.Value.ToString("MMM dd, yyyy HH:mm")</dd>
                                 }
                                 @if (Model.RejectedDate.HasValue)
                                 {
-                                    <tr>
-                                        <td><strong>@(Localizer["RejectedDate"]?.Value ?? "Rejected Date"):</strong></td>
-                                        <td>@Model.RejectedDate.Value.ToString("MMM dd, yyyy HH:mm")</td>
-                                    </tr>
+                                    <dt>@Localizer["RejectedDate"]</dt>
+                                    <dd>@Model.RejectedDate.Value.ToString("MMM dd, yyyy HH:mm")</dd>
                                 }
                                 @if (Model.CompletedDate.HasValue)
                                 {
+                                    <dt>@Localizer["CompletedDate"]</dt>
+                                    <dd>@Model.CompletedDate.Value.ToString("MMM dd, yyyy HH:mm")</dd>
+                                }
+                                <dt>@Localizer["RefundAmount"]</dt>
+                                <dd><strong class="text-success">@formatCurrency(Model.RefundAmount ?? 0)</strong></dd>
+                                <dt>@Localizer["RefundStatus"]</dt>
+                                <dd>@(Model.RefundStatus ?? Localizer["Pending"].Value)</dd>
+                            </dl>
+                        </section>
+                    </div>
+                </div>
+
+                <section class="admin-form-section mb-4">
+                    <h2>@Localizer["ReturnReason"]</h2>
+                    <p class="mb-0"><strong>@Model.Reason</strong></p>
+                    @if (!string.IsNullOrEmpty(Model.AdditionalNotes))
+                    {
+                        <p class="text-muted mt-3 mb-0"><strong>@Localizer["AdditionalNotes"]:</strong> @Model.AdditionalNotes</p>
+                    }
+                </section>
+
+                @if (!string.IsNullOrEmpty(Model.RejectionReason))
+                {
+                    <section class="admin-form-section mb-4 return-detail-alert return-detail-alert-danger">
+                        <h2>@Localizer["RejectionReason"]</h2>
+                        <p class="mb-0">@Model.RejectionReason</p>
+                    </section>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.AdminNotes))
+                {
+                    <section class="admin-form-section mb-4">
+                        <h2>@Localizer["AdminNotes"]</h2>
+                        <p class="mb-0">@Model.AdminNotes</p>
+                    </section>
+                }
+
+                <section class="admin-form-section mb-4">
+                    <h2>@Localizer["ItemsToReturn"]</h2>
+                    <div class="table-responsive admin-table-wrapper">
+                        <table class="table table-bordered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">@Localizer["Product"]</th>
+                                    <th scope="col" class="text-center">@Localizer["Quantity"]</th>
+                                    <th scope="col" class="text-end">@Localizer["Price"]</th>
+                                    <th scope="col" class="text-end">@Localizer["Total"]</th>
+                                    <th scope="col">@Localizer["ItemCondition"]</th>
+                                    <th scope="col">@Localizer["ItemReason"]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.ReturnRequestItems)
+                                {
+                                    var productName = item.OrderDetail?.Product?.Title ?? Localizer["UnknownProduct"].Value;
                                     <tr>
-                                        <td><strong>@(Localizer["CompletedDate"]?.Value ?? "Completed Date"):</strong></td>
-                                        <td>@Model.CompletedDate.Value.ToString("MMM dd, yyyy HH:mm")</td>
+                                        <td>@productName</td>
+                                        <td class="text-center">@item.Quantity</td>
+                                        <td class="text-end">@formatCurrency(item.ReturnPrice)</td>
+                                        <td class="text-end"><strong>@formatCurrency(item.ReturnPrice * item.Quantity)</strong></td>
+                                        <td>@(item.ItemCondition ?? notAvailable)</td>
+                                        <td>@(item.ItemReason ?? notAvailable)</td>
                                     </tr>
                                 }
+                            </tbody>
+                            <tfoot>
                                 <tr>
-                                    <td><strong>@Localizer["RefundAmount"]:</strong></td>
-                                    <td><strong class="text-success">@formatCurrency(Model.RefundAmount ?? 0)</strong></td>
+                                    <td colspan="3" class="text-end"><strong>@Localizer["TotalRefundAmount"]:</strong></td>
+                                    <td class="text-end"><strong class="text-success">@formatCurrency(Model.RefundAmount ?? 0)</strong></td>
+                                    <td colspan="2"></td>
                                 </tr>
-                                <tr>
-                                    <td><strong>@(Localizer["RefundStatus"]?.Value ?? "Refund Status"):</strong></td>
-                                    <td>
-                                        @{
-                                            var refundStatusClass = Model.RefundStatus switch
-                                            {
-                                                SD.RefundStatusProcessed => "success",
-                                                SD.RefundStatusFailed => "danger",
-                                                _ => "warning"
-                                            };
-                                        }
-                                        <span class="badge bg-@refundStatusClass">@(Model.RefundStatus ?? "Pending")</span>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
+                            </tfoot>
+                        </table>
                     </div>
+                </section>
 
-                    <div class="mb-4">
-                        <h5>@Localizer["ReturnReason"]</h5>
-                        <div class="alert alert-warning">
-                            <strong>@Model.Reason</strong>
-                            @if (!string.IsNullOrEmpty(Model.AdditionalNotes))
+                @if (!string.IsNullOrEmpty(Model.ReturnTrackingNumber))
+                {
+                    <section class="admin-form-section mb-4">
+                        <h2>@Localizer["ReturnShippingInformation"]</h2>
+                        <dl class="admin-details-list">
+                            <dt>@Localizer["TrackingNumber"]</dt>
+                            <dd>@Model.ReturnTrackingNumber</dd>
+                            @if (!string.IsNullOrEmpty(Model.ReturnCarrier))
                             {
-                                <hr />
-                                <p class="mb-0"><strong>@Localizer["AdditionalNotes"]:</strong> @Model.AdditionalNotes</p>
+                                <dt>@Localizer["Carrier"]</dt>
+                                <dd>@Model.ReturnCarrier</dd>
                             }
-                        </div>
-                    </div>
+                            @if (Model.ReturnShippedDate.HasValue)
+                            {
+                                <dt>@Localizer["ShippedDate"]</dt>
+                                <dd>@Model.ReturnShippedDate.Value.ToString("MMM dd, yyyy")</dd>
+                            }
+                            @if (Model.ReturnReceivedDate.HasValue)
+                            {
+                                <dt>@Localizer["ReceivedDate"]</dt>
+                                <dd>@Model.ReturnReceivedDate.Value.ToString("MMM dd, yyyy")</dd>
+                            }
+                        </dl>
+                    </section>
+                }
 
-                    @if (!string.IsNullOrEmpty(Model.RejectionReason))
+                @if (!string.IsNullOrEmpty(Model.RefundTransactionId))
+                {
+                    <section class="admin-form-section mb-4">
+                        <h2>@Localizer["RefundTransaction"]</h2>
+                        <dl class="admin-details-list">
+                            <dt>@Localizer["TransactionID"]</dt>
+                            <dd>@Model.RefundTransactionId</dd>
+                            @if (Model.RefundProcessedDate.HasValue)
+                            {
+                                <dt>@Localizer["ProcessedDate"]</dt>
+                                <dd>@Model.RefundProcessedDate.Value.ToString("MMM dd, yyyy HH:mm")</dd>
+                            }
+                        </dl>
+                    </section>
+                }
+
+                <div class="admin-header-actions mb-4" id="returnRequestActions">
+                    @if (Model.Status == SD.ReturnStatusPending)
                     {
-                        <div class="mb-4">
-                            <h5>@Localizer["RejectionReason"]</h5>
-                            <div class="alert alert-danger">
-                                @Model.RejectionReason
-                            </div>
-                        </div>
+                        <button type="button" class="btn btn-success" data-return-action="approve">
+                            <i class="bi bi-check-circle me-2" aria-hidden="true"></i>@Localizer["Approve"]
+                        </button>
+                        <button type="button" class="btn btn-danger" data-return-action="reject">
+                            <i class="bi bi-x-circle me-2" aria-hidden="true"></i>@Localizer["Reject"]
+                        </button>
                     }
-
-                    @if (!string.IsNullOrEmpty(Model.AdminNotes))
+                    @if (Model.Status == SD.ReturnStatusApproved || Model.Status == SD.ReturnStatusProcessing)
                     {
-                        <div class="mb-4">
-                            <h5>@Localizer["AdminNotes"]</h5>
-                            <div class="alert alert-info">
-                                @Model.AdminNotes
-                            </div>
-                        </div>
+                        <button type="button" class="btn btn-primary" data-return-action="received">
+                            <i class="bi bi-inbox me-2" aria-hidden="true"></i>@Localizer["MarkAsReceived"]
+                        </button>
                     }
-
-                    <div class="mb-4">
-                        <h5>@Localizer["ItemsToReturn"]</h5>
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>@Localizer["Product"]</th>
-                                        <th class="text-center">@Localizer["Quantity"]</th>
-                                        <th class="text-end">@Localizer["Price"]</th>
-                                        <th class="text-end">@Localizer["Total"]</th>
-                                        <th>@Localizer["ItemCondition"]</th>
-                                        <th>@Localizer["ItemReason"]</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var item in Model.ReturnRequestItems)
-                                    {
-                                        var productName = item.OrderDetail?.Product?.Title ?? "Unknown Product";
-                                        <tr>
-                                            <td>@productName</td>
-                                            <td class="text-center">@item.Quantity</td>
-                                            <td class="text-end">@formatCurrency(item.ReturnPrice)</td>
-                                            <td class="text-end"><strong>@formatCurrency(item.ReturnPrice * item.Quantity)</strong></td>
-                                            <td>@(item.ItemCondition ?? "N/A")</td>
-                                            <td>@(item.ItemReason ?? "N/A")</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                                <tfoot class="table-light">
-                                    <tr>
-                                        <td colspan="3" class="text-end"><strong>@Localizer["TotalRefundAmount"]:</strong></td>
-                                        <td class="text-end"><strong class="text-success fs-5">@formatCurrency(Model.RefundAmount ?? 0)</strong></td>
-                                        <td colspan="2"></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-
-                    @if (!string.IsNullOrEmpty(Model.ReturnTrackingNumber))
+                    @if (Model.Status == SD.ReturnStatusProcessing)
                     {
-                        <div class="mb-4">
-                            <h5>@Localizer["ReturnShippingInformation"]</h5>
-                            <div class="alert alert-info">
-                                <strong>@Localizer["TrackingNumber"]:</strong> @Model.ReturnTrackingNumber<br />
-                                @if (!string.IsNullOrEmpty(Model.ReturnCarrier))
-                                {
-                                    <strong>@Localizer["Carrier"]:</strong> @Model.ReturnCarrier<br />
-                                }
-                                @if (Model.ReturnShippedDate.HasValue)
-                                {
-                                    <strong>@Localizer["ShippedDate"]:</strong> @Model.ReturnShippedDate.Value.ToString("MMM dd, yyyy")<br />
-                                }
-                                @if (Model.ReturnReceivedDate.HasValue)
-                                {
-                                    <strong>@Localizer["ReceivedDate"]:</strong> @Model.ReturnReceivedDate.Value.ToString("MMM dd, yyyy")
-                                }
-                            </div>
-                        </div>
+                        <button type="button" class="btn btn-success" data-return-action="complete">
+                            <i class="bi bi-check-circle-fill me-2" aria-hidden="true"></i>@Localizer["CompleteProcessRefund"]
+                        </button>
                     }
-
-                    @if (!string.IsNullOrEmpty(Model.RefundTransactionId))
+                    @if (Model.Status != SD.ReturnStatusCompleted && Model.Status != SD.ReturnStatusRejected && Model.Status != SD.ReturnStatusCancelled)
                     {
-                        <div class="mb-4">
-                            <h5>@Localizer["RefundTransaction"]</h5>
-                            <div class="alert alert-success">
-                                <strong>@(Localizer["TransactionID"]?.Value ?? "Transaction ID"):</strong> @Model.RefundTransactionId<br />
-                                @if (Model.RefundProcessedDate.HasValue)
-                                {
-                                    <strong>@(Localizer["ProcessedDate"]?.Value ?? "Processed Date"):</strong> @Model.RefundProcessedDate.Value.ToString("MMM dd, yyyy HH:mm")
-                                }
-                            </div>
-                        </div>
+                        <button type="button" class="btn btn-outline-secondary" data-return-action="cancel">
+                            <i class="bi bi-x-circle me-2" aria-hidden="true"></i>@Localizer["Cancel"]
+                        </button>
                     }
+                </div>
 
-                    <!-- Action Buttons -->
-                    <div class="d-flex gap-2 flex-wrap">
-                        @if (Model.Status == SD.ReturnStatusPending)
-                        {
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveModal">
-                                <i class="bi bi-check-circle me-2"></i>@(Localizer["Approve"]?.Value ?? "Approve")
-                            </button>
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
-                                <i class="bi bi-x-circle me-2"></i>@(Localizer["Reject"]?.Value ?? "Reject")
-                            </button>
-                        }
-                        @if (Model.Status == SD.ReturnStatusApproved || Model.Status == SD.ReturnStatusProcessing)
-                        {
-                            <form asp-action="MarkAsReceived" method="post" style="display: inline;">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@Model.Id" />
-                                <button type="submit" class="btn btn-info">
-                                    <i class="bi bi-check2-circle me-2"></i>@Localizer["MarkAsReceived"]
-                                </button>
-                            </form>
-                        }
-                        @if (Model.Status == SD.ReturnStatusProcessing)
-                        {
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#completeModal">
-                                <i class="bi bi-check-circle-fill me-2"></i>@Localizer["CompleteProcessRefund"]
-                            </button>
-                        }
-                        @if (Model.Status != SD.ReturnStatusCompleted && Model.Status != SD.ReturnStatusRejected && Model.Status != SD.ReturnStatusCancelled)
-                        {
-                            <form asp-action="Cancel" method="post" style="display: inline;" onsubmit="return confirm('@(Localizer["ConfirmCancelReturnRequest"]?.Value ?? "Are you sure you want to cancel this return request?")');">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@Model.Id" />
-                                <button type="submit" class="btn btn-secondary">
-                                    <i class="bi bi-x-circle me-2"></i>@Localizer["Cancel"]
-                                </button>
-                            </form>
-                        }
-                    </div>
+                <div class="form-actions">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>@Localizer["BackToReturnRequests"]
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Approve Modal -->
-<div class="modal fade" id="approveModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form asp-action="Approve" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.Id" />
-                <div class="modal-header">
-                    <h5 class="modal-title">@Localizer["ApproveReturnRequest"]</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">@Localizer["ReturnTrackingNumber"] (@Localizer["Optional"]):</label>
-                        <input type="text" name="returnTrackingNumber" class="form-control" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">@Localizer["Carrier"] (@Localizer["Optional"]):</label>
-                        <input type="text" name="returnCarrier" class="form-control" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">@Localizer["AdminNotes"] (@Localizer["Optional"]):</label>
-                        <textarea name="adminNotes" class="form-control" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
-                    <button type="submit" class="btn btn-success">@Localizer["ApproveReturnRequest"]</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<form id="returnMarkReceivedForm" asp-action="MarkAsReceived" method="post" class="d-none">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+</form>
+<form id="returnCancelForm" asp-action="Cancel" method="post" class="d-none">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+</form>
 
-<!-- Reject Modal -->
-<div class="modal fade" id="rejectModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form asp-action="Reject" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.Id" />
-                <div class="modal-header">
-                    <h5 class="modal-title">@Localizer["RejectReturnRequest"]</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">@Localizer["RejectionReason"] <span class="text-danger">*</span>:</label>
-                        <textarea name="rejectionReason" class="form-control" rows="4" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">@Localizer["AdminNotes"] (@Localizer["Optional"]):</label>
-                        <textarea name="adminNotes" class="form-control" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
-                    <button type="submit" class="btn btn-danger">@Localizer["RejectReturnRequest"]</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Complete Modal -->
-<div class="modal fade" id="completeModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form asp-action="Complete" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.Id" />
-                <div class="modal-header">
-                    <h5 class="modal-title">@(Localizer["CompleteReturnRequest"]?.Value ?? "Complete Return Request")</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <strong>@Localizer["RefundAmount"]:</strong> @formatCurrency(Model.RefundAmount ?? 0)
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">@(Localizer["TransactionID"]?.Value ?? "Transaction ID") (@Localizer["Optional"]):</label>
-                        <input type="text" name="refundTransactionId" class="form-control" placeholder="@Localizer["EnterTransactionID"]" />
-                    </div>
-                    <p class="text-muted">@Localizer["ThisWillMarkReturnAsCompleted"]</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
-                    <button type="submit" class="btn btn-success">@Localizer["CompleteProcessRefund"]</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
+@section Scripts {
+    <script>
+        window.returnRequestDetailsConfig = {
+            id: @Model.Id,
+            refundAmount: '@formatCurrency(Model.RefundAmount ?? 0)',
+            approveUrl: '@Url.Action("Approve")',
+            rejectUrl: '@Url.Action("Reject")',
+            completeUrl: '@Url.Action("Complete")',
+            requestToken: document.querySelector('input[name="__RequestVerificationToken"]')?.value || '',
+            strings: {
+                approveTitle: '@Html.Raw(Localizer["ApproveReturnRequest"].Value)',
+                rejectTitle: '@Html.Raw(Localizer["RejectReturnRequest"].Value)',
+                completeTitle: '@Html.Raw(Localizer["CompleteReturnRequest"].Value)',
+                markReceivedTitle: '@Html.Raw(Localizer["MarkAsReceived"].Value)',
+                cancelTitle: '@Html.Raw(Localizer["Cancel"].Value)',
+                confirm: '@Html.Raw(Localizer["Confirm"].Value)',
+                cancel: '@Html.Raw(Localizer["Cancel"].Value)',
+                optional: '@Html.Raw(Localizer["Optional"].Value)',
+                trackingNumber: '@Html.Raw(Localizer["ReturnTrackingNumber"].Value)',
+                carrier: '@Html.Raw(Localizer["Carrier"].Value)',
+                adminNotes: '@Html.Raw(Localizer["AdminNotes"].Value)',
+                rejectionReason: '@Html.Raw(Localizer["RejectionReason"].Value)',
+                transactionId: '@Html.Raw(Localizer["TransactionID"].Value)',
+                refundAmount: '@Html.Raw(Localizer["RefundAmount"].Value)',
+                completeHint: '@Html.Raw(Localizer["ThisWillMarkReturnAsCompleted"].Value)',
+                confirmCancel: '@Html.Raw(Localizer["ConfirmCancelReturnRequest"].Value)',
+                requestLabel: '@Html.Raw(string.Format(Localizer["ReturnRequestNumber"].Value, Model.Id))',
+                approveConfirm: '@Html.Raw(string.Format(Localizer["ConfirmApproveReturnRequest"].Value, Model.Id))',
+                rejectConfirm: '@Html.Raw(string.Format(Localizer["ConfirmRejectReturnRequest"].Value, Model.Id))',
+                receivedConfirm: '@Html.Raw(string.Format(Localizer["ConfirmMarkReturnReceived"].Value, Model.Id))',
+                completeConfirm: '@Html.Raw(string.Format(Localizer["ConfirmCompleteReturnRequest"].Value, Model.Id))',
+                enterTransactionId: '@Html.Raw(Localizer["EnterTransactionID"].Value)'
+            }
+        };
+    </script>
+    <script src="~/js/return-request-details.js" asp-append-version="true"></script>
+}

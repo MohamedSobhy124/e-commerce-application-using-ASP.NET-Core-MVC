@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Localization
 @using Microsoft.AspNetCore.Mvc.Localization
 @using IdealWeightNutrition.Utility
 @inject IStringLocalizer<IdealWeightNutrition.SharedResources> Localizer
@@ -20,14 +20,14 @@
         <div class="row">
             <div class="col-lg-8 col-md-12">
                 <div class="cart-header-section">
-                    <h3 class="cart-title">
+                    <h1 class="cart-title">
                         <i class="bi bi-cart3"></i>
                         @Localizer["ShoppingCart"]
                         @if (hasItems)
                         {
                             <span class="cart-item-count-badge">@Model.ShoppingCartList.Count()</span>
                         }
-                    </h3>
+                    </h1>
                 </div>
 
                 @if (!hasItems)
@@ -185,11 +185,11 @@
                                 <!-- Quantity Controls -->
                                 <div class="cart-item-col cart-item-quantity-col">
                                     <div class="cart-quantity-controls">
-                                        <a href="#" class="cart-quantity-btn minus-btn" data-cart-id="@item.Id" data-product-id="@item.ProductId">
+                                        <a href="#" class="cart-quantity-btn minus-btn" aria-label="@Localizer["DecreaseQuantity"]" data-cart-id="@item.Id" data-product-id="@item.ProductId">
                                             <i class="bi bi-dash"></i>
                                         </a>
-                                        <input readonly value="@item.Count" type="number" class="cart-quantity-input" />
-                                        <a href="#" class="cart-quantity-btn plus-btn" data-cart-id="@item.Id" data-product-id="@item.ProductId">
+                                        <input readonly value="@item.Count" type="number" class="cart-quantity-input" aria-label="@Localizer["Quantity"]" />
+                                        <a href="#" class="cart-quantity-btn plus-btn" aria-label="@Localizer["IncreaseQuantity"]" data-cart-id="@item.Id" data-product-id="@item.ProductId">
                                             <i class="bi bi-plus"></i>
                                         </a>
                                     </div>
